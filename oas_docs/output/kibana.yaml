@@ -1357,24 +1357,17 @@ paths:
                   description: Configuration settings for the agent.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: When true, enables built-in Elastic capabilities for the agent.
+                      type: boolean
                     instructions:
                       description: Optional system instructions that define the agent behavior.
                       type: string
-                    skills:
+                    skill_ids:
+                      description: Array of skill IDs to be available to the agent.
                       items:
-                        additionalProperties: false
-                        description: Skill selection configuration for the agent.
-                        type: object
-                        properties:
-                          skill_ids:
-                            description: Array of skill IDs. Use "*" to select all built-in skills.
-                            items:
-                              description: Skill ID to be available to the agent.
-                              type: string
-                            maxItems: 100
-                            type: array
-                        required:
-                          - skill_ids
+                        description: Skill ID to be available to the agent.
+                        type: string
                       maxItems: 100
                       type: array
                     tools:
@@ -1687,24 +1680,17 @@ paths:
                   description: Updated configuration settings for the agent.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: When true, enables built-in Elastic capabilities for the agent.
+                      type: boolean
                     instructions:
                       description: Updated system instructions that define the agent behavior.
                       type: string
-                    skills:
+                    skill_ids:
+                      description: Array of skill IDs to be available to the agent.
                       items:
-                        additionalProperties: false
-                        description: Skill selection configuration for the agent.
-                        type: object
-                        properties:
-                          skill_ids:
-                            description: Array of skill IDs. Use "*" to select all built-in skills.
-                            items:
-                              description: Skill ID to be available to the agent.
-                              type: string
-                            maxItems: 100
-                            type: array
-                        required:
-                          - skill_ids
+                        description: Skill ID to be available to the agent.
+                        type: string
                       maxItems: 100
                       type: array
                     tools:
@@ -2129,14 +2115,15 @@ paths:
                 id:
                   description: Optional custom ID for the attachment.
                   type: string
-                origin: {}
+                origin:
+                  description: Origin string (e.g. saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
+                  type: string
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
                   type: string
               required:
                 - type
                 - data
-                - origin
       responses:
         '200':
           content:
@@ -2486,13 +2473,14 @@ paths:
               updateOriginExample:
                 description: Example request for linking an attachment to a saved visualization
                 value:
-                  origin:
-                    saved_object_id: abc123
+                  origin: abc123
             schema:
               additionalProperties: false
               type: object
               properties:
-                origin: {}
+                origin:
+                  description: The origin string (e.g., saved object ID for visualizations and dashboards).
+                  type: string
               required:
                 - origin
       responses:
@@ -2508,8 +2496,7 @@ paths:
                       current_version: 1
                       description: Sales chart
                       id: att-123
-                      origin:
-                        saved_object_id: abc123
+                      origin: abc123
                       type: visualization
                       versions:
                         - content_hash: sha256-xyz
@@ -14021,7 +14008,7 @@ paths:
             curl \
               --request DELETE 'https://localhost:5601/api/cases?ids=%5B%22030e6e34-6470-4001-864f-b229511ad188%22%2C%22e662ff34-0493-4538-b9d1-6706ced02ff2%22%5D' \
               --header "Authorization: $API_KEY" \
-              --header "Content-Type: application/json"
+              --header "Content-Type: application/json" \
               --header "kbn-xsrf: true"
         - label: Console
           lang: console
@@ -14194,11 +14181,10 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
+        Returns case details. The response does not include a comments property;  use the find case comments API to retrieve comments. The totalComment field  reflects the actual number of user comments on the case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
       operationId: getCaseDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_case_id'
-        - $ref: '#/components/parameters/Cases_includeComments'
       responses:
         '200':
           content:
@@ -14206,10 +14192,10 @@ paths:
               examples:
                 getDefaultCaseResponse:
                   $ref: '#/components/examples/Cases_get_case_response'
-                getDefaultObservabilityCaseReponse:
+                getDefaultObservabilityCaseResponse:
                   $ref: '#/components/examples/Cases_get_case_observability_response'
               schema:
-                $ref: '#/components/schemas/Cases_case_response_properties'
+                $ref: '#/components/schemas/Cases_case_response_get_case'
           description: Indicates a successful call.
         '401':
           content:
@@ -14398,8 +14384,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                findCaseCommentsResponse:
+                  $ref: '#/components/examples/Cases_find_case_comments_response'
               schema:
-                $ref: '#/components/schemas/Cases_case_response_properties'
+                $ref: '#/components/schemas/Cases_find_comments_response'
           description: Indicates a successful call.
         '401':
           content:
@@ -14407,7 +14396,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
-      summary: Find case comments and alerts
+      summary: Find case comments
       tags:
         - cases
       x-metaTags:
@@ -14576,7 +14565,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrives a paginated list of user activity for a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
+        Retrieves a paginated list of user activity for a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
       operationId: findCaseActivityDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_case_id'
@@ -14674,7 +14663,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get setting details such as the closure type, custom fields, templatse, and the default connector for cases. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.
+        Get setting details such as the closure type, custom fields, templates, and the default connector for cases. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.
       operationId: getCaseConfigurationDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_owner_filter'
@@ -42306,6 +42295,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: Skip dependency validation when installing a package with dependencies
+          in: query
+          name: skipDependencyCheck
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -66633,6 +66629,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66657,6 +66655,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -66725,6 +66724,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66749,6 +66750,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -66824,6 +66826,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66848,6 +66852,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -66916,6 +66921,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66940,6 +66947,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -67015,6 +67023,8 @@ paths:
                           items:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -67039,6 +67049,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                           type: array
                         rules:
@@ -67955,6 +67966,8 @@ paths:
                           index:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -67979,6 +67992,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                         required:
                           - index
@@ -68086,6 +68100,9 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                description:
+                  default: ''
+                  type: string
                 esql:
                   additionalProperties: false
                   type: object
@@ -68974,7 +68991,72 @@ paths:
         required: true
       responses:
         '200':
-          description: A successful response.
+          content:
+            application/json:
+              examples:
+                postSyntheticMonitorsResponseWithWarning:
+                  description: A response when a browser monitor specifies a timeout but has no private locations.
+                  summary: Response with warning
+                  value: |-
+                    {
+                      "type": "browser",
+                      "name": "Example journey",
+                      "enabled": true,
+                      "warnings": [
+                        {
+                          "id": "monitor-id",
+                          "message": "For browser monitors, timeout is only supported on private locations. Browser monitor \"Example journey\" specifies a timeout and is running on public locations: \"public-1, public-2\". The timeout will have no effect on these locations.",
+                          "publicLocationIds": ["public-1", "public-2"]
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    description: |
+                      An optional array of warnings about the monitor configuration.
+                    items:
+                      $ref: '#/components/schemas/Synthetics_monitorWarning'
+                    type: array
+          description: |
+            A successful response. The response may include a `warnings` array when the monitor configuration has non-critical issues. For example, if a browser monitor specifies a timeout but has no private locations configured, a warning is returned indicating the timeout will have no effect.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidBrowserTimeout:
+                  description: A 400 error when a browser monitor timeout is below 30 seconds.
+                  summary: Invalid browser timeout
+                  value: |-
+                    {
+                      "statusCode": 400,
+                      "error": "Bad Request",
+                      "message": "Browser Monitor timeout is invalid",
+                      "attributes": {
+                        "details": "Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds."
+                      }
+                    }
+              schema:
+                type: object
+                properties:
+                  attributes:
+                    type: object
+                    properties:
+                      details:
+                        example: Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds.
+                        type: string
+                  error:
+                    example: Bad Request
+                    type: string
+                  message:
+                    example: Browser Monitor timeout is invalid
+                    type: string
+                  statusCode:
+                    example: 400
+                    type: integer
+          description: |
+            Bad request. For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
       summary: Create a monitor
       tags:
         - synthetics
@@ -69249,7 +69331,39 @@ paths:
         required: true
       responses:
         '200':
-          description: OK
+          content:
+            application/json:
+              examples:
+                putSyntheticMonitorResponseWithWarning:
+                  description: A response when a browser monitor specifies a timeout but has no private locations.
+                  summary: Response with warning
+                  value: |-
+                    {
+                      "type": "browser",
+                      "name": "Example journey",
+                      "enabled": true,
+                      "warnings": [
+                        {
+                          "id": "monitor-id",
+                          "message": "For browser monitors, timeout is only supported on private locations. Browser monitor \"Example journey\" specifies a timeout and is running on public locations: \"public-1, public-2\". The timeout will have no effect on these locations.",
+                          "publicLocationIds": ["public-1", "public-2"]
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    description: |
+                      An optional array of warnings about the monitor configuration.
+                    items:
+                      $ref: '#/components/schemas/Synthetics_monitorWarning'
+                    type: array
+          description: |
+            A successful response. The response may include a `warnings` array when the monitor configuration has non-critical issues.
+        '400':
+          description: |
+            Bad request. For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
       summary: Update a monitor
       tags:
         - synthetics
@@ -72120,6 +72234,7 @@ components:
         description: A case description.
         owner: cases
         settings:
+          extractObservables: false
           syncAlerts: true
         tags:
           - tag-1
@@ -72158,6 +72273,7 @@ components:
         id: 66b9aa00-94fa-11ea-9f74-e7e108796192
         owner: cases
         settings:
+          extractObservables: false
           syncAlerts: true
         severity: low
         status: open
@@ -72244,6 +72360,28 @@ components:
                 - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             type: assignees
             version: WzM1ODg4LDFb
+    Cases_find_case_comments_response:
+      summary: Paginated list of user comments for a case
+      value:
+        comments:
+          - comment: A new comment
+            created_at: '2023-10-07T19:32:13.104Z'
+            created_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+            owner: cases
+            pushed_at: null
+            pushed_by: null
+            type: user
+            updated_at: null
+            updated_by: null
+            version: WzIzLDFd
+        page: 1
+        per_page: 20
+        total: 1
     Cases_find_case_response:
       summary: Retrieve the first five cases with the `tag-1` tag, in ascending order by last update time.
       value:
@@ -72277,6 +72415,7 @@ components:
             id: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
             owner: cases
             settings:
+              extractObservables: false
               syncAlerts: true
             severity: low
             status: open
@@ -72370,50 +72509,13 @@ components:
           updated_by: null
           version: WzEyLDNd
     Cases_get_case_observability_response:
-      summary: Retrieves information about an Observability case including its alerts and comments.
+      summary: Get case response (Observability). Comments are not included; use the find case comments API. totalComment reflects the actual count.
       value:
         assignees:
           - uid: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
         category: null
         closed_at: null
         closed_by: null
-        comments:
-          - alertId:
-              - a6e12ac4-7bce-457b-84f6-d7ce8deb8446
-            created_at: '2023-11-06T19:29:38.424Z'
-            created_by:
-              email: null
-              full_name: null
-              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-              username: elastic
-            id: 59d438d0-79a9-4864-8d4b-e63adacebf6e
-            index:
-              - .internal.alerts-observability.logs.alerts-default-000001
-            owner: observability
-            pushed_at: null
-            pushed_by: null
-            rule:
-              id: 03e4eb87-62ca-4e5d-9570-3d7625e9669d
-              name: Observability rule
-            type: alert
-            updated_at: null
-            updated_by: null
-            version: WzY3LDJd
-          - comment: The first comment.
-            created_at: '2023-11-06T19:29:57.812Z'
-            created_by:
-              email: null
-              full_name: null
-              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-              username: elastic
-            id: d99342d3-3aa3-4b80-90ec-a702607604f5
-            owner: observability
-            pushed_at: null
-            pushed_by: null
-            type: user
-            updated_at: null
-            updated_by: null
-            version: WzcyLDJd
         connector:
           fields: null
           id: none
@@ -72431,6 +72533,7 @@ components:
         id: c3ff7550-def1-4e90-b6bc-c9969a4a09b1
         owner: observability
         settings:
+          extractObservables: false
           syncAlerts: false
         severity: low
         status: in-progress
@@ -72448,29 +72551,13 @@ components:
           username: elastic
         version: WzI0NywyXQ==
     Cases_get_case_response:
-      summary: Retrieves information about a case including its comments.
+      summary: Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.
       value:
         assignees:
           - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         category: null
         closed_at: null
         closed_by: null
-        comments:
-          - comment: A new comment
-            created_at: '2023-10-13T15:40:32.335Z'
-            created_by:
-              email: null
-              full_name: null
-              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-              username: elastic
-            id: 2134c1d0-02c2-11ed-85f2-4f7c222ca2fa
-            owner: cases
-            pushed_at: null
-            pushed_by: null
-            type: user
-            updated_at: null
-            updated_by: null
-            version: WzM3LDFd
         connector:
           fields: null
           id: none
@@ -72495,13 +72582,14 @@ components:
         id: 31cdada0-02c1-11ed-85f2-4f7c222ca2fa
         owner: cases
         settings:
+          extractObservables: false
           syncAlerts: true
         severity: low
         status: open
         tags:
           - tag 1
         title: Case title 1
-        totalAlerts: 0
+        totalAlerts: 1
         totalComment: 1
         updated_at: '2023-10-13T15:40:32.335Z'
         updated_by:
@@ -72581,6 +72669,7 @@ components:
         id: b917f300-0ed9-11ed-bd18-65557fe66949
         owner: cases
         settings:
+          extractObservables: false
           syncAlerts: true
         severity: low
         status: open
@@ -72778,6 +72867,7 @@ components:
             description: A case description.
             id: a18b38a0-71b0-11ea-a0b2-c51ea50a58e2
             settings:
+              extractObservables: false
               syncAlerts: true
             tags:
               - tag-1
@@ -72827,6 +72917,7 @@ components:
           id: 66b9aa00-94fa-11ea-9f74-e7e108796192
           owner: cases
           settings:
+            extractObservables: false
             syncAlerts: true
           severity: low
           status: open
@@ -76731,14 +76822,6 @@ components:
           minItems: 1
           type: string
         type: array
-    Cases_includeComments:
-      deprecated: true
-      description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
-      in: query
-      name: includeComments
-      schema:
-        default: true
-        type: boolean
     Cases_kbn_xsrf:
       description: Cross-site request forgery protection
       in: header
@@ -77814,6 +77897,144 @@ components:
         - email
         - full_name
         - username
+    Cases_case_response_get_case:
+      description: |
+        Case details returned by the get case API. The comments property is not included in the response. Use the find case comments API to retrieve comments. totalComment reflects the actual number of user comments.
+      properties:
+        assignees:
+          $ref: '#/components/schemas/Cases_assignees'
+        category:
+          description: The case category.
+          nullable: true
+          type: string
+        closed_at:
+          format: date-time
+          nullable: true
+          type: string
+        closed_by:
+          $ref: '#/components/schemas/Cases_case_response_closed_by_properties'
+        connector:
+          discriminator:
+            mapping:
+              .cases-webhook: '#/components/schemas/Cases_connector_properties_cases_webhook'
+              .jira: '#/components/schemas/Cases_connector_properties_jira'
+              .none: '#/components/schemas/Cases_connector_properties_none'
+              .resilient: '#/components/schemas/Cases_connector_properties_resilient'
+              .servicenow: '#/components/schemas/Cases_connector_properties_servicenow'
+              .servicenow-sir: '#/components/schemas/Cases_connector_properties_servicenow_sir'
+              .swimlane: '#/components/schemas/Cases_connector_properties_swimlane'
+            propertyName: type
+          oneOf:
+            - $ref: '#/components/schemas/Cases_connector_properties_none'
+            - $ref: '#/components/schemas/Cases_connector_properties_cases_webhook'
+            - $ref: '#/components/schemas/Cases_connector_properties_jira'
+            - $ref: '#/components/schemas/Cases_connector_properties_resilient'
+            - $ref: '#/components/schemas/Cases_connector_properties_servicenow'
+            - $ref: '#/components/schemas/Cases_connector_properties_servicenow_sir'
+            - $ref: '#/components/schemas/Cases_connector_properties_swimlane'
+          title: Case response properties for connectors
+        created_at:
+          example: '2022-05-13T09:16:17.416Z'
+          format: date-time
+          type: string
+        created_by:
+          $ref: '#/components/schemas/Cases_case_response_created_by_properties'
+        customFields:
+          description: Custom field values for the case.
+          items:
+            type: object
+            properties:
+              key:
+                description: |
+                  The unique identifier for the custom field. The key value must exist in the case configuration settings.
+                type: string
+              type:
+                description: |
+                  The custom field type. It must match the type specified in the case configuration settings.
+                enum:
+                  - text
+                  - toggle
+                type: string
+              value:
+                description: |
+                  The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
+                oneOf:
+                  - maxLength: 160
+                    minLength: 1
+                    nullable: true
+                    type: string
+                  - type: boolean
+          type: array
+        description:
+          example: A case description.
+          type: string
+        duration:
+          description: |
+            The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
+          example: 120
+          nullable: true
+          type: integer
+        external_service:
+          $ref: '#/components/schemas/Cases_external_service'
+        id:
+          example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+          type: string
+        owner:
+          $ref: '#/components/schemas/Cases_owner'
+        settings:
+          $ref: '#/components/schemas/Cases_settings'
+        severity:
+          $ref: '#/components/schemas/Cases_case_severity'
+        status:
+          $ref: '#/components/schemas/Cases_case_status'
+        tags:
+          example:
+            - tag-1
+          items:
+            type: string
+          type: array
+        title:
+          example: Case title 1
+          type: string
+        totalAlerts:
+          example: 0
+          type: integer
+        totalComment:
+          description: The number of user comments on the case. Use the find case comments API to retrieve comment content.
+          example: 1
+          type: integer
+        updated_at:
+          format: date-time
+          nullable: true
+          type: string
+        updated_by:
+          $ref: '#/components/schemas/Cases_case_response_updated_by_properties'
+        version:
+          example: WzUzMiwxXQ==
+          type: string
+      required:
+        - closed_at
+        - closed_by
+        - connector
+        - created_at
+        - created_by
+        - description
+        - duration
+        - external_service
+        - id
+        - owner
+        - settings
+        - severity
+        - status
+        - tags
+        - title
+        - totalAlerts
+        - totalComment
+        - updated_at
+        - updated_by
+        - version
+      title: Get case response
+      type: object
     Cases_case_response_properties:
       title: Case response properties
       type: object
@@ -78445,6 +78666,29 @@ components:
               example: elastic
               nullable: true
               type: string
+    Cases_find_comments_response:
+      title: Find case comments response
+      type: object
+      properties:
+        comments:
+          description: Paginated list of user comments for the case.
+          items:
+            $ref: '#/components/schemas/Cases_user_comment_response_properties'
+          type: array
+        page:
+          description: The current page index.
+          type: integer
+        per_page:
+          description: The number of items per page.
+          type: integer
+        total:
+          description: The total number of comments.
+          type: integer
+      required:
+        - comments
+        - page
+        - per_page
+        - total
     Cases_owner:
       description: |
         The application that owns the cases: Stack Management, Observability, or Elastic Security.
@@ -78843,7 +79087,8 @@ components:
       type: object
       properties:
         extractObservables:
-          description: Auto extracts observables
+          description: |
+            When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.
           example: false
           type: boolean
         syncAlerts:
@@ -93806,6 +94051,11 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entitySourceIds:
+          description: List of entity source IDs associated with the watchlist
+          items:
+            type: string
+          type: array
         id:
           description: The unique ID of the watchlist
           type: string
@@ -96026,6 +96276,7 @@ components:
           - attributes:
               created_at: '2023-10-31T00:00:00Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: My pack description
               enabled: true
               name: My Pack
@@ -96038,6 +96289,7 @@ components:
                   query: select * from uptime;
               updated_at: '2023-10-31T00:00:00Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:
               - default
@@ -96082,6 +96334,7 @@ components:
           - attributes:
               created_at: '2022-07-26T09:28:08.597Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: Saved query description
               ecs_mapping:
                 host.uptime:
@@ -96093,6 +96346,7 @@ components:
               query: select * from uptime;
               updated_at: '2022-07-26T09:28:08.597Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               version: 2.8.0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:
@@ -98714,6 +98968,8 @@ components:
           default: 16
           description: |
             The monitor timeout in seconds. The monitor will fail if it doesn't complete within this time.
+
+            For browser monitors, the minimum timeout is 30 seconds. Browser monitor timeouts are only applied when the monitor runs on private locations. If a browser monitor specifies a timeout but has no private locations configured, the timeout will have no effect and a warning will be returned in the response.
           type: number
       required:
         - name
@@ -98895,6 +99151,21 @@ components:
             - host
             - type
       title: ICMP monitor fields
+    Synthetics_monitorWarning:
+      title: Monitor warning
+      type: object
+      properties:
+        message:
+          description: A human-readable warning message.
+          type: string
+        monitorId:
+          description: The monitor ID associated with the warning.
+          type: string
+        publicLocationIds:
+          description: The public location IDs associated with the warning.
+          items:
+            type: string
+          type: array
     Synthetics_parameterRequest:
       title: Parameter request
       type: object
