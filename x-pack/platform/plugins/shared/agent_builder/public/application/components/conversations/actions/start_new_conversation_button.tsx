@@ -19,8 +19,6 @@ const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
   }
 );
 
-const NEW_CONVERSATION_PATH = appPaths.chat.new;
-
 export const StartNewConversationButton: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId } = useConversationContext();
@@ -29,7 +27,7 @@ export const StartNewConversationButton: React.FC = () => {
     if (isEmbeddedContext) {
       setConversationId?.(undefined);
     } else {
-      navigateToAgentBuilderUrl(NEW_CONVERSATION_PATH);
+      navigateToAgentBuilderUrl(appPaths.root);
     }
   }, [isEmbeddedContext, setConversationId, navigateToAgentBuilderUrl]);
 

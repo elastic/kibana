@@ -42,13 +42,17 @@ export const appPaths = {
     connectors: '/manage/connectors',
   },
 
-  // Backward compatibility aliases pointing to new manage routes
-  // TODO: Migrate consumers to use appPaths.manage.* directly and remove these aliases (this is jsut a shortcut for now)
+  // Legacy paths - redirect to new structure via LegacyConversationRedirect
+  legacy: {
+    conversation: ({ conversationId }: { conversationId: string }) =>
+      `/conversations/${conversationId}`,
+  },
+
+  // Backward compatibility aliases pointing to new routes
+  // TODO: Migrate consumers to use appPaths.agent.* or appPaths.manage.* directly and remove these aliases
   chat: {
     new: '/agents/elastic-default',
     newWithAgent: ({ agentId }: { agentId: string }) => `/agents/${agentId}`,
-    conversation: ({ conversationId }: { conversationId: string }) =>
-      `/agents/elastic-default/conversations/${conversationId}`,
   },
   agents: {
     list: '/manage/agents',

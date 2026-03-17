@@ -39,7 +39,7 @@ export const NewConversationButton: React.FC<NewConversationButtonProps> = ({ on
   const buttonProps = isEmbeddedContext
     ? {}
     : {
-        href: createAgentBuilderUrl(appPaths.chat.new),
+        href: createAgentBuilderUrl(appPaths.root),
       };
 
   const label = i18n.translate('xpack.agentBuilder.newConversationButton.ariaLabel', {

@@ -114,7 +114,10 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
       if (isEmbeddedContext) {
         setConversationId?.(conversation.id);
       } else {
-        navigateToAgentBuilderUrl(appPaths.chat.conversation({ conversationId: conversation.id }));
+        // Use legacy path - LegacyConversationRedirect fetches conversation and redirects to correct agent-scoped URL
+        navigateToAgentBuilderUrl(
+          appPaths.legacy.conversation({ conversationId: conversation.id })
+        );
       }
       onClose?.();
     },
