@@ -112,15 +112,8 @@ Max
       });
 
       it('shows list layout and width limit truncation option', async () => {
-        await loadSavedLens('lnsXYvis');
-
         await lens.openLegendSettingsFlyout();
         await setLegendPositionTop();
-        await lens.selectOptionFromComboBox('lnsLegendStatisticsSelect', [
-          'average',
-          'minimum',
-          'maximum',
-        ]);
         await expectListTruncationInput();
         await lens.closeFlyoutWithBackButton();
 
