@@ -18,7 +18,7 @@ const STEP_ERROR = {
 
 const TIMEOUT_ERROR = {
   type: 'TimeoutError',
-  message: 'TimeoutError: Step execution exceeded the configured timeout of 2s.',
+  message: 'Step execution exceeded the configured timeout of 2s.',
 };
 
 describe('error handling scenarios', () => {
