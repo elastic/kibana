@@ -84,9 +84,10 @@ export function applyFieldEvaluations(
 ): Record<string, string> {
   const result: Record<string, string> = {};
   for (const evaluation of fieldEvaluations) {
+    const currentDoc = { ...doc, ...result };
     let sourceValue: string | undefined;
     for (const source of evaluation.sources) {
-      sourceValue = resolveSourceValue(doc, source);
+      sourceValue = resolveSourceValue(currentDoc, source);
       if (sourceValue !== undefined) {
         break;
       }
@@ -96,11 +97,16 @@ export function applyFieldEvaluations(
       value = evaluation.fallbackValue;
     } else {
       value = sourceValue;
+      let clauseMatched = false;
       for (const clause of evaluation.whenClauses) {
         if (clause.sourceMatchesAny.includes(value)) {
           value = clause.then;
+          clauseMatched = true;
           break;
         }
+      }
+      if (!clauseMatched && evaluation.useFallbackWhenNoClauseMatch) {
+        value = evaluation.fallbackValue;
       }
     }
     result[evaluation.destination] = value;

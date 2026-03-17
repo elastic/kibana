@@ -53,6 +53,8 @@ const fieldEvaluationSchema = z.object({
   sources: z.array(fieldEvaluationSourceSchema),
   fallbackValue: z.string(),
   whenClauses: z.array(fieldEvaluationWhenClauseSchema),
+  // When true, use fallbackValue when no whenClause matches (instead of source value). Default false. */
+  useFallbackWhenNoClauseMatch: z.optional(z.boolean()),
 });
 
 // Any field used in the euid calculation must be mapped in the fields array,

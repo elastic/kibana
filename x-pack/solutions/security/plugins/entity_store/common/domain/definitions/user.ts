@@ -33,6 +33,13 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
           { sourceMatchesAny: ['entityanalytics_ad'], then: 'active_directory' },
         ],
       },
+      {
+        destination: 'entity.confidence',
+        sources: [{ field: 'entity.namespace' }],
+        fallbackValue: 'high',
+        whenClauses: [{ sourceMatchesAny: ['local'], then: 'medium' }],
+        useFallbackWhenNoClauseMatch: true,
+      },
     ],
     // Ranking mechanism for the identity field
     euidFields: [
@@ -129,6 +136,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'event.outcome' }),
 
     newestValue({ source: 'entity.namespace' }),
+    newestValue({ source: 'entity.confidence' }),
 
     collect({ source: 'user.domain' }),
     collect({ source: 'user.email' }),

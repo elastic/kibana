@@ -235,16 +235,19 @@ describe('getFieldEvaluationsEsql', () => {
     );
   });
 
-  it('returns EVAL fragment for user entity.namespace with var per source then CASE', () => {
+  it('returns EVAL fragment for user entity.namespace and entity.confidence', () => {
     const result = getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('user', 'default'));
     const base = '_src_entity_namespace';
     const v0 = `${base}0`;
     const v1 = `${base}1`;
+    const confBase = '_src_entity_confidence';
     const expected = [
       `${v0} = MV_FIRST(event.module)`,
       `${v1} = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), "."))`,
       `${base} = CASE((${v0} IS NOT NULL AND ${v0} != ""), ${v0}, (${v1} IS NOT NULL AND ${v1} != ""), ${v1}, NULL)`,
       `entity.namespace = CASE((${base} IS NULL OR ${base} == ""), "unknown", (${base} == "okta" OR ${base} == "entityanalytics_okta"), "okta", (${base} == "azure" OR ${base} == "entityanalytics_entra_id"), "entra_id", (${base} == "o365" OR ${base} == "o365_metrics"), "microsoft_365", (${base} == "entityanalytics_ad"), "active_directory", ${base})`,
+      `${confBase} = MV_FIRST(entity.namespace)`,
+      `entity.confidence = CASE((${confBase} IS NULL OR ${confBase} == ""), "high", (${confBase} == "local"), "medium", "high")`,
     ].join(', ');
     expect(result?.replace(/\s+/g, ' ').trim()).toBe(expected.replace(/\s+/g, ' ').trim());
   });

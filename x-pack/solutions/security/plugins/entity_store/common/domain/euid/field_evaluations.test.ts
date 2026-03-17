@@ -67,72 +67,102 @@ describe('applyFieldEvaluations', () => {
   it('sets entity.namespace to fallbackValue when both event.module and data_stream.dataset are missing', () => {
     expect(applyFieldEvaluations({}, userEvaluations)).toEqual({
       'entity.namespace': 'unknown',
+      'entity.confidence': 'high',
     });
     expect(applyFieldEvaluations({ event: {} }, userEvaluations)).toEqual({
       'entity.namespace': 'unknown',
+      'entity.confidence': 'high',
     });
     expect(applyFieldEvaluations({ event: { module: null } }, userEvaluations)).toEqual({
       'entity.namespace': 'unknown',
+      'entity.confidence': 'high',
     });
     expect(applyFieldEvaluations({ event: { module: '' } }, userEvaluations)).toEqual({
       'entity.namespace': 'unknown',
+      'entity.confidence': 'high',
     });
   });
 
   it('maps okta and entityanalytics_okta to okta', () => {
     expect(applyFieldEvaluations({ event: { module: 'okta' } }, userEvaluations)).toEqual({
       'entity.namespace': 'okta',
+      'entity.confidence': 'high',
     });
     expect(
       applyFieldEvaluations({ event: { module: 'entityanalytics_okta' } }, userEvaluations)
     ).toEqual({
       'entity.namespace': 'okta',
+      'entity.confidence': 'high',
     });
   });
 
   it('maps azure and entityanalytics_entra_id to entra_id', () => {
     expect(applyFieldEvaluations({ event: { module: 'azure' } }, userEvaluations)).toEqual({
       'entity.namespace': 'entra_id',
+      'entity.confidence': 'high',
     });
     expect(
       applyFieldEvaluations({ event: { module: 'entityanalytics_entra_id' } }, userEvaluations)
-    ).toEqual({ 'entity.namespace': 'entra_id' });
+    ).toEqual({
+      'entity.namespace': 'entra_id',
+      'entity.confidence': 'high',
+    });
   });
 
   it('maps o365 and o365_metrics to microsoft_365', () => {
     expect(applyFieldEvaluations({ event: { module: 'o365' } }, userEvaluations)).toEqual({
       'entity.namespace': 'microsoft_365',
+      'entity.confidence': 'high',
     });
     expect(applyFieldEvaluations({ event: { module: 'o365_metrics' } }, userEvaluations)).toEqual({
       'entity.namespace': 'microsoft_365',
+      'entity.confidence': 'high',
     });
   });
 
   it('uses event.module as-is when no whenClause matches (fallback to source)', () => {
     expect(applyFieldEvaluations({ event: { module: 'custom_module' } }, userEvaluations)).toEqual({
       'entity.namespace': 'custom_module',
+      'entity.confidence': 'high',
+    });
+  });
+
+  it('sets entity.confidence to medium when entity.namespace is local', () => {
+    expect(applyFieldEvaluations({ event: { module: 'local' } }, userEvaluations)).toEqual({
+      'entity.namespace': 'local',
+      'entity.confidence': 'medium',
     });
   });
 
   it('when event.module is a list, uses first element for matching and fallback', () => {
     expect(applyFieldEvaluations({ event: { module: ['okta'] } }, userEvaluations)).toEqual({
       'entity.namespace': 'okta',
+      'entity.confidence': 'high',
     });
     expect(
       applyFieldEvaluations({ event: { module: ['other', 'okta'] } }, userEvaluations)
-    ).toEqual({ 'entity.namespace': 'other' });
+    ).toEqual({
+      'entity.namespace': 'other',
+      'entity.confidence': 'high',
+    });
     expect(
       applyFieldEvaluations(
         { event: { module: ['entityanalytics_entra_id', 'azure'] } },
         userEvaluations
       )
-    ).toEqual({ 'entity.namespace': 'entra_id' });
+    ).toEqual({
+      'entity.namespace': 'entra_id',
+      'entity.confidence': 'high',
+    });
   });
 
   it('when event.module is a list and no clause matches, uses first element as fallback', () => {
     expect(
       applyFieldEvaluations({ event: { module: ['custom_a', 'custom_b'] } }, userEvaluations)
-    ).toEqual({ 'entity.namespace': 'custom_a' });
+    ).toEqual({
+      'entity.namespace': 'custom_a',
+      'entity.confidence': 'high',
+    });
   });
 
   it('returns empty object when fieldEvaluations is empty', () => {
@@ -142,30 +172,41 @@ describe('applyFieldEvaluations', () => {
   it('uses first chunk of data_stream.dataset when event.module is missing', () => {
     expect(
       applyFieldEvaluations({ data_stream: { dataset: 'okta.logs' } }, userEvaluations)
-    ).toEqual({ 'entity.namespace': 'okta' });
+    ).toEqual({
+      'entity.namespace': 'okta',
+      'entity.confidence': 'high',
+    });
     expect(
       applyFieldEvaluations(
         { data_stream: { dataset: 'entityanalytics_entra_id.metrics' } },
         userEvaluations
       )
-    ).toEqual({ 'entity.namespace': 'entra_id' });
+    ).toEqual({
+      'entity.namespace': 'entra_id',
+      'entity.confidence': 'high',
+    });
   });
 
   it('returns full data_stream.dataset when it has no delimiter', () => {
     expect(applyFieldEvaluations({ data_stream: { dataset: 'okta' } }, userEvaluations)).toEqual({
       'entity.namespace': 'okta',
+      'entity.confidence': 'high',
     });
     expect(
       applyFieldEvaluations(
         { data_stream: { dataset: 'entityanalytics_entra_id' } },
         userEvaluations
       )
-    ).toEqual({ 'entity.namespace': 'entra_id' });
+    ).toEqual({
+      'entity.namespace': 'entra_id',
+      'entity.confidence': 'high',
+    });
   });
 
   it('sets entity.namespace to unknown when data_stream.dataset starts with delimiter (empty first chunk)', () => {
     expect(applyFieldEvaluations({ data_stream: { dataset: '.logs' } }, userEvaluations)).toEqual({
       'entity.namespace': 'unknown',
+      'entity.confidence': 'high',
     });
   });
 
@@ -175,12 +216,16 @@ describe('applyFieldEvaluations', () => {
         { event: { module: 'azure' }, data_stream: { dataset: 'okta.logs' } },
         userEvaluations
       )
-    ).toEqual({ 'entity.namespace': 'entra_id' });
+    ).toEqual({
+      'entity.namespace': 'entra_id',
+      'entity.confidence': 'high',
+    });
   });
 
   it('sets entity.namespace to unknown when only data_stream.dataset is present but empty', () => {
     expect(applyFieldEvaluations({ data_stream: { dataset: '' } }, userEvaluations)).toEqual({
       'entity.namespace': 'unknown',
+      'entity.confidence': 'high',
     });
   });
 });

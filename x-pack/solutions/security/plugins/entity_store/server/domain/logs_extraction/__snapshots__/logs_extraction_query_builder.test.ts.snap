@@ -840,7 +840,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
 | EVAL _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", _src_entity_namespace)
+ entity.namespace = CASE((_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", _src_entity_namespace),
+ _src_entity_confidence = MV_FIRST(entity.namespace),
+ entity.confidence = CASE((_src_entity_confidence IS NULL OR _src_entity_confidence == \\"\\"), \\"high\\", (_src_entity_confidence == \\"local\\"), \\"medium\\", \\"high\\")
 | EVAL recent.entity.EngineMetadata.UntypedId = CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
 (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
@@ -856,6 +858,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  recent.event.type = MV_DEDUPE(TOP(TO_STRING(event.type), 10)) WHERE event.type IS NOT NULL,
  recent.event.outcome = MV_DEDUPE(TOP(TO_STRING(event.outcome), 10)) WHERE event.outcome IS NOT NULL,
  recent.entity.namespace = LAST(TO_STRING(entity.namespace), @timestamp) WHERE entity.namespace IS NOT NULL,
+ recent.entity.confidence = LAST(TO_STRING(entity.confidence), @timestamp) WHERE entity.confidence IS NOT NULL,
  recent.user.domain = MV_DEDUPE(TOP(TO_STRING(user.domain), 10)) WHERE user.domain IS NOT NULL,
  recent.user.email = MV_DEDUPE(TOP(TO_STRING(user.email), 10)) WHERE user.email IS NOT NULL,
  recent.user.name = MV_DEDUPE(TOP(TO_STRING(user.name), 10)) WHERE user.name IS NOT NULL,
@@ -920,6 +923,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  event.type = MV_SLICE(MV_UNION(recent.event.type, event.type), 0, 9),
  event.outcome = MV_SLICE(MV_UNION(recent.event.outcome, event.outcome), 0, 9),
  entity.namespace = COALESCE(recent.entity.namespace, entity.namespace),
+ entity.confidence = COALESCE(recent.entity.confidence, entity.confidence),
  user.domain = MV_SLICE(MV_UNION(recent.user.domain, user.domain), 0, 9),
  user.email = MV_SLICE(MV_UNION(recent.user.email, user.email), 0, 9),
  user.name = MV_SLICE(MV_UNION(recent.user.name, user.name), 0, 9),

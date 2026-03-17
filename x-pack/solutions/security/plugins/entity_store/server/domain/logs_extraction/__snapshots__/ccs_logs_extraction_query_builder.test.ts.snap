@@ -107,7 +107,9 @@ FROM remote:logs-*
 | EVAL _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", _src_entity_namespace)
+ entity.namespace = CASE((_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", _src_entity_namespace),
+ _src_entity_confidence = MV_FIRST(entity.namespace),
+ entity.confidence = CASE((_src_entity_confidence IS NULL OR _src_entity_confidence == \\"\\"), \\"high\\", (_src_entity_confidence == \\"local\\"), \\"medium\\", \\"high\\")
 | EVAL entity.id = CONCAT(\\"user:\\", CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
 (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
@@ -123,6 +125,7 @@ FROM remote:logs-*
  event.type = MV_DEDUPE(TOP(TO_STRING(event.type), 10)) WHERE event.type IS NOT NULL,
  event.outcome = MV_DEDUPE(TOP(TO_STRING(event.outcome), 10)) WHERE event.outcome IS NOT NULL,
  entity.namespace = LAST(TO_STRING(entity.namespace), @timestamp) WHERE entity.namespace IS NOT NULL,
+ entity.confidence = LAST(TO_STRING(entity.confidence), @timestamp) WHERE entity.confidence IS NOT NULL,
  user.domain = MV_DEDUPE(TOP(TO_STRING(user.domain), 10)) WHERE user.domain IS NOT NULL,
  user.email = MV_DEDUPE(TOP(TO_STRING(user.email), 10)) WHERE user.email IS NOT NULL,
  user.name = MV_DEDUPE(TOP(TO_STRING(user.name), 10)) WHERE user.name IS NOT NULL,
