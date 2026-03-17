@@ -22,7 +22,7 @@ jest.mock('../lib/with_license_check');
 describe('POST /api/workflows/_check-conflicts', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: ReturnType<typeof createMockRouterInstance>;
-  let mockSpaces: ReturnType<typeof createSpacesMock>;
+  let mockSpaces: any;
 
   beforeEach(() => {
     mockRouter = createMockRouterInstance();
@@ -60,17 +60,14 @@ describe('POST /api/workflows/_check-conflicts', () => {
 
     const body = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
     expect(body.conflicts).toEqual([]);
-    expect(workflowsApi.checkWorkflowConflicts).toHaveBeenCalledWith(
-      ['w-1', 'w-2'],
-      'default'
-    );
+    expect(workflowsApi.checkWorkflowConflicts).toHaveBeenCalledWith(['w-1', 'w-2'], 'default');
   });
 
   it('should return conflicts for existing workflows', async () => {
     const handler = getRouteHandler();
-    workflowsApi.checkWorkflowConflicts = jest.fn().mockResolvedValue([
-      { id: 'w-1', name: 'Existing Workflow One' },
-    ]);
+    workflowsApi.checkWorkflowConflicts = jest
+      .fn()
+      .mockResolvedValue([{ id: 'w-1', name: 'Existing Workflow One' }]);
 
     const mockResponse = createMockResponse();
     await handler({}, createRequest(['w-1', 'w-2']), mockResponse);

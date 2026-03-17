@@ -11,6 +11,7 @@ import { useCallback, useState } from 'react';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowListItemDto } from '@kbn/workflows';
+import { isNotNullable } from '../../../../common/lib/utils';
 import {
   exportSingleWorkflow,
   exportWorkflows,
@@ -110,7 +111,7 @@ export const useExportWithReferences = ({
 
       const missingWorkflows = missingIds
         .map((id) => allWorkflowsMap.get(id))
-        .filter((w): w is WorkflowListItemDto => w != null);
+        .filter(isNotNullable);
 
       if (missingWorkflows.length === 0) {
         exportWithoutReferences(workflowsToExport);

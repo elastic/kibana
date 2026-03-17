@@ -12,6 +12,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ImportWorkflowsFlyout } from './import_workflows_flyout';
+import type { WorkflowPreview } from '../../../../common/lib/export';
 import { useKibana } from '../../../hooks/use_kibana';
 import { parseImportFile } from '../lib/parse_import_file';
 import type { ClientPreflightResult } from '../lib/parse_import_file';
@@ -39,6 +40,17 @@ jest.mock('@kbn/workflows-ui', () => ({
 }));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+
+const createWorkflowPreview = (props: Partial<WorkflowPreview>): WorkflowPreview => ({
+  id: 'test',
+  name: 'Test',
+  description: 'Test description',
+  triggers: [{ type: 'manual' }],
+  inputCount: 0,
+  stepCount: 0,
+  valid: true,
+  ...props,
+});
 
 const createSmallFile = (name: string, content: string): File =>
   new File([content], name, { type: 'text/plain' });
@@ -112,7 +124,7 @@ const createPreflightResult = (
 
   const rawWorkflows = (overrides.workflows ?? []).map((w) => ({
     id: w.id,
-    yaml: w.yaml ?? `name: ${w.name ?? w.id}`,
+    yaml: 'yaml' in w && w.yaml && typeof w.yaml === 'string' ? w.yaml : `name: ${w.name ?? w.id}`,
   }));
 
   return {
@@ -190,7 +202,7 @@ describe('ImportWorkflowsFlyout', () => {
   describe('preflight', () => {
     it('should parse file client-side and check conflicts on file selection', async () => {
       const clientResult = createPreflightResult({
-        workflows: [{ id: 'test', name: 'Test' }],
+        workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
       mockHttpPost.mockResolvedValue({ conflicts: [] });
@@ -215,8 +227,18 @@ describe('ImportWorkflowsFlyout', () => {
       const clientResult = createPreflightResult({
         format: 'zip',
         workflows: [
-          { id: 'w-1', name: 'Existing Workflow', triggers: [{ type: 'manual' }], stepCount: 1 },
-          { id: 'w-2', name: 'New Workflow', triggers: [{ type: 'alert' }], stepCount: 1 },
+          createWorkflowPreview({
+            id: 'w-1',
+            name: 'Existing Workflow',
+            triggers: [{ type: 'manual' }],
+            stepCount: 1,
+          }),
+          createWorkflowPreview({
+            id: 'w-2',
+            name: 'New Workflow',
+            triggers: [{ type: 'alert' }],
+            stepCount: 1,
+          }),
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
@@ -242,7 +264,7 @@ describe('ImportWorkflowsFlyout', () => {
 
     it('should enable import button with no conflicts', async () => {
       const clientResult = createPreflightResult({
-        workflows: [{ id: 'test', name: 'Test' }],
+        workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
       mockHttpPost.mockResolvedValue({ conflicts: [] });
@@ -279,20 +301,20 @@ describe('ImportWorkflowsFlyout', () => {
       const clientResult = createPreflightResult({
         format: 'zip',
         workflows: [
-          {
+          createWorkflowPreview({
             id: 'w-1',
             name: 'My Workflow',
             description: 'Does things',
             triggers: [{ type: 'manual' }],
             inputCount: 2,
             stepCount: 3,
-          },
-          {
+          }),
+          createWorkflowPreview({
             id: 'w-2',
             name: 'Alert Handler',
             triggers: [{ type: 'alert' }, { type: 'scheduled' }],
             stepCount: 1,
-          },
+          }),
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
@@ -320,7 +342,13 @@ describe('ImportWorkflowsFlyout', () => {
 
     it('should fall back to ID when name is null', async () => {
       const clientResult = createPreflightResult({
-        workflows: [{ id: 'fallback-id', name: undefined as unknown as string, valid: false }],
+        workflows: [
+          createWorkflowPreview({
+            id: 'fallback-id',
+            name: undefined as unknown as string,
+            valid: false,
+          }),
+        ],
         rawWorkflows: [{ id: 'fallback-id', yaml: 'bad yaml' }],
       });
       clientResult.workflows[0].name = null;
@@ -358,7 +386,7 @@ describe('ImportWorkflowsFlyout', () => {
   describe('import', () => {
     it('should show Close button and success icons after successful import', async () => {
       const clientResult = createPreflightResult({
-        workflows: [{ id: 'test', name: 'Test' }],
+        workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
       mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
@@ -390,8 +418,8 @@ describe('ImportWorkflowsFlyout', () => {
       const clientResult = createPreflightResult({
         format: 'zip',
         workflows: [
-          { id: 'w-1', name: 'Workflow 1' },
-          { id: 'w-2', name: 'Workflow 2' },
+          createWorkflowPreview({ id: 'w-1', name: 'Workflow 1' }),
+          createWorkflowPreview({ id: 'w-2', name: 'Workflow 2' }),
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
@@ -424,7 +452,7 @@ describe('ImportWorkflowsFlyout', () => {
     it('should show failure icon on full failure', async () => {
       const clientResult = createPreflightResult({
         format: 'zip',
-        workflows: [{ id: 'w-1', name: 'Workflow 1' }],
+        workflows: [createWorkflowPreview({ id: 'w-1', name: 'Workflow 1' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
       mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
@@ -455,7 +483,7 @@ describe('ImportWorkflowsFlyout', () => {
     it('should show Close button after import with parse errors', async () => {
       const clientResult = createPreflightResult({
         format: 'zip',
-        workflows: [{ id: 'w-1', name: 'Workflow 1' }],
+        workflows: [createWorkflowPreview({ id: 'w-1', name: 'Workflow 1' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
       mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
@@ -486,7 +514,7 @@ describe('ImportWorkflowsFlyout', () => {
     it('should send overwrite=true when conflict resolution is overwrite', async () => {
       const clientResult = createPreflightResult({
         format: 'zip',
-        workflows: [{ id: 'w-1', name: 'Existing' }],
+        workflows: [createWorkflowPreview({ id: 'w-1', name: 'Existing' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
       mockHttpPost.mockResolvedValueOnce({
@@ -527,7 +555,7 @@ describe('ImportWorkflowsFlyout', () => {
     it('should call _bulk_create with new IDs when conflict resolution is generateNewIds', async () => {
       const clientResult = createPreflightResult({
         format: 'zip',
-        workflows: [{ id: 'w-1', name: 'Existing' }],
+        workflows: [createWorkflowPreview({ id: 'w-1', name: 'Existing' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
       mockHttpPost.mockResolvedValueOnce({

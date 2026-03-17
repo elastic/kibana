@@ -964,9 +964,7 @@ describe('WorkflowsService', () => {
     it('should return only found workflows when some IDs are missing', async () => {
       mockEsClient.search.mockResolvedValueOnce({
         hits: {
-          hits: [
-            { _id: 'w-1', _source: { ...mockWorkflowDocument._source, name: 'Found' } },
-          ],
+          hits: [{ _id: 'w-1', _source: { ...mockWorkflowDocument._source, name: 'Found' } }],
           total: { value: 1 },
         },
       } as any);
@@ -982,9 +980,7 @@ describe('WorkflowsService', () => {
     it('should return matching IDs with names for existing workflows', async () => {
       mockEsClient.search.mockResolvedValueOnce({
         hits: {
-          hits: [
-            { _id: 'w-1', _source: { name: 'Existing One' } },
-          ],
+          hits: [{ _id: 'w-1', _source: { name: 'Existing One' } }],
           total: { value: 1 },
         },
       } as any);
@@ -1593,7 +1589,7 @@ steps:
       expect(result.failed).toHaveLength(0);
 
       const bulkCall = mockEsClient.bulk.mock.calls[0][0];
-      const firstOp = bulkCall.operations[0];
+      const firstOp = bulkCall.operations?.[0];
       expect(firstOp).toHaveProperty('index');
       expect(firstOp).not.toHaveProperty('create');
     });
@@ -1626,7 +1622,7 @@ steps:
       expect(result.failed).toHaveLength(0);
 
       const bulkCall = mockEsClient.bulk.mock.calls[0][0];
-      const firstOp = bulkCall.operations[0];
+      const firstOp = bulkCall.operations?.[0];
       expect(firstOp).toHaveProperty('index');
       expect(firstOp).not.toHaveProperty('create');
     });

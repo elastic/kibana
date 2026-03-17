@@ -65,6 +65,7 @@ import type {
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import { WorkflowConflictError, WorkflowValidationError } from '../../common/lib/errors';
+import { isNotNullable } from '../../common/lib/utils';
 
 import type { ValidateWorkflowResponse } from '../../common/lib/validate_workflow_yaml';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
@@ -234,11 +235,15 @@ export class WorkflowsService {
       track_total_hits: false,
     });
 
-    return response.hits.hits.map((hit) => {
-      const source: Record<string, unknown> = (hit._source ?? {}) as Record<string, unknown>;
-      const name = typeof source.name === 'string' ? source.name : hit._id;
-      return { id: hit._id, name };
-    });
+    const entries = response.hits.hits
+      .map((hit) => {
+        const source: WorkflowProperties = hit._source ?? {};
+        const name = typeof source.name === 'string' ? source.name : hit._id;
+        return { id: hit._id, name };
+      })
+      .filter((entry): entry is { id: string; name: string } => isNotNullable(entry.id));
+
+    return entries;
   }
 
   /**

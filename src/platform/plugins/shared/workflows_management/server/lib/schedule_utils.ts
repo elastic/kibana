@@ -10,6 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, complexity */
 
 import { Frequency } from '@kbn/rrule';
+import { parseIntervalString, type WorkflowTrigger } from '../../common/lib/trigger_types';
 
 export type { WorkflowTrigger } from '../../common/lib/trigger_types';
 export { parseIntervalString } from '../../common/lib/trigger_types';
@@ -38,12 +39,12 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
 
   // Handle RRule-based scheduling (new)
   if (config.rrule) {
-    return convertRRuleToTaskSchedule(config.rrule);
+    return convertRRuleToTaskSchedule(config.rrule as WorkflowRRuleConfig);
   }
 
   // Handle legacy interval-based scheduling (e.g., every 5 minutes)
   if (config.every && config.unit) {
-    const every = parseInt(config.every, 10);
+    const every = parseInt(config.every as string, 10);
     const unit = String(config.unit).toLowerCase();
 
     if (isNaN(every) || every < 1) {

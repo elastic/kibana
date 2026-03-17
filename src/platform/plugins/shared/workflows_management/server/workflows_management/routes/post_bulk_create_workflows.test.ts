@@ -23,7 +23,7 @@ jest.mock('../lib/with_license_check');
 describe('POST /api/workflows/_bulk_create', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: ReturnType<typeof createMockRouterInstance>;
-  let mockSpaces: ReturnType<typeof createSpacesMock>;
+  let mockSpaces: any;
 
   beforeEach(() => {
     mockRouter = createMockRouterInstance();

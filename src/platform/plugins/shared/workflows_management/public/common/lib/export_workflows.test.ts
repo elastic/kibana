@@ -53,7 +53,8 @@ describe('export_workflows', () => {
       expect(result).not.toBeNull();
       expect(result!.filename).toBe('My_Workflow.yml');
       expect(result!.content.type).toBe('text/yaml');
-      expect(result!.content.content).toContain('stringified:');
+      // the content property is exposed for testing puroposes
+      expect((result!.content as { content: string }).content).toContain('stringified:');
     });
 
     it('should sanitize special characters in workflow name', () => {

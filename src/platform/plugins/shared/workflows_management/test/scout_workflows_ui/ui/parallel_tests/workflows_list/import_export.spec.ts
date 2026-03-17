@@ -110,7 +110,7 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
       description: 'existing',
       enabled: false,
     });
-    const created = await apiServices.workflows.create(scoutSpace.id, workflowYaml);
+    const created = await apiServices.workflows.create(workflowYaml);
 
     const zipBuffer = await buildTestZip([{ id: created.id, yaml: created.yaml }]);
 
@@ -126,14 +126,13 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
   test('should create new workflow when choosing "generate new IDs" for conflicts', async ({
     pageObjects,
     apiServices,
-    scoutSpace,
   }) => {
     const workflowYaml = getListTestWorkflowYaml({
       name: 'ImportNewID Existing',
       description: 'will be duplicated',
       enabled: false,
     });
-    const created = await apiServices.workflows.create(scoutSpace.id, workflowYaml);
+    const created = await apiServices.workflows.create(workflowYaml);
 
     const zipBuffer = await buildTestZip([{ id: created.id, yaml: created.yaml }]);
 
@@ -162,7 +161,7 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
       description: 'will be overwritten',
       enabled: false,
     });
-    const created = await apiServices.workflows.create(scoutSpace.id, workflowYaml);
+    const created = await apiServices.workflows.create(workflowYaml);
 
     const zipBuffer = await buildTestZip([{ id: created.id, yaml: created.yaml }]);
 
@@ -213,8 +212,8 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
       description: 'second export target',
       enabled: false,
     });
-    await apiServices.workflows.create(scoutSpace.id, yaml1);
-    await apiServices.workflows.create(scoutSpace.id, yaml2);
+    await apiServices.workflows.create(yaml1);
+    await apiServices.workflows.create(yaml2);
 
     await pageObjects.workflowList.navigate();
 
