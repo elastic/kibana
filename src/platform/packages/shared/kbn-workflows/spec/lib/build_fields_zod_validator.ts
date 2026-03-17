@@ -8,74 +8,34 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import { resolveRef } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import { resolveRef } from './field_conversion';
 
 /** Root schema type for $ref resolution (same as resolveRef's second parameter). */
 type RootSchemaType = Parameters<typeof resolveRef>[1];
 
 /**
- * Recursively converts a JSON Schema to a Zod schema
- * This is only used as a fallback for $ref references, which fromJSONSchema doesn't handle
- * For non-$ref schemas, we use fromJSONSchema directly in the main function
+ * Converts a JSON Schema to a Zod schema using fromJSONSchema.
+ * Used as fallback when fromJSONSchema returns undefined or for $ref placeholders.
  */
-function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7 | null | undefined): z.ZodType {
-  // Defensive check: handle null/undefined schemas
+export function convertJsonSchemaToZod(jsonSchema: JSONSchema7 | null | undefined): z.ZodType {
   if (!jsonSchema || typeof jsonSchema !== 'object') {
     return z.any();
   }
-
-  // For $ref schemas, we can't use fromJSONSchema directly
-  // Return z.any() as a placeholder - $ref should be resolved before calling this
   if (jsonSchema.$ref) {
     return z.any();
   }
-
-  // Try fromJSONSchema - it handles most cases
   const zodSchema = fromJSONSchema(jsonSchema as Record<string, unknown>);
   if (zodSchema !== undefined) {
     return zodSchema;
   }
-
-  // If fromJSONSchema fails, return z.any() as last resort
-  // This should be rare since fromJSONSchema handles most JSON Schema features
   return z.any();
 }
 
 /**
- * Converts a JSON Schema to a Zod schema using fromJSONSchema polyfill
- * @param jsonSchema - The JSON Schema to convert
- * @returns A Zod schema equivalent to the JSON Schema
- */
-export function convertJsonSchemaToZod(jsonSchema: JSONSchema7 | null | undefined): z.ZodType {
-  // Defensive check: handle null/undefined schemas (crash prevention)
-  if (!jsonSchema || typeof jsonSchema !== 'object') {
-    return z.any();
-  }
-
-  // Note: fromJSONSchema doesn't handle $ref, so we need to resolve them first
-  // For now, if there's a $ref, fall back to recursive converter
-  // TODO: Resolve $ref before calling fromJSONSchema when remote ref support is added
-  if (jsonSchema.$ref) {
-    return convertJsonSchemaToZodRecursive(jsonSchema);
-  }
-
-  // Use fromJSONSchema polyfill - it handles objects, arrays, strings, numbers, booleans,
-  // enums, defaults, required fields, validation constraints, etc.
-  const zodSchema = fromJSONSchema(jsonSchema as Record<string, unknown>);
-  if (zodSchema !== undefined) {
-    return zodSchema;
-  }
-
-  // If fromJSONSchema returns undefined (should be rare), fall back to recursive converter
-  // This is a safety net for edge cases the polyfill might not handle
-  return convertJsonSchemaToZodRecursive(jsonSchema);
-}
-
-/**
  * Recursively converts a JSON Schema to a Zod schema, resolving $ref against the root schema.
- * Use this when you have a root schema (e.g. workflow inputsSchema) and property schemas that may reference it.
+ * Use when you have a root schema (e.g. workflow inputs/outputs) and property schemas that may reference it.
  */
 export function convertJsonSchemaToZodWithRefs(
   jsonSchema: JSONSchema7,
@@ -114,10 +74,11 @@ export function convertJsonSchemaToZodWithRefs(
 }
 
 /**
- * Builds a Zod validator for workflow inputs from a normalized JSON Schema (object with properties, required, etc.).
- * Handles required/optional, defaults, and $ref resolution. Use after normalizeInputsToJsonSchema when validating input payloads.
+ * Builds a Zod validator for workflow fields (inputs or outputs) from a normalized JSON Schema
+ * (object with properties, required, etc.). Handles required/optional, defaults, and $ref resolution.
+ * Use after normalizeFieldsToJsonSchema when validating field payloads.
  */
-export function buildInputsZodValidator(
+export function buildFieldsZodValidator(
   schema: RootSchemaType | null | undefined
 ): z.ZodType<Record<string, unknown>> {
   if (!schema?.properties || typeof schema.properties !== 'object') {

@@ -47,7 +47,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   }, [conversationId, closeCanvas]);
 
   const updateOrigin = useCallback(
-    async (origin: unknown) => {
+    async (origin: string) => {
       if (!conversationId || !canvasState) {
         return;
       }
