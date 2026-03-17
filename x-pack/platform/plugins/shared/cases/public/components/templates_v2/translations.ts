@@ -98,3 +98,11 @@ export const FAILED_TO_SAVE_TEMPLATE = i18n.translate(
     defaultMessage: 'Failed to save template',
   }
 );
+
+export const TEMPLATE_ENABLED = i18n.translate('xpack.cases.templates.enabled', {
+  defaultMessage: 'Enabled',
+});
+
+export const TEMPLATE_DISABLED = i18n.translate('xpack.cases.templates.disabled', {
+  defaultMessage: 'Disabled',
+});

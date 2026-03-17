@@ -170,6 +170,24 @@ export const AllTemplatesPage: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={true} />
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                iconType="lock"
+                iconSide="left"
+                onClick={() =>
+                  setQueryParams({
+                    isEnabled: queryParams.isEnabled === false ? undefined : false,
+                    page: 1,
+                  })
+                }
+                data-test-subj="templates-disabled-filter-link"
+              >
+                {queryParams.isEnabled === false ? i18n.SHOW_ALL : i18n.SHOW_ONLY_DISABLED}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiBasicTable
             columns={columns}

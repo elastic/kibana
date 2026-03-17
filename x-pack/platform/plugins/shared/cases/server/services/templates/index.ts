@@ -47,6 +47,7 @@ export class TemplatesService {
       author,
       owner,
       isDeleted,
+      isEnabled,
     } = params;
 
     const { templates, total } = await this.searchTemplates({
@@ -60,6 +61,7 @@ export class TemplatesService {
       author,
       owner,
       isLatest: true,
+      isEnabled,
     });
 
     const searchLower = search?.toLowerCase() ?? '';
@@ -112,6 +114,7 @@ export class TemplatesService {
     tags,
     author,
     owner,
+    isEnabled,
   }: {
     page: number;
     perPage: number;
@@ -125,6 +128,7 @@ export class TemplatesService {
     tags?: string[];
     author?: string[];
     owner?: string[];
+    isEnabled?: boolean;
   }): Promise<{ templates: Array<SavedObject<Template>>; total: number }> {
     interface SearchResult {
       hits: {
@@ -139,6 +143,11 @@ export class TemplatesService {
 
     const filters = [
       ...(isDeleted ? [] : [toElasticsearchQuery(fromKueryExpression(`NOT ${SO}.deletedAt: *`))]),
+      ...(isEnabled === true
+        ? [{ bool: { must_not: [{ term: { [`${SO}.isEnabled`]: false } }] } }]
+        : isEnabled === false
+        ? [{ term: { [`${SO}.isEnabled`]: false } }]
+        : []),
       ...(templateId
         ? [toElasticsearchQuery(fromKueryExpression(`${SO}.templateId: "${templateId}"`))]
         : []),
@@ -290,6 +299,7 @@ export class TemplatesService {
         fieldNames: parsedDefinition.fields.map((f) => f.name),
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
+        isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
       },
       {
         refresh: true,

@@ -30,11 +30,12 @@ interface TemplateFormLayoutProps {
   title: string;
   isLoading?: boolean;
   isSaving?: boolean;
-  onCreate: (data: YamlEditorFormValues) => Promise<void>;
+  onCreate: (data: YamlEditorFormValues, isEnabled: boolean) => Promise<void>;
   isEdit?: boolean;
   storageKey: string;
   initialValue: string;
   templateId?: string;
+  initialIsEnabled?: boolean;
 }
 
 export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
@@ -47,6 +48,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   storageKey,
   initialValue,
   templateId,
+  initialIsEnabled = true,
 }) => {
   const styles = useMemoCss(componentStyles);
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
@@ -60,10 +62,15 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [savedValue, setSavedValue] = useState(initialValue);
+  const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
 
   useEffect(() => {
     setSavedValue(initialValue);
   }, [initialValue]);
+
+  useEffect(() => {
+    setIsEnabled(initialIsEnabled);
+  }, [initialIsEnabled]);
 
   const {
     value: yamlValue,
@@ -113,7 +120,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     form.handleSubmit(
       async (data) => {
         try {
-          await onCreate(data);
+          await onCreate(data, isEnabled);
           setSavedValue(data.definition);
         } catch (e) {
           setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
@@ -123,7 +130,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       }
     )();
-  }, [form, onCreate]);
+  }, [form, onCreate, isEnabled]);
+
+  const handleIsEnabledChange = useCallback((enabled: boolean) => {
+    setIsEnabled(enabled);
+  }, []);
 
   return (
     <FormProvider {...form}>
@@ -140,9 +151,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             hasChanges={hasChanges}
             isEdit={isEdit}
             submitError={submitError}
+            isEnabled={isEnabled}
             onBack={navigateToCasesTemplates}
             onReset={handleResetClick}
             onSave={handleSave}
+            onIsEnabledChange={handleIsEnabledChange}
           />
         </EuiFlexItem>
 

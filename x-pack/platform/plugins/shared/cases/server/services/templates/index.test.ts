@@ -453,7 +453,7 @@ describe('TemplatesService', () => {
 
         const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
         const query = searchCall?.query as { bool: { filter?: unknown[] } };
-        // Only the isLatest filter remains (deletedAt is omitted when isDeleted is true)
+        // Only isLatest filter remains (deletedAt is omitted when isDeleted is true)
         expect(query.bool.filter).toHaveLength(1);
         expect(query.bool.filter).toEqual(
           expect.arrayContaining([
@@ -470,6 +470,68 @@ describe('TemplatesService', () => {
             }),
           ])
         );
+      });
+
+      it('adds must_not isEnabled:false filter when isEnabled is true', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+        await service.getAllTemplates({
+          ...defaultFindParams,
+          isEnabled: true,
+        });
+
+        const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+        const query = searchCall?.query as { bool: { filter?: unknown[] } };
+        expect(query.bool.filter).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              bool: expect.objectContaining({
+                must_not: expect.arrayContaining([
+                  expect.objectContaining({
+                    term: expect.objectContaining({
+                      [`${CASE_TEMPLATE_SAVED_OBJECT}.isEnabled`]: false,
+                    }),
+                  }),
+                ]),
+              }),
+            }),
+          ])
+        );
+      });
+
+      it('adds term isEnabled:false filter when isEnabled is false', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+        await service.getAllTemplates({
+          ...defaultFindParams,
+          isEnabled: false,
+        });
+
+        const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+        const query = searchCall?.query as { bool: { filter?: unknown[] } };
+        expect(query.bool.filter).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              term: expect.objectContaining({
+                [`${CASE_TEMPLATE_SAVED_OBJECT}.isEnabled`]: false,
+              }),
+            }),
+          ])
+        );
+      });
+
+      it('omits isEnabled filter when isEnabled is undefined', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+        await service.getAllTemplates({ ...defaultFindParams });
+
+        const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+        const query = searchCall?.query as { bool: { filter?: unknown[] } };
+        const filterStr = JSON.stringify(query.bool.filter);
+        expect(filterStr).not.toContain('isEnabled');
       });
     });
 

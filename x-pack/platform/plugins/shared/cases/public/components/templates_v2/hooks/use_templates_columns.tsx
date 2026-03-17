@@ -21,6 +21,7 @@ import {
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiPopover,
   EuiToolTip,
@@ -129,6 +130,7 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
   return (
     <EuiPopover
       id={`template-action-popover-${template.templateId}`}
+      aria-label={i18n.ACTIONS}
       button={
         <EuiButtonIcon
           onClick={togglePopover}
@@ -181,9 +183,35 @@ export const useTemplatesColumns = ({
         sortable: true,
         render: (name: string, template: Template) =>
           name ? (
-            <EuiLink onClick={() => onEdit(template)} data-test-subj="template-column-name">
-              {name}
-            </EuiLink>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              {template.isEnabled === false && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="lock"
+                    content={i18n.TEMPLATE_DISABLED}
+                    iconProps={{ size: 's', color: 'subdued' }}
+                    data-test-subj="template-column-disabled-icon"
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={() => onEdit(template)} data-test-subj="template-column-name">
+                  {name}
+                </EuiLink>
+              </EuiFlexItem>
+              {template.isDefault && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    css={css`
+                      border-radius: ${euiTheme.border.radius.small};
+                    `}
+                    data-test-subj="template-column-default-badge"
+                  >
+                    {i18n.DEFAULT}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           ) : (
             getEmptyCellValue()
           ),

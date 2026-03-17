@@ -20,6 +20,8 @@ describe('TemplateFormHeader', () => {
     hasChanges: false,
     isEdit: false,
     submitError: null,
+    isEnabled: true,
+    onIsEnabledChange: jest.fn(),
     onBack: jest.fn(),
     onReset: jest.fn(),
     onSave: jest.fn(),

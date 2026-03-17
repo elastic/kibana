@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
 import { TemplatesTableFilters } from './templates_table_filters';
 import { renderWithTestingProviders } from '../../../common/mock';
@@ -42,9 +42,11 @@ describe('TemplatesTableFilters', () => {
       />
     );
 
-    expect(await screen.findByTestId('templates-table-filters')).toBeInTheDocument();
-    expect(await screen.findByTestId('templates-search')).toBeInTheDocument();
-    expect(await screen.findByTestId('templates-refresh-button')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table-filters')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('templates-search')).toBeInTheDocument();
+    expect(screen.getByTestId('templates-refresh-button')).toBeInTheDocument();
   });
 
   it('calls onQueryParamsChange when search is performed', async () => {
@@ -56,7 +58,11 @@ describe('TemplatesTableFilters', () => {
       />
     );
 
-    await userEvent.type(await screen.findByTestId('templates-search'), 'test search{enter}');
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-search')).toBeInTheDocument();
+    });
+
+    await userEvent.type(screen.getByTestId('templates-search'), 'test search{enter}');
 
     expect(onQueryParamsChange).toHaveBeenCalledWith({ search: 'test search', page: 1 });
   });
@@ -70,7 +76,11 @@ describe('TemplatesTableFilters', () => {
       />
     );
 
-    await userEvent.click(await screen.findByTestId('templates-refresh-button'));
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-refresh-button')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('templates-refresh-button'));
 
     expect(onRefresh).toHaveBeenCalled();
   });
@@ -85,7 +95,11 @@ describe('TemplatesTableFilters', () => {
       />
     );
 
-    const refreshButton = await screen.findByTestId('templates-refresh-button');
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-refresh-button')).toBeInTheDocument();
+    });
+
+    const refreshButton = screen.getByTestId('templates-refresh-button');
     expect(refreshButton).toHaveAttribute('aria-label', 'Refresh templates');
   });
 
@@ -103,6 +117,8 @@ describe('TemplatesTableFilters', () => {
       />
     );
 
-    expect(await screen.findByDisplayValue('existing search')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('existing search')).toBeInTheDocument();
+    });
   });
 });

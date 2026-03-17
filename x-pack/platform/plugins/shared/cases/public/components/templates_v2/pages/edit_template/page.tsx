@@ -55,7 +55,7 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
   }, [form, template]);
 
   const handleSave = useCallback(
-    async (data: YamlEditorFormValues) => {
+    async (data: YamlEditorFormValues, isEnabled: boolean) => {
       if (!templateId) {
         return;
       }
@@ -63,6 +63,7 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
         templateId,
         template: {
           definition: data.definition,
+          isEnabled,
         },
       });
       navigateToCasesTemplates();
@@ -81,6 +82,7 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
       storageKey={LOCAL_STORAGE_KEYS.templatesYamlEditorEditState}
       initialValue={serverDefinition}
       templateId={templateId}
+      initialIsEnabled={template?.isEnabled}
     />
   );
 };

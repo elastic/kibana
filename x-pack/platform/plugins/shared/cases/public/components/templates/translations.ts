@@ -560,3 +560,19 @@ export const CASES = i18n.translate('xpack.cases.templates.cases', {
 export const DEFAULT = i18n.translate('xpack.cases.templates.default', {
   defaultMessage: 'Default',
 });
+
+export const TEMPLATE_DISABLED = i18n.translate('xpack.cases.templates.disabled', {
+  defaultMessage: 'Disabled',
+});
+
+export const SHOW_DISABLED_ONLY = i18n.translate('xpack.cases.templates.showDisabledOnly', {
+  defaultMessage: 'Show Disabled Only',
+});
+
+export const SHOW_ONLY_DISABLED = i18n.translate('xpack.cases.templates.showOnlyDisabled', {
+  defaultMessage: 'Show only disabled',
+});
+
+export const SHOW_ALL = i18n.translate('xpack.cases.templates.showAll', {
+  defaultMessage: 'Show all',
+});
