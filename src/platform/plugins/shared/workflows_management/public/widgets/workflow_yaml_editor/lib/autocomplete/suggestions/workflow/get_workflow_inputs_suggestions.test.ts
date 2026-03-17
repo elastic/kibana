@@ -177,7 +177,7 @@ describe('getWorkflowInputsSuggestions', () => {
   it('includes placeholder values in insertText', async () => {
     const result = await getWorkflowInputsSuggestions(makeContext());
     const messageSuggestion = result!.find((s) => s.label === 'message');
-    expect(messageSuggestion?.insertText).toBe('message: "string"');
+    expect(messageSuggestion?.insertText).toBe('message: "replace with your data"');
 
     const retriesSuggestion = result!.find((s) => s.label === 'retries');
     expect(retriesSuggestion?.insertText).toBe('retries: 0');
