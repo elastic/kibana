@@ -13,8 +13,11 @@ export type {
   IngestHubSetup,
   IngestHubStart,
   IngestFlowRegistration,
-  IngestFlowProps,
+  IngestFlowMountParams,
 } from './types';
+
+export { IngestFlowSteps } from './components/ingest_flow_steps';
+export type { IngestFlowStep } from './components/ingest_flow_steps';
 
 export const plugin: PluginInitializer<IngestHubSetup, IngestHubStart> = () =>
   new IngestHubPlugin();

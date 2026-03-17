@@ -31,6 +31,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
+import type { IngestHubStart, IngestFlowMountParams } from '@kbn/ingest-hub-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
@@ -69,6 +70,7 @@ export interface ObservabilityOnboardingPluginStartDeps {
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
   streams?: StreamsPluginStart;
+  ingestHub?: IngestHubStart;
 }
 
 export type ObservabilityOnboardingContextValue = CoreStart &
@@ -78,10 +80,12 @@ export class ObservabilityOnboardingPlugin
   implements Plugin<ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart>
 {
   private locators?: ObservabilityOnboardingPluginLocators;
+  private pluginSetupDeps?: ObservabilityOnboardingPluginSetupDeps;
 
   constructor(private readonly ctx: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ObservabilityOnboardingPluginSetupDeps) {
+    this.pluginSetupDeps = plugins;
     const stackVersion = this.ctx.env.packageInfo.version;
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const isServerlessBuild = this.ctx.env.packageInfo.buildFlavor === 'serverless';
@@ -142,9 +146,44 @@ export class ObservabilityOnboardingPlugin
       getLocator: () => this.locators?.onboarding,
     };
   }
-  public start(_core: CoreStart, _plugins: ObservabilityOnboardingPluginStartDeps) {
+  public start(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
+    this.registerIngestFlows(core, plugins);
     return {
       locators: this.locators,
     };
+  }
+
+  private registerIngestFlows(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
+    if (!plugins.ingestHub) {
+      return;
+    }
+
+    const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
+    const deps = {
+      core,
+      plugins,
+      config,
+      context: {
+        isDev: this.ctx.env.mode.dev,
+        isCloud: Boolean(this.pluginSetupDeps?.cloud?.isCloudEnabled),
+        isServerless:
+          Boolean(this.pluginSetupDeps?.cloud?.isServerlessEnabled) ||
+          this.ctx.env.packageInfo.buildFlavor === 'serverless',
+        stackVersion: this.ctx.env.packageInfo.version,
+        cloudServiceProvider: this.pluginSetupDeps?.cloud?.csp,
+      },
+    };
+
+    plugins.ingestHub.registerIngestFlow({
+      id: 'kubernetes',
+      title: 'Kubernetes',
+      description: 'Monitor your Kubernetes cluster with Elastic Agent',
+      icon: 'logoKubernetes',
+      category: 'Containers',
+      mount: async ({ element }: IngestFlowMountParams) => {
+        const { mountKubernetesFlow } = await import('./ingest_hub/render_ingest_flow');
+        return mountKubernetesFlow(element, deps);
+      },
+    });
   }
 }

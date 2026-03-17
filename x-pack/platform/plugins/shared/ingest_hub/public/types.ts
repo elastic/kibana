@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type React from 'react';
 import type { IconType } from '@elastic/eui';
 
-export interface IngestFlowProps {
+export interface IngestFlowMountParams {
+  element: HTMLElement;
   flowId: string;
+  onClose: () => void;
 }
 
 export interface IngestFlowRegistration {
@@ -19,7 +20,7 @@ export interface IngestFlowRegistration {
   icon: IconType;
   category: string;
   order?: number;
-  getContent: () => Promise<React.ComponentType<IngestFlowProps>>;
+  mount: (params: IngestFlowMountParams) => Promise<() => void>;
 }
 
 export type IngestHubSetup = Record<string, never>;
