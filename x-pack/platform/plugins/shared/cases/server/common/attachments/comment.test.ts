@@ -35,6 +35,7 @@ describe('common/attachments/comment', () => {
         isLegacyPayloadCommentAttachment({
           type: 'comment',
           data: { content: 'hello' },
+          owner: 'cases',
         })
       ).toBe(false);
     });
@@ -64,6 +65,7 @@ describe('common/attachments/comment', () => {
         isUnifiedPayloadCommentAttachment({
           type: 'comment',
           data: { content: 'hello' },
+          owner: 'cases',
         })
       ).toBe(true);
     });
@@ -98,6 +100,7 @@ describe('common/attachments/comment', () => {
       expect(result).toEqual({
         type: 'comment',
         data: { content: 'legacy content' },
+        owner: 'securitySolution',
       });
     });
 
@@ -114,7 +117,7 @@ describe('common/attachments/comment', () => {
   describe('toLegacyPayloadCommentAttachment', () => {
     it('transforms unified comment to legacy format with provided owner', () => {
       const result = toLegacyPayloadCommentAttachment(
-        { type: 'comment', data: { content: 'unified content' } },
+        { type: 'comment', data: { content: 'unified content' }, owner: 'securitySolution' },
         'securitySolution'
       );
       expect(result).toEqual({
@@ -126,7 +129,10 @@ describe('common/attachments/comment', () => {
 
     it('throws when content is empty', () => {
       expect(() =>
-        toLegacyPayloadCommentAttachment({ type: 'comment', data: { content: '' } }, 'owner')
+        toLegacyPayloadCommentAttachment(
+          { type: 'comment', data: { content: '' }, owner: 'securitySolution' },
+          'owner'
+        )
       ).toThrow('Comment content is required for comment attachments');
     });
   });
@@ -182,9 +188,10 @@ describe('common/attachments/comment', () => {
     };
 
     const unifiedComment = {
-      type: 'comment',
+      type: 'comment' as const,
       data: { content: 'unified content' },
       metadata: { owner: 'securitySolution' },
+      owner: 'securitySolution',
       created_at: '2024-01-01T00:00:00.000Z',
       created_by: { username: 'u', full_name: null, email: null },
       pushed_at: null,
@@ -197,7 +204,7 @@ describe('common/attachments/comment', () => {
       it('transforms legacy user comment to unified schema', () => {
         const result = commentAttachmentTransformer.toUnifiedSchema(
           legacyUserComment
-        ) as typeof unifiedComment;
+        ) as unknown as typeof unifiedComment;
         expect(result.type).toBe('comment');
         expect(result.data).toEqual({ content: 'legacy content' });
         expect(result.created_at).toBe(legacyUserComment.created_at);
@@ -207,7 +214,7 @@ describe('common/attachments/comment', () => {
       it('returns unified attributes unchanged when already new schema', () => {
         const result = commentAttachmentTransformer.toUnifiedSchema(
           unifiedComment
-        ) as typeof unifiedComment;
+        ) as unknown as typeof unifiedComment;
         expect(result).toEqual(unifiedComment);
       });
     });
@@ -225,7 +232,7 @@ describe('common/attachments/comment', () => {
       });
 
       it('uses owner argument when metadata.owner is missing', () => {
-        const unifiedNoOwner = { ...unifiedComment, metadata: {} };
+        const unifiedNoOwner = { ...unifiedComment, metadata: {}, owner: '' };
         const result = commentAttachmentTransformer.toLegacySchema(
           unifiedNoOwner,
           'fallback-owner'

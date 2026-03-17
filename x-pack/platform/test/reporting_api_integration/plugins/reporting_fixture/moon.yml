@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/reporting-fixture'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/reporting-fixture'
+  title: '@kbn/reporting-fixture'
   description: Moon project for @kbn/reporting-fixture
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture
+  sourceRoot: x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture
 dependsOn:
   - '@kbn/core'
   - '@kbn/task-manager-plugin'

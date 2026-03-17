@@ -5,74 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
-import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import type {
-  DashboardAttachmentData,
-  DashboardAttachmentOrigin,
-} from '@kbn/dashboard-agent-common';
-import type { DashboardState } from '@kbn/dashboard-plugin/common';
-import type {
-  DashboardApi,
-  DashboardCreationOptions,
-  DashboardRendererProps,
-} from '@kbn/dashboard-plugin/public';
-import { i18n } from '@kbn/i18n';
+import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { normalizePanels } from './panel_grid_layout';
-
-interface DashboardCanvasInitialInput {
-  timeRange: {
-    from: string;
-    to: string;
-  };
-  viewMode: 'view';
-  panels: DashboardState['panels'];
-  title?: string;
-  description?: string;
-}
-
-const createDashboardRendererInitialInput = (
-  data: DashboardAttachmentData
-): DashboardCanvasInitialInput => ({
-  timeRange: { from: 'now-24h', to: 'now' },
-  viewMode: 'view',
-  panels: normalizePanels(data.panels ?? []) as DashboardState['panels'],
-  title: data.title,
-  description: data.description,
-});
-
-const getDashboardRendererCreationOptions = async ({
-  savedObjectId,
-  initialDashboardInput,
-}: {
-  savedObjectId?: string;
-  initialDashboardInput: DashboardCanvasInitialInput;
-}): Promise<DashboardCreationOptions> => {
-  if (savedObjectId) {
-    return {
-      getInitialInput: () => ({
-        viewMode: 'view',
-      }),
-    };
-  }
-
-  return {
-    getInitialInput: () => {
-      const { timeRange, ...restInitialDashboardInput } = initialDashboardInput;
-      return {
-        ...restInitialDashboardInput,
-        time_range: timeRange,
-      };
-    },
-  };
-};
+import { DEFAULT_TIME_RANGE, getStateFromAttachment } from './attachment_to_dashboard_state';
+import type { SavedObjectStatus } from './use_register_action_buttons';
+import { useRegisterActionButtons } from './use_register_action_buttons';
 
 const dashboardCanvasContentStyles = {
   root: css({
@@ -96,9 +40,11 @@ const dashboardCanvasContentStyles = {
     minHeight: 0,
     display: 'flex',
   }),
-  searchBar: css({
-    flexShrink: 0,
-  }),
+  searchBar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexShrink: 0,
+      padding: `0 ${euiTheme.size.s}`,
+    }),
   callout: ({ euiTheme }: UseEuiTheme) =>
     css({
       marginTop: euiTheme.size.s,
@@ -112,131 +58,93 @@ export const DashboardCanvasContent = ({
   updateOrigin,
   dashboardLocator,
   searchBarComponent: SearchBar,
-  doesSavedDashboardExist,
+  checkSavedDashboardExist,
 }: AttachmentRenderProps<DashboardAttachment> & {
   registerActionButtons: (buttons: ActionButton[]) => void;
-  updateOrigin: (origin: DashboardAttachmentOrigin) => Promise<unknown>;
+  updateOrigin: (origin: string) => Promise<unknown>;
   dashboardLocator?: DashboardRendererProps['locator'];
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
-  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }) => {
-  const data = attachment.data;
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
-  const linkedSavedObjectId = attachment.origin?.savedObjectId;
+  const linkedSavedObjectId = attachment.origin;
+  const [savedObjectStatus, setSavedObjectStatus] = useState<SavedObjectStatus>({
+    status: 'idle',
+  });
 
-  // useEffect(
-  //   function checkLinkedSavedDashboardExists() {
-  //     let canceled = false;
+  useEffect(
+    function checkSavedObjectExists() {
+      if (!linkedSavedObjectId) {
+        setSavedObjectStatus({ status: 'resolved', exists: false });
+        return;
+      }
 
-  //     if (!linkedSavedObjectId) {
-  //       setLinkedSavedDashboardExists(false);
-  //       return;
-  //     }
+      let canceled = false;
+      setSavedObjectStatus({ status: 'loading' });
 
-  //     setLinkedSavedDashboardExists(false);
-  //     doesSavedDashboardExist(linkedSavedObjectId)
-  //       .then((exists) => {
-  //         if (!canceled) {
-  //           setLinkedSavedDashboardExists(exists);
-  //         }
-  //       })
-  //       .catch(() => {
-  //         if (!canceled) {
-  //           setLinkedSavedDashboardExists(false);
-  //         }
-  //       });
+      checkSavedDashboardExist(linkedSavedObjectId)
+        .then((exists) => {
+          if (!canceled) {
+            setSavedObjectStatus({ status: 'resolved', exists });
+          }
+        })
+        .catch(() => {
+          if (!canceled) {
+            setSavedObjectStatus({ status: 'resolved', exists: false });
+          }
+        });
 
-  //     return () => {
-  //       canceled = true;
-  //     };
-  //   },
-  //   [linkedSavedObjectId, doesSavedDashboardExist]
-  // );
-  const initialDashboardInput = useMemo(() => createDashboardRendererInitialInput(data), [data]);
+      return () => {
+        canceled = true;
+      };
+    },
+    [linkedSavedObjectId, checkSavedDashboardExist]
+  );
+
+  const dashboardState = useMemo(() => getStateFromAttachment(attachment), [attachment]);
+
+  const [timeRange, setTimeRange] = useState<{ from: string; to: string }>(
+    dashboardState.time_range ?? DEFAULT_TIME_RANGE
+  );
 
   const getCreationOptions = useCallback(
     () =>
-      getDashboardRendererCreationOptions({
-        savedObjectId: data.savedObjectId,
-        initialDashboardInput,
+      Promise.resolve({
+        getInitialInput: () => ({ ...dashboardState, viewMode: 'view' as const }),
       }),
-    [data.savedObjectId, initialDashboardInput]
+    [dashboardState]
   );
 
-  useEffect(
-    function registerActionButtonsEffect() {
-      if (!dashboardApi) {
-        return;
-      }
-      const buttons: ActionButton[] = [];
-      if (dashboardApi.locator) {
-        const { locator } = dashboardApi;
-        buttons.push({
-          label: i18n.translate(
-            'xpack.dashboardAgent.attachments.dashboard.canvasEditActionLabel',
-            {
-              defaultMessage: 'Edit',
-            }
-          ),
-          icon: 'pencil',
-          type: ActionButtonType.PRIMARY,
-          handler: async () => {
-            await locator.navigate({
-              dashboardId: data.savedObjectId,
-              title: initialDashboardInput.title,
-              description: initialDashboardInput.description,
-              panels: initialDashboardInput.panels,
-              time_range: initialDashboardInput.timeRange,
-              viewMode: 'edit',
-            });
-          },
-        });
-      }
-
-      buttons.push({
-        label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasSaveActionLabel', {
-          defaultMessage: 'Save',
-        }),
-        icon: 'save',
-        type: ActionButtonType.SECONDARY,
-        handler: async () => {
-          const result = await dashboardApi.runInteractiveSave();
-          const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
-
-          if (nextSavedObjectId && nextSavedObjectId !== linkedSavedObjectId) {
-            await updateOrigin({ savedObjectId: nextSavedObjectId });
-          }
-        },
-      });
-
-      registerActionButtons(buttons);
-    },
-    [
-      dashboardApi,
-      initialDashboardInput.description,
-      initialDashboardInput.panels,
-      initialDashboardInput.timeRange,
-      initialDashboardInput.title,
-      registerActionButtons,
-      data.savedObjectId,
-      linkedSavedObjectId,
-      updateOrigin,
-    ]
-  );
+  useRegisterActionButtons({
+    dashboardApi,
+    registerActionButtons,
+    updateOrigin,
+    timeRange,
+    dashboardState,
+    linkedSavedObjectId,
+    checkSavedDashboardExist,
+  });
 
   return (
     <div css={styles.root}>
       <div css={styles.searchBar}>
         <SearchBar
           appName="dashboardAgent"
+          isAutoRefreshDisabled={true}
           showQueryInput={false}
           showDatePicker={true}
           showFilterBar={false}
-          useDefaultBehaviors={true}
+          showQueryMenu={false}
+          query={undefined}
+          displayStyle="inPage"
+          disableQueryLanguageSwitcher
           isDisabled={!dashboardApi}
+          dateRangeFrom={timeRange.from}
+          dateRangeTo={timeRange.to}
           onQuerySubmit={({ dateRange }) => {
-            dashboardApi?.setTimeRange({ from: dateRange.from, to: dateRange.to });
+            setTimeRange(dateRange);
+            dashboardApi?.setTimeRange(dateRange);
           }}
           onRefresh={() => {
             dashboardApi?.forceRefresh();
@@ -244,44 +152,16 @@ export const DashboardCanvasContent = ({
           data-test-subj="dashboardCanvasSearchBar"
         />
       </div>
-      {/* TODO: Hide the callout for now until we agree on the design */}
-      {/*
-      {linkedSavedObjectId && linkedSavedDashboardExists && (
-        <EuiCallOut
-          css={styles.callout}
-          size="s"
-          iconType="info"
-          announceOnMount={false}
-          title={
-            <FormattedMessage
-              id="xpack.dashboardAgent.attachments.dashboard.savedVersionCalloutDescription"
-              defaultMessage="There's a {savedVersion} of this dashboard that may have more up to date content."
-              values={{
-                savedVersion: (
-                  <EuiLink
-                    href={dashboardLocator?.getRedirectUrl({ dashboardId: linkedSavedObjectId })}
-                    css={{
-                      textDecoration: 'underline',
-                    }}
-                  >
-                    {i18n.translate(
-                      'xpack.dashboardAgent.attachments.dashboard.savedVersionLinkText',
-                      {
-                        defaultMessage: 'saved version',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          }
-        />
-      )} */}
       <div css={styles.renderer}>
         <DashboardRenderer
           getCreationOptions={getCreationOptions}
           showPlainSpinner
           locator={dashboardLocator}
+          savedObjectId={
+            savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
+              ? linkedSavedObjectId
+              : undefined
+          }
           onApiAvailable={(api) => {
             api.setViewMode('view');
             const initialTimeRange = api.timeRange$.value;

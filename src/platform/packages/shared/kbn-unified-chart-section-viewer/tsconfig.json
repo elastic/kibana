@@ -30,9 +30,11 @@
     "@kbn/restorable-state",
     "@kbn/esql-types",
     "@kbn/presentation-panel-plugin",
-    "@kbn/expressions-plugin",
     "@kbn/ebt-tools",
     "@kbn/es-query",
     "@kbn/apm-types-shared",
+    "@kbn/core",
+    "@kbn/search-types",
+    "@kbn/es-types",
   ]
 }

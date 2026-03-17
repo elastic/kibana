@@ -11,7 +11,8 @@ import { v4 } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import type { ResumeWorkflowExecutionParams, StartWorkflowExecutionParams } from './types';
+import { WORKFLOW_RESUME_TASK_TYPE } from './types';
+import type { ResumeWorkflowExecutionParams } from './types';
 import { generateExecutionTaskScope } from '../utils';
 
 export class WorkflowTaskManager {
@@ -29,11 +30,11 @@ export class WorkflowTaskManager {
     const task = await this.taskManager.schedule(
       {
         id: v4(),
-        taskType: 'workflow:resume',
+        taskType: WORKFLOW_RESUME_TASK_TYPE,
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
-        } as ResumeWorkflowExecutionParams,
+        } satisfies ResumeWorkflowExecutionParams,
         state: {},
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
@@ -46,28 +47,32 @@ export class WorkflowTaskManager {
     };
   }
 
-  async scheduleExecutionTask({
+  async scheduleImmediateResume({
     executionId,
-    workflowId,
     spaceId,
     fakeRequest,
   }: {
     executionId: string;
-    workflowId: string;
     spaceId: string;
-    fakeRequest?: KibanaRequest;
-  }): Promise<void> {
-    await this.taskManager.schedule(
+    fakeRequest: KibanaRequest;
+  }): Promise<{ taskId: string }> {
+    const task = await this.taskManager.schedule(
       {
-        id: `workflow:${executionId}:promoted`,
-        taskType: 'workflow:run',
-        params: { workflowRunId: executionId, spaceId } as StartWorkflowExecutionParams,
-        state: { lastRunAt: null, lastRunStatus: null, lastRunError: null },
-        scope: ['workflow', `workflow:${workflowId}`, `workflow:execution:${executionId}`],
-        enabled: true,
+        id: v4(),
+        taskType: WORKFLOW_RESUME_TASK_TYPE,
+        params: {
+          workflowRunId: executionId,
+          spaceId,
+        } satisfies ResumeWorkflowExecutionParams,
+        state: {},
+        scope: [`workflow:execution:${executionId}`],
       },
-      fakeRequest ? { request: fakeRequest } : {}
+      { request: fakeRequest }
     );
+
+    return {
+      taskId: task.id,
+    };
   }
 
   async forceRunIdleTasks(workflowExecutionId: string): Promise<void> {

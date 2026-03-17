@@ -19,6 +19,7 @@ import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/s
 import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
+import { ResolutionClient } from './domain/resolution';
 import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
@@ -67,7 +68,7 @@ export async function createRequestHandlerContext({
     esClient,
     namespace,
   });
-  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, crudClient);
+  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, namespace);
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
@@ -105,8 +106,14 @@ export async function createRequestHandlerContext({
       logger,
       taskManager: taskManagerStart,
       namespace,
+      analytics,
     }),
     crudClient,
+    resolutionClient: new ResolutionClient({
+      logger,
+      esClient: core.elasticsearch.client.asCurrentUser,
+      namespace,
+    }),
     ccsLogsExtractionClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
