@@ -88,7 +88,7 @@ export async function fetchSavedObjects(
   const body = await soClient.find({
     type,
     search: escapeSearchQueryPhrase(name),
-    searchFields: ['name'],
+    searchFields: ['name'], // SO type automatically inferred
   });
   return { ok: true, body };
 }
