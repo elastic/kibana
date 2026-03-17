@@ -6,6 +6,7 @@
  */
 
 import * as uuid from 'uuid';
+import { isUndefined, omitBy } from 'lodash';
 import type { IEvent, IEventLogger, InternalFields } from '@kbn/event-log-plugin/server';
 import { millisToNanos, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -795,10 +796,23 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     event.kibana.alert = event.kibana.alert || {};
     event.kibana.alert.rule = event.kibana.alert.rule || {};
     event.kibana.alert.rule.execution = event.kibana.alert.rule.execution || {};
-    event.kibana.alert.rule.execution.metrics = {
-      ...event.kibana.alert.rule.execution.metrics,
-      ...consumerMetrics,
-    };
+    event.kibana.alert.rule.execution.metrics = omitBy(
+      {
+        ...event.kibana.alert.rule.execution.metrics,
+        alert_counts: omitBy(
+          {
+            ...event.kibana.alert.rule.execution.metrics?.alert_counts,
+            candidates: consumerMetrics.candidate_alerts_count,
+            suppressed: consumerMetrics.suppressed_alerts,
+          },
+          isUndefined
+        ),
+        events_found_count: consumerMetrics.events_found_count,
+        unaccounted_events: consumerMetrics.unaccounted_events,
+        frozen_indices_queried_count: consumerMetrics.frozen_indices_queried_count,
+      },
+      isUndefined
+    );
   }
 
   if (errors) {

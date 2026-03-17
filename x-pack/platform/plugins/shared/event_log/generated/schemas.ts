@@ -189,6 +189,8 @@ export const EventSchema = schema.maybe(
                             active: ecsStringOrNumber(),
                             new: ecsStringOrNumber(),
                             recovered: ecsStringOrNumber(),
+                            candidates: ecsStringOrNumber(),
+                            suppressed: ecsStringOrNumber(),
                           })
                         ),
                         number_of_delayed_alerts: ecsStringOrNumber(),
@@ -210,9 +212,7 @@ export const EventSchema = schema.maybe(
                         total_enrichment_duration_ms: ecsStringOrNumber(),
                         update_alerts_duration_ms: ecsStringOrNumber(),
                         events_found_count: ecsStringOrNumber(),
-                        candidate_alerts_count: ecsStringOrNumber(),
                         unaccounted_events: ecsStringOrNumber(),
-                        suppressed_alerts: ecsStringOrNumber(),
                       })
                     ),
                     errors: schema.maybe(

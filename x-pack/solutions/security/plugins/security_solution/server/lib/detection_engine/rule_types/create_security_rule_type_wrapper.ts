@@ -456,19 +456,18 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               };
             }
 
-            ruleExecutionLogger.logMetrics({
-              total_search_duration_ms: Math.round(sum(result.searchAfterTimes.map(Number))),
-              total_indexing_duration_ms: Math.round(sum(result.bulkCreateTimes.map(Number))),
-              frozen_indices_queried_count: frozenIndicesQueriedCount,
-            });
-
             const disabledActions = rule.actions.filter(
               (action) => !actions.isActionTypeEnabled(action.actionTypeId)
             );
             const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
 
-            ruleExecutionLogger.logMetric('events_found_count', result.totalEventsFound ?? 0);
-            ruleExecutionLogger.logMetric('suppressed_alerts', suppressedAlertsCount);
+            ruleExecutionLogger.logMetrics({
+              total_search_duration_ms: Math.round(sum(result.searchAfterTimes.map(Number))),
+              total_indexing_duration_ms: Math.round(sum(result.bulkCreateTimes.map(Number))),
+              frozen_indices_queried_count: frozenIndicesQueriedCount,
+              events_found_count: result.totalEventsFound,
+              suppressed_alerts: suppressedAlertsCount,
+            });
 
             const createdSignalsCount = result.createdSignals.length;
 

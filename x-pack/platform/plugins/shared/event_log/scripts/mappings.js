@@ -199,6 +199,12 @@ exports.EcsCustomPropertyMappings = {
                           recovered: {
                             type: 'long',
                           },
+                          candidates: {
+                            type: 'long',
+                          },
+                          suppressed: {
+                            type: 'long',
+                          },
                         },
                       },
                       number_of_delayed_alerts: {
@@ -259,13 +265,7 @@ exports.EcsCustomPropertyMappings = {
                       events_found_count: {
                         type: 'long',
                       },
-                      candidate_alerts_count: {
-                        type: 'long',
-                      },
                       unaccounted_events: {
-                        type: 'long',
-                      },
-                      suppressed_alerts: {
                         type: 'long',
                       },
                     },

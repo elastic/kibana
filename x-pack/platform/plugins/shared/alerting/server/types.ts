@@ -463,6 +463,7 @@ export interface ConsumerExecutionMetrics {
   unaccounted_events: number;
   suppressed_alerts: number;
   frozen_indices_queried_count: number;
+  indices_found_count: number;
 }
 
 export interface PublicMetricsSetters {

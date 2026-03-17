@@ -432,6 +432,12 @@
                                                         },
                                                         "recovered": {
                                                             "type": "long"
+                                                        },
+                                                        "candidates": {
+                                                            "type": "long"
+                                                        },
+                                                        "suppressed": {
+                                                            "type": "long"
                                                         }
                                                     }
                                                 },
@@ -493,13 +499,7 @@
                                                 "events_found_count": {
                                                     "type": "long"
                                                 },
-                                                "candidate_alerts_count": {
-                                                    "type": "long"
-                                                },
                                                 "unaccounted_events": {
-                                                    "type": "long"
-                                                },
-                                                "suppressed_alerts": {
                                                     "type": "long"
                                                 }
                                             }
