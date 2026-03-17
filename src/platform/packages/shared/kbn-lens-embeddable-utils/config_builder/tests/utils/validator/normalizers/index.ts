@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensAttributes } from '../../../../types';
-import type { Canonicalizer } from './types';
+import type { AttributesNormalizer } from './normalize';
+import { normalizeHeatmap } from './heatmap';
 
-export const canonicalizeTagcloud: Canonicalizer = (state: LensAttributes): LensAttributes => {
-  return state; // TODO
-};
+const chartNormalizers = {
+  heatmap: normalizeHeatmap,
+} satisfies Record<string, AttributesNormalizer<any>>;
+
+export function getChartNormalizer(chartType: string): AttributesNormalizer | undefined {
+  return (chartNormalizers as any)[chartType];
+}

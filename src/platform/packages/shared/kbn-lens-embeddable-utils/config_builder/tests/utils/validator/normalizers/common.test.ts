@@ -9,17 +9,17 @@
 
 import type { MetricVisualizationState } from '@kbn/lens-common';
 import { breakdownMetricAttributes } from '../../../metric/breakdown.mock';
-import { canonicalizeCommonState } from './common';
+import { normalizeTransformedCommonState } from './common';
 
 describe('common', () => {
-  describe('canonicalizeCommonState', () => {
+  describe('normalizeCommonState', () => {
     it('should convert metric common state', () => {
       const metricVizState = breakdownMetricAttributes.state
         .visualization as MetricVisualizationState;
 
       const layerId = metricVizState.layerId;
 
-      const result = canonicalizeCommonState(breakdownMetricAttributes, layerId, [
+      const result = normalizeTransformedCommonState(breakdownMetricAttributes, layerId, [
         [metricVizState.metricAccessor, 'metric_formula_accessor_metric'],
         [metricVizState.secondaryMetricAccessor, 'metric_formula_accessor_secondary'],
         [metricVizState.maxAccessor, 'metric_formula_accessor_max'],

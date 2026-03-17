@@ -10,7 +10,7 @@
 import { unset } from 'lodash';
 
 import { LensConfigBuilder } from '../../../config_builder';
-import type { LensApiState } from '../../../schema';
+import type { LensApiState, LensApiStateByType, LensApiStateChartType } from '../../../schema';
 import { lensApiStateSchema } from '../../../schema';
 import type { ValidateTransform } from './types';
 import { getChartSchema } from './schema';
@@ -29,7 +29,9 @@ import { getChartSchema } from './schema';
  * - Checks that the new API config includes the filtered API config
  * - Note: the excluded fields are expected to be omitted during the conversion to LensStateConfig, so they are not included in the new API config
  */
-export function validateApiTransformsFn(chartType: string): ValidateTransform['fromApi'] {
+export function validateApiTransformsFn(
+  chartType: LensApiStateChartType
+): ValidateTransform<LensApiStateByType[typeof chartType]>['fromApi'] {
   const schema = getChartSchema(chartType);
   const builder = new LensConfigBuilder(undefined, true);
 

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`common canonicalizeCommonState should convert metric common state 1`] = `
+exports[`common normalizeCommonState should convert metric common state 1`] = `
 Object {
   "description": "Metric with breakdown",
   "references": Array [

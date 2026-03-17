@@ -14,13 +14,14 @@ export const validator = {
   gauge: validateTransformsFn('gauge'),
   tagcloud: validateTransformsFn('tagcloud'),
   metric: validateTransformsFn('metric'),
-  legacyMetric: validateTransformsFn('legacyMetric'),
+  legacyMetric: validateTransformsFn('legacy_metric'),
   xy: validateTransformsFn('xy'),
   heatmap: validateTransformsFn('heatmap'),
-  regionMap: validateTransformsFn('regionMap'),
+  regionMap: validateTransformsFn('region_map'),
   datatable: validateTransformsFn('datatable'),
   mosaic: validateTransformsFn('mosaic'),
   pie: validateTransformsFn('pie'),
+  donut: validateTransformsFn('donut'),
   treemap: validateTransformsFn('treemap'),
   waffle: validateTransformsFn('waffle'),
-} satisfies Record<string, ValidateTransform>;
+} satisfies Record<string, ValidateTransform<any>>;

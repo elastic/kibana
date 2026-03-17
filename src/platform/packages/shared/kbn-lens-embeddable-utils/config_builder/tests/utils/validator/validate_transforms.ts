@@ -10,8 +10,11 @@
 import { validateStateTransformsFn } from './validate_state_transforms';
 import { validateApiTransformsFn } from './validate_api_transforms';
 import type { ValidateTransform } from './types';
+import type { LensApiStateByType, LensApiStateChartType } from '../../../schema';
 
-export function validateTransformsFn(chartType: string): ValidateTransform {
+export function validateTransformsFn(
+  chartType: LensApiStateChartType
+): ValidateTransform<LensApiStateByType[typeof chartType]> {
   return {
     fromState: validateStateTransformsFn(chartType),
     fromApi: validateApiTransformsFn(chartType),
