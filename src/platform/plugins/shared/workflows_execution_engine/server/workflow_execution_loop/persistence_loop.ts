@@ -44,8 +44,6 @@ export async function persistenceLoop(
   params: WorkflowExecutionLoopParams,
   persistenceAbortSignal?: AbortSignal
 ) {
-  // Create the abort promise once outside the loop to avoid accumulating
-  // event listeners on each iteration.
 
   while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
     if (persistenceAbortSignal?.aborted) {
