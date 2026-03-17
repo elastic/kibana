@@ -60,10 +60,14 @@ const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
       'xpack.osquery.pack.queriesTable.viewResultsMoreActionsAriaLabel',
       { defaultMessage: 'More actions' }
     );
-    const viewQueryLabel = i18n.translate(
-      'xpack.osquery.pack.queriesTable.viewQueryMenuLabel',
-      { defaultMessage: 'View query' }
-    );
+    const viewQueryLabel = i18n.translate('xpack.osquery.pack.queriesTable.viewQueryMenuLabel', {
+      defaultMessage: 'View query',
+    });
+
+    const handleViewQueryClick = useCallback(() => {
+      close();
+      onViewQuery();
+    }, [close, onViewQuery]);
 
     const menuItems = useMemo(
       () => [
@@ -95,14 +99,7 @@ const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
               />,
             ]
           : []),
-        <EuiContextMenuItem
-          key="viewQuery"
-          icon="expand"
-          onClick={() => {
-            close();
-            onViewQuery();
-          }}
-        >
+        <EuiContextMenuItem key="viewQuery" icon="expand" onClick={handleViewQueryClick}>
           {viewQueryLabel}
         </EuiContextMenuItem>,
       ],
@@ -114,7 +111,7 @@ const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
         scheduleId,
         executionCount,
         close,
-        onViewQuery,
+        handleViewQueryClick,
         viewQueryLabel,
       ]
     );
@@ -154,6 +151,11 @@ const truncateTooltipTextCss = {
 
 const euiFlexItemCss = {
   cursor: 'pointer',
+};
+
+const euiFlexItemWithMinWidthCss = {
+  minWidth: 0,
+  ...euiFlexItemCss,
 };
 
 // TODO fix types
@@ -314,10 +316,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
       if (scheduleId && packName) {
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} justifyContent="spaceBetween">
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            wrap={false}
+            justifyContent="spaceBetween"
+          >
             <EuiFlexItem
               grow={true}
-              css={{ minWidth: 0, ...euiFlexItemCss }}
+              css={euiFlexItemWithMinWidthCss}
               onClick={handleQueryFlyoutOpen(item)}
             >
               {queryContent}
@@ -368,9 +375,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const renderExecutionCountColumn = useCallback(
     () =>
-      scheduleId && executionCount != null ? (
-        <EuiText size="s">{executionCount}</EuiText>
-      ) : null,
+      scheduleId && executionCount != null ? <EuiText size="s">{executionCount}</EuiText> : null,
     [scheduleId, executionCount]
   );
 

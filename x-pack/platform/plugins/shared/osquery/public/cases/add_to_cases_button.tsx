@@ -36,11 +36,8 @@ export interface AddToCaseButtonProps {
   iconProps?: Record<string, string>;
   scheduleId?: string;
   executionCount?: number;
-  /** When true, render as EuiContextMenuItem for use inside a context menu */
   displayAsMenuItem?: boolean;
-  /** Callback invoked when the menu item is clicked (e.g. to close the kebab popover) */
   onMenuItemClick?: () => void;
-  /** Button size when rendered as EuiButtonEmpty (default: 'xs') */
   size?: 'xs' | 's' | 'm';
 }
 
@@ -118,15 +115,17 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
     selectCaseModal,
   ]);
 
+  const handleMenuItemClick = useCallback(() => {
+    onMenuItemClick?.();
+    handleClick();
+  }, [onMenuItemClick, handleClick]);
+
   if (displayAsMenuItem) {
     return (
       <EuiContextMenuItem
         icon="casesApp"
         disabled={isDisabled || !hasCasesPermissions}
-        onClick={() => {
-          onMenuItemClick?.();
-          handleClick();
-        }}
+        onClick={handleMenuItemClick}
       >
         {ADD_TO_CASE}
       </EuiContextMenuItem>

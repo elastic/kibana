@@ -73,6 +73,11 @@ export const AddToTimelineButton = (props: AddToTimelineButtonProps) => {
     addToTimeline?.(providers);
   }, [addToTimeline, providers]);
 
+  const handleMenuItemClick = useCallback(() => {
+    onMenuItemClick?.();
+    handleClick();
+  }, [onMenuItemClick, handleClick]);
+
   if (appName !== SECURITY_APP_NAME || !queryIds.length || !addToTimeline) {
     return null;
   }
@@ -81,10 +86,7 @@ export const AddToTimelineButton = (props: AddToTimelineButtonProps) => {
     return (
       <EuiContextMenuItem
         icon="timeline"
-        onClick={() => {
-          onMenuItemClick?.();
-          handleClick();
-        }}
+        onClick={handleMenuItemClick}
         data-test-subj="add-to-timeline"
       >
         {addToTimelineLabel}
