@@ -31,8 +31,10 @@ export function TransactionNameLink({
     share: { url: urlService },
     core,
     data: dataService,
+    cps,
   } = getUnifiedDocViewerServices();
 
+  const isCpsEnabled = Boolean(cps?.cpsManager);
   const canViewApm = core.application.capabilities.apm?.show || false;
   const { from: timeRangeFrom, to: timeRangeTo } =
     dataService.query.timefilter.timefilter.getTime();
@@ -69,7 +71,7 @@ export function TransactionNameLink({
 
   return (
     <>
-      {canViewApm && routeLinkProps ? (
+      {canViewApm && routeLinkProps && !isCpsEnabled ? (
         <EuiLink
           {...routeLinkProps}
           data-test-subj="unifiedDocViewerObservabilityTracesTransactionNameLink"

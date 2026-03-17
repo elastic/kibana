@@ -36,7 +36,10 @@ export function DependencyNameLink({
     share: { url: urlService },
     core,
     data: dataService,
+    cps,
   } = getUnifiedDocViewerServices();
+
+  const isCpsEnabled = Boolean(cps?.cpsManager);
 
   const canViewApm = core.application.capabilities.apm?.show || false;
   const { from: timeRangeFrom, to: timeRangeTo } =
@@ -76,7 +79,7 @@ export function DependencyNameLink({
     </EuiFlexGroup>
   );
 
-  return canViewApm && routeLinkProps ? (
+  return canViewApm && routeLinkProps && !isCpsEnabled ? (
     <EuiLink {...routeLinkProps} data-test-subj="unifiedDocViewSpanOverviewDependencyNameLink">
       {content}
     </EuiLink>
