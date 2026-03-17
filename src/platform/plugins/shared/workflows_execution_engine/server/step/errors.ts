@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line max-classes-per-file
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -95,10 +96,13 @@ export function resolveMaxStepSizeBytes(
   config: WorkflowsExecutionEngineConfig | undefined
 ): number {
   try {
-    const nodeConfig = (node as any)?.configuration;
+    const nodeConfig =
+      node && 'configuration' in node
+        ? (node.configuration as Record<string, unknown> | undefined)
+        : undefined;
     const stepLimit = nodeConfig?.['max-step-size'];
     if (stepLimit) {
-      return parseByteSize(stepLimit);
+      return parseByteSize(stepLimit as string | number);
     }
 
     const workflowLimit = workflowExecution?.workflowDefinition?.settings?.['max-step-size'];
@@ -107,10 +111,7 @@ export function resolveMaxStepSizeBytes(
     }
 
     if (config?.maxResponseSize) {
-      const configValue = config.maxResponseSize;
-      return typeof configValue === 'number'
-        ? configValue
-        : (configValue as any).getValueInBytes();
+      return config.maxResponseSize.getValueInBytes();
     }
 
     return parseByteSize(DEFAULT_MAX_STEP_SIZE);

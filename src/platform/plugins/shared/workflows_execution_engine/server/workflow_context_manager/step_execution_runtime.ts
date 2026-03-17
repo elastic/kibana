@@ -15,13 +15,13 @@ import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import type { RunStepResult } from '../step/node_implementation';
 import {
+  DEFAULT_MAX_CUMULATIVE_OUTPUT_SIZE,
   parseByteSize,
   safeOutputSize,
   WorkflowOutputBudgetExceeded,
-  DEFAULT_MAX_CUMULATIVE_OUTPUT_SIZE,
 } from '../step/errors';
+import type { RunStepResult } from '../step/node_implementation';
 import { parseDuration } from '../utils';
 
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -197,10 +197,7 @@ export class StepExecutionRuntime {
 
       const config = this.contextManager.getDependencies().config;
       if (config?.maxCumulativeOutputSize) {
-        const configValue = config.maxCumulativeOutputSize;
-        return typeof configValue === 'number'
-          ? configValue
-          : (configValue as any).getValueInBytes();
+        return config.maxCumulativeOutputSize.getValueInBytes();
       }
 
       return parseByteSize(DEFAULT_MAX_CUMULATIVE_OUTPUT_SIZE);

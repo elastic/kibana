@@ -126,17 +126,18 @@ export class WorkflowTemplatingEngine {
 
       return this.engine.parseAndRenderSync(template, context);
     } catch (error) {
-      if (error instanceof TemplateSizeLimitExceeded) {
-        throw error;
-      }
-      const originalError = (error as any)?.originalError ?? (error as any)?.cause;
-      if (originalError instanceof TemplateSizeLimitExceeded) {
-        throw originalError;
+      // Walk the error cause chain — LiquidJS may wrap our error in originalError or cause
+      let cause: unknown = error;
+      while (cause != null) {
+        if (cause instanceof TemplateSizeLimitExceeded) {
+          throw cause;
+        }
+        const errObj = cause as { originalError?: unknown; cause?: unknown };
+        const next = errObj.originalError ?? errObj.cause;
+        if (next === cause || next == null) break;
+        cause = next;
       }
       const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('TemplateSizeLimitExceeded')) {
-        throw new TemplateSizeLimitExceeded(maxOutputBytes ?? 0);
-      }
       const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
       throw new Error(customerFacingErrorMessage);
     }
