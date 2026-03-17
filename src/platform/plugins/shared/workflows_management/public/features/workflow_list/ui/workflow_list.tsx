@@ -70,7 +70,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     handleAddDirect: handleSingleExportAddDirect,
     handleAddAll: handleSingleExportAddAll,
     handleCancel: handleSingleExportCancel,
-  } = useExportWithReferences(allWorkflowsMap);
+  } = useExportWithReferences({ allWorkflowsMap });
 
   // Report list viewed telemetry when workflows are loaded
   React.useEffect(() => {
