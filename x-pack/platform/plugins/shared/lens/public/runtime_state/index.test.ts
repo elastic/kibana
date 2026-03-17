@@ -73,7 +73,7 @@ describe('hydrateState', () => {
     const result = hydrateState('lnsMetric', metricVizState, metricDatasourceStates, indexPatterns);
     const layers = (result.formBased!.state as FormBasedPrivateState).layers;
     expect(layers[TRENDLINE_LAYER_ID]).toBeDefined();
-    expect(layers[TRENDLINE_LAYER_ID].columns['x_date_histogram']).toMatchObject({
+    expect(layers[TRENDLINE_LAYER_ID].columns.x_date_histogram).toMatchObject({
       operationType: 'date_histogram',
       sourceField: '@timestamp',
     });
