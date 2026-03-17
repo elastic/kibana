@@ -167,10 +167,10 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
         request: {
           body: schema.object({
             hasReference: schema.maybe(
-              schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+              schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
             ),
             type: schema.maybe(
-              schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+              schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
                 meta: {
                   description:
                     'The saved object types to include in the export. Use `*` to export all the types.',
