@@ -41,12 +41,12 @@ import { ROLE } from '../../../../config/services/security_solution_edr_workflow
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { createSupertestErrorLogger } from '../../utils';
 
-const ENDPOINT_ARTIFACTS: {
-  listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number];
-  name: string;
-  read: string;
-  all: string;
-}[] = [
+const ENDPOINT_ARTIFACTS: readonly {
+  readonly listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number];
+  readonly name: string;
+  readonly read: string;
+  readonly all: string;
+}[] = Object.freeze([
   {
     listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
     name: 'Endpoint Exceptions',
@@ -83,7 +83,7 @@ const ENDPOINT_ARTIFACTS: {
     read: 'trusted_devices_read',
     all: 'trusted_devices_all',
   },
-];
+]);
 
 export default function artifactImportAPIIntegrationTests({ getService }: FtrProviderContext) {
   const log = getService('log');
