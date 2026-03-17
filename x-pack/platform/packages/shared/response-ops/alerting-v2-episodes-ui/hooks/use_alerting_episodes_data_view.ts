@@ -6,7 +6,7 @@
  */
 
 import useAsync from 'react-use/lib/useAsync';
-import { getEsqlDataView } from '@kbn/discover-plugin/public';
+import { getEsqlDataView } from '@kbn/discover-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataViewsContract, RuntimeField } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';

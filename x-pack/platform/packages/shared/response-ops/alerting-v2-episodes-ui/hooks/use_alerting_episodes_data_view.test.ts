@@ -8,11 +8,11 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { getEsqlDataView } from '@kbn/discover-plugin/public';
+import { getEsqlDataView } from '@kbn/discover-utils';
 import { ALERTING_EPISODES_PAGINATED_QUERY } from '../constants';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 
-jest.mock('@kbn/discover-plugin/public');
+jest.mock('@kbn/discover-utils');
 
 const getEsqlDataViewMock = getEsqlDataView as jest.MockedFunction<typeof getEsqlDataView>;
 

@@ -13,13 +13,13 @@ import {
   getIndexPatternFromESQLQuery,
   getTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DiscoverServices } from '../../../../build_services';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { HttpStart } from '@kbn/core-http-browser';
 
 export async function getEsqlDataView(
   query: AggregateQuery,
   currentDataView: DataView | undefined,
-  services: Pick<DiscoverServices, 'dataViews' | 'http'>
+  services: { dataViews: DataViewsContract; http: HttpStart }
 ) {
   const indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
   // Convert undefined time fields to a string since '' and undefined are equivalent here
