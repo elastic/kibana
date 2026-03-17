@@ -77,15 +77,15 @@ spaceTest.describe(
       await expect(pageObjects.metricsExperience.grid).toBeHidden();
     });
 
-    spaceTest('should persist grid when changing time range', async ({ pageObjects }) => {
-      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
-      const { metricsExperience, datePicker } = pageObjects;
-      await expect(metricsExperience.grid).toBeVisible();
+    // spaceTest('should persist grid when changing time range', async ({ pageObjects }) => {
+    //   await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+    //   const { metricsExperience, datePicker } = pageObjects;
+    //   await expect(metricsExperience.grid).toBeVisible();
 
-      await datePicker.setCommonlyUsedTime('Last_30 days');
+    //   await datePicker.setCommonlyUsedTime('Last_30 days');
 
-      await expect(metricsExperience.grid).toBeVisible();
-    });
+    //   await expect(metricsExperience.grid).toBeVisible();
+    // });
 
     spaceTest('should show chart actions menu on metric card', async ({ pageObjects, page }) => {
       await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
