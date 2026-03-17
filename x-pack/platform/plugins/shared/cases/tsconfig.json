@@ -107,7 +107,9 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/resizable-layout",
     "@kbn/css-utils",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-ui-settings-server",
+    "@kbn/core-ui-settings-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }
