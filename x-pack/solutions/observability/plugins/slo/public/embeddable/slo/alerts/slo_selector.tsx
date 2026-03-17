@@ -16,12 +16,6 @@ import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { hasSloGroupBy } from '../overview/slo_overview_panel_content';
 import type { SloItem } from './types';
 
-/** Option with optional indent flag and sloId for renderOption and disabled logic */
-interface SloComboBoxOption extends EuiComboBoxOptionOption<string> {
-  isIndented?: boolean;
-  sloId?: string;
-}
-
 interface Props {
   initialSlos?: SloItem[];
   onSelected: (slos: SloItem[] | undefined) => void;
@@ -38,9 +32,6 @@ const ALL_INSTANCES_LABEL = i18n.translate('xpack.slo.sloEmbeddable.config.allIn
 });
 
 const VALUE_SEP = '\u001F';
-
-/** Indent for grouped instance options (2em) - use padding so hover underline doesn't cover it */
-const INSTANCE_INDENT_EM = 2;
 
 /** Session cache: slo_id -> { name, groupBy } for instant display when reopening config */
 const sloNameCache = new Map<string, { name: string; groupBy: string[] }>();
@@ -102,12 +93,10 @@ function mapSlosToOptions(
 
 /** Build options from API results, adding "All instances" per grouped SLO. */
 function buildOptionsFromResults(
-  results: SLOWithSummaryResponse[],
-  selectedOptions: Array<EuiComboBoxOptionOption<string>> = []
-): SloComboBoxOption[] {
-  const options: SloComboBoxOption[] = [];
+  results: SLOWithSummaryResponse[]
+): EuiComboBoxOptionOption<string>[] {
+  const options: EuiComboBoxOptionOption<string>[] = [];
   const seen = new Set<string>();
-  const selectedValues = new Set(selectedOptions.map((o) => o.value));
 
   const byId = new Map<string, SLOWithSummaryResponse[]>();
   for (const slo of results) {
@@ -122,26 +111,17 @@ function buildOptionsFromResults(
     const isGrouped = hasSloGroupBy(groupBy) || new Set(group.map((s) => s.instanceId)).size > 1;
     const allValue = toOptionValue(id, ALL_VALUE);
 
-    if (isGrouped) {
-      if (!seen.has(allValue)) {
-        seen.add(allValue);
-        options.push({
-          label: `${first.name} (${ALL_INSTANCES_LABEL})`,
-          value: allValue,
-          sloId: id,
-        });
-      }
+    if (isGrouped && !seen.has(allValue)) {
+      seen.add(allValue);
+      options.push({ label: `${first.name} (${ALL_INSTANCES_LABEL})`, value: allValue });
     }
 
     for (const slo of group) {
       const value = toOptionValue(id, slo.instanceId);
       if (!seen.has(value)) {
         seen.add(value);
-        const baseLabel =
-          slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.instanceId})` : slo.name;
-        const isIndented =
-          isGrouped && slo.instanceId !== ALL_VALUE && !selectedValues.has(allValue);
-        options.push({ label: baseLabel, value, isIndented, sloId: id });
+        const label = slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.instanceId})` : slo.name;
+        options.push({ label, value });
       }
     }
   }
@@ -260,17 +240,17 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
     disabled: !dropdownOpened,
   });
 
-  const optionsRef = useRef<SloComboBoxOption[]>([]);
+  const optionsRef = useRef<EuiComboBoxOptionOption<string>[]>([]);
   const options = useMemo(() => {
     const isLoadedWithData = !isLoading && sloList?.results !== undefined;
     if (isLoadedWithData) {
       populateNameCache(sloList!.results);
-      const next = buildOptionsFromResults(sloList!.results, selectedOptions);
+      const next = buildOptionsFromResults(sloList!.results);
       optionsRef.current = next;
       return next;
     }
     return optionsRef.current;
-  }, [isLoading, sloList, selectedOptions]);
+  }, [isLoading, sloList]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     const normalized = normalizeSelection(opts, selectedOptions);
@@ -293,13 +273,6 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
       }, 150),
     []
   );
-
-  const renderOption = (option: SloComboBoxOption) => {
-    if (option.isIndented && typeof option.label === 'string') {
-      return <span style={{ paddingLeft: `${INSTANCE_INDENT_EM}em` }}>{option.label}</span>;
-    }
-    return option.label;
-  };
 
   return (
     <EuiFormRow
@@ -330,7 +303,6 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
         onSearchChange={onSearchChange}
         isInvalid={hasError}
         singleSelection={singleSelection ? { asPlainText: true } : undefined}
-        renderOption={renderOption}
       />
     </EuiFormRow>
   );
