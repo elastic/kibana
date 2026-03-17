@@ -11,12 +11,15 @@ import type { OnboardingResult, Streams, TaskResult } from '@kbn/streams-schema'
 import React from 'react';
 import { useStreamFeatures } from '../../../../hooks/use_stream_features';
 
-interface FeaturesColumnProps {
+interface KnowledgeIndicatorsColumnProps {
   stream: Streams.all.Definition;
   streamOnboardingResult?: TaskResult<OnboardingResult>;
 }
 
-export function FeaturesColumn({ stream, streamOnboardingResult }: FeaturesColumnProps) {
+export function KnowledgeIndicatorsColumn({
+  stream,
+  streamOnboardingResult,
+}: KnowledgeIndicatorsColumnProps) {
   const { features } = useStreamFeatures(stream, [streamOnboardingResult]);
 
   return (
