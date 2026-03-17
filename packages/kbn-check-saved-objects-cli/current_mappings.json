@@ -419,6 +419,9 @@
       },
       "metadata": {
         "properties": {
+          "description": {
+            "type": "text"
+          },
           "labels": {
             "type": "keyword"
           },

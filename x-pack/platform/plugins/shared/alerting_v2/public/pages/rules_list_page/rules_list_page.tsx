@@ -26,6 +26,7 @@ import {
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +40,15 @@ import { DeleteConfirmationModal } from '../../components/rule/modals/delete_con
 import { paths } from '../../constants';
 
 const DEFAULT_PER_PAGE = 20;
+
+const descriptionTextStyle = css`
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+`;
 
 interface RuleActionsMenuProps {
   rule: RuleApiResponse;

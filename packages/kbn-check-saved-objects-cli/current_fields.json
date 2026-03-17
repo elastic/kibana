@@ -124,6 +124,7 @@
     "grouping.fields",
     "kind",
     "metadata",
+    "metadata.description",
     "metadata.labels",
     "metadata.name",
     "metadata.owner",
