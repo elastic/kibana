@@ -156,8 +156,8 @@ export async function create({
     }
   }
 
-  // Invoke cross-plugin lifecycle listeners
-  await invokePostCreateListeners(
+  // Invoke cross-plugin lifecycle listeners (fire-and-forget to avoid blocking the API response)
+  void invokePostCreateListeners(
     context.connectorLifecycleListeners,
     actionTypeId,
     {

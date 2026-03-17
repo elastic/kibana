@@ -195,7 +195,7 @@ export type ConnectorLifecyclePostCreateParams = Omit<
   connectorName: string;
   workflowTemplates: string[];
 };
-export type ConnectorLifecyclePostDeleteParams = Omit<PostDeleteConnectorHookParams, 'secrets'> & {
+export type ConnectorLifecyclePostDeleteParams = PostDeleteConnectorHookParams & {
   connectorType: string;
 };
 

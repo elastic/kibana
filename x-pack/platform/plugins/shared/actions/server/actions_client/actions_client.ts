@@ -529,8 +529,8 @@ export class ActionsClient {
       }
     }
 
-    // Invoke cross-plugin lifecycle listeners
-    await invokePostDeleteListeners(
+    // Invoke cross-plugin lifecycle listeners (fire-and-forget to avoid blocking the API response)
+    void invokePostDeleteListeners(
       this.context.connectorLifecycleListeners,
       actionTypeId,
       {
