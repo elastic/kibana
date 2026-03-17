@@ -18,6 +18,7 @@ const createAuthHeaders = (url: string): Record<string, string> => {
   const headers: Record<string, string> = {
     'kbn-xsrf': 'true',
     'Content-Type': 'application/json',
+    'X-Elastic-Internal-Origin': 'Kibana',
   };
 
   const apiKey = process.env.EVALUATIONS_KBN_API_KEY;
@@ -96,7 +97,7 @@ const dryRun = async ({ log }: { log: ToolingLog }): Promise<void> => {
   log.info('=== Data View (POST /api/data_views/data_view) ===');
   log.info(JSON.stringify(dataViewBody, null, 2));
   log.info('');
-  log.info(`=== Dashboard (POST /api/dashboards/${DASHBOARD_ID}) ===`);
+  log.info(`=== Dashboard (POST /internal/dashboards/app/${DASHBOARD_ID}) ===`);
   log.info(JSON.stringify(dashboardBody, null, 2));
   log.info('');
   log.info(`Total panels: ${dashboardBody.panels.length}`);
@@ -135,13 +136,13 @@ const createOrUpdateDashboard = async ({
   }
 
   const dashboardBody = generateDashboardBody();
-  const dashboardUrl = `${baseUrl}/api/dashboards/${DASHBOARD_ID}?apiVersion=1`;
+  const dashboardUrl = `${baseUrl}/internal/dashboards/app/${DASHBOARD_ID}?apiVersion=1`;
 
   log.info(`Creating dashboard "${dashboardBody.title}" via Dashboard API...`);
 
   let response = await fetch(dashboardUrl, {
     method: 'POST',
-    headers,
+    headers: { ...headers, 'elastic-api-version': '1' },
     body: JSON.stringify(dashboardBody),
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
@@ -150,7 +151,7 @@ const createOrUpdateDashboard = async ({
     log.info('Dashboard already exists, updating...');
     response = await fetch(dashboardUrl, {
       method: 'PUT',
-      headers,
+      headers: { ...headers, 'elastic-api-version': '1' },
       body: JSON.stringify(dashboardBody),
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
@@ -177,9 +178,9 @@ const deleteDashboard = async ({
 }): Promise<void> => {
   log.info(`Deleting dashboard ${DASHBOARD_ID}...`);
 
-  const dashResponse = await fetch(`${baseUrl}/api/dashboards/${DASHBOARD_ID}?apiVersion=1`, {
+  const dashResponse = await fetch(`${baseUrl}/internal/dashboards/app/${DASHBOARD_ID}?apiVersion=1`, {
     method: 'DELETE',
-    headers,
+    headers: { ...headers, 'elastic-api-version': '1' },
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
 
