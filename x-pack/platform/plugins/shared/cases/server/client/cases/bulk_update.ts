@@ -425,11 +425,10 @@ export const bulkUpdate = async (
     user,
     logger,
     authorization,
+    uiSettingsClient,
   } = clientArgs;
   const customCloseReasonsSetting =
-    (await clientArgs.uiSettingsClient?.get<string[] | unknown>(
-      CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY
-    )) ?? [];
+    (await uiSettingsClient?.get<string[] | unknown>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY)) ?? [];
   const customCloseReasons = new Set(
     Array.isArray(customCloseReasonsSetting) ? customCloseReasonsSetting : []
   );
