@@ -14,13 +14,6 @@ import { SLO_ALERTS_SUPPORTED_TRIGGERS } from '../../../common/embeddables/alert
 const sloItemSchema = schema.object({
   slo_id: schema.string({ meta: { description: 'SLO ID' } }),
   slo_instance_id: schema.string({ meta: { description: 'SLO instance ID' } }),
-  name: schema.string({ meta: { description: 'SLO name' } }),
-  group_by: schema.arrayOf(schema.string(), {
-    defaultValue: [],
-    meta: {
-      description: 'Group by fields (e.g. ["*"] for none, ["agent.id", "url.domain"] for multiple)',
-    },
-  }),
 });
 
 const AlertsCustomSchema = schema.object({

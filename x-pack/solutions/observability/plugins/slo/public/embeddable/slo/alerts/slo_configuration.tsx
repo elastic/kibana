@@ -71,8 +71,6 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
                     slos?.map((slo) => ({
                       slo_id: slo?.id ?? '',
                       slo_instance_id: slo?.instanceId ?? '',
-                      name: slo?.name ?? '',
-                      group_by: [slo?.groupBy].flat().filter(Boolean) as string[],
                     })) as SloItem[]
                   );
                 }

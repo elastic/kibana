@@ -26,10 +26,6 @@ describe('transformAlertsOut', () => {
       Object {
         "slos": Array [
           Object {
-            "group_by": Array [
-              "agent.id",
-            ],
-            "name": "Legacy SLO",
             "slo_id": "legacy-slo-id",
             "slo_instance_id": "*",
           },
@@ -56,8 +52,6 @@ describe('transformAlertsOut', () => {
         {
           slo_id: 'slo-1',
           slo_instance_id: '*',
-          name: 'SLO',
-          group_by: ['host.name'],
         },
       ],
     });
@@ -81,8 +75,6 @@ describe('transformAlertsOut', () => {
         {
           slo_id: 'new-slo-id',
           slo_instance_id: 'new-instance-id',
-          name: 'New SLO',
-          group_by: ['url.domain'],
         },
       ],
     });
@@ -110,8 +102,6 @@ describe('transformAlertsOut', () => {
         {
           slo_id: 'new-slo-id',
           slo_instance_id: '*',
-          name: 'SLO',
-          group_by: ['field.a'],
         },
       ],
     });
@@ -156,14 +146,10 @@ describe('transformAlertsOut', () => {
         {
           slo_id: 'snake-slo',
           slo_instance_id: '*',
-          name: 'Snake SLO',
-          group_by: [],
         },
         {
           slo_id: 'legacy-slo',
           slo_instance_id: 'instance-1',
-          name: 'Legacy SLO',
-          group_by: ['host.name'],
         },
       ],
     });
@@ -197,8 +183,6 @@ describe('transformAlertsOut', () => {
         {
           slo_id: 'slo-1',
           slo_instance_id: '*',
-          name: '',
-          group_by: [],
         },
       ],
     });
@@ -222,8 +206,6 @@ describe('transformAlertsOut', () => {
         {
           slo_id: 'slo-1',
           slo_instance_id: '*',
-          name: 'SLO',
-          group_by: ['host.name'],
         },
       ],
     });

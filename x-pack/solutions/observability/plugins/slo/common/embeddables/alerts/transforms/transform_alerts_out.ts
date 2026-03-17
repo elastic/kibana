@@ -18,14 +18,11 @@ export interface LegacyAlertsSloItem {
   name: string;
 }
 
-/** Maps legacy camelCase slo item to current snake_case schema. */
+/** Maps legacy camelCase slo item to current schema (slo_id, slo_instance_id only). */
 function mapLegacySloItem(slo: Record<string, unknown>): SloItem {
-  const rawGroupBy = (slo.group_by ?? slo.groupBy) as string[] | undefined;
   return {
     slo_id: (slo.slo_id as string) ?? (slo.id as string) ?? '',
     slo_instance_id: (slo.slo_instance_id as string) ?? (slo.instanceId as string) ?? '',
-    name: (slo.name as string) ?? '',
-    group_by: Array.isArray(rawGroupBy) ? rawGroupBy : [],
   };
 }
 
@@ -60,7 +57,8 @@ export function transformAlertsOut(storedState: AlertsEmbeddableState): AlertsEm
   const rawSlos =
     state.slos?.map((slo) => {
       const hasLegacy = 'id' in slo || 'instanceId' in slo || 'groupBy' in slo;
-      return hasLegacy ? mapLegacySloItem(slo) : (slo as SloItem);
+      const mapped = hasLegacy ? mapLegacySloItem(slo) : (slo as SloItem);
+      return { slo_id: mapped.slo_id, slo_instance_id: mapped.slo_instance_id };
     }) ?? [];
   const legacyShowAll = state.show_all_group_by_instances ?? state.showAllGroupByInstances ?? false;
   const slos = migrateSlos(rawSlos, legacyShowAll);

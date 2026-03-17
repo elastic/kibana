@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +42,30 @@ const VALUE_SEP = '\u001F';
 /** Indent for grouped instance options (2em) - use padding so hover underline doesn't cover it */
 const INSTANCE_INDENT_EM = 2;
 
+/** Session cache: slo_id -> { name, groupBy } for instant display when reopening config */
+const sloNameCache = new Map<string, { name: string; groupBy: string[] }>();
+
+function populateNameCache(slos: SLOWithSummaryResponse[]) {
+  for (const slo of slos) {
+    const groupBy = [slo.groupBy].flat().filter(Boolean) as string[];
+    if (!sloNameCache.has(slo.id)) {
+      sloNameCache.set(slo.id, { name: slo.name, groupBy });
+    }
+  }
+}
+
+function getNameLookupFromCache(
+  slos: Array<{ slo_id: string; slo_instance_id: string }>
+): Map<string, { name: string; groupBy?: string[] }> | null {
+  const map = new Map<string, { name: string; groupBy?: string[] }>();
+  for (const slo of slos) {
+    const cached = sloNameCache.get(slo.slo_id);
+    if (!cached) return null;
+    map.set(toOptionValue(slo.slo_id, slo.slo_instance_id), cached);
+  }
+  return map;
+}
+
 function getSloId(slo: SloItem | SLOWithSummaryResponse): string {
   return (slo as SloItem).slo_id ?? (slo as SLOWithSummaryResponse).id ?? '';
 }
@@ -57,34 +81,43 @@ function parseOptionValue(value: string): [string, string] {
   return idx >= 0 ? [value.slice(0, idx), value.slice(idx + 1)] : [value, ''];
 }
 
-function getGroupBy(slo: SloItem | SLOWithSummaryResponse): string[] | string | undefined {
-  return (slo as SloItem).group_by ?? (slo as SLOWithSummaryResponse).groupBy;
-}
-
-function mapSlosToOptions(slos: SloItem[] | SLOWithSummaryResponse[] | undefined) {
+function mapSlosToOptions(
+  slos: SloItem[] | SLOWithSummaryResponse[] | undefined,
+  nameLookup?: Map<string, { name: string; groupBy?: string[] }>
+) {
   return (
     slos?.map((slo) => {
       const id = getSloId(slo);
       const instanceId = getSloInstanceId(slo);
-      const isGroupedWithAll = instanceId === ALL_VALUE && hasSloGroupBy(getGroupBy(slo));
-      const label =
-        instanceId !== ALL_VALUE
-          ? `${slo.name} (${instanceId})`
-          : isGroupedWithAll
-          ? `${slo.name} (${ALL_INSTANCES_LABEL})`
-          : slo.name;
-      return {
-        label,
-        value: toOptionValue(id, instanceId),
-      };
+      const value = toOptionValue(id, instanceId);
+      const fromApi = (slo as SLOWithSummaryResponse).name;
+      const fromLookup = nameLookup?.get(value);
+      const name = fromApi ?? fromLookup?.name;
+      const groupBy = (slo as SLOWithSummaryResponse).groupBy ?? fromLookup?.groupBy;
+      let label: string;
+      if (name) {
+        label =
+          instanceId !== ALL_VALUE
+            ? `${name} (${instanceId})`
+            : hasSloGroupBy(groupBy)
+            ? `${name} (${ALL_INSTANCES_LABEL})`
+            : name;
+      } else {
+        label = instanceId !== ALL_VALUE ? `${id} (${instanceId})` : id;
+      }
+      return { label, value };
     }) ?? []
   );
 }
 
 /** Build options from API results, adding "All instances" per grouped SLO. */
-function buildOptionsFromResults(results: SLOWithSummaryResponse[]): SloComboBoxOption[] {
+function buildOptionsFromResults(
+  results: SLOWithSummaryResponse[],
+  selectedOptions: Array<EuiComboBoxOptionOption<string>> = []
+): SloComboBoxOption[] {
   const options: SloComboBoxOption[] = [];
   const seen = new Set<string>();
+  const selectedValues = new Set(selectedOptions.map((o) => o.value));
 
   const byId = new Map<string, SLOWithSummaryResponse[]>();
   for (const slo of results) {
@@ -97,9 +130,9 @@ function buildOptionsFromResults(results: SLOWithSummaryResponse[]): SloComboBox
     const first = group[0];
     const groupBy = [first.groupBy].flat().filter(Boolean) as string[];
     const isGrouped = hasSloGroupBy(groupBy) || new Set(group.map((s) => s.instanceId)).size > 1;
+    const allValue = toOptionValue(id, ALL_VALUE);
 
     if (isGrouped) {
-      const allValue = toOptionValue(id, ALL_VALUE);
       if (!seen.has(allValue)) {
         seen.add(allValue);
         options.push({
@@ -116,7 +149,8 @@ function buildOptionsFromResults(results: SLOWithSummaryResponse[]): SloComboBox
         seen.add(value);
         const baseLabel =
           slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.instanceId})` : slo.name;
-        const isIndented = isGrouped && slo.instanceId !== ALL_VALUE;
+        const isIndented =
+          isGrouped && slo.instanceId !== ALL_VALUE && !selectedValues.has(allValue);
         options.push({ label: baseLabel, value, isIndented, sloId: id });
       }
     }
@@ -130,10 +164,24 @@ function buildOptionsFromResults(results: SLOWithSummaryResponse[]): SloComboBox
  * - When "All instances" is selected for an SLO: remove its child instances (they're encompassed).
  * - When a specific instance is selected for an SLO that has "All instances": remove "All instances"
  *   (user is narrowing from "all" to a specific one).
+ * Uses previous selection to infer intent when both "All" and instances are present.
  */
 function normalizeSelection(
-  opts: Array<EuiComboBoxOptionOption<string>>
+  opts: Array<EuiComboBoxOptionOption<string>>,
+  previous: Array<EuiComboBoxOptionOption<string>>
 ): Array<EuiComboBoxOptionOption<string>> {
+  const prevBySloId = new Map<string, { hadAll: boolean; hadInstances: boolean }>();
+  for (const opt of previous) {
+    const [sloId, instanceId] = parseOptionValue(opt.value ?? '');
+    let entry = prevBySloId.get(sloId);
+    if (!entry) {
+      entry = { hadAll: false, hadInstances: false };
+      prevBySloId.set(sloId, entry);
+    }
+    if (instanceId === ALL_VALUE) entry.hadAll = true;
+    else entry.hadInstances = true;
+  }
+
   const bySloId = new Map<
     string,
     { all?: EuiComboBoxOptionOption<string>; instances: EuiComboBoxOptionOption<string>[] }
@@ -153,9 +201,14 @@ function normalizeSelection(
   }
 
   const result: Array<EuiComboBoxOptionOption<string>> = [];
-  for (const [, entry] of bySloId) {
+  for (const [sloId, entry] of bySloId) {
     if (entry.all && entry.instances.length > 0) {
-      result.push(entry.all);
+      const prev = prevBySloId.get(sloId);
+      if (prev?.hadAll && !prev?.hadInstances) {
+        result.push(...entry.instances);
+      } else {
+        result.push(entry.all);
+      }
     } else if (entry.all) {
       result.push(entry.all);
     } else {
@@ -165,16 +218,8 @@ function normalizeSelection(
   return result;
 }
 
-/** Create synthetic SLO for "All instances" selection (API does not return id-* for grouped SLOs). */
-function toSloWithSummary(
-  sloId: string,
-  instanceId: string,
-  results: SLOWithSummaryResponse[]
-): SLOWithSummaryResponse {
-  const match = results.find((s) => s.id === sloId);
-  if (match) {
-    return { ...match, instanceId };
-  }
+/** Minimal SLO shape when dropdown options aren't loaded yet (e.g. user removes a pill before opening). */
+function toMinimalSlo(sloId: string, instanceId: string): SLOWithSummaryResponse {
   return {
     id: sloId,
     instanceId,
@@ -189,43 +234,110 @@ function toSloWithSummary(
   } as unknown as SLOWithSummaryResponse;
 }
 
+/** Create synthetic SLO for "All instances" selection (API does not return id-* for grouped SLOs). */
+function toSloWithSummary(
+  sloId: string,
+  instanceId: string,
+  results: SLOWithSummaryResponse[]
+): SLOWithSummaryResponse {
+  const match = results.find((s) => s.id === sloId);
+  if (match) {
+    return { ...match, instanceId };
+  }
+  return toMinimalSlo(sloId, instanceId);
+}
+
 export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {
+  const needsNameResolution = (initialSlos?.length ?? 0) > 0;
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    mapSlosToOptions(initialSlos)
+    () => {
+      if (!initialSlos?.length) return mapSlosToOptions(initialSlos);
+      const cached = getNameLookupFromCache(initialSlos);
+      if (cached) return mapSlosToOptions(initialSlos, cached);
+      return []; // no cache: wait for name-resolution fetch to avoid ID flash
+    }
   );
   const [searchValue, setSearchValue] = useState<string>('');
+  const [dropdownOpened, setDropdownOpened] = useState(false);
   const query = `${searchValue}*`;
+
+  const initialSloIds = useMemo(
+    () => (initialSlos?.length ? [...new Set(initialSlos.map((s) => s.slo_id))] : []),
+    [initialSlos]
+  );
+  const initialKql = useMemo(
+    () => initialSloIds.map((id) => `slo.id:"${id}"`).join(' or '),
+    [initialSloIds]
+  );
+
+  const { isLoading: isResolvingNames, data: initialSlosData } = useFetchSloList({
+    kqlQuery: initialKql,
+    perPage: Math.max(100, initialSloIds.length * 2),
+    disabled: initialSloIds.length === 0,
+  });
+
+  const nameLookup = useMemo(() => {
+    if (initialSlosData?.results?.length) {
+      populateNameCache(initialSlosData.results);
+      const map = new Map<string, { name: string; groupBy?: string[] }>();
+      const groupBy = (s: SLOWithSummaryResponse) => [s.groupBy].flat().filter(Boolean) as string[];
+      for (const slo of initialSlosData.results) {
+        const key = toOptionValue(slo.id, slo.instanceId);
+        if (!map.has(key)) map.set(key, { name: slo.name, groupBy: groupBy(slo) });
+        const starKey = toOptionValue(slo.id, ALL_VALUE);
+        if (!map.has(starKey)) map.set(starKey, { name: slo.name, groupBy: groupBy(slo) });
+      }
+      return map;
+    }
+    if (initialSlos?.length) {
+      return getNameLookupFromCache(initialSlos) ?? new Map();
+    }
+    return new Map();
+  }, [initialSlosData, initialSlos]);
+
+  useEffect(() => {
+    if (!initialSlos?.length) return;
+    if (nameLookup.size > 0) {
+      setSelectedOptions(mapSlosToOptions(initialSlos, nameLookup));
+    } else if (!isResolvingNames) {
+      setSelectedOptions(mapSlosToOptions(initialSlos));
+    }
+  }, [initialSlos, nameLookup, isResolvingNames]);
+
   const { isLoading, data: sloList } = useFetchSloList({
     kqlQuery: `slo.name: (${query}) or slo.instanceId.text: (${query})`,
     perPage: 100,
+    disabled: !dropdownOpened,
   });
 
+  const optionsRef = useRef<SloComboBoxOption[]>([]);
   const options = useMemo(() => {
     const isLoadedWithData = !isLoading && sloList?.results !== undefined;
-    const baseOpts = isLoadedWithData ? buildOptionsFromResults(sloList.results) : [];
-    const selectedValues = new Set(selectedOptions.map((o) => o.value));
-    return baseOpts.map((opt) => {
-      if (!opt.isIndented || !opt.sloId) return opt;
-      const allValue = toOptionValue(opt.sloId, ALL_VALUE);
-      if (selectedValues.has(allValue)) {
-        return { ...opt, disabled: true };
-      }
-      return opt;
-    });
+    if (isLoadedWithData) {
+      populateNameCache(sloList!.results);
+      const next = buildOptionsFromResults(sloList!.results, selectedOptions);
+      optionsRef.current = next;
+      return next;
+    }
+    return optionsRef.current;
   }, [isLoading, sloList, selectedOptions]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
-    const normalized = normalizeSelection(opts);
+    const normalized = normalizeSelection(opts, selectedOptions);
     setSelectedOptions(normalized);
-    if (normalized.length < 1 || !sloList?.results) {
+    if (normalized.length < 1) {
       onSelected(undefined);
       return;
     }
+    const results = sloList?.results;
     const selectedSlos = normalized.map((opt) => {
       const [sloId, instanceId] = parseOptionValue(opt.value!);
-      const match = sloList.results!.find((s) => toOptionValue(s.id, s.instanceId) === opt.value);
-      if (match) return match;
-      return toSloWithSummary(sloId, instanceId, sloList.results!);
+      if (results) {
+        const match = results.find((s) => toOptionValue(s.id, s.instanceId) === opt.value);
+        if (match) return match;
+        return toSloWithSummary(sloId, instanceId, results);
+      }
+      return toMinimalSlo(sloId, instanceId);
     });
     onSelected(singleSelection ? selectedSlos[0] : selectedSlos);
   };
@@ -234,7 +346,7 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
     () =>
       debounce((value: string) => {
         setSearchValue(value);
-      }, 300),
+      }, 150),
     []
   );
 
@@ -265,9 +377,14 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
         options={options}
         selectedOptions={selectedOptions}
         async
-        isLoading={isLoading}
+        isLoading={
+          optionsRef.current.length === 0 &&
+          ((dropdownOpened && !sloList?.results && isLoading) ||
+            (needsNameResolution && isResolvingNames))
+        }
         onChange={onChange}
         fullWidth
+        onFocus={() => setDropdownOpened(true)}
         onSearchChange={onSearchChange}
         isInvalid={hasError}
         singleSelection={singleSelection ? { asPlainText: true } : undefined}
