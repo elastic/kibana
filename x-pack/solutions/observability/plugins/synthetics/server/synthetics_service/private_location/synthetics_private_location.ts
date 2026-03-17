@@ -10,7 +10,8 @@ import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
 import {
   syntheticsMonitorSOTypes,
   syntheticsMonitorSavedObjectType,
@@ -21,7 +22,6 @@ import {
   LIGHTWEIGHT_TEST_NOW_RUN,
 } from '../synthetics_monitor/synthetics_monitor_client';
 import { scheduleCleanUpTask } from './clean_up_task';
-import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
 import type { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import type {
@@ -82,6 +82,13 @@ export class SyntheticsPrivateLocation {
       return `${config.id}-${locName}`;
     }
     return `${config.name}-${locName}`;
+  }
+
+  async getPolicyNamespace(configNamespace: string) {
+    if (configNamespace && configNamespace !== DEFAULT_NAMESPACE_STRING) {
+      return configNamespace;
+    }
+    return undefined;
   }
 
   /**
@@ -555,11 +562,11 @@ export class SyntheticsPrivateLocation {
 
 
   async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
+    const policyIdsToDelete = new Set<string>();
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
     const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
     const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
-    const policyIdsToDelete = new Set<string>();
 
     for (const config of configs) {
       const { locations } = config;
@@ -591,11 +598,37 @@ export class SyntheticsPrivateLocation {
     return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
   }
 
-  async getPolicyNamespace(configNamespace: string) {
-    if (configNamespace && configNamespace !== DEFAULT_NAMESPACE_STRING) {
-      return configNamespace;
+  /**
+   * Fetches existing package policies for the given configs and locations.
+   * Looks for new (space-agnostic) format and legacy format for all spaces
+   * that have any synthetics monitors.
+   */
+  async getExistingPolicies(
+    configs: HeartbeatConfig[],
+    allPrivateLocations: SyntheticsPrivateLocations,
+    spaceId: string
+  ) {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
+    const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
+    const policyIdsToFetch = new Set<string>();
+
+    for (const config of configs) {
+      for (const privateLocation of allPrivateLocations) {
+        policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
+        this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
+          (id) => policyIdsToFetch.add(id)
+        );
+      }
     }
-    return undefined;
+
+    const policies = await this.server.fleet.packagePolicyService.getByIDs(
+      soClient,
+      [...policyIdsToFetch],
+      { ignoreMissing: true }
+    );
+
+    return { policies, allSpaces };
   }
 }
 

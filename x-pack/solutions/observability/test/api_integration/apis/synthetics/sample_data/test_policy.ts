@@ -140,6 +140,7 @@ export const getHttpInput = ({
   isTLSEnabled,
   isBrowser,
   spaceIds,
+  namespace,
   mws,
   name = 'check if title is present-Test private location 0',
 }: PolicyProps) => {
