@@ -19,7 +19,7 @@ const initialState: AutomatedResolutionState = {
 
 export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig = {
   id: MAINTAINER_ID,
-  description: 'Auto-resolves user entities sharing the same email address',
+  description: 'Automatically resolves entities using field-matching rules',
   interval: '5m',
   initialState,
   run: async ({ status, abortController, logger, esClient }) => {
