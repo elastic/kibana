@@ -1386,7 +1386,7 @@
     "langchain": "0.3.35",
     "langsmith": "0.4.6",
     "launchdarkly-js-client-sdk": "3.9.0",
-    "liquidjs": "10.24.0",
+    "liquidjs": "10.25.0",
     "load-json-file": "6.2.0",
     "lodash": "4.17.23",
     "lru-cache": "11.2.5",
