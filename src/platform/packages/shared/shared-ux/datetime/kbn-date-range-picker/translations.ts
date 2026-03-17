@@ -129,6 +129,46 @@ export const documentationPanelTexts = {
   ),
 };
 
+export const settingsPanelTexts = {
+  heading: i18n.translate('sharedUXPackages.dateRangePicker.settingsPanel.heading', {
+    defaultMessage: 'Settings',
+  }),
+  roundRelativeTimeLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeLabel',
+    { defaultMessage: 'Round relative time ranges' }
+  ),
+  roundRelativeTimeDescription: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeDescription',
+    { defaultMessage: 'Relative ranges round to the nearest full unit (minute, hour, etc.)' }
+  ),
+  timeFormatHeading: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timeFormatHeading',
+    { defaultMessage: 'Time format and zone' }
+  ),
+  timeFormatDescription: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timeFormatDescription',
+    {
+      defaultMessage:
+        'Time zone and format can be set by the space administrator in Advanced settings and affect all the users of this space.',
+    }
+  ),
+  advancedSettingsLink: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.advancedSettingsLink',
+    { defaultMessage: 'Advanced settings' }
+  ),
+  newTimePickerHeading: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.newTimePickerHeading',
+    { defaultMessage: 'New time picker' }
+  ),
+  newTimePickerDescription: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.newTimePickerDescription',
+    {
+      defaultMessage:
+        'Don\'t like new time picker UX? Opt out from it in advanced settings under "".',
+    }
+  ),
+};
+
 export const mainPanelTexts = {
   presetsLabel: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.presetsLabel', {
     defaultMessage: 'Presets',
@@ -151,5 +191,9 @@ export const mainPanelTexts = {
   deletePresetAriaLabel: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.deletePresetAriaLabel',
     { defaultMessage: 'Delete preset' }
+  ),
+  settingsAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.settingsAriaLabel',
+    { defaultMessage: 'Settings' }
   ),
 };

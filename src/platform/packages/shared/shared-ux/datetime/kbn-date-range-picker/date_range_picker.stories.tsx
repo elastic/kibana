@@ -16,6 +16,7 @@ import {
   type DateRangePickerProps,
   type DateRangePickerOnChangeProps,
 } from './date_range_picker';
+import type { DateRangePickerSettings } from './types';
 import type { TimeRangeBoundsOption } from './types';
 
 const meta: Meta<DateRangePickerProps> = {
@@ -28,6 +29,8 @@ const meta: Meta<DateRangePickerProps> = {
   args: {
     onChange: action('onChange'),
     onInputChange: action('onInputChange'),
+    settings: { roundRelativeTime: true },
+    onSettingsChange: action('onSettingsChange'),
   },
 };
 
@@ -72,6 +75,7 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
   const [invalid, setInvalid] = useState<boolean>(false);
   const [recents, setRecents] = useState<TimeRangeBoundsOption[]>([]);
   const [presets, setPresets] = useState<TimeRangeBoundsOption[]>(props.presets ?? []);
+  const [settings, setSettings] = useState<DateRangePickerSettings>(props.settings);
   const { onChange, onPresetSave, onPresetDelete, onInputChange, ...rest } = props;
 
   const handleOnChange = (args: DateRangePickerOnChangeProps) => {
@@ -126,6 +130,8 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
       onInputChange={handleInputChange}
       onPresetSave={onPresetSave ? handlePresetSave : undefined}
       onPresetDelete={onPresetDelete ? handlePresetDelete : undefined}
+      settings={settings}
+      onSettingsChange={setSettings}
     />
   );
 }

@@ -21,6 +21,7 @@ import {
   PanelNavItem,
 } from '../date_range_picker_panel_ui';
 import { DocumentationPanel } from './documentation_panel';
+import { SettingsPanel } from './settings_panel';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 import { mainPanelStyles } from './main_panel.styles';
@@ -153,6 +154,7 @@ const DocumentationButton = () => {
 
 export function MainPanel() {
   const { onPresetSave, timeRange, applyRange } = useDateRangePickerContext();
+  const { navigateTo } = useDateRangePickerPanelNavigation();
   const euiThemeContext = useEuiTheme();
 
   const handlePresetSave = useCallback(() => {
@@ -167,10 +169,6 @@ export function MainPanel() {
   const styles = mainPanelStyles(euiThemeContext);
   const dividerStyles = panelDividerStyles(euiThemeContext);
 
-  // temporary dev-only flag to show the footer conditionally
-  // TODO remove as we make progress and add content to it
-  const _showFooter = typeof onPresetSave === 'function';
-
   return (
     <PanelContainer>
       <PanelBody>
@@ -183,26 +181,32 @@ export function MainPanel() {
           <SubPanelMenu />
         </PanelBodySection>
       </PanelBody>
-      {_showFooter && (
-        <PanelFooter
-          primaryAction={
-            // @ts-ignore onPresetSave is optional at the consumer level (_showFooter is temporary)
-            onPresetSave ? (
-              <EuiToolTip content={mainPanelTexts.savePresetTooltip} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  aria-label={mainPanelTexts.savePresetTooltip}
-                  iconType="save"
-                  display="base"
-                  color="text"
-                  size="s"
-                  disabled={timeRange.isInvalid}
-                  onClick={handlePresetSave}
-                />
-              </EuiToolTip>
-            ) : undefined
-          }
+      <PanelFooter
+        primaryAction={
+          onPresetSave ? (
+            <EuiToolTip content={mainPanelTexts.savePresetTooltip} disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label={mainPanelTexts.savePresetTooltip}
+                iconType="save"
+                display="base"
+                color="text"
+                size="s"
+                disabled={timeRange.isInvalid}
+                onClick={handlePresetSave}
+              />
+            </EuiToolTip>
+          ) : undefined
+        }
+      >
+        <EuiButtonIcon
+          aria-label={mainPanelTexts.settingsAriaLabel}
+          iconType="gear"
+          display="base"
+          color="text"
+          size="s"
+          onClick={() => navigateTo(SettingsPanel.PANEL_ID)}
         />
-      )}
+      </PanelFooter>
     </PanelContainer>
   );
 }

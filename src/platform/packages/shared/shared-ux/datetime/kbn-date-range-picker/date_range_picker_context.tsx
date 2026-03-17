@@ -28,6 +28,7 @@ import type {
   TimeRange,
   InitialFocus,
   CalendarOptions,
+  DateRangePickerSettings,
 } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
@@ -110,6 +111,10 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   isLoading: boolean;
   /** Calendar-specific options (e.g. first day of week). */
   calendarOptions?: CalendarOptions;
+  /** Current picker settings (e.g. rounding, refresh). */
+  settings: DateRangePickerSettings;
+  /** Called when the user changes a setting in the settings panel. */
+  onSettingsChange: (settings: DateRangePickerSettings) => void;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -148,6 +153,8 @@ export function DateRangePickerProvider({
   onInputChange,
   width = 'auto',
   calendarOptions,
+  settings = { roundRelativeTime: true },
+  onSettingsChange,
 }: PropsWithChildren<DateRangePickerProps>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -159,8 +166,9 @@ export function DateRangePickerProvider({
   isEditingRef.current = isEditing;
   const [text, setText] = useState<string>(() => value ?? defaultValue ?? '');
   const timeRange: TimeRange = useMemo(
-    () => textToTimeRange(text, { presets, dateFormat }),
-    [text, presets, dateFormat]
+    () =>
+      textToTimeRange(text, { presets, dateFormat, roundRelativeTime: settings.roundRelativeTime }),
+    [text, presets, dateFormat, settings]
   );
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
@@ -267,6 +275,8 @@ export function DateRangePickerProvider({
       disabled,
       isLoading,
       calendarOptions,
+      settings,
+      onSettingsChange,
     }),
     [
       text,
@@ -291,6 +301,8 @@ export function DateRangePickerProvider({
       disabled,
       isLoading,
       calendarOptions,
+      settings,
+      onSettingsChange,
     ]
   );
 

@@ -77,6 +77,16 @@ export interface TimeRangeTransformOptions {
   roundRelativeTime?: boolean;
 }
 
+/** User-facing settings exposed by the date range picker settings panel. */
+export interface DateRangePickerSettings {
+  /**
+   * When true, relative time ranges round to the nearest full unit
+   * (e.g. minute, hour, day).
+   * @default true
+   */
+  roundRelativeTime: boolean;
+}
+
 export interface TimeRange {
   value: string;
   start: DateString;
