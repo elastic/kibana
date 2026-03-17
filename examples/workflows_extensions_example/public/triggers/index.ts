@@ -8,10 +8,11 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { customTriggerPublicDefinition } from './custom_trigger';
 
 export const registerTriggerDefinitions = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
-) => {
-  workflowsExtensions.registerTriggerDefinition(customTriggerPublicDefinition);
+): void => {
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./custom_trigger').then((m) => m.customTriggerPublicDefinition)
+  );
 };

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  MetricsExperienceFieldsProvider as MetricsExperienceFieldsCapsProvider,
-  type MetricsExperienceFieldsProviderProps as MetricsExperienceFieldsCapsProviderProps,
-} from './metrics_experience_fields_provider';
-export { useMetricsExperienceFieldsContext } from './use_metrics_experience_fields_context';
+export function toArray<T>(value: T | T[] | null | undefined): T[] {
+  if (value == null) return [];
+  return Array.isArray(value) ? value : [value];
+}

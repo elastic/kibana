@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useContext } from 'react';
-import { MetricsExperienceFieldsContext } from './metrics_experience_fields_provider';
+/** Action values for metrics execution context page labels. */
+export enum MetricsExecutionContextAction {
+  FETCH = 'fetch',
+}
 
-export const useMetricsExperienceFieldsContext = () => {
-  return useContext(MetricsExperienceFieldsContext);
-};
+/** Name values for metrics execution context page labels. */
+export enum MetricsExecutionContextName {
+  METRICS_INFO = 'metrics_info',
+}
