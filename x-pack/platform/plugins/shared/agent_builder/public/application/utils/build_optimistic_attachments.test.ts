@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ConverseAttachmentInput } from '../../../common/http_api/chat';
 import {
   ATTACHMENT_REF_ACTOR,
   ATTACHMENT_REF_OPERATION,
@@ -51,7 +52,7 @@ describe('buildOptimisticAttachments', () => {
     const conversationAttachments = [
       createVersionedAttachment({ id: 'attachment-1', type: 'text', data: { value: 'before' } }),
     ];
-    const attachments: AttachmentInput[] = [
+    const attachments: ConverseAttachmentInput[] = [
       { id: 'attachment-1', type: 'text', data: { value: 'after' } },
     ];
 
@@ -73,7 +74,7 @@ describe('buildOptimisticAttachments', () => {
     const conversationAttachments = [
       createVersionedAttachment({ id: 'attachment-1', type: 'text', data }),
     ];
-    const attachments: AttachmentInput[] = [{ type: 'text', data }];
+    const attachments: ConverseAttachmentInput[] = [{ type: 'text', data }];
 
     const result = buildOptimisticAttachments({ attachments, conversationAttachments });
 
@@ -81,7 +82,9 @@ describe('buildOptimisticAttachments', () => {
   });
 
   it('creates a fallback attachment and ref for new inputs', () => {
-    const attachments: AttachmentInput[] = [{ type: 'text', data: { value: 'new' }, hidden: true }];
+    const attachments: ConverseAttachmentInput[] = [
+      { type: 'text', data: { value: 'new' }, hidden: true },
+    ];
 
     const result = buildOptimisticAttachments({ attachments, conversationAttachments: [] });
 
@@ -99,7 +102,7 @@ describe('buildOptimisticAttachments', () => {
   });
 
   it('deduplicates new attachments with matching content', () => {
-    const attachments: AttachmentInput[] = [
+    const attachments: ConverseAttachmentInput[] = [
       { type: 'text', data: { value: 'dup' } },
       { type: 'text', data: { value: 'dup' } },
     ];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { ConverseAttachmentInput } from '../../../../common/http_api/chat';
 import {
   type CheckStaleAttachmentsResponse,
   type StaleAttachment,
@@ -17,7 +17,7 @@ import {
 export const getStaleAttachmentInputs = (
   staleResponse: CheckStaleAttachmentsResponse,
   excludeAttachmentIds: Set<string>
-): Attachment[] =>
+): ConverseAttachmentInput[] =>
   (staleResponse.attachments ?? [])
     .filter(
       (attachment): attachment is StaleAttachment =>

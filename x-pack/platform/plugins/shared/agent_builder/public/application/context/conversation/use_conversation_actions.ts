@@ -19,7 +19,7 @@ import type {
 import { isToolCallStep, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ConverseAttachmentInput } from '../../../../common/http_api/chat';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';
@@ -38,7 +38,7 @@ export interface ConversationActions {
     attachments,
   }: {
     userMessage: string;
-    attachments?: AttachmentInput[];
+    attachments?: ConverseAttachmentInput[];
   }) => void;
   removeOptimisticRound: () => void;
   clearLastRoundResponse: () => void;
@@ -123,7 +123,7 @@ const createConversationActions = ({
       attachments,
     }: {
       userMessage: string;
-      attachments?: AttachmentInput[];
+      attachments?: ConverseAttachmentInput[];
     }) => {
       setConversation(
         produce((draft) => {

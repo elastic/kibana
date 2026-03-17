@@ -8,11 +8,11 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ConverseAttachmentInput } from '../../../../common/http_api/chat';
 import { AttachmentPillsRow } from './conversation_input/attachment_pills_row';
 
 export interface StaleAttachmentsPanelProps {
-  attachmentInputs: AttachmentInput[];
+  attachmentInputs: ConverseAttachmentInput[];
   onAddToInput: () => void;
 }
 
