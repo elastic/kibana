@@ -252,6 +252,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }, [services.share?.url.locators, dispatch, history]);
 
   const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);
+  const initializationState = useInternalStateSelector((state) => state.initializationState);
   const isLoading =
     rootProfileState.rootProfileLoading ||
     mainRouteInitializationState.loading ||
@@ -268,13 +269,10 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     return <InitializationError error={error} />;
   }
 
-  if (
-    !mainRouteInitializationState.value.hasESData &&
-    !mainRouteInitializationState.value.hasUserDataView
-  ) {
+  if (!initializationState.hasESData && !initializationState.hasUserDataView) {
     return (
       <NoDataPage
-        {...mainRouteInitializationState.value}
+        {...initializationState}
         onDataViewCreated={() => {
           // This is unused if there is no ES data
         }}
