@@ -82,7 +82,7 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(logCall).toBeDefined();
 
     const config = logCall![1];
-    expect(config.getIcon()).toBe('logPatternAnalysis');
+    expect(config.getIcon()).toBe('pattern');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Log entry');
   });
 
