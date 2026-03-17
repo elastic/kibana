@@ -22,6 +22,7 @@ export const DEFAULT_QUERY_PARAMS: TemplatesFindRequest = {
   search: '',
   tags: [],
   author: [],
+  owner: [],
   isDeleted: false,
 };
 

@@ -13,7 +13,11 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { TestProviders } from '../../../../common/mock';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { TABLE_SECTION_TEST_ID, TableSection } from './table_section';
+import {
+  TABLE_SECTION_TEST_ID,
+  ATTACKS_TABLE_SORT_STORAGE_KEY,
+  TableSection,
+} from './table_section';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
@@ -26,7 +30,11 @@ import { EmptyResultsPrompt } from './empty_results_prompt';
 import { useGroupStats } from './grouping_settings/use_group_stats';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
+import { useLocalStorage } from '../../../../common/components/local_storage';
 
+jest.mock('../../../../common/components/local_storage', () => ({
+  useLocalStorage: jest.fn(),
+}));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../user_info');
@@ -91,6 +99,11 @@ const defaultProps: Parameters<typeof TableSection>[0] = {
 
 describe('<TableSection />', () => {
   beforeEach(() => {
+    (useLocalStorage as jest.Mock).mockReturnValue([
+      [{ latestTimestamp: { order: 'desc' } }],
+      jest.fn(),
+    ]);
+
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         telemetry: {
@@ -526,6 +539,21 @@ describe('<TableSection />', () => {
   });
 
   describe('enforced groups', () => {
+    it('initializes useLocalStorage with correct key and default value', () => {
+      render(
+        <TestProviders>
+          <TableSection {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(useLocalStorage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: ATTACKS_TABLE_SORT_STORAGE_KEY,
+          defaultValue: [{ latestTimestamp: { order: 'desc' } }],
+        })
+      );
+    });
+
     it('should pass all grouping settings including enforcedGroups', async () => {
       render(
         <TestProviders>

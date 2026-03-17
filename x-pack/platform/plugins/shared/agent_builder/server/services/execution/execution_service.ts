@@ -25,6 +25,7 @@ import type {
   ExecuteAgentParams,
   ExecuteAgentResult,
   FollowExecutionOptions,
+  FindExecutionsOptions,
 } from './types';
 import { ExecutionStatus } from './types';
 import { taskTypes } from './task';
@@ -87,6 +88,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     executionId: providedExecutionId,
     useTaskManager,
     abortSignal,
+    metadata,
   }: ExecuteAgentParams): Promise<ExecuteAgentResult> {
     const executionId = providedExecutionId ?? uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
@@ -113,6 +115,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       agentId,
       spaceId,
       agentParams: validatedParams,
+      metadata,
     });
 
     // Wire up external abort signal to execution abort
@@ -326,6 +329,22 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const soClient = this.deps.savedObjects.getScopedClient(request);
     const uiSettingsClient = this.deps.uiSettings.asScopedToClient(soClient);
     return uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+  }
+
+  /**
+   * Find executions matching the given filters. Defaults to the current space derived from request.
+   * Callers that override spaceId are responsible for their own authorization when querying cross-space.
+   */
+  async findExecutions(
+    request: KibanaRequest,
+    options?: FindExecutionsOptions
+  ): Promise<AgentExecution[]> {
+    const defaultSpaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
+    const executionClient = this.createExecutionClient();
+    return executionClient.find({
+      ...options,
+      spaceId: options?.spaceId || defaultSpaceId,
+    });
   }
 
   private createExecutionClient(): AgentExecutionClient {

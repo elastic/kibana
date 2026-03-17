@@ -36,15 +36,16 @@ export function validateAncestorFields({
       if (!Object.hasOwn(fields, fieldName)) {
         continue;
       }
-      if (
-        Object.entries(ancestor.ingest.wired.fields).some(
-          ([ancestorFieldName, attr]) =>
-            attr.type !== fields[fieldName].type && ancestorFieldName === fieldName
-        )
-      ) {
-        throw new MalformedFieldsError(
-          `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
-        );
+      const ancestorField = ancestor.ingest.wired.fields[fieldName];
+      if (ancestorField) {
+        const fieldType = fields[fieldName].type;
+        // Check for incompatible type changes
+        // Allow: parent has no type (doc-only) → child can set any type
+        if (fieldType !== undefined && ancestorField.type && ancestorField.type !== fieldType) {
+          throw new MalformedFieldsError(
+            `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
+          );
+        }
       }
       // Skip OTEL namespace validation for logs.ecs streams which use ECS field conventions
       if (!isEcsStream) {
@@ -136,11 +137,15 @@ export function validateDescendantFields({
 }) {
   for (const descendant of descendants) {
     for (const fieldName in fields) {
+      if (!Object.hasOwn(fields, fieldName)) {
+        continue;
+      }
+      const fieldType = fields[fieldName].type;
       if (
-        Object.hasOwn(fields, fieldName) &&
+        fieldType !== undefined &&
         Object.entries(descendant.ingest.wired.fields).some(
           ([descendantFieldName, attr]) =>
-            attr.type !== fields[fieldName].type && descendantFieldName === fieldName
+            descendantFieldName === fieldName && attr.type !== undefined && attr.type !== fieldType
         )
       ) {
         throw new MalformedFieldsError(
