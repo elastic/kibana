@@ -9,7 +9,6 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 
 export interface UseFetchIndicesResult {
-  /** Index and data stream names (non-hidden, from current user scope). */
   indices: string[];
   isLoading: boolean;
   isError: boolean;

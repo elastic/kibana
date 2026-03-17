@@ -6,10 +6,14 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
+import type { InternalIStorageClient } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 
 export const automaticImportSamplesIndexName = 'automatic-import-samples';
+
+const HIDDEN_SETTING = { 'index.hidden': true } as const;
 
 const automaticImportSamplesIndexAdapterSettings = {
   name: automaticImportSamplesIndexName,
@@ -58,6 +62,71 @@ export type AutomaticImportSamplesIndexAdapter = StorageIndexAdapter<
   AutomaticImportSamplesProperties
 >;
 
+/**
+ * Ensures the samples index template and current write index have index.hidden: true.
+ * No-op if template or alias does not exist (e.g. 404).
+ */
+export async function ensureSamplesIndexHidden(esClient: ElasticsearchClient): Promise<void> {
+  const templateName = automaticImportSamplesIndexName;
+  const aliasName = automaticImportSamplesIndexName;
+
+  try {
+    const response = await esClient.indices.getIndexTemplate({ name: templateName });
+    const indexTemplate = response.index_templates[0]?.index_template;
+    if (indexTemplate?.template) {
+      const template = indexTemplate.template;
+      const mergedSettings = {
+        ...(template.settings ?? {}),
+        ...HIDDEN_SETTING,
+      };
+      await esClient.indices.putIndexTemplate({
+        name: templateName,
+        create: false,
+        allow_auto_create: false,
+        index_patterns: indexTemplate.index_patterns ?? [`${templateName}-*`],
+        _meta: indexTemplate._meta,
+        template: {
+          ...template,
+          settings: mergedSettings,
+        },
+      });
+    }
+  } catch (error) {
+    if (isResponseError(error) && error.statusCode === 404) {
+      return;
+    }
+    throw error;
+  }
+
+  try {
+    const aliases = await esClient.indices.getAlias({ name: aliasName });
+    const writeIndexEntry = Object.entries(aliases).find(
+      ([, alias]) => alias.aliases[aliasName]?.is_write_index === true
+    );
+    const writeIndexName = writeIndexEntry?.[0];
+    if (writeIndexName) {
+      await esClient.indices.putSettings({
+        index: writeIndexName,
+        body: HIDDEN_SETTING,
+      });
+    }
+  } catch (error) {
+    if (isResponseError(error) && error.statusCode === 404) {
+      return;
+    }
+    throw error;
+  }
+}
+
+let ensureHiddenPromise: Promise<void> | null = null;
+
+function getOrCreateEnsureHiddenPromise(esClient: ElasticsearchClient): Promise<void> {
+  if (ensureHiddenPromise === null) {
+    ensureHiddenPromise = ensureSamplesIndexHidden(esClient);
+  }
+  return ensureHiddenPromise;
+}
+
 export const createIndexAdapter = ({
   logger,
   esClient,
@@ -65,8 +134,29 @@ export const createIndexAdapter = ({
   logger: Logger;
   esClient: ElasticsearchClient;
 }): AutomaticImportSamplesIndexAdapter => {
-  return new StorageIndexAdapter<
+  const adapter = new StorageIndexAdapter<
     AutomaticImportSamplesIndexAdapterSettings,
     AutomaticImportSamplesProperties
   >(esClient, logger, automaticImportSamplesIndexAdapterSettings);
+
+  const realClient = adapter.getClient();
+
+  type ClientDocument = AutomaticImportSamplesProperties & { _id?: string };
+  const wrappedClient: InternalIStorageClient<ClientDocument> = {
+    ...realClient,
+    bulk: async (request, transportOptions) => {
+      const result = await realClient.bulk(request, transportOptions);
+      await getOrCreateEnsureHiddenPromise(esClient);
+      return result;
+    },
+    index: async (request, transportOptions) => {
+      const result = await realClient.index(request, transportOptions);
+      await getOrCreateEnsureHiddenPromise(esClient);
+      return result;
+    },
+  };
+
+  return {
+    getClient: () => wrappedClient,
+  } as AutomaticImportSamplesIndexAdapter;
 };
