@@ -44,23 +44,12 @@ export interface DataStreamParams {
   dataStreamId: string;
 }
 
-const NON_RECOVERABLE_STATUS_CODES = new Set([400, 404, 403]);
-const NON_RECOVERABLE_PATTERNS = [
-  /not found/i,
-  /no connector found/i,
-  /saved object .* not found/i,
-];
-
-export function isNonRecoverableError(error: unknown): boolean {
-  const statusCode =
+export function isUnrecoverableByStatus(error: unknown): boolean {
+  const s =
     (error as { statusCode?: number })?.statusCode ??
     (error as { meta?: { status?: number } })?.meta?.status ??
     (error as { output?: { statusCode?: number } })?.output?.statusCode;
-  if (statusCode && NON_RECOVERABLE_STATUS_CODES.has(statusCode)) {
-    return true;
-  }
-  const message = error instanceof Error ? error.message : String(error);
-  return NON_RECOVERABLE_PATTERNS.some((pattern) => pattern.test(message));
+  return s !== undefined && s !== 200 && s !== 201;
 }
 
 export class TaskManagerService {
@@ -307,9 +296,8 @@ export class TaskManagerService {
         );
       }
 
-      if (isNonRecoverableError(error)) {
+      if (isUnrecoverableByStatus(error))
         throwUnrecoverableError(error instanceof Error ? error : new Error(String(error)));
-      }
 
       return { state: { task_status: TASK_STATUSES.failed }, error };
     }
