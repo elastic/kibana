@@ -398,7 +398,7 @@ export function getDataStateContainer({
               );
             } else {
               internalState.dispatch(
-                injectCurrentTab(internalStateActions.syncProfileStateSnapshots)({})
+                injectCurrentTab(internalStateActions.syncProfileStateSnapshot)({})
               );
             }
           }

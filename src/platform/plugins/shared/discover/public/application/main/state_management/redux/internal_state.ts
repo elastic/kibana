@@ -104,7 +104,7 @@ const setProfileStateSnapshotField = <TField extends DefaultProfileStateField>(
   snapshot[field] = value;
 };
 
-const syncProfileStateSnapshots = (
+const syncProfileStateSnapshot = (
   tab: TabState,
   profileId: string,
   nextAppState?: TabState['appState']
@@ -279,19 +279,19 @@ export const internalStateSlice = createSlice({
         }
 
         if (!action.payload.isSystemTriggered) {
-          syncProfileStateSnapshots(tab, action.payload.profileId, appState);
+          syncProfileStateSnapshot(tab, action.payload.profileId, appState);
         }
 
         tab.previousAppState = tab.appState;
         tab.appState = appState;
       }),
 
-    syncProfileStateSnapshots: (
+    syncProfileStateSnapshot: (
       state,
       action: TabAction<{ profileId: string; appState?: TabState['appState'] }>
     ) =>
       withTab(state, action.payload, (tab) => {
-        syncProfileStateSnapshots(tab, action.payload.profileId, action.payload.appState);
+        syncProfileStateSnapshot(tab, action.payload.profileId, action.payload.appState);
       }),
 
     /**

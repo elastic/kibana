@@ -69,13 +69,13 @@ export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (
     dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
   };
 
-export const syncProfileStateSnapshots: InternalStateThunkActionCreator<
+export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
   [TabActionPayload<{ appState?: DiscoverAppState }>]
 > = (payload) =>
-  function syncProfileStateSnapshotsThunkFn(dispatch, _, { runtimeStateManager }) {
+  function syncProfileStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
     const profileId = getCurrentProfileId(runtimeStateManager, payload.tabId);
 
-    dispatch(internalStateSlice.actions.syncProfileStateSnapshots({ ...payload, profileId }));
+    dispatch(internalStateSlice.actions.syncProfileStateSnapshot({ ...payload, profileId }));
   };
 
 /**
@@ -112,7 +112,7 @@ export const updateAppStateAndReplaceUrl: InternalStateThunkActionCreator<
 
     if (!payload.isSystemTriggered) {
       dispatch(
-        syncProfileStateSnapshots({
+        syncProfileStateSnapshot({
           tabId: payload.tabId,
           appState: mergedAppState,
         })

@@ -84,7 +84,7 @@ describe('tab_state actions', () => {
     });
   });
 
-  describe('syncProfileStateSnapshots', () => {
+  describe('syncProfileStateSnapshot', () => {
     it('should sync snapshotsByProfileId for the current profile when triggered separately', async () => {
       const { internalState, tabId } = await setup();
       const snapshotsByProfileId = structuredClone(
@@ -106,7 +106,7 @@ describe('tab_state actions', () => {
         selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
       ).toEqual(snapshotsByProfileId);
 
-      internalState.dispatch(internalStateActions.syncProfileStateSnapshots({ tabId }));
+      internalState.dispatch(internalStateActions.syncProfileStateSnapshot({ tabId }));
 
       expect(
         Object.values(
