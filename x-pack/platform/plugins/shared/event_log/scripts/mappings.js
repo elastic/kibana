@@ -270,24 +270,6 @@ exports.EcsCustomPropertyMappings = {
                       },
                     },
                   },
-                  errors: {
-                    type: 'nested',
-                    properties: {
-                      message: {
-                        norms: false,
-                        type: 'text',
-                      },
-                    },
-                  },
-                  warnings: {
-                    type: 'nested',
-                    properties: {
-                      message: {
-                        norms: false,
-                        type: 'text',
-                      },
-                    },
-                  },
                 },
               },
               revision: {

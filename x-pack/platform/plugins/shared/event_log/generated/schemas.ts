@@ -215,20 +215,6 @@ export const EventSchema = schema.maybe(
                         unaccounted_events: ecsStringOrNumber(),
                       })
                     ),
-                    errors: schema.maybe(
-                      schema.arrayOf(
-                        schema.object({
-                          message: ecsString(),
-                        })
-                      )
-                    ),
-                    warnings: schema.maybe(
-                      schema.arrayOf(
-                        schema.object({
-                          message: ecsString(),
-                        })
-                      )
-                    ),
                   })
                 ),
                 revision: ecsStringOrNumber(),

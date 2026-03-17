@@ -78,10 +78,7 @@ export function createRuleExecutionLogClientForExecutors(
         throw new Error('The logger has been closed');
       }
 
-      executionResultBuffer.warnings.push({
-        timestamp: new Date().toISOString(),
-        message,
-      });
+      writeMessageToEventLog(message, LogLevelEnum.warn);
     },
 
     error(message: string): void {
@@ -89,10 +86,7 @@ export function createRuleExecutionLogClientForExecutors(
         throw new Error('The logger has been closed');
       }
 
-      executionResultBuffer.warnings.push({
-        timestamp: new Date().toISOString(),
-        message,
-      });
+      writeMessageToEventLog(message, LogLevelEnum.error);
     },
 
     logMetric<Metric extends keyof ConsumerExecutionMetrics>(
