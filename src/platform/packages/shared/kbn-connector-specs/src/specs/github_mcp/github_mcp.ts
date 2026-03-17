@@ -43,94 +43,6 @@ const parseContent = (content: ContentPart[]): any => {
   }
 };
 
-const compactRepo = (r: any) => ({
-  name: r.full_name ?? r.name,
-  description: r.description,
-  url: r.html_url,
-  language: r.language,
-  stars: r.stargazers_count,
-  updatedAt: r.updated_at,
-});
-
-const compactIssue = (i: any) => ({
-  number: i.number,
-  title: i.title,
-  state: i.state,
-  url: i.html_url,
-  user: i.user?.login,
-  labels: i.labels?.map((l: any) => l.name ?? l),
-  createdAt: i.created_at,
-  updatedAt: i.updated_at,
-});
-
-const compactPullRequest = (pr: any) => ({
-  number: pr.number,
-  title: pr.title,
-  state: pr.state,
-  url: pr.html_url,
-  user: pr.user?.login,
-  createdAt: pr.created_at,
-  updatedAt: pr.updated_at,
-  mergedAt: pr.merged_at,
-});
-
-const compactUser = (u: any) => ({
-  login: u.login,
-  url: u.html_url,
-  type: u.type,
-  avatarUrl: u.avatar_url,
-});
-
-const compactCodeResult = (c: any) => ({
-  name: c.name,
-  repository: c.repository?.full_name,
-  url: c.html_url,
-});
-
-const compactCommit = (c: any) => ({
-  sha: c.sha ?? c.oid,
-  message: c.commit?.message ?? c.message ?? c.messageHeadline,
-  author: c.commit?.author?.name ?? c.author?.login ?? c.author?.name,
-  date: c.commit?.author?.date ?? c.committedDate ?? c.authoredDate,
-  url: c.html_url ?? c.url,
-});
-
-const compactRelease = (r: any) => ({
-  name: r.name,
-  tagName: r.tag_name ?? r.tagName,
-  publishedAt: r.published_at ?? r.publishedAt,
-  url: r.html_url ?? r.url,
-});
-
-const compactBranch = (b: any) => ({
-  name: b.name,
-});
-
-const compactTag = (t: any) => ({
-  name: t.name,
-});
-
-/**
- * Wraps a GitHub search response, compacting each item with the provided mapper.
- */
-const compactSearchResult = (raw: any, mapper: (item: any) => any) => ({
-  totalCount: raw.total_count ?? raw.totalCount,
-  items: (raw.items ?? []).map(mapper),
-});
-
-/**
- * Wraps a cursor-paginated list response, compacting each item.
- * The MCP server may return pageInfo for cursor navigation.
- */
-const compactListResult = (raw: any, mapper: (item: any) => any) => {
-  const items = Array.isArray(raw) ? raw : raw.items ?? raw.nodes ?? raw.data ?? [];
-  return {
-    items: items.map(mapper),
-    ...(raw.pageInfo ? { pageInfo: raw.pageInfo } : {}),
-    ...(raw.totalCount != null ? { totalCount: raw.totalCount } : {}),
-  };
-};
-
 /**
  * Lifecycle helper: creates an MCP client from the connector's Axios instance,
  * connects, runs the callback, and disconnects. Every action call gets a fresh
@@ -195,28 +107,6 @@ export const GithubMcpConnector: ConnectorSpec = {
   },
 
   actions: {
-    listTools: {
-      isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.listTools.description',
-        { defaultMessage: 'List all available tools on the GitHub MCP server.' }
-      ),
-      input: z.object({}),
-      output: z.object({
-        tools: z.array(
-          z.object({
-            name: z.string(),
-            description: z.string().optional(),
-          })
-        ),
-      }),
-      handler: async (ctx) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const { tools } = await mcp.listTools();
-          return { tools: tools.map(({ name, description }) => ({ name, description })) };
-        });
-      },
-    },
 
     getMe: {
       isTool: true,
@@ -257,7 +147,7 @@ export const GithubMcpConnector: ConnectorSpec = {
             name: 'search_code',
             arguments: { query: input.query, page: input.page, perPage: input.perPage },
           });
-          return compactSearchResult(parseContent(result.content), compactCodeResult);
+          return result.content;
         });
       },
     },
@@ -279,7 +169,7 @@ export const GithubMcpConnector: ConnectorSpec = {
             name: 'search_repositories',
             arguments: { query: input.query, page: input.page, perPage: input.perPage },
           });
-          return compactSearchResult(parseContent(result.content), compactRepo);
+          return result.content;
         });
       },
     },
@@ -309,7 +199,7 @@ export const GithubMcpConnector: ConnectorSpec = {
               perPage: input.perPage,
             },
           });
-          return compactSearchResult(parseContent(result.content), compactIssue);
+          return result.content;
         });
       },
     },
@@ -339,7 +229,7 @@ export const GithubMcpConnector: ConnectorSpec = {
               perPage: input.perPage,
             },
           });
-          return compactSearchResult(parseContent(result.content), compactPullRequest);
+          return result.content;
         });
       },
     },
@@ -361,7 +251,7 @@ export const GithubMcpConnector: ConnectorSpec = {
             name: 'search_users',
             arguments: { query: input.query, page: input.page, perPage: input.perPage },
           });
-          return compactSearchResult(parseContent(result.content), compactUser);
+          return result.content;
         });
       },
     },
@@ -394,7 +284,6 @@ export const GithubMcpConnector: ConnectorSpec = {
               after: input.after,
             },
           });
-          // return compactListResult(parseContent(result.content), compactIssue);
           return result.content;
         });
       },
@@ -431,7 +320,7 @@ export const GithubMcpConnector: ConnectorSpec = {
               after: input.after,
             },
           });
-          return compactListResult(parseContent(result.content), compactPullRequest);
+          return result.content;
         });
       },
     },
@@ -464,7 +353,7 @@ export const GithubMcpConnector: ConnectorSpec = {
               after: input.after,
             },
           });
-          return compactListResult(parseContent(result.content), compactCommit);
+          return result.content;
         });
       },
     },
@@ -495,7 +384,7 @@ export const GithubMcpConnector: ConnectorSpec = {
               after: input.after,
             },
           });
-          return compactListResult(parseContent(result.content), compactBranch);
+          return result.content;
         });
       },
     },
@@ -526,7 +415,7 @@ export const GithubMcpConnector: ConnectorSpec = {
               after: input.after,
             },
           });
-          return compactListResult(parseContent(result.content), compactRelease);
+          return result.content;
         });
       },
     },
@@ -557,7 +446,7 @@ export const GithubMcpConnector: ConnectorSpec = {
               after: input.after,
             },
           });
-          return compactListResult(parseContent(result.content), compactTag);
+          return result.content;
         });
       },
     },
@@ -579,7 +468,7 @@ export const GithubMcpConnector: ConnectorSpec = {
             name: 'get_commit',
             arguments: { owner: input.owner, repo: input.repo, sha: input.sha },
           });
-          return compactCommit(parseContent(result.content));
+          return result.content;
         });
       },
     },
@@ -600,7 +489,7 @@ export const GithubMcpConnector: ConnectorSpec = {
             name: 'get_latest_release',
             arguments: { owner: input.owner, repo: input.repo },
           });
-          return compactRelease(parseContent(result.content));
+          return result.content;
         });
       },
     },
