@@ -64,17 +64,25 @@ export function OtelApmQuickstartFlow() {
     }
   }, [data, onPageReady]);
 
-  const [sessionStartTime] = useState(() => new Date().toISOString());
-
   const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
     onboardingFlowType: 'otel_apm',
     onboardingId: data?.onboardingId,
   });
 
+  // Set sessionStartTime when monitoring begins (first blur) rather than on
+  // mount, to narrow the time-window and reduce false positives from other
+  // APM services already ingesting data on the same cluster.
+  const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
+  useEffect(() => {
+    if (isMonitoringStepActive && sessionStartTime === null) {
+      setSessionStartTime(new Date().toISOString());
+    }
+  }, [isMonitoringStepActive, sessionStartTime]);
+
   const { hasData, isTroubleshootingVisible } = useTimeWindowDataDetection({
-    isMonitoringActive: isMonitoringStepActive,
-    sessionStartTime,
+    isMonitoringActive: isMonitoringStepActive && sessionStartTime !== null,
+    sessionStartTime: sessionStartTime ?? '',
     fetchInterval: FETCH_INTERVAL,
     troubleshootingDelay: SHOW_TROUBLESHOOTING_DELAY,
     flowType: 'otel_apm',
@@ -342,7 +350,14 @@ function ConfigureSDKInstructions({
       </EuiMarkdownFormat>
       <EuiSpacer />
 
-      <EuiBasicTable items={items} columns={columns} data-test-subj="otel-instructions-table" />
+      <EuiBasicTable
+        items={items}
+        columns={columns}
+        tableCaption={i18n.translate('xpack.observability_onboarding.otelApm.configTableCaption', {
+          defaultMessage: 'OpenTelemetry SDK configuration settings',
+        })}
+        data-test-subj="otel-instructions-table"
+      />
     </>
   );
 }

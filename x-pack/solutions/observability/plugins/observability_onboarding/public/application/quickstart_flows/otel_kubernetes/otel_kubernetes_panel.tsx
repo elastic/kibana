@@ -87,6 +87,8 @@ export const OtelKubernetesPanel: React.FC = () => {
   const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
   const useWiredStreams = ingestionMode === 'wired';
 
+  const [dataReceived, setDataReceived] = useState(false);
+
   const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
     onboardingFlowType: 'kubernetes_otel',
@@ -499,7 +501,11 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                 defaultMessage: 'Visualize your data',
               }
             ),
-            status: (isMonitoringStepActive ? 'current' : 'incomplete') as EuiStepStatus,
+            status: (dataReceived
+              ? 'complete'
+              : isMonitoringStepActive
+              ? 'current'
+              : 'incomplete') as EuiStepStatus,
             children: isMonitoringStepActive && data && (
               <DataIngestStatus
                 onboardingId={data.onboardingId}
@@ -507,6 +513,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                 dataset="kubernetes"
                 integration="kubernetes_otel"
                 actionLinks={otelKubernetesActionLinks}
+                onDataReceived={() => setDataReceived(true)}
               />
             ),
           },

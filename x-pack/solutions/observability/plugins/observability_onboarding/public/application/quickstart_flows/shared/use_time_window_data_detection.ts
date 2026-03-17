@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -44,6 +44,12 @@ export function useTimeWindowDataDetection({
     }
   }, [isMonitoringActive, checkDataStartTime]);
 
+  const stableExtraQueryParams = useMemo(
+    () => extraQueryParams,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(extraQueryParams)]
+  );
+
   const {
     data: hasDataResponse,
     status: hasDataStatus,
@@ -53,12 +59,11 @@ export function useTimeWindowDataDetection({
       if (!isMonitoringActive) return;
       return callApi(`GET ${endpoint}` as any, {
         params: {
-          query: { start: sessionStartTime, ...extraQueryParams },
+          query: { start: sessionStartTime, ...stableExtraQueryParams },
         },
       });
     },
-
-    [isMonitoringActive, sessionStartTime, endpoint, JSON.stringify(extraQueryParams)],
+    [isMonitoringActive, sessionStartTime, endpoint, stableExtraQueryParams],
     { showToastOnError: false }
   );
 
@@ -85,9 +90,16 @@ export function useTimeWindowDataDetection({
     }
   }, [analytics, hasDataResponse?.hasData, dataReceivedTelemetrySent, flowType, onboardingId]);
 
+  // Treat both "hasData === false" and fetch failures (where hasDataResponse
+  // is undefined but the request completed) as "no data yet" for the purpose
+  // of showing troubleshooting guidance. Without this, persistent fetch
+  // errors would leave the UI in a "waiting forever" state.
+  const noDataConfirmed =
+    hasDataResponse?.hasData === false || hasDataStatus === FETCH_STATUS.FAILURE;
+
   const isTroubleshootingVisible =
     isMonitoringActive &&
-    hasDataResponse?.hasData === false &&
+    noDataConfirmed &&
     checkDataStartTime !== null &&
     Date.now() - checkDataStartTime > troubleshootingDelay;
 

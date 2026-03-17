@@ -50,6 +50,8 @@ export const KubernetesPanel: React.FC = () => {
   const useWiredStreams = ingestionMode === 'wired';
   const logsLocatorParams = useWiredStreams ? { dataViewSpec: WIRED_ECS_DATA_VIEW_SPEC } : {};
 
+  const [dataReceived, setDataReceived] = useState(false);
+
   const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
     onboardingFlowType: 'kubernetes',
@@ -144,7 +146,11 @@ export const KubernetesPanel: React.FC = () => {
           defaultMessage: 'Monitor your Kubernetes cluster',
         }
       ),
-      status: (isMonitoringStepActive ? 'current' : 'incomplete') as EuiStepStatus,
+      status: (dataReceived
+        ? 'complete'
+        : isMonitoringStepActive
+        ? 'current'
+        : 'incomplete') as EuiStepStatus,
       children: isMonitoringStepActive && data && (
         <DataIngestStatus
           onboardingId={data.onboardingId}
@@ -152,6 +158,7 @@ export const KubernetesPanel: React.FC = () => {
           dataset="kubernetes"
           integration="kubernetes"
           actionLinks={kubernetesActionLinks}
+          onDataReceived={() => setDataReceived(true)}
         />
       ),
     },

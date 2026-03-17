@@ -146,6 +146,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
                 should: [
                   ...termQuery('fields.onboarding_id', onboardingId),
                   ...termQuery('resource.attributes.onboarding.id', onboardingId),
+                  ...termQuery('resource.attributes.onboarding.id._rt', onboardingId),
                   ...termQuery('labels.onboarding_id', onboardingId),
                 ],
                 minimum_should_match: 1,
@@ -156,11 +157,12 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
       };
 
       // Logs Essentials + Wired Streams: logs.otel uses a passthrough mapping for
-      // resource.attributes, storing fields in _source without indexing them. The
-      // runtime field extracts the value at query time. On classic indexed streams
-      // the indexed mapping takes precedence and the runtime field is ignored.
+      // resource.attributes, storing fields in _source without indexing them.
+      // We use a distinct runtime field name so it does not shadow the indexed
+      // mapping on classic streams where resource.attributes.onboarding.id is
+      // already a keyword. The query includes both names in the should clause.
       const runtimeMappings: estypes.MappingRuntimeFields = {
-        'resource.attributes.onboarding.id': {
+        'resource.attributes.onboarding.id._rt': {
           type: 'keyword',
           script: {
             source:

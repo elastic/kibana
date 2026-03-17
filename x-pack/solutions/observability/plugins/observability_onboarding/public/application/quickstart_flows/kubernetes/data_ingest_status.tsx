@@ -25,6 +25,7 @@ interface Props {
   dataset: string;
   integration: string;
   actionLinks: ActionLink[];
+  onDataReceived?: () => void;
 }
 
 const FETCH_INTERVAL = 2000;
@@ -36,6 +37,7 @@ export function DataIngestStatus({
   dataset,
   integration,
   actionLinks,
+  onDataReceived,
 }: Props) {
   const [checkDataStartTime] = useState(Date.now());
   const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
@@ -57,11 +59,10 @@ export function DataIngestStatus({
   const hasMetrics = data?.hasMetrics ?? hasData;
 
   const needsMetrics = actionLinks.some((actionLink) => actionLink.requires === 'metrics');
+  const isReady = needsMetrics ? hasMetrics : hasData;
 
   useEffect(() => {
     const pendingStatusList = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
-
-    const isReady = needsMetrics ? hasMetrics : hasData;
 
     if (pendingStatusList.includes(status) || isReady) {
       return;
@@ -72,7 +73,7 @@ export function DataIngestStatus({
     }, FETCH_INTERVAL);
 
     return () => clearTimeout(timeout);
-  }, [hasData, hasMetrics, needsMetrics, refetch, status]);
+  }, [isReady, refetch, status]);
 
   useEffect(() => {
     if (hasData === true && !dataReceivedTelemetrySent) {
@@ -85,6 +86,15 @@ export function DataIngestStatus({
       });
     }
   }, [analytics, hasData, dataReceivedTelemetrySent, onboardingFlowType, onboardingId]);
+
+  // Notify parent when all required data types have arrived (not just any data).
+  // This drives the step status to 'complete' and must wait for metrics
+  // if any action link requires them.
+  useEffect(() => {
+    if (isReady) {
+      onDataReceived?.();
+    }
+  }, [isReady, onDataReceived]);
 
   const isTroubleshootingVisible =
     hasData === false && Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;
