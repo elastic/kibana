@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
 import type {
   RetentionInfo,
   RetentionStatus,
@@ -103,6 +103,20 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
     return result;
   }, [categoriesData?.mainCategoriesMap, retentionData?.items, activeCategories]);
+
+  // Compute total matched items ignoring activeCategories filter (for hasData prop)
+  const totalMatchedItems = useMemo(() => {
+    let count = 0;
+    for (const category of categoriesData?.mainCategoriesMap ?? []) {
+      for (const retention of retentionData?.items ?? []) {
+        const hasMatch = category.indices.some((idx) =>
+          idx.indexName.includes(retention.indexName)
+        );
+        if (hasMatch) count++;
+      }
+    }
+    return count;
+  }, [categoriesData?.mainCategoriesMap, retentionData?.items]);
 
   // Count non-compliant items (deduplicated by indexName)
   const nonCompliantStats = useMemo(() => {
@@ -416,28 +430,6 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
   }
 
-  if (categories.length === 0) {
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={i18n.translate('xpack.securitySolution.siemReadiness.retention.noData.title', {
-            defaultMessage: 'No data streams found',
-          })}
-          color="primary"
-          iconType="iInCircle"
-          announceOnMount
-        >
-          <p>
-            {i18n.translate('xpack.securitySolution.siemReadiness.retention.noData.description', {
-              defaultMessage: 'No data streams with security-relevant data were found.',
-            })}
-          </p>
-        </EuiCallOut>
-      </>
-    );
-  }
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -492,6 +484,8 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         defaultSortDirection="asc"
         itemName="data streams / indices"
         storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
+        isFilterActive={activeCategories.length < CATEGORY_ORDER.length && totalMatchedItems > 0}
+        hasUnfilteredData={totalMatchedItems > 0}
       />
     </>
   );
