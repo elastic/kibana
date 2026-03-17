@@ -144,28 +144,13 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
             // that should be removed after
             .transform((prev) => {
               const prevRecord = prev as Record<string, unknown>;
-              const hadIngest = 'ingest' in prevRecord;
-              const hadProcessing =
-                hadIngest &&
-                typeof (prevRecord.ingest as Record<string, unknown>)?.processing !== 'undefined';
               delete prevRecord.name;
               delete prevRecord.updated_at;
-              const ingest = prevRecord.ingest as
-                | { processing?: { updated_at?: unknown }; [key: string]: unknown }
-                | undefined;
-              if (ingest?.processing && 'updated_at' in ingest.processing) {
-                delete ingest.processing.updated_at;
-              }
-              if (
-                !hadProcessing &&
-                ingest?.processing &&
-                Object.keys(ingest.processing).length === 0
-              ) {
-                delete ingest.processing;
-              }
-              if (!hadIngest && ingest && Object.keys(ingest).length === 0) {
-                delete prevRecord.ingest;
-              }
+              delete (
+                (prevRecord.ingest as Record<string, unknown> | undefined)?.processing as
+                  | Record<string, unknown>
+                  | undefined
+              )?.updated_at;
               return prev;
             }),
         }),

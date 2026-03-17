@@ -121,8 +121,11 @@ export async function startLiveDataUpload({
 
         workersWaitingRefresh.clear();
       }
-    } else if (Array.isArray(message) && message.length === 2 && typeof message[1] === 'string') {
-      logMessage(logger, message as [import('../../lib/utils/create_logger').LogLevel, string]);
+    } else {
+      logMessage(
+        logger,
+        message as [import('../../lib/utils/create_logger').LogLevel, string]
+      );
     }
   }
 

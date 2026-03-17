@@ -85,13 +85,12 @@ class LosslessHistogram {
   }
 
   record(value: number) {
-    if (this.backingHistogram) {
-      this.backingHistogram.recordValue(value);
-      return;
-    }
-
     const countForValue = this.trackedValues.get(value);
-    if (countForValue === undefined && this.trackedValues.size >= MAX_VALUES_TO_TRACK_LOSSLESS) {
+    if (
+      this.backingHistogram &&
+      countForValue === undefined &&
+      this.trackedValues.size >= MAX_VALUES_TO_TRACK_LOSSLESS
+    ) {
       this.getBackingHistogram().recordValue(value);
       return;
     }

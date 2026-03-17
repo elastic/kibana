@@ -53,31 +53,20 @@ export let callDatasetQualityApi: DatasetQualityClient = () => {
 export function createCallDatasetQualityApi(core: CoreStart | CoreSetup) {
   callDatasetQualityApi = ((endpoint, options) => {
     const { params } = options as unknown as {
-      params?: Partial<Record<string, string | number | boolean | undefined>>;
+      params?: Partial<Record<string, unknown>>;
     };
 
-    const pathParams =
-      params?.path != null && typeof params.path === 'object' && !Array.isArray(params.path)
-        ? (params.path as Record<string, unknown>)
-        : undefined;
-    const { method, pathname } = formatRequest(endpoint, pathParams ?? {});
-
-    const body =
-      params?.body != null && typeof params.body === 'object' && !Array.isArray(params.body)
-        ? (params.body as Record<string, unknown>)
-        : undefined;
-
-    const query =
-      params?.query != null && typeof params.query === 'object' && !Array.isArray(params.query)
-        ? (params.query as Record<string, unknown>)
-        : undefined;
+    const { method, pathname } = formatRequest(
+      endpoint,
+      (params?.path as Record<string, unknown>) ?? {}
+    );
 
     return callApi(core, {
       ...options,
       method,
       pathname,
-      body,
-      query,
+      body: params?.body as Record<string, unknown> | undefined,
+      query: params?.query as Record<string, unknown> | undefined,
     } as unknown as Parameters<CallApi>[1]);
   }) as DatasetQualityClient;
 }
