@@ -264,6 +264,12 @@ export interface ConnectorSpec {
   test?: ConnectorTest;
 
   transformations?: Transformations;
+
+  // Workflow YAML template strings for Agent Builder. When present, these
+  // workflows are automatically created when a connector of this type is added.
+  // Each string is a raw YAML template that may contain Mustache-style
+  // variables (e.g., `<%= connector-id %>`).
+  agentBuilderWorkflows?: string[];
 }
 
 // ============================================================================
