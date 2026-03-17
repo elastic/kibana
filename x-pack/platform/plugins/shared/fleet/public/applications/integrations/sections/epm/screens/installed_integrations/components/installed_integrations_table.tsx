@@ -38,6 +38,8 @@ import {
 
 import { wrapTitleWithDeprecated } from '../../../components/utils';
 
+import { isUpcomingDeprecation } from '../../detail/overview/deprecation_callout';
+
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
 import { AlertsCell } from './alerts_cell';
@@ -146,11 +148,16 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               const url = getHref('integration_details_overview', {
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
               });
-              const isDeprecated = !!item?.deprecated;
+              const isUpcomingDeprecated = isUpcomingDeprecation(
+                item.installationInfo!.version,
+                item.deprecated
+              );
+              const isDeprecated = !!item?.deprecated && !isUpcomingDeprecated;
 
               const hasDeprecatedPolicyTemplates =
                 doesPackageHaveIntegrations(item) &&
                 !isDeprecated &&
+                !isUpcomingDeprecated &&
                 (item.policy_templates || []).some((pt) => !!pt.deprecated);
 
               return (
@@ -170,31 +177,37 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                     >
                       {wrapTitleWithDeprecated({ title: item.title, deprecated: isDeprecated })}
                     </EuiFlexItem>
-                    {isDeprecated && (
+                    {(isDeprecated || isUpcomingDeprecated || hasDeprecatedPolicyTemplates) && (
                       <EuiFlexItem grow={false}>
                         <EuiIconTip
                           type="warning"
                           color="warning"
-                          content={i18n.translate(
-                            'xpack.fleet.installedIntegrations.deprecatedTooltip',
-                            {
-                              defaultMessage: 'This integration is deprecated',
-                            }
-                          )}
-                        />
-                      </EuiFlexItem>
-                    )}
-                    {hasDeprecatedPolicyTemplates && (
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          type="warning"
-                          color="warning"
-                          content={i18n.translate(
-                            'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
-                            {
-                              defaultMessage: 'This integration contains deprecated features',
-                            }
-                          )}
+                          content={
+                            isUpcomingDeprecated && item.deprecated?.since
+                              ? i18n.translate(
+                                  'xpack.fleet.installedIntegrations.upcomingDeprecationTooltip',
+                                  {
+                                    defaultMessage:
+                                      'This integration will be deprecated starting from version {version}',
+                                    values: { version: item.deprecated?.since },
+                                  }
+                                )
+                              : isDeprecated
+                              ? i18n.translate(
+                                  'xpack.fleet.installedIntegrations.deprecatedTooltip',
+                                  {
+                                    defaultMessage: 'This integration is deprecated',
+                                  }
+                                )
+                              : hasDeprecatedPolicyTemplates
+                              ? i18n.translate(
+                                  'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
+                                  {
+                                    defaultMessage: 'This integration contains deprecated features',
+                                  }
+                                )
+                              : undefined
+                          }
                         />
                       </EuiFlexItem>
                     )}
