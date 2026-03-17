@@ -526,8 +526,48 @@ export const getCategorizeColumns = (esql: string): string[] => {
 };
 
 export const getSparklineColumns = (esql: string): string[] => {
-  // hardcoded for now
-  return ['Sparkline'];
+  const { root } = Parser.parse(esql);
+  const statsCommand = root.commands.find(({ name }) => name === 'stats');
+  if (!statsCommand) {
+    return [];
+  }
+  const columns: string[] = [];
+
+  const sparklineArgs = statsCommand.args.filter((arg) => {
+    if ((arg as ESQLCommandOption).type === 'option') return false;
+    return (arg as ESQLFunction).text?.toLowerCase().includes('sparkline');
+  }) as ESQLFunction[];
+
+  sparklineArgs.forEach((arg) => {
+    if (isFunctionExpression(arg) && arg.name === 'sparkline') {
+      // STATS SPARKLINE(field)
+      columns.push(arg.text);
+    } else {
+      // STATS col = SPARKLINE(field)
+      const columnArgs = arg.args.filter((a) => isColumn(a));
+      columnArgs.forEach((c) => columns.push((c as ESQLColumn).name));
+    }
+  });
+
+  const renameCommand = root.commands.find(({ name }) => name === 'rename');
+  if (!renameCommand) {
+    return columns;
+  }
+  const renameFunctions: ESQLFunction[] = [];
+  walk(renameCommand, {
+    visitFunction: (node) => renameFunctions.push(node),
+  });
+
+  renameFunctions.forEach((renameFunction) => {
+    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
+    const oldColumn = original.name;
+    const newColumn = renamed.name;
+    if (columns.includes(oldColumn)) {
+      columns[columns.indexOf(oldColumn)] = newColumn;
+    }
+  });
+
+  return columns;
 };
 
 /**
