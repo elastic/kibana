@@ -608,11 +608,7 @@ export class TaskRunner<
     schedule: Result<IntervalSchedule, Error>;
     runRuleResult: Result<RunRuleResult, Error>;
   }) {
-    const {
-      executionStatus: execStatus,
-      executionMetrics: execMetrics,
-      consumerExecutionMetrics: consumerExecMetrics,
-    } = await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
+    const result = await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
       const {
         params: { alertId: ruleId },
         startedAt,
@@ -692,13 +688,15 @@ export class TaskRunner<
         executionStatus,
         executionMetrics: executionMetrics,
         consumerExecutionMetrics: this.ruleMonitoring.getExecutorMetrics(),
+        consumerContext: this.ruleMonitoring.getConsumerContext(),
       };
     });
 
     this.alertingEventLogger.done({
-      status: execStatus,
-      metrics: execMetrics,
-      consumerMetrics: consumerExecMetrics,
+      status: result.executionStatus,
+      metrics: result.executionMetrics,
+      consumerMetrics: result.consumerExecutionMetrics,
+      consumerContext: result.consumerContext,
       timings: this.timer.toJson(),
     });
   }

@@ -17,6 +17,7 @@ import type { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
 import type {
   AlertInstanceState,
   ConsumerExecutionMetrics,
+  ConsumerRuleExecutionContext,
   RuleExecutionStatus,
 } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
@@ -64,6 +65,7 @@ interface DoneOpts {
   status?: RuleExecutionStatus;
   metrics?: RuleRunMetrics | null;
   consumerMetrics?: Partial<ConsumerExecutionMetrics> | null;
+  consumerContext?: Partial<ConsumerRuleExecutionContext> | null;
   backfill?: BackfillOpts;
 }
 
@@ -351,7 +353,7 @@ export class AlertingEventLogger {
     );
   }
 
-  public done({ status, metrics, consumerMetrics, timings, backfill }: DoneOpts) {
+  public done({ status, metrics, consumerMetrics, consumerContext, timings, backfill }: DoneOpts) {
     if (!this.isInitialized || !this.event || !this.context) {
       throw new Error('AlertingEventLogger not initialized');
     }
@@ -393,6 +395,10 @@ export class AlertingEventLogger {
 
     if (consumerMetrics) {
       updateEvent(this.event, { consumerMetrics });
+    }
+
+    if (consumerContext) {
+      updateEvent(this.event, { consumerContext });
     }
 
     if (timings) {
@@ -618,6 +624,7 @@ interface UpdateEventOpts {
   reason?: string;
   metrics?: RuleRunMetrics;
   consumerMetrics?: Partial<ConsumerExecutionMetrics>;
+  consumerContext?: Partial<ConsumerRuleExecutionContext>;
   timings?: TaskRunnerTimings;
   backfill?: BackfillOpts;
   maintenanceWindowIds?: string[];
@@ -712,6 +719,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     reason,
     metrics,
     consumerMetrics,
+    consumerContext,
     timings,
     alertingOutcome,
     backfill,
@@ -796,6 +804,14 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
         isUndefined
       )
     );
+  }
+
+  if (consumerContext?.ruleUuid) {
+    set(event, 'rule.uuid', consumerContext.ruleUuid);
+  }
+
+  if (consumerContext?.ruleRevision !== undefined) {
+    set(event, 'kibana.alert.rule.revision', consumerContext.ruleRevision);
   }
 
   if (backfill) {

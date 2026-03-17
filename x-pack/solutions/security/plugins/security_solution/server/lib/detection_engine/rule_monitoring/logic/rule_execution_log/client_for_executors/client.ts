@@ -14,7 +14,6 @@ import type {
 } from '@kbn/alerting-plugin/server/types';
 import type {
   RuleExecutionSettings,
-  RuleExecutionStatus,
   LogLevel,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
@@ -52,6 +51,11 @@ export function createRuleExecutionLogClientForExecutors(
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
   const baseLogMeta = baseCorrelationIds.getLogMeta();
   const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId } = context;
+
+  ruleMonitoringService.setContext({
+    ruleUuid: ruleUuid,
+    ruleRevision: ruleRevision,
+  });
 
   // Buffers the execution related data
   const executionResultBuffer: ExecutionResultBuffer = {

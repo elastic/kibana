@@ -10,10 +10,6 @@ import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import type { LogLevel } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { logLevelToNumber } from '../../../../../../../common/api/detection_engine/rule_monitoring';
-import type {
-  RuleExecutionMetrics,
-  RuleExecutionStatus,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import { RuleExecutionEventTypeEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import {
   RULE_SAVED_OBJECT_TYPE,
@@ -43,15 +39,6 @@ export interface MessageArgs {
 export interface ExecutionResultLogEntry {
   timestamp: string;
   message: string;
-}
-
-export interface ExecutionResultArgs {
-  ruleInfo: RuleInfo;
-  outcome: RuleExecutionStatus;
-  message?: string;
-  metrics: RuleExecutionMetrics;
-  errors: ExecutionResultLogEntry[];
-  warnings: ExecutionResultLogEntry[];
 }
 
 export const createEventLogWriter = (eventLogService: IEventLogService): IEventLogWriter => {
