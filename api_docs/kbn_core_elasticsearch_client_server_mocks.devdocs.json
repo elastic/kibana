@@ -2539,11 +2539,7 @@
           "IScopedClusterClient",
           ", [request: ",
           "ScopeableRequest",
-          ", opts?: ",
-          "OriginOnlyRouting",
-          " | ",
-          "AllProjectsRouting",
-          " | undefined], unknown>; } & ",
+          "], unknown>; } & ",
           "ICustomClusterClient",
           " & ",
           "ClusterClientMock"

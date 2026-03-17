@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Indicator match execution logic API', function () {
     loadTestFile(require.resolve('./indicator_match'));
     loadTestFile(require.resolve('./indicator_match_alert_suppression'));
+    loadTestFile(require.resolve('./indicator_match_validation'));
   });
 }
