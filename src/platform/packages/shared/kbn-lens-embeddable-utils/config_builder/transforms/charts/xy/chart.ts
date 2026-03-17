@@ -260,6 +260,8 @@ function convertAxisSettingsToAPIFormat(
     const xColumn = dataSourceLayer.columns.find((c) => c.columnId === firstLayer.xAccessor);
     if (xColumn?.meta?.type === 'date') {
       xAxisScale = 'temporal';
+    } else if (xColumn?.meta?.type === 'number') {
+      xAxisScale = 'linear';
     }
   }
 

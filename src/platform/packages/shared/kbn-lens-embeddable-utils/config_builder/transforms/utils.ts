@@ -34,7 +34,7 @@ import {
 import type { LayerSettingsSchema } from '../schema/shared';
 import type { LensApiFilterType, UnifiedSearchFilterType } from '../schema/filter';
 import type { DatasetType, DatasetTypeESQL, DatasetTypeNoESQL } from '../schema/dataset';
-import type { LayerTypeESQL } from '../schema/charts/xy';
+import type { LayerTypeESQL, XScaleSchemaType } from '../schema/charts/xy';
 
 export type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -290,7 +290,7 @@ function buildDatasourceStatesLayer(
   getValueColumns: (
     layer: unknown,
     i: number,
-    xAxisScale?: 'temporal' | 'ordinal'
+    xAxisScale?: XScaleSchemaType
   ) => TextBasedLayerColumn[], // ValueBasedLayerColumn[]
   fullConfig: LensApiState
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
@@ -359,7 +359,7 @@ export const buildDatasourceStates = (
     i: number,
     index: { index: string; timeFieldName: string | undefined }
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
-  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[]
+  getValueColumns: (config: any, i: number, xAxisScale?: XScaleSchemaType) => TextBasedLayerColumn[]
 ): {
   layers: LensAttributes['state']['datasourceStates'];
   usedDataviews: Record<string, APIDataView | APIAdHocDataView>;

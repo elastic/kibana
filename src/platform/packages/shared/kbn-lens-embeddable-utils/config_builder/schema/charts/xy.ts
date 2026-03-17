@@ -229,6 +229,12 @@ const decorationsSchema = schema.object(
   }
 );
 
+const xScaleSchema = schema.maybe(
+  schema.oneOf([schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')], {
+    meta: { description: 'X-axis scale type' },
+  })
+);
+
 /**
  * Shared settings that apply to the entire XY chart visualization
  */
@@ -339,11 +345,7 @@ const xySharedSettings = {
           schema.object(
             {
               ...sharedAxisSchema,
-              scale: schema.maybe(
-                schema.oneOf([schema.literal('ordinal'), schema.literal('temporal')], {
-                  meta: { description: 'X-axis scale type' },
-                })
-              ),
+              scale: xScaleSchema,
               extent: schema.maybe(
                 schema.oneOf([
                   schema.object(
@@ -781,6 +783,7 @@ export const xyStateSchemaESQL = schema.object(
   }
 );
 
+export type XScaleSchemaType = TypeOf<typeof xScaleSchema>;
 export type XYState = TypeOf<typeof xyStateSchema>;
 export type XYStateESQL = TypeOf<typeof xyStateSchemaESQL>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;
