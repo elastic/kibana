@@ -5,9 +5,9 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
-  contents: read
-  issues: read
-  pull-requests: write
+  contents: read # needed to checkout repo
+  issues: read # needed to read PR description, conversation, comments, and labels
+  pull-requests: write # needed to post review comments and inline comments on the diff
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
