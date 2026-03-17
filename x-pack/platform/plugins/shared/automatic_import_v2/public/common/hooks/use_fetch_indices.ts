@@ -9,6 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 
 export interface UseFetchIndicesResult {
+  /** Index and data stream names (non-hidden, from current user scope). */
   indices: string[];
   isLoading: boolean;
   isError: boolean;
@@ -30,9 +31,13 @@ export function useFetchIndices(search: string = '*'): UseFetchIndicesResult {
     queryFn: async () => {
       const searchPattern = search.endsWith('*') ? search : `${search}*`;
       const response = await http.get<ResolveIndexResponse>(
-        `/internal/index-pattern-management/resolve_index/${encodeURIComponent(searchPattern)}`
+        `/internal/automatic_import_v2/indices/resolve`,
+        { query: { name: searchPattern } }
       );
-      return response.indices.map((index) => index.name);
+      return [
+        ...response.indices.map((index) => index.name),
+        ...response.data_streams.map((ds) => ds.name),
+      ];
     },
   });
 

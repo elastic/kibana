@@ -73,6 +73,25 @@ describe('useFetchIndices', () => {
     expect(result.current.isError).toBe(false);
   });
 
+  it('should return both index names and data stream names', async () => {
+    mockHttpGet.mockResolvedValue({
+      indices: [{ name: 'idx-1' }, { name: 'idx-2' }],
+      aliases: [],
+      data_streams: [{ name: 'ds-1' }, { name: 'ds-2' }],
+    });
+
+    const { result } = renderHook(() => useFetchIndices('*'), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.indices).toEqual(['idx-1', 'idx-2', 'ds-1', 'ds-2']);
+    expect(result.current.isError).toBe(false);
+  });
+
   it('should handle API errors', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -108,7 +127,9 @@ describe('useFetchIndices', () => {
       expect(mockHttpGet).toHaveBeenCalled();
     });
 
-    expect(mockHttpGet).toHaveBeenCalledWith('/internal/index-pattern-management/resolve_index/*');
+    expect(mockHttpGet).toHaveBeenCalledWith('/internal/automatic_import_v2/indices/resolve', {
+      query: { name: '*' },
+    });
   });
 
   it('should add wildcard to search pattern if not present', async () => {
@@ -126,9 +147,9 @@ describe('useFetchIndices', () => {
       expect(mockHttpGet).toHaveBeenCalled();
     });
 
-    expect(mockHttpGet).toHaveBeenCalledWith(
-      '/internal/index-pattern-management/resolve_index/logs*'
-    );
+    expect(mockHttpGet).toHaveBeenCalledWith('/internal/automatic_import_v2/indices/resolve', {
+      query: { name: 'logs*' },
+    });
   });
 
   it('should not add extra wildcard if search already ends with wildcard', async () => {
@@ -146,12 +167,12 @@ describe('useFetchIndices', () => {
       expect(mockHttpGet).toHaveBeenCalled();
     });
 
-    expect(mockHttpGet).toHaveBeenCalledWith(
-      '/internal/index-pattern-management/resolve_index/logs*'
-    );
+    expect(mockHttpGet).toHaveBeenCalledWith('/internal/automatic_import_v2/indices/resolve', {
+      query: { name: 'logs*' },
+    });
   });
 
-  it('should URL encode the search pattern', async () => {
+  it('should pass search pattern as query param name', async () => {
     mockHttpGet.mockResolvedValue({
       indices: [],
       aliases: [],
@@ -166,9 +187,9 @@ describe('useFetchIndices', () => {
       expect(mockHttpGet).toHaveBeenCalled();
     });
 
-    expect(mockHttpGet).toHaveBeenCalledWith(
-      '/internal/index-pattern-management/resolve_index/logs%20with%20spaces*'
-    );
+    expect(mockHttpGet).toHaveBeenCalledWith('/internal/automatic_import_v2/indices/resolve', {
+      query: { name: 'logs with spaces*' },
+    });
   });
 
   it('should provide refetch function', async () => {
