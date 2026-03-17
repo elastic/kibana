@@ -216,6 +216,33 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
+  public setWorkflowOutputs(outputs: Record<string, unknown>): void {
+    this.workflowExecutionState.updateWorkflowExecution({
+      context: {
+        ...(this.workflowExecution.context || {}),
+        output: outputs,
+      },
+    });
+  }
+
+  public setWorkflowStatus(status: ExecutionStatus): void {
+    this.workflowExecutionState.updateWorkflowExecution({ status });
+  }
+
+  /**
+   * Sets workflow status to CANCELLED with a reason (and cancelledAt, cancelledBy).
+   * Use when workflow.output has status: 'cancelled' or when cancelling with a specific message.
+   */
+  public setWorkflowCancelled(reason: string): void {
+    const cancelledAt = new Date().toISOString();
+    this.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.CANCELLED,
+      cancellationReason: reason,
+      cancelledAt,
+      cancelledBy: 'workflow',
+    });
+  }
+
   /**
    * Pops scopes from the scope stack, finishing each one, until {@link shouldStop}
    * returns true for the current scope (or the stack is exhausted when no predicate
