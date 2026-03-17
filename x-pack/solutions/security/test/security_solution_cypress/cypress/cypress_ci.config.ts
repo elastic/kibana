@@ -23,7 +23,6 @@ export default defineCypressConfig({
   },
   execTimeout: 150000,
   pageLoadTimeout: 150000,
-  numTestsKeptInMemory: 0,
   retries: {
     runMode: 1,
   },

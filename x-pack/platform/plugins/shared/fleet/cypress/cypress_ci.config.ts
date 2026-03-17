@@ -40,7 +40,6 @@ export default defineCypressConfig({
 
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
-    numTestsKeptInMemory: 0,
 
     specPattern: './cypress/e2e/**/*.cy.ts',
     supportFile: './cypress/support/e2e.ts',

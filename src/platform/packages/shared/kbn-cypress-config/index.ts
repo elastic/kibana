@@ -107,7 +107,10 @@ function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<st
 }
 
 export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
+  const isInteractive = !process.env.CI && !process.argv.includes('--headless');
+
   return defineConfig({
+    numTestsKeptInMemory: isInteractive ? 3 : 0,
     ...options,
     ...getReportingOptionOverrides(options),
     e2e: {

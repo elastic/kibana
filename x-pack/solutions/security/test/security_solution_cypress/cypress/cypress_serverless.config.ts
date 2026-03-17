@@ -22,7 +22,6 @@ export default defineCypressConfig({
   videosFolder: '../../../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 1200,
   viewportWidth: 1920,
-  numTestsKeptInMemory: 0,
   env: {
     grepFilterSpecs: true,
     grepTags: '@serverless --@skipInServerless',

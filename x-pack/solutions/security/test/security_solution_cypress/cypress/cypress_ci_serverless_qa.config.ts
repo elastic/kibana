@@ -24,7 +24,6 @@ export default defineCypressConfig({
   },
   execTimeout: 300000,
   pageLoadTimeout: 300000,
-  numTestsKeptInMemory: 0,
   requestTimeout: 300000,
   responseTimeout: 300000,
   retries: {
