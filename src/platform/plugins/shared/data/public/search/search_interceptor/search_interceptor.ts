@@ -186,6 +186,7 @@ export class SearchInterceptor {
         const entry = entries[entries.length - 1] as PerformanceResourceTiming | undefined;
         if (entry?.nextHopProtocol) {
           this.cachedProtocol = entry.nextHopProtocol;
+          console.log('Detected HTTP protocol:', this.cachedProtocol);
         }
       }
     } catch (e) {
