@@ -16,9 +16,11 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { INVALID_NAMESPACE_CHARACTERS, isValidNamespace } from '@kbn/fleet-plugin/common';
 import type {
   NewPackagePolicy,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
@@ -38,13 +40,18 @@ const getDefaultRouteEntry = () => {
   };
 };
 
+const NAMESPACE_MAX_LENGTH = 100;
+
+const sanitizeNamespaceInput = (value: string): string =>
+  value.toLowerCase().replace(INVALID_NAMESPACE_CHARACTERS, '').slice(0, NAMESPACE_MAX_LENGTH);
+
 interface RouteEntryComponentProps {
   index: number;
   routeEntries: RouteEntry[];
   datastreamOpts: string[];
   onChangeCriblDataId(index: number, value: string): void;
   onChangeDatastream(index: number, value: string): void;
-  onChangeNamespace(index: number, value: string): void;
+  onChangeNamespace(index: number, value: string | undefined): void;
   onDeleteEntry(index: number): void;
 }
 
@@ -58,7 +65,12 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
     onChangeNamespace,
     onDeleteEntry,
   }) => {
+    const { euiTheme } = useEuiTheme();
     const routeEntry = routeEntries[index]; // the route entry for this row
+    const namespaceValidation = routeEntry.namespace
+      ? isValidNamespace(routeEntry.namespace, false)
+      : undefined;
+    const isNamespaceInvalid = !!(namespaceValidation && !namespaceValidation.valid);
 
     const options = datastreamOpts.map((o) => ({
       label: o,
@@ -78,7 +90,9 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFormRow hasEmptyLabelSpace>
-            <span style={{ display: 'inline-flex', alignItems: 'center', blockSize: 40 }}>
+            <span
+              style={{ display: 'inline-flex', alignItems: 'center', blockSize: euiTheme.size.xxl }}
+            >
               {i18n.translate('xpack.securitySolution.securityIntegration.cribl.mapsTo', {
                 defaultMessage: 'MAPS TO',
               })}
@@ -105,16 +119,26 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label="Namespace">
+            <EuiFormRow
+              label="Namespace"
+              isInvalid={isNamespaceInvalid}
+              error={namespaceValidation?.error}
+            >
               <EuiFieldText
                 placeholder="default"
                 value={routeEntry.namespace ?? ''}
-                onChange={(e) => onChangeNamespace(index, e.currentTarget.value)}
+                isInvalid={isNamespaceInvalid}
+                onChange={(e) => {
+                  const sanitized = sanitizeNamespaceInput(e.currentTarget.value);
+                  onChangeNamespace(index, sanitized === '' ? undefined : sanitized);
+                }}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFormRow hasEmptyLabelSpace>
-            <span style={{ display: 'inline-flex', alignItems: 'center', blockSize: 40 }}>
+            <span
+              style={{ display: 'inline-flex', alignItems: 'center', blockSize: euiTheme.size.xxl }}
+            >
               <EuiButtonIcon
                 color="danger"
                 iconType="trash"
@@ -191,11 +215,11 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
       updateCriblPolicy(newValues);
     };
 
-    const onChangeNamespace = (index: number, value: string) => {
+    const onChangeNamespace = (index: number, value: string | undefined) => {
       const newValues = [...routeEntries];
       newValues[index] = {
         ...routeEntries[index],
-        namespace: value,
+        namespace: value || undefined,
       };
       setRouteEntries(newValues);
       updateCriblPolicy(newValues);
@@ -223,10 +247,15 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
         },
       };
 
+      const allNamespacesValid = updatedRouteEntries.every(
+        (entry) => !entry.namespace || isValidNamespace(entry.namespace, false).valid
+      );
+
       // must have at least one filled in and all entries must have both filled in or neither
       const isValid =
         hasAtLeastOneValidRouteEntry(updatedRouteEntries) &&
-        allRouteEntriesArePaired(updatedRouteEntries);
+        allRouteEntriesArePaired(updatedRouteEntries) &&
+        allNamespacesValid;
 
       onChange({
         isValid,

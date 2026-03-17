@@ -23,12 +23,21 @@ describe('Put cribl routing pipeline tests', () => {
     });
   });
 
-  it('defaults namespace to "default" when not specified', () => {
+  it('defaults namespace to "default" when namespace is undefined', () => {
     const req = buildPipelineRequest(routeEntries);
 
     req.processors?.forEach(function (processor) {
       expect(processor.reroute?.namespace).toEqual(['default']);
     });
+  });
+
+  it('defaults namespace to "default" when namespace is empty string', () => {
+    const entriesWithEmptyNamespace: RouteEntry[] = [
+      { dataId: 'criblSource1', datastream: 'logs-destination1.cloud', namespace: '' },
+    ];
+    const req = buildPipelineRequest(entriesWithEmptyNamespace);
+
+    expect(req.processors?.[0].reroute?.namespace).toEqual(['default']);
   });
 
   it('uses custom namespace when provided', () => {
