@@ -59,6 +59,7 @@ describe('buildUpdatedRecoveredAlert', () => {
           },
         },
         rule: alertRule,
+        tracked: true,
         timestamp: '2023-03-29T12:27:28.159Z',
       })
     ).toEqual({
@@ -112,6 +113,7 @@ describe('buildUpdatedRecoveredAlert', () => {
           },
         },
         rule: alertRule,
+        tracked: true,
         timestamp: '2023-03-29T12:27:28.159Z',
       })
     ).toEqual({
@@ -165,6 +167,7 @@ describe('buildUpdatedRecoveredAlert', () => {
           },
         },
         rule: alertRule,
+        tracked: true,
         timestamp: '2023-03-29T12:27:28.159Z',
       })
     ).toEqual({
@@ -221,7 +224,7 @@ describe('buildUpdatedRecoveredAlert', () => {
     });
   });
 
-  test('should set kibana.alert.tracked to false when not flapping and no state changes', () => {
+  test('should set kibana.alert.tracked to false when tracked is false', () => {
     expect(
       buildUpdatedRecoveredAlert<{}>({
         alert: existingFlattenedRecoveredAlert,
@@ -236,6 +239,7 @@ describe('buildUpdatedRecoveredAlert', () => {
           },
         },
         rule: alertRule,
+        tracked: false,
         timestamp: '2023-03-29T12:27:28.159Z',
       })
     ).toEqual(

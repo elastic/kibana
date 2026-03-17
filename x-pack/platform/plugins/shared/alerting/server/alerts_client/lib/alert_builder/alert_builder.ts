@@ -233,11 +233,14 @@ export class AlertBuilder<
 
   private buildRecoveredAlerts(): Array<Alert & AlertData> {
     const { rawRecoveredAlerts } = this.legacyAlertsClient.getRawAlertInstancesForState();
+    const { rawRecoveredAlerts: taskStateRecoveredAlerts } =
+      this.legacyAlertsClient.getRawAlertInstancesForState(true);
     const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_RECOVERED);
 
     const recoveredAlertsToIndex = [];
     for (const id of keys(rawRecoveredAlerts)) {
       const trackedAlert = this.trackedAlerts.getById(id);
+      const isKeptInTaskState = id in taskStateRecoveredAlerts;
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (trackedAlert) {
@@ -262,6 +265,7 @@ export class AlertBuilder<
                 legacyRawAlert: rawRecoveredAlerts[id],
                 runTimestamp: this.runTimestampString,
                 timestamp: this.currentTime,
+                tracked: isKeptInTaskState,
                 rule: this.rule,
               })
         );

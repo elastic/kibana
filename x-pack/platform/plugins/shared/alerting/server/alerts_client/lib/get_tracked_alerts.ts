@@ -17,6 +17,7 @@ import {
   ALERT_STATUS_DELAYED,
   ALERT_TRACKED,
   ALERT_UUID,
+  ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import type { RawAlertInstance, RuleAlertData } from '../../types';
@@ -171,10 +172,26 @@ export function populateTrackedAlerts<AlertData extends RuleAlertData>(
     if (status === ALERT_STATUS_DELAYED) {
       trackedAlerts.delayed[alertUuid] = alertHit;
     }
+
     trackedAlerts.indices[alertUuid] = hit._index;
     trackedAlerts.seqNo[alertUuid] = hit._seq_no;
     trackedAlerts.primaryTerm[alertUuid] = hit._primary_term;
   }
+  console.log(
+    'trackedAlerts',
+    JSON.stringify(
+      Object.values(trackedAlerts.all).map((alert) => {
+        return {
+          instanceId: alert[ALERT_INSTANCE_ID],
+          status: alert[ALERT_STATUS],
+          executionUuid: alert[ALERT_RULE_EXECUTION_UUID],
+          tracked: alert[ALERT_TRACKED],
+        };
+      }),
+      null,
+      2
+    )
+  );
 }
 
 export function findMissingAlertUuids<AlertData extends RuleAlertData>(

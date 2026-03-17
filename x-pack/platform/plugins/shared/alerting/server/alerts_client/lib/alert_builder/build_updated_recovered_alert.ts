@@ -29,6 +29,7 @@ interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   legacyRawAlert: RawAlertInstance;
   runTimestamp?: string;
   timestamp: string;
+  tracked: boolean;
   rule: AlertRule;
 }
 
@@ -42,6 +43,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   legacyRawAlert,
   runTimestamp,
   timestamp,
+  tracked,
 }: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
   // Make sure that any alert fields that are updatable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
@@ -60,7 +62,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     // For an "ongoing recovered" alert, we do not want to update the execution UUID to the current one so it does
     // not get returned for summary alerts.
     [ALERT_RULE_EXECUTION_UUID]: get(alert, ALERT_RULE_EXECUTION_UUID),
-    [ALERT_TRACKED]: shouldKeepTracking(legacyRawAlert),
+    [ALERT_TRACKED]: tracked,
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
   };
 
@@ -87,11 +89,4 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   return deepmerge.all([expandedAlert, refreshableAlertFields, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
-};
-
-const shouldKeepTracking = (legacyRawAlert: RawAlertInstance): boolean => {
-  const flapping = legacyRawAlert.meta?.flapping;
-  const flappingHistory: boolean[] = legacyRawAlert.meta?.flappingHistory || [];
-  const numStateChanges = flappingHistory.filter((f) => f).length;
-  return flapping === true || numStateChanges > 0;
 };
