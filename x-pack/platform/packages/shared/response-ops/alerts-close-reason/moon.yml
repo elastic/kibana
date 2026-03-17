@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/response-ops-alerts-table'
 tags:
   - shared-browser
   - package
