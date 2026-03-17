@@ -66,9 +66,6 @@ describe('Options List Control Api', () => {
         if (dataviewDelayPromise) await dataviewDelayPromise;
         return getDataView(id);
       });
-      coreServices.http.get = jest.fn().mockResolvedValue({
-        allowExpensiveQueries: true,
-      });
     });
 
     it('returns api immediately when no initial selections are configured', async () => {

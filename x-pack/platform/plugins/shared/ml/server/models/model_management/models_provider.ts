@@ -519,10 +519,10 @@ export class ModelsProvider {
           const id = processor.inference?.model_id;
           if (modelIdsMap.has(id)) {
             const obj = modelIdsMap.get(id);
-            if (obj === null) {
-              modelIdsMap.set(id, { [pipelineName]: pipelineDefinition });
+            if (obj == null) {
+              modelIdsMap.set(id, { [pipelineName]: pipelineDefinition as PipelineDefinition });
             } else {
-              obj![pipelineName] = pipelineDefinition;
+              obj[pipelineName] = pipelineDefinition as PipelineDefinition;
             }
           }
         }

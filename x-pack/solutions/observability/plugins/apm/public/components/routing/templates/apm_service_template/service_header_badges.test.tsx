@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ServiceHeaderBadges } from './service_header_badges';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
 
 const mockUseServiceSloContext = jest.fn();
 jest.mock('../../../../context/service_slo/use_service_slo_context', () => ({
@@ -31,6 +32,15 @@ jest.mock('../../../../hooks/use_fetcher', () => ({
     NOT_INITIATED: 'not_initiated',
   },
 }));
+
+const mockKibanaServices = jest.fn();
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useKibana: () => mockKibanaServices(),
+  };
+});
 
 const defaultProps = {
   serviceName: 'test-service',
@@ -90,6 +100,12 @@ function setupMocks({
     data: { alertsCount },
     status: FETCH_STATUS.SUCCESS,
   });
+
+  mockKibanaServices.mockReturnValue({
+    services: {
+      telemetry: mockTelemetryClient,
+    },
+  });
 }
 
 describe('ServiceHeaderBadges', () => {
@@ -132,29 +148,35 @@ describe('ServiceHeaderBadges', () => {
     setupMocks({ mostCriticalSloStatus: { status: 'violated', count: 2 } });
     renderBadges();
 
-    expect(screen.getByTestId('serviceInventorySloViolatedBadge')).toBeInTheDocument();
+    const badge = screen.getByTestId('apmSloBadge');
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveAttribute('data-slo-status', 'violated');
   });
 
   it('shows healthy SLO badge', () => {
     setupMocks({ mostCriticalSloStatus: { status: 'healthy', count: 3 } });
+
     renderBadges();
 
-    expect(screen.getByTestId('serviceInventorySloHealthyBadge')).toBeInTheDocument();
+    const badge = screen.getByTestId('apmSloBadge');
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveAttribute('data-slo-status', 'healthy');
   });
 
   it('shows degrading SLO badge', () => {
     setupMocks({ mostCriticalSloStatus: { status: 'degrading', count: 1 } });
     renderBadges();
 
-    expect(screen.getByTestId('serviceInventorySloDegradingBadge')).toBeInTheDocument();
+    const badge = screen.getByTestId('apmSloBadge');
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveAttribute('data-slo-status', 'degrading');
   });
 
   it('hides SLO badge when SLO data is still loading', () => {
     setupMocks({ alertsCount: 1, sloFetchStatus: FETCH_STATUS.LOADING });
     renderBadges();
 
-    expect(screen.queryByTestId('serviceInventorySloHealthyBadge')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('serviceInventorySloViolatedBadge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
   });
 
   it('hides SLO badge when user cannot read SLOs', () => {
@@ -165,7 +187,7 @@ describe('ServiceHeaderBadges', () => {
     });
     renderBadges();
 
-    expect(screen.queryByTestId('serviceInventorySloViolatedBadge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
   });
 
   it('returns null when no badges should be shown', () => {
@@ -187,6 +209,8 @@ describe('ServiceHeaderBadges', () => {
     renderBadges();
 
     expect(screen.getByTestId('serviceHeaderAlertsBadge')).toBeInTheDocument();
-    expect(screen.getByTestId('serviceInventorySloViolatedBadge')).toBeInTheDocument();
+    const badge = screen.getByTestId('apmSloBadge');
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveAttribute('data-slo-status', 'violated');
   });
 });

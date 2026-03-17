@@ -47,7 +47,7 @@ describe('useTopNavLinks', () => {
 
     await toolkit.initializeTabs();
 
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
 
@@ -57,7 +57,6 @@ describe('useTopNavLinks', () => {
           dataView: dataViewMock,
           onOpenInspector: jest.fn(),
           services,
-          state: stateContainer,
           hasUnsavedChanges: false,
           isEsqlMode: false,
           adHocDataViews: [],
@@ -262,6 +261,35 @@ describe('useTopNavLinks', () => {
       const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
 
       expect(resetChangesItem?.disableButton).toBe(false);
+    });
+  });
+
+  describe('save as button', () => {
+    it('should disable save as button when session is not persisted', async () => {
+      const appMenuConfig = await setup({ persistedDiscoverSession: undefined });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+
+      expect(saveAsItem?.disableButton).toBe(true);
+    });
+
+    it('should enable save as button when session is persisted', async () => {
+      const persistedSession = {
+        id: 'test-session-id',
+        title: 'Test Session',
+        description: 'Test Description',
+        tags: [],
+        managed: false,
+        tabs: [],
+        timeRestore: false,
+      };
+      const appMenuConfig = await setup({ persistedDiscoverSession: persistedSession });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+
+      expect(saveAsItem?.disableButton).toBe(false);
     });
   });
 });

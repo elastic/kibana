@@ -341,7 +341,8 @@ export const WorkflowExecuteIndexForm = ({
                   selectedDataView,
                   () => true, // Show all fields
                   10, // Max entries
-                  services.fieldFormats
+                  services.fieldFormats,
+                  undefined
                 )
               : [];
 
@@ -385,10 +386,16 @@ export const WorkflowExecuteIndexForm = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row" gutterSize="s">
+      <EuiFlexGroup direction="row" gutterSize="none">
         {/* Data View Selector */}
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
+          <EuiPanel
+            paddingSize="s"
+            hasBorder={false}
+            hasShadow={false}
+            color="transparent"
+            css={{ paddingRight: 0 }}
+          >
             <DataViewPicker
               trigger={{
                 'data-test-subj': 'workflow-data-view-selector',

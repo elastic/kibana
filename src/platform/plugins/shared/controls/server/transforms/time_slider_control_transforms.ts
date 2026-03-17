@@ -8,15 +8,17 @@
  */
 
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type {
-  LegacyStoredTimeSliderExplicitInput,
-  TimeSliderControlState,
+import {
+  type LegacyStoredTimeSliderExplicitInput,
+  type TimeSliderControlState,
+  timeSliderControlSchema,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
 export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(TIME_SLIDER_CONTROL, {
+    getSchema: () => timeSliderControlSchema,
     getTransforms: () => ({
       transformOut: <
         StoredStateType extends Partial<

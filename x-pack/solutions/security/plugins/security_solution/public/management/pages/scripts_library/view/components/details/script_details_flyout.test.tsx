@@ -7,8 +7,8 @@
 
 import React from 'react';
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import {
   EndpointScriptDetailsFlyout,
@@ -117,7 +117,7 @@ describe('EndpointScriptDetailsFlyout', () => {
         .join(', ');
 
       expect(detailLabels).toBe(
-        'Requires user input, Types, Description, Instructions, Examples, File name, Path to executable file, File size, SHA256, Updated by'
+        'Requires user input, Types, Description, Instructions, Examples, File name, Path to executable file (only for archive files), File size, SHA256, Updated by'
       );
     });
 
@@ -130,7 +130,8 @@ describe('EndpointScriptDetailsFlyout', () => {
           description: '',
           instructions: '',
           example: '',
-          pathToExecutable: '',
+          pathToExecutable: undefined,
+          fileType: 'script',
         },
       });
       const { getByTestId } = renderResult;
@@ -146,6 +147,22 @@ describe('EndpointScriptDetailsFlyout', () => {
         .join(', ');
 
       expect(detailLabels).toBe('Requires user input, File name, File size, SHA256, Updated by');
+    });
+
+    it('should have tooltip icon for requires user input detail item', () => {
+      render();
+      const { getByTestId } = renderResult;
+      const requiresInputDetailItem = getByTestId('test-body-detail-requiresInput');
+      const tooltipIcon = requiresInputDetailItem.querySelector('.euiToolTipAnchor');
+      expect(tooltipIcon).toBeInTheDocument();
+    });
+
+    it('should have tooltip icon for path to executable detail item', () => {
+      render();
+      const { getByTestId } = renderResult;
+      const pathToExecutableDetailItem = getByTestId('test-body-detail-pathToExecutable');
+      const tooltipIcon = pathToExecutableDetailItem.querySelector('.euiToolTipAnchor');
+      expect(tooltipIcon).toBeInTheDocument();
     });
   });
 

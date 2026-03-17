@@ -7,7 +7,11 @@
 
 import type { NewPackagePolicy, PackageInfo } from '../../types';
 
-import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants/cloud_connector';
+import {
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
+  CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
+} from '../../../common/constants/cloud_connector';
 
 import { extractAccountType, validateAccountType } from './integration_helpers';
 
@@ -101,10 +105,12 @@ describe('cloud connector integration helpers', () => {
         );
       });
 
-      it('should return undefined when aws.account_type is not present', () => {
+      it('should default to single-account when aws.account_type is not present', () => {
         const packagePolicy = createMockPackagePolicy({});
 
-        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBeUndefined();
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBe(
+          CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE
+        );
       });
     });
 
@@ -127,25 +133,29 @@ describe('cloud connector integration helpers', () => {
         );
       });
 
-      it('should return undefined when azure.account_type is not present', () => {
+      it('should default to single-account when azure.account_type is not present', () => {
         const packagePolicy = createMockPackagePolicy({});
 
-        expect(extractAccountType('azure', packagePolicy, mockPackageInfo)).toBeUndefined();
+        expect(extractAccountType('azure', packagePolicy, mockPackageInfo)).toBe(
+          CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE
+        );
       });
     });
 
     describe('GCP account type extraction', () => {
-      it('should return undefined for GCP (not yet supported)', () => {
+      it('should default to single-account for GCP (not yet supported)', () => {
         const packagePolicy = createMockPackagePolicy({
           'gcp.account_type': { value: 'single-project' },
         });
 
-        expect(extractAccountType('gcp', packagePolicy, mockPackageInfo)).toBeUndefined();
+        expect(extractAccountType('gcp', packagePolicy, mockPackageInfo)).toBe(
+          CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE
+        );
       });
     });
 
     describe('edge cases', () => {
-      it('should return undefined when inputs are empty', () => {
+      it('should default to single-account when inputs are empty', () => {
         const packagePolicy: NewPackagePolicy = {
           name: 'test-policy',
           namespace: 'default',
@@ -154,10 +164,12 @@ describe('cloud connector integration helpers', () => {
           inputs: [],
         };
 
-        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBeUndefined();
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBe(
+          CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE
+        );
       });
 
-      it('should return undefined when no enabled input exists', () => {
+      it('should default to single-account when no enabled input exists', () => {
         const packagePolicy: NewPackagePolicy = {
           name: 'test-policy',
           namespace: 'default',
@@ -178,10 +190,12 @@ describe('cloud connector integration helpers', () => {
           ],
         };
 
-        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBeUndefined();
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBe(
+          CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE
+        );
       });
 
-      it('should return undefined when streams have no vars', () => {
+      it('should default to single-account when streams have no vars', () => {
         const packagePolicy: NewPackagePolicy = {
           name: 'test-policy',
           namespace: 'default',
@@ -201,7 +215,9 @@ describe('cloud connector integration helpers', () => {
           ],
         };
 
-        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBeUndefined();
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBe(
+          CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE
+        );
       });
     });
   });

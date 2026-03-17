@@ -22,6 +22,7 @@ import {
   AZURE_ACCOUNT_TYPE_VAR_NAME,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
+  CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
 } from '../../../common/constants/cloud_connector';
 
 import type {
@@ -31,38 +32,46 @@ import type {
   PackageInfo,
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
+  GcpCloudConnectorVars,
 } from '../../../common/types';
 import type { NewPackagePolicy } from '../../types';
 
 /**
- * Extracts the account type from package policy variables
+ * Extracts the account type from package policy
+ *
+ * Checks provider-specific account type vars (legacy approach for CSPM).
+ * Returns DEFAULT_ACCOUNT_TYPE ('single-account') if not found.
  *
  * @param cloudProvider - The cloud provider (aws, azure, gcp)
  * @param packagePolicy - The package policy containing account type vars
  * @param packageInfo - The package info for storage mode detection
- * @returns Account type ('single-account' or 'organization-account') or undefined if not found
+ * @returns Account type ('single-account' or 'organization-account')
  */
 export function extractAccountType(
   cloudProvider: CloudProvider,
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
-): AccountType | undefined {
-  // Use accessor to get vars from the correct location (package-level or input-level)
+): AccountType {
+  // Check provider-specific vars (legacy approach for CSPM)
   const vars = extractRawCredentialVars(packagePolicy, packageInfo);
 
-  if (!vars) {
-    return undefined;
+  if (vars) {
+    let rawAccountType: string | undefined;
+
+    if (cloudProvider === 'aws') {
+      rawAccountType = vars[AWS_ACCOUNT_TYPE_VAR_NAME]?.value;
+    } else if (cloudProvider === 'azure') {
+      rawAccountType = vars[AZURE_ACCOUNT_TYPE_VAR_NAME]?.value;
+    }
+
+    const validated = validateAccountType(rawAccountType);
+    if (validated) {
+      return validated;
+    }
   }
 
-  let rawAccountType: string | undefined;
-
-  if (cloudProvider === 'aws') {
-    rawAccountType = vars[AWS_ACCOUNT_TYPE_VAR_NAME]?.value;
-  } else if (cloudProvider === 'azure') {
-    rawAccountType = vars[AZURE_ACCOUNT_TYPE_VAR_NAME]?.value;
-  }
-
-  return validateAccountType(rawAccountType);
+  // Default to single-account when not specified
+  return CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE;
 }
 
 /**
@@ -145,6 +154,38 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
       for (const key of clientIdKeys) {
         if (key in updatedVars) {
           updatedVars[key] = azureVars.client_id;
+          break;
+        }
+      }
+    }
+  } else if (cloudProvider === 'gcp') {
+    const gcpVars = cloudConnectorVars as GcpCloudConnectorVars;
+    // Update service_account with secret reference using schema-defined keys
+    if (gcpVars.service_account) {
+      const serviceAccountKeys = getAllVarKeys(schema.fields.serviceAccount);
+      for (const key of serviceAccountKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = gcpVars.service_account;
+          break;
+        }
+      }
+    }
+    // Update audience with secret reference using schema-defined keys
+    if (gcpVars.audience) {
+      const audienceKeys = getAllVarKeys(schema.fields.audience);
+      for (const key of audienceKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = gcpVars.audience;
+          break;
+        }
+      }
+    }
+    // Update gcp_credentials_cloud_connector_id with secret reference using schema-defined keys
+    if (gcpVars.gcp_credentials_cloud_connector_id) {
+      const connectorIdKeys = getAllVarKeys(schema.fields.gcp_credentials_cloud_connector_id);
+      for (const key of connectorIdKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = gcpVars.gcp_credentials_cloud_connector_id;
           break;
         }
       }

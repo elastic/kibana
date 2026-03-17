@@ -16,7 +16,7 @@ import { createLogsDataSourceProfileProvider } from '../profile';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 import { createIntegrationLogsDataSourceProfileProviders } from './integration_logs';
-import { RESOLUTION_MATCH } from '../__mocks__';
+import { RESOLUTION_MATCH } from '../__mocks__/logs_data_source_resolution_match';
 
 const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
   profileId: OBSERVABILITY_ROOT_PROFILE_ID,

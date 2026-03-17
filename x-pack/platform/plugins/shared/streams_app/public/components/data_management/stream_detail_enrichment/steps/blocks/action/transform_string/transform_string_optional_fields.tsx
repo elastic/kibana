@@ -10,13 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
-interface TransformStringTargetFieldProps {
-  targetFieldHelpText: string;
-}
-
-export const TransformStringTargetField = ({
-  targetFieldHelpText,
-}: TransformStringTargetFieldProps) => {
+export const TransformStringTargetField = () => {
   const { register } = useFormContext();
   const { ref, ...inputProps } = register('to');
 
@@ -26,7 +20,6 @@ export const TransformStringTargetField = ({
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.transformStringTargetLabel',
         { defaultMessage: 'Target field' }
       )}
-      helpText={targetFieldHelpText}
       fullWidth
     >
       <EuiFieldText {...inputProps} inputRef={ref} />

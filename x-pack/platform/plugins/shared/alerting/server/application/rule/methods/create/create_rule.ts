@@ -24,7 +24,11 @@ import {
   validateActions,
   addGeneratedActionValues,
 } from '../../../../rules_client/lib';
-import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
+import {
+  generateAPIKeyName,
+  apiKeyAsRuleDomainProperties,
+  addMissingUiamKeyTagIfNeeded,
+} from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleDomain, RuleParams } from '../../types';
@@ -197,15 +201,26 @@ export async function createRule<Params extends RuleParams = never>(
   const throttle = data.throttle ?? null;
 
   const { systemActions, actions: actionToNotUse, ...restData } = data;
+
+  const apiKeyProps = apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey);
+  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    data.tags,
+    apiKeyProps.uiamApiKey,
+    apiKeyProps.apiKeyCreatedByUser,
+    context.isServerless,
+    context.featureFlags
+  );
+
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({
     actionsWithRefs,
     artifactsWithRefs,
     rule: {
       ...restData,
+      tags: tagsWithUiamCheck,
       // TODO (http-versioning) create a rule domain version of this function
       // Right now this works because the 2 types can interop but it's not ideal
-      ...apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey),
+      ...apiKeyProps,
       id,
       createdBy: username,
       updatedBy: username,

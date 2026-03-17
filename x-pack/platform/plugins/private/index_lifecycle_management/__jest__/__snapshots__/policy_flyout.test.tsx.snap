@@ -35,6 +35,7 @@ exports[`View policy flyout shows all phases 1`] = `
     >
       <div
         class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"
+        data-test-subj="euiFlyoutBodyOverflow"
         tabindex="0"
       >
         <div
@@ -987,7 +988,7 @@ exports[`View policy flyout shows all phases 1`] = `
                 data-euiicon-type="cross"
               />
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
               >
                 Close
               </span>
@@ -1013,7 +1014,7 @@ exports[`View policy flyout shows all phases 1`] = `
                   class="emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate"
+                    class="eui-textTruncate css-13ifi6d-m"
                   >
                     Manage
                   </span>

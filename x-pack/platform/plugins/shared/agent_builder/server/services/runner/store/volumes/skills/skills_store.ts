@@ -6,19 +6,19 @@
  */
 
 import type { SkillsStore, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { MemoryVolume } from '../../filesystem';
-import { createSkillEntries, getSkillEntryPath } from './utils';
+import { createSkillEntries, getSkillEntryPath, getSkillReferencedContentEntryPath } from './utils';
 
-export const createSkillsStore = ({ skills }: { skills: SkillDefinition[] }) => {
+export const createSkillsStore = ({ skills }: { skills: InternalSkillDefinition[] }) => {
   return new SkillsStoreImpl({ skills });
 };
 
 export class SkillsStoreImpl implements WritableSkillsStore {
-  private readonly skills: Map<string, SkillDefinition> = new Map();
+  private readonly skills: Map<string, InternalSkillDefinition> = new Map();
   private readonly volume: MemoryVolume;
 
-  constructor({ skills = [] }: { skills?: SkillDefinition[] }) {
+  constructor({ skills = [] }: { skills?: InternalSkillDefinition[] }) {
     this.volume = new MemoryVolume('skills');
     skills.forEach((skill) => this.add(skill));
   }
@@ -27,9 +27,8 @@ export class SkillsStoreImpl implements WritableSkillsStore {
     return this.volume;
   }
 
-  add(skill: SkillDefinition): void {
+  add(skill: InternalSkillDefinition): void {
     this.skills.set(skill.id, skill);
-    // Also add to the volume for filesystem access
     const entries = createSkillEntries(skill);
     entries.forEach((entry) => this.volume.add(entry));
   }
@@ -42,10 +41,15 @@ export class SkillsStoreImpl implements WritableSkillsStore {
   delete(skillId: string): boolean {
     const skill = this.skills.get(skillId);
     if (skill) {
-      const path = getSkillEntryPath({
-        skill,
-      });
+      const path = getSkillEntryPath({ skill });
       this.volume.remove(path);
+      skill.referencedContent?.forEach((rc) => {
+        const rcPath = getSkillReferencedContentEntryPath({
+          skill,
+          referencedContent: rc,
+        });
+        this.volume.remove(rcPath);
+      });
     }
     return this.skills.delete(skillId);
   }
@@ -54,7 +58,7 @@ export class SkillsStoreImpl implements WritableSkillsStore {
     return this.skills.has(skillId);
   }
 
-  get(skillId: string): SkillDefinition {
+  get(skillId: string): InternalSkillDefinition {
     if (!this.skills.has(skillId)) {
       throw new Error(`Skill with id ${skillId} does not exist`);
     }

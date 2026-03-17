@@ -100,7 +100,6 @@ describe(
       inputQuery('{selectall}{backspace}select * from users;');
       getAdvancedButton().click();
       fillInQueryTimeout('601');
-      cy.wait(1000);
       submitQuery();
       checkResults();
       navigateTo('/app/osquery');

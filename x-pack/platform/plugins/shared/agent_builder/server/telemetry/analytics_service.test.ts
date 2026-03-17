@@ -89,7 +89,9 @@ describe('AnalyticsService', () => {
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
         agent_id: agentBuilderDefaultAgentId,
+        attachments: undefined,
         conversation_id: 'conversation-1',
+        execution_id: undefined,
         input_tokens: 4,
         llm_calls: 3,
         message_length: 2,
@@ -97,11 +99,14 @@ describe('AnalyticsService', () => {
         model_provider: ModelProvider.OpenAI,
         output_tokens: 5,
         round_id: 'round-1',
+        round_status: ConversationRoundStatus.completed,
         response_length: round.response.message.length,
         round_number: 2,
         started_at: '2025-01-01T00:00:00.000Z',
         time_to_first_token: 1,
         time_to_last_token: 2,
+        tool_calls: 1,
+        tool_call_errors: 0,
         tools_invoked: ['custom-3c9388baa67aef90'],
       });
     });
@@ -117,7 +122,9 @@ describe('AnalyticsService', () => {
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
         agent_id: 'custom-da3031a511e7fadf',
+        attachments: undefined,
         conversation_id: 'conversation-1',
+        execution_id: undefined,
         input_tokens: 4,
         llm_calls: 3,
         message_length: 2,
@@ -125,11 +132,14 @@ describe('AnalyticsService', () => {
         model_provider: ModelProvider.OpenAI,
         output_tokens: 5,
         round_id: 'round-1',
+        round_status: ConversationRoundStatus.completed,
         response_length: round.response.message.length,
         round_number: 2,
         started_at: '2025-01-01T00:00:00.000Z',
         time_to_first_token: 1,
         time_to_last_token: 2,
+        tool_calls: 1,
+        tool_call_errors: 0,
         tools_invoked: ['custom-3c9388baa67aef90'],
       });
     });
@@ -252,6 +262,151 @@ describe('AnalyticsService', () => {
           error_message: `${'a'.repeat(500)}`,
         })
       );
+    });
+  });
+
+  describe('reportToolCallSuccess', () => {
+    it('reports the ToolCallSuccess event with normalized IDs', () => {
+      service.reportToolCallSuccess({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conv-1',
+        toolId: 'my_custom_tool',
+        toolCallId: 'tc-1',
+        source: 'agent',
+        resultTypes: ['resource', 'esql_results'],
+        duration: 150,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess,
+        {
+          agent_id: agentBuilderDefaultAgentId,
+          conversation_id: 'conv-1',
+          tool_id: 'custom-3c9388baa67aef90',
+          tool_call_id: 'tc-1',
+          source: 'agent',
+          result_types: ['resource', 'esql_results'],
+          duration_ms: 150,
+        }
+      );
+    });
+
+    it('passes undefined agent_id when agentId is undefined', () => {
+      service.reportToolCallSuccess({
+        toolId: 'my_custom_tool',
+        toolCallId: 'tc-1',
+        source: 'user',
+        resultTypes: ['other'],
+        duration: 50,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess,
+        expect.objectContaining({
+          agent_id: undefined,
+        })
+      );
+    });
+
+    it('does not throw when reporting throws', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      expect(() =>
+        service.reportToolCallSuccess({
+          toolId: 'tool-1',
+          toolCallId: 'tc-1',
+          source: 'agent',
+          resultTypes: ['other'],
+          duration: 100,
+        })
+      ).not.toThrow();
+
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
+
+  describe('reportToolCallError', () => {
+    it('reports the ToolCallError event with normalized IDs and sanitized error type', () => {
+      service.reportToolCallError({
+        agentId: agentBuilderDefaultAgentId,
+        toolId: 'my_custom_tool',
+        toolCallId: 'tc-1',
+        source: 'agent',
+        errorType: 'tool_error',
+        errorMessage: 'Something went wrong',
+        duration: 200,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.ToolCallError, {
+        agent_id: agentBuilderDefaultAgentId,
+        conversation_id: undefined,
+        tool_id: 'custom-3c9388baa67aef90',
+        tool_call_id: 'tc-1',
+        source: 'agent',
+        error_type: 'tool_error',
+        error_message: 'Something went wrong',
+        duration_ms: 200,
+      });
+    });
+
+    it('truncates error_message to 500 characters', () => {
+      const longMessage = 'x'.repeat(1000);
+
+      service.reportToolCallError({
+        agentId: agentBuilderDefaultAgentId,
+        toolId: 'tool-1',
+        toolCallId: 'tc-1',
+        source: 'agent',
+        errorType: 'tool_error',
+        errorMessage: longMessage,
+        duration: 100,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.ToolCallError,
+        expect.objectContaining({
+          error_message: 'x'.repeat(500),
+        })
+      );
+    });
+
+    it('passes undefined agent_id when agentId is undefined', () => {
+      service.reportToolCallError({
+        toolId: 'tool-1',
+        toolCallId: 'tc-1',
+        source: 'mcp',
+        errorType: 'tool_error',
+        errorMessage: 'fail',
+        duration: 50,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.ToolCallError,
+        expect.objectContaining({
+          agent_id: undefined,
+        })
+      );
+    });
+
+    it('does not throw when reporting throws', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      expect(() =>
+        service.reportToolCallError({
+          toolId: 'tool-1',
+          toolCallId: 'tc-1',
+          source: 'agent',
+          errorType: 'tool_error',
+          errorMessage: 'fail',
+          duration: 100,
+        })
+      ).not.toThrow();
+
+      expect(logger.debug).toHaveBeenCalled();
     });
   });
 });

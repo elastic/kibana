@@ -202,13 +202,19 @@ export class QueryUtils {
   /**
    * Get conversation metrics from Elasticsearch
    */
-  async getConversationMetrics() {
+  async getConversationMetrics(dateFilter?: { gte: string }) {
     try {
       const conversationIndexName = chatSystemIndex('conversations');
+
+      const query: Record<string, any> = dateFilter
+        ? { bool: { filter: [{ range: { created_at: { gte: dateFilter.gte } } }] } }
+        : { match_all: {} };
+
       const response = await this.esClient.search({
         index: conversationIndexName,
         size: 0,
         track_total_hits: true,
+        query,
         aggs: {
           rounds_distribution: {
             terms: {
@@ -229,23 +235,53 @@ export class QueryUtils {
               size: 100,
             },
           },
-          total_tokens: {
+          total_rounds: {
             sum: {
               script: {
                 source: `
                   def source = params._source;
                   def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
-                  def totalTokens = 0;
+                  return roundsArray != null ? roundsArray.size() : 0;
+                `,
+                lang: 'painless',
+              },
+            },
+          },
+          total_input_tokens: {
+            sum: {
+              script: {
+                source: `
+                  def source = params._source;
+                  def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                  def total = 0;
                   if (roundsArray != null) {
                     for (def round : roundsArray) {
                       if (round.model_usage != null) {
-                        def inputTokens = round.model_usage.input_tokens != null ? round.model_usage.input_tokens : 0;
-                        def outputTokens = round.model_usage.output_tokens != null ? round.model_usage.output_tokens : 0;
-                        totalTokens += inputTokens + outputTokens;
+                        total += round.model_usage.input_tokens != null ? round.model_usage.input_tokens : 0;
                       }
                     }
                   }
-                  return totalTokens;
+                  return total;
+                `,
+                lang: 'painless',
+              },
+            },
+          },
+          total_output_tokens: {
+            sum: {
+              script: {
+                source: `
+                  def source = params._source;
+                  def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                  def total = 0;
+                  if (roundsArray != null) {
+                    for (def round : roundsArray) {
+                      if (round.model_usage != null) {
+                        total += round.model_usage.output_tokens != null ? round.model_usage.output_tokens : 0;
+                      }
+                    }
+                  }
+                  return total;
                 `,
                 lang: 'painless',
               },
@@ -260,31 +296,19 @@ export class QueryUtils {
         count: bucket.doc_count as number,
       }));
 
-      // Calculate total rounds and average
-      let totalRounds = 0;
-      buckets.forEach((bucket: any) => {
-        const bucketKey = bucket.key as string;
-        const count = bucket.doc_count as number;
-        if (bucketKey === '1-5') {
-          totalRounds += count * 3; // Approximate: use middle value
-        } else if (bucketKey === '6-10') {
-          totalRounds += count * 8;
-        } else if (bucketKey === '11-20') {
-          totalRounds += count * 15;
-        } else if (bucketKey === '21-50') {
-          totalRounds += count * 35;
-        } else {
-          totalRounds += count * 75; // Approximate for 51+
-        }
-      });
+      const totalRoundsAgg = response.aggregations?.total_rounds as any;
+      const totalRounds = Math.round(totalRoundsAgg?.value || 0);
 
       const total = response.hits.total as any;
       const totalConversations = typeof total === 'number' ? total : total?.value || 0;
       const avgRoundsPerConversation =
         totalConversations > 0 ? totalRounds / totalConversations : 0;
 
-      const totalTokensAgg = response.aggregations?.total_tokens as any;
-      const tokensUsed = totalTokensAgg?.value || 0;
+      const totalInputTokensAgg = response.aggregations?.total_input_tokens as any;
+      const totalOutputTokensAgg = response.aggregations?.total_output_tokens as any;
+      const tokensInput = Math.round(totalInputTokensAgg?.value || 0);
+      const tokensOutput = Math.round(totalOutputTokensAgg?.value || 0);
+      const tokensUsed = tokensInput + tokensOutput;
       const averageTokensPerConversation =
         totalConversations > 0 ? tokensUsed / totalConversations : 0;
 
@@ -293,7 +317,9 @@ export class QueryUtils {
         total_rounds: totalRounds,
         avg_rounds_per_conversation: Math.round(avgRoundsPerConversation * 100) / 100,
         rounds_distribution: roundsDistribution,
-        tokens_used: Math.round(tokensUsed),
+        tokens_used: tokensUsed,
+        tokens_input: tokensInput,
+        tokens_output: tokensOutput,
         average_tokens_per_conversation: Math.round(averageTokensPerConversation * 100) / 100,
       };
     } catch (error) {
@@ -306,6 +332,8 @@ export class QueryUtils {
         avg_rounds_per_conversation: 0,
         rounds_distribution: [],
         tokens_used: 0,
+        tokens_input: 0,
+        tokens_output: 0,
         average_tokens_per_conversation: 0,
       };
     }

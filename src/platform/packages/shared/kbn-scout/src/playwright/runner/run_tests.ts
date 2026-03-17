@@ -183,6 +183,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     log.info(`scout: Running Scout tests located in:\n${pwTestFiles.join('\n')}`);
   }
 
+  if (options.repeatEach) {
+    log.info(
+      `scout: Each test will be repeated ${options.repeatEach} time(s) for flakiness validation`
+    );
+  }
+
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
@@ -191,6 +197,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     `--grep=${pwGrepTag}`,
     `--project=${pwProject}`,
     ...(options.headed ? ['--headed'] : []),
+    ...(options.repeatEach ? [`--repeat-each=${options.repeatEach}`] : []),
   ];
 
   await withProcRunner(log, async (procs) => {

@@ -6,20 +6,54 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import type { DataStreamResponse } from '../../../../../common';
 import type { GetDataStreamResultsResponse } from '../../../../common/lib/api';
 
 jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: jest.fn(({ value }) => <div data-test-subj="code-editor">{value}</div>),
+  CodeEditor: jest.fn(({ value, onChange }) => (
+    <div>
+      <div data-test-subj="code-editor">{value}</div>
+      <button
+        data-test-subj="code-editor-change"
+        onClick={() =>
+          onChange?.(
+            JSON.stringify(
+              {
+                processors: [
+                  {
+                    set: {
+                      field: 'test.field',
+                      value: 'updated',
+                    },
+                  },
+                ],
+              },
+              null,
+              2
+            )
+          )
+        }
+      >
+        Change editor value
+      </button>
+    </div>
+  )),
 }));
 
 const mockUseGetDataStreamResults = jest.fn();
+const mockMutateAsync = jest.fn();
 jest.mock('../../../../common', () => ({
   useGetDataStreamResults: (integrationId: string, dataStreamId: string) =>
     mockUseGetDataStreamResults(integrationId, dataStreamId),
+  useUpdateDataStreamPipeline: () => ({
+    updateDataStreamPipelineMutation: {
+      mutateAsync: mockMutateAsync,
+      isLoading: false,
+    },
+  }),
 }));
 
 const mockSelectPipelineTab = jest.fn();
@@ -83,6 +117,7 @@ describe('EditPipelineFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockMutateAsync.mockResolvedValue(createMockResults());
     mockUIState.selectedPipelineTab = 'table';
     mockUseGetDataStreamResults.mockReturnValue({
       data: createMockResults(),
@@ -168,9 +203,7 @@ describe('EditPipelineFlyout', () => {
       render(<EditPipelineFlyout {...defaultProps} />);
 
       expect(screen.getByText('Error loading data')).toBeInTheDocument();
-      expect(
-        screen.getByText('Failed to load pipeline results. Please try again.')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Test error')).toBeInTheDocument();
     });
   });
 
@@ -279,6 +312,20 @@ describe('EditPipelineFlyout', () => {
 
       expect(mockSelectPipelineTab).toHaveBeenCalledWith('pipeline');
     });
+
+    it('should render save button and submit updated pipeline', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      const saveButton = screen.getByTestId('editPipelineFlyoutSaveButton');
+      await userEvent.click(saveButton);
+
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        dataStreamId: 'ds-1',
+        ingestPipeline: expect.stringContaining('"processors"'),
+      });
+    });
   });
 
   describe('pagination', () => {
@@ -320,6 +367,23 @@ describe('EditPipelineFlyout', () => {
 
       expect(onClose).toHaveBeenCalled();
     });
+
+    it('should warn before closing when pipeline has unsaved changes', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      const onClose = jest.fn();
+      render(<EditPipelineFlyout {...defaultProps} onClose={onClose} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-change'));
+      await userEvent.click(screen.getByRole('button', { name: /close/i }));
+
+      expect(
+        screen.getByText('You have unsaved changes in the ingest pipeline editor.')
+      ).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Discard changes' }));
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('type icons', () => {
@@ -340,7 +404,7 @@ describe('EditPipelineFlyout', () => {
       expect(dateIcon).toBeInTheDocument();
 
       if (dateIcon) {
-        await userEvent.hover(dateIcon);
+        fireEvent.mouseOver(dateIcon);
 
         const tooltip = await screen.findByText('date');
         expect(tooltip).toBeInTheDocument();

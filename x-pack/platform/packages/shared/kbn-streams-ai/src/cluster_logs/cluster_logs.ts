@@ -7,8 +7,16 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { assertNever } from '@kbn/std';
 import type { Condition } from '@kbn/streamlang';
-import { conditionToQueryDsl } from '@kbn/streamlang';
+import {
+  conditionToQueryDsl,
+  isAndCondition,
+  isOrCondition,
+  isNotCondition,
+  isAlwaysCondition,
+  isNeverCondition,
+} from '@kbn/streamlang';
 import { format } from 'util';
 import pLimit from 'p-limit';
 import { compact, isEqual } from 'lodash';
@@ -21,19 +29,30 @@ export interface ClusterLogsResponse {
   clusters: Array<{ count: number; analysis: FormattedDocumentAnalysis }>;
 }
 
-function getFields(condition: Condition): string[] {
+/**
+ * Extracts all field names from a condition, recursively handling
+ * nested conditions (and, or, not).
+ * @internal Exported for testing purposes only
+ */
+export function getFields(condition: Condition): string[] {
   if ('field' in condition) {
     return [condition.field];
   }
 
-  if ('and' in condition) {
+  if (isAndCondition(condition)) {
     return condition.and.flatMap(getFields);
   }
-  if ('or' in condition) {
+  if (isOrCondition(condition)) {
     return condition.or.flatMap(getFields);
   }
+  if (isNotCondition(condition)) {
+    return getFields(condition.not);
+  }
+  if (isAlwaysCondition(condition) || isNeverCondition(condition)) {
+    return [];
+  }
 
-  return [];
+  return assertNever(condition);
 }
 
 /**
@@ -46,6 +65,7 @@ function getFields(condition: Condition): string[] {
 export async function clusterLogs({
   index,
   partitions,
+  excludeConditions = [],
   esClient,
   start,
   end,
@@ -55,6 +75,7 @@ export async function clusterLogs({
 }: {
   index: string;
   partitions: Array<{ name: string; condition: Condition }>;
+  excludeConditions?: Condition[];
   esClient: ElasticsearchClient;
   start: number;
   end: number;
@@ -83,6 +104,7 @@ export async function clusterLogs({
 
   // extract used fields to create runtime_mappings
   const fieldsToMap = new Set<string>();
+  excludeConditions.flatMap(getFields).forEach((field) => fieldsToMap.add(field));
 
   // create requests for exclusive partitions (data only ends up in single bucket)
   partitions.forEach((partition, idx) => {
@@ -96,7 +118,10 @@ export async function clusterLogs({
       query: {
         bool: {
           filter: [conditionToQueryDsl(partition.condition), rangeQuery],
-          must_not: prevPartitions.map((prev) => conditionToQueryDsl(prev.condition)),
+          must_not: [
+            ...prevPartitions.map((prev) => conditionToQueryDsl(prev.condition)),
+            ...excludeConditions.map((condition) => conditionToQueryDsl(condition)),
+          ],
         },
       },
     });
