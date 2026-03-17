@@ -17,19 +17,22 @@ export function SloIncludedCount({ slos }: { slos: SloItem[] }) {
     perPage: 0,
   });
 
+  const instanceCount = sloList?.total ?? 0;
+  const instances =
+    instanceCount > 1
+      ? i18n.translate('xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel.instancesCount', {
+          defaultMessage: ' ({count, number} {count, plural, one {Instance} other {Instances}})',
+          values: { count: instanceCount },
+        })
+      : '';
+
   return (
     <FormattedMessage
       id="xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel.withInstances"
       defaultMessage="{numOfSlos, number} {numOfSlos, plural, one {SLO} other {SLOs}}{instances} included"
       values={{
         numOfSlos: uniqueSloCount,
-        instances: i18n.translate(
-          'xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel.instancesCount',
-          {
-            defaultMessage: ' ({count, number} {count, plural, one {Instance} other {Instances}})',
-            values: { count: sloList?.total ?? 0 },
-          }
-        ),
+        instances,
       }}
     />
   );
