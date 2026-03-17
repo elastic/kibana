@@ -27,6 +27,10 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
+
+jest.mock('../../../../common/hooks/use_upselling');
+const mockUseUpsellingComponent = useUpsellingComponent as jest.Mock;
 
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
   uiMetricService: {
@@ -84,6 +88,7 @@ describe('<GraphPreviewContainer />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    mockUseUpsellingComponent.mockReturnValue(null);
   });
 
   it('should render component and link in header', async () => {
@@ -421,5 +426,51 @@ describe('<GraphPreviewContainer />', () => {
     });
 
     expect(uiMetricServiceMock.trackUiMetric).not.toHaveBeenCalled();
+  });
+
+  it('should render upsell when shouldShowGraph is false and upsell component is available', () => {
+    mockUseFetchGraphData.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: undefined,
+    });
+
+    const timestamp = new Date().toISOString();
+
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      timestamp,
+      eventIds: [],
+      shouldShowGraph: false,
+      isAlert: true,
+    });
+
+    const MockUpsell = () => <div data-test-subj="graphVisualizationUpsell">{'Upgrade'}</div>;
+    mockUseUpsellingComponent.mockReturnValue(MockUpsell);
+
+    const { getByTestId } = renderGraphPreview();
+
+    expect(getByTestId('graphVisualizationUpsell')).toBeInTheDocument();
+    expect(uiMetricServiceMock.trackUiMetric).not.toHaveBeenCalled();
+  });
+
+  it('should return null when shouldShowGraph is false and no upsell component', () => {
+    mockUseFetchGraphData.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: undefined,
+    });
+
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      timestamp: new Date().toISOString(),
+      eventIds: [],
+      shouldShowGraph: false,
+      isAlert: true,
+    });
+
+    mockUseUpsellingComponent.mockReturnValue(null);
+
+    const { container } = renderGraphPreview();
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

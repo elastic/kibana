@@ -96,7 +96,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
-      shouldShowUpsell: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: [],
@@ -119,7 +119,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
-      shouldShowUpsell: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -157,7 +157,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
-      shouldShowUpsell: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: [],
@@ -195,7 +195,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
-      shouldShowUpsell: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -229,7 +229,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
-      shouldShowUpsell: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: [],
       actorIds: ['userActorId'],
@@ -263,7 +263,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
-      shouldShowUpsell: false,
+      hasGraphData: false,
       timestamp: null,
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -289,7 +289,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
-      shouldShowUpsell: false,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -331,7 +331,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
-      shouldShowUpsell: false,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['id1', 'id2'],
       actorIds: ['userActorId1', 'userActorId2'],
@@ -357,7 +357,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
-      shouldShowUpsell: false,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -397,7 +397,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
-      shouldShowUpsell: false,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['id1', 'id2'],
       actorIds: ['userActorId1', 'userActorId2'],
@@ -437,7 +437,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
-      shouldShowUpsell: false,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -477,7 +477,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
-      shouldShowUpsell: false,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['hostActorId'],
@@ -517,7 +517,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
-      shouldShowUpsell: false,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['serviceActorId'],
@@ -557,7 +557,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
-      shouldShowUpsell: false,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['entityActorId'],
@@ -586,7 +586,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current.shouldShowGraph).toBe(false);
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
-      shouldShowUpsell: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],

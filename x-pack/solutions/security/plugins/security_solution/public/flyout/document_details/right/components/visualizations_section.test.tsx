@@ -109,7 +109,7 @@ describe('<VisualizationsSection />', () => {
     // Default mock: graph visualization not available
     mockUseGraphPreview.mockReturnValue({
       shouldShowGraph: false,
-      shouldShowUpsell: false,
+      hasGraphData: false,
       eventIds: [],
     });
     mockUseUpsellingComponent.mockReturnValue(null);
@@ -156,7 +156,7 @@ describe('<VisualizationsSection />', () => {
 
     mockUseGraphPreview.mockReturnValue({
       shouldShowGraph: true,
-      shouldShowUpsell: false,
+      hasGraphData: true,
       eventIds: [],
     });
 
@@ -177,39 +177,35 @@ describe('<VisualizationsSection />', () => {
     expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
   });
 
-  it('should render the graph upsell when shouldShowUpsell is true and upsell component is available', () => {
+  it('should render the graph upsell when hasGraphData is true and upsell component is available', () => {
     mockUseExpandSection.mockReturnValue(true);
 
     mockUseGraphPreview.mockReturnValue({
       shouldShowGraph: false,
-      shouldShowUpsell: true,
+      hasGraphData: true,
       eventIds: [],
     });
 
     const MockUpsell = () => <div data-test-subj="graphVisualizationUpsell">{'Upgrade'}</div>;
     mockUseUpsellingComponent.mockReturnValue(MockUpsell);
 
-    const { getByTestId, queryByTestId } = renderVisualizationsSection();
+    const { getByTestId } = renderVisualizationsSection();
 
-    expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
+    expect(getByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
     expect(getByTestId('graphVisualizationUpsell')).toBeInTheDocument();
   });
 
-  it('should not render the graph upsell when shouldShowUpsell is false', () => {
+  it('should not render the graph container when hasGraphData is false', () => {
     mockUseExpandSection.mockReturnValue(true);
 
     mockUseGraphPreview.mockReturnValue({
       shouldShowGraph: false,
-      shouldShowUpsell: false,
+      hasGraphData: false,
       eventIds: [],
     });
-
-    const MockUpsell = () => <div data-test-subj="graphVisualizationUpsell">{'Upgrade'}</div>;
-    mockUseUpsellingComponent.mockReturnValue(MockUpsell);
 
     const { queryByTestId } = renderVisualizationsSection();
 
     expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
-    expect(queryByTestId('graphVisualizationUpsell')).not.toBeInTheDocument();
   });
 });

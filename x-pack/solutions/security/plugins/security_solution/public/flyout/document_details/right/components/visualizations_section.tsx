@@ -21,7 +21,6 @@ import {
   VISUALIZATION_SECTION_TEST_ID,
   VISUALIZATION_SECTION_TITLE,
 } from '../../../../flyout_v2/document/components/visualizations_section';
-import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 
 const KEY = 'visualizations';
 
@@ -49,7 +48,7 @@ export const VisualizationsSection = memo(() => {
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   // Decide whether to show the graph preview or not
-  const { shouldShowGraph, shouldShowUpsell } = useGraphPreview({
+  const { hasGraphData } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
@@ -62,8 +61,6 @@ export const VisualizationsSection = memo(() => {
     scopeId,
     isPreviewMode,
   });
-  // Show upsell when event has graph data but license is insufficient (ESS only)
-  const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
 
   return (
     <ExpandableSection
@@ -82,16 +79,10 @@ export const VisualizationsSection = memo(() => {
         showIcon={!isPreviewMode}
         disableNavigation={isRulePreview}
       />
-      {shouldShowGraph && (
+      {hasGraphData && (
         <>
           <EuiSpacer />
           <GraphPreviewContainer />
-        </>
-      )}
-      {shouldShowUpsell && GraphVisualizationUpsell && (
-        <>
-          <EuiSpacer />
-          <GraphVisualizationUpsell />
         </>
       )}
     </ExpandableSection>

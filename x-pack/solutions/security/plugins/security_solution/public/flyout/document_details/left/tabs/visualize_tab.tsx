@@ -106,7 +106,7 @@ export const VisualizeTab = memo(() => {
   );
 
   // Decide whether to show the graph preview or not
-  const { shouldShowGraph, shouldShowUpsell } = useGraphPreview({
+  const { shouldShowGraph, hasGraphData } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
@@ -114,7 +114,7 @@ export const VisualizeTab = memo(() => {
 
   // Show upsell when event has graph data but license is insufficient (ESS only)
   const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
-  const showGraphButton = shouldShowGraph || (shouldShowUpsell && !!GraphVisualizationUpsell);
+  const showGraphButton = shouldShowGraph || (hasGraphData && !!GraphVisualizationUpsell);
 
   const options = [...visualizeButtons];
 
@@ -164,7 +164,7 @@ export const VisualizeTab = memo(() => {
         (shouldShowGraph ? (
           <GraphVisualization />
         ) : (
-          GraphVisualizationUpsell && <GraphVisualizationUpsell />
+          hasGraphData && !!GraphVisualizationUpsell && <GraphVisualizationUpsell />
         ))}
     </>
   );

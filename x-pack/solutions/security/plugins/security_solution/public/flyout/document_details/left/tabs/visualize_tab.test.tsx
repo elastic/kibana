@@ -66,7 +66,7 @@ describe('VisualizeTab', () => {
 
     (useGraphPreview as jest.Mock).mockReturnValue({
       shouldShowGraph: true,
-      shouldShowUpsell: false,
+      hasGraphData: true,
     });
 
     (useUpsellingComponent as jest.Mock).mockReturnValue(null);
@@ -89,7 +89,7 @@ describe('VisualizeTab', () => {
   it('should not render GraphVisualization component when graph is not available', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       shouldShowGraph: false,
-      shouldShowUpsell: false,
+      hasGraphData: false,
     });
 
     renderVisualizeTab();
@@ -104,7 +104,7 @@ describe('VisualizeTab', () => {
   it('should render graph visualization when shouldShowGraph is true', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       shouldShowGraph: true,
-      shouldShowUpsell: false,
+      hasGraphData: true,
     });
 
     renderVisualizeTab();
@@ -115,10 +115,10 @@ describe('VisualizeTab', () => {
     expect(screen.getByTestId(mockGraphVisualizationTestId)).toBeInTheDocument();
   });
 
-  it('should render graph upselling message when shouldShowUpsell is true', () => {
+  it('should render graph upselling message when hasGraphData is true and upsell component is available', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       shouldShowGraph: false,
-      shouldShowUpsell: true,
+      hasGraphData: true,
     });
 
     const MockUpsell = () => <div data-test-subj="graphVisualizationUpsell">{'Upgrade'}</div>;

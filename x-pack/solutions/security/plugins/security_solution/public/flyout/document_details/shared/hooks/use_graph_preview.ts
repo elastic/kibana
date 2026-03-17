@@ -70,10 +70,9 @@ export interface UseGraphPreviewResult {
   shouldShowGraph: boolean;
 
   /**
-   * Boolean indicating if a graph upsell should be shown
-   * True when the event has graph-compatible data but the required license is not met
+   * Boolean indicating if the event has all required data fields for graph visualization
    */
-  shouldShowUpsell: boolean;
+  hasGraphData: boolean;
 
   /**
    * Boolean indicating if the event is an alert or not
@@ -118,7 +117,7 @@ export const useGraphPreview = ({
   const isEntityStoreRunning = entityStoreStatus?.status === 'running';
 
   // Check if graph has all required data fields for graph visualization
-  const hasGraphRepresentation =
+  const hasGraphData =
     Boolean(timestamp) &&
     Boolean(action?.length) &&
     eventIds.length > 0 &&
@@ -126,10 +125,7 @@ export const useGraphPreview = ({
     targetIds.length > 0;
 
   // Combine all conditions: data availability + license + entity store running
-  const shouldShowGraph = hasGraphRepresentation && hasRequiredLicense && isEntityStoreRunning;
-
-  // Show upsell when event has graph data but license is insufficient
-  const shouldShowUpsell = hasGraphRepresentation && !hasRequiredLicense;
+  const shouldShowGraph = hasGraphData && hasRequiredLicense && isEntityStoreRunning;
 
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
@@ -140,7 +136,7 @@ export const useGraphPreview = ({
     action,
     targetIds,
     shouldShowGraph,
-    shouldShowUpsell,
+    hasGraphData,
     isAlert,
   };
 };
