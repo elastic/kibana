@@ -54,7 +54,11 @@ import { SplitButton } from '@kbn/split-button';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
-import { DateRangePicker, type DateRangePickerOnChangeProps } from '@kbn/date-range-picker';
+import {
+  DateRangePicker,
+  type DateRangePickerSettings,
+  type DateRangePickerOnChangeProps,
+} from '@kbn/date-range-picker';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -358,6 +362,12 @@ export const QueryBarTopRow = React.memo(
       [appName, queryLanguage, uiSettings, storage]
     );
 
+    const [dateRangePickerSettings, setDateRangePickerSettings] = useState<DateRangePickerSettings>(
+      {
+        roundRelativeTime: true,
+      }
+    );
+
     function getDateRange() {
       const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
       return {
@@ -581,6 +591,9 @@ export const QueryBarTopRow = React.memo(
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
 
+      // TODO confirm we don't want this
+      // dateFormat={uiSettings.get('dateFormat')}
+
       /**
        * TODO: DateRangePicker does not yet support the following SuperDatePicker props:
        * - General (coming soon): locale, className, timeZoneDisplayProps
@@ -596,13 +609,14 @@ export const QueryBarTopRow = React.memo(
           isInvalid={isDateRangeInvalid}
           isLoading={props.isLoading}
           disabled={props.isDisabled}
-          width="restricted"
-          dateFormat={uiSettings.get('dateFormat')}
+          width="full"
           compressed
           collapsed={shouldShowDatePickerAsBadge()}
           showTimeWindowButtons
           presets={commonlyUsedRanges}
           recent={recentlyUsedRanges}
+          settings={dateRangePickerSettings}
+          onSettingsChange={setDateRangePickerSettings}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
