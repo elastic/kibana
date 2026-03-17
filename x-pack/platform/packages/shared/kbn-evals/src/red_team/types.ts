@@ -50,6 +50,14 @@ export interface AttackResult {
   evaluations: Record<string, EvaluationResult>;
   severity: Severity;
   passed: boolean;
+  /**
+   * OTel trace ID associated with the LLM interaction that produced this result.
+   * When available, enables downstream consumers to correlate attack results with
+   * full execution traces stored in the `kibana-evaluations` datastream.
+   *
+   * @see vision Section 5.2.2 — trace-first evaluation model
+   */
+  traceId?: string;
 }
 
 export interface RedTeamRunSummary {
