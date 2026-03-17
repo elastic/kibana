@@ -21,5 +21,6 @@ export { ReadsDuringExecution } from './18_ReadsDuringExecution';
 export { ReadsViaUI } from './19_ReadsViaUI';
 export { Migration } from './21_Migration';
 export { Benefits } from './20_Benefits';
+export { CQRSvsRollover } from './23_CQRSvsRollover';
 export { OpenQuestions } from './21_OpenQuestions';
 export { Discussion } from './22_Discussion';

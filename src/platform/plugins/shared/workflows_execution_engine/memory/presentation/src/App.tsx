@@ -24,6 +24,7 @@ import {
   ReadsViaUI,
   Migration,
   Benefits,
+  CQRSvsRollover,
   OpenQuestions,
   Discussion,
 } from './slides';
@@ -52,11 +53,12 @@ const SLIDES: FC[] = [
   ILMPhases,
   Migration,
   Benefits,
+  CQRSvsRollover,
   OpenQuestions,
   Discussion,
 ];
 
-const isTitleSlide = (idx: number) => [0, 2, 6, 13, 24].includes(idx);
+const isTitleSlide = (idx: number) => [0, 2, 6, 13, 25].includes(idx);
 
 const SLIDE_META: SlideMeta[] = [
   { label: 'Title',                   chapter: 'Opening' },
@@ -82,6 +84,7 @@ const SLIDE_META: SlideMeta[] = [
   { label: 'ILM Lifecycle Phases',    chapter: 'Ch 3 — Chosen Approach' },
   { label: 'Migration',               chapter: 'Ch 3 — Chosen Approach' },
   { label: 'Benefits',                chapter: 'Ch 3 — Chosen Approach' },
+  { label: 'CQRS vs Rollover',        chapter: 'Ch 3 — Chosen Approach' },
   { label: 'Open Questions',          chapter: 'Closing' },
   { label: 'Discussion',              chapter: 'Closing' },
 ];

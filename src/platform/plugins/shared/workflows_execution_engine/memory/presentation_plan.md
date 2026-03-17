@@ -238,7 +238,25 @@ All content derived from:
   5. **Transparent search** — alias handles fan-out automatically
 - Key message: Rollover aliases give us bounded indexes, automatic lifecycle, and full mutability — with less complexity than CQRS.
 
-**Slide 23 — "Open Questions"**
+**Slide 23 — "CQRS vs Rollover: Side-by-Side Comparison"**
+- Layout: full-width SlideTable
+- Table comparing execution paths, infrastructure, and trade-offs:
+
+| Aspect | CQRS (Tiered Storage) | Rollover Indexes with ILM |
+|--------|----------------------|---------------------------|
+| Write path | Upserts to mutable state index | Upserts to pinned backing index |
+| Get by ID (execution) | Waterfall: state index → fall back to history | O(1) direct GET via encoded ID |
+| Get steps (execution) | mget on state index → fall back to search history | mget on pinned backing index |
+| Search (UI) | Multi-index with field collapsing for dedup | Single alias fan-out, no dedup needed |
+| Lifecycle mgmt | Scheduled migration task + cleanup | ILM fully automatic |
+| Data duplication | Overlap window: same doc in both tiers | None |
+| Infrastructure | State index + 2 data streams + migration task | Alias + backing indexes + ILM policy |
+| Mutability | State index only; data streams are append-only | All backing indexes support updates |
+| Complexity | Higher: two-tier queries, dedup, migration tuning | Lower: single alias, encoded IDs |
+
+- Key message: Rollover indexes match CQRS on every execution path while eliminating the migration task, dedup logic, and two-tier query complexity. The key benefit: no reindexes — data is already in the right place once ingested.
+
+**Slide 24 — "Open Questions"**
 - Source: `rollover_index_rfc.md` § "Risks and Open Questions"
 - Layout: full-width BulletList
 - Questions:
@@ -251,6 +269,6 @@ All content derived from:
 
 ---
 
-### Slide 24 — Discussion
+### Slide 25 — Discussion
 - "Let's discuss."
 - Subtitle: "Questions, concerns, and next steps"
