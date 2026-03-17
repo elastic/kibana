@@ -28,12 +28,9 @@ import {
 } from '@kbn/discover-utils';
 import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   type EuiDataGridCellValueElementProps,
-  type EuiDataGridControlColumn,
   type EuiDataGridStyle,
   EuiProgress,
 } from '@elastic/eui';
@@ -48,17 +45,10 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { createDataProviders } from '../../../../app/actions/add_to_timeline/data_provider';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
-import {
-  SecurityAgentBuilderAttachments,
-  THREAT_HUNTING_AGENT_ID,
-} from '../../../../../common/constants';
 import { EmptyComponent } from '../../../../common/lib/cell_actions/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { EntityType } from '../../../../../common/entity_analytics/types';
-import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
@@ -73,8 +63,10 @@ import { RiskScoreCell } from './risk_score_cell';
 import { AdditionalControls } from './additional_controls';
 import { EntitiesEmptyState } from './empty_state';
 import { DataViewContext } from '.';
+import { getEntityFields } from './utils';
 import { useStyles } from './hooks/use_styles';
 import { useFetchGridData } from './hooks/use_fetch_grid_data';
+import { useLeadingControlColumns } from './hooks/use_leading_control_columns';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import {
   ENTITY_ANALYTICS_TABLE_ID,
@@ -163,31 +155,6 @@ export interface EntitiesDataTableProps {
   height?: number;
   groupSelectorComponent?: JSX.Element;
 }
-
-const getEntityFields = (doc: DataTableRecord) => {
-  const source = doc.raw._source as Record<string, unknown> | undefined;
-  const entityType =
-    (((source?.entity as Record<string, unknown>)?.EngineMetadata as Record<string, unknown>)
-      ?.Type as EntityType | undefined) ??
-    (doc.flattened['entity.EngineMetadata.Type'] as EntityType | undefined);
-  const entityName =
-    ((source?.entity as Record<string, unknown>)?.name as string | undefined) ??
-    (doc.flattened['entity.name'] as string | undefined);
-  return { entityType, entityName };
-};
-
-const createEntityDataProviders = (
-  entityType: EntityType | undefined,
-  entityName: string | undefined
-) => {
-  if (!entityName || !entityType) return null;
-  const fieldName: string = EntityTypeToIdentifierField[entityType] || 'entity.id';
-  return createDataProviders({
-    contextId: ENTITY_ANALYTICS_TABLE_ID,
-    field: fieldName,
-    values: entityName,
-  });
-};
 
 export const EntitiesDataTable = ({
   state,
@@ -461,120 +428,12 @@ export const EntitiesDataTable = ({
     };
   }, [rows, currentColumns]);
 
-  const leadingControlColumns = useMemo<EuiDataGridControlColumn[]>(() => {
-    const columns: EuiDataGridControlColumn[] = [];
-
-    if (canUseTimeline) {
-      columns.push({
-        id: 'entity-analytics-timeline-action',
-        width: 40,
-        headerCellRender: () => null,
-        rowCellRender: function TimelineActionCell({ rowIndex }) {
-          const doc = rows[rowIndex];
-          if (!doc) return null;
-
-          const { entityType, entityName } = getEntityFields(doc);
-          if (!entityName || !entityType) return null;
-
-          const handleTimelineClick = () => {
-            const dataProviders = createEntityDataProviders(entityType, entityName);
-            if (dataProviders && dataProviders.length > 0) {
-              investigateInTimeline({ dataProviders });
-            }
-          };
-
-          return (
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.securitySolution.entityAnalytics.entitiesTable.investigateInTimeline',
-                { defaultMessage: 'Investigate in timeline' }
-              )}
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                iconType="timeline"
-                size="s"
-                color="text"
-                onClick={handleTimelineClick}
-                aria-label={i18n.translate(
-                  'xpack.securitySolution.entityAnalytics.entitiesTable.investigateInTimeline',
-                  { defaultMessage: 'Investigate in timeline' }
-                )}
-                data-test-subj="entity-analytics-home-timeline-icon"
-              />
-            </EuiToolTip>
-          );
-        },
-      });
-    }
-
-    if (isAgentBuilderEnabled && agentBuilder?.openConversationFlyout) {
-      columns.push({
-        id: 'entity-analytics-ai-action',
-        width: 40,
-        headerCellRender: () => null,
-        rowCellRender: function AiActionCell({ rowIndex }) {
-          const doc = rows[rowIndex];
-          if (!doc) return null;
-
-          const { entityType, entityName } = getEntityFields(doc);
-          if (!entityName || !entityType) return null;
-
-          const handleAddToChat = () => {
-            const attachmentId = `${SecurityAgentBuilderAttachments.entity}-${Date.now()}`;
-            agentBuilder.openConversationFlyout({
-              autoSendInitialMessage: false,
-              newConversation: true,
-              initialMessage: i18n.translate(
-                'xpack.securitySolution.entityAnalytics.entitiesTable.aiInvestigationPrompt',
-                {
-                  defaultMessage:
-                    'Investigate this entity and provide relevant context about its risk and activity.',
-                }
-              ),
-              attachments: [
-                {
-                  id: attachmentId,
-                  type: SecurityAgentBuilderAttachments.entity,
-                  data: {
-                    identifierType: entityType,
-                    identifier: entityName,
-                    attachmentLabel: `${entityType}: ${entityName}`,
-                  },
-                },
-              ],
-              sessionTag: 'security',
-              agentId: THREAT_HUNTING_AGENT_ID,
-            });
-          };
-
-          return (
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.securitySolution.entityAnalytics.entitiesTable.addToChat',
-                { defaultMessage: 'Add to chat' }
-              )}
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                iconType="sparkles"
-                size="s"
-                color="text"
-                onClick={handleAddToChat}
-                aria-label={i18n.translate(
-                  'xpack.securitySolution.entityAnalytics.entitiesTable.addToChat',
-                  { defaultMessage: 'Add to chat' }
-                )}
-                data-test-subj="entity-analytics-home-ai-action-icon"
-              />
-            </EuiToolTip>
-          );
-        },
-      });
-    }
-
-    return columns;
-  }, [canUseTimeline, investigateInTimeline, rows, isAgentBuilderEnabled, agentBuilder]);
+  const leadingControlColumns = useLeadingControlColumns({
+    canUseTimeline,
+    investigateInTimeline,
+    isAgentBuilderEnabled,
+    agentBuilder,
+  });
 
   const onResetColumns = () => {
     setLocalStorageColumns(DEFAULT_COLUMNS.map((c) => c.id));
@@ -715,7 +574,7 @@ export const EntitiesDataTable = ({
             gridStyleOverride={gridStyle}
             rowLineHeightOverride="24px"
             dataGridDensityState={DataGridDensity.EXPANDED}
-            externalControlColumns={leadingControlColumns}
+            rowAdditionalLeadingControls={leadingControlColumns}
             customGridColumnsConfiguration={customGridColumnsConfiguration}
           />
         )}

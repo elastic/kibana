@@ -10,6 +10,7 @@ import { buildEsQuery, type EsQueryConfig } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useContext, useEffect, useMemo } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
 import type { EntitiesBaseURLQuery } from './use_entity_url_state';
 
@@ -50,19 +51,22 @@ export const useBaseEsQuery = ({ filters = [], query, pageFilters = [] }: Entiti
     uiSettings,
   } = useKibana().services;
   const { dataView } = useContext(DataViewContext);
+  const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
   const allowLeadingWildcards = uiSettings.get('query:allowLeadingWildcards');
   const config: EsQueryConfig = useMemo(() => ({ allowLeadingWildcards }), [allowLeadingWildcards]);
-  const baseEsQuery = useMemo(
-    () =>
-      getBaseQuery({
-        dataView,
-        filters,
-        pageFilters,
-        query,
-        config,
-      }),
-    [dataView, filters, pageFilters, query, config]
-  );
+  const baseEsQuery = useMemo(() => {
+    const result = getBaseQuery({
+      dataView,
+      filters,
+      pageFilters,
+      query,
+      config,
+    });
+    if (result.query && globalFilterQuery) {
+      result.query.bool.filter = [...(result.query.bool.filter ?? []), globalFilterQuery];
+    }
+    return result;
+  }, [dataView, filters, pageFilters, query, config, globalFilterQuery]);
 
   useEffect(() => {
     filterManager.setAppFilters(filters);

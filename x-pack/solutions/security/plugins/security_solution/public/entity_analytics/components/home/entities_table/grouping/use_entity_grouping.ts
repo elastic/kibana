@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import dedent from 'dedent';
 import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
+import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
 import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
 import {
@@ -100,6 +101,7 @@ export const useEntityGrouping = ({
 }) => {
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
+  const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
 
   const grouping = useGrouping({
     componentProps: {
@@ -128,9 +130,12 @@ export const useEntityGrouping = ({
   const groupingQuery = useMemo(
     () => ({
       ...getGroupingQuery({
-        additionalFilters: query
-          ? [query, additionalFilters, ENTITY_TYPE_FILTER]
-          : [additionalFilters, ENTITY_TYPE_FILTER],
+        additionalFilters: [
+          ...(query ? [query] : []),
+          additionalFilters,
+          ENTITY_TYPE_FILTER,
+          ...(globalFilterQuery ? [globalFilterQuery] : []),
+        ],
         groupByField: currentSelectedGroup,
         uniqueValue,
         pageNumber: pageIndex * pageSize,
@@ -171,7 +176,7 @@ export const useEntityGrouping = ({
         },
       },
     }),
-    [currentSelectedGroup, uniqueValue, additionalFilters, query, pageIndex, pageSize]
+    [currentSelectedGroup, uniqueValue, additionalFilters, query, pageIndex, pageSize, globalFilterQuery]
   );
 
   const { data, isFetching } = useFetchGroupedData({

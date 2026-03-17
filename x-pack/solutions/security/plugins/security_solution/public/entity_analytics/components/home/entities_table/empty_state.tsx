@@ -35,7 +35,6 @@ export const EntitiesEmptyState = ({ onResetFilters }: { onResetFilters: () => v
         </h2>
       }
       layout="horizontal"
-      color="plain"
       body={
         <p>
           <FormattedMessage
