@@ -114,7 +114,10 @@ export const useAgentBuilderIntegration = ({
 
     const syncAttachment = (yaml: string) => {
       const attachment = buildAttachment(yaml);
-      agentBuilder.setChatConfig({ attachments: [attachment] });
+      agentBuilder.setChatConfig({
+        sessionTag: `workflow-editor:${attachmentId}`,
+        attachments: [attachment],
+      });
       agentBuilder.addAttachment(attachment);
     };
 
