@@ -246,6 +246,7 @@ const xySharedSettings = {
           {
             ...sharedLegendSchema,
             inside: schema.maybe(schema.literal(false)),
+            layout: schema.maybe(schema.literal('list')),
             position: schema.maybe(
               schema.oneOf([
                 schema.literal('top'),
