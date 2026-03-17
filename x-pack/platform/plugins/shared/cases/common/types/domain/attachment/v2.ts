@@ -7,8 +7,12 @@
 
 import * as rt from 'io-ts';
 import { jsonValueRt } from '../../../api';
-import { UserRt } from '../user/v1';
-import { AttachmentAttributesRt, AttachmentPatchAttributesRt, AttachmentRt } from './v1';
+import {
+  AttachmentAttributesBasicRt,
+  AttachmentAttributesRt,
+  AttachmentPatchAttributesRt,
+  AttachmentRt,
+} from './v1';
 
 /**
  * Payload for Reference-based Attachments
@@ -21,6 +25,7 @@ export const UnifiedReferenceAttachmentPayloadRt = rt.intersection([
   rt.strict({
     type: rt.string,
     attachmentId: rt.string,
+    owner: rt.string,
   }),
   rt.exact(
     rt.partial({
@@ -40,6 +45,7 @@ export const UnifiedValueAttachmentPayloadRt = rt.intersection([
   rt.strict({
     type: rt.string,
     data: rt.record(rt.string, jsonValueRt),
+    owner: rt.string,
   }),
   rt.exact(
     rt.partial({
@@ -54,25 +60,12 @@ export const UnifiedAttachmentPayloadRt = rt.union([
 ]);
 
 /**
- * Basic attributes for Unified Attachments
- * Contains all the basic attributes minus the owner
- */
-export const AttachmentAttributesBasicWithoutOwnerRt = rt.strict({
-  created_at: rt.string,
-  created_by: UserRt,
-  pushed_at: rt.union([rt.string, rt.null]),
-  pushed_by: rt.union([UserRt, rt.null]),
-  updated_at: rt.union([rt.string, rt.null]),
-  updated_by: rt.union([UserRt, rt.null]),
-});
-
-/**
  * Saved Object attributes for Unified Attachments
  * Contains the payload and the basic attributes
  */
 export const UnifiedAttachmentAttributesRt = rt.intersection([
   UnifiedAttachmentPayloadRt,
-  AttachmentAttributesBasicWithoutOwnerRt,
+  AttachmentAttributesBasicRt,
 ]);
 
 /**
@@ -111,7 +104,7 @@ const UnifiedValueAttachmentPayloadPartialRt = rt.exact(
 
 export const UnifiedAttachmentPatchAttributesRt = rt.intersection([
   rt.union([UnifiedReferenceAttachmentPayloadPartialRt, UnifiedValueAttachmentPayloadPartialRt]),
-  rt.exact(rt.partial(AttachmentAttributesBasicWithoutOwnerRt.type.props)),
+  rt.exact(rt.partial(AttachmentAttributesBasicRt.type.props)),
 ]);
 
 export type UnifiedReferenceAttachmentPayload = rt.TypeOf<

@@ -356,6 +356,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               transactionType,
               sampleRangeFrom,
               sampleRangeTo,
+              sortDirection: 'DESC',
             }}
           />
         </EuiFlexItem>
