@@ -35,9 +35,9 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const { euiTheme } = useEuiTheme();
   const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
-  const { conversationActions } = useConversationContext();
+  const { conversationActions, sessionTag, agentId } = useConversationContext();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
-  const { updatePersistedConversationId } = usePersistedConversationId({});
+  const { updatePersistedConversationId } = usePersistedConversationId({ sessionTag, agentId });
 
   const openSidebarConversation = useCallback(() => {
     if (conversationId) {
