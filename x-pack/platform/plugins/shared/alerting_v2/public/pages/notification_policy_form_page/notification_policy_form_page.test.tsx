@@ -136,6 +136,11 @@ describe('NotificationPolicyFormPage', () => {
       const user = userEvent.setup();
       renderPage();
 
+      // Select a workflow destination
+      const destinationsCombobox = within(screen.getByTestId('destinationsInput'));
+      await user.click(destinationsCombobox.getByTestId('comboBoxSearchInput'));
+      await user.click(await screen.findByText('Workflow 1'));
+
       await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Policy from test');
       await user.tab();
       await user.type(screen.getByTestId(TEST_SUBJ.descriptionInput), 'Description from test');
