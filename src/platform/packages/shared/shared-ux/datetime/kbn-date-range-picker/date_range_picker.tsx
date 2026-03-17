@@ -25,6 +25,7 @@ import {
 import { MainPanel } from './panels/main_panel';
 import { CalendarPanel } from './panels/calendar_panel';
 import { CustomTimeRangePanel } from './panels/custom_time_range_panel';
+import { DocumentationPanel } from './panels/documentation_panel';
 import { ExamplePanel, ExampleNestedPanel } from './panels/example_panel';
 
 const DEFAULT_PANEL_ID = 'main' as const;
@@ -172,6 +173,9 @@ export function DateRangePicker({
             </DateRangePickerPanel>
             <DateRangePickerPanel id={CustomTimeRangePanel.PANEL_ID}>
               <CustomTimeRangePanel />
+            </DateRangePickerPanel>
+            <DateRangePickerPanel id={DocumentationPanel.PANEL_ID}>
+              <DocumentationPanel />
             </DateRangePickerPanel>
             {panels.map(({ id, component: Component }) => (
               <DateRangePickerPanel key={id} id={id}>

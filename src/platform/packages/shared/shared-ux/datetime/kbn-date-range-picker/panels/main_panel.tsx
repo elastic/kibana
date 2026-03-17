@@ -9,7 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { EuiButtonIcon, EuiTab, EuiTabs, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiTab, EuiTabs, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import type { TimeRangeBoundsOption } from '../types';
 import {
@@ -20,6 +20,7 @@ import {
   PanelListItem,
   PanelNavItem,
 } from '../date_range_picker_panel_ui';
+import { DocumentationPanel } from './documentation_panel';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 import { mainPanelStyles } from './main_panel.styles';
@@ -131,6 +132,25 @@ const SubPanelMenu = () => {
   );
 };
 
+const DocumentationButton = () => {
+  const { navigateTo } = useDateRangePickerPanelNavigation();
+  const euiThemeContext = useEuiTheme();
+  const styles = mainPanelStyles(euiThemeContext);
+
+  return (
+    <div css={styles.documentationButtonWrapper}>
+      <EuiButton
+        size="s"
+        iconType="documentation"
+        fullWidth
+        onClick={() => navigateTo(DocumentationPanel.PANEL_ID)}
+      >
+        Discover allowed formats and shorthands
+      </EuiButton>
+    </div>
+  );
+};
+
 export function MainPanel() {
   const { onPresetSave, timeRange, applyRange } = useDateRangePickerContext();
   const euiThemeContext = useEuiTheme();
@@ -155,6 +175,7 @@ export function MainPanel() {
     <PanelContainer>
       <PanelBody>
         <PanelBodySection spacingSide="none">
+          {timeRange.value === '' && <DocumentationButton />}
           <PresetsRecentTabs />
         </PanelBodySection>
         <PanelBodySection spacingSide="none" css={styles.stickyBottom}>
