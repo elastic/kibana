@@ -16,7 +16,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/discover-plugin",
     "@kbn/core-http-browser",
     "@kbn/data-views-plugin",
     "@kbn/field-formats-plugin",
