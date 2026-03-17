@@ -628,6 +628,8 @@ The evaluation results are automatically exported to Elasticsearch in datastream
 
 A single API key can cover **all** golden cluster operations: evaluation result export, trace storage, and dataset management. The key is created via the Kibana API (not the ES API) so it can bundle both Elasticsearch index privileges and Kibana feature privileges using `kibana_role_descriptors`.
 
+When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, `@kbn/evals` does **not** attempt to create/update templates or create the data stream. Instead it runs an export **preflight check** (sentinel write + best-effort cleanup) to fail fast when the cluster is misconfigured (missing data stream, incompatible mappings, missing write privileges, etc).
+
 **Automatic setup (recommended):**
 
 ```bash

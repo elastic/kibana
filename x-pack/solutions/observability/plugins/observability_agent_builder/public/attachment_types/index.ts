@@ -57,7 +57,7 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.log.label', {
       defaultMessage: 'Log entry',
     }),
-    icon: 'logPatternAnalysis',
+    icon: 'pattern',
   },
   {
     type: OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,

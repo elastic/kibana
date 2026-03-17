@@ -98,6 +98,15 @@ export const myTriggerPublicDefinition: PublicTriggerDefinition = {
 plugins.workflowsExtensions.registerTriggerDefinition(myTriggerPublicDefinition);
 ```
 
+**Async registration (optional):** To keep your plugin's main bundle small, you can register a **loader** instead of the definition. The workflows app awaits `workflowsExtensions.isReady()` before rendering, so trigger definitions are available when the UI needs them:
+
+```typescript
+// In public plugin setup():
+plugins.workflowsExtensions.registerTriggerDefinition(() =>
+  import('./triggers/custom_trigger').then((m) => m.myTriggerPublicDefinition)
+);
+```
+
 Reference: `examples/workflows_extensions_example/public/triggers/custom_trigger.ts` and `public/triggers/index.ts`.
 
 ### Step 4: Emit events — two ways

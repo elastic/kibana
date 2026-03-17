@@ -14,6 +14,7 @@ import type {
   KibanaGraphNode,
   WaitForInputGraphNode,
   WaitGraphNode,
+  WorkflowOutputGraphNode,
 } from './nodes/base';
 import type {
   EnterConditionBranchNode,
@@ -59,6 +60,9 @@ export const isWaitForInput = (node: GraphNodeUnion): node is WaitForInputGraphN
 
 export const isDataSet = (node: GraphNodeUnion): node is DataSetGraphNode =>
   node.type === 'data.set';
+
+export const isWorkflowOutput = (node: GraphNodeUnion): node is WorkflowOutputGraphNode =>
+  node.type === 'workflow.output';
 
 export const isEnterIf = (node: GraphNodeUnion): node is EnterIfNode => node.type === 'enter-if';
 
