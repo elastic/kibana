@@ -57,6 +57,8 @@ const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTy
   ...overrides,
 });
 
+const mockAbortController = new AbortController();
+
 function getRegisteredTaskRunner(params: { attachmentType?: string }) {
   registerSmlCrawlerTaskDefinition({
     taskManager: mockTaskManager as unknown as TaskManagerSetupContract,
@@ -66,7 +68,8 @@ function getRegisteredTaskRunner(params: { attachmentType?: string }) {
   const taskDef = registered[SML_CRAWLER_TASK_TYPE];
   return taskDef.createTaskRunner({
     taskInstance: { params },
-  } as unknown as { taskInstance: { params?: Record<string, unknown> } });
+    abortController: mockAbortController,
+  } as unknown as { taskInstance: { params?: Record<string, unknown> }; abortController: AbortController });
 }
 
 describe('sml_task_definitions', () => {
@@ -141,6 +144,7 @@ describe('sml_task_definitions', () => {
         definition,
         esClient: mockEsClient,
         savedObjectsClient: mockSoRepository,
+        abortSignal: mockAbortController.signal,
       });
     });
 
@@ -172,11 +176,6 @@ describe('sml_task_definitions', () => {
       );
     });
 
-    it('cancel is a no-op function', async () => {
-      const runner = getRegisteredTaskRunner({ attachmentType: 'visualization' });
-
-      await expect(runner.cancel()).resolves.toBeUndefined();
-    });
   });
 
   describe('scheduleSmlCrawlerTasks', () => {

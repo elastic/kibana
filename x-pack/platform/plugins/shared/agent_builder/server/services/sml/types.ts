@@ -180,6 +180,7 @@ export interface SmlCrawler {
     definition: SmlTypeDefinition;
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
+    abortSignal?: AbortSignal;
   }) => Promise<void>;
 }
 

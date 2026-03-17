@@ -43,10 +43,12 @@ export class SmlCrawlerImpl implements SmlCrawler {
     definition,
     esClient,
     savedObjectsClient,
+    abortSignal,
   }: {
     definition: SmlTypeDefinition;
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
+    abortSignal?: AbortSignal;
   }): Promise<void> {
     const crawlerStateStorage = createSmlCrawlerStateStorage({
       logger: this.logger,
@@ -80,6 +82,13 @@ export class SmlCrawlerImpl implements SmlCrawler {
 
     try {
       for await (const page of definition.list(context)) {
+        if (abortSignal?.aborted) {
+          this.logger.info(
+            `SML crawler: crawl aborted for type '${definition.id}' after ${totalItems} item(s)`
+          );
+          return;
+        }
+
         totalItems += page.length;
 
         const result = await this.processPage({

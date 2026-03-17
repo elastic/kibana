@@ -71,7 +71,7 @@ export const registerSmlCrawlerTaskDefinition = ({
       maxAttempts: 3,
       priority: TaskPriority.Low,
       createTaskRunner: (context) => {
-        const { taskInstance } = context;
+        const { taskInstance, abortController } = context;
         const { attachmentType } = (taskInstance.params ?? {}) as Partial<SmlCrawlerTaskParams>;
 
         return {
@@ -116,6 +116,7 @@ export const registerSmlCrawlerTaskDefinition = ({
                 definition,
                 esClient,
                 savedObjectsClient: soRepository,
+                abortSignal: abortController.signal,
               });
               logger.info(`SML crawler task completed for type '${attachmentType}'`);
             } catch (error) {
@@ -125,9 +126,6 @@ export const registerSmlCrawlerTaskDefinition = ({
             }
 
             return { state: {} };
-          },
-          cancel: async () => {
-            // No-op: the crawler is idempotent
           },
         };
       },
