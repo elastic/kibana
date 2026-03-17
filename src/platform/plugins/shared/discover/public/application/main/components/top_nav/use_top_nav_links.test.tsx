@@ -14,15 +14,9 @@ import { AppMenuActionId } from '@kbn/discover-utils';
 import { BehaviorSubject } from 'rxjs';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { useTopNavLinks } from './use_top_nav_links';
-import {
-  getDiscoverInternalStateMock,
-  getDiscoverStateMock,
-} from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import {
-  DiscoverToolkitTestProvider,
-  DiscoverTestProvider,
-} from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { internalStateActions } from '../../state_management/redux';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -327,7 +321,7 @@ describe('useTopNavLinks', () => {
   });
 
   describe('alerting v2 rules menu', () => {
-    const setupWithAlertingV2 = (
+    const setupWithAlertingV2 = async (
       hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {},
       alertingV2Enabled = true
     ) => {
@@ -347,31 +341,19 @@ describe('useTopNavLinks', () => {
             },
           },
         },
-        // Required for legacy alerts menu to show
         triggersActionsUi: triggersActionsUiMock.createStart(),
       });
 
-      const v2State = getDiscoverStateMock({ isTimeBased: true });
-      v2State.internalState.dispatch(
-        v2State.injectCurrentTab(internalStateActions.assignNextDataView)({
+      const toolkit = getDiscoverInternalStateMock({ services: v2Services });
+      await toolkit.initializeTabs();
+      await toolkit.initializeSingleTab({
+        tabId: toolkit.getCurrentTab().id,
+      });
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.assignNextDataView)({
           dataView: dataViewMock,
         })
       );
-
-      const V2Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-        return (
-          <DiscoverTestProvider
-            services={v2Services}
-            stateContainer={v2State}
-            runtimeState={{
-              currentDataView: dataViewMock,
-              adHocDataViews: [],
-            }}
-          >
-            {children}
-          </DiscoverTestProvider>
-        );
-      };
 
       return renderHook(
         () =>
@@ -379,22 +361,23 @@ describe('useTopNavLinks', () => {
             dataView: dataViewMock,
             onOpenInspector: jest.fn(),
             services: v2Services,
-            state: v2State,
             hasUnsavedChanges: false,
-            isEsqlMode: true, // Default to ES|QL mode for v2 tests
+            isEsqlMode: true,
             adHocDataViews: [],
             hasShareIntegration: false,
             persistedDiscoverSession: undefined,
             ...hookAttrs,
           }),
         {
-          wrapper: V2Wrapper,
+          wrapper: ({ children }) => (
+            <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+          ),
         }
       ).result.current;
     };
 
-    it('should include the createRule menu item when in ES|QL mode and alerting v2 is enabled', () => {
-      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: true }, true);
+    it('should include the createRule menu item when in ES|QL mode and alerting v2 is enabled', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
 
       const createRuleItem = appMenuConfig.items?.find(
         (item) => item.id === AppMenuActionId.createRule
@@ -403,8 +386,8 @@ describe('useTopNavLinks', () => {
       expect(createRuleItem?.label).toBe('Rules');
     });
 
-    it('should NOT include the createRule menu item when not in ES|QL mode', () => {
-      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: false }, true);
+    it('should NOT include the createRule menu item when not in ES|QL mode', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
 
       const createRuleItem = appMenuConfig.items?.find(
         (item) => item.id === AppMenuActionId.createRule
@@ -412,8 +395,8 @@ describe('useTopNavLinks', () => {
       expect(createRuleItem).toBeUndefined();
     });
 
-    it('should NOT include the createRule menu item when alerting v2 is disabled', () => {
-      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: true }, false);
+    it('should NOT include the createRule menu item when alerting v2 is disabled', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, false);
 
       const createRuleItem = appMenuConfig.items?.find(
         (item) => item.id === AppMenuActionId.createRule
@@ -421,22 +404,22 @@ describe('useTopNavLinks', () => {
       expect(createRuleItem).toBeUndefined();
     });
 
-    it('should include the legacy alerts menu when not in ES|QL mode', () => {
-      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: false }, true);
+    it('should include the legacy alerts menu when not in ES|QL mode', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();
     });
 
-    it('should NOT include the legacy alerts menu when in ES|QL mode and v2 is enabled', () => {
-      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: true }, true);
+    it('should NOT include the legacy alerts menu when in ES|QL mode and v2 is enabled', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeUndefined();
     });
 
-    it('should include legacy alerts menu when in ES|QL mode but v2 is disabled', () => {
-      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: true }, false);
+    it('should include legacy alerts menu when in ES|QL mode but v2 is disabled', async () => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, false);
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();

@@ -576,6 +576,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
           apiKey: 'old-api-key',
@@ -626,6 +627,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
           apiKey: 'old-api-key',
@@ -672,6 +674,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
           owner: 'old-user',
