@@ -7,14 +7,18 @@
 
 import { processJsonExtractProcessor } from './json_extract_processor';
 
+interface ScriptProcessorResult {
+  script: { source: string; lang: string; description: string; [key: string]: unknown };
+}
+
 describe('processJsonExtractProcessor', () => {
   describe('Painless key escaping', () => {
     it('should escape double quotes in bracket-notation key names', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: '["key\\"with\\"quotes"]', target_field: 'out' }],
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).toContain('.get("key\\"with\\"quotes")');
       expect(source).not.toContain('.get("key"with"quotes")');
     });
@@ -23,8 +27,8 @@ describe('processJsonExtractProcessor', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: "['back\\\\slash']", target_field: 'out' }],
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).toContain('.get("back\\\\slash")');
     });
 
@@ -32,8 +36,8 @@ describe('processJsonExtractProcessor', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: 'user.name', target_field: 'out' }],
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).toContain('.get("user")');
       expect(source).toContain('.get("name")');
     });
@@ -44,7 +48,7 @@ describe('processJsonExtractProcessor', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: 'user_id', target_field: 'user.id' }],
-      });
+      }) as ScriptProcessorResult;
       expect(result.script).toMatchObject({
         lang: 'painless',
         description: 'JsonExtract processor: extract from message',
@@ -56,8 +60,8 @@ describe('processJsonExtractProcessor', () => {
         field: 'message',
         extractions: [{ selector: 'id', target_field: 'out' }],
         ignore_missing: true,
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).toContain('if (jsonStr == null) { return; }');
     });
 
@@ -66,8 +70,8 @@ describe('processJsonExtractProcessor', () => {
         field: 'message',
         extractions: [{ selector: 'id', target_field: 'out' }],
         ignore_missing: false,
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).not.toContain('if (jsonStr == null) { return; }');
     });
 
@@ -78,8 +82,8 @@ describe('processJsonExtractProcessor', () => {
         tag: 'my-tag',
         if: 'ctx.message != null',
         ignore_failure: true,
-      });
-      const script = result.script as Record<string, unknown>;
+      }) as ScriptProcessorResult;
+      const { script } = result;
       expect(script.tag).toBe('my-tag');
       expect(script.if).toBe('ctx.message != null');
       expect(script.ignore_failure).toBe(true);
@@ -89,8 +93,8 @@ describe('processJsonExtractProcessor', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: 'id', target_field: 'out' }],
-      });
-      const script = result.script as Record<string, unknown>;
+      }) as ScriptProcessorResult;
+      const { script } = result;
       expect(script).not.toHaveProperty('tag');
       expect(script).not.toHaveProperty('if');
       expect(script).not.toHaveProperty('ignore_failure');
@@ -102,8 +106,8 @@ describe('processJsonExtractProcessor', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: 'name', target_field: 'out', type: 'keyword' }],
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).toContain('instanceof Map || extracted_0 instanceof List');
       expect(source).toContain('Processors.json(extracted_0)');
       expect(source).toContain('extracted_0.toString()');
@@ -113,8 +117,8 @@ describe('processJsonExtractProcessor', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: 'count', target_field: 'out', type: 'integer' }],
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).toContain('intValue()');
     });
 
@@ -122,8 +126,8 @@ describe('processJsonExtractProcessor', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: 'ts', target_field: 'out', type: 'long' }],
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).toContain('longValue()');
     });
 
@@ -131,8 +135,8 @@ describe('processJsonExtractProcessor', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: 'price', target_field: 'out', type: 'double' }],
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).toContain('doubleValue()');
     });
 
@@ -140,8 +144,8 @@ describe('processJsonExtractProcessor', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: 'active', target_field: 'out', type: 'boolean' }],
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).toContain('instanceof Boolean');
     });
   });
@@ -151,8 +155,8 @@ describe('processJsonExtractProcessor', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: 'items[0].name', target_field: 'out' }],
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).toContain('instanceof List');
       expect(source).toContain('.size() > 0');
       expect(source).toContain('.get(0)');
@@ -168,8 +172,8 @@ describe('processJsonExtractProcessor', () => {
           { selector: 'a', target_field: 'out_a' },
           { selector: 'b', target_field: 'out_b', type: 'integer' },
         ],
-      });
-      const source = (result.script as { source: string }).source;
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
       expect(source).toContain('def extracted_0');
       expect(source).toContain('def extracted_1');
       expect(source).toContain("ctx['out_a']");

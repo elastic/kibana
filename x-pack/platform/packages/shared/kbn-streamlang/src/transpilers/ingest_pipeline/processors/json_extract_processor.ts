@@ -150,6 +150,6 @@ export function processJsonExtractProcessor(
       ...(processor.tag && { tag: processor.tag }),
       ...(processor.if && { if: processor.if }),
       ...(processor.ignore_failure === true && { ignore_failure: true }),
-    } as IngestProcessorContainer['script'],
-  };
+    },
+  } as IngestProcessorContainer;
 }
