@@ -73,18 +73,19 @@ export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedRe
   }
 
   // Step 3: Resolve
-  const { resolutionsCreated, skippedAmbiguousBuckets } = await resolveMatchBuckets(
+  const { resolutionsCreated, skippedAmbiguousBuckets, failedBuckets } = await resolveMatchBuckets(
     resolutionClient,
     matchBuckets,
     logger
   );
   logger.info(
-    `Completed: ${resolutionsCreated} resolutions created, ${skippedAmbiguousBuckets} ambiguous buckets skipped`
+    `Completed: ${resolutionsCreated} resolutions created, ${skippedAmbiguousBuckets} ambiguous buckets skipped, ${failedBuckets} buckets failed`
   );
 
-  // Step 4: Update state
+  // Step 4: Update state — don't advance watermark if any buckets failed,
+  // so the next run re-collects the same email values and retries.
   return {
-    lastProcessedTimestamp: maxTimestamp,
+    lastProcessedTimestamp: failedBuckets > 0 ? state.lastProcessedTimestamp : maxTimestamp,
     lastRun: { resolutionsCreated, skippedAmbiguousBuckets },
   };
 }
@@ -274,9 +275,10 @@ async function resolveMatchBuckets(
   resolutionClient: ResolutionClient,
   buckets: MatchBucket[],
   logger: Logger
-): Promise<{ resolutionsCreated: number; skippedAmbiguousBuckets: number }> {
+): Promise<{ resolutionsCreated: number; skippedAmbiguousBuckets: number; failedBuckets: number }> {
   let resolutionsCreated = 0;
   let skippedAmbiguousBuckets = 0;
+  let failedBuckets = 0;
 
   for (const bucket of buckets) {
     try {
@@ -312,11 +314,12 @@ async function resolveMatchBuckets(
       }
       // else: only 1 unresolved, no existing targets → no match, skip
     } catch (err) {
+      failedBuckets++;
       logger.warn(`Failed to resolve bucket: ${err?.message ?? err}`);
     }
   }
 
-  return { resolutionsCreated, skippedAmbiguousBuckets };
+  return { resolutionsCreated, skippedAmbiguousBuckets, failedBuckets };
 }
 
 /**
