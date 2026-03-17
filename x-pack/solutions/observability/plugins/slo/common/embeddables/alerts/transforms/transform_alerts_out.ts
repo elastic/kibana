@@ -38,15 +38,10 @@ export interface LegacyAlertsState {
  * Migration: When legacy show_all_group_by_instances was true and a slo had a specific instance,
  * the toggle overrode the selection — user intended "all instances". Set slo_instance_id to "*".
  */
-function migrateSlos(
-  slos: SloItem[],
-  legacyShowAll: boolean
-): SloItem[] {
+function migrateSlos(slos: SloItem[], legacyShowAll: boolean): SloItem[] {
   if (!legacyShowAll) return slos;
   return slos.map((slo) =>
-    slo.slo_instance_id !== ALL_VALUE
-      ? { ...slo, slo_instance_id: ALL_VALUE }
-      : slo
+    slo.slo_instance_id !== ALL_VALUE ? { ...slo, slo_instance_id: ALL_VALUE } : slo
   );
 }
 
@@ -57,7 +52,11 @@ export function transformAlertsOut(storedState: AlertsEmbeddableState): AlertsEm
     showAllGroupByInstances?: boolean;
     show_all_group_by_instances?: boolean;
   };
-  const { show_all_group_by_instances: _dropped, showAllGroupByInstances: _legacy, ...rest } = state;
+  const {
+    show_all_group_by_instances: _dropped,
+    showAllGroupByInstances: _legacy,
+    ...rest
+  } = state;
   const rawSlos =
     state.slos?.map((slo) => {
       const hasLegacy = 'id' in slo || 'instanceId' in slo || 'groupBy' in slo;

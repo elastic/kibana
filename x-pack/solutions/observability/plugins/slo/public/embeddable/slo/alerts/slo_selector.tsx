@@ -27,10 +27,9 @@ const SLO_REQUIRED = i18n.translate('xpack.slo.sloEmbeddable.config.errors.sloRe
   defaultMessage: 'SLO is required.',
 });
 
-const ALL_INSTANCES_LABEL = i18n.translate(
-  'xpack.slo.sloEmbeddable.config.allInstancesLabel',
-  { defaultMessage: 'All instances' }
-);
+const ALL_INSTANCES_LABEL = i18n.translate('xpack.slo.sloEmbeddable.config.allInstancesLabel', {
+  defaultMessage: 'All instances',
+});
 
 const VALUE_SEP = '\u001F';
 
@@ -58,14 +57,13 @@ function mapSlosToOptions(slos: SloItem[] | SLOWithSummaryResponse[] | undefined
     slos?.map((slo) => {
       const id = getSloId(slo);
       const instanceId = getSloInstanceId(slo);
-      const isGroupedWithAll =
-        instanceId === ALL_VALUE && hasSloGroupBy(getGroupBy(slo));
+      const isGroupedWithAll = instanceId === ALL_VALUE && hasSloGroupBy(getGroupBy(slo));
       const label =
         instanceId !== ALL_VALUE
           ? `${slo.name} (${instanceId})`
           : isGroupedWithAll
-            ? `${slo.name} (${ALL_INSTANCES_LABEL})`
-            : slo.name;
+          ? `${slo.name} (${ALL_INSTANCES_LABEL})`
+          : slo.name;
       return {
         label,
         value: toOptionValue(id, instanceId),
@@ -75,7 +73,9 @@ function mapSlosToOptions(slos: SloItem[] | SLOWithSummaryResponse[] | undefined
 }
 
 /** Build options from API results, adding "All instances" per grouped SLO. */
-function buildOptionsFromResults(results: SLOWithSummaryResponse[]): Array<EuiComboBoxOptionOption<string>> {
+function buildOptionsFromResults(
+  results: SLOWithSummaryResponse[]
+): Array<EuiComboBoxOptionOption<string>> {
   const options: Array<EuiComboBoxOptionOption<string>> = [];
   const seen = new Set<string>();
 
@@ -118,7 +118,11 @@ function buildOptionsFromResults(results: SLOWithSummaryResponse[]): Array<EuiCo
 }
 
 /** Create synthetic SLO for "All instances" selection (API does not return id-* for grouped SLOs). */
-function toSloWithSummary(sloId: string, instanceId: string, results: SLOWithSummaryResponse[]): SLOWithSummaryResponse {
+function toSloWithSummary(
+  sloId: string,
+  instanceId: string,
+  results: SLOWithSummaryResponse[]
+): SLOWithSummaryResponse {
   const match = results.find((s) => s.id === sloId);
   if (match) {
     return { ...match, instanceId };
@@ -128,7 +132,11 @@ function toSloWithSummary(sloId: string, instanceId: string, results: SLOWithSum
     instanceId,
     name: '',
     groupBy: [],
-    summary: { status: 'NO_DATA', sliValue: 0, errorBudget: { initial: 0, consumed: 0, remaining: 1 } },
+    summary: {
+      status: 'NO_DATA',
+      sliValue: 0,
+      errorBudget: { initial: 0, consumed: 0, remaining: 1 },
+    },
     groupings: {},
   } as SLOWithSummaryResponse;
 }

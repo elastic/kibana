@@ -25,12 +25,7 @@ interface Props {
   onLoaded?: () => void;
 }
 
-export function SloAlertsSummary({
-  slos,
-  deps,
-  timeRange,
-  onLoaded,
-}: Props) {
+export function SloAlertsSummary({ slos, deps, timeRange, onLoaded }: Props) {
   const {
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
   } = deps;

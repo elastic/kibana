@@ -90,9 +90,7 @@ export const getSloInstanceFilter = (sloId: string, sloInstanceId: string) => {
     bool: {
       must: [
         { term: { 'slo.id': sloId } },
-        ...(sloInstanceId !== ALL_VALUE
-          ? [{ term: { 'slo.instanceId': sloInstanceId } }]
-          : []),
+        ...(sloInstanceId !== ALL_VALUE ? [{ term: { 'slo.instanceId': sloInstanceId } }] : []),
       ],
     },
   };
@@ -125,9 +123,7 @@ export const useSloAlertsQuery = (slos: SloItem[], timeRange: TimeRange) => {
           },
           {
             bool: {
-              should: slos.map((slo) =>
-                getSloInstanceFilter(slo.slo_id, slo.slo_instance_id)
-              ),
+              should: slos.map((slo) => getSloInstanceFilter(slo.slo_id, slo.slo_instance_id)),
             },
           },
         ],
