@@ -91,7 +91,7 @@ export function SettingsTab() {
               connectorIdKnowledgeIndicatorExtraction: knowledgeIndicatorExtraction,
               connectorIdRuleGeneration: ruleGeneration,
               connectorIdDiscovery: discovery,
-              indexPatterns: indexPatterns,
+              indexPatterns,
             },
           },
         }
