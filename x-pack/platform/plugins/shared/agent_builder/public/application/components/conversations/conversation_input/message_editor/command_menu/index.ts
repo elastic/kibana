@@ -19,3 +19,4 @@ export { getRectAtOffset } from './cursor_rect';
 export { CommandMenuPopover } from './command_menu_popover';
 export { CommandMenuContainer } from './command_menu_container';
 export { useCommandMenuAnchor } from './use_command_menu_anchor';
+export { sortedCommandDefinitions, getCommandDefinition } from './command_definitions';

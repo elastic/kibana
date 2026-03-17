@@ -43,6 +43,8 @@ export interface CommandMenuHandle {
 export interface CommandDefinition {
   /** Unique identifier for this command */
   readonly id: CommandId;
+  /** Unique identifier that is used for text representation in URL format (e.g. scheme://) */
+  readonly scheme: string;
   /** The character sequence that activates the command (e.g. '@', '/') */
   readonly sequence: string;
   /** Human readable name to be used for a11y */

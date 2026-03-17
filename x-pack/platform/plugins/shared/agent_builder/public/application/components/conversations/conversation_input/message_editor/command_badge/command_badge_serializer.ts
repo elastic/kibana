@@ -6,9 +6,9 @@
  */
 
 import type { CommandBadgeData } from './types';
-import type { CommandId } from '../command_menu/types';
-import { sortedCommandDefinitions } from '../command_menu/command_definitions';
+import { getCommandDefinition } from '../command_menu';
 import { COMMAND_ID_ATTRIBUTE, COMMAND_METADATA_ATTRIBUTE } from './attributes';
+import { getCommandDefinitionByScheme } from '../command_menu/command_definitions';
 
 interface TextSegment {
   type: 'text';
@@ -20,18 +20,13 @@ interface BadgeSegment {
 }
 export type ContentSegment = TextSegment | BadgeSegment;
 
-const COMMAND_ID_TO_SCHEME: Record<string, string> = {};
-const SCHEME_TO_COMMAND_ID: Record<string, CommandId> = {};
-
-for (const def of sortedCommandDefinitions) {
-  const scheme = def.id;
-  COMMAND_ID_TO_SCHEME[def.id] = scheme;
-  SCHEME_TO_COMMAND_ID[scheme] = def.id;
-}
-
 export const serializeCommandBadge = (element: HTMLElement): string => {
   const commandId = element.getAttribute(COMMAND_ID_ATTRIBUTE) ?? '';
-  const scheme = COMMAND_ID_TO_SCHEME[commandId] ?? commandId;
+  const commandDefinition = getCommandDefinition(commandId);
+  if (!commandDefinition) {
+    return '';
+  }
+  const { scheme } = commandDefinition;
   const label = element.textContent ?? '';
 
   const metadataRaw = element.getAttribute(COMMAND_METADATA_ATTRIBUTE);
@@ -77,7 +72,8 @@ export const deserializeCommandBadge = (text: string): ContentSegment[] => {
     }
 
     const [_, label, scheme, path, queryString] = match;
-    const commandId = SCHEME_TO_COMMAND_ID[scheme];
+    const commandDefinition = getCommandDefinitionByScheme(scheme);
+    const commandId = commandDefinition?.id;
 
     if (commandId) {
       const metadata: CommandBadgeData['metadata'] = {};
