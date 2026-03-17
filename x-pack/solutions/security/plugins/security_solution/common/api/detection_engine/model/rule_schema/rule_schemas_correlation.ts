@@ -115,14 +115,12 @@ export const CorrelationRulePatchFields = CorrelationOptionalFields.merge(
 );
 
 export type CorrelationRuleResponseFields = z.infer<typeof CorrelationRuleResponseFields>;
-export const CorrelationRuleResponseFields = CorrelationOptionalFields.merge(
-  CorrelationRequiredFields
-);
+export const CorrelationRuleResponseFields =
+  CorrelationOptionalFields.merge(CorrelationRequiredFields);
 
 export type CorrelationRuleCreateFields = z.infer<typeof CorrelationRuleCreateFields>;
-export const CorrelationRuleCreateFields = CorrelationOptionalFields.merge(
-  CorrelationRequiredFields
-);
+export const CorrelationRuleCreateFields =
+  CorrelationOptionalFields.merge(CorrelationRequiredFields);
 
 export type CorrelationRule = z.infer<typeof CorrelationRule>;
 export const CorrelationRule = SharedResponseProps.merge(CorrelationRuleResponseFields);
