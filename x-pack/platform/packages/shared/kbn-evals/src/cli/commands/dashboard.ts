@@ -7,12 +7,7 @@
 
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  generateDashboardBody,
-  generateDataViewBody,
-  DASHBOARD_ID,
-  DATA_VIEW_ID,
-} from '../../dashboard/saved_objects';
+import { generateDashboardBody, generateDataViewBody, DASHBOARD_ID, DATA_VIEW_ID } from '../../dashboard/saved_objects';
 
 const DEFAULT_KBN_URL = 'http://elastic:changeme@localhost:5620';
 
@@ -67,8 +62,19 @@ export const dashboardCmd: Command<void> = {
     const isDelete = flagsReader.boolean('delete');
     const isDryRun = flagsReader.boolean('dry-run');
     const kbnUrlRaw = flagsReader.string('kibana-url') ?? resolveKibanaUrl();
-    const baseUrl = stripCredentials(kbnUrlRaw);
-    const headers = createAuthHeaders(kbnUrlRaw);
+
+    let baseUrl: string;
+    let headers: Record<string, string>;
+    try {
+      baseUrl = stripCredentials(kbnUrlRaw);
+      headers = createAuthHeaders(kbnUrlRaw);
+    } catch (_e) {
+      log.error(
+        `Invalid Kibana URL: "${kbnUrlRaw}". Provide a valid URL via --kibana-url or KIBANA_URL env var.`
+      );
+      process.exitCode = 1;
+      return;
+    }
 
     if (isDryRun) {
       await dryRun({ log });
@@ -98,6 +104,8 @@ const dryRun = async ({ log }: { log: ToolingLog }): Promise<void> => {
   log.info(`Data View ID: ${DATA_VIEW_ID}`);
 };
 
+const FETCH_TIMEOUT_MS = 30_000;
+
 const createOrUpdateDashboard = async ({
   baseUrl,
   headers,
@@ -114,6 +122,7 @@ const createOrUpdateDashboard = async ({
     method: 'POST',
     headers,
     body: JSON.stringify(dataViewBody),
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
 
   if (dvResponse.ok) {
@@ -134,6 +143,7 @@ const createOrUpdateDashboard = async ({
     method: 'POST',
     headers,
     body: JSON.stringify(dashboardBody),
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
 
   if (response.status === 409) {
@@ -142,14 +152,13 @@ const createOrUpdateDashboard = async ({
       method: 'PUT',
       headers,
       body: JSON.stringify(dashboardBody),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
   }
 
   if (!response.ok) {
     const body = await response.text();
-    throw new Error(
-      `Failed to create/update dashboard: ${response.status} ${response.statusText}\n${body}`
-    );
+    throw new Error(`Failed to create/update dashboard: ${response.status} ${response.statusText}\n${body}`);
   }
 
   const result = (await response.json()) as { id: string };
@@ -171,6 +180,7 @@ const deleteDashboard = async ({
   const dashResponse = await fetch(`${baseUrl}/api/dashboards/${DASHBOARD_ID}?apiVersion=1`, {
     method: 'DELETE',
     headers,
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
 
   if (dashResponse.ok) {
@@ -187,6 +197,7 @@ const deleteDashboard = async ({
   const dvResponse = await fetch(`${baseUrl}/api/data_views/data_view/${DATA_VIEW_ID}`, {
     method: 'DELETE',
     headers,
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
 
   if (dvResponse.ok) {
