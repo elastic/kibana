@@ -230,9 +230,9 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewId: string }>]
 > = ({ tabId, dataViewId }) =>
   function transitionFromESQLToDataViewThunkFn(dispatch) {
-    // Reset the default profile state when transitioning to data view mode
+    // Mark all profile state fields to reset when transitioning to data view mode
     dispatch(
-      internalStateSlice.actions.setResetDefaultProfileState({
+      internalStateSlice.actions.setProfileStateFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
@@ -277,9 +277,9 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
   function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
-    // Reset the default profile state when transitioning to ES|QL mode
+    // Mark all profile state fields to reset when transitioning to ES|QL mode
     dispatch(
-      internalStateSlice.actions.setResetDefaultProfileState({
+      internalStateSlice.actions.setProfileStateFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })

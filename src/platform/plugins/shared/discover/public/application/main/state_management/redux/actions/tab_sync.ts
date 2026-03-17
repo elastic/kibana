@@ -101,7 +101,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 
       addLog('[tab_sync] initialize state and sync with URL', { persistedDiscoverSession });
 
-      // Set the default profile state only if not loading a saved search,
+      // Set the profile state fields to reset only if not loading a saved search,
       // to avoid overwriting saved search state
       if (!persistedDiscoverSession?.id) {
         const { breakdownField, columns, rowHeight, hideChart } = getCurrentUrlState(
@@ -111,7 +111,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 
         // Only set default state which is not already set in the URL
         dispatch(
-          internalStateActions.setResetDefaultProfileState({
+          internalStateActions.setProfileStateFieldsToReset({
             tabId,
             fieldsToReset: getFieldsToReset({
               columns: columns === undefined,

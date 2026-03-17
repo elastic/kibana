@@ -521,10 +521,10 @@ export function getDataStateContainer({
                 );
               }
 
-              // Clear the default profile state flags after the data fetching
+              // Clear the profile state field-reset flags after data fetching
               // is done so refetches don't reset the state again
               internalState.dispatch(
-                injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+                injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
                   fieldsToReset: 'none',
                 })
               );

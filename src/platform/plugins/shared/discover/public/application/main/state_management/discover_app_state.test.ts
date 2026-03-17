@@ -107,14 +107,14 @@ describe('Test discover app state', () => {
   });
 
   describe('initializeAndSync', () => {
-    it('should call setResetDefaultProfileState correctly with no initial state', async () => {
+    it('should call setProfileStateFieldsToReset correctly with no initial state', async () => {
       const { initializeSingleTab, getCurrentTab } = await setupNoTab();
       expect(getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('none');
       await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
       expect(getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('all');
     });
 
-    it('should call setResetDefaultProfileState correctly with initial columns', async () => {
+    it('should call setProfileStateFieldsToReset correctly with initial columns', async () => {
       const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'] });
@@ -128,7 +128,7 @@ describe('Test discover app state', () => {
       ]);
     });
 
-    it('should call setResetDefaultProfileState correctly with initial rowHeight', async () => {
+    it('should call setProfileStateFieldsToReset correctly with initial rowHeight', async () => {
       const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ rowHeight: 5 });
@@ -142,7 +142,7 @@ describe('Test discover app state', () => {
       ]);
     });
 
-    it('should call setResetDefaultProfileState correctly with initial hide chart', async () => {
+    it('should call setProfileStateFieldsToReset correctly with initial hide chart', async () => {
       const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ hideChart: true });
@@ -156,7 +156,7 @@ describe('Test discover app state', () => {
       ]);
     });
 
-    it('should call setResetDefaultProfileState correctly with persisted Discover session', async () => {
+    it('should call setProfileStateFieldsToReset correctly with persisted Discover session', async () => {
       const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'], rowHeight: 5 });

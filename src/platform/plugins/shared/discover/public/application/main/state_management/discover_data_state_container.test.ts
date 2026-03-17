@@ -221,7 +221,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       toolkit.internalState.dispatch(
-        internalStateActions.setResetDefaultProfileState({
+        internalStateActions.setProfileStateFieldsToReset({
           tabId: toolkit.getCurrentTab().id,
           fieldsToReset: ['columns', 'rowHeight'],
         })
@@ -288,7 +288,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       toolkit.internalState.dispatch(
-        internalStateActions.setResetDefaultProfileState({
+        internalStateActions.setProfileStateFieldsToReset({
           tabId: toolkit.getCurrentTab().id,
           fieldsToReset: ['columns', 'rowHeight', 'breakdownField', 'hideChart'],
         })
@@ -370,7 +370,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       stateContainer.internalState.dispatch(
-        stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        stateContainer.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
           fieldsToReset: ['columns', 'rowHeight', 'breakdownField'],
         })
       );
@@ -412,7 +412,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       stateContainer.internalState.dispatch(
-        stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        stateContainer.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
           fieldsToReset: 'none',
         })
       );

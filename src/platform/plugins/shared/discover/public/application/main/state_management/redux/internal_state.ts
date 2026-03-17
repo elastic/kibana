@@ -348,7 +348,7 @@ export const internalStateSlice = createSlice({
       state.isESQLToDataViewTransitionModalVisible = action.payload;
     },
 
-    setResetDefaultProfileState: {
+    setProfileStateFieldsToReset: {
       prepare: (
         payload: TabActionPayload<{
           fieldsToReset: TabState['resetDefaultProfileState']['fieldsToReset'];

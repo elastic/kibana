@@ -202,7 +202,7 @@ describe('tab_state_data_view actions', () => {
       expect(params.getCurrentTab().isDataViewLoading).toBe(false);
     });
 
-    it('should call setResetDefaultProfileState correctly when switching data view', async () => {
+    it('should call setProfileStateFieldsToReset correctly when switching data view', async () => {
       const params = await setupTestParams(dataViewComplexMock);
       expect(params.getCurrentTab().resetDefaultProfileState).toEqual(
         expect.objectContaining({

@@ -51,7 +51,7 @@ async function getTestProps({
 
   // Reset the profile state to match the expected initial state for tests
   toolkit.internalState.dispatch(
-    toolkit.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+    toolkit.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
       fieldsToReset: 'none',
     })
   );
@@ -599,7 +599,7 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
-  it('should call setResetDefaultProfileState correctly when index pattern changes', async () => {
+  it('should call setProfileStateFieldsToReset correctly when index pattern changes', async () => {
     const { toolkit, dataState } = await setupTest({
       appState: { query: { esql: 'from pattern' } },
       defaultFetchStatus: FetchStatus.LOADING,
@@ -627,7 +627,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern1' },
     });
     toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+      toolkit.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
         fieldsToReset: 'none',
       })
     );
@@ -718,7 +718,7 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
-  it('should call setResetDefaultProfileState correctly when columns change', async () => {
+  it('should call setProfileStateFieldsToReset correctly when columns change', async () => {
     const { toolkit, dataState } = await setupTest({});
     const documents$ = dataState.data$.documents$;
     const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];

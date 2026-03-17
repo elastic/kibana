@@ -130,7 +130,7 @@ describe('InternalStateStore', () => {
     const prevResetId = selectTab(store.getState(), tabId).resetDefaultProfileState.resetId;
 
     store.dispatch(
-      internalStateActions.setResetDefaultProfileState({
+      internalStateActions.setProfileStateFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
@@ -159,7 +159,7 @@ describe('InternalStateStore', () => {
       .getContexts().dataSourceContext.profileId;
 
     store.dispatch(
-      internalStateActions.setResetDefaultProfileState({
+      internalStateActions.setProfileStateFieldsToReset({
         tabId,
         fieldsToReset: ['columns'],
       })
