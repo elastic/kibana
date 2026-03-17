@@ -16,11 +16,17 @@ import { createStore } from 'redux';
 import { AlertFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
 
+const mockDocumentHeader = jest.fn((_props: unknown) => <div>{'MockDocumentHeader'}</div>);
+
 jest.mock('../../flyout_v2/document/components/document_header', () => ({
-  DocumentHeader: () => <div>{'MockDocumentHeader'}</div>,
+  DocumentHeader: (props: unknown) => mockDocumentHeader(props),
 }));
 
 describe('AlertFlyoutHeader', () => {
+  beforeEach(() => {
+    mockDocumentHeader.mockClear();
+  });
+
   const servicesMock = {
     core: { overlays: {} },
     uiActions: {
@@ -82,5 +88,24 @@ describe('AlertFlyoutHeader', () => {
     await waitFor(() => {
       expect(screen.getByText('MockDocumentHeader')).toBeInTheDocument();
     });
+  });
+
+  it('renders shared document header in Discover', async () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+
+    render(
+      <AlertFlyoutHeader
+        hit={hit}
+        servicesPromise={Promise.resolve(servicesMock)}
+        storePromise={Promise.resolve(store as never)}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('MockDocumentHeader')).toBeInTheDocument();
+    });
+
+    expect(mockDocumentHeader).toHaveBeenCalledWith(expect.objectContaining({ hit }));
   });
 });

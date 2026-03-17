@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
@@ -52,7 +53,9 @@ export const DocumentFlyoutContent: FC<DocumentFlyoutContentProps> = memo(
 
     return (
       <>
-        <DocumentHeader hit={hit} titleHref={ruleDetailsHref} />
+        <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m" grow={false}>
+          <DocumentHeader hit={hit} titleHref={ruleDetailsHref} />
+        </EuiPanel>
         <OverviewTab hit={hit} renderCellActions={renderCellActions} />
       </>
     );
