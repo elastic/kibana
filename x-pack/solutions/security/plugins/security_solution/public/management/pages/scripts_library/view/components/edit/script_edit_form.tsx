@@ -8,22 +8,24 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
+  EuiButtonEmpty,
+  EuiCheckbox,
+  EuiComboBox,
   EuiFieldText,
+  EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiComboBox,
-  EuiTextArea,
-  EuiFilePicker,
-  EuiText,
-  EuiCheckbox,
-  EuiIconTip,
-  EuiFlexItem,
-  EuiFlexGroup,
-  htmlIdGenerator,
-  EuiButtonEmpty,
+  EuiHorizontalRule,
   EuiIcon,
-  useEuiTheme,
+  EuiIconTip,
+  EuiSelect,
   EuiSpacer,
+  EuiText,
+  EuiTextArea,
+  htmlIdGenerator,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -65,6 +67,7 @@ const buildDraft = (item?: ScriptFlyoutScriptItem): EditableScriptFieldsWithFile
   file: item?.file,
   fileName: item?.fileName,
   fileSize: item?.fileSize,
+  fileType: item?.fileType,
   platform: item?.platform,
   requiresInput: item?.requiresInput,
   tags: item?.tags,
@@ -76,6 +79,8 @@ const buildDraft = (item?: ScriptFlyoutScriptItem): EditableScriptFieldsWithFile
 
 const buildInitialValidationState = (scriptItem?: ScriptFlyoutScriptItem) => ({
   hasFileError: !scriptItem?.fileName || !scriptItem?.fileSize,
+  hasFileTypeError: !scriptItem?.fileType,
+  hasPathToExecutableError: scriptItem?.fileType === 'archive' && !scriptItem?.pathToExecutable,
   hasNameError: !scriptItem?.name,
   hasPlatformError: !scriptItem?.platform || !scriptItem?.platform.length,
   hasEmptyDescription: !scriptItem?.description || scriptItem?.description.length === 0,
@@ -84,6 +89,7 @@ const buildInitialValidationState = (scriptItem?: ScriptFlyoutScriptItem) => ({
 });
 
 export interface EndpointScriptEditFormProps {
+  isUploading: boolean;
   error?:
     | ReturnType<typeof usePatchEndpointScript>['error']
     | ReturnType<typeof usePostEndpointScript>['error'];
@@ -100,7 +106,7 @@ export interface EndpointScriptEditFormProps {
   'data-test-subj'?: string;
 }
 export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
-  ({ error: submitError, onChange, scriptItem, 'data-test-subj': dataTestSubj }) => {
+  ({ isUploading, error: submitError, onChange, scriptItem, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { euiTheme } = useEuiTheme();
 
@@ -112,6 +118,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
 
     // create input state trackers for validation
     const [hasFileBeenChanged, setHasFileBeenChanged] = useState<boolean>(false);
+    const [hasFileTypeBeenChanged, setHasFileTypeBeenChanged] = useState<boolean>(false);
     const [hasNameBeenChanged, setHasNameBeenChanged] = useState<boolean>(false);
     const [hasPlatformBeenChanged, setHasPlatformBeenChanged] = useState<boolean>(false);
 
@@ -124,11 +131,17 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
     const [hasFileError, toggleHasFileError] = useState<boolean>(
       initialValidationState.hasFileError
     );
+    const [hasFileTypeError, toggleHasFileTypeError] = useState<boolean>(
+      initialValidationState.hasFileTypeError
+    );
     const [hasNameError, toggleHasNameError] = useState<boolean>(
       initialValidationState.hasNameError
     );
     const [hasPlatformError, toggleHasPlatformError] = useState<boolean>(
       initialValidationState.hasPlatformError
+    );
+    const [hasPathToExecutableError, toggleHasPathToExecutableError] = useState<boolean>(
+      initialValidationState.hasPathToExecutableError
     );
 
     // show help text for optional fields
@@ -142,9 +155,29 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
       initialValidationState.hasEmptyExample
     );
 
+    // Derive disabled state from current fileType to avoid lag
+    const isPathToExecutableDisabled = useMemo(
+      () => draftScript.fileType !== 'archive',
+      [draftScript.fileType]
+    );
+
     const hasValidFormData = useMemo(
-      () => hasFormChanged && !hasFileError && !hasNameError && !hasPlatformError,
-      [hasFormChanged, hasFileError, hasNameError, hasPlatformError]
+      () =>
+        // also check pathToExecutable is not empty when file type is archive since it's a required field in that case
+        hasFormChanged &&
+        !hasFileError &&
+        !hasFileTypeError &&
+        !hasNameError &&
+        !hasPlatformError &&
+        !hasPathToExecutableError,
+      [
+        hasFormChanged,
+        hasFileError,
+        hasFileTypeError,
+        hasNameError,
+        hasPlatformError,
+        hasPathToExecutableError,
+      ]
     );
 
     // fake file picker state for validation
@@ -193,11 +226,12 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="m">
-                <h5>{scriptItem?.fileName}</h5>
+                <h5>{draftScript.fileName}</h5>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                aria-label={SCRIPT_LIBRARY_LABELS.flyout.body.edit.removeFileButtonLabel}
                 type="button"
                 size="xs"
                 onClick={onRemoveFileName}
@@ -210,7 +244,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           <EuiSpacer size="m" />
         </>
       );
-    }, [fakeFilePickerStyle, getTestId, scriptItem?.fileName, onRemoveFileName]);
+    }, [fakeFilePickerStyle, getTestId, draftScript.fileName, onRemoveFileName]);
 
     // real file picker
     const filePickerUUID = useMemo(() => {
@@ -219,14 +253,14 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
 
     //  platforms
     const selectedPlatforms = useMemo(
-      () => scriptItem?.platform?.sort().map((platform) => ({ label: OS_TITLES[platform] })),
-      [scriptItem?.platform]
+      () => draftScript.platform?.sort().map((platform) => ({ label: OS_TITLES[platform] })),
+      [draftScript.platform]
     );
 
     // types/tags
     const selectedTags = useMemo(
-      () => scriptItem?.tags?.sort().map((tag) => ({ label: SCRIPT_TAGS[tag] })) || [],
-      [scriptItem?.tags]
+      () => draftScript.tags?.sort().map((tag) => ({ label: SCRIPT_TAGS[tag] })) || [],
+      [draftScript.tags]
     );
 
     const onChangeFile = useCallback(
@@ -243,6 +277,57 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
         }));
       },
       [setDraftScript]
+    );
+
+    const fileTypeOptions = useMemo(() => {
+      const options = [
+        { value: 'archive', text: SCRIPT_LIBRARY_LABELS.flyout.body.edit.fileType.archive },
+        { value: 'script', text: SCRIPT_LIBRARY_LABELS.flyout.body.edit.fileType.script },
+      ];
+
+      if (isUploading) {
+        options.unshift({
+          value: '',
+          text: SCRIPT_LIBRARY_LABELS.flyout.body.edit.fileType.placeholder,
+        });
+      }
+
+      return options;
+    }, [isUploading]);
+
+    const onChangeFileType = useCallback(
+      (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const _fileType = e.target.value.trim();
+        toggleHasFileTypeError(!_fileType.length);
+        toggleHasPathToExecutableError(_fileType === 'archive' && !draftScript.pathToExecutable);
+        setHasFormChanged(true);
+
+        setDraftScript((prev) => ({
+          ...prev,
+          fileType: _fileType as EndpointScript['fileType'],
+          // clear path to executable if file type is changed to script/empty
+          pathToExecutable: _fileType !== 'archive' ? '' : prev.pathToExecutable,
+        }));
+      },
+      [
+        draftScript.pathToExecutable,
+        setDraftScript,
+        toggleHasFileTypeError,
+        toggleHasPathToExecutableError,
+      ]
+    );
+
+    const onChangePathToExecutable = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        const pathToExecutable = event.target.value.trim();
+        toggleHasPathToExecutableError(
+          draftScript.fileType === 'archive' && !pathToExecutable.length
+        );
+        setHasFormChanged(true);
+
+        setDraftScript((prev) => ({ ...prev, pathToExecutable }));
+      },
+      [setDraftScript, draftScript.fileType, toggleHasPathToExecutableError]
     );
 
     const onChangeName = useCallback(
@@ -295,16 +380,6 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
         setHasFormChanged(true);
 
         setDraftScript((prev) => ({ ...prev, requiresInput }));
-      },
-      [setDraftScript]
-    );
-
-    const onChangePathToExecutable = useCallback(
-      (event: React.ChangeEvent<HTMLInputElement>) => {
-        const pathToExecutable = event.target.value;
-        setHasFormChanged(true);
-
-        setDraftScript((prev) => ({ ...prev, pathToExecutable }));
       },
       [setDraftScript]
     );
@@ -375,13 +450,13 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           fakeFilePicker
         ) : (
           <EuiFormRow
-            isInvalid={hasFileBeenChanged && hasFileError}
+            isInvalid={hasFileError && hasFileBeenChanged}
             error={SCRIPT_LIBRARY_LABELS.flyout.body.edit.filePickerPrompt.validationErrorMessage}
             data-test-subj={getTestId('file-picker-row')}
           >
             <EuiFilePicker
               data-test-subj={getTestId('file-picker')}
-              isInvalid={hasFileBeenChanged && hasFileError}
+              isInvalid={hasFileError && hasFileBeenChanged}
               id={filePickerUUID}
               initialPromptText={SCRIPT_LIBRARY_LABELS.flyout.body.edit.filePickerPrompt.label}
               onChange={onChangeFile}
@@ -389,6 +464,47 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
             />
           </EuiFormRow>
         )}
+
+        {/* file type selection */}
+        <EuiFormRow
+          isInvalid={hasFileTypeError && hasFileTypeBeenChanged}
+          error={SCRIPT_LIBRARY_LABELS.flyout.body.edit.fileType.validationErrorMessage}
+          label={
+            <EndpointScriptEditItem label={SCRIPT_LIBRARY_LABELS.flyout.body.edit.fileType.label} />
+          }
+          data-test-subj={getTestId('file-type-row')}
+        >
+          <EuiSelect
+            isInvalid={hasFileTypeError && hasFileTypeBeenChanged}
+            data-test-subj={getTestId('file-type-select')}
+            options={fileTypeOptions}
+            value={draftScript.fileType || ''}
+            onChange={onChangeFileType}
+            onBlur={() => !hasFileTypeBeenChanged && setHasFileTypeBeenChanged(true)}
+          />
+        </EuiFormRow>
+
+        {/* path to executable */}
+        <EuiFormRow
+          isInvalid={hasPathToExecutableError}
+          error={SCRIPT_LIBRARY_LABELS.flyout.body.edit.pathToExecutable.validationErrorMessage}
+          label={
+            <LabelTooltipWithOptionalInput
+              label={SCRIPT_LIBRARY_LABELS.flyout.body.details.pathToExecutable.label}
+              tooltip={SCRIPT_LIBRARY_LABELS.flyout.body.edit.pathToExecutable.tooltip}
+            />
+          }
+          data-test-subj={getTestId('path-to-executable-row')}
+          isDisabled={isPathToExecutableDisabled}
+        >
+          <EuiFieldText
+            data-test-subj={getTestId('path-to-executable-input')}
+            value={draftScript.pathToExecutable || ''}
+            onChange={onChangePathToExecutable}
+            isInvalid={hasPathToExecutableError}
+          />
+        </EuiFormRow>
+        <EuiHorizontalRule margin="l" />
 
         {/* name */}
         <EuiFormRow
@@ -402,7 +518,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           <EuiFieldText
             data-test-subj={getTestId('name-input')}
             isInvalid={hasNameError && hasNameBeenChanged}
-            defaultValue={scriptItem?.name}
+            defaultValue={draftScript.name}
             onChange={onChangeName}
             onBlur={() => !hasNameBeenChanged && setHasNameBeenChanged(true)}
           />
@@ -440,7 +556,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
               <EuiCheckbox
                 id="scriptRequiresInputCheckbox"
                 label={SCRIPT_LIBRARY_LABELS.flyout.body.edit.requiresInput.label}
-                checked={scriptItem?.requiresInput}
+                checked={draftScript.requiresInput}
                 onChange={onChangeRequiresInput}
               />
             }
@@ -467,23 +583,6 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           />
         </EuiFormRow>
 
-        {/* path to executable */}
-        <EuiFormRow
-          label={
-            <LabelTooltipWithOptionalInput
-              label={SCRIPT_LIBRARY_LABELS.flyout.body.details.pathToExecutable.label}
-              tooltip={SCRIPT_LIBRARY_LABELS.flyout.body.edit.pathToExecutable.tooltip}
-            />
-          }
-          labelAppend={labelAppend}
-          data-test-subj={getTestId('path-to-executable-row')}
-        >
-          <EuiFieldText
-            defaultValue={scriptItem?.pathToExecutable}
-            onChange={onChangePathToExecutable}
-          />
-        </EuiFormRow>
-
         {/* description */}
         <EuiFormRow
           label={
@@ -500,7 +599,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           data-test-subj={getTestId('description-row')}
         >
           <EuiFieldText
-            defaultValue={scriptItem?.description}
+            defaultValue={draftScript.description}
             onChange={onChangeDescription}
             data-test-subj={getTestId('description-input')}
           />
@@ -522,7 +621,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           data-test-subj={getTestId('instructions-row')}
         >
           <EuiTextArea
-            defaultValue={scriptItem?.instructions}
+            defaultValue={draftScript.instructions}
             rows={5}
             onChange={onChangeInstructions}
             data-test-subj={getTestId('instructions-input')}
@@ -543,7 +642,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           data-test-subj={getTestId('example-row')}
         >
           <EuiTextArea
-            defaultValue={scriptItem?.example}
+            defaultValue={draftScript.example}
             rows={5}
             onChange={onChangeExample}
             data-test-subj={getTestId('example-input')}
