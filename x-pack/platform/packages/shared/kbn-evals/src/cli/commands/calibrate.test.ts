@@ -9,6 +9,7 @@ import Fs from 'fs';
 import Path from 'path';
 
 const mockGetStatsByRunId = jest.fn();
+const mockGetDistinctRunCount = jest.fn();
 const mockClose = jest.fn();
 
 jest.mock('@elastic/elasticsearch', () => ({
@@ -20,6 +21,7 @@ jest.mock('@elastic/elasticsearch', () => ({
 jest.mock('../../utils/score_repository', () => ({
   EvaluationScoreRepository: jest.fn(() => ({
     getStatsByRunId: mockGetStatsByRunId,
+    getDistinctRunCount: mockGetDistinctRunCount,
   })),
 }));
 
@@ -113,6 +115,7 @@ describe('calibrateCmd', () => {
     process.env = { ...originalEnv };
     process.stdout.write = jest.fn() as any;
     mockCalibrateThresholds.mockResolvedValue(createMockCalibrationResult());
+    mockGetDistinctRunCount.mockResolvedValue(5);
     mockClose.mockResolvedValue(undefined);
     if (Fs.existsSync(outputFile)) {
       Fs.unlinkSync(outputFile);
@@ -131,13 +134,22 @@ describe('calibrateCmd', () => {
 
     it('defines string flags', () => {
       expect(calibrateCmd.flags?.string).toEqual(
-        expect.arrayContaining(['run-id', 'config', 'output', 'mode', 'margin', 'model', 'suite'])
+        expect.arrayContaining([
+          'run-id',
+          'config',
+          'output',
+          'mode',
+          'margin',
+          'model',
+          'suite',
+          'min-runs',
+        ])
       );
     });
 
-    it('defaults mode to bootstrap and margin to 2', () => {
+    it('defaults mode to bootstrap, margin to 2, and min-runs to 3', () => {
       expect(calibrateCmd.flags?.default).toEqual(
-        expect.objectContaining({ mode: 'bootstrap', margin: '2' })
+        expect.objectContaining({ mode: 'bootstrap', margin: '2', 'min-runs': '3' })
       );
     });
   });
@@ -188,6 +200,24 @@ describe('calibrateCmd', () => {
 
       await expect(calibrateCmd.run({ log, flagsReader } as any)).rejects.toThrow(
         'Config file not found'
+      );
+    });
+
+    it('throws for non-numeric --min-runs', async () => {
+      const log = createMockLog();
+      const flagsReader = createMockFlagsReader({ 'run-id': 'abc', 'min-runs': 'bad' });
+
+      await expect(calibrateCmd.run({ log, flagsReader } as any)).rejects.toThrow(
+        '--min-runs must be a positive integer'
+      );
+    });
+
+    it('throws for zero --min-runs', async () => {
+      const log = createMockLog();
+      const flagsReader = createMockFlagsReader({ 'run-id': 'abc', 'min-runs': '0' });
+
+      await expect(calibrateCmd.run({ log, flagsReader } as any)).rejects.toThrow(
+        '--min-runs must be a positive integer'
       );
     });
   });
@@ -370,6 +400,63 @@ describe('calibrateCmd', () => {
         (call: string[]) => typeof call[0] === 'string' && call[0].includes('was 0.8')
       );
       expect(changeLog).toBeDefined();
+    });
+  });
+
+  describe('stability warning', () => {
+    it('warns when distinct run count is below --min-runs', async () => {
+      mockGetDistinctRunCount.mockResolvedValue(1);
+      const log = createMockLog();
+      const flagsReader = createMockFlagsReader({ 'run-id': 'abc' });
+
+      await calibrateCmd.run({ log, flagsReader } as any);
+
+      const warningLog = log.warning.mock.calls.find(
+        (call: string[]) =>
+          typeof call[0] === 'string' &&
+          call[0].includes('Calibrating from 1 run(s)') &&
+          call[0].includes('soft gates')
+      );
+      expect(warningLog).toBeDefined();
+    });
+
+    it('does not warn when distinct run count meets --min-runs', async () => {
+      mockGetDistinctRunCount.mockResolvedValue(5);
+      const log = createMockLog();
+      const flagsReader = createMockFlagsReader({ 'run-id': 'abc' });
+
+      await calibrateCmd.run({ log, flagsReader } as any);
+
+      const warningLog = log.warning.mock.calls.find(
+        (call: string[]) => typeof call[0] === 'string' && call[0].includes('soft gates')
+      );
+      expect(warningLog).toBeUndefined();
+    });
+
+    it('respects custom --min-runs value', async () => {
+      mockGetDistinctRunCount.mockResolvedValue(4);
+      const log = createMockLog();
+      const flagsReader = createMockFlagsReader({ 'run-id': 'abc', 'min-runs': '5' });
+
+      await calibrateCmd.run({ log, flagsReader } as any);
+
+      const warningLog = log.warning.mock.calls.find(
+        (call: string[]) =>
+          typeof call[0] === 'string' &&
+          call[0].includes('Calibrating from 4 run(s)') &&
+          call[0].includes('>= 5 runs')
+      );
+      expect(warningLog).toBeDefined();
+    });
+
+    it('still runs calibration even when warning is emitted', async () => {
+      mockGetDistinctRunCount.mockResolvedValue(1);
+      const log = createMockLog();
+      const flagsReader = createMockFlagsReader({ 'run-id': 'abc' });
+
+      await calibrateCmd.run({ log, flagsReader } as any);
+
+      expect(mockCalibrateThresholds).toHaveBeenCalled();
     });
   });
 

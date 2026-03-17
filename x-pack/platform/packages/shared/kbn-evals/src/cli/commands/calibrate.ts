@@ -25,8 +25,8 @@ export const calibrateCmd: Command<void> = {
     node scripts/evals calibrate --run-id abc123 --mode bootstrap --margin 1.5
   `,
   flags: {
-    string: ['run-id', 'config', 'output', 'mode', 'margin', 'model', 'suite'],
-    default: { mode: 'bootstrap', margin: '2' },
+    string: ['run-id', 'config', 'output', 'mode', 'margin', 'model', 'suite', 'min-runs'],
+    default: { mode: 'bootstrap', margin: '2', 'min-runs': '3' },
   },
   run: async ({ log, flagsReader }) => {
     const runId = flagsReader.string('run-id');
@@ -43,6 +43,12 @@ export const calibrateCmd: Command<void> = {
     const margin = parseFloat(marginRaw);
     if (!Number.isFinite(margin) || margin < 0) {
       throw createFlagError('--margin must be a non-negative number');
+    }
+
+    const minRunsRaw = flagsReader.string('min-runs') ?? '3';
+    const minRuns = parseInt(minRunsRaw, 10);
+    if (!Number.isFinite(minRuns) || minRuns < 1) {
+      throw createFlagError('--min-runs must be a positive integer');
     }
 
     const configPath = flagsReader.string('config');
@@ -68,6 +74,15 @@ export const calibrateCmd: Command<void> = {
     });
 
     const repository = new EvaluationScoreRepository(esClient, log);
+
+    const distinctRunCount = await repository.getDistinctRunCount({
+      suiteId: flagsReader.string('suite'),
+    });
+    if (distinctRunCount < minRuns) {
+      log.warning(
+        `Calibrating from ${distinctRunCount} run(s). Thresholds should be used as soft gates until >= ${minRuns} runs confirm stability.`
+      );
+    }
 
     log.info(`Calibrating thresholds from run "${runId}" (mode=${mode}, margin=${margin})`);
 

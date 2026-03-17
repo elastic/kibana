@@ -520,6 +520,31 @@ export class EvaluationScoreRepository {
     }
   }
 
+  async getDistinctRunCount(options?: { suiteId?: string }): Promise<number> {
+    try {
+      const query = options?.suiteId
+        ? { term: { 'suite.id': options.suiteId } }
+        : { match_all: {} };
+
+      const response = await this.esClient.search({
+        index: EVALUATIONS_DATA_STREAM_ALIAS,
+        size: 0,
+        query,
+        aggs: {
+          distinct_runs: {
+            cardinality: { field: 'run_id' },
+          },
+        },
+      });
+
+      const aggs = response.aggregations as { distinct_runs?: { value?: number } } | undefined;
+      return aggs?.distinct_runs?.value ?? 0;
+    } catch (error) {
+      this.log.warning('Failed to count distinct run IDs:', error);
+      return 0;
+    }
+  }
+
   async getScoresByRunId(
     runId: string,
     options?: { taskModelId?: string; suiteId?: string }

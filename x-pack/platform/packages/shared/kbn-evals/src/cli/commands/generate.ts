@@ -10,6 +10,16 @@ import Path from 'path';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { generateTestsFromToolSchema, type JSONSchema } from '../../generation/schema_walker';
+import type { Example } from '../../types';
+
+const formatAsTypescript = (examples: Example[]): string => {
+  const lines = [
+    `import type { Example } from '@kbn/evals';`,
+    '',
+    `export const generatedDataset: Example[] = ${JSON.stringify(examples, null, 2)};`,
+  ];
+  return lines.join('\n');
+};
 
 export const generateCmd: Command<void> = {
   name: 'generate',
@@ -21,8 +31,8 @@ export const generateCmd: Command<void> = {
     node scripts/evals generate --schema tool_schema.json --count 5 --difficulty simple --output examples.json
   `,
   flags: {
-    string: ['schema', 'count', 'difficulty', 'output'],
-    default: { count: '10', difficulty: 'moderate' },
+    string: ['schema', 'count', 'difficulty', 'output', 'output-format'],
+    default: { count: '10', difficulty: 'moderate', 'output-format': 'json' },
   },
   run: async ({ log, flagsReader }) => {
     const schemaPath = flagsReader.string('schema');
@@ -46,6 +56,11 @@ export const generateCmd: Command<void> = {
       throw createFlagError('--difficulty must be one of: simple, moderate, complex');
     }
 
+    const outputFormat = flagsReader.string('output-format') ?? 'json';
+    if (outputFormat !== 'json' && outputFormat !== 'typescript') {
+      throw createFlagError('--output-format must be "json" or "typescript"');
+    }
+
     const schemaRaw = Fs.readFileSync(resolvedSchemaPath, 'utf-8');
     let toolSchema: JSONSchema;
     try {
@@ -61,15 +76,23 @@ export const generateCmd: Command<void> = {
       difficulty: difficulty as 'simple' | 'moderate' | 'complex',
     });
 
+    const content =
+      outputFormat === 'typescript'
+        ? formatAsTypescript(examples)
+        : JSON.stringify(examples, null, 2);
+
     const outputPath = flagsReader.string('output');
     if (outputPath) {
       const resolvedOutput = Path.resolve(process.cwd(), outputPath);
-      Fs.writeFileSync(resolvedOutput, JSON.stringify(examples, null, 2), 'utf-8');
+      Fs.writeFileSync(resolvedOutput, content, 'utf-8');
       log.info(`Wrote ${examples.length} examples to ${resolvedOutput}`);
     } else {
-      process.stdout.write(`${JSON.stringify(examples, null, 2)}\n`);
+      process.stdout.write(`${content}\n`);
     }
 
     log.info(`Generated ${examples.length} examples`);
+    log.info(
+      "To promote this dataset: review the output, commit to your suite's dataset files, and run in CI."
+    );
   },
 };

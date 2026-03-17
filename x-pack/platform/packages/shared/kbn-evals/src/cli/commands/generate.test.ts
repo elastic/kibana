@@ -88,13 +88,13 @@ describe('generateCmd', () => {
 
     it('defines string flags', () => {
       expect(generateCmd.flags?.string).toEqual(
-        expect.arrayContaining(['schema', 'count', 'difficulty', 'output'])
+        expect.arrayContaining(['schema', 'count', 'difficulty', 'output', 'output-format'])
       );
     });
 
-    it('defaults count to 10 and difficulty to moderate', () => {
+    it('defaults count to 10, difficulty to moderate, and output-format to json', () => {
       expect(generateCmd.flags?.default).toEqual(
-        expect.objectContaining({ count: '10', difficulty: 'moderate' })
+        expect.objectContaining({ count: '10', difficulty: 'moderate', 'output-format': 'json' })
       );
     });
   });
@@ -153,6 +153,15 @@ describe('generateCmd', () => {
 
       await expect(generateCmd.run({ log, flagsReader } as any)).rejects.toThrow(
         'Failed to parse schema file as JSON'
+      );
+    });
+
+    it('throws for invalid --output-format', async () => {
+      const log = createMockLog();
+      const flagsReader = createMockFlagsReader({ schema: schemaFile, 'output-format': 'yaml' });
+
+      await expect(generateCmd.run({ log, flagsReader } as any)).rejects.toThrow(
+        '--output-format must be "json" or "typescript"'
       );
     });
   });
@@ -236,6 +245,66 @@ describe('generateCmd', () => {
         (call: string[]) => typeof call[0] === 'string' && call[0].includes('Wrote 2 examples')
       );
       expect(writeLog).toBeDefined();
+    });
+  });
+
+  describe('output-format', () => {
+    it('outputs JSON by default', async () => {
+      const log = createMockLog();
+      const flagsReader = createMockFlagsReader({ schema: schemaFile });
+
+      await generateCmd.run({ log, flagsReader } as any);
+
+      const stdoutOutput = (process.stdout.write as jest.Mock).mock.calls[0][0];
+      const parsed = JSON.parse(stdoutOutput.trim());
+      expect(Array.isArray(parsed)).toBe(true);
+    });
+
+    it('outputs TypeScript module when --output-format=typescript', async () => {
+      const log = createMockLog();
+      const flagsReader = createMockFlagsReader({
+        schema: schemaFile,
+        'output-format': 'typescript',
+      });
+
+      await generateCmd.run({ log, flagsReader } as any);
+
+      const stdoutOutput = (process.stdout.write as jest.Mock).mock.calls[0][0];
+      expect(stdoutOutput).toContain("import type { Example } from '@kbn/evals'");
+      expect(stdoutOutput).toContain('export const generatedDataset: Example[]');
+    });
+
+    it('writes TypeScript to file when --output and --output-format=typescript', async () => {
+      const tsOutputFile = Path.join(tmpDir, 'output.ts');
+      const log = createMockLog();
+      const flagsReader = createMockFlagsReader({
+        schema: schemaFile,
+        output: tsOutputFile,
+        'output-format': 'typescript',
+      });
+
+      await generateCmd.run({ log, flagsReader } as any);
+
+      expect(Fs.existsSync(tsOutputFile)).toBe(true);
+      const content = Fs.readFileSync(tsOutputFile, 'utf-8');
+      expect(content).toContain("import type { Example } from '@kbn/evals'");
+      expect(content).toContain('export const generatedDataset: Example[]');
+      Fs.unlinkSync(tsOutputFile);
+    });
+  });
+
+  describe('promotion workflow', () => {
+    it('logs the promotion suggestion after generation', async () => {
+      const log = createMockLog();
+      const flagsReader = createMockFlagsReader({ schema: schemaFile });
+
+      await generateCmd.run({ log, flagsReader } as any);
+
+      const promotionLog = log.info.mock.calls.find(
+        (call: string[]) =>
+          typeof call[0] === 'string' && call[0].includes('To promote this dataset')
+      );
+      expect(promotionLog).toBeDefined();
     });
   });
 });
