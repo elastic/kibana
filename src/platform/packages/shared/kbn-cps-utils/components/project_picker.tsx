@@ -13,6 +13,8 @@ import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiPopover,
   EuiToolTip,
+  EuiTourStep,
+  EuiButton,
   EuiButtonIcon,
   EuiButtonEmpty,
   EuiPopoverTitle,
@@ -25,6 +27,7 @@ import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { UseFetchProjectsResult } from './use_fetch_projects';
 import { ProjectPickerContent } from './project_picker_content';
+import { useProjectPickerTour } from './use_project_picker_tour';
 import { strings } from './strings';
 import { CPSIconDisabled } from './cps_icon';
 
@@ -47,6 +50,7 @@ export const ProjectPicker = ({
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
+  const { isTourOpen, closeTour } = useProjectPickerTour();
 
   const { originProject, linkedProjects, isLoading, error } = projects;
 
@@ -79,42 +83,69 @@ export const ProjectPicker = ({
   );
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={showPopover}
-      closePopover={() => setShowPopover(false)}
-      repositionOnScroll
+    <EuiTourStep
+      isStepOpen={isTourOpen}
+      title={strings.getProjectPickerTourTitle()}
+      content={strings.getProjectPickerTourContent()}
+      onFinish={closeTour}
+      step={1}
+      stepsTotal={1}
       anchorPosition="downLeft"
-      ownFocus
-      panelPaddingSize="none"
-      panelProps={{ css: styles.popover }}
-      hasArrow
-    >
-      <EuiPopoverTitle paddingSize="s">
-        <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem>
-            <EuiTitle size="xxs">
-              <h5>{strings.getProjectPickerPopoverTitle()}</h5>
-            </EuiTitle>
-          </EuiFlexItem>
-          {settingsComponent && <EuiFlexItem grow={false}>{settingsComponent}</EuiFlexItem>}
-        </EuiFlexGroup>
-      </EuiPopoverTitle>
-      {isReadonly && (
-        <EuiCallOut
+      minWidth={300}
+      maxWidth={360}
+      repositionOnScroll
+      offset={2}
+      footerAction={
+        <EuiButton
           size="s"
-          css={styles.callout}
-          title={strings.getProjectPickerReadonlyCallout()}
-          iconType="info"
+          color="success"
+          onClick={closeTour}
+          data-test-subj="project-picker-tour-close-button"
+        >
+          {strings.getProjectPickerTourCloseButton()}
+        </EuiButton>
+      }
+      panelProps={{
+        'data-test-subj': 'project-picker-tour',
+      }}
+    >
+      <EuiPopover
+        button={button}
+        isOpen={showPopover}
+        closePopover={() => setShowPopover(false)}
+        repositionOnScroll
+        anchorPosition="downLeft"
+        ownFocus
+        panelPaddingSize="none"
+        panelProps={{ css: styles.popover }}
+        hasArrow
+      >
+        <EuiPopoverTitle paddingSize="s">
+          <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h5>{strings.getProjectPickerPopoverTitle()}</h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            {settingsComponent && <EuiFlexItem grow={false}>{settingsComponent}</EuiFlexItem>}
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
+        {isReadonly && (
+          <EuiCallOut
+            size="s"
+            css={styles.callout}
+            title={strings.getProjectPickerReadonlyCallout()}
+            iconType="info"
+          />
+        )}
+        <ProjectPickerContent
+          projectRouting={projectRouting}
+          onProjectRoutingChange={onProjectRoutingChange}
+          projects={projects}
+          isReadonly={isReadonly}
         />
-      )}
-      <ProjectPickerContent
-        projectRouting={projectRouting}
-        onProjectRoutingChange={onProjectRoutingChange}
-        projects={projects}
-        isReadonly={isReadonly}
-      />
-    </EuiPopover>
+      </EuiPopover>
+    </EuiTourStep>
   );
 };
 

@@ -74,7 +74,6 @@ describe('ProjectPicker', () => {
     await renderProjectPicker();
 
     expect(getButton()).toBeInTheDocument();
-    expect(screen.queryByTestId('project-picker-tour')).not.toBeInTheDocument();
   });
   it('should display button group options in popover', async () => {
     await renderProjectPicker();
