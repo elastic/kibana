@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/maintenance-windows-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/maintenance-windows-plugin'
+  title: '@kbn/maintenance-windows-plugin'
   description: Moon project for @kbn/maintenance-windows-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/maintenance_windows
+  sourceRoot: x-pack/platform/plugins/shared/maintenance_windows
 dependsOn:
   - '@kbn/core'
   - '@kbn/security-plugin'
@@ -70,14 +69,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
