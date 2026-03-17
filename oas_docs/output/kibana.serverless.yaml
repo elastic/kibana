@@ -1286,24 +1286,17 @@ paths:
                   description: Configuration settings for the agent.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: When true, enables built-in Elastic capabilities for the agent.
+                      type: boolean
                     instructions:
                       description: Optional system instructions that define the agent behavior.
                       type: string
-                    skills:
+                    skill_ids:
+                      description: Array of skill IDs to be available to the agent.
                       items:
-                        additionalProperties: false
-                        description: Skill selection configuration for the agent.
-                        type: object
-                        properties:
-                          skill_ids:
-                            description: Array of skill IDs. Use "*" to select all built-in skills.
-                            items:
-                              description: Skill ID to be available to the agent.
-                              type: string
-                            maxItems: 100
-                            type: array
-                        required:
-                          - skill_ids
+                        description: Skill ID to be available to the agent.
+                        type: string
                       maxItems: 100
                       type: array
                     tools:
@@ -1616,24 +1609,17 @@ paths:
                   description: Updated configuration settings for the agent.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: When true, enables built-in Elastic capabilities for the agent.
+                      type: boolean
                     instructions:
                       description: Updated system instructions that define the agent behavior.
                       type: string
-                    skills:
+                    skill_ids:
+                      description: Array of skill IDs to be available to the agent.
                       items:
-                        additionalProperties: false
-                        description: Skill selection configuration for the agent.
-                        type: object
-                        properties:
-                          skill_ids:
-                            description: Array of skill IDs. Use "*" to select all built-in skills.
-                            items:
-                              description: Skill ID to be available to the agent.
-                              type: string
-                            maxItems: 100
-                            type: array
-                        required:
-                          - skill_ids
+                        description: Skill ID to be available to the agent.
+                        type: string
                       maxItems: 100
                       type: array
                     tools:
@@ -2058,14 +2044,15 @@ paths:
                 id:
                   description: Optional custom ID for the attachment.
                   type: string
-                origin: {}
+                origin:
+                  description: Origin string (e.g. saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
+                  type: string
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
                   type: string
               required:
                 - type
                 - data
-                - origin
       responses:
         '200':
           content:
@@ -2415,13 +2402,14 @@ paths:
               updateOriginExample:
                 description: Example request for linking an attachment to a saved visualization
                 value:
-                  origin:
-                    saved_object_id: abc123
+                  origin: abc123
             schema:
               additionalProperties: false
               type: object
               properties:
-                origin: {}
+                origin:
+                  description: The origin string (e.g., saved object ID for visualizations and dashboards).
+                  type: string
               required:
                 - origin
       responses:
@@ -2437,8 +2425,7 @@ paths:
                       current_version: 1
                       description: Sales chart
                       id: att-123
-                      origin:
-                        saved_object_id: abc123
+                      origin: abc123
                       type: visualization
                       versions:
                         - content_hash: sha256-xyz
@@ -39729,6 +39716,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: Skip dependency validation when installing a package with dependencies
+          in: query
+          name: skipDependencyCheck
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -62175,6 +62169,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62199,6 +62195,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62267,6 +62264,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62291,6 +62290,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62366,6 +62366,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62390,6 +62392,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62458,6 +62461,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62482,6 +62487,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62557,6 +62563,8 @@ paths:
                           items:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -62581,6 +62589,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                           type: array
                         rules:
@@ -63497,6 +63506,8 @@ paths:
                           index:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -63521,6 +63532,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                         required:
                           - index
@@ -63628,6 +63640,9 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                description:
+                  default: ''
+                  type: string
                 esql:
                   additionalProperties: false
                   type: object
@@ -83035,6 +83050,11 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entitySourceIds:
+          description: List of entity source IDs associated with the watchlist
+          items:
+            type: string
+          type: array
         id:
           description: The unique ID of the watchlist
           type: string
@@ -85255,6 +85275,7 @@ components:
           - attributes:
               created_at: '2023-10-31T00:00:00Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: My pack description
               enabled: true
               name: My Pack
@@ -85267,6 +85288,7 @@ components:
                   query: select * from uptime;
               updated_at: '2023-10-31T00:00:00Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:
               - default
@@ -85311,6 +85333,7 @@ components:
           - attributes:
               created_at: '2022-07-26T09:28:08.597Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: Saved query description
               ecs_mapping:
                 host.uptime:
@@ -85322,6 +85345,7 @@ components:
               query: select * from uptime;
               updated_at: '2022-07-26T09:28:08.597Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               version: 2.8.0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:
