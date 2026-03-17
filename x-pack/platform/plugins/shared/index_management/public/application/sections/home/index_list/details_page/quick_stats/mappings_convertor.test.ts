@@ -99,10 +99,10 @@ describe('countVectorBasedTypesFromMappings', () => {
     });
   });
 
-  test('does not traverse into multi-fields (fields key)', () => {
-    // Multi-fields are flat records without a `properties` wrapper,
-    // so the recursive traversal does not enter them. In practice,
-    // vector types would not appear as multi-fields.
+  test('counts vector fields inside multi-fields (fields key)', () => {
+    // Multi-fields are flat records without a `properties` wrapper.
+    // Currently, vector types can not be defined as multi-fields, but
+    // we are still checking for them in case this is ever changed in the future.
     const mappings = createMappingsResponse({
       content: {
         type: 'text',
@@ -114,8 +114,8 @@ describe('countVectorBasedTypesFromMappings', () => {
     });
 
     expect(countVectorBasedTypesFromMappings(mappings)).toEqual({
-      semantic_text: 0,
-      dense_vector: 0,
+      semantic_text: 1,
+      dense_vector: 1,
       sparse_vector: 0,
     });
   });

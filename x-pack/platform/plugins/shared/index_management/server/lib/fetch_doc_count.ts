@@ -11,6 +11,10 @@ export const fetchDocCount = async (
   client: ElasticsearchClient,
   indexNames: string[]
 ): Promise<Record<string, number>> => {
+  if (indexNames.length === 0) {
+    return {};
+  }
+
   const result = await client.esql.query({
     query: `FROM ${indexNames.join(',')} METADATA _index | STATS count() BY _index`,
   });

@@ -24,35 +24,35 @@ export function countVectorBasedTypesFromMappings(mappings: MappingsResponse): V
   const typeCountKeys = Object.keys(typeCounts);
 
   function recursiveCount(
-    fields: MappingsResponse | MappingProperty | MappingPropertyBase['fields']
+    node: MappingsResponse | MappingProperty | MappingPropertyBase['fields']
   ) {
-    if (!fields) {
+    if (!node) {
       return;
     }
-    if ('mappings' in fields) {
-      recursiveCount(fields.mappings);
+    if ('mappings' in node) {
+      recursiveCount(node.mappings);
     }
-    if ('properties' in fields && fields.properties) {
-      Object.keys(fields.properties).forEach((key) => {
-        const value = (fields.properties as Record<string, MappingProperty>)?.[key];
 
-        if (value && value.type) {
-          if (typeCountKeys.includes(value.type)) {
-            const type = value.type as keyof VectorFieldTypes;
-            typeCounts[type] = typeCounts[type] + 1;
-          }
+    const visitEntries = (entries: Record<string, MappingProperty>) => {
+      Object.keys(entries).forEach((key) => {
+        const value = entries[key];
 
-          if ('fields' in value) {
-            recursiveCount(value.fields);
-          }
+        if (value && value.type && typeCountKeys.includes(value.type)) {
+          const type = value.type as keyof VectorFieldTypes;
+          typeCounts[type] = typeCounts[type] + 1;
+        }
 
-          if ('properties' in value) {
-            recursiveCount(value.properties);
-          }
-        } else if (value.properties || value.fields) {
+        if (value) {
           recursiveCount(value);
         }
       });
+    };
+
+    if ('properties' in node && node.properties) {
+      visitEntries(node.properties as Record<string, MappingProperty>);
+    }
+    if ('fields' in node && node.fields) {
+      visitEntries(node.fields as Record<string, MappingProperty>);
     }
   }
 
