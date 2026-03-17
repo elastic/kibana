@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Create private location in the non-default space
       loc = await testPrivateLocations.createPrivateLocation({
-        spaceId,
+        spaces: [spaceId],
         label: 'Test private location non-default space',
       });
       testFleetPolicyID = loc.agentPolicyId;
@@ -162,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: testFleetPolicyID },
-          spaceId,
+          spaceIds: [spaceId],
           mws: [mwObject],
           packageVersion: testPrivateLocations.installedVersion,
         })
