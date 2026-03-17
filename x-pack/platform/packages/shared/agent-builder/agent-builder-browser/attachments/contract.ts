@@ -19,6 +19,8 @@ export enum ActionButtonType {
   SECONDARY = 'secondary',
   OVERFLOW = 'overflow',
 }
+
+export type AttachmentPreviewState = 'none' | 'preview_available' | 'previewing';
 /**
  * Props passed to custom attachment content renderers.
  */
@@ -39,6 +41,13 @@ export interface CanvasRenderCallbacks {
   registerActionButtons: (buttons: ActionButton[]) => void;
   /** Update the attachment's origin reference (e.g., after saving to library) */
   updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
+  /** Close the canvas (expanded flyout view) */
+  closeCanvas: () => void;
+  /**
+   * Optional callback for externally-controlled inline preview state.
+   * Use to mark an attachment as currently previewed outside canvas.
+   */
+  setPreviewState?: (previewState: AttachmentPreviewState) => void;
 }
 
 /**
@@ -55,6 +64,11 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
   openCanvas?: () => void;
+  /**
+   * Optional callback for externally-controlled inline preview state.
+   * Use to mark an attachment as currently previewed outside canvas.
+   */
+  setPreviewBadgeState?: (previewBadgeState: AttachmentPreviewState) => void;
 }
 
 /**
