@@ -10,6 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlToolsOptions } from './types';
 
 const smlSearchSchema = z.object({
@@ -46,6 +47,18 @@ export const createSmlSearchTool = ({
     'To bring a result into the conversation as an attachment, pass its chunk_id, attachment_id, and attachment_type to sml_attach.',
   schema: smlSearchSchema,
   tags: ['sml', 'search'],
+  availability: {
+    cacheMode: 'global',
+    handler: async ({ uiSettings }) => {
+      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      return enabled
+        ? { status: 'available' }
+        : {
+            status: 'unavailable',
+            reason: 'SML features require experimental features to be enabled',
+          };
+    },
+  },
   handler: async ({ keywords, size }, context) => {
     const smlService = getSmlService();
     const { spaceId, esClient, request } = context;

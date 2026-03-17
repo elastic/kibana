@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { TaskManagerSetupContract, TaskManagerStartContract, TaskPriority, } from '@kbn/task-manager-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { Logger } from '@kbn/logging';
-import type { SmlCrawler, SmlService } from './types';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type { SmlService } from './types';
 
 /**
  * Security model:
@@ -43,6 +49,7 @@ export interface SmlCrawlerDepsProvider {
   smlService: SmlService;
   elasticsearch: ElasticsearchServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  uiSettings: UiSettingsServiceStart;
   logger: Logger;
 }
 
@@ -73,8 +80,20 @@ export const registerSmlCrawlerTaskDefinition = ({
               return { state: {} };
             }
 
-            const { smlService, elasticsearch, savedObjects, logger } =
+            const { smlService, elasticsearch, savedObjects, uiSettings, logger } =
               await getCrawlerDeps();
+
+            const soClient = savedObjects.createInternalRepository();
+            const uiSettingsClient = uiSettings.asScopedToClient(soClient);
+            const experimentalEnabled = await uiSettingsClient.get<boolean>(
+              AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+            );
+            if (!experimentalEnabled) {
+              logger.debug(
+                `SML crawler: experimental features disabled — skipping crawl for type '${attachmentType}'`
+              );
+              return { state: {} };
+            }
 
             logger.info(`SML crawler task starting for type '${attachmentType}'`);
 

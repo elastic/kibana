@@ -115,6 +115,7 @@ export class AgentBuilderPlugin
           smlService: services.sml,
           elasticsearch: coreStart.elasticsearch,
           savedObjects: coreStart.savedObjects,
+          uiSettings: coreStart.uiSettings,
           logger: this.logger.get('services').get('sml'),
         };
       },

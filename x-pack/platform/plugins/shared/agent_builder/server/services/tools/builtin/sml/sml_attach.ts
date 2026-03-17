@@ -11,6 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlToolsOptions } from './types';
 
 const smlAttachItemSchema = z.object({
@@ -54,6 +55,18 @@ export const createSmlAttachTool = ({
     'Items that cannot be resolved return individual errors without failing the entire call.',
   schema: smlAttachSchema,
   tags: ['sml', 'attachment'],
+  availability: {
+    cacheMode: 'global',
+    handler: async ({ uiSettings }) => {
+      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      return enabled
+        ? { status: 'available' }
+        : {
+            status: 'unavailable',
+            reason: 'SML features require experimental features to be enabled',
+          };
+    },
+  },
   handler: async ({ items }, context) => {
     const smlService = getSmlService();
     const { spaceId, savedObjectsClient, request, attachments, esClient, logger } = context;

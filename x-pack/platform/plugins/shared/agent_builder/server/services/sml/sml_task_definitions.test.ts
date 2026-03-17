@@ -21,6 +21,9 @@ import {
 const mockEsClient = {};
 const mockSoRepository = {};
 
+const mockUiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
+const mockUiSettings = { asScopedToClient: jest.fn().mockReturnValue(mockUiSettingsClient) };
+
 const mockCrawler = { crawl: jest.fn().mockResolvedValue(undefined) };
 const mockSmlService = {
   getCrawler: jest.fn().mockReturnValue(mockCrawler),
@@ -37,6 +40,7 @@ const mockGetCrawlerDeps = jest.fn().mockResolvedValue({
   smlService: mockSmlService,
   elasticsearch: { client: { asInternalUser: mockEsClient } },
   savedObjects: { createInternalRepository: jest.fn().mockReturnValue(mockSoRepository) },
+  uiSettings: mockUiSettings,
   logger: mockLogger,
 });
 
@@ -68,10 +72,12 @@ function getRegisteredTaskRunner(params: { attachmentType?: string }) {
 describe('sml_task_definitions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUiSettingsClient.get.mockResolvedValue(true);
     mockGetCrawlerDeps.mockResolvedValue({
       smlService: mockSmlService,
       elasticsearch: { client: { asInternalUser: mockEsClient } },
       savedObjects: { createInternalRepository: jest.fn().mockReturnValue(mockSoRepository) },
+      uiSettings: mockUiSettings,
       logger: mockLogger,
     });
     mockSmlService.listTypeDefinitions.mockReturnValue([]);
@@ -105,6 +111,21 @@ describe('sml_task_definitions', () => {
 
       expect(result).toEqual({ state: {} });
       expect(mockGetCrawlerDeps).not.toHaveBeenCalled();
+    });
+
+    it('skips crawl when experimental features are disabled', async () => {
+      mockUiSettingsClient.get.mockResolvedValue(false);
+      const definition = createMockDefinition({ id: 'visualization' });
+      mockSmlService.getTypeDefinition.mockReturnValue(definition);
+
+      const runner = getRegisteredTaskRunner({ attachmentType: 'visualization' });
+      const result = await runner.run();
+
+      expect(result).toEqual({ state: {} });
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        "SML crawler: experimental features disabled — skipping crawl for type 'visualization'"
+      );
+      expect(mockCrawler.crawl).not.toHaveBeenCalled();
     });
 
     it('awaits getCrawlerDeps and calls crawler.crawl with correct params', async () => {

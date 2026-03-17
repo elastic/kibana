@@ -77,6 +77,8 @@ export const defaultAgentToolIds = [
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
   platformCoreTools.getWorkflowExecutionStatus,
+  platformCoreTools.smlSearch,
+  platformCoreTools.smlAttach,
 ];
 
 /**
