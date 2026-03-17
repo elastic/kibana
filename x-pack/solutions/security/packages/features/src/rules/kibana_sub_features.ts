@@ -256,6 +256,11 @@ export const getRulesManagementSettingsSubFeature = (): SubFeatureConfig => ({
             all: [],
             read: [],
           },
+          alerting: {
+            rule: {
+              manage_rule_settings: alertingFeatures,
+            },
+          },
           ui: [RULES_MANAGEMENT_SETTINGS_UI],
           api: [RULES_MANAGEMENT_SETTINGS_API_PRIVILEGE],
         },
