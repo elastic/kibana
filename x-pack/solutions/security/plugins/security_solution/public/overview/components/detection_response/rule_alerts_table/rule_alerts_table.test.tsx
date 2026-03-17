@@ -9,6 +9,7 @@ import moment from 'moment';
 import React from 'react';
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 import { SecurityPageName } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
@@ -170,6 +171,7 @@ describe('RuleAlertsTable', () => {
     fireEvent.click(getByTestId('severityRuleAlertsTable-alertCountLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith({
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       field_name: 'kibana.alert.rule.name',
       selected_options: ['ruleName'],
       title: 'Rule name',
@@ -190,6 +192,7 @@ describe('RuleAlertsTable', () => {
 
     await waitFor(() => {
       expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith({
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         field_name: 'kibana.alert.workflow_status',
         title: 'Status',
         selected_options: ['open'],

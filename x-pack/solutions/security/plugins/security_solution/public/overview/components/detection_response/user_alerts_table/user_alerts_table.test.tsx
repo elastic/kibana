@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 import { TestProviders } from '../../../../common/mock';
 import { parsedVulnerableUserAlertsResult } from './mock_data';
@@ -146,7 +147,12 @@ describe('UserAlertsTable', () => {
     fireEvent.click(getByTestId('userSeverityAlertsTable-totalAlertsLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
-      { field_name: 'user.name', selected_options: ['crffn20qcs'], title: 'Username' },
+      {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+        field_name: 'user.name',
+        selected_options: ['crffn20qcs'],
+        title: 'Username',
+      },
     ]);
   });
 
@@ -157,8 +163,14 @@ describe('UserAlertsTable', () => {
     fireEvent.click(getByTestId('userSeverityAlertsTable-criticalLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
-      { field_name: 'user.name', selected_options: ['crffn20qcs'], title: 'Username' },
       {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+        field_name: 'user.name',
+        selected_options: ['crffn20qcs'],
+        title: 'Username',
+      },
+      {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         field_name: 'kibana.alert.severity',
         selected_options: ['critical'],
         title: 'Severity',

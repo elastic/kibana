@@ -11,6 +11,7 @@ import '@testing-library/jest-dom';
 import { SecurityAlertsPageReference } from './security_alerts_page_reference';
 import { useKibana } from '../../../../context/typed_kibana_context/typed_kibana_context';
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../hooks/navigate_to_alerts_page_with_filters/use_navigate_to_alerts_page_with_filters';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import type { SecurityAlertsPageContentReference } from '@kbn/elastic-assistant-common';
@@ -98,6 +99,7 @@ describe('SecurityAlertsPageReference', () => {
     fireEvent.click(screen.getByTestId('alertsReferenceLink'));
     expect(mockOpenAlertsPageWithFilters).toHaveBeenCalledWith(
       {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         selected_options: [ALERTS_PAGE_FILTER_OPEN, ALERTS_PAGE_FILTER_ACKNOWLEDGED],
         field_name: 'kibana.alert.workflow_status',
         persist: false,
