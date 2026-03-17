@@ -153,6 +153,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
         path: `/internal/streams/logs.otel/processing/_suggestions/${patternType}`,
         body: {
           connector_id: connectorId,
+          field_name: fieldToParse || 'body.text',
           sample_messages: messages,
           review_fields: reviewFields,
         },

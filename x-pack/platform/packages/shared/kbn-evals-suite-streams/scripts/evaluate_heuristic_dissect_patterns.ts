@@ -58,6 +58,7 @@ async function getSuggestions(
       headers: getKibanaAuthHeaders(),
       body: JSON.stringify({
         connector_id: connectorId,
+        field_name: MESSAGE_FIELD,
         sample_messages: messages.slice(0, 10),
         review_fields: reviewFields,
       }),
