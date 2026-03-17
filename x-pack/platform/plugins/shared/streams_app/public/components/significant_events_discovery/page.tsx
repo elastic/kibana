@@ -21,8 +21,15 @@ import { FeaturesTable } from './components/features_table/features_table';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';
+import { SettingsTab } from './components/settings/tab';
 
-const discoveryTabs = ['streams', 'knowledge_indicators', 'queries', 'significant_events'] as const;
+const discoveryTabs = [
+  'streams',
+  'knowledge_indicators',
+  'queries',
+  'significant_events',
+  'settings',
+] as const;
 type DiscoveryTab = (typeof discoveryTabs)[number];
 
 function isValidDiscoveryTab(value: string): value is DiscoveryTab {
@@ -110,6 +117,14 @@ export function SignificantEventsDiscoveryPage() {
       href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
       isSelected: tab === 'significant_events',
     },
+    {
+      id: 'settings',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
+        defaultMessage: 'Settings',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
+      isSelected: tab === 'settings',
+    },
   ];
 
   return (
@@ -143,6 +158,7 @@ export function SignificantEventsDiscoveryPage() {
         {tab === 'knowledge_indicators' && <FeaturesTable />}
         {tab === 'queries' && <QueriesTable />}
         {tab === 'significant_events' && <InsightsTab />}
+        {tab === 'settings' && <SettingsTab />}
       </StreamsAppPageTemplate.Body>
     </>
   );
