@@ -74,18 +74,10 @@ export function createRuleExecutionLogClientForExecutors(
     },
 
     warn(message: string): void {
-      if (this.closed()) {
-        throw new Error('The logger has been closed');
-      }
-
       writeMessageToEventLog(message, LogLevelEnum.warn);
     },
 
     error(message: string): void {
-      if (this.closed()) {
-        throw new Error('The logger has been closed');
-      }
-
       writeMessageToEventLog(message, LogLevelEnum.error);
     },
 

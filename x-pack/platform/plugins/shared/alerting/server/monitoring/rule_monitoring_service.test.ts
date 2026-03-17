@@ -105,9 +105,9 @@ describe('RuleMonitoringService', () => {
 
     it('should set totalSearchDurationMs', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsTotalSearchDurationMs } =
-        ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsTotalSearchDurationMs(123);
+      const { setMetric } = ruleMonitoringService.getSetters();
+
+      setMetric('total_search_duration_ms', 123);
 
       const {
         run: {
@@ -119,9 +119,9 @@ describe('RuleMonitoringService', () => {
 
     it('should set totalIndexDurationMs', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsTotalIndexingDurationMs } =
-        ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsTotalIndexingDurationMs(234);
+      const { setMetric } = ruleMonitoringService.getSetters();
+
+      setMetric('total_indexing_duration_ms', 234);
 
       const {
         run: {
@@ -133,9 +133,9 @@ describe('RuleMonitoringService', () => {
 
     it('should set totalAlertsDetected', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsTotalAlertsDetected } =
-        ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsTotalAlertsDetected(345);
+      const { setMetric } = ruleMonitoringService.getSetters();
+
+      setMetric('total_alerts_detected', 345);
 
       const {
         run: {
@@ -147,9 +147,9 @@ describe('RuleMonitoringService', () => {
 
     it('should set totalAlertsCreated', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsTotalAlertsCreated } =
-        ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsTotalAlertsCreated(456);
+      const { setMetric } = ruleMonitoringService.getSetters();
+
+      setMetric('total_alerts_created', 456);
 
       const {
         run: {
@@ -161,8 +161,9 @@ describe('RuleMonitoringService', () => {
 
     it('should set gapDurationS', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsGapDurationS } = ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsGapDurationS(567);
+      const { setMetric } = ruleMonitoringService.getSetters();
+
+      setMetric('gap_duration_s', 567);
 
       const {
         run: {
@@ -174,8 +175,9 @@ describe('RuleMonitoringService', () => {
 
     it('should set gapRange', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsGapRange } = ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsGapRange({
+      const { setMetric } = ruleMonitoringService.getSetters();
+
+      setMetric('gap_range', {
         gte: '2020-01-01T00:00:00.000Z',
         lte: '2020-01-01T01:00:00.000Z',
       });

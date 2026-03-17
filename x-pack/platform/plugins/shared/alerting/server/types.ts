@@ -466,18 +466,13 @@ export interface ConsumerExecutionMetrics {
   indices_found_count: number;
 }
 
-export interface PublicMetricsSetters {
-  setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
-  setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
-  setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
-  setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
-  setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
-  setLastRunMetricsGapRange: (gapRange: { lte: string; gte: string } | null) => void;
+export interface PublicRuleMonitoringService {
   setMetric: <MetricName extends keyof ConsumerExecutionMetrics>(
     metricName: MetricName,
     value: ConsumerExecutionMetrics[MetricName]
   ) => void;
   setMetrics: (metrics: Partial<ConsumerExecutionMetrics>) => void;
+  clearGapRange: () => void;
 }
 
 export interface PublicLastRunSetters {
@@ -485,8 +480,6 @@ export interface PublicLastRunSetters {
   addLastRunWarning: (outcomeMsg: string) => void;
   setLastRunOutcomeMessage: (warning: string) => void;
 }
-
-export type PublicRuleMonitoringService = PublicMetricsSetters;
 
 export type PublicRuleResultService = PublicLastRunSetters;
 

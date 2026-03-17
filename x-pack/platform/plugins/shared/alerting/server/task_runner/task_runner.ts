@@ -581,7 +581,7 @@ export class TaskRunner<
 
       // Clear gap range that was persisted in the rule SO
       if (this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range) {
-        this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
+        this.ruleMonitoring.getSetters().clearGapRange();
       }
       (async () => {
         try {

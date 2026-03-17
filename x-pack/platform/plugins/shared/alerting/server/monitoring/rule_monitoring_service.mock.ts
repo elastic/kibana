@@ -20,12 +20,8 @@ function createRuleMonitoringServiceMock() {
 function createPublicRuleMonitoringServiceMock() {
   return jest.fn().mockImplementation(() => {
     return {
-      setLastRunMetricsGapDurationS: jest.fn(),
-      setLastRunMetricsTotalAlertsCreated: jest.fn(),
-      setLastRunMetricsTotalAlertsDetected: jest.fn(),
-      setLastRunMetricsTotalIndexingDurationMs: jest.fn(),
-      setLastRunMetricsTotalSearchDurationMs: jest.fn(),
-      setLastRunMetricsGapRange: jest.fn(),
+      setMetric: jest.fn(),
+      setMetrics: jest.fn(),
     };
   });
 }
