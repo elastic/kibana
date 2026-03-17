@@ -9792,25 +9792,25 @@
     "@langchain/core" ">0.1.0  <0.3.0"
     js-tiktoken "^1.0.12"
 
-"@launchdarkly/js-sdk-common@2.20.0":
-  version "2.20.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.20.0.tgz#1e9f762cc5c9d707003af173176ca5d5dc1a144f"
-  integrity sha512-g1Lyi5xL7AXAP6BP8BzRcqVqIhqOSVpA5Bx8Vvj8A/4A6sIHVz2vIZluykD/bJiKg1+G9ojm+OCfdL/c0ebi0A==
+"@launchdarkly/js-sdk-common@2.22.0":
+  version "2.22.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.22.0.tgz#1de5b52a0b7bb0994d256ddc60102973b0c8219e"
+  integrity sha512-M5kX3Dl2ZN8CPIMB+j4lR0AcCtUuIRVBNoccswiqsh9sb5owjP0OQZqJoa5gHDgc6avMLASOVxkDKRlBPxUemw==
 
-"@launchdarkly/js-server-sdk-common@2.17.2":
-  version "2.17.2"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.17.2.tgz#c5dfa9468335264a15640e8ea25387309944eb73"
-  integrity sha512-0BOdfrJ+jU2rDqbr3Saf5T6KsPIzhRHi7mAhqS7lxXbkL9cBIafNLIbXcv+O+9e4QQX88J6K8OdhOs7+/OrlkQ==
+"@launchdarkly/js-server-sdk-common@2.18.1":
+  version "2.18.1"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.18.1.tgz#e8d6033571e8a1e5a15a68a65814d85e4f792c9f"
+  integrity sha512-eMjUbTu78fjk10Aa4X1m9jl83nY5NHCYNHvBNnO99EwBVZbalxA228rUORSlldl0v4a7fBfJK8tacLgqGPhAeA==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.20.0"
+    "@launchdarkly/js-sdk-common" "2.22.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@9.10.6":
-  version "9.10.6"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.10.6.tgz#1ef63ad3dadae266ba1940ce6f15a43bd4a16efa"
-  integrity sha512-mxvyeknuWZ4DLPSe8FqtzfSBsmvMU1SfSCv9s4rnpALFOgHQX+jMYEfLDy7GpkScriClu8soekYRhPeQamqB6A==
+"@launchdarkly/node-server-sdk@9.10.8":
+  version "9.10.8"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.10.8.tgz#81c03aff4b88552eccd98eecba9f982f3cac6b26"
+  integrity sha512-VMceUjWTQL61O8wyOTUqzYoC0LjWp3KnXY32oPs3ZiDr/pz59unV2XPZw3EsYEIuqIajkCSBQWwySYOhslF3Og==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.17.2"
+    "@launchdarkly/js-server-sdk-common" "2.18.1"
     https-proxy-agent "^7.0.6"
     launchdarkly-eventsource "2.2.0"
 
