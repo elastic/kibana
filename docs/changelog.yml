@@ -10,6 +10,14 @@
 #     - value3
 # Both forms produce the same result. Choose whichever is more readable for your use case.
 
+# Filename strategy for generated changelog files.
+# Controls how files created by 'changelog add' are named.
+#   pr        — use the PR number (e.g., 12345.yaml).
+#   issue     — use the issue number (e.g., 67890.yaml).
+#   timestamp — use a Unix timestamp with a title slug (e.g., 1735689600-fix-search.yaml). Default.
+# Can be overridden per invocation with --use-pr-number or --use-issue-number CLI flags.
+filename: pr
+
 # Products configuration (optional)
 # If not specified, all products from products.yml are allowed
 products:
@@ -35,11 +43,11 @@ extract:
   issues: true
 
 # Available lifecycle values (strongly typed: preview, beta, ga)
-# New name (preferred):
-# lifecycles:
-#   - preview
-#   - beta
-#   - ga
+# Accepts string or list: "preview, beta, ga" or a YAML list
+lifecycles:
+  - preview
+  - beta
+  - ga
 
 # Pivot configuration for types, subtypes, and areas with label mappings.
 # By default we render entries grouped by type > subtype > area.
@@ -319,12 +327,53 @@ rules:
   #     'cloud-serverless':
   #       exclude: "ILM"
 
-  # Publish — controls which entries appear in rendered output.
-  #   exclude_types / include_types (string or list)
-  #   exclude_areas / include_areas (string or list)
-  # Cannot mix exclude_ and include_ for the same field.
+  # Bundle — filtering applied during 'changelog bundle' and 'changelog gh-release'.
+  # Applied after the primary filter (--prs, --issues, --all, ...) has collected changelogs.
   #
-  # match_areas inherits from rules.match if not specified.
+  # Product filtering:
+  #   Skipped when the primary filter is already product-based
+  #   (--input-products option or a profile with bundle.profiles.<name>.products configured).
+  #   exclude_products / include_products (string or list) — cannot specify both.
+  #   match_products inherits from rules.match if not specified.
+  #
+  # Type and area filtering (replaces rules.publish):
+  #   Always applied, regardless of the primary filter.
+  #   exclude_types / include_types (string or list) — cannot specify both.
+  #   exclude_areas / include_areas (string or list) — cannot specify both.
+  #   match_areas inherits from rules.match if not specified.
+  #
+  # Per-product overrides:
+  #   products:
+  #     '<id>': override type/area filters for that product
+  #
+  #   When an entry belongs to multiple products, the applicable rule is resolved using
+  #   intersection + alphabetical first-match. See docs/contribute/changelog.md for details.
+  #
+  # bundle:
+  #   # match_products: any
+  #   exclude_products: "cloud-enterprise"
+  #   # Or include only certain products:
+  #   # include_products:
+  #   #   - cloud-serverless
+  #   #   - cloud-hosted
+  #   # Type/area filtering:
+  #   # exclude_types: "deprecation, known-issue"
+  #   # exclude_areas:
+  #   #   - "Internal"
+  #   # Per-product overrides:
+    #   # products:
+  #   #   'elasticsearch, kibana':
+  #   #     exclude_types:
+  #   #       - docs
+  #   #   'cloud-serverless':
+  #   #     # match_areas: any
+  #   #     include_areas:
+  #   #       - "Search"
+  #   #       - "Monitoring"
+
+  # Publish — DEPRECATED. Use rules.bundle instead.
+  # The rules.publish section is still supported for backward compatibility but will be removed
+  # in a future release. Move filtering to rules.bundle so it applies at bundle time.
   #
   publish:
   #   # match_areas: any
