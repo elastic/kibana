@@ -8,11 +8,6 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/core/server';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import {
-  getExplicitSkillIds,
-  hasSkillSelectionWildcard,
-  type SkillSelection,
-} from '@kbn/agent-builder-common/skills';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 import { createSigEventsSkill, SIG_EVENTS_SKILL_ID } from './skills/sig_events_skill';
 
@@ -63,22 +58,18 @@ export async function enableSigEventsSkill(
   try {
     const registry = await agentBuilder.agents.getRegistry({ request });
     const agent = await registry.get(agentBuilderDefaultAgentId);
-    const currentSkills: SkillSelection[] = agent.configuration?.skills ?? [];
-    const explicitIds = getExplicitSkillIds(currentSkills);
-    if (explicitIds.includes(SIG_EVENTS_SKILL_ID)) {
+    const currentSkillIds: string[] = agent.configuration?.skill_ids ?? [];
+    if (currentSkillIds.includes(SIG_EVENTS_SKILL_ID)) {
       return {
         skillRegistered,
         defaultAgentUpdated: false,
         message: 'SigEvents skill was already on the default agent.',
       };
     }
-    const newExplicitIds = [...explicitIds, SIG_EVENTS_SKILL_ID];
-    const newSkills: SkillSelection[] = hasSkillSelectionWildcard(currentSkills)
-      ? [{ skill_ids: ['*', ...newExplicitIds] }]
-      : [{ skill_ids: newExplicitIds }];
+    const newSkillIds = [...currentSkillIds, SIG_EVENTS_SKILL_ID];
 
     await registry.update(agentBuilderDefaultAgentId, {
-      configuration: { skills: newSkills },
+      configuration: { skill_ids: newSkillIds },
     });
     defaultAgentUpdated = true;
   } catch (err) {
@@ -115,41 +106,49 @@ export async function disableSigEventsSkill(
 
   const registry = await agentBuilder.agents.getRegistry({ request });
   const agent = await registry.get(agentBuilderDefaultAgentId);
-  const currentSkills: SkillSelection[] = agent.configuration?.skills ?? [];
-  const wasPresent = currentSkills.some((s) => s.skill_ids.includes(SIG_EVENTS_SKILL_ID));
+  const currentSkillIds: string[] = agent.configuration?.skill_ids ?? [];
+  const wasPresent = currentSkillIds.includes(SIG_EVENTS_SKILL_ID);
   if (!wasPresent) {
-    await agentBuilder.skills.unregister(SIG_EVENTS_SKILL_ID).catch((err) => {
-      logger.warn('Failed to unregister SigEvents skill', { error: err });
-    });
+    let skillUnregistered = false;
+    try {
+      await agentBuilder.skills.unregister(SIG_EVENTS_SKILL_ID);
+      skillUnregistered = true;
+    } catch (err) {
+      logger.warn('Failed to unregister SigEvents skill', {
+        error: err instanceof Error ? err : new Error(String(err)),
+      });
+    }
     return {
       defaultAgentUpdated: false,
-      skillUnregistered: true,
+      skillUnregistered,
       message: 'SigEvents skill was not on the default agent; skill unregistered.',
     };
   }
 
-  const explicitIds = getExplicitSkillIds(currentSkills).filter((id) => id !== SIG_EVENTS_SKILL_ID);
-  const hasWildcard = hasSkillSelectionWildcard(currentSkills);
-  const newSkills: SkillSelection[] = hasWildcard
-    ? [{ skill_ids: ['*', ...explicitIds] }]
-    : explicitIds.length > 0
-    ? [{ skill_ids: explicitIds }]
-    : [];
+  const newSkillIds = currentSkillIds.filter((id: string) => id !== SIG_EVENTS_SKILL_ID);
 
   await registry.update(agentBuilderDefaultAgentId, {
-    configuration: { skills: newSkills },
+    configuration: { skill_ids: newSkillIds },
   });
   defaultAgentUpdated = true;
 
-  await agentBuilder.skills.unregister(SIG_EVENTS_SKILL_ID).catch((err) => {
-    logger.warn('Failed to unregister SigEvents skill', { error: err });
-  });
+  let skillUnregistered = false;
+  try {
+    await agentBuilder.skills.unregister(SIG_EVENTS_SKILL_ID);
+    skillUnregistered = true;
+  } catch (err) {
+    logger.warn('Failed to unregister SigEvents skill', {
+      error: err instanceof Error ? err : new Error(String(err)),
+    });
+  }
 
   return {
     defaultAgentUpdated,
-    skillUnregistered: true,
+    skillUnregistered,
     message: defaultAgentUpdated
-      ? 'SigEvents skill removed from the default agent and unregistered.'
+      ? skillUnregistered
+        ? 'SigEvents skill removed from the default agent and unregistered.'
+        : 'SigEvents skill removed from the default agent; unregister failed (see logs).'
       : 'Default agent was not updated; skill unregistered.',
   };
 }

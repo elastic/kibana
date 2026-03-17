@@ -26,8 +26,17 @@ const listSignificantEventsSchema = z.object({
   from: z
     .string()
     .optional()
+    .refine((val) => !val || !Number.isNaN(Date.parse(val)), {
+      message: 'from must be a valid ISO 8601 date string',
+    })
     .describe('Start of the time range (ISO 8601). Defaults to 24 hours ago.'),
-  to: z.string().optional().describe('End of the time range (ISO 8601). Defaults to now.'),
+  to: z
+    .string()
+    .optional()
+    .refine((val) => !val || !Number.isNaN(Date.parse(val)), {
+      message: 'to must be a valid ISO 8601 date string',
+    })
+    .describe('End of the time range (ISO 8601). Defaults to now.'),
   bucket_size: z
     .string()
     .optional()
@@ -56,18 +65,42 @@ export const createListSignificantEventsTool = ({
     const from = fromStr ? new Date(fromStr) : new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const to = toStr ? new Date(toStr) : now;
 
+    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+      throw new Error(
+        'Invalid time range: `from` and `to` must be valid ISO 8601 date-time strings.'
+      );
+    }
+    if (from > to) {
+      throw new Error('Invalid time range: `from` must be earlier than or equal to `to`.');
+    }
+
     const allStreams = await streamsClient.listStreams();
     const names =
       streamNames && streamNames.length > 0
         ? allStreams.filter((s) => streamNames.includes(s.name)).map((s) => s.name)
         : allStreams.map((s) => s.name);
 
+    if (streamNames && streamNames.length > 0 && names.length === 0) {
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              significant_events: [],
+              aggregated_occurrences: [],
+              total: 0,
+            },
+          },
+        ],
+      };
+    }
+
     const result = await readSignificantEventsFromAlertsIndices(
       {
-        streamNames: names.length > 0 ? names : undefined,
+        streamNames: streamNames && streamNames.length > 0 ? names : undefined,
         from,
         to,
-        bucketSize: bucketSize ?? DEFAULT_BUCKET_SIZE,
+        bucketSize,
       },
       { queryClient, scopedClusterClient }
     );

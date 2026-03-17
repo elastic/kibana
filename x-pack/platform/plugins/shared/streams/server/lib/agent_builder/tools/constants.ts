@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-const SIG_EVENTS_NAMESPACE = 'platform.streams.sig_events';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+
+const SIG_EVENTS_NAMESPACE = internalNamespaces.streamsSigEvents;
 
 export const SIG_EVENTS_TOOL_IDS = {
   listStreams: `${SIG_EVENTS_NAMESPACE}.list_streams`,

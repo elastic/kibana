@@ -15,6 +15,7 @@ import {
   type DisableSigEventsSkillResult,
 } from '../../../../lib/agent_builder/sig_events_skill_enablement';
 import { registerSigEventsTools } from '../../../../lib/agent_builder/register_tools';
+import { SIG_EVENTS_TOOL_IDS } from '../../../../lib/agent_builder/tools/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
 const enableRoute = createServerRoute({
@@ -54,6 +55,19 @@ const enableRoute = createServerRoute({
     getScopedClients,
     params,
   }): Promise<EnableSigEventsSkillResult> => {
+    const requestedToolIds = params?.body?.tool_ids;
+    if (requestedToolIds && requestedToolIds.length > 0) {
+      const allowedToolIds = new Set<string>(Object.values(SIG_EVENTS_TOOL_IDS));
+      const invalidToolIds = requestedToolIds.filter((id) => !allowedToolIds.has(id));
+      if (invalidToolIds.length > 0) {
+        throw new Error(
+          `Invalid tool_ids: ${invalidToolIds.join(
+            ', '
+          )}. Must be a subset of allowed Sig Events tool IDs.`
+        );
+      }
+    }
+
     const { licensing, uiSettingsClient, sigEventsSettingsClient } = await getScopedClients({
       request,
     });
@@ -74,7 +88,7 @@ const enableRoute = createServerRoute({
       }
     }
     const result = await enableSigEventsSkill(server.agentBuilderStart, request, {
-      toolIds: params?.body?.tool_ids,
+      toolIds: requestedToolIds,
       content: params?.body?.content,
     });
     const sigEventsSkill: { enabled: true; content?: string; toolIds?: string[] } = {
