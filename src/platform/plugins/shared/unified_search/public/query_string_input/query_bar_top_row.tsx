@@ -617,6 +617,7 @@ export const QueryBarTopRow = React.memo(
           recent={recentlyUsedRanges}
           settings={dateRangePickerSettings}
           onSettingsChange={setDateRangePickerSettings}
+          timeZone={uiSettings.get('dateFormat:tz')}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
