@@ -3,6 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  *
  * This file is loaded on demand when the document flyout is opened. It imports
  * UnifiedDocViewerFlyout so that when unifiedDocViewer is an optional plugin,
