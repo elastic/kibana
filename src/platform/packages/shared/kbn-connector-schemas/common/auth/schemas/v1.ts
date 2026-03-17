@@ -15,7 +15,6 @@ export const authTypeSchema = z
     z.literal(AuthType.Basic),
     z.literal(AuthType.SSL),
     z.literal(AuthType.OAuth2ClientCredentials),
-    z.literal(AuthType.QueryParam),
     z.literal(null),
   ])
   .default(AuthType.Basic)

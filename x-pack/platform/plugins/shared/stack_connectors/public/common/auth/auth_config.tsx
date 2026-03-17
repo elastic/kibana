@@ -37,7 +37,6 @@ import { useSecretHeaders } from './use_secret_headers';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
 import { HeaderFields } from './header_fields';
-import { QueryParamFields } from './query_param_fields';
 import { OAuth2Fields } from './oauth2_fields';
 import * as i18n from './translations';
 
@@ -45,7 +44,6 @@ interface Props {
   readOnly: boolean;
   isOAuth2Enabled?: boolean;
   isPfxEnabled?: boolean;
-  isQueryParamEnabled?: boolean;
 }
 
 export interface InternalFormData {
@@ -62,7 +60,6 @@ export const AuthConfig: FunctionComponent<Props> = ({
   readOnly,
   isPfxEnabled = true,
   isOAuth2Enabled = false,
-  isQueryParamEnabled = false,
 }) => {
   const isModified = useFormIsModified();
   const { setFieldValue, getFieldDefaultValue, getFormData, updateFieldValues } = useFormContext();
@@ -185,12 +182,6 @@ export const AuthConfig: FunctionComponent<Props> = ({
         <OAuth2Fields readOnly={readOnly} />
       ),
       'data-test-subj': 'authOAuth2',
-    },
-    (isQueryParamEnabled || authType === AuthType.QueryParam) && {
-      value: AuthType.QueryParam,
-      label: i18n.AUTHENTICATION_QUERY_PARAM,
-      children: authType === AuthType.QueryParam && <QueryParamFields readOnly={readOnly} />,
-      'data-test-subj': 'authQueryParam',
     },
   ].filter(Boolean);
 
