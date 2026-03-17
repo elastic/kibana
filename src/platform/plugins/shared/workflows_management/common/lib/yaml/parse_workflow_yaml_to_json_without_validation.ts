@@ -41,20 +41,17 @@ export function parseYamlToJSONWithoutValidation(
   
 */
 
-  const doc = parseDocument(yamlString);
+  // mapAsMap: true prevents console warning about collection values being stringified
+  // TypeScript types don't include this option, but it exists at runtime
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const doc = parseDocument(yamlString, { mapAsMap: true, maxAliasCount: 100 } as any);
 
   try {
-    const js: unknown = doc.toJS({ mapAsMap: false, maxAliasCount: 100 });
-    if (js == null || typeof js !== 'object' || Array.isArray(js)) {
-      return {
-        success: false,
-        error: new Error('YAML root must be a mapping'),
-        document: doc,
-      };
-    }
     return {
       success: true,
-      json: js as Record<string, unknown>,
+      // mapAsMap: false ensures plain objects are returned instead of Map instances
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      json: doc.toJSON({ mapAsMap: false, maxAliasCount: 100 } as any) as Record<string, unknown>,
       document: doc,
     };
   } catch (error) {
