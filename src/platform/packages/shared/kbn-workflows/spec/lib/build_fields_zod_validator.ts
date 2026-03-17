@@ -52,7 +52,7 @@ export function convertJsonSchemaToZod(jsonSchema: JSONSchema7 | null | undefine
   }
   const zodSchema = fromJSONSchema(jsonSchema as Record<string, unknown>);
   if (zodSchema !== undefined) {
-    enrichZodSchema(jsonSchema, zodSchema);
+    return enrichZodSchema(jsonSchema, zodSchema);
   }
   return z.any();
 }
