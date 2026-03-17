@@ -217,7 +217,17 @@ All content derived from:
   - In the future, users may configure how long executions stay in the cold phase. Hot/warm phases are controlled by us.
 - Key message: ILM manages the full lifecycle automatically — no custom tasks, no `delete_by_query`.
 
-**Slide 21 — "Benefits"**
+**Slide 21 — "Migration from Flat Indexes"**
+- Layout: full-width with FlowDiagram + BulletList
+- FlowDiagram: `.workflows-executions` (flat) → Reindex → Rollover alias. Same for `.workflows-step-executions`.
+- BulletList:
+  - Reindex from current flat indexes into the new rollover aliases
+  - Done for both workflow executions and step executions
+  - After reindex, rename flat indexes to `-legacy` (not delete) for rollback safety
+  - Straightforward one-time migration on upgrade
+- Key message: Migration is simple — reindex from flat indexes to rollover aliases. Old indexes renamed, not deleted.
+
+**Slide 22 — "Benefits"**
 - Source: `rollover_index_rfc.md` § Benefits
 - Layout: full-width with cards
 - Five cards (success variant):
@@ -228,20 +238,19 @@ All content derived from:
   5. **Transparent search** — alias handles fan-out automatically
 - Key message: Rollover aliases give us bounded indexes, automatic lifecycle, and full mutability — with less complexity than CQRS.
 
-**Slide 22 — "Open Questions"**
+**Slide 23 — "Open Questions"**
 - Source: `rollover_index_rfc.md` § "Risks and Open Questions"
 - Layout: full-width BulletList
 - Questions:
-  1. Upgrade migration (flat index → rollover alias) approach is sketched — what's the rollback strategy?
-  2. Tuning `rolloverMaxAge` (default 1d) — does the team have data on execution volume to inform this?
-  3. Cold-phase retention — should we expose a user-configurable setting for how long executions stay in cold before deletion?
-  4. Encoded IDs are not human-readable — impact on debugging and external integrations?
-  5. Is the proposed ILM policy acceptable for the product? To be confirmed with Tinsae Erkailo.
-  6. Validate the overall rollover index approach with someone having deeper ES index expertise — Brandon Kobel or Yulia Naumenko.
+  1. Tuning `rolloverMaxAge` (default 1d) — does the team have data on execution volume to inform this?
+  2. Cold-phase retention — should we expose a user-configurable setting for how long executions stay in cold before deletion?
+  3. Encoded IDs are not human-readable — impact on debugging and external integrations?
+  4. Is the proposed ILM policy acceptable for the product? To be confirmed with Tinsae Erkailo.
+  5. Validate the overall rollover index approach with someone having deeper ES index expertise — Brandon Kobel or Yuliia Naumenko.
 - Key message: The core design is validated; these are the decisions we need the team's input on.
 
 ---
 
-### Slide 23 — Discussion
+### Slide 24 — Discussion
 - "Let's discuss."
 - Subtitle: "Questions, concerns, and next steps"

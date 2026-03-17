@@ -3,10 +3,6 @@ import { ContentSlide, BulletList } from '../components';
 
 const items = [
   <span key="1">
-    <strong>Upgrade migration</strong> — flat index → rollover alias approach is sketched.
-    What&apos;s the rollback strategy?
-  </span>,
-  <span key="2">
     <strong>Tuning rolloverMaxAge</strong> — default is 1d. Does the team have data on execution
     volume to inform this?
   </span>,
@@ -24,7 +20,7 @@ const items = [
   </span>,
   <span key="6">
     <strong>Approach validation</strong> — validate the overall rollover index approach with
-    someone with deeper ES index expertise (Brandon Kobel or Yulia Naumenko).
+    someone with deeper ES index expertise (Brandon Kobel or Yuliia Naumenko).
   </span>,
 ];
 

@@ -20,6 +20,7 @@ import {
   EncodedIDs,
   ReadsDuringExecution,
   ReadsViaUI,
+  Migration,
   Benefits,
   OpenQuestions,
   Discussion,
@@ -46,12 +47,13 @@ const SLIDES: FC[] = [
   ReadsDuringExecution,
   ReadsViaUI,
   ILMPhases,
+  Migration,
   Benefits,
   OpenQuestions,
   Discussion,
 ];
 
-const isTitleSlide = (idx: number) => [0, 2, 5, 12, 22].includes(idx);
+const isTitleSlide = (idx: number) => [0, 2, 5, 12, 23].includes(idx);
 
 const SlideWrapper = ({ children, isTitle, active }: { children: ReactNode; isTitle: boolean; active: boolean }) => (
   <div
