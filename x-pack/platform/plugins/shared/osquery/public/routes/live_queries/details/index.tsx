@@ -19,7 +19,7 @@ import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
 const tableWrapperCss = {
-  paddingLeft: '10px',
+  paddingLeft: 0,
 };
 
 const LiveQueryDetailsPageComponent = () => {
