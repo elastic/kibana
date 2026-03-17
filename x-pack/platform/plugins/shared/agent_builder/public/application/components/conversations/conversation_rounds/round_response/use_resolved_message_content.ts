@@ -17,7 +17,7 @@ interface UseResolvedMessageContentParams {
   content: string;
   hasHttp: boolean;
   anonymizationEnabled: boolean;
-  http?: Parameters<typeof createAnonymizationReplacementsClient>[0];
+  http: Parameters<typeof createAnonymizationReplacementsClient>[0];
   replacementsId?: string;
   holdContentWhileResolvingReplacements: boolean;
   holdContentMaxMs: number;
@@ -34,17 +34,7 @@ export const useResolvedMessageContent = ({
   holdContentMaxMs,
   showAnonymized,
 }: UseResolvedMessageContentParams) => {
-  const replacementsClient = useMemo(() => {
-    if (http) {
-      return createAnonymizationReplacementsClient(http);
-    }
-    const noHttpError = new Error('HTTP service unavailable');
-    return {
-      getReplacements: async () => Promise.reject(noHttpError),
-      deanonymizeText: async () => Promise.reject(noHttpError),
-      getTokenToOriginalMap: async () => Promise.reject(noHttpError),
-    };
-  }, [http]);
+  const replacementsClient = useMemo(() => createAnonymizationReplacementsClient(http), [http]);
 
   // Fetch replacements when anonymization is active and a replacementsId is present.
   // showAnonymized=true: skip the fetch — raw stored content (tokens) is the desired output.
