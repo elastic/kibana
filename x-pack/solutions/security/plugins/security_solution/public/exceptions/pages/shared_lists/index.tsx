@@ -19,6 +19,7 @@ import {
   EuiPageHeader,
   EuiPagination,
   EuiPopover,
+  EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -152,6 +153,7 @@ export const SharedLists = React.memo(() => {
 
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
+  const [screenReaderMessage, setScreenReaderMessage] = useState('');
   const { addError, addSuccess } = useAppToasts();
 
   // Loading states
@@ -206,7 +208,9 @@ export const SharedLists = React.memo(() => {
   const handleExportSuccess = useCallback(
     (listId: string, name: string) =>
       (blob: Blob): void => {
-        addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name));
+        const message = i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name);
+        addSuccess(message);
+        setScreenReaderMessage(message);
         setExportDownload({ name: listId, blob });
       },
     [addSuccess]
@@ -468,6 +472,7 @@ export const SharedLists = React.memo(() => {
 
   return (
     <>
+      <EuiScreenReaderLive>{screenReaderMessage}</EuiScreenReaderLive>
       <MissingDetectionsPrivilegesCallOut />
       <EuiPageHeader
         pageTitle={i18n.ALL_EXCEPTIONS}
