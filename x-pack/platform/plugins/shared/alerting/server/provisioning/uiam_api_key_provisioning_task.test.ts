@@ -314,6 +314,49 @@ describe('UiamApiKeyProvisioningTask', () => {
     });
   });
 
+  describe('stop', () => {
+    it('unsubscribes from the feature flag observable', async () => {
+      const flag$ = new Subject<boolean>();
+      const core = coreMock.createStart();
+      core.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$);
+      const ensureScheduled = jest.fn().mockResolvedValue(undefined);
+      const taskManager = { ensureScheduled, removeIfExists: jest.fn() } as never;
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      await task.start({ core, taskManager });
+
+      task.stop();
+
+      flag$.next(true);
+      await new Promise<void>((resolve) => setImmediate(resolve));
+
+      expect(ensureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('is safe to call when start was never called', () => {
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      expect(() => task.stop()).not.toThrow();
+    });
+
+    it('is safe to call multiple times', async () => {
+      const flag$ = new Subject<boolean>();
+      const core = coreMock.createStart();
+      core.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$);
+      const taskManager = {
+        ensureScheduled: jest.fn().mockResolvedValue(undefined),
+        removeIfExists: jest.fn(),
+      } as never;
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      await task.start({ core, taskManager });
+
+      expect(() => {
+        task.stop();
+        task.stop();
+      }).not.toThrow();
+    });
+  });
+
   describe('runTask', () => {
     it('increments state.runs and returns no runAt when no rules to process', async () => {
       const uiamConvert = jest.fn().mockResolvedValueOnce({ results: [] });

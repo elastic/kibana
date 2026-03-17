@@ -13,7 +13,7 @@ import {
   UiamApiKeyProvisioningEntityType,
 } from '../../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
 import { convertRuleIdsToKueryNode } from '../../lib/convert_rule_ids_to_kuery_node';
-import { GET_STATUS_BATCH_SIZE } from '../constants';
+import { GET_STATUS_BATCH_SIZE, EXCLUDE_FILTER_CLAUSE_BATCH_SIZE } from '../constants';
 
 /**
  * Returns a KQL filter that excludes rules which already have provisioning status
@@ -54,5 +54,23 @@ export const getExcludeRulesFilter = async (
     page += 1;
   }
   if (ruleIds.size === 0) return undefined;
-  return nodeTypes.function.buildNode('not', convertRuleIdsToKueryNode(Array.from(ruleIds)));
+  return nodeTypes.function.buildNode(
+    'not',
+    buildChunkedOrNode(Array.from(ruleIds), EXCLUDE_FILTER_CLAUSE_BATCH_SIZE)
+  );
+};
+
+/**
+ * Splits rule IDs into chunks and builds nested `or` nodes so that no single
+ * bool.should exceeds Elasticsearch's max_clause_count.
+ */
+export const buildChunkedOrNode = (ruleIds: string[], chunkSize: number): KueryNode => {
+  if (ruleIds.length <= chunkSize) {
+    return convertRuleIdsToKueryNode(ruleIds);
+  }
+  const chunks: KueryNode[] = [];
+  for (let i = 0; i < ruleIds.length; i += chunkSize) {
+    chunks.push(convertRuleIdsToKueryNode(ruleIds.slice(i, i + chunkSize)));
+  }
+  return nodeBuilder.or(chunks);
 };

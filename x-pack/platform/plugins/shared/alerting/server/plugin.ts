@@ -838,6 +838,7 @@ export class AlertingPlugin {
     if (this.licenseState) {
       this.licenseState.clean();
     }
+    this.uiamApiKeyProvisioningTask?.stop();
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }

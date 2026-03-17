@@ -18,3 +18,8 @@ export const TAGS = ['serverless', 'alerting', 'uiam-api-key-provisioning', 'bac
 
 export const GET_RULES_BATCH_SIZE = 300;
 export const GET_STATUS_BATCH_SIZE = 500;
+/**
+ * Max number of rule IDs per KQL `or` clause when building the exclude filter.
+ * Keeps each bool.should below Elasticsearch's indices.query.bool.max_clause_count (default 4096).
+ */
+export const EXCLUDE_FILTER_CLAUSE_BATCH_SIZE = 1024;

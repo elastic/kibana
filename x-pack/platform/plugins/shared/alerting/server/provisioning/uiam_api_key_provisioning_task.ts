@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Subscription } from 'rxjs';
 import type { Logger, CoreSetup, CoreStart } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
@@ -53,6 +54,7 @@ export class UiamApiKeyProvisioningTask {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
   private isTaskScheduled: boolean | undefined = undefined;
+  private featureFlagSubscription: Subscription | undefined;
 
   constructor({ logger, isServerless }: { logger: Logger; isServerless: boolean }) {
     this.logger = logger;
@@ -109,11 +111,16 @@ export class UiamApiKeyProvisioningTask {
       return;
     }
 
-    core.featureFlags
+    this.featureFlagSubscription = core.featureFlags
       .getBooleanValue$(PROVISION_UIAM_API_KEYS_FLAG, false)
       .subscribe((enabled: boolean) => {
         this.applyProvisioningFlag(enabled, taskManager).catch(() => {});
       });
+  };
+
+  public stop = () => {
+    this.featureFlagSubscription?.unsubscribe();
+    this.featureFlagSubscription = undefined;
   };
 
   private scheduleProvisioningTask = async (
