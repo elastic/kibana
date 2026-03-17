@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { ConverseAttachmentInput } from '../../../../common/http_api/chat';
@@ -14,42 +22,53 @@ import { AttachmentPillsRow } from './conversation_input/attachment_pills_row';
 export interface StaleAttachmentsPanelProps {
   attachmentInputs: ConverseAttachmentInput[];
   onAddToInput: () => void;
+  onDismiss: () => void;
 }
 
 export const StaleAttachmentsPanel: React.FC<StaleAttachmentsPanelProps> = ({
   attachmentInputs,
   onAddToInput,
-}) => (
-  <>
-    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="m">
-      <EuiText size="s">
-        <h4>
-          <FormattedMessage
-            id="xpack.agentBuilder.conversation.staleAttachments.title"
-            defaultMessage="Some attachments are out of sync"
-          />
-        </h4>
-        <p>
-          <FormattedMessage
-            id="xpack.agentBuilder.conversation.staleAttachments.description"
-            defaultMessage="These snapshots are older than their source data. Add updated attachments to the input to use them in your next message."
-          />
-        </p>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <AttachmentPillsRow attachments={attachmentInputs} />
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton size="s" onClick={onAddToInput}>
+  onDismiss,
+}) =>
+  attachmentInputs.length > 0 ? (
+    <>
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="m">
+        <EuiText size="s">
+          <h4>
             <FormattedMessage
-              id="xpack.agentBuilder.conversation.staleAttachments.stageButton"
-              defaultMessage="Add updated attachments to input"
+              id="xpack.agentBuilder.conversation.staleAttachments.title"
+              defaultMessage="Some attachments are out of sync"
             />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-    <EuiSpacer size="m" />
-  </>
-);
+          </h4>
+          <p>
+            <FormattedMessage
+              id="xpack.agentBuilder.conversation.staleAttachments.description"
+              defaultMessage="These snapshots are older than their source data. Add updated attachments to the input to use them in your next message."
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <AttachmentPillsRow attachments={attachmentInputs} />
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="s" onClick={onDismiss}>
+              <FormattedMessage
+                id="xpack.agentBuilder.conversation.staleAttachments.dismissButton"
+                defaultMessage="Dismiss"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" onClick={onAddToInput}>
+              <FormattedMessage
+                id="xpack.agentBuilder.conversation.staleAttachments.stageButton"
+                defaultMessage="Add updated attachments to input"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      <EuiSpacer size="m" />
+    </>
+  ) : null;

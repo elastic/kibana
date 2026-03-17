@@ -13,7 +13,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isString } from 'lodash';
 import { useConversationError, useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInput } from './conversation_input/conversation_input';
@@ -40,9 +40,8 @@ import { CanvasProvider } from './conversation_rounds/round_response/attachments
 import { CanvasFlyout } from './conversation_rounds/round_response/attachments/canvas_flyout';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
-import { useStaleAttachmentsCheck } from '../../hooks/use_stale_attachments_check';
-import { getStaleAttachmentInputs } from '../../context/conversation/get_stale_attachment_inputs';
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
+import { useStaleAttachments } from '../../hooks/use_stale_attachments_check';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -55,8 +54,8 @@ export const Conversation: React.FC<{}> = () => {
   const onAppLeave = useAppLeave();
   const { attachmentsService } = useAgentBuilderServices();
   const { attachments: stagedAttachments = [], upsertAttachments } = useConversationContext();
-  const { staleResponse, scheduleStaleCheck } = useStaleAttachmentsCheck(conversationId);
-
+  const { staleAttachments, scheduleStaleCheck } = useStaleAttachments(conversationId);
+  const [dismissStaleAttachments, setDismissStaleAttachments] = useState(false);
   useSendPredefinedInitialMessage();
 
   useNavigationAbort({
@@ -79,18 +78,21 @@ export const Conversation: React.FC<{}> = () => {
     return new Set(ids);
   }, [stagedAttachments]);
 
-  const staleAttachmentInputs = useMemo(
-    () => getStaleAttachmentInputs(staleResponse ?? { attachments: [] }, stagedAttachmentIds),
-    [stagedAttachmentIds, staleResponse]
-  );
-
-  const hasStaleAttachments = staleAttachmentInputs.length > 0;
+  const staleAttachmentInputs = useMemo(() => {
+    return staleAttachments.filter((attachment) => !stagedAttachmentIds.has(attachment.id!));
+  }, [staleAttachments, stagedAttachmentIds]);
 
   const handleStageStaleAttachments = useCallback(() => {
     if (upsertAttachments && staleAttachmentInputs.length > 0) {
       upsertAttachments(staleAttachmentInputs);
     }
+    setDismissStaleAttachments(true);
   }, [staleAttachmentInputs, upsertAttachments]);
+
+  // Display stale attachments panel when stale attachments response changes or conversationId changes
+  useEffect(() => {
+    setDismissStaleAttachments(false);
+  }, [staleAttachments, conversationId]);
 
   // Stick to bottom only when user returns to an existing conversation (conversationId is defined and changes)
   useEffect(() => {
@@ -173,10 +175,11 @@ export const Conversation: React.FC<{}> = () => {
           ]}
           grow={false}
         >
-          {hasStaleAttachments && (
+          {!dismissStaleAttachments && (
             <StaleAttachmentsPanel
               attachmentInputs={staleAttachmentInputs}
               onAddToInput={handleStageStaleAttachments}
+              onDismiss={() => setDismissStaleAttachments(true)}
             />
           )}
           <ConversationInput onSubmit={scrollToMostRecentRoundTop} onFocus={scheduleStaleCheck} />
