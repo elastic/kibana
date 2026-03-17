@@ -8475,6 +8475,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-inference-endpoints-fixture-plugin@link:x-pack/platform/test/api_integration/apis/search_inference_endpoints/fixture_plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-inference-endpoints@link:x-pack/platform/plugins/shared/search_inference_endpoints":
   version "0.0.0"
   uid ""
