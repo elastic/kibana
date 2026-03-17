@@ -19,10 +19,10 @@ import type { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
 import type { LinkType } from '../../../common/content_management';
 import { EXTERNAL_LINK_TYPE, DASHBOARD_LINK_TYPE } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
-import type { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import type { ExternalLinkOptions, LinkOptions } from '../../../server';
 import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../external_link/constants';
 import { ExternalLinkOptionsEditor } from '../external_link/external_link_options_edtior';
+import type { ResolvedLink } from '../../types';
 
 export const LinkOptionsComponent = ({
   link,
@@ -30,7 +30,7 @@ export const LinkOptionsComponent = ({
   selectedLinkType,
 }: {
   selectedLinkType: LinkType;
-  link?: UnorderedLink;
+  link?: ResolvedLink;
   setLinkOptions: (options: LinkOptions) => void;
 }) => {
   const [dashboardLinkOptions, setDashboardLinkOptions] = useState<DashboardNavigationOptions>({
