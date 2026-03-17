@@ -52,7 +52,7 @@ export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
 export const ROUND_UNIT_MAP: Record<string, string> = {
   ms: 's',
   s: 'm',
-  m: 'h',
+  m: 'm',
   h: 'h',
   d: 'd',
   w: 'd',
