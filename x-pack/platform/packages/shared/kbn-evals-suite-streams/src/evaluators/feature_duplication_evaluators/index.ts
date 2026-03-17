@@ -74,16 +74,16 @@ export const createSemanticUniquenessEvaluator = ({
         analyze: async (toolCall) => {
           const { k, duplicate_clusters } = toolCall.function.arguments;
 
-          if (!isFinite(k) || k < 0 || k > uniqueById) {
+          if (!Number.isFinite(k) || k < 0 || k > uniqueById) {
             throw new Error(
               `Expected k to be a number between 0 and ${uniqueById}, got ${JSON.stringify(k)}`
             );
           }
 
-          const knownIds = new Set(compactUniqueFeatures.map((f) => f.id));
+          const knownIds = new Set(compactUniqueFeatures.map((f) => f.id.toLowerCase()));
           for (const cluster of duplicate_clusters) {
             for (const id of cluster.ids ?? []) {
-              if (!knownIds.has(id)) {
+              if (!knownIds.has(id.toLowerCase())) {
                 throw new Error(`duplicate_clusters references unknown feature id "${id}"`);
               }
             }
@@ -204,9 +204,9 @@ export const createIdConsistencyEvaluator = ({
         evaluate: async (toolCall) => {
           const { collision_groups } = toolCall.function.arguments;
 
-          const ambiguousIds = new Set(ambiguous.map(([id]) => id));
+          const ambiguousIds = new Set(ambiguous.map(([id]) => id.toLowerCase()));
           for (const group of collision_groups) {
-            if (!ambiguousIds.has(group.id)) {
+            if (!ambiguousIds.has(group.id.toLowerCase())) {
               throw new Error(`collision_groups references unknown id "${group.id}"`);
             }
           }
