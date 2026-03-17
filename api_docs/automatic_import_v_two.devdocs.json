@@ -509,7 +509,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 55,
+        "lineNumber": 59,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -526,7 +526,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 58,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -543,7 +543,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 42,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -560,7 +560,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 45,
+        "lineNumber": 49,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -611,7 +611,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 63,
+        "lineNumber": 67,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -628,7 +628,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 66,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -645,7 +645,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 102,
+        "lineNumber": 106,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -662,7 +662,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 105,
+        "lineNumber": 109,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -751,7 +751,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 114,
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -768,7 +768,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 117,
+        "lineNumber": 121,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -819,7 +819,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 127,
+        "lineNumber": 131,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -836,7 +836,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 130,
+        "lineNumber": 134,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -853,7 +853,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 140,
+        "lineNumber": 144,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -870,7 +870,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 143,
+        "lineNumber": 147,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -887,7 +887,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 145,
+        "lineNumber": 149,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -904,7 +904,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 148,
+        "lineNumber": 152,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -921,7 +921,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 158,
+        "lineNumber": 162,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -938,7 +938,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 159,
+        "lineNumber": 163,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1309,7 +1309,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 178,
+        "lineNumber": 182,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1326,7 +1326,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 181,
+        "lineNumber": 185,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1343,7 +1343,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 165,
+        "lineNumber": 169,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1360,7 +1360,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
-        "lineNumber": 168,
+        "lineNumber": 172,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
