@@ -500,9 +500,7 @@ export function getDataStateContainer({
 
               const { defaultProfileState: currentDefaultProfileState } = getCurrentTab();
 
-              if (
-                getCurrentTab().defaultProfileState.resetId !== currentDefaultProfileState.resetId
-              ) {
+              if (currentDefaultProfileState.resetId !== defaultProfileState.resetId) {
                 return;
               }
 
