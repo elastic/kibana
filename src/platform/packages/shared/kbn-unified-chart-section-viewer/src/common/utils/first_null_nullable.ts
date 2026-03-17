@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
-
 /**
- * A legacy histogram is a metric where both the ES field type and the
- * metric instrument are histogram.
+ * Returns the "primary" (first/single) value for display or chart use.
+ * - If value is an array: returns the first element that is not null/undefined, or undefined.
  */
-export const isLegacyHistogram = (
-  type: ES_FIELD_TYPES,
-  instrument: MappingTimeSeriesMetricType
-): boolean => {
-  return type === 'histogram' && instrument === 'histogram';
-};
+
+export function firstNonNullable<T>(values: T[]): T extends NonNullable<T> ? T : T | undefined {
+  // Find the first element that isn't null or undefined
+  const found = values.find((v) => v != null);
+
+  // We use 'as any' for the final return to satisfy the complex conditional type
+  return found as any;
+}
