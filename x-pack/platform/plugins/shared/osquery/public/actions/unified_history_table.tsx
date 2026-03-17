@@ -41,7 +41,7 @@ import { usePacks } from '../packs/use_packs';
 import { RunByColumn } from './components/run_by_column';
 import { SourceBadge } from './components/source_column';
 import { TagsColumn } from './components/tags_column';
-import { HistoryFilters, DEFAULT_START_DATE, DEFAULT_END_DATE } from './components/history_filters';
+import { HistoryFilters } from './components/history_filters';
 import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 import { useHistoryUrlParams } from './use_history_url_params';
 
@@ -122,7 +122,7 @@ const UnifiedHistoryTableComponent = () => {
       start: startDate,
       end: endDate,
       pageSize: urlPageSize,
-      tags: selectedTags
+      tags: selectedTags,
     },
     setFilter,
     setFilters,

@@ -163,7 +163,8 @@ describe('serializeHistoryUrlParams', () => {
   });
 
   it('roundtrips through parse and serialize', () => {
-    const search = '?q=test&sources=live,scheduled&runBy=user1&tags=important&start=now-7d&end=now-1d&pageSize=25';
+    const search =
+      '?q=test&sources=live,scheduled&runBy=user1&tags=important&start=now-7d&end=now-1d&pageSize=25';
     const parsed = parseHistoryUrlParams(search);
     const serialized = serializeHistoryUrlParams(parsed);
 
