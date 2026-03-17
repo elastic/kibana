@@ -70,7 +70,9 @@ describe('request', () => {
 
   test('throws when URL is not in allowedHosts', async () => {
     configurationUtilities.ensureUriAllowed = jest.fn().mockImplementation(() => {
-      throw new Error('target url "https://disallowed.host/path" is not added to the Kibana config xpack.actions.allowedHosts');
+      throw new Error(
+        'target url "https://disallowed.host/path" is not added to the Kibana config xpack.actions.allowedHosts'
+      );
     });
 
     await expect(
@@ -80,9 +82,13 @@ describe('request', () => {
         logger,
         configurationUtilities,
       })
-    ).rejects.toThrow('target url "https://disallowed.host/path" is not added to the Kibana config xpack.actions.allowedHosts');
+    ).rejects.toThrow(
+      'target url "https://disallowed.host/path" is not added to the Kibana config xpack.actions.allowedHosts'
+    );
 
-    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith('https://disallowed.host/path');
+    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+      'https://disallowed.host/path'
+    );
     expect(axiosMock).not.toHaveBeenCalled();
   });
 
