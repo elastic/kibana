@@ -40,7 +40,7 @@ type ChangeHistoryDataStreamClient = DataStreamClient<
 
 export interface IChangeHistoryClient {
   isInitialized(): boolean;
-  initialize(elasticsearchClient: ElasticsearchClient): void;
+  initialize(elasticsearchClient: ElasticsearchClient): Promise<void>;
   log(change: ObjectChange, opts: LogChangeHistoryOptions): Promise<void>;
   logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions): Promise<void>;
   getHistory(
