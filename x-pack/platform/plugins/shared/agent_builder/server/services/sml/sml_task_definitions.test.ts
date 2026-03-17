@@ -175,7 +175,6 @@ describe('sml_task_definitions', () => {
         "SML crawler task failed for type 'visualization': crawl failed"
       );
     });
-
   });
 
   describe('scheduleSmlCrawlerTasks', () => {
