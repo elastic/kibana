@@ -67,6 +67,8 @@ export interface SearchHomepageServicesContextDeps {
 export type SearchHomepageServicesContext = CoreStart &
   SearchHomepageAppPluginStartDependencies & {
     history: AppMountParameters['history'];
+    kibanaBuildDate: Date;
+    kibanaVersion: string;
   };
 
 export interface AppUsageTracker {

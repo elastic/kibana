@@ -7,9 +7,17 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { useKibana } from '../../hooks/use_kibana';
@@ -20,12 +28,20 @@ import { SearchHomepageBody } from './search_homepage_body';
 
 export const SearchHomepagePage = () => {
   const {
-    services: { console: consolePlugin, history, searchNavigation, cloud },
+    services: {
+      console: consolePlugin,
+      history,
+      searchNavigation,
+      cloud,
+      kibanaBuildDate,
+      kibanaVersion,
+    },
   } = useKibana();
 
   const { isTrial } = useGetLicenseInfo();
   const { user } = useAuthenticatedUser();
 
+  console.log(cloud?.isServerlessEnabled, cloud?.isCloudEnabled);
   useEffect(() => {
     if (searchNavigation) {
       searchNavigation.breadcrumbs.setSearchBreadCrumbs([
@@ -89,8 +105,29 @@ export const SearchHomepagePage = () => {
         </EuiFlexGroup>
 
         <EuiHorizontalRule margin="s" />
-
-        <BasicMetricBadges />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <BasicMetricBadges />
+          <EuiFlexItem>
+            <EuiButton data-test-subj="homepage-kibana-version" color="text" size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.searchHomepage.versionTextLabel"
+                  defaultMessage="{version}"
+                  values={{
+                    version:
+                      !cloud?.isServerlessEnabled && !cloud?.isCloudEnabled
+                        ? `Version ${kibanaVersion}`
+                        : `${new Date(kibanaBuildDate).toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })}`,
+                  }}
+                />
+              </p>
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </KibanaPageTemplate.Section>
       <SearchHomepageBody />
       {embeddableConsole}
