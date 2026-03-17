@@ -18,6 +18,7 @@ export interface ReadonlySkillProvider {
   readonly: true;
   has(skillId: string): MaybePromise<boolean>;
   get(skillId: string): MaybePromise<InternalSkillDefinition | undefined>;
+  bulkGet(ids: string[]): MaybePromise<Map<string, InternalSkillDefinition>>;
   list(options?: SkillListOptions): MaybePromise<InternalSkillDefinition[]>;
 }
 

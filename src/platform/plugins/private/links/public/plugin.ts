@@ -89,7 +89,7 @@ export class LinksPlugin
         return getLinksEmbeddableFactory();
       });
 
-      plugins.embeddable.registerLegacyURLTransform(LINKS_SAVED_OBJECT_TYPE, async () => {
+      plugins.embeddable.registerLegacyURLTransform(LINKS_EMBEDDABLE_TYPE, async () => {
         const { transformOut } = await import('../common/embeddable/transforms/transform_out');
         return transformOut;
       });
