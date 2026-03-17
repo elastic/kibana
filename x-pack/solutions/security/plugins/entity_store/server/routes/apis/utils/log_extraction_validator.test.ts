@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { LogExtractionSchemaField, validateKql } from './log_extraction_validator';
+import { LogExtractionInstallSchema, validateKql } from './log_extraction_validator';
 
-const TestSchema = z.object({ logExtraction: LogExtractionSchemaField });
+const TestSchema = z.object({ logExtraction: LogExtractionInstallSchema });
 
-describe('logExtractionSchemaField additionalIndexPatterns', () => {
+describe('LogExtractionInstallParams additionalIndexPatterns', () => {
   it('accepts valid index patterns', () => {
     const result = TestSchema.safeParse({
       logExtraction: { additionalIndexPatterns: ['logs-*', 'metrics-*', 'valid_index'] },
