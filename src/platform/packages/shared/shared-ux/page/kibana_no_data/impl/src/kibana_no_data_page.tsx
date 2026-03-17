@@ -8,7 +8,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
 import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
 import type { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
@@ -67,7 +68,27 @@ export const KibanaNoDataPage = ({
   }
 
   if (!dataExists) {
-    return <NoDataConfigPage noDataConfig={noDataConfig} />;
+    return (
+      <NoDataConfigPage
+        noDataConfig={noDataConfig}
+        noDataConfigPageFooter={
+          onTryESQL
+            ? (
+                <EuiButton
+                  color="primary"
+                  fill
+                  data-test-subj="tryESQLLink"
+                  onClick={onTryESQL}
+                >
+                  {i18n.translate('sharedUXPackages.kibanaNoDataPage.orTryESQLButtonLabel', {
+                    defaultMessage: 'Or try ES|QL',
+                  })}
+                </EuiButton>
+              )
+            : undefined
+        }
+      />
+    );
   }
 
   return null;

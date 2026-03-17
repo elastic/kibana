@@ -16,6 +16,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
+import { useOnTryESQL } from '@kbn/shared-ux-prompt-no-data-views';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { DiscoverCustomizationContextProvider } from '../../customizations';
@@ -229,6 +230,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     isEmbeddedEditor,
   ]);
 
+  const onTryESQL = useOnTryESQL({
+    locatorClient: services.share?.url.locators,
+    navigateToApp: services.application.navigateToApp,
+  });
+
   const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);
   const isLoading =
     rootProfileState.rootProfileLoading ||
@@ -256,6 +262,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
         onDataViewCreated={() => {
           // This is unused if there is no ES data
         }}
+        onTryESQL={onTryESQL}
       />
     );
   }

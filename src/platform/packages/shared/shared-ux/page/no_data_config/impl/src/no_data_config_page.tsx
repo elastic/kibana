@@ -9,7 +9,7 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
 import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import { NoDataPage } from '@kbn/shared-ux-page-no-data';
@@ -26,7 +26,8 @@ const getClasses = (template?: string, className?: string) => {
 };
 
 export const NoDataConfigPage = (props: NoDataConfigPageProps) => {
-  const { className, noDataConfig, pageSideBar, pageSideBarProps, ...rest } = props;
+  const { className, noDataConfig, noDataConfigPageFooter, pageSideBar, pageSideBarProps, ...rest } =
+    props;
 
   if (!noDataConfig) {
     return null;
@@ -54,7 +55,15 @@ export const NoDataConfigPage = (props: NoDataConfigPageProps) => {
       {...rest}
     >
       {sideBar}
-      <NoDataPage {...noDataConfig} />
+      <>
+        <NoDataPage {...noDataConfig} />
+        {noDataConfigPageFooter && (
+          <>
+            <EuiSpacer size="xl" />
+            {noDataConfigPageFooter}
+          </>
+        )}
+      </>
     </EuiPageTemplate>
   );
 };
