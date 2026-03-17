@@ -11,6 +11,7 @@ import { lastValueFrom, zip } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { isFilters } from '@kbn/es-query';
 import type {
   GetLiveQueryResultsRequestQuerySchema,
   GetLiveQueryResultsRequestParamsSchema,
@@ -35,7 +36,6 @@ import {
   getLiveQueryResultsRequestParamsSchema,
   getLiveQueryResultsRequestQuerySchema,
 } from '../../../common/api';
-import { isFilters } from '@kbn/es-query';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -138,6 +138,7 @@ export const getLiveQueryResultsRoute = (
             } catch {
               return response.badRequest({ body: { message: 'esFilters contains invalid JSON' } });
             }
+
             if (!isFilters(parsed)) {
               return response.badRequest({
                 body: { message: 'esFilters must be a valid filters array' },
