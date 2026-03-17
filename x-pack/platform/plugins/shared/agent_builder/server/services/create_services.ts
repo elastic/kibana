@@ -22,7 +22,12 @@ import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
-import { createMeteringService, type MeteringService } from './metering';
+import {
+  createMeteringService,
+  type MeteringService,
+  createConsumptionService,
+  type ConsumptionService,
+} from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
 
 interface ServiceInstances {
@@ -33,6 +38,7 @@ interface ServiceInstances {
   skills: SkillService;
   plugins: PluginsService;
   metering: MeteringService;
+  consumption: ConsumptionService;
 }
 
 export class ServiceManager {
@@ -59,6 +65,7 @@ export class ServiceManager {
       skills: createSkillService(),
       plugins: createPluginsService(),
       metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
+      consumption: createConsumptionService(),
     };
 
     this.internalSetup = {
@@ -200,6 +207,8 @@ export class ServiceManager {
       config: this.config,
     });
 
+    const consumption = this.services.consumption.start({ elasticsearch, spaces });
+
     this.internalStart = {
       tools,
       agents,
@@ -216,6 +225,7 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       plugins,
+      consumption,
     };
 
     return this.internalStart;
