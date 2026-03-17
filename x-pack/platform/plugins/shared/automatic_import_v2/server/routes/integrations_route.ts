@@ -252,12 +252,13 @@ const approveIntegrationRoute = (
           const authenticatedUser = await getCurrentUser();
 
           const { integration_id: integrationId } = request.params;
-          const { version } = request.body;
+          const { version, categories } = request.body;
 
           await automaticImportService.approveIntegration({
             integrationId,
             authenticatedUser,
             version,
+            categories,
           });
 
           return response.ok({ body: { message: 'Integration approved successfully' } });
