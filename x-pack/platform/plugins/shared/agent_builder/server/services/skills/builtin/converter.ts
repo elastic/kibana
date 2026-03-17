@@ -14,6 +14,7 @@ export const convertBuiltinSkill = (skill: SkillDefinition): InternalSkillDefini
   content: skill.content,
   readonly: true,
   referencedContent: skill.referencedContent,
+  referencedContentCount: skill.referencedContent?.length ?? 0,
   basePath: skill.basePath,
   getRegistryTools: () => skill.getRegistryTools?.() ?? [],
   getInlineTools: skill.getInlineTools,

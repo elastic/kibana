@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/management-settings-section-registry'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/management-settings-section-registry'
+  title: '@kbn/management-settings-section-registry'
   description: Moon project for @kbn/management-settings-section-registry
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-management/settings/section_registry
+  sourceRoot: src/platform/packages/shared/kbn-management/settings/section_registry
 dependsOn:
   - '@kbn/core-notifications-browser'
   - '@kbn/core-ui-settings-common'

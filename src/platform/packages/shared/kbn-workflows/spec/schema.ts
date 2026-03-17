@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
+import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { timezoneNames } from './schema/triggers/timezone_names';
 
@@ -199,6 +199,8 @@ export const MaxIterationsSchema = z.union([
 ]);
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
 
+export const DEFAULT_LOOP_MAX_ITERATIONS = 2000;
+
 export const LoopStepPropsSchema = z.object({
   'max-iterations': MaxIterationsSchema.optional(),
   'iteration-timeout': DurationSchema.optional(),
@@ -257,6 +259,17 @@ export const WaitStepSchema = BaseStepSchema.extend({
   with: WaitStepInputSchema,
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
+
+export const WaitForInputStepInputSchema = z
+  .object({
+    message: z.string().optional().describe('Message displayed to the user when waiting for input'),
+  })
+  .optional();
+export const WaitForInputStepSchema = BaseStepSchema.extend({
+  type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
+  with: WaitForInputStepInputSchema,
+});
+export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const DataSetStepInputSchema = z
   .record(z.string(), z.unknown())
@@ -561,6 +574,24 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+export const LoopBreakStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('loop.break')
+    .describe('Exit the enclosing loop immediately. Valid only inside a foreach or while body'),
+  ...StepWithIfConditionSchema.shape,
+});
+export type LoopBreakStep = z.infer<typeof LoopBreakStepSchema>;
+
+export const LoopContinueStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('loop.continue')
+    .describe(
+      'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body'
+    ),
+  ...StepWithIfConditionSchema.shape,
+});
+export type LoopContinueStep = z.infer<typeof LoopContinueStepSchema>;
+
 export const ConsoleStepInputSchema = z.object({
   message: z.unknown().optional(),
 });
@@ -592,6 +623,24 @@ export const WorkflowExecuteAsyncStepOutputSchema = z.object({
   status: z.string(),
   startedAt: z.string().optional(),
 });
+
+export const WorkflowOutputStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.output'),
+  status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
+  with: z.record(z.string(), z.any()),
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
+
+export const WorkflowFailStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.fail'),
+  with: z
+    .object({
+      message: z.string().optional(),
+      reason: z.string().optional(),
+    })
+    .optional(),
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
@@ -640,6 +689,11 @@ export const WorkflowInputSchema = z.union([
 ]);
 export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
+/* --- Outputs --- */
+// Outputs use the same format as inputs (name, type, required, etc.); default is ignored at runtime for outputs.
+export const WorkflowOutputSchema = WorkflowInputSchema;
+export type WorkflowOutput = z.infer<typeof WorkflowOutputSchema>;
+
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
   z.string(),
@@ -659,6 +713,7 @@ const StepSchema = z.lazy(() =>
     WhileStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    WaitForInputStepSchema,
     DataSetStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
@@ -666,14 +721,23 @@ const StepSchema = z.lazy(() =>
     MergeStepSchema,
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
+    WorkflowOutputStepSchema,
+    WorkflowFailStepSchema,
+    LoopBreakStepSchema,
+    LoopContinueStepSchema,
     BaseConnectorStepSchema,
   ])
 );
 export type Step = z.infer<typeof StepSchema>;
 
-export const BuiltInStepTypes = [
+export const LoopStepTypes = [
   ForEachStepSchema.shape.type.value,
   WhileStepSchema.shape.type.value,
+] as const;
+export type LoopStepType = (typeof LoopStepTypes)[number];
+
+export const BuiltInStepTypes = [
+  ...LoopStepTypes,
   IfStepSchema.shape.type.value,
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
@@ -681,6 +745,10 @@ export const BuiltInStepTypes = [
   WaitStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
+  WorkflowOutputStepSchema.shape.type.value,
+  WorkflowFailStepSchema.shape.type.value,
+  LoopBreakStepSchema.shape.type.value,
+  LoopContinueStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -701,34 +769,34 @@ const WorkflowSchemaBase = z.object({
       z.array(WorkflowInputSchema),
     ])
     .optional(),
+  outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
 });
 
+/** Normalize inputs or outputs from either JSON Schema or legacy array format to JsonModelSchema. */
+function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
+  if (!value) return undefined;
+  if (typeof value === 'object' && !Array.isArray(value) && 'properties' in value) {
+    return value as z.infer<typeof JsonModelSchema>;
+  }
+  if (Array.isArray(value)) {
+    return convertLegacyFieldsToJsonSchema(value);
+  }
+  return undefined;
+}
+
 export const WorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(TriggerSchema).min(1),
 }).transform((data) => {
-  // Transform inputs from legacy array format to JSON Schema format
-  let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
-  if (data.inputs) {
-    if (
-      'properties' in data.inputs &&
-      typeof data.inputs === 'object' &&
-      !Array.isArray(data.inputs)
-    ) {
-      normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
-    } else if (Array.isArray(data.inputs)) {
-      normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
-    }
-  }
+  const normalizedInputs = normalizeFieldsToJsonSchema(data.inputs);
+  const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
-  // Return the data with normalized inputs, preserving all other fields as-is
-  // This preserves the optionality of fields since we're not explicitly listing them all
-  // Exclude inputs from spread to ensure it's always the normalized JSON Schema format (or undefined)
-  const { inputs: _, ...rest } = data;
+  const { inputs: _, outputs: __, ...rest } = data;
   return {
     ...rest,
     ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
+    ...(normalizedOutputs !== undefined && { outputs: normalizedOutputs }),
   };
 });
 
@@ -758,6 +826,20 @@ const WorkflowSchemaForAutocompleteBase = z
         // New JSON Schema format
         JsonModelSchema,
         // Legacy array format (for backward compatibility during parsing)
+        z.array(
+          z
+            .object({
+              name: z.string().catch(''),
+              type: z.string().catch(''),
+            })
+            .passthrough()
+        ),
+      ])
+      .optional()
+      .catch(undefined),
+    outputs: z
+      .union([
+        JsonModelSchema,
         z.array(
           z
             .object({
@@ -883,6 +965,17 @@ export const WorkflowContextSchema = z.object({
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
   inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
+  output: z
+    .record(
+      z.string(),
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
+      ])
+    )
+    .optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
   parent: z
@@ -897,8 +990,9 @@ export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
 export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
-  // extending with actual inputs and consts of different types
+  // extending with actual inputs, outputs and consts of different types
   inputs: z.object({}),
+  output: z.object({}),
   consts: z.object({}),
   // overriding event with base event schema (spaceId only) so it can be
   // dynamically extended with trigger-specific properties (e.g., alerts, rule)
@@ -921,6 +1015,13 @@ export const ForEachContextSchema = z.object({
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
+export const BaseSerializedErrorSchema = z.object({
+  type: z.string(),
+  message: z.string(),
+  details: z.record(z.string(), z.unknown()).optional(),
+});
+export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
+
 export const WhileContextSchema = z.object({
   iteration: z.number().int(),
 });
@@ -931,6 +1032,7 @@ export const StepContextSchema = WorkflowContextSchema.extend({
   foreach: ForEachContextSchema.optional(),
   while: WhileContextSchema.optional(),
   variables: z.record(z.string(), z.unknown()).optional(),
+  error: BaseSerializedErrorSchema.optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
 
@@ -940,10 +1042,3 @@ export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
   steps: z.object({}),
 });
 export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
-
-export const BaseSerializedErrorSchema = z.object({
-  type: z.string(),
-  message: z.string(),
-  details: z.record(z.string(), z.unknown()).optional(),
-});
-export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
