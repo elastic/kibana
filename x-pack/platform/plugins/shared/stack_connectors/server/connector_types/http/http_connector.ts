@@ -182,6 +182,12 @@ export async function executor(
   // Combine base url and path
   const url = combineUrl(baseUrl, path) + buildQueryString(query);
 
+  try {
+    configurationUtilities.ensureUriAllowed(url);
+  } catch (allowListError) {
+    return errorResultInvalid(actionId, `error validating url: ${allowListError.message}`);
+  }
+
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
     services,

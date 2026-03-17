@@ -911,6 +911,46 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0].url).toBe('https://example.com/api/endpoint');
   });
 
+  test('execute returns error when URL is not in allowedHosts', async () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: (_: string) => {
+        throw new Error(`target url is not present in allowedHosts`);
+      },
+    };
+
+    const config = {
+      authType: AuthType.Basic,
+      hasAuth: true,
+    } as ConnectorTypeConfigType;
+    const result = await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+      },
+      params: {
+        method: 'GET',
+        url: 'https://malicious.internal.host/secret',
+      },
+      configurationUtilities: configUtils,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(result?.status).toBe('error');
+    expect(result?.serviceMessage).toContain('error validating url');
+    expect(result?.serviceMessage).toContain('target url is not present in allowedHosts');
+    expect(requestMock).not.toHaveBeenCalled();
+  });
+
   test('execute returns error when URL is missing', async () => {
     const config = {
       authType: AuthType.Basic,
