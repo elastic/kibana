@@ -1242,7 +1242,6 @@ describe('NotificationPolicyClient', () => {
           id: 'policy-1',
           attributes: {
             enabled: true,
-            snoozedUntil: null,
             updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
@@ -1252,7 +1251,6 @@ describe('NotificationPolicyClient', () => {
           id: 'policy-2',
           attributes: {
             enabled: false,
-            snoozedUntil: null,
             updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },

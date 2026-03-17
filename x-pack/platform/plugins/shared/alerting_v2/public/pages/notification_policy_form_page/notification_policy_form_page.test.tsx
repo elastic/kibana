@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -49,6 +49,13 @@ jest.mock('../../hooks/use_update_notification_policy', () => ({
 const mockUseFetchNotificationPolicy = jest.fn();
 jest.mock('../../hooks/use_fetch_notification_policy', () => ({
   useFetchNotificationPolicy: (...args: unknown[]) => mockUseFetchNotificationPolicy(...args),
+}));
+
+jest.mock('../../hooks/use_fetch_workflows', () => ({
+  useFetchWorkflows: () => ({
+    data: { results: [{ id: 'workflow-1', name: 'Workflow 1' }, { id: 'workflow-2', name: 'Workflow 2' }] },
+    isLoading: false,
+  }),
 }));
 
 const mockUseParams = jest.fn();
@@ -128,6 +135,12 @@ describe('NotificationPolicyFormPage', () => {
       await user.tab();
       await user.type(screen.getByTestId(TEST_SUBJ.descriptionInput), 'Description from test');
       await user.tab();
+
+      // Select a workflow destination via EuiComboBox
+      const destinationsCombo = screen.getByTestId('destinationsInput');
+      const comboInput = within(destinationsCombo).getByRole('combobox');
+      await user.click(comboInput);
+      await user.click(await screen.findByTitle('Workflow 1'));
 
       const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
       await waitFor(() => expect(saveButton).toBeEnabled());
