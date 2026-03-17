@@ -6,8 +6,12 @@
  */
 
 import type { GcsConfig } from '../../../src/data_generators/replay';
-import { OTEL_DEMO_NAMESPACE } from '../../../scripts/significant_events_snapshots/lib/constants';
+import {
+  OTEL_DEMO_NAMESPACE,
+  HTTP_ACCESS_SYNTH_NAMESPACE,
+} from '../../../scripts/significant_events_snapshots/lib/constants';
 import { otelDemoDataset } from './otel_demo';
+import { httpAccessLogsDataset } from './http_access_logs';
 import type { DatasetConfig, SnapshotSourceOverride } from './types';
 
 export const MANAGED_STREAM_NAME = 'logs';
@@ -15,6 +19,7 @@ export const MANAGED_STREAM_SEARCH_PATTERN = `${MANAGED_STREAM_NAME}*`;
 
 const DATASETS: Record<string, DatasetConfig> = {
   [OTEL_DEMO_NAMESPACE]: otelDemoDataset,
+  [HTTP_ACCESS_SYNTH_NAMESPACE]: httpAccessLogsDataset,
 };
 
 let cachedActiveDatasets: DatasetConfig[] | undefined;
