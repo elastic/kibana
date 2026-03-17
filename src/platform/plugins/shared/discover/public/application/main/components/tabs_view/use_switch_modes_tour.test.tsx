@@ -16,8 +16,7 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { DISCOVER_TAB_MENU_SWITCH_MODES_CALLOUT_KEY } from '../../../../../common/constants';
-import { internalStateActions } from '../../state_management/redux';
-import { TabsBarVisibility } from '../../state_management/redux/types';
+import { internalStateActions, TabsBarVisibility } from '../../state_management/redux';
 import { useSwitchModesTour } from './use_switch_modes_tour';
 
 describe('useSwitchModesTour', () => {

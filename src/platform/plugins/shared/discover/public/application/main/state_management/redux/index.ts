@@ -15,13 +15,16 @@ export {
   type DiscoverInternalState,
   type TabState,
   type TabStateGlobalState,
+  type RecentlyClosedTabState,
   type DiscoverAppState,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
   type DefaultProfileStateField,
   type DefaultProfileStateFields,
   type DefaultProfileState,
+  type UpdateESQLQueryActionPayload,
   TabInitializationStatus,
+  TabsBarVisibility,
 } from './types';
 
 export { DEFAULT_TAB_STATE } from './constants';
@@ -65,6 +68,7 @@ export {
   selectTabCombinedFilters,
   selectIsTabsBarHidden,
   selectHasUnsavedChanges,
+  searchSourceComparator,
   selectTabSavedSearch,
 } from './selectors';
 
