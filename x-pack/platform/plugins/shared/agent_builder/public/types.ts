@@ -141,13 +141,13 @@ export interface AgentBuilderPluginStart {
    * await plugins.agentBuilder.updateAttachmentOrigin(
    *   conversationId,
    *   attachmentId,
-   *   { saved_object_id: savedObjectId }
+   *   savedObjectId
    * );
    * ```
    */
   updateAttachmentOrigin: (
     conversationId: string,
     attachmentId: string,
-    origin: unknown
+    origin: string
   ) => Promise<UpdateOriginResponse>;
 }
