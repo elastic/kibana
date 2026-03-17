@@ -351,9 +351,7 @@ export const createVisualizationGraph = (
             ),
           to: z
             .string()
-            .describe(
-              'End of the time range in Elasticsearch date math format (e.g., "now")'
-            ),
+            .describe('End of the time range in Elasticsearch date math format (e.g., "now")'),
         }),
         { name: 'determine_time_range' }
       );
