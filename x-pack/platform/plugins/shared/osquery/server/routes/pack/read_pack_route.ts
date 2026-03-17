@@ -73,8 +73,10 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           enabled: attributes.enabled,
           created_at: attributes.created_at,
           created_by: attributes.created_by,
+          created_by_profile_uid: attributes.created_by_profile_uid,
           updated_at: attributes.updated_at,
           updated_by: attributes.updated_by,
+          updated_by_profile_uid: attributes.updated_by_profile_uid,
           saved_object_id: id,
           queries: mapValues(
             convertSOQueriesToPack(attributes.queries),
