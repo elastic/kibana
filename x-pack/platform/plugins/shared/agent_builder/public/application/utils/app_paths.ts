@@ -29,6 +29,7 @@ export const appPaths = {
   manage: {
     agents: '/manage/agents',
     agentsNew: '/manage/agents/new',
+    agentDetails: ({ agentId }: { agentId: string }) => `/manage/agents/${agentId}`,
     tools: '/manage/tools',
     toolsNew: '/manage/tools/new',
     toolDetails: ({ toolId }: { toolId: string }) => `/manage/tools/${toolId}`,
@@ -39,5 +40,34 @@ export const appPaths = {
     plugins: '/manage/plugins',
     pluginDetails: ({ pluginId }: { pluginId: string }) => `/manage/plugins/${pluginId}`,
     connectors: '/manage/connectors',
+  },
+
+  // Backward compatibility aliases pointing to new manage routes
+  // TODO: Migrate consumers to use appPaths.manage.* directly and remove these aliases (this is jsut a shortcut for now)
+  chat: {
+    new: '/agents/elastic-default',
+    newWithAgent: ({ agentId }: { agentId: string }) => `/agents/${agentId}`,
+    conversation: ({ conversationId }: { conversationId: string }) =>
+      `/agents/elastic-default/conversations/${conversationId}`,
+  },
+  agents: {
+    list: '/manage/agents',
+    new: '/manage/agents/new',
+    edit: ({ agentId }: { agentId: string }) => `/manage/agents/${agentId}`,
+  },
+  tools: {
+    list: '/manage/tools',
+    new: '/manage/tools/new',
+    details: ({ toolId }: { toolId: string }) => `/manage/tools/${toolId}`,
+    bulkImportMcp: '/manage/tools/bulk_import_mcp',
+  },
+  skills: {
+    list: '/manage/skills',
+    new: '/manage/skills/new',
+    details: ({ skillId }: { skillId: string }) => `/manage/skills/${skillId}`,
+  },
+  plugins: {
+    list: '/manage/plugins',
+    details: ({ pluginId }: { pluginId: string }) => `/manage/plugins/${pluginId}`,
   },
 };

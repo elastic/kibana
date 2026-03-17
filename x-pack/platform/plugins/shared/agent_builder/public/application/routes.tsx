@@ -30,7 +30,7 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
     <AppLayout>
       <Routes>
         {enabledRoutes.map((route) => (
-          <Route key={route.path} path={route.path}>
+          <Route key={route.path} path={route.path} exact>
             {route.element}
           </Route>
         ))}
@@ -40,8 +40,13 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
           <LegacyConversationRedirect />
         </Route>
 
+        {/* Redirect /agents to /agents/:lastAgentId */}
+        <Route path="/agents" exact>
+          <RootRedirect />
+        </Route>
+
         {/* Root route - redirect to last used agent */}
-        <Route path="/">
+        <Route path="/" exact>
           <RootRedirect />
         </Route>
       </Routes>

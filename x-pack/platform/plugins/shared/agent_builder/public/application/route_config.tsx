@@ -13,6 +13,7 @@ import { RouteDisplay } from './components/common/route_display';
 import { AgentBuilderConversationsPage } from './pages/conversations';
 import { AgentBuilderAgentsPage } from './pages/agents';
 import { AgentBuilderAgentsCreate } from './pages/agent_create';
+import { AgentBuilderAgentsEdit } from './pages/agent_edit';
 import { AgentBuilderToolsPage } from './pages/tools';
 import { AgentBuilderToolCreatePage } from './pages/tool_create';
 import { AgentBuilderToolDetailsPage } from './pages/tool_details';
@@ -104,6 +105,11 @@ export const manageRoutes: RouteDefinition[] = [
     path: '/manage/agents/new',
     sidebarView: 'manage',
     element: <AgentBuilderAgentsCreate />,
+  },
+  {
+    path: '/manage/agents/:agentId',
+    sidebarView: 'manage',
+    element: <AgentBuilderAgentsEdit />,
   },
   {
     path: '/manage/tools',
