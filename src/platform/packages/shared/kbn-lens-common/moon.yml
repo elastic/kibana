@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/lens-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/lens-common'
+  title: '@kbn/lens-common'
   description: Moon project for @kbn/lens-common
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-lens-common
+  sourceRoot: src/platform/packages/shared/kbn-lens-common
 dependsOn:
   - '@kbn/lens-formula-docs'
   - '@kbn/navigation-plugin'
@@ -67,6 +66,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/kql'
   - '@kbn/control-group-renderer'
+  - '@kbn/palettes'
 tags:
   - shared-common
   - package
@@ -81,14 +81,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

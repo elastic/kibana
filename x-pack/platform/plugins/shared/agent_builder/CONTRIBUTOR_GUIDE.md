@@ -411,7 +411,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   ),
 
   // Customize buttons based on viewport context
-  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas }) => {
+  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, setPreviewBadgeState, openSidebarConversation }) => {
     const buttons = [];
 
     if (isSidebar) {
@@ -439,6 +439,25 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
       });
     }
 
+    // openSidebarConversation is {undefined} when already in the sidebar
+    if (openSidebarConversation) {
+      buttons.push({
+        label: 'Continue in sidebar',
+        icon: 'discuss',
+        type: ActionButtonType.SECONDARY,
+        handler: openSidebarConversation,
+      });
+    }
+    // Optional: if preview happens outside canvas, keep inline badge state in sync
+    buttons.push({
+      label: 'Preview',
+      icon: 'eye',
+      type: ActionButtonType.SECONDARY,
+      handler: () => {
+        setPreviewBadgeState?.('previewing');
+      },
+    });
+
     return buttons;
   },
 };
@@ -451,12 +470,48 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isSidebar`** - `true` when rendered in the sidebar (constrained width)
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
+- **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
+
+#### Opening the sidebar from attachments
+
+When an attachment is rendered inline in the full-screen Agent Builder experience, you can use `openSidebarConversation` to open the conversation in the sidebar on demand. This is useful when an action button navigates the user away from the full-screen experience (e.g., navigating to Discover or Dashboards). By calling `openSidebarConversation` after navigation, the user can continue the conversation in the sidebar while viewing the destination page.
+
+```tsx
+getActionButtons: ({ attachment, openSidebarConversation }) => {
+  const buttons = [];
+
+  buttons.push({
+    label: 'Open in Discover',
+    icon: 'discoverApp',
+    type: ActionButtonType.PRIMARY,
+    handler: async () => {
+      // Navigate to Discover (this leaves the full-screen Agent Builder)
+      await discoverLocator.navigate({ query: { esql: attachment.data.query } });
+      // Open the sidebar so the conversation remains accessible
+      openSidebarConversation?.();
+    },
+  });
+
+  return buttons;
+},
+```
+
+The callback handles setting the correct conversation context in localStorage before opening the sidebar, ensuring the sidebar loads the same conversation. It is `undefined` when already in the sidebar context.
+- **`setPreviewBadgeState`** - Optional callback to control inline preview badge state when preview is driven outside the canvas
+
+`setPreviewBadgeState` accepts:
+
+- **`none`** - regular inline state
+- **`preview_available`** - show "Preview Only" badge
+- **`previewing`** - show "You're previewing this" badge and hide inline action buttons
 
 #### Dynamic canvas buttons with registerActionButtons
 
 For canvas content that needs to register buttons dynamically (e.g., a "Save" button that depends on runtime state like an API being available), use the `registerActionButtons` callback passed as the second argument to `renderCanvasContent`.
 
 The `getActionButtons` function provides **static** buttons. The `registerActionButtons` callback allows canvas content to add **dynamic** buttons that are merged with the static ones.
+
+The callbacks object also exposes `closeCanvas`, which allows canvas content to close the flyout from within attachment UI actions (for example after an "Edit in app" navigation).
 
 ```tsx
 import React, { useEffect, useState } from 'react';
@@ -473,7 +528,7 @@ interface MyCanvasContentProps extends AttachmentRenderProps<MyAttachment> {
 
 const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
   attachment,
-  callbacks: { registerActionButtons, updateOrigin },
+  callbacks: { registerActionButtons, updateOrigin, closeCanvas },
 }) => {
   const [api, setApi] = useState<MyApi | undefined>();
 
@@ -509,6 +564,23 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
     <MyCanvasContent {...props} callbacks={callbacks} />
   ),
 };
+```
+
+#### Closing the canvas from canvas content
+
+Use `closeCanvas` when an action inside `renderCanvasContent` should dismiss the flyout.
+
+```tsx
+renderCanvasContent: (props, { closeCanvas }) => (
+  <EuiButton
+    onClick={async () => {
+      await locator.navigate({ /* ... */ });
+      closeCanvas();
+    }}
+  >
+    Edit in app
+  </EuiButton>
+);
 ```
 
 #### Linking by-value attachments to persistent storage with updateOrigin
@@ -579,6 +651,26 @@ The `origin` parameter accepts any shape - it will be validated by the attachmen
   description?: string;
 }
 ```
+
+#### Updating origin from outside attachment context
+
+If you need to update an attachment's origin from outside the `getActionButtons` context (e.g., from a different plugin or component that has the conversation and attachment IDs), you can use the `updateAttachmentOrigin` API from the `agentBuilder` plugin's start contract:
+
+```ts
+// In your plugin
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    // Update an attachment's origin directly
+    await agentBuilder.updateAttachmentOrigin(
+      conversationId,
+      attachmentId,
+      { saved_object_id: savedObjectId }
+    );
+  }
+}
+```
+
+This is useful when the save operation happens outside the attachment's UI, such as when a separate "Save to library" workflow completes asynchronously. It is your responsibility to pass the `conversationId` and `attachmentId` to your plugin when navigating away from the chat - how you do this is up to you (e.g., URL parameters, local storage, or other mechanisms).
 
 ## Registering skills
 
