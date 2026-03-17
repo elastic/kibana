@@ -122,10 +122,7 @@ export async function startLiveDataUpload({
         workersWaitingRefresh.clear();
       }
     } else {
-      logMessage(
-        logger,
-        message as [import('../../lib/utils/create_logger').LogLevel, string]
-      );
+      logMessage(logger, message as [import('../../lib/utils/create_logger').LogLevel, string]);
     }
   }
 
