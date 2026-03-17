@@ -244,7 +244,7 @@ describe('tab_state actions', () => {
       expect(prevResetDefaultProfileState).toEqual(
         expect.objectContaining({
           resetId: expect.any(String),
-          fields: 'none',
+          fieldsToReset: 'none',
         })
       );
 
@@ -274,7 +274,7 @@ describe('tab_state actions', () => {
       expect(tab.resetDefaultProfileState).toEqual(
         expect.objectContaining({
           resetId: expect.any(String),
-          fields: 'all',
+          fieldsToReset: 'all',
         })
       );
       expect(tab.resetDefaultProfileState.resetId).not.toEqual(
@@ -333,7 +333,7 @@ describe('tab_state actions', () => {
       expect(prevResetDefaultProfileState).toEqual(
         expect.objectContaining({
           resetId: expect.any(String),
-          fields: 'none',
+          fieldsToReset: 'none',
         })
       );
 
@@ -363,7 +363,7 @@ describe('tab_state actions', () => {
       expect(tab.resetDefaultProfileState).toEqual(
         expect.objectContaining({
           resetId: expect.any(String),
-          fields: 'all',
+          fieldsToReset: 'all',
         })
       );
       expect(tab.resetDefaultProfileState.resetId).not.toEqual(

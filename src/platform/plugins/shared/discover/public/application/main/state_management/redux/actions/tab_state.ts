@@ -234,7 +234,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
     dispatch(
       internalStateSlice.actions.setResetDefaultProfileState({
         tabId,
-        resetDefaultProfileState: 'all',
+        fieldsToReset: 'all',
       })
     );
 
@@ -281,7 +281,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     dispatch(
       internalStateSlice.actions.setResetDefaultProfileState({
         tabId,
-        resetDefaultProfileState: 'all',
+        fieldsToReset: 'all',
       })
     );
 

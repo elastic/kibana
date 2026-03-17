@@ -223,13 +223,13 @@ describe('test getDataStateContainer', () => {
       toolkit.internalState.dispatch(
         internalStateActions.setResetDefaultProfileState({
           tabId: toolkit.getCurrentTab().id,
-          resetDefaultProfileState: ['columns', 'rowHeight'],
+          fieldsToReset: ['columns', 'rowHeight'],
         })
       );
 
       await waitFor(() => {
         expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-          fields: ['columns', 'rowHeight'],
+          fieldsToReset: ['columns', 'rowHeight'],
           previousStateSnapshotsByProfileId: {
             [previousProfileId]: {
               columns: ['custom_column'],
@@ -290,7 +290,7 @@ describe('test getDataStateContainer', () => {
       toolkit.internalState.dispatch(
         internalStateActions.setResetDefaultProfileState({
           tabId: toolkit.getCurrentTab().id,
-          resetDefaultProfileState: ['columns', 'rowHeight', 'breakdownField', 'hideChart'],
+          fieldsToReset: ['columns', 'rowHeight', 'breakdownField', 'hideChart'],
         })
       );
       getContextsSpy.mockReturnValue({
@@ -371,7 +371,7 @@ describe('test getDataStateContainer', () => {
       );
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-          resetDefaultProfileState: ['columns', 'rowHeight', 'breakdownField'],
+          fieldsToReset: ['columns', 'rowHeight', 'breakdownField'],
         })
       );
 
@@ -384,7 +384,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('none');
+      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
       dataUnsub();
@@ -413,7 +413,7 @@ describe('test getDataStateContainer', () => {
       );
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-          resetDefaultProfileState: 'none',
+          fieldsToReset: 'none',
         })
       );
       dataState.data$.totalHits$.next({
@@ -424,7 +424,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('none');
+      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
       dataUnsub();

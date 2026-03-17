@@ -94,7 +94,7 @@ export const buildEsqlFetchSubscribe = ({
         if (indexPatternChanged) {
           internalState.dispatch(
             injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-              resetDefaultProfileState: 'all',
+              fieldsToReset: 'all',
             })
           );
         }
@@ -158,7 +158,7 @@ export const buildEsqlFetchSubscribe = ({
     if (!indexPatternChanged && allColumnsChanged) {
       internalState.dispatch(
         injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-          resetDefaultProfileState: ['columns'],
+          fieldsToReset: ['columns'],
         })
       );
     }

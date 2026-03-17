@@ -31,7 +31,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          fields: ['breakdownField'],
+          fieldsToReset: ['breakdownField'],
           previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
@@ -43,7 +43,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          fields: ['breakdownField'],
+          fieldsToReset: ['breakdownField'],
           previousStateSnapshotsByProfileId: {},
         },
         dataView: emptyDataView,
@@ -56,7 +56,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          fields: ['hideChart'],
+          fieldsToReset: ['hideChart'],
           previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
@@ -68,7 +68,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          fields: 'none',
+          fieldsToReset: 'none',
           previousStateSnapshotsByProfileId: {},
         },
         dataView: emptyDataView,
@@ -83,7 +83,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          fields: ['columns'],
+          fieldsToReset: ['columns'],
           previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
@@ -108,7 +108,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          fields: ['columns'],
+          fieldsToReset: ['columns'],
           previousStateSnapshotsByProfileId: {},
         },
         dataView: emptyDataView,
@@ -136,7 +136,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          fields: ['rowHeight'],
+          fieldsToReset: ['rowHeight'],
           previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
@@ -154,7 +154,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          fields: 'none',
+          fieldsToReset: 'none',
           previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,

@@ -351,13 +351,13 @@ export const internalStateSlice = createSlice({
     setResetDefaultProfileState: {
       prepare: (
         payload: TabActionPayload<{
-          resetDefaultProfileState: TabState['resetDefaultProfileState']['fields'];
+          fieldsToReset: TabState['resetDefaultProfileState']['fieldsToReset'];
         }>
       ) => ({
         payload: {
           ...payload,
-          resetDefaultProfileState: {
-            fields: payload.resetDefaultProfileState,
+          fieldsToReset: {
+            fieldsToReset: payload.fieldsToReset,
             resetId: uuidv4(),
           },
         },
@@ -365,16 +365,13 @@ export const internalStateSlice = createSlice({
       reducer: (
         state,
         action: TabAction<{
-          resetDefaultProfileState: Pick<
-            TabState['resetDefaultProfileState'],
-            'fields' | 'resetId'
-          >;
+          fieldsToReset: Pick<TabState['resetDefaultProfileState'], 'fieldsToReset' | 'resetId'>;
         }>
       ) =>
         withTab(state, action.payload, (tab) => {
           tab.resetDefaultProfileState = {
             ...tab.resetDefaultProfileState,
-            ...action.payload.resetDefaultProfileState,
+            ...action.payload.fieldsToReset,
           };
         }),
     },

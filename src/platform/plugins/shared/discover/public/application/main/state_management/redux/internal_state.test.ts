@@ -132,13 +132,13 @@ describe('InternalStateStore', () => {
     store.dispatch(
       internalStateActions.setResetDefaultProfileState({
         tabId,
-        resetDefaultProfileState: 'all',
+        fieldsToReset: 'all',
       })
     );
 
     expect(selectTab(store.getState(), tabId).resetDefaultProfileState).toEqual({
       resetId: expect.any(String),
-      fields: 'all',
+      fieldsToReset: 'all',
       previousStateSnapshotsByProfileId: {
         [profileId]: {
           columns: ['field1'],
@@ -161,7 +161,7 @@ describe('InternalStateStore', () => {
     store.dispatch(
       internalStateActions.setResetDefaultProfileState({
         tabId,
-        resetDefaultProfileState: ['columns'],
+        fieldsToReset: ['columns'],
       })
     );
 

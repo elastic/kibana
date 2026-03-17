@@ -383,7 +383,7 @@ export function getDataStateContainer({
               ];
             const nextProfileStateUpdate = getPreviousStateSnapshot(
               nextProfileSnapshot ?? {},
-              resetDefaultProfileState.fields
+              resetDefaultProfileState.fieldsToReset
             );
             const hasNextProfileStateUpdate =
               nextProfileStateUpdate && Object.keys(nextProfileStateUpdate).length > 0;
@@ -525,7 +525,7 @@ export function getDataStateContainer({
               // is done so refetches don't reset the state again
               internalState.dispatch(
                 injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-                  resetDefaultProfileState: 'none',
+                  fieldsToReset: 'none',
                 })
               );
             },
@@ -620,16 +620,13 @@ export function getDataStateContainer({
 
 const getPreviousStateSnapshot = (
   appState: TabState['appState'],
-  resetDefaultProfileStateFields: TabState['resetDefaultProfileState']['fields']
+  fieldsToReset: TabState['resetDefaultProfileState']['fieldsToReset']
 ): PreviousStateSnapshot | undefined => {
-  if (resetDefaultProfileStateFields === 'none') {
+  if (fieldsToReset === 'none') {
     return undefined;
   }
 
-  const profileStateFields =
-    resetDefaultProfileStateFields === 'all'
-      ? DEFAULT_PROFILE_STATE_FIELDS
-      : resetDefaultProfileStateFields;
+  const profileStateFields = fieldsToReset === 'all' ? DEFAULT_PROFILE_STATE_FIELDS : fieldsToReset;
 
   return pick(appState, profileStateFields);
 };

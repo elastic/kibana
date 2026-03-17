@@ -118,8 +118,9 @@ const shouldResetDefaultProfileField = (
   resetDefaultProfileState: TabState['resetDefaultProfileState'],
   field: DefaultProfileStateField
 ) =>
-  resetDefaultProfileState.fields === 'all' ||
-  (resetDefaultProfileState.fields !== 'none' && resetDefaultProfileState.fields.includes(field));
+  resetDefaultProfileState.fieldsToReset === 'all' ||
+  (resetDefaultProfileState.fieldsToReset !== 'none' &&
+    resetDefaultProfileState.fieldsToReset.includes(field));
 
 const getIsValidColumn =
   (dataView: DataView, esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns']) =>

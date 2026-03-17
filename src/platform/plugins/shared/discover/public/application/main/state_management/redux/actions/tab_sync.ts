@@ -113,7 +113,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         dispatch(
           internalStateActions.setResetDefaultProfileState({
             tabId,
-            resetDefaultProfileState: getResetDefaultProfileFields({
+            fieldsToReset: getFieldsToReset({
               columns: columns === undefined,
               rowHeight: rowHeight === undefined,
               breakdownField: breakdownField === undefined,
@@ -289,7 +289,7 @@ export const stopSyncing: InternalStateThunkActionCreator<[TabActionPayload]> = 
     tabRuntimeState.unsubscribeFn$.next(undefined);
   };
 
-const getResetDefaultProfileFields = (
+const getFieldsToReset = (
   shouldResetByField: Record<DefaultProfileStateField, boolean>
 ): ResetDefaultProfileStateFields => {
   const fields = DEFAULT_PROFILE_STATE_FIELDS.filter((field) => shouldResetByField[field]);

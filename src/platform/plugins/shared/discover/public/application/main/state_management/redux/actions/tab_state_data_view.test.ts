@@ -206,7 +206,7 @@ describe('tab_state_data_view actions', () => {
       const params = await setupTestParams(dataViewComplexMock);
       expect(params.getCurrentTab().resetDefaultProfileState).toEqual(
         expect.objectContaining({
-          fields: 'none',
+          fieldsToReset: 'none',
         })
       );
       await params.internalState.dispatch(
@@ -216,7 +216,7 @@ describe('tab_state_data_view actions', () => {
       );
       expect(params.getCurrentTab().resetDefaultProfileState).toEqual(
         expect.objectContaining({
-          fields: 'all',
+          fieldsToReset: 'all',
         })
       );
     });

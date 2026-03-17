@@ -152,7 +152,7 @@ export type ResetDefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultPro
 
 export interface ResetDefaultProfileState {
   resetId: string;
-  fields: ResetDefaultProfileStateFields;
+  fieldsToReset: ResetDefaultProfileStateFields;
   previousStateSnapshotsByProfileId: PreviousStateSnapshotsByProfileId;
 }
 
