@@ -74,7 +74,7 @@ export const transformFindAlerts = (
     total: ruleFindResults.total,
     data: ruleFindResults.data.map((rule) => {
       return internalRuleToAPIResponse(rule);
-    }),
+    }) as FindRulesResponse['data'],
     ...(warnings && warnings.length > 0 ? { warnings } : {}),
   };
 };

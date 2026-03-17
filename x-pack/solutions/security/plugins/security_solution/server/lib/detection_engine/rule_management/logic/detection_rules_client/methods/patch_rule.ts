@@ -14,6 +14,7 @@ import type {
   RulePatchProps,
   RuleResponse,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { PatchRuleRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { getIdError } from '../../../utils/utils';
@@ -111,7 +112,7 @@ export const patchRule = async ({
     const patchedRule = await applyRulePatch({
       prebuiltRuleAssetClient,
       existingRule,
-      rulePatch,
+      rulePatch: rulePatch as PatchRuleRequestBody,
     });
 
     const patchedInternalRule = await rulesClient.update({

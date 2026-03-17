@@ -54,7 +54,7 @@ export const registerSiemRuleMigrationsPrebuiltRulesRoute = (
               savedObjectsClient
             );
 
-            return res.ok({ body: prebuiltRules });
+            return res.ok({ body: prebuiltRules as GetRuleMigrationPrebuiltRulesResponse });
           } catch (err) {
             logger.error(err);
             return res.badRequest({ body: err.message });

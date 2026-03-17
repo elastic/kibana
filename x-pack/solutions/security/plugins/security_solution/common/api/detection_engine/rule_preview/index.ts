@@ -6,3 +6,9 @@
  */
 
 export * from './rule_preview.gen';
+export * from './rule_preview_correlation';
+
+export {
+  RulePreviewRequestBody,
+  type RulePreviewRequestBodyInput,
+} from './rule_preview_correlation';

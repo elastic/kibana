@@ -67,7 +67,7 @@ export const buildBulkResponse = (
 
   // if response is for dry_run, empty lists of rules returned, as rules are not actually updated and stored within ES
   // thus, it's impossible to return reliably updated/duplicated/deleted rules
-  const results: BulkEditActionResults = isDryRun
+  const results = isDryRun
     ? {
         updated: [],
         created: [],
@@ -80,6 +80,7 @@ export const buildBulkResponse = (
         deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
         skipped,
       };
+  const typedResults: BulkEditActionResults = results as BulkEditActionResults;
 
   if (numFailed > 0) {
     let message = summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed';
@@ -96,7 +97,7 @@ export const buildBulkResponse = (
         status_code: 500,
         attributes: {
           errors: normalizeErrorResponse(errors),
-          results,
+          results: typedResults,
           summary,
         },
       },
@@ -107,7 +108,7 @@ export const buildBulkResponse = (
   const responseBody: BulkEditActionResponse = {
     success: true,
     rules_count: summary.total,
-    attributes: { results, summary },
+    attributes: { results: typedResults, summary },
   };
 
   return response.ok({ body: responseBody });

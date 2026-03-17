@@ -72,7 +72,7 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
           } else {
-            return response.ok({ body: transformed ?? {} });
+            return response.ok({ body: (transformed ?? {}) as DeleteRuleResponse });
           }
         } catch (err) {
           const error = transformError(err);

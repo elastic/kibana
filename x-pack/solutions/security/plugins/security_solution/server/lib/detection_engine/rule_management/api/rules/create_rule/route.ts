@@ -105,7 +105,7 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
           });
 
           return response.ok({
-            body: createdRule,
+            body: createdRule as CreateRuleResponse,
           });
         } catch (err) {
           const error = transformError(err as Error);

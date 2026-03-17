@@ -90,7 +90,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
           });
 
           return response.ok({
-            body: updatedRule,
+            body: updatedRule as UpdateRuleResponse,
           });
         } catch (err) {
           const error = transformError(err);

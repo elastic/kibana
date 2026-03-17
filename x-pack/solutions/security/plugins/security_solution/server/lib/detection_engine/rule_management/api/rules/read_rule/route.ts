@@ -63,7 +63,7 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
             if (transformed == null) {
               return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
             } else {
-              return response.ok({ body: transformed ?? {} });
+              return response.ok({ body: (transformed ?? {}) as ReadRuleResponse });
             }
           } else {
             const error = getIdError({ id, ruleId });

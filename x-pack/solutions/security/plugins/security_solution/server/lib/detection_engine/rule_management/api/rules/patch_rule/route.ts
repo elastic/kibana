@@ -102,7 +102,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
           });
 
           return response.ok({
-            body: patchedRule,
+            body: patchedRule as PatchRuleResponse,
           });
         } catch (err) {
           const error = transformError(err);
