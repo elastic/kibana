@@ -12,22 +12,24 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import * as translations from '../../../common/translations';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
+import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getModelId } from '../../utils/get_model_id';
 import type { InferenceFeatureConfig } from './feature_metadata';
 import { AddModelPopover } from './add_model_popover';
+import { CopyToModal } from './copy_to_modal';
 
 const COLLAPSED_COUNT = 1;
 
@@ -45,7 +47,9 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   onEndpointsChange,
 }) => {
   const { data: inferenceEndpoints = [] } = useQueryInferenceEndpoints();
+  const { features: registeredFeatures } = useRegisteredFeatures();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
 
   const endpointDisplayMap = useMemo(
     () =>
@@ -59,6 +63,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         ])
       ),
     [inferenceEndpoints]
+  );
+
+  const hasOtherSubFeatures = useMemo(
+    () =>
+      registeredFeatures.some((f) => f.featureId !== featureId && f.parentFeatureId !== undefined),
+    [registeredFeatures, featureId]
   );
 
   const hasOverflow = endpointIds.length > COLLAPSED_COUNT;
@@ -84,109 +94,148 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     [endpointIds, featureId, onEndpointsChange]
   );
 
-  const removeButton = (endpointId: string, index: number) =>
-    endpointIds.length > 1 ? (
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="cross"
-          aria-label={i18n.translate('xpack.searchInferenceEndpoints.settings.removeModel', {
-            defaultMessage: 'Remove model',
-          })}
-          size="s"
-          color="text"
-          onClick={() => handleRemove(index)}
-          data-test-subj={`remove-endpoint-${endpointId}`}
-        />
-      </EuiFlexItem>
-    ) : null;
+  const handleCopyApply = useCallback(
+    (selectedFeatureIds: string[]) => {
+      for (const targetId of selectedFeatureIds) {
+        onEndpointsChange(targetId, [...endpointIds]);
+      }
+    },
+    [endpointIds, onEndpointsChange]
+  );
+
+  const removeButton = (endpointId: string, index: number) => (
+    <EuiFlexItem grow={false}>
+      <EuiButtonIcon
+        iconType="cross"
+        aria-label={i18n.translate('xpack.searchInferenceEndpoints.settings.removeModel', {
+          defaultMessage: 'Remove model',
+        })}
+        size="s"
+        color="text"
+        onClick={() => handleRemove(index)}
+        isDisabled={endpointIds.length <= 1}
+        data-test-subj={`remove-endpoint-${endpointId}`}
+      />
+    </EuiFlexItem>
+  );
 
   return (
-    <EuiFlexGroup responsive={false} data-test-subj={`subFeatureCard-${featureId}`}>
-      <EuiFlexItem grow={3}>
-        <EuiTitle size="xs">
-          <h4>{feature.featureName}</h4>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          <p>{feature.featureDescription}</p>
-        </EuiText>
-        {feature.taskType && (
-          <>
-            <EuiSpacer size="s" />
-            <div>
-              <EuiBadge>{feature.taskType}</EuiBadge>
-            </div>
-          </>
-        )}
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={4}>
-        <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
-          <EuiText size="xs" color="subdued">
-            <strong>{translations.SETTINGS_ASSIGNED_MODELS}</strong>
-          </EuiText>
+    <>
+      <EuiFlexGroup responsive={false} data-test-subj={`subFeatureCard-${featureId}`}>
+        <EuiFlexItem grow={3}>
+          <EuiTitle size="xs">
+            <h4>{feature.featureName}</h4>
+          </EuiTitle>
           <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>{feature.featureDescription}</p>
+          </EuiText>
+          {feature.taskType && (
+            <>
+              <EuiSpacer size="s" />
+              <div>
+                <EuiBadge>{feature.taskType}</EuiBadge>
+              </div>
+            </>
+          )}
+        </EuiFlexItem>
 
-          <EuiSplitPanel.Outer hasBorder>
-            {visibleEndpoints.map((endpointId, index) => (
-              <React.Fragment key={endpointId}>
-                <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`endpoint-row-${endpointId}`}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        type={endpointDisplayMap.get(endpointId)?.icon ?? 'compute'}
-                        size="m"
-                        aria-hidden
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow>
-                      <EuiText size="s">
-                        {endpointDisplayMap.get(endpointId)?.label ?? endpointId}
-                      </EuiText>
-                    </EuiFlexItem>
-                    {index === 0 && (
+        <EuiFlexItem grow={4}>
+          <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
+            <EuiText size="xs" color="subdued">
+              <strong>{translations.SETTINGS_ASSIGNED_MODELS}</strong>
+            </EuiText>
+            <EuiSpacer size="s" />
+
+            <EuiSplitPanel.Outer hasBorder>
+              {visibleEndpoints.map((endpointId, index) => (
+                <React.Fragment key={endpointId}>
+                  <EuiSplitPanel.Inner
+                    paddingSize="s"
+                    data-test-subj={`endpoint-row-${endpointId}`}
+                  >
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                       <EuiFlexItem grow={false}>
-                        <EuiBadge color="hollow">{translations.SETTINGS_DEFAULT_BADGE}</EuiBadge>
+                        <EuiIcon
+                          type={endpointDisplayMap.get(endpointId)?.icon ?? 'compute'}
+                          size="m"
+                          aria-hidden
+                        />
                       </EuiFlexItem>
-                    )}
-                    {removeButton(endpointId, index)}
-                  </EuiFlexGroup>
-                </EuiSplitPanel.Inner>
-                {index !== visibleEndpoints.length - 1 && <EuiHorizontalRule margin="none" />}
-              </React.Fragment>
-            ))}
-          </EuiSplitPanel.Outer>
+                      <EuiFlexItem grow>
+                        <EuiText size="s">
+                          {endpointDisplayMap.get(endpointId)?.label ?? endpointId}
+                        </EuiText>
+                      </EuiFlexItem>
+                      {index === 0 && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="hollow">{translations.SETTINGS_DEFAULT_BADGE}</EuiBadge>
+                        </EuiFlexItem>
+                      )}
+                      {removeButton(endpointId, index)}
+                    </EuiFlexGroup>
+                  </EuiSplitPanel.Inner>
+                  {index !== visibleEndpoints.length - 1 && <EuiHorizontalRule margin="none" />}
+                </React.Fragment>
+              ))}
+            </EuiSplitPanel.Outer>
 
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-            {hasOverflow && !isExpanded && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="arrowDown"
-                  size="s"
-                  onClick={() => setIsExpanded(true)}
-                  data-test-subj={`show-more-${featureId}`}
-                  color="text"
-                >
-                  {i18n.translate('xpack.searchInferenceEndpoints.settings.showMore', {
-                    defaultMessage: 'Show {count} more',
-                    values: { count: hiddenCount },
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-            {(!hasOverflow || isExpanded) && canAddMore && (
-              <EuiFlexItem grow={false}>
-                <AddModelPopover
-                  existingEndpointIds={endpointIds}
-                  onAdd={handleAdd}
-                  taskType={feature.taskType || undefined}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              {hasOverflow && !isExpanded && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="arrowDown"
+                    size="s"
+                    onClick={() => setIsExpanded(true)}
+                    data-test-subj={`show-more-${featureId}`}
+                    color="text"
+                  >
+                    {i18n.translate('xpack.searchInferenceEndpoints.settings.showMore', {
+                      defaultMessage: 'Show {count} more',
+                      values: { count: hiddenCount },
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              {(!hasOverflow || isExpanded) && canAddMore && (
+                <EuiFlexItem grow={false}>
+                  <AddModelPopover
+                    existingEndpointIds={endpointIds}
+                    onAdd={handleAdd}
+                    taskType={feature.taskType || undefined}
+                  />
+                </EuiFlexItem>
+              )}
+              {(!hasOverflow || isExpanded) && hasOtherSubFeatures && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="copy"
+                    size="s"
+                    color="text"
+                    onClick={() => setIsCopyModalOpen(true)}
+                    data-test-subj={`copy-to-${featureId}`}
+                  >
+                    {i18n.translate('xpack.searchInferenceEndpoints.settings.copyTo.button', {
+                      defaultMessage: 'Copy to',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {isCopyModalOpen && (
+        <CopyToModal
+          sourceFeatureName={feature.featureName}
+          currentFeatureId={featureId}
+          taskType={feature.taskType}
+          onApply={handleCopyApply}
+          onClose={() => setIsCopyModalOpen(false)}
+        />
+      )}
+    </>
   );
 };
