@@ -18,7 +18,7 @@ import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { Threat } from '../../api/detection_engine/model/rule_schema/common_attributes.gen';
-import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas_correlation';
+import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
 import {
   MigrationTranslationResult,
   MigrationStatus,

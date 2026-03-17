@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
-import { RuleResponse } from '../../model/rule_schema/rule_schemas_correlation';
+import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import {
   GapFillStatus,
   RuleActionGroup,
