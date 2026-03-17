@@ -6,11 +6,11 @@
  */
 
 import React, { forwardRef, useCallback, useMemo } from 'react';
+import { useSkills } from '../../../../../../../hooks/skills/use_skills';
 import type { CommandMenuComponentProps, CommandMenuHandle } from '../../types';
 import { CommandId } from '../../types';
 import { CommandMenuList } from '../components/command_menu_list';
 import type { CommandMenuListOption } from '../components/command_menu_list';
-import { useSkills } from './use_skills';
 
 export const Skills = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
   ({ query, onSelect }, ref) => {

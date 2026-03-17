@@ -16,7 +16,7 @@ const mockSkills = [
   { id: 'skill-3', name: 'Search', description: 'Search documents' },
 ];
 
-jest.mock('./use_skills', () => ({
+jest.mock('../../../../../../../hooks/skills/use_skills', () => ({
   useSkills: () => ({
     skills: mockSkills,
     isLoading: false,
@@ -54,7 +54,9 @@ describe('Skills', () => {
   });
 
   it('shows loading state when skills are loading', () => {
-    const useSkillsMock = jest.requireMock('./use_skills') as { useSkills: () => unknown };
+    const useSkillsMock = jest.requireMock('../../../../../../../hooks/skills/use_skills') as {
+      useSkills: () => unknown;
+    };
     const originalImpl = useSkillsMock.useSkills;
     useSkillsMock.useSkills = () => ({
       skills: [],
