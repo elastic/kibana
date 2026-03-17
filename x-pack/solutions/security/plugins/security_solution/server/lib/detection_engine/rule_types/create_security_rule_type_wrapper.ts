@@ -302,7 +302,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             tuples,
             remainingGap,
             warningStatusMessage: rangeTuplesWarningMessage,
-            gap,
             originalFrom,
             originalTo,
           } = await getRuleRangeTuples({
@@ -465,19 +464,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               total_search_duration_ms: Math.round(sum(result.searchAfterTimes.map(Number))),
               total_indexing_duration_ms: Math.round(sum(result.bulkCreateTimes.map(Number))),
               frozen_indices_queried_count: frozenIndicesQueriedCount,
-              events_found_count: result.totalEventsFound,
               suppressed_alerts: suppressedAlertsCount,
             });
 
             const createdSignalsCount = result.createdSignals.length;
-
-            if (result.totalEventsFound != null && result.totalEventsFound > 0) {
-              const unaccountedEvents =
-                result.totalEventsFound - createdSignalsCount - suppressedAlertsCount;
-              if (unaccountedEvents > 0) {
-                ruleExecutionLogger.logMetric('unaccounted_events', unaccountedEvents);
-              }
-            }
 
             agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
 

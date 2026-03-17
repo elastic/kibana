@@ -262,12 +262,6 @@ exports.EcsCustomPropertyMappings = {
                       update_alerts_duration_ms: {
                         type: 'long',
                       },
-                      events_found_count: {
-                        type: 'long',
-                      },
-                      unaccounted_events: {
-                        type: 'long',
-                      },
                     },
                   },
                 },

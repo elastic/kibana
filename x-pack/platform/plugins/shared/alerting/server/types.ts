@@ -458,9 +458,7 @@ export interface ConsumerExecutionMetrics {
   total_alerts_created: number;
   gap_duration_s: number;
   gap_range: { lte: string; gte: string };
-  events_found_count: number;
   candidate_alerts_count: number;
-  unaccounted_events: number;
   suppressed_alerts: number;
   frozen_indices_queried_count: number;
   indices_found_count: number;

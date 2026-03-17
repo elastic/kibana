@@ -791,8 +791,6 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
             },
             isUndefined
           ),
-          events_found_count: consumerMetrics.events_found_count,
-          unaccounted_events: consumerMetrics.unaccounted_events,
           frozen_indices_queried_count: consumerMetrics.frozen_indices_queried_count,
         },
         isUndefined
