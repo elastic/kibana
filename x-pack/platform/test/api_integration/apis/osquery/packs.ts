@@ -175,6 +175,87 @@ export default function ({ getService }: FtrProviderContext) {
       ).to.be(singleLineQuery);
     });
 
+    it('create route should include profile_uid fields in response', async () => {
+      const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+        .send({
+          name: `ProfileUidPack-${Date.now()}`,
+          description: 'Test profile uid',
+          enabled: false,
+          queries: {
+            q1: { query: 'select 1;', interval: 3600 },
+          },
+        })
+        .expect(200);
+
+      const { data } = createResponse.body;
+      expect(data).to.have.property('created_by_profile_uid');
+      expect(data).to.have.property('updated_by_profile_uid');
+      expect(data.created_by).to.be.ok();
+
+      // Clean up
+      await withOsqueryHeaders(
+        supertest.delete(`/api/osquery/packs/${data.saved_object_id}`)
+      ).expect(200);
+    });
+
+    it('find route supports search, enabled, and createdBy params', async () => {
+      // Create test packs with a unique prefix
+      const prefix = `FindTest-${Date.now()}`;
+      const createdIds: string[] = [];
+
+      for (const suffix of ['alpha', 'beta']) {
+        const resp = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: `${prefix}-${suffix}`,
+            description: `Find test ${suffix}`,
+            enabled: suffix === 'alpha',
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(200);
+        createdIds.push(resp.body.data.saved_object_id);
+      }
+
+      // Search by name
+      const searchResponse = await withOsqueryHeaders(
+        supertest.get(`/api/osquery/packs?search=${prefix}`)
+      ).expect(200);
+      expect(searchResponse.body.total).to.be(2);
+
+      // Search with no match
+      const noMatchResponse = await withOsqueryHeaders(
+        supertest.get('/api/osquery/packs?search=zzzznonexistent999')
+      ).expect(200);
+      expect(noMatchResponse.body.total).to.be(0);
+
+      // Filter by enabled
+      const enabledResponse = await withOsqueryHeaders(
+        supertest.get(`/api/osquery/packs?search=${prefix}&enabled=true`)
+      ).expect(200);
+      expect(enabledResponse.body.total).to.be(1);
+      expect(enabledResponse.body.data[0].name).to.contain('alpha');
+
+      // Filter by createdBy
+      const createdByResponse = await withOsqueryHeaders(
+        supertest.get(`/api/osquery/packs?search=${prefix}&createdBy=elastic`)
+      ).expect(200);
+      expect(createdByResponse.body.total).to.be(2);
+
+      // Non-matching createdBy
+      const noUserResponse = await withOsqueryHeaders(
+        supertest.get(`/api/osquery/packs?search=${prefix}&createdBy=nonexistentuser`)
+      ).expect(200);
+      expect(noUserResponse.body.total).to.be(0);
+
+      // Profile uid fields present in find results
+      expect(searchResponse.body.data[0]).to.have.property('created_by_profile_uid');
+      expect(searchResponse.body.data[0]).to.have.property('updated_by_profile_uid');
+
+      // Clean up
+      for (const id of createdIds) {
+        await withOsqueryHeaders(supertest.delete(`/api/osquery/packs/${id}`)).expect(200);
+      }
+    });
+
     it('update route should return 200 and multi line query, but single line query in packs config', async () => {
       expect(packId).to.be.ok();
       const updatePackResponse = await withOsqueryHeaders(
