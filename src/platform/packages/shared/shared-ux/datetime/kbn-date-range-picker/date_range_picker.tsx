@@ -12,7 +12,12 @@ import React, { useMemo, type ComponentType } from 'react';
 import type { SerializedStyles } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 
-import type { TimeRangeBounds, TimeRangeBoundsOption, CalendarOptions } from './types';
+import type {
+  TimeRangeBounds,
+  TimeRangeBoundsOption,
+  CalendarOptions,
+  DateRangePickerSettings,
+} from './types';
 import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 import { DateRangePickerProvider } from './date_range_picker_context';
 import { DateRangePickerLayout } from './date_range_picker_layout';
@@ -26,6 +31,7 @@ import { MainPanel } from './panels/main_panel';
 import { CalendarPanel } from './panels/calendar_panel';
 import { CustomTimeRangePanel } from './panels/custom_time_range_panel';
 import { DocumentationPanel } from './panels/documentation_panel';
+import { SettingsPanel } from './panels/settings_panel';
 import { ExamplePanel, ExampleNestedPanel } from './panels/example_panel';
 
 const DEFAULT_PANEL_ID = 'main' as const;
@@ -128,6 +134,10 @@ export interface DateRangePickerProps {
   onPresetDelete?: (option: TimeRangeBoundsOption) => void;
   /** Calendar-specific options (e.g. first day of week). */
   calendarOptions?: CalendarOptions;
+  /** Current picker settings (e.g. rounding, refresh). */
+  settings: DateRangePickerSettings;
+  /** Called when the user changes a setting in the settings panel. */
+  onSettingsChange: (settings: DateRangePickerSettings) => void;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
@@ -176,6 +186,9 @@ export function DateRangePicker({
             </DateRangePickerPanel>
             <DateRangePickerPanel id={DocumentationPanel.PANEL_ID}>
               <DocumentationPanel />
+            </DateRangePickerPanel>
+            <DateRangePickerPanel id={SettingsPanel.PANEL_ID}>
+              <SettingsPanel />
             </DateRangePickerPanel>
             {panels.map(({ id, component: Component }) => (
               <DateRangePickerPanel key={id} id={id}>

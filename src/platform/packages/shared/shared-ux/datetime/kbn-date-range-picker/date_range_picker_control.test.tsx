@@ -18,6 +18,8 @@ import { DateRangePicker, type DateRangePickerProps } from './date_range_picker'
 const defaultProps: DateRangePickerProps = {
   defaultValue: 'last 20 minutes',
   onChange: () => {},
+  settings: { roundRelativeTime: false },
+  onSettingsChange: () => {},
 };
 
 const openEditing = () => {
@@ -248,35 +250,48 @@ describe('DateRangePickerControl', () => {
   });
 
   describe('controlled mode (value prop)', () => {
+    const controlledDefaults = {
+      settings: { roundRelativeTime: false },
+      onSettingsChange: () => {},
+    } as const;
+
     const renderPicker = (props: DateRangePickerProps) =>
       renderWithEuiTheme(<DateRangePicker {...props} />);
 
     it('renders with initial value', () => {
-      renderPicker({ value: 'last 20 minutes', onChange: () => {} });
+      renderPicker({ value: 'last 20 minutes', onChange: () => {}, ...controlledDefaults });
       expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent(
         'Last 20 minutes'
       );
     });
 
     it('updates displayed text when value changes while idle', async () => {
-      const { rerender } = renderPicker({ value: 'last 20 minutes', onChange: () => {} });
+      const { rerender } = renderPicker({
+        value: 'last 20 minutes',
+        onChange: () => {},
+        ...controlledDefaults,
+      });
       expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent(
         'Last 20 minutes'
       );
 
-      rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} />);
+      rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />);
       await waitFor(() => {
         expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent('Last 1 hour');
       });
     });
 
     it('does not overwrite user input when value changes during editing', async () => {
-      const { rerender } = renderPicker({ value: 'last 20 minutes', onChange: () => {} });
+      const { rerender } = renderPicker({
+        value: 'last 20 minutes',
+        onChange: () => {},
+        ...controlledDefaults,
+      });
       const input = openEditing();
       fireEvent.change(input, { target: { value: 'last 5 minutes' } });
       expect(input).toHaveValue('last 5 minutes');
 
-      rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} />);
+      rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />);
       await waitFor(() => {
         expect(input).toHaveValue('last 5 minutes');
       });
@@ -286,11 +301,19 @@ describe('DateRangePickerControl', () => {
     });
 
     it('restores to latest value on cancel after external value change during editing', async () => {
-      const { rerender } = renderPicker({ value: 'last 20 minutes', onChange: () => {} });
+      const { rerender } = renderPicker({
+        value: 'last 20 minutes',
+        onChange: () => {},
+        ...controlledDefaults,
+      });
       const input = openEditing();
       fireEvent.change(input, { target: { value: 'something typed' } });
 
-      await act(async () => rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} />));
+      await act(async () =>
+        rerender(
+          <DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />
+        )
+      );
       fireEvent.keyDown(input, { key: 'Escape' });
 
       expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent('Last 1 hour');
@@ -299,7 +322,7 @@ describe('DateRangePickerControl', () => {
 
     it('calls onChange on Enter in controlled mode', async () => {
       const onChange = jest.fn();
-      renderPicker({ value: 'last 20 minutes', onChange });
+      renderPicker({ value: 'last 20 minutes', onChange, ...controlledDefaults });
 
       const input = openEditing();
       fireEvent.keyDown(input, { key: 'Enter' });
@@ -318,6 +341,8 @@ describe('DateRangePickerControl', () => {
             <DateRangePicker
               {...(controlled ? { value: 'last 1 hour' } : {})}
               onChange={() => {}}
+              settings={{ roundRelativeTime: false }}
+              onSettingsChange={() => {}}
             />
           </EuiThemeProvider>
         );
