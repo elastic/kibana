@@ -36,6 +36,7 @@ const putSignificantEventsSettingsBodySchema = z.object({
   connectorIdKnowledgeIndicatorExtraction: z.string().optional(),
   connectorIdRuleGeneration: z.string().optional(),
   connectorIdDiscovery: z.string().optional(),
+  indexPatterns: z.string().optional(),
 });
 
 export const putSignificantEventsSettingsRoute = createServerRoute({
