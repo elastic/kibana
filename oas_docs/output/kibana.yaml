@@ -1506,6 +1506,163 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/agent_builder/agents/{agent_id}/consumption:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{agent_id}/consumption</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns paginated, per-conversation token consumption data for a given agent. Includes input/output token counts, round counts, LLM call counts, and warnings for conversations with high token usage. Requires the manageAgents privilege.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
+      operationId: post-agent-builder-agents-agent-id-consumption
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the agent.
+          in: path
+          name: agent_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              consumptionDefaultExample:
+                description: Get consumption data for an agent with default pagination
+                value:
+                  size: 25
+                  sort_field: updated_at
+                  sort_order: desc
+              consumptionFilteredExample:
+                description: Get consumption data filtered by username with warnings
+                value:
+                  has_warnings: true
+                  size: 10
+                  sort_field: total_tokens
+                  sort_order: desc
+                  usernames:
+                    - elastic
+                    - admin
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                has_warnings:
+                  description: Filter to conversations with or without high-token warnings.
+                  type: boolean
+                search:
+                  description: Free-text search filter on conversation title.
+                  type: string
+                search_after:
+                  description: Cursor for pagination. Pass the search_after value from the previous response.
+                  items: {}
+                  maxItems: 10000
+                  type: array
+                size:
+                  default: 25
+                  description: Number of results per page.
+                  maximum: 100
+                  minimum: 1
+                  type: number
+                sort_field:
+                  default: updated_at
+                  description: Field to sort results by.
+                  enum:
+                    - updated_at
+                    - total_tokens
+                    - round_count
+                  type: string
+                sort_order:
+                  default: desc
+                  description: Sort direction.
+                  enum:
+                    - asc
+                    - desc
+                  type: string
+                usernames:
+                  description: Filter results to conversations by these usernames.
+                  items:
+                    type: string
+                  maxItems: 10000
+                  type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                consumptionResponseExample:
+                  description: Example response with per-conversation token usage data
+                  value:
+                    aggregations:
+                      total_with_warnings: 0
+                      usernames:
+                        - elastic
+                        - admin
+                    results:
+                      - conversation_id: conv-abc123
+                        created_at: '2025-03-01T10:00:00Z'
+                        llm_calls: 8
+                        round_count: 5
+                        title: Help me search my data
+                        token_usage:
+                          input_tokens: 15000
+                          output_tokens: 3000
+                          total_tokens: 18000
+                        updated_at: '2025-03-01T10:15:00Z'
+                        user:
+                          id: uid-1
+                          username: elastic
+                        warnings: []
+                      - conversation_id: conv-def456
+                        created_at: '2025-03-02T14:00:00Z'
+                        llm_calls: 20
+                        round_count: 12
+                        title: Analyze server logs
+                        token_usage:
+                          input_tokens: 250000
+                          output_tokens: 8000
+                          total_tokens: 258000
+                        updated_at: '2025-03-02T14:30:00Z'
+                        user:
+                          id: uid-2
+                          username: admin
+                        warnings:
+                          - input_tokens: 250000
+                            round_id: round-7
+                            type: high_input_tokens
+                    search_after:
+                      - 1709391000000
+                      - '2025-03-02T14:30:00Z'
+                    total: 2
+          description: Indicates a successful response
+      summary: Get agent consumption data
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X POST "${KIBANA_URL}/api/agent_builder/agents/elastic-ai-agent/consumption" \
+             -H "Authorization: ApiKey ${API_KEY}" \
+             -H "Content-Type: application/json" \
+             -H "elastic-api-version: 2023-10-31" \
+             -d '{"size": 25, "sort_field": "updated_at", "sort_order": "desc"}'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/agents/elastic-ai-agent/consumption
+            {"size": 25, "sort_field": "updated_at", "sort_order": "desc"}
+      x-state: Technical Preview; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/agent_builder/agents/{id}:
     delete:
       description: |-
