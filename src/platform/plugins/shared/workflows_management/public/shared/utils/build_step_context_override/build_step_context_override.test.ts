@@ -14,6 +14,7 @@ import {
   buildContextOverride,
   buildContextOverrideFromExecution,
 } from './build_step_context_override';
+import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
 
 describe('buildContextOverride', () => {
   const mockStaticData = {
@@ -92,7 +93,7 @@ describe('buildContextOverride', () => {
         steps: {
           first_step: {
             output: {
-              result: 'replace with your data',
+              result: INPUT_STRING_PLACEHOLDER,
             },
           },
         },
@@ -140,12 +141,12 @@ describe('buildContextOverride', () => {
               data: {
                 rows: {
                   '0': {
-                    name: 'replace with your data',
+                    name: INPUT_STRING_PLACEHOLDER,
                   },
                 },
               },
               meta: {
-                total: 'replace with your data',
+                total: INPUT_STRING_PLACEHOLDER,
               },
             },
           },
@@ -193,7 +194,7 @@ describe('buildContextOverride', () => {
         steps: {
           data_step: {
             output: {
-              items: 'replace with your data',
+              items: INPUT_STRING_PLACEHOLDER,
             },
           },
         },
@@ -230,9 +231,9 @@ describe('buildContextOverride', () => {
       expect(result.stepContext).toEqual({
         foreach: {
           item: {
-            name: 'replace with your data',
+            name: INPUT_STRING_PLACEHOLDER,
           },
-          index: 'replace with your data',
+          index: INPUT_STRING_PLACEHOLDER,
         },
       });
       expect(result.schema).toBeDefined();
@@ -267,9 +268,9 @@ describe('buildContextOverride', () => {
       expect(result.stepContext).toEqual({
         execution: {
           workflow: {
-            id: 'replace with your data',
+            id: INPUT_STRING_PLACEHOLDER,
           },
-          id: 'replace with your data',
+          id: INPUT_STRING_PLACEHOLDER,
         },
       });
       expect(result.schema).toBeDefined();
@@ -307,7 +308,7 @@ describe('buildContextOverride', () => {
         steps: {
           previous_step: {
             output: {
-              data: 'replace with your data',
+              data: INPUT_STRING_PLACEHOLDER,
             },
           },
         },
@@ -317,12 +318,12 @@ describe('buildContextOverride', () => {
         event: {
           payload: {
             user: {
-              id: 'replace with your data',
+              id: INPUT_STRING_PLACEHOLDER,
             },
           },
         },
         inputs: {
-          userInput: 'replace with your data',
+          userInput: INPUT_STRING_PLACEHOLDER,
         },
       });
       expect(result.schema).toBeDefined();
@@ -409,7 +410,7 @@ describe('buildContextOverride', () => {
       expect(result.stepContext).toEqual({
         inputs: {
           messageWithDefault: 'default value',
-          messageWithoutDefault: 'replace with your data',
+          messageWithoutDefault: INPUT_STRING_PLACEHOLDER,
         },
       });
       expect(result.schema).toBeDefined();
@@ -599,7 +600,7 @@ describe('buildContextOverride', () => {
       expect(result.stepContext).toEqual({
         inputs: {
           messageWithDefault: 'default value',
-          messageWithoutDefault: 'replace with your data',
+          messageWithoutDefault: INPUT_STRING_PLACEHOLDER,
         },
       });
       expect(result.schema).toBeDefined();
@@ -730,7 +731,7 @@ describe('buildContextOverride', () => {
             output: {
               items: {
                 '0': {
-                  name: 'replace with your data',
+                  name: INPUT_STRING_PLACEHOLDER,
                 },
               },
             },
@@ -792,8 +793,8 @@ describe('buildContextOverride', () => {
         steps: {
           source: {
             output: {
-              data: 'replace with your data',
-              meta: 'replace with your data',
+              data: INPUT_STRING_PLACEHOLDER,
+              meta: INPUT_STRING_PLACEHOLDER,
             },
           },
         },
@@ -834,7 +835,7 @@ describe('buildContextOverride', () => {
                   user: {
                     profile: {
                       settings: {
-                        theme: 'replace with your data',
+                        theme: INPUT_STRING_PLACEHOLDER,
                       },
                     },
                   },
@@ -879,13 +880,13 @@ describe('buildContextOverride', () => {
               matrix: {
                 '0': {
                   '1': {
-                    value: 'replace with your data',
+                    value: INPUT_STRING_PLACEHOLDER,
                   },
                 },
               },
               list: {
                 '5': {
-                  name: 'replace with your data',
+                  name: INPUT_STRING_PLACEHOLDER,
                 },
               },
             },
@@ -927,7 +928,7 @@ describe('buildContextOverride', () => {
                 'user-info': {
                   '0': {
                     profile: {
-                      name: 'replace with your data',
+                      name: INPUT_STRING_PLACEHOLDER,
                     },
                   },
                 },
@@ -1151,10 +1152,10 @@ describe('buildContextOverrideFromExecution', () => {
     const result = buildContextOverrideFromExecution(graph, workflowExecution, targetStep);
 
     expect(result.stepContext).toEqual({
-      inputs: { missing: 'replace with your data' },
+      inputs: { missing: INPUT_STRING_PLACEHOLDER },
       steps: {
         nonexistent: {
-          output: 'replace with your data',
+          output: INPUT_STRING_PLACEHOLDER,
         },
       },
     });

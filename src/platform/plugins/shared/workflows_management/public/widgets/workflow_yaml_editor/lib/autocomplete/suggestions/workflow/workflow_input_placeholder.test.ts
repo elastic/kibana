@@ -8,10 +8,11 @@
  */
 
 import { getPlaceholderForProperty } from './workflow_input_placeholder';
+import { INPUT_STRING_PLACEHOLDER } from '../../../../../../../common/consts/placeholders';
 
 describe('getPlaceholderForProperty', () => {
   it('wraps string samples in double quotes', () => {
-    expect(getPlaceholderForProperty({ type: 'string' })).toBe('"replace with your data"');
+    expect(getPlaceholderForProperty({ type: 'string' })).toBe(`"${INPUT_STRING_PLACEHOLDER}"`);
   });
 
   it('wraps email-format strings in double quotes', () => {
@@ -38,7 +39,7 @@ describe('getPlaceholderForProperty', () => {
 
   it('handles array type', () => {
     expect(getPlaceholderForProperty({ type: 'array', items: { type: 'string' } })).toBe(
-      '["replace with your data"]'
+      `["${INPUT_STRING_PLACEHOLDER}"]`
     );
   });
 
@@ -48,6 +49,6 @@ describe('getPlaceholderForProperty', () => {
       properties: { name: { type: 'string' } },
       required: ['name'],
     });
-    expect(result).toBe('{"name":"replace with your data"}');
+    expect(result).toBe(`{"name":"${INPUT_STRING_PLACEHOLDER}"}`);
   });
 });

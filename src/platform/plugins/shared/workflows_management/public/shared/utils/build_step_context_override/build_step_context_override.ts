@@ -30,6 +30,8 @@ import {
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
 
+export const STRING_PLACEHOLDER = '<your_input>';
+
 export interface ContextOverrideData {
   stepContext: Partial<StepContext>;
   schema: z.ZodType;
@@ -136,7 +138,7 @@ export function buildContextOverride(
         current[part] =
           current[part] ||
           readPropertyRecursive(pathParts.slice(0, i + 1), staticDataWithInputs) ||
-          'replace with your data';
+          STRING_PLACEHOLDER;
       } else {
         // Create nested object if it doesn't exist
         if (!current[part]) {
@@ -154,8 +156,6 @@ export function buildContextOverride(
     schema,
   };
 }
-
-const PLACEHOLDER = 'replace with your data';
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -341,7 +341,7 @@ export function buildContextOverrideFromExecution(
 
       if (isLastPart) {
         const value = readPropertyRecursive(pathParts.slice(0, i + 1), lookupData);
-        current[part] = current[part] ?? value ?? PLACEHOLDER;
+        current[part] = current[part] ?? value ?? STRING_PLACEHOLDER;
       } else {
         if (!current[part]) {
           current[part] = {};
