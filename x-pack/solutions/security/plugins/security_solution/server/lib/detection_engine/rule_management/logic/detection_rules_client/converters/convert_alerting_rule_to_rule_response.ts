@@ -13,7 +13,13 @@ import { internalRuleToAPIResponse } from './internal_rule_to_api_response';
 import { RuleResponseValidationError } from '../utils';
 
 export function convertAlertingRuleToRuleResponse(rule: SanitizedRule<RuleParams>): RuleResponse {
-  const parseResult = RuleResponse.safeParse(internalRuleToAPIResponse(rule));
+  const apiResponse = internalRuleToAPIResponse(rule);
+
+  if (rule.params.type === 'vulnerability_check') {
+    return apiResponse as unknown as RuleResponse;
+  }
+
+  const parseResult = RuleResponse.safeParse(apiResponse);
 
   if (!parseResult.success) {
     throw new RuleResponseValidationError({
