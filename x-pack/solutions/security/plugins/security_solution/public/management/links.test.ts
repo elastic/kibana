@@ -258,7 +258,7 @@ describe('links', () => {
       );
     });
 
-    it('should hide Scripts library for user without `canReadScriptsLibrary` privilege', async () => {
+    it('should hide `Script library` for user without `canReadScriptsLibrary` privilege', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadScriptsLibrary: false,

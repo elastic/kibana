@@ -43,7 +43,7 @@ import { PrivilegedRoute } from '../components/privileged_route';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { TrustedDevicesContainer } from './trusted_devices';
 import { EndpointExceptionsContainer } from './endpoint_exceptions';
-import { ScriptsLibraryContainer } from './scripts_library';
+import { ScriptLibraryContainer } from './script_library';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -103,7 +103,7 @@ const ResponseActionsTelemetry = () => (
 
 const ScriptLibraryTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.scriptLibrary}>
-    <ScriptsLibraryContainer />
+    <ScriptLibraryContainer />
     <SpyRoute pageName={SecurityPageName.scriptLibrary} />
   </TrackApplicationView>
 );
