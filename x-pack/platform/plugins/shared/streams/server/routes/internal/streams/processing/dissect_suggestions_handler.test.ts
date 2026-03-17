@@ -25,18 +25,22 @@ describe('mapFields', () => {
       columns: ['field_2'],
     },
     {
-      ecs_field: 'otel.field',
+      ecs_field: 'message',
       columns: ['field_3'],
     },
     {
-      ecs_field: 'no.otel.equiv',
+      ecs_field: 'otel.field',
       columns: ['field_4'],
+    },
+    {
+      ecs_field: 'no.otel.equiv',
+      columns: ['field_5'],
     },
   ];
 
   describe('non-otel (useOtelFieldNames = false)', () => {
     it('maps @timestamp to custom.timestamp and preserves other ECS names', () => {
-      const result = mapFields(reviewResults.slice(0, 2), fieldMetadata, false);
+      const result = mapFields(reviewResults.slice(0, 2), fieldMetadata, false, 'message');
       expect(result).toEqual([
         {
           ecs_field: 'custom.timestamp',
@@ -48,11 +52,26 @@ describe('mapFields', () => {
         },
       ]);
     });
+
+    it('replaces message catch-all with the actual field name', () => {
+      const result = mapFields(
+        [{ ecs_field: 'message', columns: ['field_3'] }],
+        fieldMetadata,
+        false,
+        'error.message'
+      );
+      expect(result).toEqual([
+        {
+          ecs_field: 'error.message',
+          columns: ['field_3'],
+        },
+      ]);
+    });
   });
 
   describe('otel (useOtelFieldNames = true)', () => {
-    it('maps fields to OTel equivalents with prefixing', () => {
-      const result = mapFields(reviewResults, fieldMetadata, true);
+    it('maps fields to OTel equivalents with prefixing and replaces message with field name', () => {
+      const result = mapFields(reviewResults, fieldMetadata, true, 'body.text');
       expect(result).toEqual([
         {
           ecs_field: prefixOTelField('custom.timestamp'),
@@ -63,12 +82,16 @@ describe('mapFields', () => {
           columns: ['field_2'],
         },
         {
-          ecs_field: 'otel.mapped',
+          ecs_field: 'body.text',
           columns: ['field_3'],
         },
         {
-          ecs_field: prefixOTelField('no.otel.equiv'),
+          ecs_field: 'otel.mapped',
           columns: ['field_4'],
+        },
+        {
+          ecs_field: prefixOTelField('no.otel.equiv'),
+          columns: ['field_5'],
         },
       ]);
     });

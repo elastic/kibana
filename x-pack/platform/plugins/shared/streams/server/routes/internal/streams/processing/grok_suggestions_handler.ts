@@ -78,9 +78,6 @@ export const handleProcessingGrokSuggestions = async ({
 }: ProcessingGrokSuggestionsHandlerDeps) => {
   const stream = await streamsClient.getStream(params.path.name);
   const useOtelFieldNames = isOtelStream(stream);
-  // For OTel streams the source field is e.g. "body.text", but the LLM should output ECS names
-  // so that normalizeFieldName can translate them correctly.
-  const defaultFieldName = useOtelFieldNames ? 'message' : params.body.field_name;
 
   // Call LLM inference to review fields
   const reviewResult = await callInferenceWithPrompt(
@@ -89,9 +86,7 @@ export const handleProcessingGrokSuggestions = async ({
     ReviewFieldsPrompt,
     params.body.sample_messages,
     params.body.review_fields,
-    signal,
-    params.body.field_name,
-    defaultFieldName
+    signal
   );
 
   // Fetch field metadata for ECS/OTEL field name resolution
@@ -102,16 +97,27 @@ export const handleProcessingGrokSuggestions = async ({
 
   return {
     log_source: reviewResult.log_source,
-    fields: mapFields(reviewResult.fields, fieldMetadata, useOtelFieldNames),
+    fields: mapFields(
+      reviewResult.fields,
+      fieldMetadata,
+      useOtelFieldNames,
+      params.body.field_name
+    ),
   };
 };
 
 export function mapFields(
   reviewResults: FieldReviewResults,
   fieldMetadata: Record<string, FieldMetadataPlain>,
-  useOtelFieldNames: boolean
+  useOtelFieldNames: boolean,
+  fieldName: string
 ) {
   return reviewResults.map((field) => {
+    // The LLM always uses "message" as the catch-all content field. Replace it with the actual
+    // target field name (e.g. "error.message" on ECS streams or "body.text" on OTel streams).
+    if (field.ecs_field === 'message') {
+      return { name: fieldName, columns: field.columns, grok_components: field.grok_components };
+    }
     const name = normalizeFieldName(field.ecs_field, fieldMetadata, useOtelFieldNames);
     return {
       name,

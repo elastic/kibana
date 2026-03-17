@@ -61,16 +61,12 @@ export async function callInferenceWithPrompt<
   prompt: TPrompt,
   sampleMessages: string[],
   reviewFields: unknown,
-  signal: AbortSignal,
-  fieldName: string,
-  defaultFieldName: string
+  signal: AbortSignal
 ) {
   const response = await inferenceClient.prompt({
     connectorId,
     prompt,
     input: {
-      field_name: fieldName,
-      default_field_name: defaultFieldName,
       sample_messages: sampleMessages,
       review_fields: JSON.stringify(reviewFields),
     } as PromptOptions<TPrompt>['input'],
