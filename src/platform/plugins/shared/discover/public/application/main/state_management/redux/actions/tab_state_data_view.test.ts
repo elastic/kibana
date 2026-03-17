@@ -204,7 +204,7 @@ describe('tab_state_data_view actions', () => {
 
     it('should call setProfileStateFieldsToReset correctly when switching data view', async () => {
       const params = await setupTestParams(dataViewComplexMock);
-      expect(params.getCurrentTab().resetDefaultProfileState).toEqual(
+      expect(params.getCurrentTab().defaultProfileState).toEqual(
         expect.objectContaining({
           fieldsToReset: 'none',
         })
@@ -214,7 +214,7 @@ describe('tab_state_data_view actions', () => {
           dataViewOrDataViewId: dataViewComplexMock.id!,
         })
       );
-      expect(params.getCurrentTab().resetDefaultProfileState).toEqual(
+      expect(params.getCurrentTab().defaultProfileState).toEqual(
         expect.objectContaining({
           fieldsToReset: 'all',
         })

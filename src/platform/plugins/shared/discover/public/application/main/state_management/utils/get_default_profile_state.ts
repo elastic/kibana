@@ -18,11 +18,11 @@ import type { TabState } from '../redux';
 
 export const getDefaultProfileState = ({
   scopedProfilesManager,
-  resetDefaultProfileState,
+  defaultProfileState,
   dataView,
 }: {
   scopedProfilesManager: ScopedProfilesManager;
-  resetDefaultProfileState: TabState['resetDefaultProfileState'];
+  defaultProfileState: TabState['defaultProfileState'];
   dataView: DataView;
 }) => {
   const defaultState = getDefaultState(scopedProfilesManager, dataView);
@@ -37,7 +37,7 @@ export const getDefaultProfileState = ({
       const stateUpdate: DiscoverAppState = {};
 
       if (
-        shouldResetDefaultProfileField(resetDefaultProfileState, 'breakdownField') &&
+        shouldResetDefaultProfileField(defaultProfileState, 'breakdownField') &&
         defaultState.breakdownField !== undefined &&
         dataView.fields.getByName(defaultState.breakdownField)
       ) {
@@ -45,7 +45,7 @@ export const getDefaultProfileState = ({
       }
 
       if (
-        shouldResetDefaultProfileField(resetDefaultProfileState, 'hideChart') &&
+        shouldResetDefaultProfileField(defaultProfileState, 'hideChart') &&
         defaultState.hideChart !== undefined
       ) {
         stateUpdate.hideChart = defaultState.hideChart;
@@ -68,7 +68,7 @@ export const getDefaultProfileState = ({
     }) => {
       const stateUpdate: DiscoverAppState = {};
 
-      if (shouldResetDefaultProfileField(resetDefaultProfileState, 'columns')) {
+      if (shouldResetDefaultProfileField(defaultProfileState, 'columns')) {
         const mappedDefaultColumns = defaultColumns.map((name) => ({ name }));
         const isValidColumn = getIsValidColumn(dataView, esqlQueryColumns);
         const validColumns = uniqBy(
@@ -93,7 +93,7 @@ export const getDefaultProfileState = ({
       }
 
       if (
-        shouldResetDefaultProfileField(resetDefaultProfileState, 'rowHeight') &&
+        shouldResetDefaultProfileField(defaultProfileState, 'rowHeight') &&
         defaultState.rowHeight !== undefined
       ) {
         stateUpdate.rowHeight = defaultState.rowHeight;
@@ -115,12 +115,12 @@ const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView:
 };
 
 const shouldResetDefaultProfileField = (
-  resetDefaultProfileState: TabState['resetDefaultProfileState'],
+  defaultProfileState: TabState['defaultProfileState'],
   field: DefaultProfileStateField
 ) =>
-  resetDefaultProfileState.fieldsToReset === 'all' ||
-  (resetDefaultProfileState.fieldsToReset !== 'none' &&
-    resetDefaultProfileState.fieldsToReset.includes(field));
+  defaultProfileState.fieldsToReset === 'all' ||
+  (defaultProfileState.fieldsToReset !== 'none' &&
+    defaultProfileState.fieldsToReset.includes(field));
 
 const getIsValidColumn =
   (dataView: DataView, esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns']) =>

@@ -127,7 +127,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    const prevResetId = selectTab(store.getState(), tabId).resetDefaultProfileState.resetId;
+    const prevResetId = selectTab(store.getState(), tabId).defaultProfileState.resetId;
 
     store.dispatch(
       internalStateActions.setProfileStateFieldsToReset({
@@ -136,7 +136,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), tabId).resetDefaultProfileState).toEqual({
+    expect(selectTab(store.getState(), tabId).defaultProfileState).toEqual({
       resetId: expect.any(String),
       fieldsToReset: 'all',
       previousStateSnapshotsByProfileId: {
@@ -146,9 +146,7 @@ describe('InternalStateStore', () => {
         },
       },
     });
-    expect(selectTab(store.getState(), tabId).resetDefaultProfileState.resetId).not.toBe(
-      prevResetId
-    );
+    expect(selectTab(store.getState(), tabId).defaultProfileState.resetId).not.toBe(prevResetId);
   });
 
   it('should only update previousStateSnapshotsByProfileId', async () => {
@@ -165,10 +163,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    const prevResetDefaultProfileState = selectTab(
-      store.getState(),
-      tabId
-    ).resetDefaultProfileState;
+    const prevDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
 
     await store.dispatch(
       internalStateActions.setAppState({
@@ -179,8 +174,8 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), tabId).resetDefaultProfileState).toEqual({
-      ...prevResetDefaultProfileState,
+    expect(selectTab(store.getState(), tabId).defaultProfileState).toEqual({
+      ...prevDefaultProfileState,
       previousStateSnapshotsByProfileId: {
         [profileId]: {
           columns: ['field1'],
@@ -219,7 +214,7 @@ describe('InternalStateStore', () => {
     );
 
     expect(
-      selectTab(store.getState(), tabId).resetDefaultProfileState.previousStateSnapshotsByProfileId
+      selectTab(store.getState(), tabId).defaultProfileState.previousStateSnapshotsByProfileId
     ).toEqual({
       [profileId]: {
         columns: ['field2'],
@@ -256,7 +251,7 @@ describe('InternalStateStore', () => {
     );
 
     expect(
-      selectTab(store.getState(), tabId).resetDefaultProfileState.previousStateSnapshotsByProfileId
+      selectTab(store.getState(), tabId).defaultProfileState.previousStateSnapshotsByProfileId
     ).toEqual({
       [profileId]: {
         columns: ['field1'],

@@ -228,7 +228,7 @@ describe('test getDataStateContainer', () => {
       );
 
       await waitFor(() => {
-        expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        expect(omit(toolkit.getCurrentTab().defaultProfileState, 'resetId')).toEqual({
           fieldsToReset: ['columns', 'rowHeight'],
           previousStateSnapshotsByProfileId: {
             [previousProfileId]: {
@@ -384,7 +384,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('none');
+      expect(stateContainer.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
       dataUnsub();
@@ -424,7 +424,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('none');
+      expect(stateContainer.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
       dataUnsub();

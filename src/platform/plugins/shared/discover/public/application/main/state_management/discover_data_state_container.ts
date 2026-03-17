@@ -279,7 +279,7 @@ export function getDataStateContainer({
           const tabState = getCurrentTab();
           const {
             id: currentTabId,
-            resetDefaultProfileState,
+            defaultProfileState,
             dataRequestParams,
             appState,
             globalState,
@@ -378,12 +378,10 @@ export function getDataStateContainer({
           if (didProfileChange) {
             const nextProfileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
             const nextProfileSnapshot =
-              getCurrentTab().resetDefaultProfileState.previousStateSnapshotsByProfileId[
-                nextProfileId
-              ];
+              getCurrentTab().defaultProfileState.previousStateSnapshotsByProfileId[nextProfileId];
             const nextProfileStateUpdate = getPreviousStateSnapshot(
               nextProfileSnapshot ?? {},
-              resetDefaultProfileState.fieldsToReset
+              defaultProfileState.fieldsToReset
             );
             const hasNextProfileStateUpdate =
               nextProfileStateUpdate && Object.keys(nextProfileStateUpdate).length > 0;
@@ -406,15 +404,15 @@ export function getDataStateContainer({
           }
 
           const dataView = currentDataView$.getValue();
-          const defaultProfileState =
+          const resolvedDefaultProfileState =
             shouldApplyDefaultProfileState && dataView
               ? getDefaultProfileState({
                   scopedProfilesManager,
-                  resetDefaultProfileState,
+                  defaultProfileState,
                   dataView,
                 })
               : undefined;
-          const preFetchStateUpdate = defaultProfileState?.getPreFetchState();
+          const preFetchStateUpdate = resolvedDefaultProfileState?.getPreFetchState();
 
           if (preFetchStateUpdate) {
             await withSkipNextFetch(() =>
@@ -500,15 +498,17 @@ export function getDataStateContainer({
                 );
               }
 
-              const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
+              const { defaultProfileState: currentDefaultProfileState } = getCurrentTab();
 
-              if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
+              if (
+                getCurrentTab().defaultProfileState.resetId !== currentDefaultProfileState.resetId
+              ) {
                 return;
               }
 
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
-              const postFetchStateUpdate = defaultProfileState?.getPostFetchState({
+              const postFetchStateUpdate = resolvedDefaultProfileState?.getPostFetchState({
                 defaultColumns,
                 esqlQueryColumns,
               });
@@ -620,7 +620,7 @@ export function getDataStateContainer({
 
 const getPreviousStateSnapshot = (
   appState: TabState['appState'],
-  fieldsToReset: TabState['resetDefaultProfileState']['fieldsToReset']
+  fieldsToReset: TabState['defaultProfileState']['fieldsToReset']
 ): PreviousStateSnapshot | undefined => {
   if (fieldsToReset === 'none') {
     return undefined;

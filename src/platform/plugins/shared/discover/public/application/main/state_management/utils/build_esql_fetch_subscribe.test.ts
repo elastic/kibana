@@ -605,7 +605,7 @@ describe('buildEsqlFetchSubscribe', () => {
       defaultFetchStatus: FetchStatus.LOADING,
     });
     const documents$ = dataState.data$.documents$;
-    expect(toolkit.getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('none');
+    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
@@ -620,7 +620,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(toolkit.getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('all')
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('all')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -641,7 +641,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(toolkit.getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('none')
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -657,7 +657,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern2' },
     });
     await waitFor(() =>
-      expect(toolkit.getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('all')
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('all')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -723,14 +723,14 @@ describe('buildEsqlFetchSubscribe', () => {
     const documents$ = dataState.data$.documents$;
     const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
     const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
-    expect(toolkit.getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('none');
+    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
       result: result1,
     });
     await waitFor(() =>
-      expect(toolkit.getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual('none')
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -738,7 +738,7 @@ describe('buildEsqlFetchSubscribe', () => {
       result: result2,
     });
     await waitFor(() =>
-      expect(toolkit.getCurrentTab().resetDefaultProfileState.fieldsToReset).toEqual(['columns'])
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual(['columns'])
     );
   });
 });

@@ -109,7 +109,7 @@ const syncPreviousStateSnapshots = (
   profileId: string,
   nextAppState?: TabState['appState']
 ) => {
-  const previousStateSnapshots = tab.resetDefaultProfileState.previousStateSnapshotsByProfileId;
+  const previousStateSnapshots = tab.defaultProfileState.previousStateSnapshotsByProfileId;
   const previousStateSnapshot = previousStateSnapshots[profileId] ?? {};
   const snapshotAppState = nextAppState ?? tab.appState;
 
@@ -351,7 +351,7 @@ export const internalStateSlice = createSlice({
     setProfileStateFieldsToReset: {
       prepare: (
         payload: TabActionPayload<{
-          fieldsToReset: TabState['resetDefaultProfileState']['fieldsToReset'];
+          fieldsToReset: TabState['defaultProfileState']['fieldsToReset'];
         }>
       ) => ({
         payload: {
@@ -365,12 +365,12 @@ export const internalStateSlice = createSlice({
       reducer: (
         state,
         action: TabAction<{
-          fieldsToReset: Pick<TabState['resetDefaultProfileState'], 'fieldsToReset' | 'resetId'>;
+          fieldsToReset: Pick<TabState['defaultProfileState'], 'fieldsToReset' | 'resetId'>;
         }>
       ) =>
         withTab(state, action.payload, (tab) => {
-          tab.resetDefaultProfileState = {
-            ...tab.resetDefaultProfileState,
+          tab.defaultProfileState = {
+            ...tab.defaultProfileState,
             ...action.payload.fieldsToReset,
           };
         }),

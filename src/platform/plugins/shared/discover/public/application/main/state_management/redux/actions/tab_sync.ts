@@ -22,7 +22,7 @@ import { internalStateActions } from '..';
 import {
   DEFAULT_PROFILE_STATE_FIELDS,
   type DiscoverAppState,
-  type ResetDefaultProfileStateFields,
+  type DefaultProfileStateFields,
   type DefaultProfileStateField,
 } from '../types';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
@@ -291,7 +291,7 @@ export const stopSyncing: InternalStateThunkActionCreator<[TabActionPayload]> = 
 
 const getFieldsToReset = (
   shouldResetByField: Record<DefaultProfileStateField, boolean>
-): ResetDefaultProfileStateFields => {
+): DefaultProfileStateFields => {
   const fields = DEFAULT_PROFILE_STATE_FIELDS.filter((field) => shouldResetByField[field]);
 
   if (fields.length === 0) {

@@ -96,7 +96,7 @@ describe('createUrlSyncObservables', () => {
       .scopedProfilesManager$.getValue()
       .getContexts().dataSourceContext.profileId;
     const previousStateSnapshotsByProfileId = structuredClone(
-      selectTab(internalState.getState(), tabId).resetDefaultProfileState
+      selectTab(internalState.getState(), tabId).defaultProfileState
         .previousStateSnapshotsByProfileId
     );
 
@@ -114,10 +114,10 @@ describe('createUrlSyncObservables', () => {
     state = internalState.getState();
     tab = selectTab(state, tabId);
     expect(tab.appState.hideChart).toBe(true);
-    expect(tab.resetDefaultProfileState.previousStateSnapshotsByProfileId).toEqual(
+    expect(tab.defaultProfileState.previousStateSnapshotsByProfileId).toEqual(
       previousStateSnapshotsByProfileId
     );
-    expect(tab.resetDefaultProfileState.previousStateSnapshotsByProfileId[profileId]).toBe(
+    expect(tab.defaultProfileState.previousStateSnapshotsByProfileId[profileId]).toBe(
       previousStateSnapshotsByProfileId[profileId]
     );
   });

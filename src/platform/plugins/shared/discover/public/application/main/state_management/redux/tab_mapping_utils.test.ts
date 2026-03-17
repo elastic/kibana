@@ -113,6 +113,11 @@ describe('tab mapping utils', () => {
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
+          "defaultProfileState": Object {
+            "fieldsToReset": "none",
+            "previousStateSnapshotsByProfileId": Object {},
+            "resetId": "",
+          },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
@@ -143,11 +148,6 @@ describe('tab mapping utils', () => {
             "columns": Array [
               "column1",
             ],
-          },
-          "resetDefaultProfileState": Object {
-            "fields": "none",
-            "previousStateSnapshotsByProfileId": Object {},
-            "resetId": "",
           },
           "uiState": Object {},
         }
@@ -204,6 +204,11 @@ describe('tab mapping utils', () => {
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
+          "defaultProfileState": Object {
+            "fieldsToReset": "none",
+            "previousStateSnapshotsByProfileId": Object {},
+            "resetId": "",
+          },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
@@ -234,11 +239,6 @@ describe('tab mapping utils', () => {
             "columns": Array [
               "column1",
             ],
-          },
-          "resetDefaultProfileState": Object {
-            "fields": "none",
-            "previousStateSnapshotsByProfileId": Object {},
-            "resetId": "",
           },
           "uiState": Object {},
         }

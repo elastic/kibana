@@ -19,8 +19,8 @@ export {
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
   type DefaultProfileStateField,
-  type ResetDefaultProfileStateFields,
-  type ResetDefaultProfileState,
+  type DefaultProfileStateFields,
+  type DefaultProfileState,
   TabInitializationStatus,
 } from './types';
 

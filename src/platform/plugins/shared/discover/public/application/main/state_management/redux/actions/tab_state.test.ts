@@ -70,7 +70,7 @@ describe('tab_state actions', () => {
       );
 
       expect(
-        selectTab(internalState.getState(), tabId).resetDefaultProfileState
+        selectTab(internalState.getState(), tabId).defaultProfileState
           .previousStateSnapshotsByProfileId
       ).toEqual(
         expect.objectContaining({
@@ -89,7 +89,7 @@ describe('tab_state actions', () => {
     it('should sync previousStateSnapshotsByProfileId for the current profile when triggered separately', async () => {
       const { internalState, tabId } = await setup();
       const previousStateSnapshotsByProfileId = structuredClone(
-        selectTab(internalState.getState(), tabId).resetDefaultProfileState
+        selectTab(internalState.getState(), tabId).defaultProfileState
           .previousStateSnapshotsByProfileId
       );
 
@@ -105,7 +105,7 @@ describe('tab_state actions', () => {
       );
 
       expect(
-        selectTab(internalState.getState(), tabId).resetDefaultProfileState
+        selectTab(internalState.getState(), tabId).defaultProfileState
           .previousStateSnapshotsByProfileId
       ).toEqual(previousStateSnapshotsByProfileId);
 
@@ -113,7 +113,7 @@ describe('tab_state actions', () => {
 
       expect(
         Object.values(
-          selectTab(internalState.getState(), tabId).resetDefaultProfileState
+          selectTab(internalState.getState(), tabId).defaultProfileState
             .previousStateSnapshotsByProfileId
         )
       ).toContainEqual({
@@ -177,7 +177,7 @@ describe('tab_state actions', () => {
         })
       );
       expect(
-        selectTab(internalState.getState(), tabId).resetDefaultProfileState
+        selectTab(internalState.getState(), tabId).defaultProfileState
           .previousStateSnapshotsByProfileId
       ).toEqual(
         expect.objectContaining({
@@ -215,7 +215,7 @@ describe('tab_state actions', () => {
       );
 
       expect(
-        selectTab(internalState.getState(), tabId).resetDefaultProfileState
+        selectTab(internalState.getState(), tabId).defaultProfileState
           .previousStateSnapshotsByProfileId
       ).toEqual(
         expect.objectContaining({
@@ -233,7 +233,7 @@ describe('tab_state actions', () => {
       const dataViewId = 'test-data-view-id';
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
-      const prevResetDefaultProfileState = tab.resetDefaultProfileState;
+      const prevDefaultProfileState = tab.defaultProfileState;
 
       expect(tab.appState.query).toStrictEqual({ esql: 'FROM test-index' });
       expect(tab.appState.columns).toHaveLength(2);
@@ -241,7 +241,7 @@ describe('tab_state actions', () => {
         type: DataSourceType.Esql,
       });
 
-      expect(prevResetDefaultProfileState).toEqual(
+      expect(prevDefaultProfileState).toEqual(
         expect.objectContaining({
           resetId: expect.any(String),
           fieldsToReset: 'none',
@@ -271,16 +271,14 @@ describe('tab_state actions', () => {
         dataViewId,
       });
 
-      expect(tab.resetDefaultProfileState).toEqual(
+      expect(tab.defaultProfileState).toEqual(
         expect.objectContaining({
           resetId: expect.any(String),
           fieldsToReset: 'all',
         })
       );
-      expect(tab.resetDefaultProfileState.resetId).not.toEqual(
-        prevResetDefaultProfileState.resetId
-      );
-      expect(tab.resetDefaultProfileState.resetId).not.toEqual('');
+      expect(tab.defaultProfileState.resetId).not.toEqual(prevDefaultProfileState.resetId);
+      expect(tab.defaultProfileState.resetId).not.toEqual('');
     });
   });
 
@@ -316,7 +314,7 @@ describe('tab_state actions', () => {
 
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
-      const prevResetDefaultProfileState = tab.resetDefaultProfileState;
+      const prevDefaultProfileState = tab.defaultProfileState;
 
       expect(tab.appState.query).toStrictEqual(query);
       expect(tab.appState.sort).toEqual([
@@ -330,7 +328,7 @@ describe('tab_state actions', () => {
         dataViewId: 'the-data-view-id',
       });
 
-      expect(prevResetDefaultProfileState).toEqual(
+      expect(prevDefaultProfileState).toEqual(
         expect.objectContaining({
           resetId: expect.any(String),
           fieldsToReset: 'none',
@@ -360,16 +358,14 @@ describe('tab_state actions', () => {
         type: DataSourceType.Esql,
       });
 
-      expect(tab.resetDefaultProfileState).toEqual(
+      expect(tab.defaultProfileState).toEqual(
         expect.objectContaining({
           resetId: expect.any(String),
           fieldsToReset: 'all',
         })
       );
-      expect(tab.resetDefaultProfileState.resetId).not.toEqual(
-        prevResetDefaultProfileState.resetId
-      );
-      expect(tab.resetDefaultProfileState.resetId).not.toEqual('');
+      expect(tab.defaultProfileState.resetId).not.toEqual(prevDefaultProfileState.resetId);
+      expect(tab.defaultProfileState.resetId).not.toEqual('');
     });
   });
 

@@ -148,11 +148,11 @@ export type PreviousStateSnapshotsByProfileId = Record<string, PreviousStateSnap
 
 type NonEmptyDefaultProfileStateFields = [DefaultProfileStateField, ...DefaultProfileStateField[]];
 
-export type ResetDefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultProfileStateFields;
+export type DefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultProfileStateFields;
 
-export interface ResetDefaultProfileState {
+export interface DefaultProfileState {
   resetId: string;
-  fieldsToReset: ResetDefaultProfileStateFields;
+  fieldsToReset: DefaultProfileStateFields;
   previousStateSnapshotsByProfileId: PreviousStateSnapshotsByProfileId;
 }
 
@@ -184,7 +184,7 @@ export interface TabState extends TabItem {
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
-  resetDefaultProfileState: ResetDefaultProfileState;
+  defaultProfileState: DefaultProfileState;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;

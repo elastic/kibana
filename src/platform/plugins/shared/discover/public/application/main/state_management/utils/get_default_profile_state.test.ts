@@ -29,7 +29,7 @@ describe('getDefaultProfileState', () => {
     it('should return expected breakdownField', () => {
       let appState = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
+        defaultProfileState: {
           resetId: 'test',
           fieldsToReset: ['breakdownField'],
           previousStateSnapshotsByProfileId: {},
@@ -41,7 +41,7 @@ describe('getDefaultProfileState', () => {
       });
       appState = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
+        defaultProfileState: {
           resetId: 'test',
           fieldsToReset: ['breakdownField'],
           previousStateSnapshotsByProfileId: {},
@@ -54,7 +54,7 @@ describe('getDefaultProfileState', () => {
     it('should return expected hideChart', () => {
       let appState = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
+        defaultProfileState: {
           resetId: 'test',
           fieldsToReset: ['hideChart'],
           previousStateSnapshotsByProfileId: {},
@@ -66,7 +66,7 @@ describe('getDefaultProfileState', () => {
       });
       appState = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
+        defaultProfileState: {
           resetId: 'test',
           fieldsToReset: 'none',
           previousStateSnapshotsByProfileId: {},
@@ -81,7 +81,7 @@ describe('getDefaultProfileState', () => {
     it('should return expected columns', () => {
       let appState = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
+        defaultProfileState: {
           resetId: 'test',
           fieldsToReset: ['columns'],
           previousStateSnapshotsByProfileId: {},
@@ -106,7 +106,7 @@ describe('getDefaultProfileState', () => {
       });
       appState = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
+        defaultProfileState: {
           resetId: 'test',
           fieldsToReset: ['columns'],
           previousStateSnapshotsByProfileId: {},
@@ -134,7 +134,7 @@ describe('getDefaultProfileState', () => {
     it('should return expected rowHeight', () => {
       const appState = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
+        defaultProfileState: {
           resetId: 'test',
           fieldsToReset: ['rowHeight'],
           previousStateSnapshotsByProfileId: {},
@@ -152,7 +152,7 @@ describe('getDefaultProfileState', () => {
     it('should return undefined', () => {
       const appState = getDefaultProfileState({
         scopedProfilesManager,
-        resetDefaultProfileState: {
+        defaultProfileState: {
           resetId: 'test',
           fieldsToReset: 'none',
           previousStateSnapshotsByProfileId: {},
