@@ -110,7 +110,10 @@ describe('Score Trend panel', () => {
   });
 
   it('has timestamp, breakdown, and score columns', () => {
-    const layers = panel.config.state.datasourceStates.formBased.layers as Record<string, Record<string, unknown>>;
+    const layers = panel.config.state.datasourceStates.formBased.layers as Record<
+      string,
+      Record<string, unknown>
+    >;
     const layer = Object.values(layers)[0];
     const columns = layer.columns as Record<string, Record<string, unknown>>;
 
@@ -129,7 +132,10 @@ describe('Model Comparison panel', () => {
   });
 
   it('groups by task.model.id', () => {
-    const layers = panel.config.state.datasourceStates.formBased.layers as Record<string, Record<string, unknown>>;
+    const layers = panel.config.state.datasourceStates.formBased.layers as Record<
+      string,
+      Record<string, unknown>
+    >;
     const layer = Object.values(layers)[0];
     const columns = layer.columns as Record<string, Record<string, unknown>>;
     expect(columns.model.sourceField).toBe('task.model.id');
@@ -156,7 +162,10 @@ describe('Pass Rate panel', () => {
   });
 
   it('groups by run_id', () => {
-    const layers = panel.config.state.datasourceStates.formBased.layers as Record<string, Record<string, unknown>>;
+    const layers = panel.config.state.datasourceStates.formBased.layers as Record<
+      string,
+      Record<string, unknown>
+    >;
     const layer = Object.values(layers)[0];
     const columns = layer.columns as Record<string, Record<string, unknown>>;
     expect(columns.runId.sourceField).toBe('run_id');
@@ -171,7 +180,10 @@ describe('Per-Suite Breakdown panel', () => {
   });
 
   it('has dataset, evaluator, and 5 stat columns', () => {
-    const layers = panel.config.state.datasourceStates.formBased.layers as Record<string, Record<string, unknown>>;
+    const layers = panel.config.state.datasourceStates.formBased.layers as Record<
+      string,
+      Record<string, unknown>
+    >;
     const layer = Object.values(layers)[0];
     const columnOrder = layer.columnOrder as string[];
     expect(columnOrder).toEqual(['dataset', 'evaluator', 'mean', 'median', 'stdDev', 'min', 'max']);
