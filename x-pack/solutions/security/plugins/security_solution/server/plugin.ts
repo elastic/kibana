@@ -165,7 +165,6 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 
-
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
 export class Plugin implements ISecuritySolutionPlugin {
