@@ -110,47 +110,60 @@ export function LensEditConfigurationFlyout({
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
 
+    // While store is loading, treat as no changes so Apply stays disabled
+    if (isLoading) return false;
+
     const datasource = datasourceMap[datasourceId];
 
-    const rawState = datasourceStates[datasourceId].state;
-    const currentPersistable = rawState ? datasource.getPersistableState(rawState) : null;
+    const currentDatasourceEntry = datasourceStates[datasourceId];
+    if (!currentDatasourceEntry?.state) return false;
 
-    const previousAttrs = previousAttributes.current;
-    const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
-    // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
-    // formBased attributes are already persistable and getPersistableState expects private state.
-    let previousPersistable: typeof currentPersistable = null;
-    if (previousDsState) {
-      previousPersistable =
+    const currentDatasourceRawState = currentDatasourceEntry.state;
+    // current = from the store
+    const currentPersistable = currentDatasourceRawState
+      ? datasource.getPersistableState(currentDatasourceRawState)
+      : null;
+
+    const savedAttributes = previousAttributes.current;
+    const savedDatasourceState = (
+      savedAttributes.state.datasourceStates as Partial<Record<LensDatasourceId, unknown>>
+    )[datasourceId];
+
+    // saved = from the attributes when the flyout opened
+    let savedPersistable: typeof currentPersistable = null;
+    if (savedDatasourceState) {
+      savedPersistable =
         datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
-          ? datasource.getPersistableState(previousDsState)
-          : {
-              state: previousDsState,
-              references: previousAttrs.references,
+          ? // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
+            datasource.getPersistableState(savedDatasourceState)
+          : // formBased attributes are already persistable.
+            {
+              state: savedDatasourceState,
+              references: savedAttributes.references,
             };
     }
 
     const datasourceStatesAreSame =
+      savedPersistable != null &&
       currentPersistable != null &&
-      previousPersistable != null &&
       datasource.isEqual(
-        previousPersistable.state,
-        previousPersistable.references,
+        savedPersistable.state,
+        savedPersistable.references,
         currentPersistable.state,
         currentPersistable.references
       );
 
     if (!datasourceStatesAreSame) return true;
 
-    const visualizationState = visualization.state;
-    const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
-    const visualizationStateIsEqual = customIsEqual
+    const currentVisualizationState = visualization.state;
+    const visualizationIsEqual = visualizationMap[savedAttributes.visualizationType]?.isEqual;
+    const visualizationStatesMatch = visualizationIsEqual
       ? (() => {
           try {
-            return customIsEqual(
-              previousAttrs.state.visualization,
-              previousAttrs.references,
-              visualizationState,
+            return visualizationIsEqual(
+              savedAttributes.state.visualization,
+              savedAttributes.references,
+              currentVisualizationState,
               attributes.references,
               annotationGroups
             );
@@ -158,9 +171,9 @@ export function LensEditConfigurationFlyout({
             return false;
           }
         })()
-      : isEqual(visualizationState, previousAttrs.state.visualization);
+      : isEqual(currentVisualizationState, savedAttributes.state.visualization);
 
-    return !visualizationStateIsEqual;
+    return !visualizationStatesMatch;
   }, [
     datasourceStates,
     datasourceId,
@@ -170,6 +183,7 @@ export function LensEditConfigurationFlyout({
     isNewPanel,
     visualizationMap,
     annotationGroups,
+    isLoading,
   ]);
 
   const onCancel = useCallback(() => {
@@ -179,12 +193,15 @@ export function LensEditConfigurationFlyout({
       // This is important when canceling after a datasource conversion (e.g., formBased -> textBased)
       const previousDatasourceId = getActiveDatasourceIdFromDoc(previousAttrs) as LensDatasourceId;
       if (previousAttrs.visualizationType === visualization.activeId) {
+        const prevDsStates = previousAttrs.state.datasourceStates as Partial<
+          Record<LensDatasourceId, unknown>
+        >;
         const currentDatasourceState = datasourceMap[previousDatasourceId].injectReferencesToLayers
           ? datasourceMap[previousDatasourceId]?.injectReferencesToLayers?.(
-              previousAttrs.state.datasourceStates[previousDatasourceId],
+              prevDsStates[previousDatasourceId],
               previousAttrs.references
             )
-          : previousAttrs.state.datasourceStates[previousDatasourceId];
+          : prevDsStates[previousDatasourceId];
         updatePanelState?.(
           currentDatasourceState,
           previousAttrs.state.visualization,

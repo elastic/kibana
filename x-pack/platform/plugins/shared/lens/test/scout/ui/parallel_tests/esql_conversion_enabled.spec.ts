@@ -47,9 +47,10 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
       await expect(lens.getInlineEditor()).toBeVisible();
-      await expect(lens.getConvertToEsqlButton()).toBeVisible();
 
-      await lens.getConvertToEsqlButton().click();
+      const convertToEsqlButton = lens.getConvertToEsqlButton();
+      await expect(convertToEsqlButton).toBeVisible();
+      await convertToEsqlButton.click();
 
       const modal = lens.getConvertToEsqModal();
       await expect(modal).toBeVisible();
@@ -85,9 +86,10 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
       await expect(lens.getInlineEditor()).toBeVisible();
-      await expect(lens.getConvertToEsqlButton()).toBeVisible();
 
-      await lens.getConvertToEsqlButton().click();
+      const convertToEsqlButton = lens.getConvertToEsqlButton();
+      await expect(convertToEsqlButton).toBeVisible();
+      await convertToEsqlButton.click();
 
       const modal = lens.getConvertToEsqModal();
       await expect(modal).toBeVisible();
@@ -132,13 +134,18 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
       await expect(lens.getInlineEditor()).toBeVisible();
-      await expect(lens.getConvertToEsqlButton()).toBeVisible();
-      // Wait for Lens form view: ES|QL editor is hidden until we convert
-      await expect(page.getByTestId('ESQLEditor')).toBeHidden({ timeout: 20000 });
+
+      const convertToEsqlButton = lens.getConvertToEsqlButton();
+      const esqlEditor = page.getByTestId('ESQLEditor');
+
+      await expect(esqlEditor).toBeHidden({ timeout: 20000 });
+      await expect(convertToEsqlButton).toBeVisible();
 
       await lens.getConvertToEsqlButton().click();
       await lens.getConvertToEsqModalConfirmButton().click();
-      await expect(page.getByTestId('ESQLEditor')).toBeVisible();
+
+      await expect(esqlEditor).toBeVisible();
+      await expect(convertToEsqlButton).toBeHidden();
 
       await lens.getCancelFlyoutButton().click();
       await expect(lens.getInlineEditor()).toBeHidden();
