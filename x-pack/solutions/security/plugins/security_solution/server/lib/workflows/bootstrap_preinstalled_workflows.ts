@@ -70,10 +70,8 @@ export class PreinstalledWorkflowsBootstrap {
    */
   public async bootstrap(): Promise<BootstrapResult> {
     this.logger.info(
-      `[PreinstalledWorkflows] Bootstrap method started - workflowsDir: ${
-        this.workflowsDir
-      }, workflowCount: ${PREINSTALLED_WORKFLOWS.length}, spaceId: ${
-        this.spaceId
+      `[PreinstalledWorkflows] Bootstrap method started - workflowsDir: ${this.workflowsDir
+      }, workflowCount: ${PREINSTALLED_WORKFLOWS.length}, spaceId: ${this.spaceId
       }, hasManagement: ${!!this.workflowsManagement?.management}`
     );
 
@@ -201,7 +199,7 @@ export class PreinstalledWorkflowsBootstrap {
    */
   private shouldUpdate(existingYaml: string, fileYaml: string): boolean {
     return false;
-    // return this.normalizeYaml(existingYaml) !== this.normalizeYaml(fileYaml);
+    //return this.normalizeYaml(existingYaml) !== this.normalizeYaml(fileYaml);
   }
 
   /**
@@ -240,7 +238,7 @@ export class PreinstalledWorkflowsBootstrap {
   /**
    * Normalize YAML strings for comparison
    */
-  private normalizeYaml(yaml: string): string {
+  /* private normalizeYaml(yaml: string): string {
     return yaml
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n')
@@ -248,7 +246,7 @@ export class PreinstalledWorkflowsBootstrap {
       .map((line) => line.trimEnd())
       .join('\n')
       .trim();
-  }
+  } */
 }
 
 /**
@@ -262,8 +260,7 @@ export async function bootstrapPreinstalledWorkflows(
 ): Promise<void> {
   logger.info('[PreinstalledWorkflows] Bootstrap function called');
   logger.debug(
-    `[PreinstalledWorkflows] Creating bootstrap instance - hasWorkflowsManagement: ${!!workflowsManagement}, hasManagement: ${!!workflowsManagement?.management}, spaceId: ${spaceId}, workflowCount: ${
-      PREINSTALLED_WORKFLOWS.length
+    `[PreinstalledWorkflows] Creating bootstrap instance - hasWorkflowsManagement: ${!!workflowsManagement}, hasManagement: ${!!workflowsManagement?.management}, spaceId: ${spaceId}, workflowCount: ${PREINSTALLED_WORKFLOWS.length
     }`
   );
 

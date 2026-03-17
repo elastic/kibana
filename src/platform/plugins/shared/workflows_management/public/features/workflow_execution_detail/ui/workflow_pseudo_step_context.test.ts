@@ -77,6 +77,7 @@ describe('buildTriggerStepExecutionFromContext', () => {
     status: ExecutionStatus.COMPLETED,
     error: null,
     isTestRun: false,
+    createdAt: '2024-01-01T00:00:00Z',
     startedAt: '2024-01-01T00:00:00Z',
     finishedAt: '2024-01-01T00:01:00Z',
     workflowId: 'wf-1',
