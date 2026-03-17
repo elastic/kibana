@@ -16,6 +16,7 @@ describe('parseHistoryUrlParams', () => {
       q: '',
       sources: [],
       runBy: [],
+      tags: [],
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
@@ -24,13 +25,14 @@ describe('parseHistoryUrlParams', () => {
 
   it('parses all parameters', () => {
     const result = parseHistoryUrlParams(
-      '?q=test&sources=live,rule&runBy=user1,user2&start=now-7d&end=now-1d&pageSize=50'
+      '?q=test&sources=live,rule&runBy=user1,user2&tags=tag1,tag2&start=now-7d&end=now-1d&pageSize=50'
     );
 
     expect(result).toEqual({
       q: 'test',
       sources: ['live', 'rule'],
       runBy: ['user1', 'user2'],
+      tags: ['tag1', 'tag2'],
       start: 'now-7d',
       end: 'now-1d',
       pageSize: 50,
@@ -44,6 +46,7 @@ describe('parseHistoryUrlParams', () => {
       q: 'test',
       sources: [],
       runBy: [],
+      tags: [],
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
@@ -99,6 +102,7 @@ describe('serializeHistoryUrlParams', () => {
       q: '',
       sources: [],
       runBy: [],
+      tags: [],
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
@@ -110,6 +114,7 @@ describe('serializeHistoryUrlParams', () => {
       q: undefined,
       sources: undefined,
       runBy: undefined,
+      tags: undefined,
       start: undefined,
       end: undefined,
       pageSize: undefined,
@@ -121,6 +126,7 @@ describe('serializeHistoryUrlParams', () => {
       q: 'test',
       sources: ['live', 'rule'],
       runBy: ['user1', 'user2'],
+      tags: ['tag1', 'tag2'],
       start: 'now-7d',
       end: 'now-1d',
       pageSize: 50,
@@ -132,6 +138,7 @@ describe('serializeHistoryUrlParams', () => {
       q: 'test',
       sources: 'live,rule',
       runBy: 'user1,user2',
+      tags: 'tag1,tag2',
       start: 'now-7d',
       end: 'now-1d',
       pageSize: '50',
@@ -143,6 +150,7 @@ describe('serializeHistoryUrlParams', () => {
       q: '',
       sources: ['live'],
       runBy: [],
+      tags: [],
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
@@ -155,7 +163,7 @@ describe('serializeHistoryUrlParams', () => {
   });
 
   it('roundtrips through parse and serialize', () => {
-    const search = '?q=test&sources=live,scheduled&runBy=user1&start=now-7d&end=now-1d&pageSize=25';
+    const search = '?q=test&sources=live,scheduled&runBy=user1&tags=important&start=now-7d&end=now-1d&pageSize=25';
     const parsed = parseHistoryUrlParams(search);
     const serialized = serializeHistoryUrlParams(parsed);
 
@@ -163,6 +171,7 @@ describe('serializeHistoryUrlParams', () => {
       q: 'test',
       sources: 'live,scheduled',
       runBy: 'user1',
+      tags: 'important',
       start: 'now-7d',
       end: 'now-1d',
       pageSize: '25',

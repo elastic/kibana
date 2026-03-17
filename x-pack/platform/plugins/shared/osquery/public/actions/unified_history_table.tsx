@@ -181,10 +181,10 @@ const UnifiedHistoryTableComponent = () => {
 
   const handleSelectedTagsChanged = useCallback(
     (newTags: string[]) => {
-      setSelectedTags(newTags);
+      setFilter('tags', newTags);
       resetPagination();
     },
-    [resetPagination]
+    [setFilter, resetPagination]
   );
 
   const handleTimeChange = useCallback(

@@ -17,6 +17,7 @@ export interface HistoryUrlFilters {
   q: string;
   sources: SourceFilter[];
   runBy: string[];
+  tags: string[];
   start: string;
   end: string;
   pageSize: number | undefined;
@@ -26,6 +27,7 @@ const DEFAULTS: Omit<HistoryUrlFilters, 'pageSize'> = {
   q: '',
   sources: [],
   runBy: [],
+  tags: [],
   start: DEFAULT_START_DATE,
   end: DEFAULT_END_DATE,
 };
@@ -64,6 +66,7 @@ export const parseHistoryUrlParams = (search: string): HistoryUrlFilters => {
     q: parseString(params.q) || DEFAULTS.q,
     sources: parseSourceFilters(params.sources),
     runBy: parseCommaSeparated(params.runBy),
+    tags: parseCommaSeparated(params.tags),
     start: parseString(params.start) || DEFAULTS.start,
     end: parseString(params.end) || DEFAULTS.end,
     pageSize: parsePageSize(params.pageSize),
@@ -76,6 +79,7 @@ export const serializeHistoryUrlParams = (
   q: filters.q || undefined,
   sources: filters.sources.length > 0 ? filters.sources.join(',') : undefined,
   runBy: filters.runBy.length > 0 ? filters.runBy.join(',') : undefined,
+  tags: filters.tags.length > 0 ? filters.tags.join(',') : undefined,
   start: filters.start !== DEFAULTS.start ? filters.start : undefined,
   end: filters.end !== DEFAULTS.end ? filters.end : undefined,
   pageSize: filters.pageSize != null ? String(filters.pageSize) : undefined,
