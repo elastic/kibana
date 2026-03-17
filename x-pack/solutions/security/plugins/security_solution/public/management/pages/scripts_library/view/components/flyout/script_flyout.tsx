@@ -32,7 +32,7 @@ type ScriptFormStateItem =
       // required by submit hook types
       name: string;
       platform: EndpointScript['platform'];
-      fileType: EndpointScript['fileType'];
+      fileType: EndpointScript['fileType'] | undefined;
       pathToExecutable: EndpointScript['pathToExecutable'];
       file?: File;
     };
@@ -48,7 +48,7 @@ const createFormState = (
       id: '',
       name: '',
       platform: [],
-      fileType: 'script',
+      fileType: undefined,
       pathToExecutable: undefined,
     } as ScriptFormStateItem),
 });
@@ -125,11 +125,22 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
       show as Extract<Required<ScriptsLibraryUrlParams>['show'], 'edit' | 'create'>
     );
 
+    const submitScriptItem = useMemo(
+      () => ({
+        ...formState.scriptItem,
+        fileType: formState.scriptItem.fileType as 'archive' | 'script',
+        pathToExecutable:
+          formState.scriptItem.fileType === 'archive'
+            ? (formState.scriptItem.pathToExecutable as string)
+            : undefined,
+      }),
+      [formState.scriptItem]
+    );
     const {
       isLoading: isSubmittingData,
       mutateAsync: submitScriptData,
       error: submitScriptError,
-    } = useSubmitScript(formState.scriptItem);
+    } = useSubmitScript(submitScriptItem);
 
     const onSuccessSubmit = useCallback(() => {
       toasts.addSuccess(
@@ -149,8 +160,8 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     }, [toasts, isEditForm, isMounted, queryParams, onSuccess, setUrlParams]);
 
     const onSubmit = useCallback(() => {
-      submitScriptData(formState.scriptItem).then(onSuccessSubmit);
-    }, [onSuccessSubmit, submitScriptData, formState.scriptItem]);
+      submitScriptData(submitScriptItem).then(onSuccessSubmit);
+    }, [onSuccessSubmit, submitScriptData, submitScriptItem]);
 
     const onCloseFlyoutHandler = useCallback(
       () => onCloseFlyout(formState.hasFormChanged),
