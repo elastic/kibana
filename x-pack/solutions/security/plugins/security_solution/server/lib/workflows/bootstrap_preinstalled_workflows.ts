@@ -70,8 +70,10 @@ export class PreinstalledWorkflowsBootstrap {
    */
   public async bootstrap(): Promise<BootstrapResult> {
     this.logger.info(
-      `[PreinstalledWorkflows] Bootstrap method started - workflowsDir: ${this.workflowsDir
-      }, workflowCount: ${PREINSTALLED_WORKFLOWS.length}, spaceId: ${this.spaceId
+      `[PreinstalledWorkflows] Bootstrap method started - workflowsDir: ${
+        this.workflowsDir
+      }, workflowCount: ${PREINSTALLED_WORKFLOWS.length}, spaceId: ${
+        this.spaceId
       }, hasManagement: ${!!this.workflowsManagement?.management}`
     );
 
@@ -199,7 +201,7 @@ export class PreinstalledWorkflowsBootstrap {
    */
   private shouldUpdate(existingYaml: string, fileYaml: string): boolean {
     return false;
-    //return this.normalizeYaml(existingYaml) !== this.normalizeYaml(fileYaml);
+    // return this.normalizeYaml(existingYaml) !== this.normalizeYaml(fileYaml);
   }
 
   /**
@@ -260,7 +262,8 @@ export async function bootstrapPreinstalledWorkflows(
 ): Promise<void> {
   logger.info('[PreinstalledWorkflows] Bootstrap function called');
   logger.debug(
-    `[PreinstalledWorkflows] Creating bootstrap instance - hasWorkflowsManagement: ${!!workflowsManagement}, hasManagement: ${!!workflowsManagement?.management}, spaceId: ${spaceId}, workflowCount: ${PREINSTALLED_WORKFLOWS.length
+    `[PreinstalledWorkflows] Creating bootstrap instance - hasWorkflowsManagement: ${!!workflowsManagement}, hasManagement: ${!!workflowsManagement?.management}, spaceId: ${spaceId}, workflowCount: ${
+      PREINSTALLED_WORKFLOWS.length
     }`
   );
 
