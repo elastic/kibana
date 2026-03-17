@@ -18,7 +18,6 @@ export const toFormState = (response: NotificationPolicyResponse): NotificationP
     description: response.description,
     matcher: response.matcher ?? '',
     groupBy: response.group_by ?? [],
-    ruleLabels: response.rule_labels ?? [],
     frequency: response.throttle
       ? { type: 'throttle', interval: response.throttle.interval }
       : { type: 'immediate' },
@@ -34,7 +33,6 @@ export const toCreatePayload = (
     description: state.description,
     ...(state.matcher ? { matcher: state.matcher } : {}),
     ...(state.groupBy.length > 0 ? { group_by: state.groupBy } : {}),
-    ...(state.ruleLabels.length > 0 ? { rule_labels: state.ruleLabels } : {}),
     ...(state.frequency.type === 'throttle'
       ? { throttle: { interval: state.frequency.interval } }
       : {}),

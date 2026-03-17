@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
@@ -16,10 +17,17 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiComboBox,
+  EuiFormAppend,
+  EuiFormPrepend,
 } from '@elastic/eui';
 import type { VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { Position, LegendValue } from '@elastic/charts';
-import type { LegendSize, XYLegendValue } from '@kbn/chart-expressions-common';
+import {
+  LegendLayout,
+  getLegendLayout,
+  type LegendSize,
+  type XYLegendValue,
+} from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { ToolbarDivider } from '../toolbar_divider';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
@@ -91,6 +99,14 @@ export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendV
    */
   onMaxLinesChange?: (value: number) => void;
   /**
+   * Sets the max label width in pixels (list layout only)
+   */
+  listLayoutMaxWidth?: number;
+  /**
+   * Callback on max width limit option change
+   */
+  onListLayoutMaxWidthChange?: (value: number) => void;
+  /**
    * Defines if the legend items will be truncated or not
    */
   shouldTruncate?: boolean;
@@ -136,6 +152,14 @@ export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendV
    */
   onLegendSizeChange: (size?: LegendSize) => void;
   /**
+   * Legend layout (applies only for horizontal legends - top/bottom)
+   */
+  layout?: LegendLayout;
+  /**
+   * Callback on layout change. When called with `undefined`, the default layout behavior is used.
+   */
+  onLayoutChange?: (layout?: LegendLayout) => void;
+  /**
    * Whether to show auto legend size option. Should only be true for pre 8.3 visualizations that already had it as their setting.
    * (We're trying to get people to stop using it so it can eventually be removed.)
    */
@@ -149,6 +173,9 @@ export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendV
 const DEFAULT_TRUNCATE_LINES = 1;
 const MAX_TRUNCATE_LINES = 5;
 const MIN_TRUNCATE_LINES = 1;
+const DEFAULT_TRUNCATE_WIDTH_LIMIT = 250;
+const MIN_TRUNCATE_WIDTH_LIMIT = 50;
+const MAX_TRUNCATE_WIDTH_LIMIT = 1000;
 
 export const MaxLinesInput = ({
   value,
@@ -186,6 +213,43 @@ export const MaxLinesInput = ({
   );
 };
 
+export const WidthLimitInput = ({
+  value,
+  setValue,
+  disabled,
+}: {
+  value: number;
+  setValue: (value: number) => void;
+  disabled?: boolean;
+}) => {
+  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange: setValue });
+  const pixelLimitLabel = i18n.translate('xpack.lens.shared.widthLimitLabel', {
+    defaultMessage: 'Width limit',
+  });
+  return (
+    <EuiFieldNumber
+      id="lensLegendWidthLimitInput"
+      disabled={disabled}
+      fullWidth
+      prepend={<EuiFormPrepend compressed label={pixelLimitLabel} />}
+      append={<EuiFormAppend compressed label="px" inputId="" />}
+      aria-label={pixelLimitLabel}
+      data-test-subj="lens-legend-width-limit-input"
+      value={inputValue}
+      min={MIN_TRUNCATE_WIDTH_LIMIT}
+      max={MAX_TRUNCATE_WIDTH_LIMIT}
+      step={10}
+      compressed
+      onChange={(e) => {
+        const val = Number(e.target.value);
+        handleInputChange(
+          Math.min(MAX_TRUNCATE_WIDTH_LIMIT, Math.max(val, MIN_TRUNCATE_WIDTH_LIMIT))
+        );
+      }}
+    />
+  );
+};
+
 const noop = () => {};
 const PANEL_STYLE = {
   width: '500px',
@@ -203,6 +267,25 @@ const legendTitleStrings = {
   }),
   getDataTestSubj: () => `lnsLegendTableSeriesHeader`,
 };
+const labelTruncationLabel = i18n.translate('xpack.lens.shared.labelTruncation', {
+  defaultMessage: 'Label truncation',
+});
+const legendLayoutButtonOptions: Array<{ id: string; label: string; layout?: LegendLayout }> = [
+  {
+    id: 'legend_layout_list',
+    label: i18n.translate('xpack.lens.shared.legendLayout.list', {
+      defaultMessage: 'List',
+    }),
+    layout: LegendLayout.List,
+  },
+  {
+    id: 'legend_layout_grid',
+    label: i18n.translate('xpack.lens.shared.legendLayout.grid', {
+      defaultMessage: 'Grid',
+    }),
+    layout: undefined,
+  },
+];
 
 export function shouldDisplayTable(legendValues: LegendValue[]) {
   return legendValues.some((v) => v !== LegendValue.CurrentAndLastValue);
@@ -252,10 +335,14 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
   onLegendStatsChange = noop,
   maxLines,
   onMaxLinesChange = noop,
+  listLayoutMaxWidth,
+  onListLayoutMaxWidthChange = noop,
   shouldTruncate,
   onTruncateLegendChange = noop,
   legendSize,
   onLegendSizeChange,
+  layout,
+  onLayoutChange,
   showAutoLegendSizeOption,
   titlePlaceholder,
 }: LegendSettingsProps<LegendStats>) {
@@ -269,7 +356,21 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
     (allowedLegendStats[0].value === LegendValue.CurrentAndLastValue ||
       allowedLegendStats[0].value === LegendValue.Value);
 
-  const showsLegendTitleSetting = shouldDisplayTable(legendStats) && !!onLegendTitleChange;
+  const isHorizontalLegend = position === Position.Top || position === Position.Bottom;
+  const isTableLayout = layout === undefined && shouldDisplayTable(legendStats);
+  const showsLegendLayoutSetting =
+    isLegendNotHidden && location !== 'inside' && isHorizontalLegend && Boolean(onLayoutChange);
+  const effectiveLayout = getLegendLayout({
+    isInside: location === 'inside',
+    position,
+    layout,
+  });
+  const usesWidthLimitTruncation = effectiveLayout === LegendLayout.List;
+
+  const showsLegendTitleSetting = isTableLayout && !!onLegendTitleChange;
+
+  const legendLayoutIdSelected =
+    layout === LegendLayout.List ? 'legend_layout_list' : 'legend_layout_grid';
 
   return (
     <>
@@ -304,6 +405,33 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
             position={position}
             onPositionChange={onPositionChange}
           />
+          {showsLegendLayoutSetting && (
+            <EuiFormRow
+              display="columnCompressed"
+              label={i18n.translate('xpack.lens.shared.legendLayoutLabel', {
+                defaultMessage: 'Layout',
+              })}
+              fullWidth
+            >
+              <EuiButtonGroup
+                isFullWidth
+                legend={i18n.translate('xpack.lens.shared.legendLayoutLabel', {
+                  defaultMessage: 'Layout',
+                })}
+                data-test-subj="lens-legend-layout-btn"
+                buttonSize="compressed"
+                type="single"
+                options={legendLayoutButtonOptions}
+                idSelected={legendLayoutIdSelected}
+                onChange={(id) => {
+                  const next = legendLayoutButtonOptions.find(
+                    ({ id: optionId }) => optionId === id
+                  );
+                  onLayoutChange?.(next?.layout);
+                }}
+              />
+            </EuiFormRow>
+          )}
           {location !== 'inside' && (
             <LegendSizeSettings
               legendSize={legendSize}
@@ -395,18 +523,18 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
       {isLegendNotHidden && (
         <EuiFormRow
           display="columnCompressed"
-          label={i18n.translate('xpack.lens.shared.labelTruncation', {
-            defaultMessage: 'Label truncation',
-          })}
+          label={labelTruncationLabel}
           fullWidth
+          css={css`
+            align-items: center;
+          `}
         >
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiSwitch
+                id="lensLegendTruncateSwitch"
                 compressed
-                label={i18n.translate('xpack.lens.shared.labelTruncation', {
-                  defaultMessage: 'Label truncation',
-                })}
+                label={labelTruncationLabel}
                 data-test-subj="lens-legend-truncate-switch"
                 showLabel={false}
                 checked={shouldTruncate ?? true}
@@ -414,11 +542,19 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
               />
             </EuiFlexItem>
             <EuiFlexItem grow>
-              <MaxLinesInput
-                disabled={!shouldTruncate}
-                value={maxLines ?? DEFAULT_TRUNCATE_LINES}
-                setValue={onMaxLinesChange}
-              />
+              {usesWidthLimitTruncation ? (
+                <WidthLimitInput
+                  disabled={!shouldTruncate}
+                  value={listLayoutMaxWidth ?? DEFAULT_TRUNCATE_WIDTH_LIMIT}
+                  setValue={onListLayoutMaxWidthChange}
+                />
+              ) : (
+                <MaxLinesInput
+                  disabled={!shouldTruncate}
+                  value={maxLines ?? DEFAULT_TRUNCATE_LINES}
+                  setValue={onMaxLinesChange}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>

@@ -30,7 +30,6 @@ export const DEFAULT_FORM_STATE: NotificationPolicyFormState = {
   description: '',
   matcher: '',
   groupBy: [],
-  ruleLabels: [],
   frequency: { type: 'immediate' },
   destinations: [],
 };

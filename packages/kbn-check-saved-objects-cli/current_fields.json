@@ -108,7 +108,6 @@
     "destinations.type",
     "enabled",
     "name",
-    "rule_labels",
     "snoozedUntil",
     "updatedAt",
     "updatedBy"
@@ -1027,6 +1026,7 @@
   "osquery-pack": [
     "created_at",
     "created_by",
+    "created_by_profile_uid",
     "description",
     "enabled",
     "name",
@@ -1041,6 +1041,7 @@
     "shards",
     "updated_at",
     "updated_by",
+    "updated_by_profile_uid",
     "version"
   ],
   "osquery-pack-asset": [
@@ -1060,6 +1061,7 @@
   "osquery-saved-query": [
     "created_at",
     "created_by",
+    "created_by_profile_uid",
     "description",
     "ecs_mapping",
     "id",
@@ -1069,6 +1071,7 @@
     "timeout",
     "updated_at",
     "updated_by",
+    "updated_by_profile_uid",
     "version"
   ],
   "policy-settings-protection-updates-note": [

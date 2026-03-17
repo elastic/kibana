@@ -146,6 +146,12 @@ describe('NotificationPolicyFormPage', () => {
       await user.type(screen.getByTestId(TEST_SUBJ.descriptionInput), 'Description from test');
       await user.tab();
 
+      // Select a workflow destination via EuiComboBox
+      const destinationsCombo = screen.getByTestId('destinationsInput');
+      const comboInput = within(destinationsCombo).getByRole('combobox');
+      await user.click(comboInput);
+      await user.click(await screen.findByTitle('Workflow 1'));
+
       const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
       await waitFor(() => expect(saveButton).toBeEnabled());
       await user.click(saveButton);

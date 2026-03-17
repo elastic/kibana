@@ -70,6 +70,7 @@ dependsOn:
   - '@kbn/core-http-server-utils'
   - '@kbn/eval-kql'
   - '@kbn/react-query'
+  - '@kbn/es-query'
   - '@kbn/react-hooks'
 tags:
   - plugin

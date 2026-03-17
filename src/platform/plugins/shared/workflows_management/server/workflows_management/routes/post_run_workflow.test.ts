@@ -102,12 +102,58 @@ describe('POST /api/workflows/{id}/run', () => {
         },
         'default',
         mockRequest.body.inputs,
-        mockRequest
+        mockRequest,
+        undefined,
+        undefined
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           workflowExecutionId: mockExecutionId,
         },
+      });
+    });
+
+    it('should forward metadata to runWorkflow when provided', async () => {
+      const mockWorkflow = {
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        definition: {
+          name: 'Test Workflow',
+          steps: [],
+        },
+        yaml: 'name: Test Workflow',
+      };
+
+      const mockExecutionId = 'execution-with-metadata';
+
+      workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
+      workflowsApi.runWorkflow = jest.fn().mockResolvedValue(mockExecutionId);
+
+      const mockRequest = {
+        params: { id: 'workflow-123' },
+        body: {
+          inputs: { param1: 'value1' },
+          metadata: { agent_id: 'agent-abc', source: 'agent-builder' },
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/workflow-123/run' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(workflowsApi.runWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'workflow-123' }),
+        'default',
+        mockRequest.body.inputs,
+        mockRequest,
+        undefined,
+        { agent_id: 'agent-abc', source: 'agent-builder' }
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { workflowExecutionId: mockExecutionId },
       });
     });
 
@@ -381,7 +427,9 @@ describe('POST /api/workflows/{id}/run', () => {
         },
         'custom-space',
         mockRequest.body.inputs,
-        mockRequest
+        mockRequest,
+        undefined,
+        undefined
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {

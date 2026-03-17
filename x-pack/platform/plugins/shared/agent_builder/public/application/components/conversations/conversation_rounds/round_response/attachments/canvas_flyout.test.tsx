@@ -37,6 +37,18 @@ jest.mock('../../../../../hooks/use_conversation', () => ({
   }),
 }));
 
+jest.mock('../../../../../hooks/use_agent_builder_service', () => ({
+  useAgentBuilderServices: () => ({
+    openSidebarConversation: jest.fn(),
+  }),
+}));
+
+jest.mock('../../../../../hooks/use_persisted_conversation_id', () => ({
+  usePersistedConversationId: () => ({
+    updatePersistedConversationId: jest.fn(),
+  }),
+}));
+
 const mockAttachmentsService = {
   getAttachmentUiDefinition: jest.fn(),
   updateOrigin: jest.fn(),
