@@ -506,7 +506,6 @@ export class SyntheticsPrivateLocation {
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
     const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
     const policyIdsToFetch = new Set<string>();
@@ -522,49 +521,14 @@ export class SyntheticsPrivateLocation {
 
     const policies = await this.packagePolicyService.getByIds({
       spaceId,
-      policyIdsToFetch,
+      packagePolicyIds: Array.from(policyIdsToFetch),
     });
 
     return { policies, allSpaces };
   }
 
-  async createPolicyBulk(newPolicies: NewPackagePolicyWithId[]) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    if (esClient && newPolicies.length > 0) {
-      return await this.server.fleet.packagePolicyService.bulkCreate(
-        soClient,
-        esClient,
-        newPolicies,
-        {
-          asyncDeploy: true,
-        }
-      );
-    }
-  }
-
-  async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[]) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    if (policiesToUpdate.length > 0) {
-      const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
-        soClient,
-        esClient,
-        policiesToUpdate,
-        {
-          force: true,
-          asyncDeploy: true,
-        }
-      );
-      return failedPolicies;
-    }
-  }
-
-
   async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
     const policyIdsToDelete = new Set<string>();
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
     const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
     const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
 
@@ -578,15 +542,15 @@ export class SyntheticsPrivateLocation {
           (id) => policyIdsToDelete.add(id)
         );
       }
-      if (policyIdsToDelete.length > 0) {
+      if (policyIdsToDelete.size > 0) {
         const result = await this.packagePolicyService.bulkDelete({
-          policyIdsToDelete,
+          policyIdsToDelete: Array.from(policyIdsToDelete),
           spaceId,
         });
         const failedPolicies = result?.filter((policy) => {
           return !policy.success && policy?.statusCode !== 404;
         });
-        if (failedPolicies?.length === policyIdsToDelete.length) {
+        if (failedPolicies?.length === policyIdsToDelete.size) {
           throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
         }
         return result;
@@ -596,39 +560,6 @@ export class SyntheticsPrivateLocation {
 
   async getAgentPolicies() {
     return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
-  }
-
-  /**
-   * Fetches existing package policies for the given configs and locations.
-   * Looks for new (space-agnostic) format and legacy format for all spaces
-   * that have any synthetics monitors.
-   */
-  async getExistingPolicies(
-    configs: HeartbeatConfig[],
-    allPrivateLocations: SyntheticsPrivateLocations,
-    spaceId: string
-  ) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
-    const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
-    const policyIdsToFetch = new Set<string>();
-
-    for (const config of configs) {
-      for (const privateLocation of allPrivateLocations) {
-        policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
-        this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
-          (id) => policyIdsToFetch.add(id)
-        );
-      }
-    }
-
-    const policies = await this.server.fleet.packagePolicyService.getByIDs(
-      soClient,
-      [...policyIdsToFetch],
-      { ignoreMissing: true }
-    );
-
-    return { policies, allSpaces };
   }
 }
 
