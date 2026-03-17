@@ -69,12 +69,15 @@ export const registerExistingIndicesPath = (router: IRouter): void => {
         validate: {
           request: {
             query: schema.object({
-              indices: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+              indices: schema.oneOf([
+                schema.string(),
+                schema.arrayOf(schema.string(), { maxSize: 1000 }),
+              ]),
             }),
           },
           response: {
             200: {
-              body: () => schema.arrayOf(schema.string()),
+              body: () => schema.arrayOf(schema.string(), { maxSize: 1000 }),
             },
           },
         },
