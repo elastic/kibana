@@ -486,9 +486,7 @@ describe('useWorkflowActions – import mutations', () => {
       const importResponse = { created: [{ id: 'w-1', name: 'W' }], failed: [], parseErrors: [] };
 
       mockParseImportFile.mockResolvedValueOnce(clientResult);
-      mockHttp.post
-        .mockResolvedValueOnce({ conflicts: [] })
-        .mockResolvedValueOnce(importResponse);
+      mockHttp.post.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce(importResponse);
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
       const file = createFile('flow.yml', 'name: W');
