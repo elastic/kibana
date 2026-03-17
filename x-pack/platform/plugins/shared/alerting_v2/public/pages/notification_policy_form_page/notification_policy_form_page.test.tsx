@@ -53,7 +53,12 @@ jest.mock('../../hooks/use_fetch_notification_policy', () => ({
 
 jest.mock('../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
-    data: { results: [{ id: 'workflow-1', name: 'Workflow 1' }, { id: 'workflow-2', name: 'Workflow 2' }] },
+    data: {
+      results: [
+        { id: 'workflow-1', name: 'Workflow 1' },
+        { id: 'workflow-2', name: 'Workflow 2' },
+      ],
+    },
     isLoading: false,
   }),
 }));
