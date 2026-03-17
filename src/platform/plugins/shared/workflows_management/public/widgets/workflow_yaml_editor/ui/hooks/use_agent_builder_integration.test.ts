@@ -97,6 +97,14 @@ const expectedAttachment = (yaml: string, overrides?: { workflowId?: string; nam
   },
 });
 
+const expectedChatConfig = (
+  attachment: ReturnType<typeof expectedAttachment>,
+  attachmentId: string = MOCK_UUID
+) => ({
+  sessionTag: `workflow-editor:${attachmentId}`,
+  attachments: [attachment],
+});
+
 describe('useAgentBuilderIntegration', () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -122,7 +130,7 @@ describe('useAgentBuilderIntegration', () => {
       );
 
       const expected = expectedAttachment(INITIAL_YAML);
-      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith({ attachments: [expected] });
+      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(expectedChatConfig(expected));
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith(expected);
     });
 
@@ -189,7 +197,9 @@ describe('useAgentBuilderIntegration', () => {
         workflowId: 'wf-123',
         name: 'My Workflow',
       });
-      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith({ attachments: [expected] });
+      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
+        expectedChatConfig(expected, 'wf-123')
+      );
     });
 
     it('does not tear down the effect when workflowName changes', () => {
@@ -224,9 +234,9 @@ describe('useAgentBuilderIntegration', () => {
         jest.advanceTimersByTime(500);
       });
 
-      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith({
-        attachments: [expectedAttachment('name: changed', { name: 'Updated Name' })],
-      });
+      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
+        expectedChatConfig(expectedAttachment('name: changed', { name: 'Updated Name' }))
+      );
     });
 
     it('uses a generated UUID as attachment id when workflowId is undefined', () => {
@@ -241,9 +251,12 @@ describe('useAgentBuilderIntegration', () => {
         })
       );
 
-      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith({
-        attachments: [expect.objectContaining({ id: MOCK_UUID })],
-      });
+      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sessionTag: `workflow-editor:${MOCK_UUID}`,
+          attachments: [expect.objectContaining({ id: MOCK_UUID })],
+        })
+      );
     });
   });
 
@@ -273,7 +286,7 @@ describe('useAgentBuilderIntegration', () => {
       });
 
       const expected = expectedAttachment(updatedYaml);
-      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith({ attachments: [expected] });
+      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(expectedChatConfig(expected));
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith(expected);
     });
 
@@ -311,9 +324,9 @@ describe('useAgentBuilderIntegration', () => {
       });
 
       expect(agentBuilder.setChatConfig).toHaveBeenCalledTimes(1);
-      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith({
-        attachments: [expectedAttachment('change-3')],
-      });
+      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
+        expectedChatConfig(expectedAttachment('change-3'))
+      );
     });
   });
 
