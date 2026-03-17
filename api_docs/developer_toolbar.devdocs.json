@@ -18,7 +18,7 @@
         "DeveloperToolbarItemRegistry"
       ],
       "path": "src/platform/plugins/shared/developer_toolbar/public/plugin.tsx",
-      "lineNumber": 22,
+      "lineNumber": 23,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
