@@ -302,4 +302,38 @@ describe('SharedLists', () => {
       expect(createButton).toHaveFocus();
     });
   });
+
+  it('returns focus to the create button when the create shared list flyout is closed', async () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        rules: { read: true, edit: true },
+        exceptions: { read: true, edit: true },
+      },
+    });
+
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    const createButtonText = wrapper.getByText('Create shared exception list');
+    const createButton = createButtonText.closest('button')!;
+    fireEvent.click(createButton);
+
+    const createListOption = wrapper.getByTestId('manageExceptionListCreateExceptionListButton');
+    fireEvent.click(createListOption);
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId('createSharedExceptionListFlyout')).toBeInTheDocument();
+    });
+
+    const closeFlyoutButton = wrapper.getByTestId('closeFlyoutButton');
+    fireEvent.click(closeFlyoutButton);
+
+    await waitFor(() => {
+      expect(createButton).toHaveFocus();
+    });
+  });
 });
