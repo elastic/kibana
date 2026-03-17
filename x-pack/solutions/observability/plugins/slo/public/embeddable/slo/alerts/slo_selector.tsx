@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,9 +16,10 @@ import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { hasSloGroupBy } from '../overview/slo_overview_panel_content';
 import type { SloItem } from './types';
 
-/** Option with optional indent flag for renderOption */
+/** Option with optional indent flag and sloId for renderOption and disabled logic */
 interface SloComboBoxOption extends EuiComboBoxOptionOption<string> {
   isIndented?: boolean;
+  sloId?: string;
 }
 
 interface Props {
@@ -104,6 +105,7 @@ function buildOptionsFromResults(results: SLOWithSummaryResponse[]): SloComboBox
         options.push({
           label: `${first.name} (${ALL_INSTANCES_LABEL})`,
           value: allValue,
+          sloId: id,
         });
       }
     }
@@ -115,12 +117,52 @@ function buildOptionsFromResults(results: SLOWithSummaryResponse[]): SloComboBox
         const baseLabel =
           slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.instanceId})` : slo.name;
         const isIndented = isGrouped && slo.instanceId !== ALL_VALUE;
-        options.push({ label: baseLabel, value, isIndented });
+        options.push({ label: baseLabel, value, isIndented, sloId: id });
       }
     }
   }
 
   return options;
+}
+
+/**
+ * Normalize selection to avoid redundancy between "All instances" and specific instances.
+ * - When "All instances" is selected for an SLO: remove its child instances (they're encompassed).
+ * - When a specific instance is selected for an SLO that has "All instances": remove "All instances"
+ *   (user is narrowing from "all" to a specific one).
+ */
+function normalizeSelection(
+  opts: Array<EuiComboBoxOptionOption<string>>
+): Array<EuiComboBoxOptionOption<string>> {
+  const bySloId = new Map<
+    string,
+    { all?: EuiComboBoxOptionOption<string>; instances: EuiComboBoxOptionOption<string>[] }
+  >();
+  for (const opt of opts) {
+    const [sloId, instanceId] = parseOptionValue(opt.value ?? '');
+    let entry = bySloId.get(sloId);
+    if (!entry) {
+      entry = { instances: [] };
+      bySloId.set(sloId, entry);
+    }
+    if (instanceId === ALL_VALUE) {
+      entry.all = opt;
+    } else {
+      entry.instances.push(opt);
+    }
+  }
+
+  const result: Array<EuiComboBoxOptionOption<string>> = [];
+  for (const [, entry] of bySloId) {
+    if (entry.all && entry.instances.length > 0) {
+      result.push(entry.all);
+    } else if (entry.all) {
+      result.push(entry.all);
+    } else {
+      result.push(...entry.instances);
+    }
+  }
+  return result;
 }
 
 /** Create synthetic SLO for "All instances" selection (API does not return id-* for grouped SLOs). */
@@ -148,7 +190,6 @@ function toSloWithSummary(
 }
 
 export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {
-  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     mapSlosToOptions(initialSlos)
   );
@@ -159,21 +200,28 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
     perPage: 100,
   });
 
-  useEffect(() => {
+  const options = useMemo(() => {
     const isLoadedWithData = !isLoading && sloList?.results !== undefined;
-    const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
-      ? buildOptionsFromResults(sloList.results)
-      : [];
-    setOptions(opts);
-  }, [isLoading, sloList]);
+    const baseOpts = isLoadedWithData ? buildOptionsFromResults(sloList.results) : [];
+    const selectedValues = new Set(selectedOptions.map((o) => o.value));
+    return baseOpts.map((opt) => {
+      if (!opt.isIndented || !opt.sloId) return opt;
+      const allValue = toOptionValue(opt.sloId, ALL_VALUE);
+      if (selectedValues.has(allValue)) {
+        return { ...opt, disabled: true };
+      }
+      return opt;
+    });
+  }, [isLoading, sloList, selectedOptions]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
-    setSelectedOptions(opts);
-    if (opts.length < 1 || !sloList?.results) {
+    const normalized = normalizeSelection(opts);
+    setSelectedOptions(normalized);
+    if (normalized.length < 1 || !sloList?.results) {
       onSelected(undefined);
       return;
     }
-    const selectedSlos = opts.map((opt) => {
+    const selectedSlos = normalized.map((opt) => {
       const [sloId, instanceId] = parseOptionValue(opt.value!);
       const match = sloList.results!.find((s) => toOptionValue(s.id, s.instanceId) === opt.value);
       if (match) return match;
