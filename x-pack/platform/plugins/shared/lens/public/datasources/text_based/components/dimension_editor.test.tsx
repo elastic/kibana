@@ -5,12 +5,19 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { TextBasedDimensionEditorProps } from './dimension_editor';
 import { TextBasedDimensionEditor } from './dimension_editor';
 import type { FieldSelectProps } from './field_select';
 
-// Mock fetchFieldsFromESQLExpression
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
+
 jest.mock('./fetch_fields_from_esql_expression', () => ({
   fetchFieldsFromESQLExpression: jest.fn(),
 }));
@@ -22,6 +29,10 @@ jest.mock('./field_select', () => ({
     capturedOnChoose = props.onChoose;
     return <div data-test-subj="text-based-dimension-field" />;
   },
+}));
+
+jest.mock('../../form_based/dimension_panel/format_selector', () => ({
+  FormatSelector: () => <div data-test-subj="format-selector" />,
 }));
 
 const { fetchFieldsFromESQLExpression } = jest.requireMock('./fetch_fields_from_esql_expression');
@@ -57,6 +68,26 @@ describe('TextBasedDimensionEditor', () => {
     core: { docLinks: {} },
     groupId: 'rows',
   } as unknown as TextBasedDimensionEditorProps;
+
+  const stateWithColumn = (overrides: Record<string, unknown> = {}) =>
+    ({
+      ...defaultProps.state,
+      layers: {
+        layer1: {
+          ...defaultProps.state.layers.layer1,
+          columns: [
+            {
+              columnId: 'dim1',
+              fieldName: 'bytes',
+              label: 'bytes',
+              customLabel: false,
+              meta: { type: 'number' },
+              ...overrides,
+            },
+          ],
+        },
+      },
+    } as unknown as TextBasedDimensionEditorProps['state']);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -136,5 +167,209 @@ describe('TextBasedDimensionEditor', () => {
     expect(newColumn.columnId).toBe('dim1');
     expect(newColumn.fieldName).toBe('Field One');
     expect(newColumn.inMetricDimension).toBeUndefined();
+  });
+
+  describe('NameInput label handling', () => {
+    it('should pass empty string value when no custom label is set', () => {
+      render(
+        <TextBasedDimensionEditor
+          {...defaultProps}
+          state={stateWithColumn({ customLabel: false, label: 'bytes' })}
+        />
+      );
+
+      const nameInput = screen.getByTestId('name-input');
+      expect(nameInput).toHaveValue('');
+    });
+
+    it('should pass the custom label as the input value when customLabel is true', () => {
+      render(
+        <TextBasedDimensionEditor
+          {...defaultProps}
+          state={stateWithColumn({ customLabel: true, label: 'My Custom Label' })}
+        />
+      );
+
+      const nameInput = screen.getByTestId('name-input');
+      expect(nameInput).toHaveValue('My Custom Label');
+    });
+
+    it('should update label and set customLabel to true on name input change', () => {
+      const setState = jest.fn();
+      const state = stateWithColumn();
+      render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+
+      const nameInput = screen.getByTestId('name-input');
+      fireEvent.change(nameInput, { target: { value: 'New Label' } });
+
+      expect(setState).toHaveBeenCalledTimes(1);
+      const stateUpdater = setState.mock.calls[0][0];
+      const updatedState = stateUpdater(state);
+      expect(updatedState.layers.layer1.columns[0]).toMatchObject({
+        columnId: 'dim1',
+        fieldName: 'bytes',
+        label: 'New Label',
+        customLabel: true,
+      });
+    });
+
+    it('should set customLabel to false when label is cleared back to the default', () => {
+      const setState = jest.fn();
+      const state = stateWithColumn({ customLabel: true, label: 'Custom' });
+      render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+
+      const nameInput = screen.getByTestId('name-input');
+      fireEvent.change(nameInput, { target: { value: '' } });
+
+      expect(setState).toHaveBeenCalledTimes(1);
+      const stateUpdater = setState.mock.calls[0][0];
+      const updatedState = stateUpdater(state);
+      expect(updatedState.layers.layer1.columns[0]).toMatchObject({
+        columnId: 'dim1',
+        fieldName: 'bytes',
+        label: 'bytes',
+        customLabel: false,
+      });
+    });
+  });
+
+  describe('FormatSelector numeric column detection', () => {
+    it('should show FormatSelector when activeData reports the column as numeric', () => {
+      render(
+        <TextBasedDimensionEditor
+          {...defaultProps}
+          state={stateWithColumn({ meta: { type: 'string' } })}
+          activeData={{
+            layer1: {
+              type: 'datatable',
+              columns: [{ id: 'dim1', name: 'bytes', meta: { type: 'number' } }],
+              rows: [],
+            },
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('format-selector')).toBeInTheDocument();
+    });
+
+    it('should hide FormatSelector when activeData reports the column as non-numeric', () => {
+      render(
+        <TextBasedDimensionEditor
+          {...defaultProps}
+          state={stateWithColumn({ meta: { type: 'number' } })}
+          activeData={{
+            layer1: {
+              type: 'datatable',
+              columns: [{ id: 'dim1', name: 'bytes', meta: { type: 'string' } }],
+              rows: [],
+            },
+          }}
+        />
+      );
+
+      expect(screen.queryByTestId('format-selector')).not.toBeInTheDocument();
+    });
+
+    it('should fall back to selectedField.meta when activeData is not available', () => {
+      render(
+        <TextBasedDimensionEditor
+          {...defaultProps}
+          state={stateWithColumn({ meta: { type: 'number' } })}
+        />
+      );
+
+      expect(screen.getByTestId('format-selector')).toBeInTheDocument();
+    });
+
+    it('should hide FormatSelector for non-numeric field when no activeData', () => {
+      render(
+        <TextBasedDimensionEditor
+          {...defaultProps}
+          state={stateWithColumn({ meta: { type: 'string' } })}
+        />
+      );
+
+      expect(screen.queryByTestId('format-selector')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('field change behavior', () => {
+    it('should clear format params when switching from a numeric to a non-numeric field', async () => {
+      const setState = jest.fn();
+      const state = stateWithColumn({
+        meta: { type: 'number' },
+        params: { format: { id: 'number', params: { decimals: 2 } } },
+      });
+      render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+
+      await waitFor(() => {
+        expect(capturedOnChoose).toBeDefined();
+      });
+      capturedOnChoose!({ type: 'field', field: 'Field One' });
+
+      expect(setState).toHaveBeenCalledTimes(1);
+      const newState = setState.mock.calls[0][0];
+      const updatedColumn = newState.layers.layer1.columns[0];
+      expect(updatedColumn.fieldName).toBe('Field One');
+      expect(updatedColumn.params).toBeUndefined();
+    });
+
+    it('should preserve format params when switching between numeric fields', async () => {
+      const setState = jest.fn();
+      const state = stateWithColumn({
+        meta: { type: 'number' },
+        params: { format: { id: 'number', params: { decimals: 2 } } },
+      });
+      render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+
+      await waitFor(() => {
+        expect(capturedOnChoose).toBeDefined();
+      });
+      capturedOnChoose!({ type: 'field', field: 'Field Two' });
+
+      expect(setState).toHaveBeenCalledTimes(1);
+      const newState = setState.mock.calls[0][0];
+      const updatedColumn = newState.layers.layer1.columns[0];
+      expect(updatedColumn.fieldName).toBe('Field Two');
+      expect(updatedColumn.params).toEqual({
+        format: { id: 'number', params: { decimals: 2 } },
+      });
+    });
+
+    it("should default the label to the new field's name when the previous column didn't have a custom label", async () => {
+      const setState = jest.fn();
+      const state = stateWithColumn();
+      render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+
+      await waitFor(() => {
+        expect(capturedOnChoose).toBeDefined();
+      });
+      capturedOnChoose!({ type: 'field', field: 'Field One' });
+
+      expect(setState).toHaveBeenCalledTimes(1);
+      const newState = setState.mock.calls[0][0];
+      const updatedColumn = newState.layers.layer1.columns[0];
+      expect(updatedColumn.fieldName).toBe('Field One');
+      expect(updatedColumn.customLabel).toBe(false);
+      expect(updatedColumn.label).toBe('Field One');
+    });
+
+    it('should keep the previous label when the previous column had a custom label', async () => {
+      const setState = jest.fn();
+      const state = stateWithColumn({ customLabel: true, label: 'Custom Label' });
+      render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+
+      await waitFor(() => {
+        expect(capturedOnChoose).toBeDefined();
+      });
+      capturedOnChoose!({ type: 'field', field: 'Field One' });
+
+      expect(setState).toHaveBeenCalledTimes(1);
+      const newState = setState.mock.calls[0][0];
+      const updatedColumn = newState.layers.layer1.columns[0];
+      expect(updatedColumn.fieldName).toBe('Field One');
+      expect(updatedColumn.customLabel).toBe(true);
+      expect(updatedColumn.label).toBe('Custom Label');
+    });
   });
 });
