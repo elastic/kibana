@@ -182,7 +182,8 @@ describe(
       });
 
       it('shows confirmation modal about existing non-blocking validation errors', function () {
-        const nonExistingDataSourceQuery = 'from fake* metadata _id, _version, _index | limit 5';
+        const nonExistingDataSourceQuery =
+          'from nonexistent_index_name metadata _id, _version, _index | limit 5';
         selectEsqlRuleType();
         fillEsqlQueryBar(nonExistingDataSourceQuery);
         getDefineContinueButton().click();
