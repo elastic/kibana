@@ -22,12 +22,14 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
   description: schema.string(),
   enabled: schema.boolean(),
   destinations: schema.arrayOf(notificationPolicyDestinationSchema),
-  matcher: schema.maybe(schema.string()),
-  group_by: schema.maybe(schema.arrayOf(schema.string())),
+  matcher: schema.maybe(schema.nullable(schema.string())),
+  group_by: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
   throttle: schema.maybe(
-    schema.object({
-      interval: schema.string(),
-    })
+    schema.nullable(
+      schema.object({
+        interval: schema.string(),
+      })
+    )
   ),
   snoozedUntil: schema.maybe(schema.nullable(schema.string())),
   auth: schema.object({

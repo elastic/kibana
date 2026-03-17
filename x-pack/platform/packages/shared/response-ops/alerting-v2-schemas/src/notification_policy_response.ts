@@ -14,10 +14,10 @@ export interface NotificationPolicyResponse {
   description: string;
   enabled: boolean;
   destinations: NotificationPolicyDestination[];
-  matcher?: string;
-  group_by?: string[];
-  throttle?: { interval: string };
-  snoozedUntil?: string | null;
+  matcher: string | null;
+  group_by: string[] | null;
+  throttle: { interval: string } | null;
+  snoozedUntil: string | null;
   auth: {
     owner: string;
     createdByUser: boolean;

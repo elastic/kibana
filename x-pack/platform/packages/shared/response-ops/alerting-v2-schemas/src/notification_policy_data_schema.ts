@@ -83,9 +83,9 @@ export const updateNotificationPolicyDataSchema = z.object({
     .array(notificationPolicyDestinationSchema)
     .min(1, 'At least one destination must be provided')
     .optional(),
-  matcher: z.string().optional(),
-  group_by: z.array(z.string()).optional(),
-  throttle: z.object({ interval: durationSchema }).optional(),
+  matcher: z.string().optional().nullable(),
+  group_by: z.array(z.string()).optional().nullable(),
+  throttle: z.object({ interval: durationSchema }).optional().nullable(),
 });
 
 export type UpdateNotificationPolicyData = z.infer<typeof updateNotificationPolicyDataSchema>;

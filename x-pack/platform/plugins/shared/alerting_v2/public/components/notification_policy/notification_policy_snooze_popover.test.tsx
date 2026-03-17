@@ -17,6 +17,10 @@ const createPolicy = (
   name: 'Test policy',
   description: '',
   enabled: true,
+  matcher: null,
+  group_by: null,
+  throttle: null,
+  snoozedUntil: null,
   destinations: [],
   auth: { owner: 'elastic', createdByUser: true },
   createdBy: 'elastic',
@@ -33,11 +37,11 @@ const defaultProps = {
 };
 
 describe('NotificationPolicySnoozePopover', () => {
-  it('renders a bell icon when snoozedUntil is undefined (not snoozed)', () => {
+  it('renders a bell icon when snoozedUntil is null (not snoozed)', () => {
     render(
       <NotificationPolicySnoozePopover
         {...defaultProps}
-        policy={createPolicy({ snoozedUntil: undefined })}
+        policy={createPolicy({ snoozedUntil: null })}
       />
     );
 

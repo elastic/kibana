@@ -45,7 +45,12 @@ export const toUpdatePayload = (
   version: string
 ): UpdateNotificationPolicyBody => {
   return {
-    ...toCreatePayload(state),
     version,
+    name: state.name,
+    description: state.description,
+    matcher: state.matcher || null,
+    group_by: state.groupBy.length > 0 ? state.groupBy : null,
+    throttle: state.frequency.type === 'throttle' ? { interval: state.frequency.interval } : null,
+    destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
   };
 };

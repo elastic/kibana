@@ -88,6 +88,7 @@ const EXISTING_POLICY: NotificationPolicyResponse = {
   matcher: 'data.severity : "critical"',
   group_by: ['host.name', 'service.name'],
   throttle: { interval: '5m' },
+  snoozedUntil: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   createdBy: 'elastic',
   createdAt: '2026-03-01T10:00:00.000Z',

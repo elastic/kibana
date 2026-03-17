@@ -131,6 +131,10 @@ describe('NotificationPolicyClient', () => {
           description: 'my-policy description',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          matcher: null,
+          group_by: null,
+          throttle: null,
+          snoozedUntil: null,
           auth: {
             owner: 'test-user',
             createdByUser: false,
@@ -280,6 +284,10 @@ describe('NotificationPolicyClient', () => {
         'policy-id-get-1',
         undefined
       );
+      expect(res.matcher).toBeNull();
+      expect(res.group_by).toBeNull();
+      expect(res.throttle).toBeNull();
+      expect(res.snoozedUntil).toBeNull();
       expect(res.auth).toEqual({ owner: 'test-user', createdByUser: false });
       expect(res.auth).not.toHaveProperty('apiKey');
     });
@@ -537,6 +545,10 @@ describe('NotificationPolicyClient', () => {
       const res = await client.findNotificationPolicies();
 
       expect(res.items).toHaveLength(1);
+      expect(res.items[0].matcher).toBeNull();
+      expect(res.items[0].group_by).toBeNull();
+      expect(res.items[0].throttle).toBeNull();
+      expect(res.items[0].snoozedUntil).toBeNull();
       expect(res.items[0].auth).toEqual({ owner: 'find-user', createdByUser: false });
       expect(res.items[0].auth).not.toHaveProperty('apiKey');
     });
@@ -698,6 +710,69 @@ describe('NotificationPolicyClient', () => {
   });
 
   describe('updateNotificationPolicy', () => {
+    it('clears nullable fields with null values', async () => {
+      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'original-policy',
+        description: 'original-policy description',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
+        matcher: 'event.severity: critical',
+        group_by: ['host.name'],
+        throttle: { interval: '1h' },
+        auth: {
+          apiKey: 'old-api-key',
+          owner: 'old-user',
+          createdByUser: false,
+        },
+        createdBy: 'creator_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.updateNotificationPolicy({
+        data: {
+          matcher: null,
+          group_by: null,
+          throttle: null,
+        },
+        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+      });
+
+      expect(apiKeyService.create).toHaveBeenCalledWith('Notification Policy: original-policy');
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-update-1',
+        expect.objectContaining({
+          name: 'original-policy',
+          description: 'original-policy description',
+          destinations: [{ type: 'workflow', id: 'original-workflow' }],
+          matcher: null,
+          group_by: null,
+          throttle: null,
+        }),
+        { version: 'WzEsMV0=' }
+      );
+      expect(res.matcher).toBeNull();
+      expect(res.group_by).toBeNull();
+      expect(res.throttle).toBeNull();
+      expect(res.snoozedUntil).toBeNull();
+    });
+
     it('updates a notification policy and rotates the API key', async () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
