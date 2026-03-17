@@ -186,14 +186,23 @@ export const RulesListPage = () => {
       name: <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />,
       width: '20%',
       truncateText: true,
-      render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
-        <EuiLink
-          href={basePath.prepend(paths.ruleDetails(rule.id))}
-          data-test-subj={`ruleDetailsLink-${rule.id}`}
-        >
-          {metadata?.name ?? rule.id}
-        </EuiLink>
-      ),
+      render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => {
+        return (
+          <div>
+            <EuiLink
+              href={basePath.prepend(paths.ruleDetails(rule.id))}
+              data-test-subj={`ruleDetailsLink-${rule.id}`}
+            >
+              {metadata?.name ?? rule.id}
+            </EuiLink>
+            {metadata?.description && (
+              <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
+                {metadata.description}
+              </EuiText>
+            )}
+          </div>
+        );
+      },
     },
     {
       field: 'evaluation',
