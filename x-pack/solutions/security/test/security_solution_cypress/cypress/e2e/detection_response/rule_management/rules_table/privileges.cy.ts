@@ -61,8 +61,24 @@ import {
 import { NO_PRIVILEGES_BOX } from '../../../../screens/common/page';
 import { assertSuccessToast } from '../../../../screens/common/toast';
 import type { CreateRulePropsRewrites } from '../../../../objects/types';
-const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser, rulesReadManualRunAllUser, rulesAllManualRunNoneUser, rulesAllEnableDisableNoneUser, rulesReadEnableDisableAllUser];
-const rolesToCreate = [rulesAll, rulesRead, rulesNone, rulesReadManualRunAll, rulesAllManualRunNone, rulesReadEnableDisableAll, rulesAllEnableDisableNone];
+const usersToCreate = [
+  rulesAllUser,
+  rulesReadUser,
+  rulesNoneUser,
+  rulesReadManualRunAllUser,
+  rulesAllManualRunNoneUser,
+  rulesAllEnableDisableNoneUser,
+  rulesReadEnableDisableAllUser,
+];
+const rolesToCreate = [
+  rulesAll,
+  rulesRead,
+  rulesNone,
+  rulesReadManualRunAll,
+  rulesAllManualRunNone,
+  rulesReadEnableDisableAll,
+  rulesAllEnableDisableNone,
+];
 
 // As part of the rules RBAC effort, we have created these tests with roles that only have the new rules feature 'securitySolutionRulesVX' enabled in order to test
 // the features that said roles should have access to. Notice that the roles created are very minimal and only contain the new rules feature.
@@ -78,14 +94,14 @@ const getBulkActionsButtonConfiguration = (enabledButtons: string[]) => {
     [BULK_EXPORT_ACTION_BTN, 'disabled'],
   ];
 
-  return baseConfig.map(config => {
+  return baseConfig.map((config) => {
     if (enabledButtons.includes(config[0])) {
-      return [config[0], 'enabled']
+      return [config[0], 'enabled'];
     }
 
-    return config
-  })
-}
+    return config;
+  });
+};
 
 describe('Rules table - privileges', { tags: ['@ess'] }, () => {
   const testRuleName = 'My rule';
@@ -131,15 +147,13 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       selectRulesByName([testRuleName]);
       cy.get(BULK_ACTIONS_BTN).click();
 
-      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration(
-        [
-          BULK_MANUAL_RULE_RUN_BTN,
-          DISABLE_RULE_BULK_BTN,
-          DELETE_RULE_BULK_BTN,
-          DUPLICATE_RULE_BULK_BTN,
-          BULK_EXPORT_ACTION_BTN
-        ]
-      )
+      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration([
+        BULK_MANUAL_RULE_RUN_BTN,
+        DISABLE_RULE_BULK_BTN,
+        DELETE_RULE_BULK_BTN,
+        DUPLICATE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
 
       for (const [actionButton, enableState] of bulkActionButtonsWhenEnabled) {
         cy.get(actionButton).should(`be.${enableState}`);
@@ -151,14 +165,12 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
 
       cy.get(BULK_ACTIONS_BTN).click();
 
-      const bulkActionsWhenDisabled = getBulkActionsButtonConfiguration(
-        [
-          ENABLE_RULE_BULK_BTN, 
-          DELETE_RULE_BULK_BTN,
-          DUPLICATE_RULE_BULK_BTN,
-          BULK_EXPORT_ACTION_BTN,
-        ]
-      )
+      const bulkActionsWhenDisabled = getBulkActionsButtonConfiguration([
+        ENABLE_RULE_BULK_BTN,
+        DELETE_RULE_BULK_BTN,
+        DUPLICATE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
 
       for (const [actionButton, disabledState] of bulkActionsWhenDisabled) {
         cy.get(actionButton).should(`be.${disabledState}`);
@@ -210,12 +222,10 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       selectRulesByName([testRuleName]);
       cy.get(BULK_ACTIONS_BTN).click();
 
-      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration(
-        [
-          DISABLE_RULE_BULK_BTN,
-          BULK_EXPORT_ACTION_BTN
-        ]
-      )
+      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration([
+        DISABLE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
 
       for (const [actionButton, enableState] of bulkActionButtonsWhenEnabled) {
         cy.get(actionButton).should(`be.${enableState}`);
@@ -227,18 +237,16 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
 
       cy.get(BULK_ACTIONS_BTN).click();
 
-      const bulkActionsWhenDisabled = getBulkActionsButtonConfiguration(
-        [
-          ENABLE_RULE_BULK_BTN,
-          BULK_EXPORT_ACTION_BTN
-        ]
-      )
+      const bulkActionsWhenDisabled = getBulkActionsButtonConfiguration([
+        ENABLE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
 
       for (const [actionButton, disabledState] of bulkActionsWhenDisabled) {
         cy.get(actionButton).should(`be.${disabledState}`);
       }
-      
-       // Enable the rule again
+
+      // Enable the rule again
       enableRule(0);
     });
   });
@@ -252,21 +260,19 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     it(`should not be able to "Enable/Disable" a rule`, () => {
       selectRulesByName([testRuleName]);
       cy.get(BULK_ACTIONS_BTN).click();
-      assertEnableRuleToggleDisabled(0)
+      assertEnableRuleToggleDisabled(0);
     });
 
     it(`should see enabled bulk actions in a disabled state from context menu`, () => {
       selectRulesByName([testRuleName]);
       cy.get(BULK_ACTIONS_BTN).click();
 
-      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration(
-        [
-          BULK_MANUAL_RULE_RUN_BTN,
-          DELETE_RULE_BULK_BTN,
-          DUPLICATE_RULE_BULK_BTN,
-          BULK_EXPORT_ACTION_BTN
-        ]
-      )
+      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration([
+        BULK_MANUAL_RULE_RUN_BTN,
+        DELETE_RULE_BULK_BTN,
+        DUPLICATE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
 
       for (const [actionButton, enableState] of bulkActionButtonsWhenEnabled) {
         cy.get(actionButton).should(`be.${enableState}`);
@@ -307,14 +313,12 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       selectRulesByName([testRuleName]);
       cy.get(BULK_ACTIONS_BTN).click();
 
-      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration(
-        [
-          DISABLE_RULE_BULK_BTN,
-          DELETE_RULE_BULK_BTN,
-          DUPLICATE_RULE_BULK_BTN,
-          BULK_EXPORT_ACTION_BTN
-        ]
-      )
+      const bulkActionButtonsWhenEnabled = getBulkActionsButtonConfiguration([
+        DISABLE_RULE_BULK_BTN,
+        DELETE_RULE_BULK_BTN,
+        DUPLICATE_RULE_BULK_BTN,
+        BULK_EXPORT_ACTION_BTN,
+      ]);
 
       for (const [actionButton, enableState] of bulkActionButtonsWhenEnabled) {
         cy.get(actionButton).should(`be.${enableState}`);

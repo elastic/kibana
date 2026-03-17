@@ -231,10 +231,10 @@ const getRulesSubfeaturesPrivilegeArrayExcluding = (privilegesToExclude: string[
     'security_solution_enable_disable_rules',
     'security_solution_manual_run_rules',
     'security_solution_rules_management_settings',
-  ]
+  ];
 
-  return privilegesArray.filter(privilege => !privilegesToExclude.includes(privilege))
-}
+  return privilegesArray.filter((privilege) => !privilegesToExclude.includes(privilege));
+};
 
 export const rulesReadEnableDisableAll: Role = {
   name: 'rules_read_enable_disable_all',
@@ -308,7 +308,9 @@ export const rulesAllManualRunNone: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionRulesV4: getRulesSubfeaturesPrivilegeArrayExcluding(['security_solution_manual_run_rules']),
+          securitySolutionRulesV4: getRulesSubfeaturesPrivilegeArrayExcluding([
+            'security_solution_manual_run_rules',
+          ]),
           actions: ['all'],
         },
         spaces: ['*'],
@@ -337,7 +339,9 @@ export const rulesAllEnableDisableNone: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionRulesV4: getRulesSubfeaturesPrivilegeArrayExcluding(['security_solution_enable_disable_rules']),
+          securitySolutionRulesV4: getRulesSubfeaturesPrivilegeArrayExcluding([
+            'security_solution_enable_disable_rules',
+          ]),
           actions: ['all'],
         },
         spaces: ['*'],
@@ -395,7 +399,9 @@ export const rulesAllManagementSettingsUserNone: Role = {
     kibana: [
       {
         feature: {
-          securitySolutionRulesV4: getRulesSubfeaturesPrivilegeArrayExcluding(['security_solution_rules_management_settings']),
+          securitySolutionRulesV4: getRulesSubfeaturesPrivilegeArrayExcluding([
+            'security_solution_rules_management_settings',
+          ]),
           actions: ['all'],
         },
         spaces: ['*'],

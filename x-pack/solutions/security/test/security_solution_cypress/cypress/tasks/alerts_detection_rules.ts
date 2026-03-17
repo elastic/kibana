@@ -91,8 +91,8 @@ export const enableRule = (rulePosition: number) => {
 };
 
 export const assertEnableRuleToggleDisabled = (rulePosition: number) => {
-  cy.get(RULE_SWITCH).eq(rulePosition).should('be.disabled')
-}
+  cy.get(RULE_SWITCH).eq(rulePosition).should('be.disabled');
+};
 
 export const editFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).should('be.visible');

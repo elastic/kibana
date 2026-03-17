@@ -230,7 +230,10 @@ describe(
 
 describe('Auto gap fill RBAC', { tags: ['@ess'] }, () => {
   const rbacRolesToCreate = [rulesReadManagementSettingsAll, rulesAllManagementSettingsUserNone];
-  const rbacUsersToCreate = [rulesReadManagementSettingsAllUser, rulesAllManagementSettingsUserNoneUser];
+  const rbacUsersToCreate = [
+    rulesReadManagementSettingsAllUser,
+    rulesAllManagementSettingsUserNoneUser,
+  ];
 
   before(() => {
     deleteAlertsAndRules();

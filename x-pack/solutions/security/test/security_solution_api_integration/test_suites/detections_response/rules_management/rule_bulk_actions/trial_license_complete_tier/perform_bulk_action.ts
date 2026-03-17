@@ -2690,7 +2690,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('@skipInServerless RBAC', () => {
         describe('with rules_read_manual_run_all user role', () => {
-          const roleWithManualRun = ROLES.rules_read_manual_run_all
+          const roleWithManualRun = ROLES.rules_read_manual_run_all;
 
           beforeEach(async () => {
             await createUserAndRole(getService, roleWithManualRun);
@@ -2747,10 +2747,10 @@ export default ({ getService }: FtrProviderContext): void => {
             });
             expect(body.attributes.errors).toBeUndefined();
           });
-        })
+        });
 
         describe('with rules_all_manual_run_none user role', () => {
-          const roleWithoutManualRun = ROLES.rules_all_manual_run_none
+          const roleWithoutManualRun = ROLES.rules_all_manual_run_none;
 
           beforeEach(async () => {
             await createUserAndRole(getService, roleWithoutManualRun);
@@ -2801,8 +2801,8 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(500);
           });
-        })
-      })
+        });
+      });
     });
 
     describe('@skipInServerlessMKI fill gaps run action', () => {
@@ -2827,34 +2827,34 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const initializeTestGapEvents = async () => {
         generatedGapEvents = {};
-          for (const rule of createdRules) {
-            const { gapEvents } = await generateGapsForRule(es, rule, 100);
-            generatedGapEvents[rule.id] = {
-              rule,
-              gapEvents: gapEvents.map((gapEvent) => {
-                if (!gapEvent._id) {
-                  throw new Error('generated gap event id cannot be undefined');
-                }
-                return { ...gapEvent.kibana.alert.rule.gap, _id: gapEvent._id };
-              }),
-            };
-          }
+        for (const rule of createdRules) {
+          const { gapEvents } = await generateGapsForRule(es, rule, 100);
+          generatedGapEvents[rule.id] = {
+            rule,
+            gapEvents: gapEvents.map((gapEvent) => {
+              if (!gapEvent._id) {
+                throw new Error('generated gap event id cannot be undefined');
+              }
+              return { ...gapEvent.kibana.alert.rule.gap, _id: gapEvent._id };
+            }),
+          };
+        }
 
-          let earliest = Date.now();
-          let latest = 0;
+        let earliest = Date.now();
+        let latest = 0;
 
-          Object.values(generatedGapEvents).forEach(({ gapEvents }) => {
-            gapEvents
-              .flatMap((event) => event.unfilled_intervals)
-              .forEach(({ gte, lte }) => {
-                earliest = Math.min(earliest, new Date(gte).getTime());
-                latest = Math.max(latest, new Date(lte).getTime());
-              });
-          });
+        Object.values(generatedGapEvents).forEach(({ gapEvents }) => {
+          gapEvents
+            .flatMap((event) => event.unfilled_intervals)
+            .forEach(({ gte, lte }) => {
+              earliest = Math.min(earliest, new Date(gte).getTime());
+              latest = Math.max(latest, new Date(lte).getTime());
+            });
+        });
 
-          backfillEnd = new Date(latest);
-          backfillStart = new Date(earliest);
-      }
+        backfillEnd = new Date(latest);
+        backfillStart = new Date(earliest);
+      };
 
       afterEach(resetEverything);
 
@@ -2884,7 +2884,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('scheduling gap fills for rules', () => {
         beforeEach(async () => {
-          await initializeTestGapEvents()
+          await initializeTestGapEvents();
         });
 
         it('should trigger the scheduling of gap fills for the rules in the request', async () => {
@@ -3135,10 +3135,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('@skipInServerless RBAC', () => {
         describe('with rules_read_manual_run_all user role', () => {
-          const roleWithManualRun = ROLES.rules_read_manual_run_all
+          const roleWithManualRun = ROLES.rules_read_manual_run_all;
 
           beforeEach(async () => {
-            await initializeTestGapEvents()
+            await initializeTestGapEvents();
             await createUserAndRole(getService, roleWithManualRun);
           });
 
@@ -3147,39 +3147,39 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it('should trigger the scheduling of gap fills for the rules in the request', async () => {
-          // Only backfill the first 2 rules
-          const ruleIdsToBackfill = Object.keys(generatedGapEvents).slice(0, 2);
+            // Only backfill the first 2 rules
+            const ruleIdsToBackfill = Object.keys(generatedGapEvents).slice(0, 2);
 
-          const restrictedUser = { username: roleWithManualRun, password: 'changeme' };
-          const restrictedApis = detectionsApi.withUser(restrictedUser);
+            const restrictedUser = { username: roleWithManualRun, password: 'changeme' };
+            const restrictedApis = detectionsApi.withUser(restrictedUser);
 
-          // Trigger the backfill for the selected rules
-          const { body } = await restrictedApis
-            .performRulesBulkAction({
-              query: {},
-              body: {
-                ids: ruleIdsToBackfill,
-                action: BulkActionTypeEnum.fill_gaps,
-                [BulkActionTypeEnum.fill_gaps]: {
-                  start_date: backfillStart.toISOString(),
-                  end_date: backfillEnd.toISOString(),
+            // Trigger the backfill for the selected rules
+            const { body } = await restrictedApis
+              .performRulesBulkAction({
+                query: {},
+                body: {
+                  ids: ruleIdsToBackfill,
+                  action: BulkActionTypeEnum.fill_gaps,
+                  [BulkActionTypeEnum.fill_gaps]: {
+                    start_date: backfillStart.toISOString(),
+                    end_date: backfillEnd.toISOString(),
+                  },
                 },
-              },
-            })
-            .expect(200);
+              })
+              .expect(200);
 
-          expect(body.success).toEqual(true);
-          expect(body.attributes.summary).toEqual({
-            failed: 0,
-            succeeded: 2,
-            skipped: 0,
-            total: 2,
+            expect(body.success).toEqual(true);
+            expect(body.attributes.summary).toEqual({
+              failed: 0,
+              succeeded: 2,
+              skipped: 0,
+              total: 2,
+            });
           });
         });
-        })
 
         describe('@skipInServerless with rules_all_manual_run_none user role', () => {
-          const roleWithoutManualRun = ROLES.rules_all_manual_run_none
+          const roleWithoutManualRun = ROLES.rules_all_manual_run_none;
 
           beforeEach(async () => {
             await createUserAndRole(getService, roleWithoutManualRun);
@@ -3191,28 +3191,28 @@ export default ({ getService }: FtrProviderContext): void => {
 
           it('should fail triggering fill gaps', async () => {
             // Only backfill the first 2 rules
-          const ruleIdsToBackfill = Object.keys(generatedGapEvents).slice(0, 2);
+            const ruleIdsToBackfill = Object.keys(generatedGapEvents).slice(0, 2);
 
-          const restrictedUser = { username: roleWithoutManualRun, password: 'changeme' };
-          const restrictedApis = detectionsApi.withUser(restrictedUser);
+            const restrictedUser = { username: roleWithoutManualRun, password: 'changeme' };
+            const restrictedApis = detectionsApi.withUser(restrictedUser);
 
-          // Trigger the backfill for the selected rules
-          await restrictedApis
-            .performRulesBulkAction({
-              query: {},
-              body: {
-                ids: ruleIdsToBackfill,
-                action: BulkActionTypeEnum.fill_gaps,
-                [BulkActionTypeEnum.fill_gaps]: {
-                  start_date: backfillStart.toISOString(),
-                  end_date: backfillEnd.toISOString(),
+            // Trigger the backfill for the selected rules
+            await restrictedApis
+              .performRulesBulkAction({
+                query: {},
+                body: {
+                  ids: ruleIdsToBackfill,
+                  action: BulkActionTypeEnum.fill_gaps,
+                  [BulkActionTypeEnum.fill_gaps]: {
+                    start_date: backfillStart.toISOString(),
+                    end_date: backfillEnd.toISOString(),
+                  },
                 },
-              },
-            })
-            .expect(500);
+              })
+              .expect(500);
           });
-        })
-      })
+        });
+      });
     });
 
     describe('overwrite_data_views', () => {
