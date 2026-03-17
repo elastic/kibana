@@ -1820,7 +1820,7 @@ const bucketDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  locationsAvailable: [Location.STATS, Location.STATS_BY, Location.LIMIT_BY],
+  locationsAvailable: [Location.STATS, Location.STATS_BY],
   examples: [
     'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS hire_date = MV_SORT(VALUES(hire_date)) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
     'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS hires_per_month = COUNT(*) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")\n| SORT month',
@@ -1870,7 +1870,7 @@ const categorizeDefinition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  locationsAvailable: [Location.STATS, Location.STATS_BY, Location.LIMIT_BY],
+  locationsAvailable: [Location.STATS, Location.STATS_BY],
   license: 'platinum',
   observabilityTier: 'COMPLETE',
   examples: ['FROM sample_data\n| STATS count=COUNT() BY category=CATEGORIZE(message)'],
@@ -2404,7 +2404,7 @@ const tbucketDefinition: FunctionDefinition = {
       returnType: 'date_nanos',
     },
   ],
-  locationsAvailable: [Location.STATS, Location.STATS_BY, Location.LIMIT_BY],
+  locationsAvailable: [Location.STATS, Location.STATS_BY],
   examples: [
     'FROM sample_data\n| STATS count = COUNT(*) BY bucket = TBUCKET(3, "2023-10-23T12:00:00Z", "2023-10-23T14:00:00Z")\n| SORT bucket',
     'FROM sample_data\n| STATS count = COUNT(*) BY bucket = TBUCKET(20, "2023-10-23T12:00:00Z", "2023-10-23T14:00:00Z")\n| SORT bucket',
