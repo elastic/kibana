@@ -88,7 +88,7 @@ export type NoDataCardComponentProps = Pick<EuiEmptyPromptProps, 'icon'> & {
    */
   docsLink?: string;
   /** Callback function for when the button is clicked */
-  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   /** Data test subject for the card */
   'data-test-subj'?: string;
 };

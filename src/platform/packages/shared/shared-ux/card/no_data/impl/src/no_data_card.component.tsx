@@ -103,7 +103,7 @@ export const NoDataCard = ({
               color="primary"
               fill
               data-test-subj="noDataDefaultActionButton"
-              onClick={onClick as unknown as React.MouseEventHandler<HTMLButtonElement>}
+              onClick={onClick}
             >
               {buttonText || defaultButtonText}
             </EuiButton>

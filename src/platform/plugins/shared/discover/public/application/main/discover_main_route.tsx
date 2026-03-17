@@ -10,13 +10,13 @@
 import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
-import { useOnTryESQL } from '@kbn/shared-ux-prompt-no-data-views';
+import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { DiscoverCustomizationContextProvider } from '../../customizations';
@@ -230,10 +230,26 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     isEmbeddedEditor,
   ]);
 
-  const onTryESQL = useOnTryESQL({
-    locatorClient: services.share?.url.locators,
-    navigateToApp: services.application.navigateToApp,
-  });
+  const onTryESQL = useCallback(async () => {
+    const location = await services.share?.url.locators
+      ?.get(DISCOVER_ESQL_LOCATOR)
+      ?.getLocation({});
+
+    if (!location) {
+      return;
+    }
+
+    // Bypass the no-data guard so Discover renders in ES|QL mode
+    dispatch(
+      internalStateActions.setInitializationState({
+        hasESData: true,
+        hasUserDataView: false,
+      })
+    );
+
+    // Push the ES|QL path in-app, which triggers tab re-initialization via useUrl
+    history.push(location.path);
+  }, [services.share?.url.locators, dispatch, history]);
 
   const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);
   const isLoading =
