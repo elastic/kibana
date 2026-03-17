@@ -98,12 +98,12 @@ const uploadSamplesRoute = (
                 },
               },
             });
-            rawSamples = (searchResult.hits.hits ?? [])
-              .map((hit) => {
-                const src = hit._source as { event?: { original?: string } } | undefined;
-                return src?.event?.original;
-              })
-              .filter((val): val is string => typeof val === 'string' && val.length > 0);
+            const hits = searchResult.hits.hits ?? [];
+            rawSamples = hits.flatMap((hit) => {
+              const original = (hit._source as { event?: { original?: string } } | undefined)?.event
+                ?.original;
+              return typeof original === 'string' && original.length > 0 ? [original] : [];
+            });
 
             if (rawSamples.length === 0) {
               return response.badRequest({
