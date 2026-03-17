@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { peggyTransform } = require('./peggy');
-const { dotTextTransform } = require('./dot_text');
-const { yamlTransform } = require('./yaml');
-const { babelTransform } = require('./babel');
+/** @type {import('./types').Transform} */
+const yamlTransform = (path, source, cache) => {
+  const key = cache.getKey(path, source);
 
-module.exports = {
-  /**
-   * @type {Record<string, import('./types').Transform>}
-   */
-  TRANSFORMS: {
-    '.peggy': peggyTransform,
-    '.text': dotTextTransform,
-    '.yaml': yamlTransform,
-    '.yml': yamlTransform,
-    default: babelTransform,
-  },
+  const cached = cache.getCode(key);
+  if (cached) {
+    return cached;
+  }
+
+  const code = `module.exports = ${JSON.stringify(source)};\n`;
+
+  cache.update(key, {
+    code,
+  });
+
+  return code;
 };
+
+module.exports = { yamlTransform };
