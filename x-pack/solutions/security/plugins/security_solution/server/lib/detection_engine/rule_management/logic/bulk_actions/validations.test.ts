@@ -14,6 +14,8 @@ import { DryRunError } from './dry_run';
 import {
   validateBulkEnableRule,
   validateBulkDisableRule,
+  validateBulkScheduleBackfill,
+  validateBulkRuleGapFilling,
   validateBulkEditRule,
   dryRunValidateBulkEditRule,
 } from './validations';
@@ -88,6 +90,126 @@ describe('bulk actions validations', () => {
       await expect(validateBulkDisableRule({ rule, mlAuthz, rulesAuthz })).rejects.toThrow(
         expect.objectContaining({
           errorCode: BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
+        })
+      );
+    });
+  });
+
+  describe('validateBulkScheduleBackfill', () => {
+    it('should pass when user has canManualRunRules, rule is enabled, and ML auth passes', async () => {
+      const mlAuthz = createMockMlAuthz();
+      const rulesAuthz = getMockRulesAuthz();
+      const rule = getRuleMock(getQueryRuleParams());
+
+      await expect(
+        validateBulkScheduleBackfill({ rule, mlAuthz, rulesAuthz })
+      ).resolves.not.toThrow();
+    });
+
+    it('should pass when ML rule is enabled and ML auth passes', async () => {
+      const mlAuthz = createMockMlAuthz();
+      const rulesAuthz = getMockRulesAuthz();
+      const rule = getRuleMock(getMlRuleParams());
+
+      await expect(
+        validateBulkScheduleBackfill({ rule, mlAuthz, rulesAuthz })
+      ).resolves.not.toThrow();
+    });
+
+    it('should throw USER_INSUFFICIENT_RULE_PRIVILEGES when canManualRunRules is false', async () => {
+      const mlAuthz = createMockMlAuthz();
+      const rulesAuthz = { ...getMockRulesAuthz(), canManualRunRules: false };
+      const rule = getRuleMock(getQueryRuleParams());
+
+      await expect(validateBulkScheduleBackfill({ rule, mlAuthz, rulesAuthz })).rejects.toThrow(
+        expect.objectContaining({
+          errorCode: BulkActionsDryRunErrCodeEnum.USER_INSUFFICIENT_RULE_PRIVILEGES,
+          message: expect.stringContaining('run rules manually'),
+        })
+      );
+    });
+
+    it('should throw MACHINE_LEARNING_AUTH when ML authorization fails', async () => {
+      const mlAuthz = createMockMlAuthz(false);
+      const rulesAuthz = getMockRulesAuthz();
+      const rule = getRuleMock(getMlRuleParams());
+
+      await expect(validateBulkScheduleBackfill({ rule, mlAuthz, rulesAuthz })).rejects.toThrow(
+        expect.objectContaining({
+          errorCode: BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
+        })
+      );
+    });
+
+    it('should throw MANUAL_RULE_RUN_DISABLED_RULE when rule is disabled', async () => {
+      const mlAuthz = createMockMlAuthz();
+      const rulesAuthz = getMockRulesAuthz();
+      const rule = getRuleMock(getQueryRuleParams(), { enabled: false });
+
+      await expect(validateBulkScheduleBackfill({ rule, mlAuthz, rulesAuthz })).rejects.toThrow(
+        expect.objectContaining({
+          errorCode: BulkActionsDryRunErrCodeEnum.MANUAL_RULE_RUN_DISABLED_RULE,
+          message: expect.stringContaining('disabled rule'),
+        })
+      );
+    });
+  });
+
+  describe('validateBulkRuleGapFilling', () => {
+    it('should pass when user has canManualRunRules, rule is enabled, and ML auth passes', async () => {
+      const mlAuthz = createMockMlAuthz();
+      const rulesAuthz = getMockRulesAuthz();
+      const rule = getRuleMock(getQueryRuleParams());
+
+      await expect(
+        validateBulkRuleGapFilling({ rule, mlAuthz, rulesAuthz })
+      ).resolves.not.toThrow();
+    });
+
+    it('should pass when ML rule is enabled and ML auth passes', async () => {
+      const mlAuthz = createMockMlAuthz();
+      const rulesAuthz = getMockRulesAuthz();
+      const rule = getRuleMock(getMlRuleParams());
+
+      await expect(
+        validateBulkRuleGapFilling({ rule, mlAuthz, rulesAuthz })
+      ).resolves.not.toThrow();
+    });
+
+    it('should throw USER_INSUFFICIENT_RULE_PRIVILEGES when canManualRunRules is false', async () => {
+      const mlAuthz = createMockMlAuthz();
+      const rulesAuthz = { ...getMockRulesAuthz(), canManualRunRules: false };
+      const rule = getRuleMock(getQueryRuleParams());
+
+      await expect(validateBulkRuleGapFilling({ rule, mlAuthz, rulesAuthz })).rejects.toThrow(
+        expect.objectContaining({
+          errorCode: BulkActionsDryRunErrCodeEnum.USER_INSUFFICIENT_RULE_PRIVILEGES,
+          message: expect.stringContaining('run rules manually'),
+        })
+      );
+    });
+
+    it('should throw MACHINE_LEARNING_AUTH when ML authorization fails', async () => {
+      const mlAuthz = createMockMlAuthz(false);
+      const rulesAuthz = getMockRulesAuthz();
+      const rule = getRuleMock(getMlRuleParams());
+
+      await expect(validateBulkRuleGapFilling({ rule, mlAuthz, rulesAuthz })).rejects.toThrow(
+        expect.objectContaining({
+          errorCode: BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
+        })
+      );
+    });
+
+    it('should throw RULE_FILL_GAPS_DISABLED_RULE when rule is disabled', async () => {
+      const mlAuthz = createMockMlAuthz();
+      const rulesAuthz = getMockRulesAuthz();
+      const rule = getRuleMock(getQueryRuleParams(), { enabled: false });
+
+      await expect(validateBulkRuleGapFilling({ rule, mlAuthz, rulesAuthz })).rejects.toThrow(
+        expect.objectContaining({
+          errorCode: BulkActionsDryRunErrCodeEnum.RULE_FILL_GAPS_DISABLED_RULE,
+          message: expect.stringContaining('disabled rule'),
         })
       );
     });
