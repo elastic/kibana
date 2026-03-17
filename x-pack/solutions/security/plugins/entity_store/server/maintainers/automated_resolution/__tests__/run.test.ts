@@ -106,7 +106,9 @@ describe('Automated Resolution', () => {
     it('should perform a full scan when watermark is null', async () => {
       const state = createInitialState();
       mockEsClient.search
-        .mockResolvedValueOnce(createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+        )
         .mockResolvedValueOnce(
           createFindMatchingGroupsResponse([
             {
@@ -131,7 +133,9 @@ describe('Automated Resolution', () => {
     it('should include timestamp range filter for incremental scan', async () => {
       const state = createInitialState({ lastProcessedTimestamp: '2026-03-09T00:00:00Z' });
       mockEsClient.search
-        .mockResolvedValueOnce(createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+        )
         .mockResolvedValueOnce(
           createFindMatchingGroupsResponse([
             {
@@ -172,7 +176,9 @@ describe('Automated Resolution', () => {
     it('should create new resolution group with 2+ unresolved entities', async () => {
       const state = createInitialState();
       mockEsClient.search
-        .mockResolvedValueOnce(createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+        )
         .mockResolvedValueOnce(
           createFindMatchingGroupsResponse([
             {
@@ -203,7 +209,9 @@ describe('Automated Resolution', () => {
     it('should extend existing resolution group', async () => {
       const state = createInitialState();
       mockEsClient.search
-        .mockResolvedValueOnce(createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+        )
         .mockResolvedValueOnce(
           createFindMatchingGroupsResponse([
             {
@@ -232,7 +240,9 @@ describe('Automated Resolution', () => {
       const state = createInitialState();
       const logger = loggerMock.create();
       mockEsClient.search
-        .mockResolvedValueOnce(createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+        )
         .mockResolvedValueOnce(
           createFindMatchingGroupsResponse([
             {
@@ -270,7 +280,9 @@ describe('Automated Resolution', () => {
     it('should include entity type scoping in both queries', async () => {
       const state = createInitialState();
       mockEsClient.search
-        .mockResolvedValueOnce(createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+        )
         .mockResolvedValueOnce(createFindMatchingGroupsResponse([]) as any);
 
       await runAutomatedResolution(createDeps(state, mockEsClient, mockResolutionClient));
@@ -294,7 +306,9 @@ describe('Automated Resolution', () => {
       const state = createInitialState();
       const logger = loggerMock.create();
       mockEsClient.search
-        .mockResolvedValueOnce(createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+        )
         .mockResolvedValueOnce(
           createFindMatchingGroupsResponse([
             {
@@ -338,7 +352,9 @@ describe('Automated Resolution', () => {
       const state = createInitialState({ lastProcessedTimestamp: '2026-03-09T00:00:00Z' });
       const logger = loggerMock.create();
       mockEsClient.search
-        .mockResolvedValueOnce(createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+        )
         .mockResolvedValueOnce(
           createFindMatchingGroupsResponse([
             {
@@ -367,7 +383,9 @@ describe('Automated Resolution', () => {
     it('should advance watermark when all buckets succeed', async () => {
       const state = createInitialState({ lastProcessedTimestamp: '2026-03-09T00:00:00Z' });
       mockEsClient.search
-        .mockResolvedValueOnce(createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+        )
         .mockResolvedValueOnce(
           createFindMatchingGroupsResponse([
             {
@@ -402,7 +420,9 @@ describe('Automated Resolution', () => {
       // Step 2 response has 2 unresolved hits but reports totalUnresolved = 150
       // (simulating top_hits capped at TOP_HITS_SIZE)
       mockEsClient.search
-        .mockResolvedValueOnce(createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(['a@test.com'], '2026-03-10T00:00:00Z') as any
+        )
         .mockResolvedValueOnce(
           createFindMatchingGroupsResponse([
             {
