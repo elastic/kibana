@@ -38,6 +38,19 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await pageObjects.syntheticsApp.navigateToSettings();
     });
 
+    await test.step('show create agent policy flow when no policy exists', async () => {
+      await syntheticsServices.deleteSyntheticsIntegrations();
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
+      await expect(page.getByText('No agent policies found')).toBeVisible();
+      await page.click('text=Create agent policy');
+      await expect(page).toHaveURL(/\/app\/fleet\/policies\?create/);
+      await page.click('[placeholder="Choose a name"]');
+      await page.fill('[placeholder="Choose a name"]', FLEET_POLICY_NAME);
+      await page.click('text=Collect system logs and metrics');
+      await page.click('div[role="dialog"] button:has-text("Create agent policy")');
+      await pageObjects.syntheticsApp.navigateToSettings();
+    });
+
     await test.step('create private location', async () => {
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       await pageObjects.syntheticsApp.createPrivateLocation({
@@ -87,6 +100,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       // there is "ghost" element with the same locator, so we need to specify the first one
       // eslint-disable-next-line playwright/no-nth-methods
       await expect(page.testSubj.locator('syntheticsManagedPolicyCallout').first()).toBeVisible();
+      await expect(page.getByText('This package policy is managed by the Synthetics app.')).toBeVisible();
     });
 
     await test.step('edit button leads to Synthetics edit page', async () => {
@@ -101,7 +115,14 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await page.testSubj.click('settings-page-link');
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
-      await expect(page.locator(`[data-test-subj="deleteLocation-${locationId}"]`)).toBeDisabled();
+      const deleteLocationButton = page.locator(`[data-test-subj="deleteLocation-${locationId}"]`);
+      await expect(deleteLocationButton).toBeDisabled();
+      await deleteLocationButton.hover({ force: true });
+      await expect(
+        page.getByText(
+          'This location cannot be deleted, because it has 1 monitors running. Please remove this location from your monitors before deleting this location.'
+        )
+      ).toBeVisible();
     });
 
     await test.step('delete location after removing monitor', async () => {
@@ -118,6 +139,10 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       const createBtn = page.getByRole('button', { name: 'Create location' });
       await expect(createBtn).toBeDisabled();
+      await createBtn.hover({ force: true });
+      await expect(
+        page.getByText('You do not have sufficient permissions to perform this action.')
+      ).toBeVisible();
     });
   });
 });
