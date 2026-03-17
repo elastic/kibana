@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
-import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
+
+const noop = () => {};
 
 export interface OsqueryResultsFlyoutProps {
   hit: DataTableRecord;
@@ -25,60 +26,39 @@ export interface OsqueryResultsFlyoutProps {
   chrome: ChromeStart;
 }
 
-const OsqueryResultsFlyoutLazy = React.lazy(() =>
-  import('./results_flyout_content').then((m) => ({
-    default: m.OsqueryResultsFlyoutContent,
-  }))
-);
+const OsqueryResultsFlyoutComponent: React.FC<OsqueryResultsFlyoutProps> = ({
+  hit,
+  hits,
+  columns,
+  dataView,
+  columnsMeta,
+  onClose,
+  setExpandedDoc,
+  toastNotifications,
+  chrome,
+}) => {
+  const flyoutServices = React.useMemo(
+    () => ({ toastNotifications, chrome }),
+    [toastNotifications, chrome]
+  );
 
-const DocumentViewerUnavailableFallback = () => (
-  <EuiCallOut
-    title={i18n.translate('xpack.osquery.results.flyout.unavailableTitle', {
-      defaultMessage: 'Document viewer unavailable',
-    })}
-    color="warning"
-    iconType="eyeClosed"
-    data-test-subj="osqueryResultsFlyoutUnavailable"
-  >
-    <p>
-      {i18n.translate('xpack.osquery.results.flyout.unavailableDescription', {
-        defaultMessage: 'The document detail view is not available in this environment.',
-      })}
-    </p>
-  </EuiCallOut>
-);
-
-interface DocViewerErrorBoundaryState {
-  hasError: boolean;
-}
-
-class DocViewerErrorBoundary extends React.Component<
-  React.PropsWithChildren<Record<string, unknown>>,
-  DocViewerErrorBoundaryState
-> {
-  state: DocViewerErrorBoundaryState = { hasError: false };
-
-  static getDerivedStateFromError(): DocViewerErrorBoundaryState {
-    return { hasError: true };
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <DocumentViewerUnavailableFallback />;
-    }
-
-    return this.props.children;
-  }
-}
-
-const OsqueryResultsFlyoutComponent: React.FC<OsqueryResultsFlyoutProps> = (props) => (
-  <DocViewerErrorBoundary>
-    <Suspense
-      fallback={<EuiLoadingSpinner size="xl" data-test-subj="osqueryResultsFlyoutLoading" />}
-    >
-      <OsqueryResultsFlyoutLazy {...props} />
-    </Suspense>
-  </DocViewerErrorBoundary>
-);
+  return (
+    <UnifiedDocViewerFlyout
+      services={flyoutServices}
+      isEsqlQuery={false}
+      hit={hit}
+      hits={hits}
+      columns={columns}
+      columnsMeta={columnsMeta}
+      dataView={dataView}
+      setExpandedDoc={setExpandedDoc}
+      onClose={onClose}
+      onAddColumn={noop}
+      onRemoveColumn={noop}
+      flyoutType="overlay"
+      data-test-subj="osqueryResultsFlyout"
+    />
+  );
+};
 
 export const OsqueryResultsFlyout = React.memo(OsqueryResultsFlyoutComponent);
