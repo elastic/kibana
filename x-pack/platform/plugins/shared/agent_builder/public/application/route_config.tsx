@@ -10,6 +10,18 @@ import { matchPath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { RouteDisplay } from './components/common/route_display';
+import { AgentBuilderConversationsPage } from './pages/conversations';
+import { AgentBuilderAgentsPage } from './pages/agents';
+import { AgentBuilderAgentsCreate } from './pages/agent_create';
+import { AgentBuilderToolsPage } from './pages/tools';
+import { AgentBuilderToolCreatePage } from './pages/tool_create';
+import { AgentBuilderToolDetailsPage } from './pages/tool_details';
+import { AgentBuilderBulkImportMcpToolsPage } from './pages/bulk_import_mcp_tools';
+import { AgentBuilderSkillsPage } from './pages/skills';
+import { AgentBuilderSkillCreatePage } from './pages/skill_create';
+import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
+import { AgentBuilderPluginsPage } from './pages/plugins';
+import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 
 export type SidebarView = 'conversation' | 'agentSettings' | 'manage';
 
@@ -47,7 +59,7 @@ export const agentRoutes: RouteDefinition[] = [
   {
     path: '/agents/:agentId/conversations/:conversationId',
     sidebarView: 'conversation',
-    element: <RouteDisplay />,
+    element: <AgentBuilderConversationsPage />,
   },
   {
     path: '/agents/:agentId/instructions',
@@ -77,7 +89,7 @@ export const agentRoutes: RouteDefinition[] = [
   {
     path: '/agents/:agentId',
     sidebarView: 'conversation',
-    element: <RouteDisplay />,
+    element: <AgentBuilderConversationsPage />,
   },
 ];
 
@@ -86,63 +98,63 @@ export const manageRoutes: RouteDefinition[] = [
     path: '/manage/agents',
     sidebarView: 'manage',
     navLabel: navLabels.agents,
-    element: <RouteDisplay />,
+    element: <AgentBuilderAgentsPage />,
   },
   {
     path: '/manage/agents/new',
     sidebarView: 'manage',
-    element: <RouteDisplay />,
+    element: <AgentBuilderAgentsCreate />,
   },
   {
     path: '/manage/tools',
     sidebarView: 'manage',
     navLabel: navLabels.tools,
-    element: <RouteDisplay />,
+    element: <AgentBuilderToolsPage />,
   },
   {
     path: '/manage/tools/new',
     sidebarView: 'manage',
-    element: <RouteDisplay />,
+    element: <AgentBuilderToolCreatePage />,
   },
   {
     path: '/manage/tools/bulk_import_mcp',
     sidebarView: 'manage',
-    element: <RouteDisplay />,
+    element: <AgentBuilderBulkImportMcpToolsPage />,
   },
   {
     path: '/manage/tools/:toolId',
     sidebarView: 'manage',
-    element: <RouteDisplay />,
+    element: <AgentBuilderToolDetailsPage />,
   },
   {
     path: '/manage/skills',
     sidebarView: 'manage',
     navLabel: navLabels.skills,
     isExperimental: true,
-    element: <RouteDisplay />,
+    element: <AgentBuilderSkillsPage />,
   },
   {
     path: '/manage/skills/new',
     sidebarView: 'manage',
     isExperimental: true,
-    element: <RouteDisplay />,
+    element: <AgentBuilderSkillCreatePage />,
   },
   {
     path: '/manage/skills/:skillId',
     sidebarView: 'manage',
     isExperimental: true,
-    element: <RouteDisplay />,
+    element: <AgentBuilderSkillDetailsPage />,
   },
   {
     path: '/manage/plugins',
     sidebarView: 'manage',
     navLabel: navLabels.plugins,
-    element: <RouteDisplay />,
+    element: <AgentBuilderPluginsPage />,
   },
   {
     path: '/manage/plugins/:pluginId',
     sidebarView: 'manage',
-    element: <RouteDisplay />,
+    element: <AgentBuilderPluginDetailsPage />,
   },
   {
     path: '/manage/connectors',
