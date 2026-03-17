@@ -37,6 +37,17 @@ describe('isInputOnlyPolicyTemplate', () => {
     };
     expect(isInputOnlyPolicyTemplate(inputOnlyPolicyTemplate)).toEqual(true);
   });
+  it('should return true for input only policy template with dynamic_signal_types and no type', () => {
+    const inputOnlyPolicyTemplate: RegistryPolicyInputOnlyTemplate = {
+      input: 'otelcol',
+      name: 'otel',
+      template_path: 'otel/otel.hbl',
+      title: 'OTel',
+      description: 'OTel input',
+      dynamic_signal_types: true,
+    };
+    expect(isInputOnlyPolicyTemplate(inputOnlyPolicyTemplate)).toEqual(true);
+  });
   it('should return false for empty integration policy template', () => {
     const emptyIntegrationTemplate: RegistryPolicyIntegrationTemplate = {
       inputs: [],
@@ -401,6 +412,30 @@ describe('getNormalizedDataStreams', () => {
     expect(result[0].streams).toHaveLength(1);
     const vars = result[0].streams![0].vars;
     const useApmVar = vars?.find((v) => v.name === 'use_apm');
+    expect(useApmVar).toBeDefined();
+    expect(useApmVar?.default).toEqual(true);
+  });
+
+  it('should return valid data stream with default type when dynamic_signal_types true and type omitted', () => {
+    const result = getNormalizedDataStreams({
+      ...integrationPkg,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'otelcol',
+          name: 'otel-dynamic',
+          template_path: 'some/path.hbl',
+          title: 'OTel Dynamic',
+          description: 'OTel with dynamic signal types',
+          dynamic_signal_types: true,
+          vars: [],
+        },
+      ] as any,
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toEqual('logs');
+    expect(result[0].streams).toHaveLength(1);
+    const useApmVar = result[0].streams![0].vars?.find((v) => v.name === 'use_apm');
     expect(useApmVar).toBeDefined();
     expect(useApmVar?.default).toEqual(true);
   });

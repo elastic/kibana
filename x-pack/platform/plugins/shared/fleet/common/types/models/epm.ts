@@ -291,7 +291,7 @@ export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
 }
 
 export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
-  [RegistryPolicyTemplateKeys.type]: string;
+  [RegistryPolicyTemplateKeys.type]?: string;
   [RegistryPolicyTemplateKeys.input]: string;
   [RegistryPolicyTemplateKeys.template_path]: string;
   [RegistryPolicyTemplateKeys.required_vars]?: RegistryRequiredVars;
