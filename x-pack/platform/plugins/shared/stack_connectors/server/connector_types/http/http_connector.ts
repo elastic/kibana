@@ -180,8 +180,6 @@ export async function executor(
   }
 
   // Combine base url and path
-  const url = combineUrl(baseUrl, path) + buildQueryString(query);
-
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
     services,
@@ -202,6 +200,10 @@ export async function executor(
       axiosConfigError.message ?? 'unknown error - couldnt load axios config'
     );
   }
+
+  // Merge secret query params (from connector secrets) with explicit query params (params take precedence)
+  const mergedQuery = { ...(axiosConfig.secretQueryParams ?? {}), ...(query ?? {}) };
+  const url = combineUrl(baseUrl, path) + buildQueryString(mergedQuery);
 
   const { axiosInstance, headers: configHeaders, sslOverrides: baseSslOverrides } = axiosConfig;
 

@@ -44,6 +44,7 @@ export const SecretConfiguration = {
   pfx: z.string().nullable().default(null),
   clientSecret: z.string().nullable().default(null),
   secretHeaders: HeadersSchema.nullable().default(null),
+  secretQueryParams: HeadersSchema.nullable().default(null),
 };
 
 export const SecretConfigurationSchemaValidation = {

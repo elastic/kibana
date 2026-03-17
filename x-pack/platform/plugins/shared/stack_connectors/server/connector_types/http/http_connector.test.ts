@@ -100,6 +100,7 @@ describe('secrets validation', () => {
       pfx: null,
       clientSecret: null,
       secretHeaders: null,
+      secretQueryParams: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
   });
@@ -121,6 +122,7 @@ describe('secrets validation', () => {
       user: null,
       clientSecret: null,
       secretHeaders: null,
+      secretQueryParams: null,
     });
   });
 
@@ -133,6 +135,7 @@ describe('secrets validation', () => {
       user: null,
       clientSecret: null,
       secretHeaders: null,
+      secretQueryParams: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
@@ -144,6 +147,7 @@ describe('secrets validation', () => {
       password: null,
       clientSecret: null,
       secretHeaders: null,
+      secretQueryParams: null,
     };
 
     expect(
@@ -160,6 +164,7 @@ describe('secrets validation', () => {
       key: null,
       clientSecret: null,
       secretHeaders: null,
+      secretQueryParams: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
@@ -171,6 +176,7 @@ describe('secrets validation', () => {
       key: null,
       clientSecret: null,
       secretHeaders: null,
+      secretQueryParams: null,
     };
 
     expect(
@@ -509,6 +515,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'POST',
@@ -560,6 +567,7 @@ describe('execute()', () => {
         crt: null,
         pfx: null,
         secretHeaders: { secretKey: 'secretValue' },
+        secretQueryParams: null,
         clientSecret: null,
       },
       params: {
@@ -613,6 +621,7 @@ describe('execute()', () => {
         crt: null,
         pfx: null,
         secretHeaders: { Authorization: 'secretAuthorizationValue' },
+        secretQueryParams: null,
         clientSecret: null,
       },
       params: {
@@ -667,6 +676,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'POST',
@@ -714,6 +724,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'POST',
@@ -830,6 +841,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'GET',
@@ -861,6 +873,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'GET',
@@ -880,6 +893,74 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0].url).toContain('key2=value2');
   });
 
+  test('execute injects secretQueryParams from connector secrets into URL', async () => {
+    const config = {
+      url: 'https://maps.googleapis.com/maps/api/geocode/json',
+      authType: null,
+      hasAuth: false,
+    } as ConnectorTypeConfigType;
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: null,
+        password: null,
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+        secretQueryParams: { key: 'secret-api-key' },
+      },
+      params: {
+        method: 'GET',
+        query: { address: 'Beijing' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toContain('key=secret-api-key');
+    expect(requestMock.mock.calls[0][0].url).toContain('address=Beijing');
+  });
+
+  test('execute params.query takes precedence over secretQueryParams', async () => {
+    const config = {
+      url: 'https://example.com/api',
+      authType: null,
+      hasAuth: false,
+    } as ConnectorTypeConfigType;
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: null,
+        password: null,
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+        secretQueryParams: { version: 'v1', apiKey: 'secret' },
+      },
+      params: {
+        method: 'GET',
+        query: { version: 'v2' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    expect(resultUrl).toContain('version=v2');
+    expect(resultUrl).not.toContain('version=v1');
+    expect(resultUrl).toContain('apiKey=secret');
+  });
+
   test('execute uses params.url when config.url is not provided', async () => {
     const config = {
       authType: AuthType.Basic,
@@ -897,6 +978,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'GET',
@@ -928,6 +1010,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'GET',
@@ -962,6 +1045,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'POST',
@@ -1000,6 +1084,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'POST',
@@ -1036,6 +1121,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'POST',
@@ -1070,6 +1156,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'POST',
@@ -1104,6 +1191,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'POST',
@@ -1139,6 +1227,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'POST',
@@ -1172,6 +1261,7 @@ describe('execute()', () => {
         pfx: null,
         clientSecret: null,
         secretHeaders: null,
+        secretQueryParams: null,
       },
       params: {
         method: 'POST',
@@ -1230,6 +1320,7 @@ describe('execute()', () => {
             pfx: null,
             clientSecret: null,
             secretHeaders: null,
+            secretQueryParams: null,
           },
           params: {
             method: 'POST',
@@ -1275,6 +1366,7 @@ describe('execute()', () => {
           crt: null,
           pfx: null,
           secretHeaders: null,
+          secretQueryParams: null,
         },
         configurationUtilities,
         logger: mockedLogger,
@@ -1317,6 +1409,7 @@ describe('execute()', () => {
           crt: null,
           pfx: null,
           secretHeaders: null,
+          secretQueryParams: null,
         },
         configurationUtilities,
         logger: mockedLogger,
@@ -1358,6 +1451,7 @@ describe('execute()', () => {
           crt: null,
           pfx: null,
           secretHeaders: null,
+          secretQueryParams: null,
         },
         configurationUtilities,
         logger: mockedLogger,
@@ -1398,6 +1492,7 @@ describe('execute()', () => {
           crt: null,
           pfx: null,
           secretHeaders: null,
+          secretQueryParams: null,
         },
         configurationUtilities,
         logger: mockedLogger,
