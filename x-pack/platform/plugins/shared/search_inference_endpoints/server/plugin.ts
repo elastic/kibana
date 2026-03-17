@@ -27,6 +27,7 @@ import type {
   SearchInferenceEndpointsPluginStartDependencies,
 } from './types';
 import {
+  DYNAMIC_CONNECTORS_POLLING_START_DELAY,
   INFERENCE_ENDPOINTS_APP_ID,
   INFERENCE_SETTINGS_SO_TYPE,
   MODEL_SETTINGS_APP_ID,
@@ -122,7 +123,10 @@ export class SearchInferenceEndpointsPlugin
         core.elasticsearch.client.asInternalUser,
         this.config.dynamicConnectors.pollingIntervalMins
       );
-      this.dynamicConnectorsPoller.start();
+
+      setTimeout(() => {
+        this.dynamicConnectorsPoller?.start();
+      }, DYNAMIC_CONNECTORS_POLLING_START_DELAY);
     }
 
     return {
