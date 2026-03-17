@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { validateDataView } from '@kbn/data-view-validation';
 import { fromKueryExpression } from '@kbn/es-query';
-import type { LogExtractionBodyParams} from '../../constants';
+import type { LogExtractionBodyParams } from '../../constants';
 import { LogExtractionInstallParams, LogExtractionUpdateParams } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
 import {
@@ -140,7 +140,10 @@ export function validateLogExtractionParams(
   validateDelayVsLookbackPeriod(data, ctx);
 }
 
-export const LogExtractionInstallSchema = LogExtractionInstallParams.superRefine(validateLogExtractionParams).optional()
+export const LogExtractionInstallSchema = LogExtractionInstallParams.superRefine(
+  validateLogExtractionParams
+).optional();
 
-export const LogExtractionUpdadeSchema = LogExtractionUpdateParams.superRefine(validateLogExtractionParams)
-
+export const LogExtractionUpdadeSchema = LogExtractionUpdateParams.superRefine(
+  validateLogExtractionParams
+);
