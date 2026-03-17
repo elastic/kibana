@@ -8,7 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { validateDataView } from '@kbn/data-view-validation';
 import { fromKueryExpression } from '@kbn/es-query';
-import { LogExtractionBodyParams, LogExtractionInstallParams, LogExtractionUpdateParams } from '../../constants';
+import type { LogExtractionBodyParams} from '../../constants';
+import { LogExtractionInstallParams, LogExtractionUpdateParams } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
 import {
   LOG_EXTRACTION_DELAY_DEFAULT,
