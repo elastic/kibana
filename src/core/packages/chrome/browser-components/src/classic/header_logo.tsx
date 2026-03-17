@@ -9,14 +9,12 @@
 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { HTMLAttributes } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { HttpStart } from '@kbn/core-http-browser';
 import { useEuiTheme } from '@elastic/eui';
 import { LoadingIndicator } from '../shared/loading_indicator';
+import { useCustomBranding, useNavigateToUrl, useHomeHref } from '../shared/chrome_hooks';
+import { isModifiedOrPrevented } from '../shared/nav_link';
 
 const ElasticMark = ({ ...props }: HTMLAttributes<SVGElement>) => (
   <svg
@@ -32,28 +30,22 @@ const ElasticMark = ({ ...props }: HTMLAttributes<SVGElement>) => (
   </svg>
 );
 
-function onClick(
-  event: React.MouseEvent<HTMLAnchorElement>,
-  navigateToApp: (appId: string) => void
-) {
-  if (event.isDefaultPrevented() || event.altKey || event.metaKey || event.ctrlKey) {
-    return;
-  }
-  navigateToApp('home');
-  event.preventDefault();
-}
-
-interface Props {
-  href: string;
-  navigateToApp: (appId: string) => void;
-  loadingCount$?: ReturnType<HttpStart['getLoadingCount$']>;
-  customBranding$: Observable<CustomBranding>;
-}
-
-export function HeaderLogo({ href, navigateToApp, loadingCount$, customBranding$ }: Props) {
+export function HeaderLogo() {
   const { euiTheme } = useEuiTheme();
-  const customBranding = useObservable(customBranding$, {});
+  const navigateToUrl = useNavigateToUrl();
+  const homeHref = useHomeHref();
+  const customBranding = useCustomBranding();
   const { customizedLogo, logo } = customBranding;
+
+  const navigateHome = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!isModifiedOrPrevented(event)) {
+        event.preventDefault();
+        navigateToUrl(homeHref);
+      }
+    },
+    [homeHref, navigateToUrl]
+  );
 
   const styles = {
     logoCss: css({
@@ -70,15 +62,15 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, customBranding$
 
   return (
     <a
-      onClick={(e) => onClick(e, navigateToApp)}
+      onClick={navigateHome}
       css={styles.logoCss}
-      href={href}
+      href={homeHref}
       data-test-subj="logo"
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Elastic home',
       })}
     >
-      <LoadingIndicator loadingCount$={loadingCount$!} customLogo={logo} />
+      <LoadingIndicator customLogo={logo} />
       {customizedLogo ? (
         <img
           src={customizedLogo}

@@ -48,6 +48,7 @@ const StateAnnotation = Annotation.Root({
   additionalInstructions: Annotation<string | undefined>(),
   additionalContext: Annotation<string | undefined>(),
   rowLimit: Annotation<number | undefined>(),
+  disableNamedParams: Annotation<boolean | undefined>(),
   timeRange: Annotation<TimeRange>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
@@ -140,6 +141,7 @@ export const createNlToEsqlGraph = ({
         additionalInstructions: state.additionalInstructions,
         additionalContext: state.additionalContext,
         rowLimit: state.rowLimit,
+        disableNamedParams: state.disableNamedParams,
       })
     );
 
