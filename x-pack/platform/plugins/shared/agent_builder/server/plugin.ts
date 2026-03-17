@@ -193,6 +193,25 @@ export class AgentBuilderPlugin
       serviceManager: this.serviceManager,
       workflowsManagement: setupDeps.workflowsManagement,
       logger: this.logger.get('connector-lifecycle'),
+      smlIndexAttachment: async (params) => {
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        const sml = this.serviceManager.internalStart?.sml;
+        if (!sml) return;
+        // Use the internal repository with the hidden 'action' type because
+        // connector saved objects are encrypted/hidden and not visible to
+        // scoped clients or default internal repositories.
+        const soClient = coreStart.savedObjects.createInternalRepository(['action']);
+        const spaceId = startDeps.spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
+        await sml.indexAttachment({
+          originId: params.originId,
+          attachmentType: params.attachmentType,
+          action: params.action,
+          spaces: [spaceId],
+          esClient: coreStart.elasticsearch.client.asInternalUser,
+          savedObjectsClient: soClient,
+          logger: this.logger.get('services').get('sml'),
+        });
+      },
     });
 
     setupDeps.actions.registerConnectorLifecycleListener({

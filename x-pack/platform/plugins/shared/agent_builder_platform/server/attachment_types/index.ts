@@ -11,7 +11,11 @@ import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
 import { createVisualizationAttachmentType } from './visualization';
+<<<<<<< HEAD
 import { createGraphAttachmentType } from './graph';
+=======
+import { createConnectorAttachmentType } from './connector';
+>>>>>>> 3069836570a4 (Add connector attachment type)
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -33,6 +37,7 @@ export const registerAttachmentTypes = ({
     createEsqlAttachmentType(),
     createVisualizationAttachmentType(),
     createGraphAttachmentType(),
+    createConnectorAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

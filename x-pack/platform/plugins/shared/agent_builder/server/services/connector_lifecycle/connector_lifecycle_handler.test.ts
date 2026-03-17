@@ -174,6 +174,44 @@ describe('createConnectorLifecycleHandler', () => {
       );
     });
 
+    it('calls smlIndexAttachment with create action after tool creation', async () => {
+      const smlIndexAttachment = jest.fn().mockResolvedValue(undefined);
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: createMockServiceManager() as any,
+        workflowsManagement: createMockWorkflowsManagement() as any,
+        logger,
+        smlIndexAttachment,
+      });
+
+      const params = createBaseParams({ workflowTemplates: [SIMPLE_WORKFLOW_YAML] });
+      await handler.onPostCreate(params as any);
+
+      expect(smlIndexAttachment).toHaveBeenCalledWith({
+        request: params.request,
+        originId: 'connector-abc',
+        attachmentType: 'connector',
+        action: 'create',
+      });
+    });
+
+    it('logs warning but does not throw when smlIndexAttachment fails', async () => {
+      const smlIndexAttachment = jest.fn().mockRejectedValue(new Error('SML error'));
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: createMockServiceManager() as any,
+        workflowsManagement: createMockWorkflowsManagement() as any,
+        logger,
+        smlIndexAttachment,
+      });
+
+      await expect(
+        handler.onPostCreate(createBaseParams({ workflowTemplates: [SIMPLE_WORKFLOW_YAML] }) as any)
+      ).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('failed to index connector')
+      );
+    });
+
     it('substitutes template variables with connector ID', async () => {
       const workflowsManagement = createMockWorkflowsManagement();
       const handler = createConnectorLifecycleHandler({
@@ -274,11 +312,6 @@ describe('createConnectorLifecycleHandler', () => {
           tags: ['connector', 'test', 'connector:connector-abc'],
           configuration: { workflow_id: 'wf-2' },
         },
-        {
-          id: 'tool-other',
-          tags: ['connector', 'test', 'connector:other-id'],
-          configuration: { workflow_id: 'wf-other' },
-        },
       ]);
       const workflowsManagement = createMockWorkflowsManagement();
       const handler = createConnectorLifecycleHandler({
@@ -289,10 +322,10 @@ describe('createConnectorLifecycleHandler', () => {
 
       await handler.onPostDelete(createBaseParams({ connectorType: '.test' }) as any);
 
+      expect(toolRegistry.list).toHaveBeenCalledWith({ tags: ['connector:connector-abc'] });
       expect(toolRegistry.delete).toHaveBeenCalledTimes(2);
       expect(toolRegistry.delete).toHaveBeenCalledWith('tool-1');
       expect(toolRegistry.delete).toHaveBeenCalledWith('tool-2');
-      expect(toolRegistry.delete).not.toHaveBeenCalledWith('tool-other');
 
       expect(workflowsManagement.management.deleteWorkflows).toHaveBeenCalledWith(
         ['wf-1', 'wf-2'],
@@ -315,6 +348,48 @@ describe('createConnectorLifecycleHandler', () => {
 
       expect(toolRegistry.delete).not.toHaveBeenCalled();
       expect(workflowsManagement.management.deleteWorkflows).not.toHaveBeenCalled();
+    });
+
+    it('calls smlIndexAttachment with delete action after cleanup', async () => {
+      const smlIndexAttachment = jest.fn().mockResolvedValue(undefined);
+      const toolRegistry = createMockToolRegistry();
+      toolRegistry.list.mockResolvedValue([]);
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: createMockServiceManager(toolRegistry) as any,
+        workflowsManagement: createMockWorkflowsManagement() as any,
+        logger,
+        smlIndexAttachment,
+      });
+
+      const params = createBaseParams({ connectorType: '.test' });
+      await handler.onPostDelete(params as any);
+
+      expect(smlIndexAttachment).toHaveBeenCalledWith({
+        request: params.request,
+        originId: 'connector-abc',
+        attachmentType: 'connector',
+        action: 'delete',
+      });
+    });
+
+    it('logs warning but does not throw when SML delete fails', async () => {
+      const smlIndexAttachment = jest.fn().mockRejectedValue(new Error('SML delete error'));
+      const toolRegistry = createMockToolRegistry();
+      toolRegistry.list.mockResolvedValue([]);
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: createMockServiceManager(toolRegistry) as any,
+        workflowsManagement: createMockWorkflowsManagement() as any,
+        logger,
+        smlIndexAttachment,
+      });
+
+      await expect(
+        handler.onPostDelete(createBaseParams({ connectorType: '.test' }) as any)
+      ).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('failed to remove connector')
+      );
     });
 
     it('logs error but does not throw on failure', async () => {
