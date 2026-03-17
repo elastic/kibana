@@ -260,7 +260,7 @@ export const links: LinkItem = {
       title: SCRIPT_LIBRARY,
       description: i18n.translate('xpack.securitySolution.appLinks.scriptLibraryDescription', {
         defaultMessage:
-          'Upload and manage reusable scripts to run on endpoints protected by Elastic Defend.',
+          'Upload and manage scripts to use with the runscript response action on endpoints protected by Elastic Defend.',
       }),
       landingIcon: IconScriptLibrary,
       path: SCRIPT_LIBRARY_PATH,
