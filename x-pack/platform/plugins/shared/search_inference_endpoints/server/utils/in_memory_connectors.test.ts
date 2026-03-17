@@ -17,28 +17,44 @@ import {
 } from './in_memory_connectors';
 
 const makeEndpoint = (
-  overrides: Partial<InferenceInferenceEndpointInfo | InferenceEndpointWithMetadata> = {}
-): InferenceInferenceEndpointInfo | InferenceEndpointWithMetadata => ({
+  overrides: Partial<InferenceEndpointWithMetadata> = {}
+): InferenceEndpointWithMetadata => ({
   inference_id: '.test-model-chat_completion',
   task_type: 'chat_completion',
   service: 'elastic',
   service_settings: { model_id: 'test-model' },
+  metadata: {
+    heuristics: {
+      properties: ['kibana-connector'],
+    },
+  },
   ...overrides,
 });
 
 describe('filterPreconfiguredEndpoints', () => {
-  it('returns endpoints that are elastic service, start with ".", and are chat_completion', () => {
+  it('returns endpoints that have kibana-connector in metadata.heuristics.properties and are chat_completion', () => {
     const endpoint = makeEndpoint();
     expect(filterPreconfiguredEndpoints([endpoint])).toEqual([endpoint]);
   });
 
-  it('filters out endpoints where service is not elastic', () => {
-    const endpoint = makeEndpoint({ service: 'openai' });
+  it('filters out endpoints without metadata', () => {
+    const endpoint: InferenceInferenceEndpointInfo = {
+      inference_id: '.test-model-chat_completion',
+      task_type: 'chat_completion',
+      service: 'elastic',
+      service_settings: { model_id: 'test-model' },
+    };
     expect(filterPreconfiguredEndpoints([endpoint])).toEqual([]);
   });
 
-  it('filters out endpoints where inference_id does not start with "."', () => {
-    const endpoint = makeEndpoint({ inference_id: 'test-model-chat_completion' });
+  it('filters out endpoints where kibana-connector is not in metadata.heuristics.properties', () => {
+    const endpoint = makeEndpoint({
+      metadata: {
+        heuristics: {
+          properties: ['multilingual', 'multimodal'],
+        },
+      },
+    });
     expect(filterPreconfiguredEndpoints([endpoint])).toEqual([]);
   });
 
@@ -56,9 +72,14 @@ describe('filterPreconfiguredEndpoints', () => {
     const valid = makeEndpoint();
     const results = filterPreconfiguredEndpoints([
       valid,
-      makeEndpoint({ service: 'elasticsearch' }),
-      makeEndpoint({ inference_id: 'no-dot-chat_completion' }),
+      makeEndpoint({ metadata: { heuristics: { properties: ['multilingual'] } } }),
       makeEndpoint({ task_type: 'sparse_embedding' }),
+      {
+        inference_id: 'no-metadata-chat_completion',
+        task_type: 'chat_completion',
+        service: 'elastic',
+        service_settings: {},
+      },
     ]);
     expect(results).toEqual([valid]);
   });
@@ -67,12 +88,12 @@ describe('filterPreconfiguredEndpoints', () => {
     expect(filterPreconfiguredEndpoints([])).toEqual([]);
   });
 
-  it('filters the EIS mock endpoints to only chat_completion elastic endpoints with a "." prefix', () => {
+  it('filters the EIS mock endpoints to only chat_completion endpoints with kibana-connector property', () => {
     const results = filterPreconfiguredEndpoints(mockEISPreconfiguredEndpoints);
     expect(results.length).toBeGreaterThan(0);
     results.forEach((endpoint) => {
-      expect(endpoint.service).toBe('elastic');
-      expect(endpoint.inference_id).toMatch(/^\./);
+      const ep = endpoint as InferenceEndpointWithMetadata;
+      expect(ep.metadata?.heuristics?.properties).toContain('kibana-connector');
       expect(endpoint.task_type).toBe('chat_completion');
     });
   });
