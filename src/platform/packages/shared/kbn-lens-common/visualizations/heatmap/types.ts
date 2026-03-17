@@ -12,9 +12,9 @@ import type { ExpressionValueVisDimension, LegendSize } from '@kbn/chart-express
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { Position } from '@elastic/charts';
 import type { LensLayerType } from '../types';
-import type { HEATMAP_LEGEND_NAME, HEATMAP_GRID_NAME } from './constants';
+import type { HEATMAP_LEGEND_NAME, HEATMAP_GRID_NAME, HEATMAP_NAME } from './constants';
 
-export type HeatmapChartShapes = 'heatmap';
+export type HeatmapChartShapes = typeof HEATMAP_NAME;
 
 export interface HeatmapLegendConfigResult {
   /**

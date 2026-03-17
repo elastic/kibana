@@ -11,6 +11,7 @@ import type { MappingField } from './types';
 interface MappingProperties {
   [key: string]: {
     type?: string; // Leaf field (e.g., "text", "keyword", etc.)
+    index?: boolean; // Whether the field is indexed (searchable)
     properties?: MappingProperties; // Nested object fields
     fields?: MappingProperties; // Multi-fields (alternative analyzers/types)
     meta?: Record<string, string>; // meta
@@ -35,6 +36,7 @@ export const flattenMapping = (mapping: MappingTypeMapping): MappingField[] => {
           type: value.type,
           path: fieldPath,
           meta: value.meta ?? {},
+          searchable: value.index !== false,
         });
       }
       if (value.properties) {
