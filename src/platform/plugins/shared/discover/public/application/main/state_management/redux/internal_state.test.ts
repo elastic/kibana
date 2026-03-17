@@ -110,7 +110,7 @@ describe('InternalStateStore', () => {
     );
   });
 
-  it('should preserve previousStateSnapshotsByProfileId when updating reset state', async () => {
+  it('should preserve snapshotsByProfileId when updating reset state', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
@@ -139,7 +139,7 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), tabId).defaultProfileState).toEqual({
       resetId: expect.any(String),
       fieldsToReset: 'all',
-      previousStateSnapshotsByProfileId: {
+      snapshotsByProfileId: {
         [profileId]: {
           columns: ['field1'],
           rowHeight: 3,
@@ -149,7 +149,7 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), tabId).defaultProfileState.resetId).not.toBe(prevResetId);
   });
 
-  it('should only update previousStateSnapshotsByProfileId', async () => {
+  it('should only update snapshotsByProfileId', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
@@ -176,7 +176,7 @@ describe('InternalStateStore', () => {
 
     expect(selectTab(store.getState(), tabId).defaultProfileState).toEqual({
       ...prevDefaultProfileState,
-      previousStateSnapshotsByProfileId: {
+      snapshotsByProfileId: {
         [profileId]: {
           columns: ['field1'],
         },
@@ -184,7 +184,7 @@ describe('InternalStateStore', () => {
     });
   });
 
-  it('should only apply changed app state fields to previousStateSnapshotsByProfileId', async () => {
+  it('should only apply changed app state fields to snapshotsByProfileId', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
@@ -213,9 +213,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(
-      selectTab(store.getState(), tabId).defaultProfileState.previousStateSnapshotsByProfileId
-    ).toEqual({
+    expect(selectTab(store.getState(), tabId).defaultProfileState.snapshotsByProfileId).toEqual({
       [profileId]: {
         columns: ['field2'],
         rowHeight: 3,
@@ -224,7 +222,7 @@ describe('InternalStateStore', () => {
     });
   });
 
-  it('should not update previousStateSnapshotsByProfileId for system-triggered app state changes', async () => {
+  it('should not update snapshotsByProfileId for system-triggered app state changes', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
@@ -250,9 +248,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(
-      selectTab(store.getState(), tabId).defaultProfileState.previousStateSnapshotsByProfileId
-    ).toEqual({
+    expect(selectTab(store.getState(), tabId).defaultProfileState.snapshotsByProfileId).toEqual({
       [profileId]: {
         columns: ['field1'],
       },

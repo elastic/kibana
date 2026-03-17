@@ -38,7 +38,7 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   defaultProfileState: {
     resetId: '',
     fieldsToReset: 'none',
-    previousStateSnapshotsByProfileId: {},
+    snapshotsByProfileId: {},
   },
   expandedDoc: undefined,
   uiState: {},

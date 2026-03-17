@@ -115,8 +115,8 @@ describe('tab mapping utils', () => {
           },
           "defaultProfileState": Object {
             "fieldsToReset": "none",
-            "previousStateSnapshotsByProfileId": Object {},
             "resetId": "",
+            "snapshotsByProfileId": Object {},
           },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
@@ -206,8 +206,8 @@ describe('tab mapping utils', () => {
           },
           "defaultProfileState": Object {
             "fieldsToReset": "none",
-            "previousStateSnapshotsByProfileId": Object {},
             "resetId": "",
+            "snapshotsByProfileId": Object {},
           },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],

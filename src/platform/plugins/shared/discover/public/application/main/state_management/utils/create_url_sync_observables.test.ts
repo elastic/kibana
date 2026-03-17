@@ -95,9 +95,8 @@ describe('createUrlSyncObservables', () => {
     const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
       .scopedProfilesManager$.getValue()
       .getContexts().dataSourceContext.profileId;
-    const previousStateSnapshotsByProfileId = structuredClone(
-      selectTab(internalState.getState(), tabId).defaultProfileState
-        .previousStateSnapshotsByProfileId
+    const snapshotsByProfileId = structuredClone(
+      selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
     );
 
     let state = internalState.getState();
@@ -114,11 +113,9 @@ describe('createUrlSyncObservables', () => {
     state = internalState.getState();
     tab = selectTab(state, tabId);
     expect(tab.appState.hideChart).toBe(true);
-    expect(tab.defaultProfileState.previousStateSnapshotsByProfileId).toEqual(
-      previousStateSnapshotsByProfileId
-    );
-    expect(tab.defaultProfileState.previousStateSnapshotsByProfileId[profileId]).toBe(
-      previousStateSnapshotsByProfileId[profileId]
+    expect(tab.defaultProfileState.snapshotsByProfileId).toEqual(snapshotsByProfileId);
+    expect(tab.defaultProfileState.snapshotsByProfileId[profileId]).toBe(
+      snapshotsByProfileId[profileId]
     );
   });
 

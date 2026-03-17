@@ -42,7 +42,7 @@ import {
   TabsBarVisibility,
   type DefaultProfileStateField,
   type DiscoverInternalState,
-  type PreviousStateSnapshot,
+  type ProfileStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
   TabInitializationStatus,
@@ -96,30 +96,30 @@ const withTab = <TPayload extends TabActionPayload>(
   }
 };
 
-const setPreviousStateSnapshotField = <TField extends DefaultProfileStateField>(
-  snapshot: PreviousStateSnapshot,
+const setProfileStateSnapshotField = <TField extends DefaultProfileStateField>(
+  snapshot: ProfileStateSnapshot,
   field: TField,
   value: TabState['appState'][TField]
 ) => {
   snapshot[field] = value;
 };
 
-const syncPreviousStateSnapshots = (
+const syncProfileStateSnapshots = (
   tab: TabState,
   profileId: string,
   nextAppState?: TabState['appState']
 ) => {
-  const previousStateSnapshots = tab.defaultProfileState.previousStateSnapshotsByProfileId;
-  const previousStateSnapshot = previousStateSnapshots[profileId] ?? {};
+  const profileStateSnapshots = tab.defaultProfileState.snapshotsByProfileId;
+  const profileStateSnapshot = profileStateSnapshots[profileId] ?? {};
   const snapshotAppState = nextAppState ?? tab.appState;
 
   for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
     if (!nextAppState || !isEqual(tab.appState[field], nextAppState[field])) {
-      setPreviousStateSnapshotField(previousStateSnapshot, field, snapshotAppState[field]);
+      setProfileStateSnapshotField(profileStateSnapshot, field, snapshotAppState[field]);
     }
   }
 
-  previousStateSnapshots[profileId] = previousStateSnapshot;
+  profileStateSnapshots[profileId] = profileStateSnapshot;
 };
 
 export const internalStateSlice = createSlice({
@@ -279,19 +279,19 @@ export const internalStateSlice = createSlice({
         }
 
         if (!action.payload.isSystemTriggered) {
-          syncPreviousStateSnapshots(tab, action.payload.profileId, appState);
+          syncProfileStateSnapshots(tab, action.payload.profileId, appState);
         }
 
         tab.previousAppState = tab.appState;
         tab.appState = appState;
       }),
 
-    syncPreviousStateSnapshots: (
+    syncProfileStateSnapshots: (
       state,
       action: TabAction<{ profileId: string; appState?: TabState['appState'] }>
     ) =>
       withTab(state, action.payload, (tab) => {
-        syncPreviousStateSnapshots(tab, action.payload.profileId, action.payload.appState);
+        syncProfileStateSnapshots(tab, action.payload.profileId, action.payload.appState);
       }),
 
     /**

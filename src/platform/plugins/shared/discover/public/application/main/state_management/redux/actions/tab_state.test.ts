@@ -50,7 +50,7 @@ const setup = async () => {
 
 describe('tab_state actions', () => {
   describe('setAppState', () => {
-    it('should sync previousStateSnapshotsByProfileId for the current profile', async () => {
+    it('should sync snapshotsByProfileId for the current profile', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
       const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
         .scopedProfilesManager$.getValue()
@@ -70,8 +70,7 @@ describe('tab_state actions', () => {
       );
 
       expect(
-        selectTab(internalState.getState(), tabId).defaultProfileState
-          .previousStateSnapshotsByProfileId
+        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
       ).toEqual(
         expect.objectContaining({
           [profileId]: {
@@ -85,12 +84,11 @@ describe('tab_state actions', () => {
     });
   });
 
-  describe('syncPreviousStateSnapshots', () => {
-    it('should sync previousStateSnapshotsByProfileId for the current profile when triggered separately', async () => {
+  describe('syncProfileStateSnapshots', () => {
+    it('should sync snapshotsByProfileId for the current profile when triggered separately', async () => {
       const { internalState, tabId } = await setup();
-      const previousStateSnapshotsByProfileId = structuredClone(
-        selectTab(internalState.getState(), tabId).defaultProfileState
-          .previousStateSnapshotsByProfileId
+      const snapshotsByProfileId = structuredClone(
+        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
       );
 
       internalState.dispatch(
@@ -105,16 +103,14 @@ describe('tab_state actions', () => {
       );
 
       expect(
-        selectTab(internalState.getState(), tabId).defaultProfileState
-          .previousStateSnapshotsByProfileId
-      ).toEqual(previousStateSnapshotsByProfileId);
+        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
+      ).toEqual(snapshotsByProfileId);
 
-      internalState.dispatch(internalStateActions.syncPreviousStateSnapshots({ tabId }));
+      internalState.dispatch(internalStateActions.syncProfileStateSnapshots({ tabId }));
 
       expect(
         Object.values(
-          selectTab(internalState.getState(), tabId).defaultProfileState
-            .previousStateSnapshotsByProfileId
+          selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
         )
       ).toContainEqual({
         columns: ['message'],
@@ -177,8 +173,7 @@ describe('tab_state actions', () => {
         })
       );
       expect(
-        selectTab(internalState.getState(), tabId).defaultProfileState
-          .previousStateSnapshotsByProfileId
+        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
       ).toEqual(
         expect.objectContaining({
           [profileId]: {
@@ -189,7 +184,7 @@ describe('tab_state actions', () => {
       );
     });
 
-    it('should not sync previousStateSnapshotsByProfileId after replacing the URL for system-triggered updates', async () => {
+    it('should not sync snapshotsByProfileId after replacing the URL for system-triggered updates', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
       const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
         .scopedProfilesManager$.getValue()
@@ -215,8 +210,7 @@ describe('tab_state actions', () => {
       );
 
       expect(
-        selectTab(internalState.getState(), tabId).defaultProfileState
-          .previousStateSnapshotsByProfileId
+        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
       ).toEqual(
         expect.objectContaining({
           [profileId]: expect.objectContaining({

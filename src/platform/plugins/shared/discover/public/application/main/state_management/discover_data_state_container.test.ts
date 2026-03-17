@@ -179,7 +179,7 @@ describe('test getDataStateContainer', () => {
   });
 
   describe('default profile state', () => {
-    it('should populate previousStateSnapshotsByProfileId when the data source profile changes', async () => {
+    it('should populate snapshotsByProfileId when the data source profile changes', async () => {
       const toolkit = getDiscoverInternalStateMock();
 
       await toolkit.initializeTabs();
@@ -230,7 +230,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(omit(toolkit.getCurrentTab().defaultProfileState, 'resetId')).toEqual({
           fieldsToReset: ['columns', 'rowHeight'],
-          previousStateSnapshotsByProfileId: {
+          snapshotsByProfileId: {
             [previousProfileId]: {
               columns: ['custom_column'],
               rowHeight: 5,

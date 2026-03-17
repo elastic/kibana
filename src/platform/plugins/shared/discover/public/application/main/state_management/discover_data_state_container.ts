@@ -42,7 +42,7 @@ import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
-import { DEFAULT_PROFILE_STATE_FIELDS, type PreviousStateSnapshot } from './redux/types';
+import { DEFAULT_PROFILE_STATE_FIELDS, type ProfileStateSnapshot } from './redux/types';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import { createSearchSource } from './utils/create_search_source';
 
@@ -378,8 +378,8 @@ export function getDataStateContainer({
           if (didProfileChange) {
             const nextProfileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
             const nextProfileSnapshot =
-              getCurrentTab().defaultProfileState.previousStateSnapshotsByProfileId[nextProfileId];
-            const nextProfileStateUpdate = getPreviousStateSnapshot(
+              getCurrentTab().defaultProfileState.snapshotsByProfileId[nextProfileId];
+            const nextProfileStateUpdate = getProfileStateSnapshot(
               nextProfileSnapshot ?? {},
               defaultProfileState.fieldsToReset
             );
@@ -398,7 +398,7 @@ export function getDataStateContainer({
               );
             } else {
               internalState.dispatch(
-                injectCurrentTab(internalStateActions.syncPreviousStateSnapshots)({})
+                injectCurrentTab(internalStateActions.syncProfileStateSnapshots)({})
               );
             }
           }
@@ -618,10 +618,10 @@ export function getDataStateContainer({
   };
 }
 
-const getPreviousStateSnapshot = (
+const getProfileStateSnapshot = (
   appState: TabState['appState'],
   fieldsToReset: TabState['defaultProfileState']['fieldsToReset']
-): PreviousStateSnapshot | undefined => {
+): ProfileStateSnapshot | undefined => {
   if (fieldsToReset === 'none') {
     return undefined;
   }
