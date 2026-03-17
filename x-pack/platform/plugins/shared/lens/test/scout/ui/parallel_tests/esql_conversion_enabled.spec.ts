@@ -67,13 +67,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
       await expect(editor).toBeVisible();
-      // Wait for flyout to settle: Apply is disabled when there are no unsaved changes
-      await expect
-        .poll(async () => await lens.getApplyFlyoutButton().isDisabled(), {
-          timeout: 20000,
-          intervals: [200],
-        })
-        .toBe(true);
+      await expect(lens.getApplyFlyoutButton()).toBeDisabled();
 
       // TODO: Add conversion assertions: https://github.com/elastic/kibana/issues/250385
     }
@@ -100,11 +94,13 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
       await expect(metricDimensionPanel).toBeVisible({ timeout: 15000 });
-      await metricDimensionPanel.click();
+      // Click the dimension link to open the dimension editor (not just the panel container)
+      await metricDimensionPanel.getByTestId('lnsLayerPanel-dimensionLink').click();
+      await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible({ timeout: 15000 });
       const nameInput = page.getByTestId('name-input');
-      // Dimension panel can open slowly; wait for name input to be ready before filling
-      await expect(nameInput).toBeVisible({ timeout: 20000 });
-      await nameInput.fill('Converted metric');
+      await expect(nameInput).toBeVisible({ timeout: 10000 });
+      await expect(nameInput).toHaveValue(/./, { timeout: 5000 });
+      await page.getByTestId('name-input').fill('Converted metric', { timeout: 15000 });
       await expect(nameInput).toHaveValue('Converted metric');
 
       // The changes are reflected in the visualization
@@ -118,12 +114,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
       // The button is disabled after clicking on "Apply and close" when there are no unsaved changes
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
       await expect(lens.getInlineEditor()).toBeVisible();
-      await expect
-        .poll(async () => await lens.getApplyFlyoutButton().isDisabled(), {
-          timeout: 20000,
-          intervals: [200],
-        })
-        .toBe(true);
+      await expect(lens.getApplyFlyoutButton()).toBeDisabled();
     }
   );
 
@@ -152,8 +143,9 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
       await expect(lens.getInlineEditor()).toBeVisible();
-      // After cancel, panel is back to Lens form view; ES|QL editor hidden
-      await expect(page.getByTestId('ESQLEditor')).toBeHidden({ timeout: 20000 });
+      // After cancel, panel reverts to Lens form view; Convert button visible confirms we're back
+      await expect(lens.getConvertToEsqlButton()).toBeVisible({ timeout: 20000 });
+      await expect(page.getByTestId('ESQLEditor')).toBeHidden();
     }
   );
 

@@ -192,7 +192,13 @@ export function LensEditConfigurationFlyout({
       // Use the datasourceId from the previous attributes, not the current one
       // This is important when canceling after a datasource conversion (e.g., formBased -> textBased)
       const previousDatasourceId = getActiveDatasourceIdFromDoc(previousAttrs) as LensDatasourceId;
-      if (previousAttrs.visualizationType === visualization.activeId) {
+      const currentDatasourceId = getActiveDatasourceIdFromDoc(attributes) as LensDatasourceId;
+      const isDatasourceConversionRevert = previousDatasourceId !== currentDatasourceId;
+
+      if (
+        previousAttrs.visualizationType === visualization.activeId &&
+        !isDatasourceConversionRevert
+      ) {
         const prevDsStates = previousAttrs.state.datasourceStates as Partial<
           Record<LensDatasourceId, unknown>
         >;
@@ -220,6 +226,7 @@ export function LensEditConfigurationFlyout({
     onCancelCallback?.();
     closeFlyout?.();
   }, [
+    attributes,
     attributesChanged,
     closeFlyout,
     visualization.activeId,
