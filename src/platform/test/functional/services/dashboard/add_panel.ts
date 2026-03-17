@@ -163,7 +163,16 @@ export class DashboardAddPanelService extends FtrService {
     }
 
     await this.header.waitUntilLoadingHasFinished();
-    await pagerNextButton.click();
+    try {
+      await pagerNextButton.click();
+    } catch (err) {
+      if (err.name === 'ElementClickInterceptedError') {
+        await this.toasts.dismissAll();
+        await pagerNextButton.click();
+      } else {
+        throw err;
+      }
+    }
     await this.header.waitUntilLoadingHasFinished();
     return true;
   }
