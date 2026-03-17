@@ -32,9 +32,12 @@ jest.mock('../../quality_gates/types', () => ({
   serializeGateConfig: jest.fn((config: unknown) => JSON.stringify(config, null, 2)),
 }));
 
+import { Client as EsClient } from '@elastic/elasticsearch';
 import { calibrateCmd } from './calibrate';
 import { calibrateThresholds } from '../../quality_gates/calibrate';
 import type { CalibrationResult } from '../../quality_gates/calibrate';
+
+const MockClient = EsClient as unknown as jest.Mock;
 
 const mockCalibrateThresholds = calibrateThresholds as jest.MockedFunction<
   typeof calibrateThresholds
@@ -197,8 +200,7 @@ describe('calibrateCmd', () => {
 
       await calibrateCmd.run({ log, flagsReader } as any);
 
-      const { Client } = require('@elastic/elasticsearch');
-      expect(Client).toHaveBeenCalledWith(
+      expect(MockClient).toHaveBeenCalledWith(
         expect.objectContaining({ node: 'http://custom-es:9200' })
       );
     });
@@ -211,8 +213,7 @@ describe('calibrateCmd', () => {
 
       await calibrateCmd.run({ log, flagsReader } as any);
 
-      const { Client } = require('@elastic/elasticsearch');
-      expect(Client).toHaveBeenCalledWith(
+      expect(MockClient).toHaveBeenCalledWith(
         expect.objectContaining({ node: 'http://es-fallback:9200' })
       );
     });
@@ -224,8 +225,7 @@ describe('calibrateCmd', () => {
 
       await calibrateCmd.run({ log, flagsReader } as any);
 
-      const { Client } = require('@elastic/elasticsearch');
-      expect(Client).toHaveBeenCalledWith(
+      expect(MockClient).toHaveBeenCalledWith(
         expect.objectContaining({ auth: { apiKey: 'test-key' } })
       );
     });
@@ -323,8 +323,7 @@ describe('calibrateCmd', () => {
       await calibrateCmd.run({ log, flagsReader } as any);
 
       const changesLog = log.info.mock.calls.find(
-        (call: string[]) =>
-          typeof call[0] === 'string' && call[0].includes('Changes (2)')
+        (call: string[]) => typeof call[0] === 'string' && call[0].includes('Changes (2)')
       );
       expect(changesLog).toBeDefined();
     });
@@ -368,8 +367,7 @@ describe('calibrateCmd', () => {
       await calibrateCmd.run({ log, flagsReader } as any);
 
       const changeLog = log.info.mock.calls.find(
-        (call: string[]) =>
-          typeof call[0] === 'string' && call[0].includes('was 0.8')
+        (call: string[]) => typeof call[0] === 'string' && call[0].includes('was 0.8')
       );
       expect(changeLog).toBeDefined();
     });
