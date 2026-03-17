@@ -33,7 +33,7 @@ export const createSoftDeleteSemanticEvaluator = ({
 
     if (deletedFeatures.length === 0) {
       return {
-        score: undefined,
+        score: null,
         explanation:
           'Inconclusive: initial identification did not return enough features to fulfill the requested deletion count',
       };

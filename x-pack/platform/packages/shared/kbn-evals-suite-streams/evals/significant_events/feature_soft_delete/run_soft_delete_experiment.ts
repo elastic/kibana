@@ -8,7 +8,7 @@
 import { isDuplicateFeature } from '@kbn/streams-schema';
 import { identifyFeatures, type DeletedFeatureSummary } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
-import { sampleSize as lodashSampleSize } from 'lodash';
+import { sortBy } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
@@ -64,7 +64,7 @@ export async function runSoftDeleteExperiment({
     };
   }
 
-  const featuresToDelete = lodashSampleSize(initialFeatures, deleteCount);
+  const featuresToDelete = sortBy(initialFeatures, (f) => f.id).slice(0, deleteCount);
   const deletedFeatures: DeletedFeatureSummary[] = featuresToDelete.map(
     ({ id, type, subtype, title, description, properties }) => ({
       id,
