@@ -56,6 +56,7 @@ const createStep2Response = (
     email: string;
     unresolved: Array<{ id: string; namespace: string }>;
     existingTargets: string[];
+    totalUnresolved?: number;
   }>
 ) => ({
   aggregations: {
@@ -64,9 +65,10 @@ const createStep2Response = (
         key: g.email,
         doc_count: g.unresolved.length + g.existingTargets.length,
         unresolved: {
-          doc_count: g.unresolved.length,
+          doc_count: g.totalUnresolved ?? g.unresolved.length,
           hits: {
             hits: {
+              total: { value: g.totalUnresolved ?? g.unresolved.length, relation: 'eq' },
               hits: g.unresolved.map((u) => ({
                 _source: { entity: { id: u.id, namespace: u.namespace } },
               })),
@@ -330,6 +332,104 @@ describe('Automated Resolution', () => {
       );
 
       expect(result.lastProcessedTimestamp).toBe('2026-03-10T19:30:11.776Z');
+    });
+
+    it('should not advance watermark when a bucket fails', async () => {
+      const state = createInitialState({ lastProcessedTimestamp: '2026-03-09T00:00:00Z' });
+      const logger = loggerMock.create();
+      mockEsClient.search
+        .mockResolvedValueOnce(createStep1Response(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createStep2Response([
+            {
+              email: 'a@test.com',
+              unresolved: [
+                { id: 'user-1', namespace: 'okta' },
+                { id: 'user-2', namespace: 'entra_id' },
+              ],
+              existingTargets: [],
+            },
+          ]) as any
+        );
+
+      mockLinkEntities.mockRejectedValueOnce(new Error('transient ES failure'));
+
+      const result = await runAutomatedResolution(
+        createDeps(state, mockEsClient, mockResolutionClient, { logger })
+      );
+
+      // Watermark should NOT advance — stays at original value
+      expect(result.lastProcessedTimestamp).toBe('2026-03-09T00:00:00Z');
+      expect(result.lastRun?.resolutionsCreated).toBe(0);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to resolve bucket'));
+    });
+
+    it('should advance watermark when all buckets succeed', async () => {
+      const state = createInitialState({ lastProcessedTimestamp: '2026-03-09T00:00:00Z' });
+      mockEsClient.search
+        .mockResolvedValueOnce(createStep1Response(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createStep2Response([
+            {
+              email: 'a@test.com',
+              unresolved: [
+                { id: 'user-1', namespace: 'okta' },
+                { id: 'user-2', namespace: 'entra_id' },
+              ],
+              existingTargets: [],
+            },
+          ]) as any
+        );
+
+      mockLinkEntities.mockResolvedValueOnce({
+        linked: ['user-2'],
+        skipped: [],
+        target_id: 'user-1',
+      });
+
+      const result = await runAutomatedResolution(
+        createDeps(state, mockEsClient, mockResolutionClient)
+      );
+
+      // Watermark should advance to maxTimestamp
+      expect(result.lastProcessedTimestamp).toBe('2026-03-10T00:00:00Z');
+    });
+
+    it('should log warning when top_hits truncation occurs', async () => {
+      const state = createInitialState();
+      const logger = loggerMock.create();
+
+      // Step 2 response has 2 unresolved hits but reports totalUnresolved = 150
+      // (simulating top_hits capped at TOP_HITS_SIZE)
+      mockEsClient.search
+        .mockResolvedValueOnce(createStep1Response(['a@test.com'], '2026-03-10T00:00:00Z') as any)
+        .mockResolvedValueOnce(
+          createStep2Response([
+            {
+              email: 'a@test.com',
+              unresolved: [
+                { id: 'user-1', namespace: 'okta' },
+                { id: 'user-2', namespace: 'entra_id' },
+              ],
+              existingTargets: [],
+              totalUnresolved: 150,
+            },
+          ]) as any
+        );
+
+      mockLinkEntities.mockResolvedValueOnce({
+        linked: ['user-2'],
+        skipped: [],
+        target_id: 'user-1',
+      });
+
+      await runAutomatedResolution(
+        createDeps(state, mockEsClient, mockResolutionClient, { logger })
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('150 unresolved entities but top_hits is capped at')
+      );
     });
 
     it('should not advance watermark when no new entities found', async () => {
