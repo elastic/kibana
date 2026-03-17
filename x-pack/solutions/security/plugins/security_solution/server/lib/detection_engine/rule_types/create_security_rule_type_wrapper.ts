@@ -264,13 +264,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             } catch (exc) {
               if (SavedObjectsErrorHelpers.isNotFoundError(exc)) {
                 await ruleExecutionLogger.logExecutionResult({
-                  outcome: RuleExecutionStatusEnum.failed,
+                  status: RuleExecutionStatusEnum.failed,
                   message: `Data view is not found.\nError: ${exc}`,
                   userError: true,
                 });
               } else {
                 await ruleExecutionLogger.logExecutionResult({
-                  outcome: RuleExecutionStatusEnum.failed,
+                  status: RuleExecutionStatusEnum.failed,
                   message: `Check for indices to search failed.\nError: ${exc}`,
                 });
               }
@@ -479,32 +479,32 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               wrapperWarnings.push(disabledActionsWarning);
             }
 
-            let outcome: RuleExecutionStatus = RuleExecutionStatusEnum.succeeded;
-            let outcomeMessage = 'Rule execution completed successfully';
+            let status: RuleExecutionStatus = RuleExecutionStatusEnum.succeeded;
+            let statusMessage = 'Rule execution completed successfully';
 
             const hasWarnings = result.warningMessages.length > 0;
             const hasErrors = result.errors.length > 0;
 
             if (hasErrors || hasWarnings) {
-              outcome = RuleExecutionStatusEnum['partial failure'];
-              outcomeMessage = truncateList(result.warningMessages.concat(wrapperWarnings)).join(
+              status = RuleExecutionStatusEnum['partial failure'];
+              statusMessage = truncateList(result.warningMessages.concat(wrapperWarnings)).join(
                 '\n\n'
               );
             } else if (wrapperErrors.length > 0 || result.errors.length > 0) {
-              outcome = RuleExecutionStatusEnum.failed;
-              outcomeMessage = truncateList(result.errors.concat(wrapperErrors)).join(', ');
+              status = RuleExecutionStatusEnum.failed;
+              statusMessage = truncateList(result.errors.concat(wrapperErrors)).join(', ');
             }
 
             ruleExecutionLogger.logExecutionResult({
-              outcome,
-              message: outcomeMessage,
+              status,
+              message: statusMessage,
               userError: result.userError,
             });
           } catch (error) {
             const errorMessage = error.message ?? '(no error message given)';
 
             ruleExecutionLogger.logExecutionResult({
-              outcome: RuleExecutionStatusEnum.failed,
+              status: RuleExecutionStatusEnum.failed,
               message: `An error occurred during rule execution. ${errorMessage}`,
               userError: checkErrorDetails(errorMessage).isUserError,
             });

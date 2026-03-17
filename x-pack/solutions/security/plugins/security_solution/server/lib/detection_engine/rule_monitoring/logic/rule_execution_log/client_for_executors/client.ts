@@ -26,14 +26,18 @@ import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { ExtMeta } from '../../utils/console_logging';
 import { truncateValue } from '../../utils/normalization';
 import type { ExecutionResultLogEntry, IEventLogWriter } from '../event_log/event_log_writer';
-import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import {
   LogLevelEnum,
   LogLevelSetting,
   logLevelToNumber,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_names';
-import type { IRuleExecutionLogForExecutors, RuleExecutionContext } from './client_interface';
+import type {
+  ExecutionResult,
+  IRuleExecutionLogForExecutors,
+  LogMessageOptions,
+  RuleExecutionContext,
+} from './client_interface';
 import { getCorrelationIds } from './correlation_ids';
 
 export function createRuleExecutionLogClientForExecutors(
@@ -46,6 +50,7 @@ export function createRuleExecutionLogClientForExecutors(
 ): IRuleExecutionLogForExecutors {
   const baseCorrelationIds = getCorrelationIds(context);
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
+  const baseLogMeta = baseCorrelationIds.getLogMeta();
   const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId } = context;
 
   // Buffers the execution related data
@@ -61,24 +66,39 @@ export function createRuleExecutionLogClientForExecutors(
       return context;
     },
 
-    trace(message: string): void {
-      writeMessageToEventLog(message, LogLevelEnum.trace);
+    trace(message: string, options?: LogMessageOptions): void {
+      writeMessage(message, {
+        eventLogLevel: LogLevelEnum.trace,
+        consoleLogLevel: options?.consoleLogLevel ?? LogLevelEnum.trace,
+      });
     },
 
-    debug(message: string): void {
-      writeMessageToEventLog(message, LogLevelEnum.debug);
+    debug(message: string, options?: LogMessageOptions): void {
+      writeMessage(message, {
+        eventLogLevel: LogLevelEnum.debug,
+        consoleLogLevel: options?.consoleLogLevel ?? LogLevelEnum.debug,
+      });
     },
 
-    info(message: string): void {
-      writeMessageToEventLog(message, LogLevelEnum.info);
+    info(message: string, options?: LogMessageOptions): void {
+      writeMessage(message, {
+        eventLogLevel: LogLevelEnum.info,
+        consoleLogLevel: options?.consoleLogLevel,
+      });
     },
 
-    warn(message: string): void {
-      writeMessageToEventLog(message, LogLevelEnum.warn);
+    warn(message: string, options?: LogMessageOptions): void {
+      writeMessage(message, {
+        eventLogLevel: LogLevelEnum.warn,
+        consoleLogLevel: options?.consoleLogLevel,
+      });
     },
 
-    error(message: string): void {
-      writeMessageToEventLog(message, LogLevelEnum.error);
+    error(message: string, options?: LogMessageOptions): void {
+      writeMessage(message, {
+        eventLogLevel: LogLevelEnum.error,
+        consoleLogLevel: options?.consoleLogLevel,
+      });
     },
 
     logMetric<Metric extends keyof ConsumerExecutionMetrics>(
@@ -100,7 +120,7 @@ export function createRuleExecutionLogClientForExecutors(
       ruleMonitoringService.setMetrics(metrics);
     },
 
-    logExecutionResult(args: ExecutionOutcome): void {
+    logExecutionResult(args: ExecutionResult): void {
       executionResultBuffer.executionResult = args;
     },
 
@@ -124,24 +144,24 @@ export function createRuleExecutionLogClientForExecutors(
       executionResultBuffer.closed = true;
 
       await withSecuritySpan('IRuleExecutionLogForExecutors.close', async () => {
-        const correlationIds = baseCorrelationIds.withStatus(executionResult.outcome);
+        const correlationIds = baseCorrelationIds.withStatus(executionResult.status);
         const logMeta = correlationIds.getLogMeta();
 
-        agent.addLabels({ [SECURITY_RULE_STATUS]: executionResult.outcome });
+        agent.addLabels({ [SECURITY_RULE_STATUS]: executionResult.status });
 
         try {
-          const executionOutcome: ExecutionOutcome = {
-            outcome: executionResult.outcome,
+          const normalizedExecutionResult: ExecutionResult = {
+            status: executionResult.status,
             message: truncateValue(executionResult.message) ?? '',
             userError: executionResult.userError,
           };
 
           await Promise.all([
-            writeExecutionResultToConsole(executionOutcome, logMeta),
-            writeExecutionResultToRuleObject(executionOutcome),
+            writeExecutionResultToConsole(normalizedExecutionResult, logMeta),
+            writeExecutionResultToRuleObject(normalizedExecutionResult),
           ]);
         } catch (e) {
-          const logMessage = `Error logging execution result with outcome "${executionResult.outcome}"`;
+          const logMessage = `Error writing execution result with status "${executionResult.status}"`;
           writeExceptionToConsole(e, logMessage, logMeta);
         }
       });
@@ -153,28 +173,32 @@ export function createRuleExecutionLogClientForExecutors(
     writeMessageToConsole(`${message}. Reason: ${logReason}`, LogLevelEnum.error, logMeta);
   };
 
-  const writeExecutionResultToConsole = (args: ExecutionOutcome, logMeta: ExtMeta): void => {
-    const messageParts: string[] = [`Changing rule status to "${args.outcome}"`, args.message];
+  const writeExecutionResultToConsole = (args: ExecutionResult, logMeta: ExtMeta): void => {
+    const messageParts: string[] = [`Changing rule status to "${args.status}"`, args.message];
     const logMessage = messageParts.filter(Boolean).join('. ');
-    const logLevel = consoleLogLevelFromExecutionStatus(args.outcome, args.userError);
+    const logLevel = consoleLogLevelFromExecutionStatus(args.status, args.userError);
 
     writeMessageToConsole(logMessage, logLevel, logMeta);
   };
 
-  const writeExecutionResultToRuleObject = async (args: ExecutionOutcome): Promise<void> => {
-    const { outcome, message, userError } = args;
+  const writeExecutionResultToRuleObject = async (args: ExecutionResult): Promise<void> => {
+    const { status, message, userError } = args;
 
-    if (outcome === RuleExecutionStatusEnum.running) {
-      return;
-    }
-
-    if (outcome === RuleExecutionStatusEnum.failed) {
+    if (status === RuleExecutionStatusEnum.failed) {
       ruleResultService.addLastRunError(message, userError ?? false);
-    } else if (outcome === RuleExecutionStatusEnum['partial failure']) {
+    } else if (status === RuleExecutionStatusEnum['partial failure']) {
       ruleResultService.addLastRunWarning(message);
     }
 
     ruleResultService.setLastRunOutcomeMessage(message);
+  };
+
+  const writeMessage = (
+    message: string,
+    levels: { eventLogLevel: LogLevel; consoleLogLevel?: LogLevel }
+  ): void => {
+    writeMessageToConsole(message, levels.consoleLogLevel ?? LogLevelEnum.debug, baseLogMeta);
+    writeMessageToEventLog(message, levels.eventLogLevel);
   };
 
   const writeMessageToEventLog = (message: string, logLevel: LogLevel): void => {
@@ -227,16 +251,9 @@ export function createRuleExecutionLogClientForExecutors(
   return ruleExecutionLogClient;
 }
 
-interface ExecutionOutcome {
-  outcome: RuleExecutionStatus;
-  message: string;
-  metrics?: Partial<RuleExecutionMetrics>;
-  userError?: boolean;
-}
-
 interface ExecutionResultBuffer {
   errors: ExecutionResultLogEntry[];
   warnings: ExecutionResultLogEntry[];
-  executionResult: ExecutionOutcome | undefined;
+  executionResult: ExecutionResult | undefined;
   closed: boolean;
 }

@@ -75,7 +75,7 @@ export interface IRuleExecutionLogForExecutors {
    * Logs rule execution result at the end of rule execution. This includes the final rule outcome (failed, partial failure, succeeded)
    * and an optional message describing the outcome.
    */
-  logExecutionResult(args: ExecutionResultArgs): void;
+  logExecutionResult(args: ExecutionResult): void;
 
   /**
    * Whether the logger is closed
@@ -141,8 +141,8 @@ export interface LogMessageOptions {
 /**
  * Arguments for logging the final execution result. The outcome must not be 'running'.
  */
-export interface ExecutionResultArgs {
-  outcome: Exclude<RuleExecutionStatus, RuleExecutionStatusEnum['running']>;
+export interface ExecutionResult {
+  status: Exclude<RuleExecutionStatus, RuleExecutionStatusEnum['running']>;
   message: string;
   userError?: boolean;
 }
