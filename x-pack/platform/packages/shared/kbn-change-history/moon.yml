@@ -11,12 +11,11 @@ toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/change-history'
+  title: '@kbn/change-history'
   description: Moon project for @kbn/change-history
   channel: ''
   owner: '@elastic/security-detection-rule-management'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/kbn-change-history
+  sourceRoot: x-pack/platform/packages/shared/kbn-change-history
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-streams'
@@ -39,14 +38,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
