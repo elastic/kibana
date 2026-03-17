@@ -100,7 +100,9 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       // there is "ghost" element with the same locator, so we need to specify the first one
       // eslint-disable-next-line playwright/no-nth-methods
       await expect(page.testSubj.locator('syntheticsManagedPolicyCallout').first()).toBeVisible();
-      await expect(page.getByText('This package policy is managed by the Synthetics app.')).toBeVisible();
+      await expect(
+        page.getByText('This package policy is managed by the Synthetics app.')
+      ).toBeVisible();
     });
 
     await test.step('edit button leads to Synthetics edit page', async () => {
