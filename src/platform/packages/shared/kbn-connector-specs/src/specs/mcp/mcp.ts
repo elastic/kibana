@@ -8,12 +8,50 @@
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
+import type { ListToolsResponse } from '@kbn/mcp-client';
 import { createMcpClientFromAxios } from './create_mcp_client_from_axios';
 
 /** MCP connector type id (same as @kbn/connector-schemas/mcp CONNECTOR_ID) */
 const MCP_CONNECTOR_ID = '.mcp';
 /** MCP client version string */
 const MCP_CLIENT_VERSION = '1.0.0';
+
+/** TTL for listTools cache entries (15 minutes, matches v1 connector) */
+const LIST_TOOLS_CACHE_TTL_MS = 15 * 60 * 1000;
+/** Maximum number of cached entries before oldest is evicted */
+const LIST_TOOLS_CACHE_MAX_SIZE = 100;
+
+interface CacheEntry {
+  data: ListToolsResponse;
+  cachedAt: number;
+}
+
+/**
+ * Module-level cache for listTools results.
+ * Shared across all connector invocations to reduce redundant calls to MCP servers.
+ * Keyed by serverUrl. Entries expire after LIST_TOOLS_CACHE_TTL_MS.
+ */
+const listToolsCache = new Map<string, CacheEntry>();
+
+function getCachedTools(serverUrl: string): ListToolsResponse | undefined {
+  const entry = listToolsCache.get(serverUrl);
+  if (!entry) return undefined;
+  if (Date.now() - entry.cachedAt > LIST_TOOLS_CACHE_TTL_MS) {
+    listToolsCache.delete(serverUrl);
+    return undefined;
+  }
+  return entry.data;
+}
+
+function setCachedTools(serverUrl: string, data: ListToolsResponse): void {
+  if (listToolsCache.size >= LIST_TOOLS_CACHE_MAX_SIZE) {
+    const oldestKey = listToolsCache.keys().next().value;
+    if (oldestKey !== undefined) {
+      listToolsCache.delete(oldestKey);
+    }
+  }
+  listToolsCache.set(serverUrl, { data, cachedAt: Date.now() });
+}
 
 /** Feature IDs supported by the MCP connector (values match @kbn/actions-plugin/common) */
 const MCP_SUPPORTED_FEATURE_IDS = [
@@ -66,6 +104,16 @@ export const mcpConnectorSpec: ConnectorSpec = {
         if (!serverUrl) {
           throw new Error('MCP connector config.serverUrl is required');
         }
+        const typedInput = input as { forceRefresh?: boolean };
+
+        if (!typedInput.forceRefresh) {
+          const cached = getCachedTools(serverUrl);
+          if (cached) {
+            ctx.log.debug(`Returning cached listTools result for ${serverUrl} (${cached.tools.length} tools)`);
+            return cached;
+          }
+        }
+
         const mcpClient = createMcpClientFromAxios({
           logger: ctx.log,
           axiosInstance: ctx.client,
@@ -76,6 +124,7 @@ export const mcpConnectorSpec: ConnectorSpec = {
         try {
           await mcpClient.connect();
           const result = await mcpClient.listTools();
+          setCachedTools(serverUrl, result);
           return result;
         } finally {
           await mcpClient.disconnect();

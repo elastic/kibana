@@ -13,6 +13,7 @@ export * from './specs/atlassian/jira-cloud/jira';
 export * from './specs/aws_lambda/aws_lambda';
 export * from './specs/brave_search/brave_search';
 export * from './specs/github/github';
+export * from './specs/github_mcp/github_mcp';
 export * from './specs/google_calendar/google_calendar';
 export * from './specs/google_drive/google_drive';
 export * from './specs/greynoise/greynoise';
