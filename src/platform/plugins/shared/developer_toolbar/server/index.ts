@@ -21,7 +21,7 @@ const configSchema = schema.object({
     /** When not in dev, only false is allowed. */
     schema.literal(false),
     /** Default to true in dev */
-    { defaultValue: true }
+    { defaultValue: schema.contextRef('dev') }
   ),
 });
 
