@@ -15,7 +15,7 @@ const SEMANTIC_UNIQUENESS_OUTPUT_SCHEMA = {
     k: {
       type: 'number',
       description:
-        'Number of semantic clusters you formed — each cluster = one unique real-world concept. K is always <= N (the total number of unique-by-id features provided in the input). (integer)',
+        'Number of semantic clusters you formed - each cluster = one unique real-world concept. K is always <= N (the total number of unique-by-id KIs provided in the input). (integer)',
     },
     explanation: {
       type: 'string',
@@ -30,7 +30,7 @@ const SEMANTIC_UNIQUENESS_OUTPUT_SCHEMA = {
           ids: {
             type: 'array',
             items: { type: 'string' },
-            description: 'Feature ids that form the duplicate cluster',
+            description: 'KI ids that form the duplicate cluster',
           },
           identity_statement: {
             type: 'string',
@@ -56,7 +56,7 @@ const ID_CONSISTENCY_OUTPUT_SCHEMA = {
         properties: {
           id: {
             type: 'string',
-            description: 'The feature id that is a collision',
+            description: 'The KI id that is a collision',
           },
           reason: {
             type: 'string',
@@ -79,9 +79,9 @@ const ID_CONSISTENCY_OUTPUT_SCHEMA = {
 } as const;
 
 /**
- * Checks that all unique-by-id features are semantically distinct.
+ * Checks that all unique-by-id KIs are semantically distinct.
  * Score = K / N, where K = semantic clusters and N = unique ids.
- * A score < 1 means there are semantic duplicates in the feature set.
+ * A score < 1 means there are semantic duplicates in the KI set.
  */
 export const createSemanticUniquenessEvaluator = ({
   inferenceClient,
@@ -98,24 +98,24 @@ export const createSemanticUniquenessEvaluator = ({
     output: { runs?: Array<{ features: BaseFeature[] }> };
   }) => {
     const runs: Array<{ features: BaseFeature[] }> = output?.runs ?? [];
-    const allFeatures = runs.flatMap((run) => run.features);
+    const allKIs = runs.flatMap((run) => run.features);
 
-    if (runs.length === 0 || allFeatures.length === 0) {
-      return { score: 1, explanation: 'No features to evaluate' };
+    if (runs.length === 0 || allKIs.length === 0) {
+      return { score: 1, explanation: 'No KIs to evaluate' };
     }
 
-    const featuresUniqueById = uniqBy(allFeatures, (feature) => feature.id.toLowerCase());
-    const uniqueById = featuresUniqueById.length;
-    const uniqueByFingerprint = uniqWith(featuresUniqueById, hasSameFingerprint).length;
+    const kisUniqueById = uniqBy(allKIs, (ki) => ki.id.toLowerCase());
+    const uniqueById = kisUniqueById.length;
+    const uniqueByFingerprint = uniqWith(kisUniqueById, hasSameFingerprint).length;
 
-    const compactUniqueFeatures = featuresUniqueById
-      .map((feature) => ({
-        id: feature.id.toLowerCase(),
-        type: feature.type,
-        subtype: feature.subtype,
-        title: feature.title,
-        properties: feature.properties,
-        description: feature.description?.slice(0, 300),
+    const compactUniqueKIs = kisUniqueById
+      .map((ki) => ({
+        id: ki.id.toLowerCase(),
+        type: ki.type,
+        subtype: ki.subtype,
+        title: ki.title,
+        properties: ki.properties,
+        description: ki.description?.slice(0, 300),
       }))
       .sort((a, b) =>
         `${a.type}:${a.subtype ?? ''}:${a.id}`.localeCompare(`${b.type}:${b.subtype ?? ''}:${b.id}`)
@@ -123,34 +123,34 @@ export const createSemanticUniquenessEvaluator = ({
 
     const result = await inferenceClient.output({
       id: 'semantic_uniqueness_analysis',
-      system: `You are an automated quality-assurance LLM evaluating feature extraction from log streams.
+      system: `You are an automated quality-assurance LLM evaluating Knowledge Indicator (KI) extraction from log streams.
 
-Your task: given a list of features already de-duplicated by id (one representative per unique id), determine whether all unique ids are truly semantically distinct, or whether some are SEMANTIC DUPLICATES — features that refer to the exact same underlying real-world component or fact, even if their ids, titles, or descriptions differ slightly.
+Your task: given a list of KIs already de-duplicated by id (one representative per unique id), determine whether all unique ids are truly semantically distinct, or whether some are SEMANTIC DUPLICATES — KIs that refer to the exact same underlying real-world component or fact, even if their ids, titles, or descriptions differ slightly.
 
 Definitions:
-- Only compare features within the same category: type + subtype must match for two features to be considered duplicates.
+- Only compare KIs within the same category: type + subtype must match for two KIs to be considered duplicates.
 - If ambiguous, treat as NOT duplicates.
-- Same technology family ≠ duplicates. Only truly interchangeable features are duplicates.
-- Two features are duplicates only if an operator would consider them interchangeable: knowing one tells you everything knowing the other would.
+- Same technology family ≠ duplicates. Only truly interchangeable KIs are duplicates.
+- Two KIs are duplicates only if an operator would consider them interchangeable: knowing one tells you everything knowing the other would.
 
 Burden of proof for each cluster:
 - You must be able to state in one sentence what single real-world thing all members refer to.
 - A valid identity statement names a specific component or process, not a category or domain.
-- If you cannot write the one-sentence identity, the features are NOT duplicates.
+- If you cannot write the one-sentence identity, the KIs are NOT duplicates.
 
 Method:
-1. Read the full list of unique features.
+1. Read the full list of unique KIs.
 2. Apply the burden-of-proof test before finalising each cluster.
 3. Return K = the number of semantic clusters you formed. K must be <= N (provided in the input as unique_by_id).`,
       input: JSON.stringify({
         stream_name: input?.stream_name,
         totals: {
           runs: runs.length,
-          total_features: allFeatures.length,
+          total_kis: allKIs.length,
           unique_by_id: uniqueById,
           unique_by_fingerprint: uniqueByFingerprint,
         },
-        unique_features_by_id: compactUniqueFeatures,
+        unique_kis_by_id: compactUniqueKIs,
       }),
       schema: SEMANTIC_UNIQUENESS_OUTPUT_SCHEMA,
       retry: { onValidationError: 3 },
@@ -175,7 +175,7 @@ Method:
 });
 
 /**
- * Checks that features sharing the same id across runs refer to the same concept.
+ * Checks that KIs sharing the same id across runs refer to the same concept.
  * Only ids with differing fingerprints across runs are sent to the LLM — trivially
  * identical occurrences are counted as consistent without an LLM call.
  * Score = (trivially_consistent + llm_consistent) / total_multi_occurrence_ids.
@@ -195,24 +195,22 @@ export const createIdConsistencyEvaluator = ({
     output: { runs?: Array<{ features: BaseFeature[] }> };
   }) => {
     const runs: Array<{ features: BaseFeature[] }> = output?.runs ?? [];
-    const allFeatures = runs.flatMap((run) => run.features);
+    const allKIs = runs.flatMap((run) => run.features);
 
-    if (runs.length <= 1 || allFeatures.length === 0) {
+    if (runs.length <= 1 || allKIs.length === 0) {
       return { score: 1, explanation: 'Not enough runs to evaluate id consistency' };
     }
 
-    const featuresById = new Map<string, BaseFeature[]>();
+    const kisById = new Map<string, BaseFeature[]>();
     runs.forEach((run) => {
-      run.features.forEach((feature) => {
-        const list = featuresById.get(feature.id) ?? [];
-        list.push(feature);
-        featuresById.set(feature.id, list);
+      run.features.forEach((ki) => {
+        const list = kisById.get(ki.id) ?? [];
+        list.push(ki);
+        kisById.set(ki.id, list);
       });
     });
 
-    const multiOccurrenceEntries = [...featuresById.entries()].filter(
-      ([, features]) => features.length > 1
-    );
+    const multiOccurrenceEntries = [...kisById.entries()].filter(([, kis]) => kis.length > 1);
 
     if (multiOccurrenceEntries.length === 0) {
       return {
@@ -224,10 +222,10 @@ export const createIdConsistencyEvaluator = ({
     const totalMultiOccurrence = multiOccurrenceEntries.length;
 
     const triviallyConsistent = multiOccurrenceEntries.filter(
-      ([, features]) => uniqWith(features, hasSameFingerprint).length === 1
+      ([, kis]) => uniqWith(kis, hasSameFingerprint).length === 1
     );
     const ambiguous = multiOccurrenceEntries.filter(
-      ([, features]) => uniqWith(features, hasSameFingerprint).length > 1
+      ([, kis]) => uniqWith(kis, hasSameFingerprint).length > 1
     );
 
     if (ambiguous.length === 0) {
@@ -237,23 +235,23 @@ export const createIdConsistencyEvaluator = ({
       };
     }
 
-    const idGroups = ambiguous.map(([id, features]) => ({
+    const idGroups = ambiguous.map(([id, kis]) => ({
       id,
-      variants: uniqWith(features, hasSameFingerprint).map((f) => ({
-        type: f.type,
-        subtype: f.subtype,
-        title: f.title,
-        properties: f.properties,
-        description: f.description?.slice(0, 200),
+      variants: uniqWith(kis, hasSameFingerprint).map((ki) => ({
+        type: ki.type,
+        subtype: ki.subtype,
+        title: ki.title,
+        properties: ki.properties,
+        description: ki.description?.slice(0, 200),
       })),
     }));
 
     const result = await inferenceClient.output({
       id: 'id_consistency_analysis',
-      system: `You are an automated quality-assurance LLM evaluating feature extraction from log streams.
+      system: `You are an automated quality-assurance LLM evaluating Knowledge Indicator (KI) extraction from log streams.
 
-You are given groups of features that share the same id but were produced with different content across multiple runs on the SAME stream.
-Features with the same id should always represent the same underlying real-world concept. An id collision — the same id used for genuinely different concepts — is a bug.
+You are given groups of KIs that share the same id but were produced with different content across multiple runs on the SAME stream.
+KIs with the same id should always represent the same underlying real-world concept. An id collision — the same id used for genuinely different concepts — is a bug.
 
 Definitions:
 - "Consistent": all variants in the group clearly refer to the same underlying concept, even if minor wording or property details differ.
@@ -296,29 +294,29 @@ Method:
 });
 
 /**
- * Structural duplication evaluator (CODE). Checks that features with different
+ * Structural duplication evaluator (CODE). Checks that KIs with different
  * ids don't share the same fingerprint (type + subtype + properties).
  * Score = 1 - (missed_duplicates / unique_by_id).
  */
-export const featureDuplicationEvaluator = {
-  name: 'features_duplication',
+export const kiDuplicationEvaluator = {
+  name: 'ki_duplication',
   kind: 'CODE' as const,
   evaluate: async ({ output }: { output: { runs?: Array<{ features: BaseFeature[] }> } }) => {
-    const allFeatures = output.runs?.flatMap((run) => run.features) || [];
+    const allKIs = output.runs?.flatMap((run) => run.features) || [];
 
-    if (allFeatures.length === 0) {
-      return { score: 1, explanation: 'No features to evaluate' };
+    if (allKIs.length === 0) {
+      return { score: 1, explanation: 'No KIs to evaluate' };
     }
 
-    const uniqueById = uniqBy(allFeatures, (feature) => feature.id.toLowerCase());
+    const uniqueById = uniqBy(allKIs, (ki) => ki.id.toLowerCase());
     const dedupedByFingerprint = uniqWith(uniqueById, hasSameFingerprint);
     const uniqueByFingerprint = dedupedByFingerprint.length;
 
     const structuralDuplicateGroups = dedupedByFingerprint
       .map((representative) => ({
         ids: uniqueById
-          .filter((f) => hasSameFingerprint(f, representative))
-          .map((f) => f.id.toLowerCase()),
+          .filter((ki) => hasSameFingerprint(ki, representative))
+          .map((ki) => ki.id.toLowerCase()),
         type: representative.type,
         subtype: representative.subtype,
         properties: representative.properties,
@@ -332,7 +330,7 @@ export const featureDuplicationEvaluator = {
     return {
       score,
       metadata: {
-        total_features: allFeatures.length,
+        total_kis: allKIs.length,
         unique_by_id: uniqueById.length,
         unique_by_fingerprint: uniqueByFingerprint,
         missed_duplicates: missedDuplicates,

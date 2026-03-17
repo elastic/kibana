@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface FeaturesDuplicationEvaluationDataset {
+export interface KIDuplicationEvaluationDataset {
   name: string;
   description: string;
   input: {
@@ -17,11 +17,11 @@ export interface FeaturesDuplicationEvaluationDataset {
   };
 }
 
-export const FEATURES_DUPLICATION_DATASETS: FeaturesDuplicationEvaluationDataset[] = [
+export const KI_DUPLICATION_DATASETS: KIDuplicationEvaluationDataset[] = [
   {
-    name: 'Features duplication (synthtrace sample_logs)',
+    name: 'KI duplication (synthtrace sample_logs)',
     description:
-      'Indexes one synthtrace LogHub system into a dedicated stream, then runs features identification multiple times to measure duplicated features across runs.',
+      'Indexes one synthtrace LogHub system into a dedicated stream, then runs KI identification multiple times to measure duplicated KIs across runs.',
     input: {
       scenario: 'sample_logs',
       stream_name: 'logs.otel',
