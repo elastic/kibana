@@ -62,7 +62,7 @@ import type {
   SuccessfulRunResult,
   TaskDefinition,
 } from '../task';
-import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromString } from '../task';
+import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
@@ -285,7 +285,7 @@ export class TaskManagerRunner implements TaskRunner {
    *  Effective cost for this task (instance override, then definition, then Normal).
    */
   public get cost(): number {
-    const instanceCost = getTaskCostFromString(this.instance.task.cost);
+    const instanceCost = getTaskCostFromInstance(this.instance.task.cost);
     return instanceCost ?? this.definition?.cost ?? TaskCost.Normal;
   }
 

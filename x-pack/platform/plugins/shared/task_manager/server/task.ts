@@ -34,26 +34,26 @@ export enum TaskCost {
  * String values for task cost as stored in the task schema (e.g. in saved objects).
  * Use these when reading cost from task params or instance attributes.
  */
-export enum TaskCostString {
+export enum InstanceTaskCost {
   Tiny = 'tiny',
   Normal = 'normal',
   ExtraLarge = 'extralarge',
 }
 
 /** Maps schema cost strings to their integer values for capacity calculations. */
-export const TASK_COST_STRING_TO_INT: Record<TaskCostString, TaskCost> = {
-  [TaskCostString.Tiny]: TaskCost.Tiny,
-  [TaskCostString.Normal]: TaskCost.Normal,
-  [TaskCostString.ExtraLarge]: TaskCost.ExtraLarge,
+export const INSTANCE_TASK_COST_TO_INT: Record<InstanceTaskCost, TaskCost> = {
+  [InstanceTaskCost.Tiny]: TaskCost.Tiny,
+  [InstanceTaskCost.Normal]: TaskCost.Normal,
+  [InstanceTaskCost.ExtraLarge]: TaskCost.ExtraLarge,
 };
 
 /**
- * Translates a cost string from task params/instance (e.g. 'extralarge') to the
+ * Translates cost string from task params/instance (e.g. 'extralarge') to the
  * corresponding TaskCost integer. Returns undefined if the string is invalid or null.
  */
-export const getTaskCostFromString = (cost?: TaskCostString): number | undefined => {
+export const getTaskCostFromInstance = (cost?: InstanceTaskCost): number | undefined => {
   if (cost) {
-    return TASK_COST_STRING_TO_INT[cost];
+    return INSTANCE_TASK_COST_TO_INT[cost];
   }
 };
 
@@ -413,11 +413,11 @@ export interface TaskInstance {
 
   /**
    * Optional cost for this task instance, overriding the task type's default cost.
-   * When set, must be one of the TaskCostString enum values ('tiny', 'normal', 'extralarge').
+   * When set, must be one of the InstanceTaskCost enum values ('tiny', 'normal', 'extralarge').
    * Used by the task selector and capacity logic to limit concurrent work.
-   * Use getTaskCostFromString() to translate to the integer TaskCost.
+   * Use getTaskCostFromInstance() to translate to the integer TaskCost.
    */
-  cost?: TaskCostString;
+  cost?: InstanceTaskCost;
 }
 
 /**

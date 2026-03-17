@@ -24,7 +24,7 @@ import {
   asTaskManagerStatEvent,
 } from '../task_events';
 import type { ConcreteTaskInstance } from '../task';
-import { getDeleteTaskRunResult, TaskStatus, TaskCost, TaskCostString } from '../task';
+import { getDeleteTaskRunResult, TaskStatus, TaskCost, InstanceTaskCost } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import type { TaskDefinitionRegistry } from '../task_type_dictionary';
@@ -828,7 +828,7 @@ describe('TaskManagerRunner', () => {
     describe('cost', () => {
       test('task instance cost takes precedence over task definition cost', async () => {
         const { runner } = await pendingStageSetup({
-          instance: { id: 'foo', taskType: 'bar', cost: TaskCostString.Tiny },
+          instance: { id: 'foo', taskType: 'bar', cost: InstanceTaskCost.Tiny },
           definitions: {
             bar: {
               title: 'Bar!',

@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { asLimited, asUnlimited } from '../../queries/task_claiming';
 import { selectTasksByCapacity, getTaskCost } from './task_selector_by_capacity';
 import type { ConcreteTaskInstance } from '../../task';
-import { TaskCost, TaskCostString } from '../../task';
+import { TaskCost, InstanceTaskCost } from '../../task';
 import { TaskTypeDictionary } from '../../task_type_dictionary';
 import { mockLogger } from '../../test_utils';
 
@@ -138,7 +138,7 @@ describe('selectTasksByCapacity', () => {
     it('returns instance cost when set', () => {
       const task = mockInstance({
         taskType: 'limitedTaskTypeWithCost',
-        cost: TaskCostString.ExtraLarge,
+        cost: InstanceTaskCost.ExtraLarge,
       });
       expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.ExtraLarge);
     });
@@ -174,7 +174,7 @@ describe('selectTasksByCapacity', () => {
         mockInstance({
           id: `id-3`,
           taskType: 'limitedTaskTypeWithCost',
-          cost: TaskCostString.ExtraLarge,
+          cost: InstanceTaskCost.ExtraLarge,
         }),
       ];
 
@@ -197,17 +197,17 @@ describe('selectTasksByCapacity', () => {
         mockInstance({
           id: `id-1`,
           taskType: 'limitedTaskTypeWithCost',
-          cost: TaskCostString.Tiny,
+          cost: InstanceTaskCost.Tiny,
         }),
         mockInstance({
           id: `id-2`,
           taskType: 'limitedTaskTypeWithCost',
-          cost: TaskCostString.Tiny,
+          cost: InstanceTaskCost.Tiny,
         }),
         mockInstance({
           id: `id-3`,
           taskType: 'limitedTaskTypeWithCost',
-          cost: TaskCostString.Tiny,
+          cost: InstanceTaskCost.Tiny,
         }),
       ];
 
