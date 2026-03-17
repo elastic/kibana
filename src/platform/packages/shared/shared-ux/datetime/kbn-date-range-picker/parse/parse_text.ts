@@ -390,7 +390,12 @@ function dateStringToDate(
     if (forgiving.isValid()) return forgiving.toDate();
   }
 
-  if (/^(now|[+-]|\d)/.test(dateString)) {
+  // Only send ISO dates and datemath expressions to dateMath.parse; other
+  // strings (e.g. "2025-01-01 to") would fall through to moment(string)
+  // without an explicit format, triggering a deprecation warning.
+  const isIsoDate = /^\d{4}-\d{2}-\d{2}(T|\s+\d|$)/.test(dateString);
+  const isDateMath = dateString === 'now' || /^now[/|+-]/.test(dateString);
+  if (isIsoDate || isDateMath) {
     const parsed = dateMath.parse(dateString, options);
     return parsed?.isValid() ? parsed.toDate() : null;
   }
