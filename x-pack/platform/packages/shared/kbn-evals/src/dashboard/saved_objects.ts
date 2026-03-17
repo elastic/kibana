@@ -116,12 +116,30 @@ const buildScoreTrendPanel = (): LensPanel => {
     },
   };
 
-  return makeLensPanel('panel-score-trend', 'Score Trend', { x: 0, y: 0, w: 24, h: 15 }, 'lnsXY', layerId, columns, ['timestamp', 'breakdown', 'score'], {
-    preferredSeriesType: 'line',
-    layers: [{ layerId, seriesType: 'line', xAccessor: 'timestamp', accessors: ['score'], splitAccessor: 'breakdown', layerType: 'data' }],
-    title: 'Score Trend',
-    axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-  });
+  return makeLensPanel(
+    'panel-score-trend',
+    'Score Trend',
+    { x: 0, y: 0, w: 24, h: 15 },
+    'lnsXY',
+    layerId,
+    columns,
+    ['timestamp', 'breakdown', 'score'],
+    {
+      preferredSeriesType: 'line',
+      layers: [
+        {
+          layerId,
+          seriesType: 'line',
+          xAccessor: 'timestamp',
+          accessors: ['score'],
+          splitAccessor: 'breakdown',
+          layerType: 'data',
+        },
+      ],
+      title: 'Score Trend',
+      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+    }
+  );
 };
 
 const buildModelComparisonPanel = (): LensPanel => {
@@ -144,11 +162,28 @@ const buildModelComparisonPanel = (): LensPanel => {
     },
   };
 
-  return makeLensPanel('panel-model-comparison', 'Model Comparison', { x: 24, y: 0, w: 24, h: 15 }, 'lnsXY', layerId, columns, ['model', 'score'], {
-    preferredSeriesType: 'bar_grouped',
-    layers: [{ layerId, seriesType: 'bar_grouped', xAccessor: 'model', accessors: ['score'], layerType: 'data' }],
-    title: 'Model Comparison',
-  });
+  return makeLensPanel(
+    'panel-model-comparison',
+    'Model Comparison',
+    { x: 24, y: 0, w: 24, h: 15 },
+    'lnsXY',
+    layerId,
+    columns,
+    ['model', 'score'],
+    {
+      preferredSeriesType: 'bar_grouped',
+      layers: [
+        {
+          layerId,
+          seriesType: 'bar_grouped',
+          xAccessor: 'model',
+          accessors: ['score'],
+          layerType: 'data',
+        },
+      ],
+      title: 'Model Comparison',
+    }
+  );
 };
 
 const buildEvaluatorHeatmapPanel = (): LensPanel => {
@@ -179,15 +214,24 @@ const buildEvaluatorHeatmapPanel = (): LensPanel => {
     },
   };
 
-  return makeLensPanel('panel-evaluator-heatmap', 'Evaluator Heatmap', { x: 0, y: 15, w: 24, h: 15 }, 'lnsHeatmap', layerId, columns, ['dataset', 'evaluator', 'score'], {
+  return makeLensPanel(
+    'panel-evaluator-heatmap',
+    'Evaluator Heatmap',
+    { x: 0, y: 15, w: 24, h: 15 },
+    'lnsHeatmap',
     layerId,
-    layerType: 'data',
-    shape: 'heatmap',
-    xAccessor: 'dataset',
-    yAccessor: 'evaluator',
-    valueAccessor: 'score',
-    legend: { isVisible: true, position: 'right' },
-  });
+    columns,
+    ['dataset', 'evaluator', 'score'],
+    {
+      layerId,
+      layerType: 'data',
+      shape: 'heatmap',
+      xAccessor: 'dataset',
+      yAccessor: 'evaluator',
+      valueAccessor: 'score',
+      legend: { isVisible: true, position: 'right' },
+    }
+  );
 };
 
 const buildPassRatePanel = (): LensPanel => {
@@ -213,11 +257,28 @@ const buildPassRatePanel = (): LensPanel => {
     },
   };
 
-  return makeLensPanel('panel-pass-rate', 'Pass Rate Over Runs', { x: 24, y: 15, w: 24, h: 15 }, 'lnsXY', layerId, columns, ['runId', 'passRate'], {
-    preferredSeriesType: 'area',
-    layers: [{ layerId, seriesType: 'area', xAccessor: 'runId', accessors: ['passRate'], layerType: 'data' }],
-    title: 'Pass Rate Over Runs',
-  });
+  return makeLensPanel(
+    'panel-pass-rate',
+    'Pass Rate Over Runs',
+    { x: 24, y: 15, w: 24, h: 15 },
+    'lnsXY',
+    layerId,
+    columns,
+    ['runId', 'passRate'],
+    {
+      preferredSeriesType: 'area',
+      layers: [
+        {
+          layerId,
+          seriesType: 'area',
+          xAccessor: 'runId',
+          accessors: ['passRate'],
+          layerType: 'data',
+        },
+      ],
+      title: 'Pass Rate Over Runs',
+    }
+  );
 };
 
 const buildTokenUsagePanel = (): LensPanel => {
@@ -229,7 +290,11 @@ const buildTokenUsagePanel = (): LensPanel => {
       label: 'Dataset',
       operationType: 'terms',
       sourceField: 'example.dataset.name',
-      params: { size: 20, orderBy: { type: 'column', columnId: 'inputTokens' }, orderDirection: 'desc' },
+      params: {
+        size: 20,
+        orderBy: { type: 'column', columnId: 'inputTokens' },
+        orderDirection: 'desc',
+      },
     },
     inputTokens: {
       dataType: 'number',
@@ -254,11 +319,28 @@ const buildTokenUsagePanel = (): LensPanel => {
     },
   };
 
-  return makeLensPanel('panel-token-usage', 'Token Usage', { x: 0, y: 30, w: 24, h: 15 }, 'lnsXY', layerId, columns, ['dataset', 'inputTokens', 'outputTokens', 'cachedTokens'], {
-    preferredSeriesType: 'bar_stacked',
-    layers: [{ layerId, seriesType: 'bar_stacked', xAccessor: 'dataset', accessors: ['inputTokens', 'outputTokens', 'cachedTokens'], layerType: 'data' }],
-    title: 'Token Usage',
-  });
+  return makeLensPanel(
+    'panel-token-usage',
+    'Token Usage',
+    { x: 0, y: 30, w: 24, h: 15 },
+    'lnsXY',
+    layerId,
+    columns,
+    ['dataset', 'inputTokens', 'outputTokens', 'cachedTokens'],
+    {
+      preferredSeriesType: 'bar_stacked',
+      layers: [
+        {
+          layerId,
+          seriesType: 'bar_stacked',
+          xAccessor: 'dataset',
+          accessors: ['inputTokens', 'outputTokens', 'cachedTokens'],
+          layerType: 'data',
+        },
+      ],
+      title: 'Token Usage',
+    }
+  );
 };
 
 const buildLatencyDistributionPanel = (): LensPanel => {
@@ -281,12 +363,29 @@ const buildLatencyDistributionPanel = (): LensPanel => {
     },
   };
 
-  return makeLensPanel('panel-latency-distribution', 'Latency Distribution', { x: 24, y: 30, w: 24, h: 15 }, 'lnsXY', layerId, columns, ['latencyBucket', 'count'], {
-    preferredSeriesType: 'bar',
-    layers: [{ layerId, seriesType: 'bar', xAccessor: 'latencyBucket', accessors: ['count'], layerType: 'data' }],
-    title: 'Latency Distribution',
-    fittingFunction: 'None',
-  });
+  return makeLensPanel(
+    'panel-latency-distribution',
+    'Latency Distribution',
+    { x: 24, y: 30, w: 24, h: 15 },
+    'lnsXY',
+    layerId,
+    columns,
+    ['latencyBucket', 'count'],
+    {
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          layerId,
+          seriesType: 'bar',
+          xAccessor: 'latencyBucket',
+          accessors: ['count'],
+          layerType: 'data',
+        },
+      ],
+      title: 'Latency Distribution',
+      fittingFunction: 'None',
+    }
+  );
 };
 
 const buildRegressionHighlightPanel = (): LensPanel => {
@@ -302,27 +401,36 @@ const buildRegressionHighlightPanel = (): LensPanel => {
     },
   };
 
-  return makeLensPanel('panel-regression-highlight', 'Regression Highlight', { x: 0, y: 45, w: 12, h: 10 }, 'lnsMetric', layerId, columns, ['lastValue'], {
+  return makeLensPanel(
+    'panel-regression-highlight',
+    'Regression Highlight',
+    { x: 0, y: 45, w: 12, h: 10 },
+    'lnsMetric',
     layerId,
-    layerType: 'data',
-    metricAccessor: 'lastValue',
-    color: '#6092C0',
-    subtitle: 'Latest mean evaluator score',
-    palette: {
-      name: 'custom',
-      type: 'palette',
-      params: {
-        steps: 3,
-        stops: [
-          { color: '#E7664C', stop: 0.5 },
-          { color: '#D6BF57', stop: 0.7 },
-          { color: '#54B399', stop: 1.0 },
-        ],
-        continuity: 'above',
-        rangeType: 'number',
+    columns,
+    ['lastValue'],
+    {
+      layerId,
+      layerType: 'data',
+      metricAccessor: 'lastValue',
+      color: '#6092C0',
+      subtitle: 'Latest mean evaluator score',
+      palette: {
+        name: 'custom',
+        type: 'palette',
+        params: {
+          steps: 3,
+          stops: [
+            { color: '#E7664C', stop: 0.5 },
+            { color: '#D6BF57', stop: 0.7 },
+            { color: '#54B399', stop: 1.0 },
+          ],
+          continuity: 'above',
+          rangeType: 'number',
+        },
       },
-    },
-  });
+    }
+  );
 };
 
 const buildPerSuiteBreakdownPanel = (): LensPanel => {
@@ -344,26 +452,65 @@ const buildPerSuiteBreakdownPanel = (): LensPanel => {
       sourceField: 'evaluator.name',
       params: { size: 100, orderBy: { type: 'alphabetical' }, orderDirection: 'asc' },
     },
-    mean: { dataType: 'number', isBucketed: false, label: 'Mean', operationType: 'average', sourceField: 'evaluator.score' },
-    median: { dataType: 'number', isBucketed: false, label: 'Median', operationType: 'median', sourceField: 'evaluator.score' },
-    stdDev: { dataType: 'number', isBucketed: false, label: 'Std Dev', operationType: 'standard_deviation', sourceField: 'evaluator.score' },
-    min: { dataType: 'number', isBucketed: false, label: 'Min', operationType: 'min', sourceField: 'evaluator.score' },
-    max: { dataType: 'number', isBucketed: false, label: 'Max', operationType: 'max', sourceField: 'evaluator.score' },
+    mean: {
+      dataType: 'number',
+      isBucketed: false,
+      label: 'Mean',
+      operationType: 'average',
+      sourceField: 'evaluator.score',
+    },
+    median: {
+      dataType: 'number',
+      isBucketed: false,
+      label: 'Median',
+      operationType: 'median',
+      sourceField: 'evaluator.score',
+    },
+    stdDev: {
+      dataType: 'number',
+      isBucketed: false,
+      label: 'Std Dev',
+      operationType: 'standard_deviation',
+      sourceField: 'evaluator.score',
+    },
+    min: {
+      dataType: 'number',
+      isBucketed: false,
+      label: 'Min',
+      operationType: 'min',
+      sourceField: 'evaluator.score',
+    },
+    max: {
+      dataType: 'number',
+      isBucketed: false,
+      label: 'Max',
+      operationType: 'max',
+      sourceField: 'evaluator.score',
+    },
   };
 
-  return makeLensPanel('panel-per-suite-breakdown', 'Per-Suite Breakdown', { x: 12, y: 45, w: 36, h: 15 }, 'lnsDatatable', layerId, columns, ['dataset', 'evaluator', 'mean', 'median', 'stdDev', 'min', 'max'], {
+  return makeLensPanel(
+    'panel-per-suite-breakdown',
+    'Per-Suite Breakdown',
+    { x: 12, y: 45, w: 36, h: 15 },
+    'lnsDatatable',
     layerId,
-    layerType: 'data',
-    columns: [
-      { columnId: 'dataset', isTransposed: false },
-      { columnId: 'evaluator', isTransposed: false },
-      { columnId: 'mean', isTransposed: false },
-      { columnId: 'median', isTransposed: false },
-      { columnId: 'stdDev', isTransposed: false },
-      { columnId: 'min', isTransposed: false },
-      { columnId: 'max', isTransposed: false },
-    ],
-  });
+    columns,
+    ['dataset', 'evaluator', 'mean', 'median', 'stdDev', 'min', 'max'],
+    {
+      layerId,
+      layerType: 'data',
+      columns: [
+        { columnId: 'dataset', isTransposed: false },
+        { columnId: 'evaluator', isTransposed: false },
+        { columnId: 'mean', isTransposed: false },
+        { columnId: 'median', isTransposed: false },
+        { columnId: 'stdDev', isTransposed: false },
+        { columnId: 'min', isTransposed: false },
+        { columnId: 'max', isTransposed: false },
+      ],
+    }
+  );
 };
 
 /**
@@ -379,7 +526,8 @@ export const generateDashboardBody = (): {
   pinned_panels: [];
 } => ({
   title: '@kbn/evals Dashboard',
-  description: 'Evaluation scores overview: trends, model comparison, pass rates, and per-suite breakdowns.',
+  description:
+    'Evaluation scores overview: trends, model comparison, pass rates, and per-suite breakdowns.',
   panels: [
     buildScoreTrendPanel(),
     buildModelComparisonPanel(),

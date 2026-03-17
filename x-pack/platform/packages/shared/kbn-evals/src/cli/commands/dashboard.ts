@@ -185,11 +185,14 @@ const deleteDashboard = async ({
 }): Promise<void> => {
   log.info(`Deleting dashboard ${DASHBOARD_ID}...`);
 
-  const dashResponse = await fetch(`${baseUrl}/internal/dashboards/app/${DASHBOARD_ID}?apiVersion=1`, {
-    method: 'DELETE',
-    headers: { ...headers, 'elastic-api-version': '1' },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
+  const dashResponse = await fetch(
+    `${baseUrl}/internal/dashboards/app/${DASHBOARD_ID}?apiVersion=1`,
+    {
+      method: 'DELETE',
+      headers: { ...headers, 'elastic-api-version': '1' },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    }
+  );
 
   if (dashResponse.ok) {
     log.info('Dashboard deleted.');
