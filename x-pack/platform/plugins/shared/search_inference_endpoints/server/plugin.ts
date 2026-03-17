@@ -66,7 +66,7 @@ export class SearchInferenceEndpointsPlugin
 
     core.savedObjects.registerType(createInferenceSettingsSavedObjectType());
 
-    defineRoutes({ logger: this.logger, router });
+    defineRoutes({ logger: this.logger, router, featureRegistry: this.featureRegistry });
 
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
