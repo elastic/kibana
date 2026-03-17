@@ -33,6 +33,9 @@ import {
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
+import { useResolvedMessageContent } from '../../../../hooks/use_resolved_message_content';
+import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import {
   Cursor,
   esqlLanguagePlugin,
@@ -42,10 +45,7 @@ import {
   renderAttachmentTagParser,
   createRenderAttachmentRenderer,
 } from './markdown_plugins';
-import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
-import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { ExternalLinkModal } from './external_link_modal';
-import { useResolvedMessageContent } from './use_resolved_message_content';
 
 interface Props {
   content: string;
