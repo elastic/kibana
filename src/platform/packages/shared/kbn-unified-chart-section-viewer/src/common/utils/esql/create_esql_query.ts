@@ -35,6 +35,17 @@ export function createESQLQuery({
 }: CreateESQLQueryParams) {
   const { name: metricField, instrument, index, type } = metric;
   const source = timeseries(index);
+  const metricAggregation = createMetricAggregation({
+    type,
+    instrument,
+    placeholderName: 'metricField',
+  });
+  const timeBucketAggregation = createTimeBucketAggregation({});
+  const splitAccessorsClause =
+    splitAccessors.length > 0
+      ? `, ${splitAccessors.map((field) => sanitazeESQLInput(field)).join(',')}`
+      : '';
+  const statsClause = `${metricAggregation} BY ${timeBucketAggregation}${splitAccessorsClause}`;
 
   const whereCommands = whereStatements.flatMap((statement) => {
     const trimmed = statement.trim();
@@ -43,20 +54,9 @@ export function createESQLQuery({
 
   const queryPipeline = source.pipe(
     ...whereCommands,
-    stats(
-      `${createMetricAggregation({
-        type,
-        instrument,
-        placeholderName: 'metricField',
-      })} BY ${createTimeBucketAggregation({})}${
-        splitAccessors.length > 0
-          ? `, ${splitAccessors.map((field) => sanitazeESQLInput(field)).join(',')}`
-          : ''
-      }`,
-      {
-        metricField,
-      }
-    )
+    stats(statsClause, {
+      metricField,
+    })
   );
 
   return queryPipeline.toString();

@@ -280,6 +280,23 @@ TS metrics-*
     );
   });
 
+  it('should preserve multiple non-empty WHERE statements and ignore empty entries', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      splitAccessors: ['host.name'],
+      whereStatements: [' host.name == "host-01" ', '', 'cpu.cores > 4', '   '],
+    });
+
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE host.name == "host-01"
+  | WHERE cpu.cores > 4
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
+`.trim()
+    );
+  });
+
   it('should ignore empty WHERE statements', () => {
     const query = createESQLQuery({
       metric: mockMetric,
@@ -293,6 +310,21 @@ TS metrics-*
 `.trim()
     );
   });
+
+  it('should handle undefined whereStatements without throwing error', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      whereStatements: undefined,
+    });
+
+    expect(query).toBe(
+      `
+TS metrics-*
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
+
   it('should handle empty splitAccessors array', () => {
     const query = createESQLQuery({
       metric: mockMetric,
