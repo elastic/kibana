@@ -48,4 +48,8 @@ export const queryKeys = {
     all: ['skills', 'list'] as const,
     byId: (skillId?: string) => ['skills', skillId],
   },
+  plugins: {
+    all: ['plugins', 'list'] as const,
+    byId: (pluginId?: string) => ['plugins', pluginId],
+  },
 };

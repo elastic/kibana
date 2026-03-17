@@ -143,7 +143,7 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
-export const SCRIPTS_LIBRARY_PATH = `${MANAGEMENT_PATH}/scripts_library` as const;
+export const SCRIPT_LIBRARY_PATH = `${MANAGEMENT_PATH}/script_library` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
@@ -170,7 +170,7 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
-export const APP_SCRIPTS_LIBRARY_PATH = `${APP_PATH}${SCRIPTS_LIBRARY_PATH}` as const;
+export const APP_SCRIPT_LIBRARY_PATH = `${APP_PATH}${SCRIPT_LIBRARY_PATH}` as const;
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
 export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as const;
@@ -208,12 +208,13 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
-/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (EASE) */
-export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in alert prevalence */
+export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE =
+  'securitySolution:excludeColdAndFrozenTiersInPrevalence' as const;
 
 /** This Kibana Advanced Setting when turned on keeps the suppression window open when an alert is closed */
 export const SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
@@ -647,7 +648,6 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
   /* File */
   'file.name',
   'file.path',
-  'file.Ext.original.path',
   'file.hash.sha256',
 
   /* Groups */

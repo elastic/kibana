@@ -42,6 +42,7 @@ describe('fromEs', () => {
       content: 'Skill content body',
       referenced_content: [{ name: 'ref.md', relativePath: '/ref.md', content: 'ref content' }],
       tool_ids: ['tool-1', 'tool-2'],
+      referenced_content_count: 1,
       created_at: creationDate,
       updated_at: updateDate,
     });

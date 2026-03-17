@@ -24,4 +24,5 @@ export const convertPersistedSkill = (
   })),
   getRegistryTools: () => skill.tool_ids ?? [],
   plugin_id: skill.plugin_id,
+  referencedContentCount: skill.referenced_content_count,
 });
