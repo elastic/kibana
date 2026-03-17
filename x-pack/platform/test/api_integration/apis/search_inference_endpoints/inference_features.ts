@@ -31,7 +31,6 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 with a features array', async () => {
         const { body } = await supertestWithoutAuth
           .get(API_PATH)
-          .set('kbn-xsrf', 'xxx')
           .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
           .auth(USERS.ALL.username, USERS.ALL.password)
           .expect(200);
@@ -46,7 +45,6 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200', async () => {
         const { body } = await supertestWithoutAuth
           .get(API_PATH)
-          .set('kbn-xsrf', 'xxx')
           .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
           .auth(USERS.FEATURE.username, USERS.FEATURE.password)
           .expect(200);
@@ -59,7 +57,6 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 403', async () => {
         await supertestWithoutAuth
           .get(API_PATH)
-          .set('kbn-xsrf', 'xxx')
           .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
           .auth(USERS.NO_ACCESS.username, USERS.NO_ACCESS.password)
           .expect(403);
