@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TaskManagerSetupContract, TaskManagerStartContract, TaskPriority, } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerSetupContract, TaskManagerStartContract} from '@kbn/task-manager-plugin/server';
+import { TaskPriority, } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
