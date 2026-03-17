@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { APP_UI_ID } from '../../../../../common/constants';
@@ -131,6 +138,15 @@ const RulesPageContent = () => {
                     onClick={showValueListFlyout}
                   >
                     {i18n.IMPORT_VALUE_LISTS}
+                    <EuiScreenReaderOnly>
+                      <span>
+                        {`, ${
+                          cantCreateNonExistentListIndex
+                            ? i18n.UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP
+                            : i18n.UPLOAD_VALUE_LISTS_TOOLTIP
+                        }`}
+                      </span>
+                    </EuiScreenReaderOnly>
                   </EuiButtonEmpty>
                 </EuiToolTip>
               </EuiFlexItem>
