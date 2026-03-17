@@ -68,7 +68,7 @@ const saveWorkflow = async ({
     } else {
       const result = await createWorkflow(http, yaml);
       savedId = result.id;
-      await updateOrigin({ workflowId: result.id });
+      await updateOrigin(result.id);
     }
     queryClient.invalidateQueries({ queryKey: ['workflows'] });
     notifications.toasts.addSuccess(

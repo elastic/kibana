@@ -37,11 +37,7 @@ const workflowYamlDataSchema = z.object({
 
 type WorkflowYamlData = z.infer<typeof workflowYamlDataSchema>;
 
-const workflowYamlOriginSchema = z.object({
-  workflowId: z.string().describe('The workflow ID to resolve'),
-});
-
-type WorkflowYamlOrigin = z.infer<typeof workflowYamlOriginSchema>;
+const workflowYamlOriginSchema = z.string().describe('The workflow ID to resolve');
 
 const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
   id: WORKFLOW_YAML_ATTACHMENT_TYPE,
@@ -61,10 +57,10 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     return { valid: false as const, error: parseResult.error.message };
   },
   resolve: async (
-    origin: WorkflowYamlOrigin,
+    origin: string,
     context: AttachmentResolveContext
   ): Promise<WorkflowYamlData | undefined> => {
-    const workflow = await api.getWorkflow(origin.workflowId, context.spaceId);
+    const workflow = await api.getWorkflow(origin, context.spaceId);
     if (!workflow) return undefined;
     return { yaml: workflow.yaml, workflowId: workflow.id, name: workflow.name };
   },
