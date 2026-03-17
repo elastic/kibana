@@ -305,7 +305,8 @@ function buildDatasourceStatesLayer(
     ds: NarrowByType<DatasetType, 'table'>
   ): TextBasedPersistedState['layers'][0] {
     const table = ds.table as LensDatatableDataset;
-    const xAxisScale = 'axis' in fullConfig ? fullConfig.axis?.x?.scale : undefined;
+    const xAxisScale =
+      fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
     const newLayer = {
       table,
       columns: getValueColumns(config, i, xAxisScale),
@@ -327,7 +328,8 @@ function buildDatasourceStatesLayer(
     config: unknown,
     ds: NarrowByType<DatasetType, 'esql'>
   ): TextBasedPersistedState['layers'][0] {
-    const xAxisScale = 'axis' in fullConfig ? fullConfig.axis?.x?.scale : undefined;
+    const xAxisScale =
+      fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
     const columns = getValueColumns(config, i, xAxisScale);
 
     return {
