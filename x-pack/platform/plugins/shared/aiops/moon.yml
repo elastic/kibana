@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/aiops-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/aiops-plugin'
+  title: '@kbn/aiops-plugin'
   description: Moon project for @kbn/aiops-plugin
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/aiops
+  sourceRoot: x-pack/platform/plugins/shared/aiops
 dependsOn:
   - '@kbn/aiops-change-point-detection'
   - '@kbn/aiops-common'
@@ -88,6 +87,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/unified-data-table'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod
@@ -104,14 +104,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

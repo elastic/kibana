@@ -439,6 +439,7 @@ export class SecurityPlugin
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
       customLogoutURL,
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
+      userActivity: core.userActivity,
     });
 
     this.authorizationService.start({

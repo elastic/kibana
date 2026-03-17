@@ -75,12 +75,17 @@ const mockSavedObjectsErrorHelpers = SavedObjectsErrorHelpers as jest.Mocked<
   typeof SavedObjectsErrorHelpers
 >;
 
+const mockAnalytics = {
+  reportEvent: jest.fn(),
+};
+
 function createClient(overrides?: {
   taskManager?: Partial<TaskManagerStartContract>;
   namespace?: string;
 }) {
   const taskManager = {
     get: jest.fn(),
+    runSoon: jest.fn().mockResolvedValue({ id: 'id:default', forced: false }),
     ...overrides?.taskManager,
   } as unknown as TaskManagerStartContract;
 
@@ -88,6 +93,7 @@ function createClient(overrides?: {
     logger: loggerMock.create(),
     taskManager,
     namespace: overrides?.namespace ?? 'default',
+    analytics: mockAnalytics,
   });
 }
 
@@ -136,6 +142,38 @@ describe('EntityMaintainersClient', () => {
       const request = createMockRequest();
 
       await expect(client.start('maintainer-a', request)).rejects.toThrow('start failed');
+    });
+  });
+
+  describe('runNow', () => {
+    it('should return without calling runSoon when id is not in registry', async () => {
+      entityMaintainersRegistry.hasId.mockReturnValue(false);
+      const runSoonMock = jest.fn().mockResolvedValue({ id: 'id:default', forced: false });
+      const client = createClient({ taskManager: { runSoon: runSoonMock } });
+      await client.runNow('unknown-id');
+
+      expect(entityMaintainersRegistry.hasId).toHaveBeenCalledWith('unknown-id');
+      expect(runSoonMock).not.toHaveBeenCalled();
+    });
+
+    it('should call taskManager.runSoon with task id when id is in registry', async () => {
+      entityMaintainersRegistry.hasId.mockReturnValue(true);
+      const runSoonMock = jest.fn().mockResolvedValue({ id: 'id:default', forced: false });
+      const client = createClient({ taskManager: { runSoon: runSoonMock } });
+
+      await client.runNow('maintainer-a');
+
+      expect(getTaskId).toHaveBeenCalledWith('maintainer-a', 'default');
+      expect(runSoonMock).toHaveBeenCalledWith('maintainer-a:default');
+    });
+
+    it('should propagate error when runSoon throws', async () => {
+      entityMaintainersRegistry.hasId.mockReturnValue(true);
+      const client = createClient({
+        taskManager: { runSoon: jest.fn().mockRejectedValue(new Error('runSoon failed')) },
+      });
+
+      await expect(client.runNow('maintainer-a')).rejects.toThrow('runSoon failed');
     });
   });
 

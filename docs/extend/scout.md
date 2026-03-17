@@ -1,5 +1,5 @@
 ---
-navigation_title: Scout testing framework
+navigation_title: Testing framework
 ---
 
 # Scout [scout]
@@ -13,7 +13,7 @@ Scout is Kibana’s **modern UI and API test framework** built on [Playwright](h
 - [UI testing](./scout/ui-testing.md)
 - [API testing](./scout/api-testing.md)
 
-## Why Scout? [scout-main-features]
+## Scout benefits [scout-main-features]
 
 - **Parallel execution**: run UI suites in [parallel](./scout/parallelism.md) against the same deployment.
 - **Co-located tests**: keep tests close to [plugin code](./scout/setup-plugin.md) for easier iteration and maintenance.
@@ -83,6 +83,10 @@ It’s easier to iterate and maintain, and it can enable smarter test selection 
 #### Q: Can I use FTR services in Scout (for example, `esArchiver`)? [scout-faq-ftr-services]
 
 Not directly—use Scout [fixtures](./scout/fixtures.md) instead.
+
+#### Q: What happens to FTR tests? [scout-faq-ftr-tests]
+
+Existing FTR tests continue to run, and teams can migrate them to Scout incrementally over time.
 
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 

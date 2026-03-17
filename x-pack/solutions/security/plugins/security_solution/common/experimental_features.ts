@@ -98,6 +98,20 @@ export const allowedExperimentalValues = Object.freeze({
   entityThreatHuntingEnabled: false,
 
   /**
+   * Enables the lead generation pipeline for Entity Analytics.
+   * When enabled, the lead generation engine, observation modules,
+   * API routes, and persistence indices are activated.
+   */
+  leadGenerationEnabled: false,
+
+  /**
+   * Enables lead generation details: the "i" icon on lead cards/list items
+   * and the "How this lead was generated" flyout.
+   * Requires `leadGenerationEnabled` to also be true.
+   */
+  leadGenerationDetailsEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
@@ -231,6 +245,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
+
+  /**
+   * Uses entity store v2 for entity analytics skill
+   */
+  entityAnalyticsEntityStoreV2: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

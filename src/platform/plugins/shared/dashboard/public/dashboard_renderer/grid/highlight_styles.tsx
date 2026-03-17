@@ -60,7 +60,7 @@ const highlightPropertyStyles = css`
 export const getHighlightStyles = (context: UseEuiTheme) => {
   const { euiTheme } = context;
   const rotatingGradient = `
-    linear-gradient(var(--highlight-rotate), 
+    linear-gradient(var(--highlight-rotate),
     ${euiTheme.colors.borderBaseSuccess} 0%,
     ${euiTheme.colors.borderBaseAccent} 46%,
     ${euiTheme.colors.borderBaseAccentSecondary} 100%
@@ -72,28 +72,30 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
   return css([
     highlightPropertyStyles,
     {
-      '&.dshDashboardGrid__item--highlighted .embPanel': {
+      '&.dshDashboardGrid__item--highlighted': {
         position: 'relative',
+        isolation: 'isolate',
+      },
+      '&.dshDashboardGrid__item--highlighted .embPanel': {
         overflow: 'visible !important',
         backgroundColor: euiTheme.colors.backgroundBasePlain,
         animation: `${getOutlineFadeKeyframes(context)} ${highlightAnimationDuration}ms ease-out`,
       },
-      '&.dshDashboardGrid__item--highlighted:not(&.dshDashboardGrid__item--focused) .embPanel::before':
-        {
-          content: `""`,
-          opacity: 0,
-          position: 'absolute',
-          left: '-5px',
-          top: '-5px',
-          'z-index': -1,
-          width: 'calc(100% + 10px)',
-          height: 'calc(100% + 10px)',
-          backgroundImage: rotatingGradient,
-          filter: brightenInDarkMode(1.5),
-          borderRadius: euiTheme.border.radius.medium,
-          animation: `${borderSpinKeyframes} ${highlightAnimationDuration}ms ease-out`,
-        },
-      '&.dshDashboardGrid__item--highlighted .embPanel::after': {
+      '&.dshDashboardGrid__item--highlighted:not(&.dshDashboardGrid__item--focused)::before': {
+        content: `""`,
+        opacity: 0,
+        position: 'absolute',
+        left: '-5px',
+        top: '-5px',
+        'z-index': -1,
+        width: 'calc(100% + 10px)',
+        height: 'calc(100% + 10px)',
+        backgroundImage: rotatingGradient,
+        filter: brightenInDarkMode(1.5),
+        borderRadius: euiTheme.border.radius.medium,
+        animation: `${borderSpinKeyframes} ${highlightAnimationDuration}ms ease-out`,
+      },
+      '&.dshDashboardGrid__item--highlighted::after': {
         content: `""`,
         opacity: 0,
         position: 'absolute',
@@ -105,11 +107,6 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
         backgroundImage: rotatingGradient,
         filter: `${brightenInDarkMode(1.3)} blur(25px)`,
         animation: `${shineKeyframes} ${highlightAnimationDuration}ms ease-out`,
-      },
-
-      // Call out focused panels with a simple border
-      '&.dshDashboardGrid__item--focused .embPanel': {
-        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
       },
     },
   ]);
