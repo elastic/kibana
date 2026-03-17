@@ -17,7 +17,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
 
-  async function createRule(roleAuthc: RoleCredentials, name: string) {
+  async function createRule(
+    roleAuthc: RoleCredentials,
+    name: string,
+    overrides: Record<string, unknown> = {}
+  ) {
     const response = await supertestWithoutAuth
       .post(RULE_API_PATH)
       .set(roleAuthc.apiKeyHeader)
@@ -28,6 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         time_field: '@timestamp',
         schedule: { every: '5m' },
         evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+        ...overrides,
       });
 
     expect(response.status).to.be(200);
@@ -170,6 +175,82 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(keptResponse.status).to.be(200);
       expect(keptResponse.body.id).to.be(rule2.id);
       expect(keptResponse.body.metadata.name).to.be('to-keep');
+    });
+
+    describe('Bulk Delete with filter', () => {
+      it('should delete all rules matching the filter', async () => {
+        const signalRule1 = await createRule(roleAuthc, 'signal-delete-1', { kind: 'signal' });
+        const signalRule2 = await createRule(roleAuthc, 'signal-delete-2', { kind: 'signal' });
+        const alertRule = await createRule(roleAuthc, 'alert-keep-1', { kind: 'alert' });
+
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_delete`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ filter: 'kind: signal' });
+
+        expect(response.status).to.be(200);
+        expect(response.body.errors).to.be.an('array');
+        expect(response.body.errors.length).to.be(0);
+
+        // Verify signal rules are deleted
+        const getResponse1 = await supertestWithoutAuth
+          .get(`${RULE_API_PATH}/${signalRule1.id}`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+        expect(getResponse1.status).to.be(404);
+
+        const getResponse2 = await supertestWithoutAuth
+          .get(`${RULE_API_PATH}/${signalRule2.id}`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+        expect(getResponse2.status).to.be(404);
+
+        // Verify alert rule still exists
+        const keptResponse = await supertestWithoutAuth
+          .get(`${RULE_API_PATH}/${alertRule.id}`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+        expect(keptResponse.status).to.be(200);
+        expect(keptResponse.body.id).to.be(alertRule.id);
+        expect(keptResponse.body.metadata.name).to.be('alert-keep-1');
+      });
+
+      it('should return empty result when filter matches nothing', async () => {
+        await createRule(roleAuthc, 'no-match-delete');
+
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_delete`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({
+            filter: 'metadata.name: nonexistent-rule-xyz',
+          });
+
+        expect(response.status).to.be(200);
+        expect(response.body.errors).to.be.an('array');
+        expect(response.body.errors.length).to.be(0);
+      });
+
+      it('should return 400 when both ids and filter are provided', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_delete`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ ids: ['some-id'], filter: 'some-filter' });
+
+        expect(response.status).to.be(400);
+      });
+
+      it('should return 400 when neither ids nor filter is provided', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_delete`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({});
+
+        expect(response.status).to.be(400);
+      });
     });
   });
 }

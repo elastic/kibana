@@ -57,10 +57,10 @@ describe('useBulkEnableRules', () => {
     const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1', 'rule-2']);
+      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
     });
 
-    expect(mockBulkEnableRules).toHaveBeenCalledWith(['rule-1', 'rule-2']);
+    expect(mockBulkEnableRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
   });
 
   it('shows success toast when all rules are enabled', async () => {
@@ -70,7 +70,7 @@ describe('useBulkEnableRules', () => {
     const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1']);
+      await result.current.mutateAsync({ ids: ['rule-1'] });
     });
 
     expect(mockAddSuccess).toHaveBeenCalledWith('Rules enabled successfully');
@@ -86,7 +86,7 @@ describe('useBulkEnableRules', () => {
     const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1', 'rule-2']);
+      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
     });
 
     expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('1 error'));
@@ -101,7 +101,7 @@ describe('useBulkEnableRules', () => {
 
     await act(async () => {
       try {
-        await result.current.mutateAsync(['rule-1']);
+        await result.current.mutateAsync({ ids: ['rule-1'] });
       } catch {
         // expected
       }
@@ -118,7 +118,7 @@ describe('useBulkEnableRules', () => {
     const { result } = renderHook(() => useBulkEnableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1']);
+      await result.current.mutateAsync({ ids: ['rule-1'] });
     });
 
     expect(invalidateSpy).toHaveBeenCalledWith(['rule', 'list']);
@@ -137,10 +137,10 @@ describe('useBulkDisableRules', () => {
     const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1', 'rule-2']);
+      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
     });
 
-    expect(mockBulkDisableRules).toHaveBeenCalledWith(['rule-1', 'rule-2']);
+    expect(mockBulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
   });
 
   it('shows success toast when all rules are disabled', async () => {
@@ -150,7 +150,7 @@ describe('useBulkDisableRules', () => {
     const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1']);
+      await result.current.mutateAsync({ ids: ['rule-1'] });
     });
 
     expect(mockAddSuccess).toHaveBeenCalledWith('Rules disabled successfully');
@@ -169,7 +169,7 @@ describe('useBulkDisableRules', () => {
     const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1', 'rule-2']);
+      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
     });
 
     expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('2 errors'));
@@ -184,7 +184,7 @@ describe('useBulkDisableRules', () => {
 
     await act(async () => {
       try {
-        await result.current.mutateAsync(['rule-1']);
+        await result.current.mutateAsync({ ids: ['rule-1'] });
       } catch {
         // expected
       }
@@ -201,7 +201,7 @@ describe('useBulkDisableRules', () => {
     const { result } = renderHook(() => useBulkDisableRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1']);
+      await result.current.mutateAsync({ ids: ['rule-1'] });
     });
 
     expect(invalidateSpy).toHaveBeenCalledWith(['rule', 'list']);

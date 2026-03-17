@@ -53,10 +53,10 @@ describe('useBulkDeleteRules', () => {
     const { result } = renderHook(() => useBulkDeleteRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1', 'rule-2']);
+      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
     });
 
-    expect(mockBulkDeleteRules).toHaveBeenCalledWith(['rule-1', 'rule-2']);
+    expect(mockBulkDeleteRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
   });
 
   it('shows success toast when all rules are deleted', async () => {
@@ -66,7 +66,7 @@ describe('useBulkDeleteRules', () => {
     const { result } = renderHook(() => useBulkDeleteRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1']);
+      await result.current.mutateAsync({ ids: ['rule-1'] });
     });
 
     expect(mockAddSuccess).toHaveBeenCalledWith('Rules deleted successfully');
@@ -82,7 +82,7 @@ describe('useBulkDeleteRules', () => {
     const { result } = renderHook(() => useBulkDeleteRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1', 'rule-2']);
+      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
     });
 
     expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('1 error'));
@@ -97,7 +97,7 @@ describe('useBulkDeleteRules', () => {
 
     await act(async () => {
       try {
-        await result.current.mutateAsync(['rule-1']);
+        await result.current.mutateAsync({ ids: ['rule-1'] });
       } catch {
         // expected
       }
@@ -114,7 +114,7 @@ describe('useBulkDeleteRules', () => {
     const { result } = renderHook(() => useBulkDeleteRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync(['rule-1']);
+      await result.current.mutateAsync({ ids: ['rule-1'] });
     });
 
     expect(invalidateSpy).toHaveBeenCalledWith(['rule', 'list']);

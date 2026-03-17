@@ -504,7 +504,7 @@ describe('RulesListPage', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockBulkDeleteMutate).toHaveBeenCalledWith(
-        ['rule-1'],
+        { ids: ['rule-1'] },
         expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
       );
     });
@@ -539,7 +539,7 @@ describe('RulesListPage', () => {
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
       expect(mockBulkEnableMutate).toHaveBeenCalledWith(
-        ['rule-1'],
+        { ids: ['rule-1'] },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -554,7 +554,7 @@ describe('RulesListPage', () => {
       fireEvent.click(screen.getByTestId('bulkDisableRules'));
 
       expect(mockBulkDisableMutate).toHaveBeenCalledWith(
-        ['rule-1'],
+        { ids: ['rule-1'] },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -585,7 +585,7 @@ describe('RulesListPage', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockBulkDeleteMutate).toHaveBeenCalledWith(
-        expect.arrayContaining(['rule-1', 'rule-2']),
+        { ids: expect.arrayContaining(['rule-1', 'rule-2']) },
         expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
       );
     });

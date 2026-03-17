@@ -6,20 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
-import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { bulkOperationParamsSchema } from '@kbn/alerting-v2-schemas';
+import type { BulkOperationParams } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
-
-const bulkDeleteBodySchema = schema.object({
-  ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
-});
 
 @injectable()
 export class BulkDeleteRulesRoute {
@@ -33,20 +30,22 @@ export class BulkDeleteRulesRoute {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: bulkDeleteBodySchema,
+      body: buildRouteValidationWithZod(bulkOperationParamsSchema),
     },
   } as const;
 
   constructor(
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, TypeOf<typeof bulkDeleteBodySchema>>,
+    private readonly request: KibanaRequest<unknown, unknown, BulkOperationParams>,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {}
 
   async handle() {
     try {
-      const result = await this.rulesClient.bulkDeleteRules({ ids: this.request.body.ids });
+      const { ids, filter } = this.request.body;
+      const params = ids ? { ids } : { filter: filter! };
+      const result = await this.rulesClient.bulkDeleteRules(params);
       return this.response.ok({ body: result });
     } catch (e) {
       const boom = Boom.isBoom(e) ? e : Boom.boomify(e);

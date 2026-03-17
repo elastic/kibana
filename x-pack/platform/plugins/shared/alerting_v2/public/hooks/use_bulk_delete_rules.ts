@@ -8,7 +8,7 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { RulesApi } from '../services/rules_api';
+import { RulesApi, type BulkOperationParams } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 
 export const useBulkDeleteRules = () => {
@@ -18,7 +18,7 @@ export const useBulkDeleteRules = () => {
 
   return useMutation({
     mutationKey: ruleKeys.bulkDelete(),
-    mutationFn: (ids: string[]) => rulesApi.bulkDeleteRules(ids),
+    mutationFn: (params: BulkOperationParams) => rulesApi.bulkDeleteRules(params),
     onSuccess: (data) => {
       if (data.errors.length > 0) {
         toasts.addWarning(

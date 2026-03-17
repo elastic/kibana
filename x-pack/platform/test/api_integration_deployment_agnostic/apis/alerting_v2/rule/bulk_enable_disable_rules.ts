@@ -17,7 +17,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
 
-  async function createRule(roleAuthc: RoleCredentials, name: string) {
+  async function createRule(
+    roleAuthc: RoleCredentials,
+    name: string,
+    overrides: Record<string, unknown> = {}
+  ) {
     const response = await supertestWithoutAuth
       .post(RULE_API_PATH)
       .set(roleAuthc.apiKeyHeader)
@@ -28,6 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         time_field: '@timestamp',
         schedule: { every: '5m' },
         evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+        ...overrides,
       });
 
     expect(response.status).to.be(200);
@@ -291,6 +296,145 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const finalRule3 = await getRule(roleAuthc, rule3.id);
         expect(finalRule3.enabled).to.be(true);
+      });
+    });
+
+    describe('Bulk Disable with filter', () => {
+      it('should disable all rules matching the filter', async () => {
+        const alertRule1 = await createRule(roleAuthc, 'alert-disable-1', { kind: 'alert' });
+        const alertRule2 = await createRule(roleAuthc, 'alert-disable-2', { kind: 'alert' });
+        const signalRule = await createRule(roleAuthc, 'signal-disable-1', { kind: 'signal' });
+
+        // All rules start enabled
+        expect(alertRule1.enabled).to.be(true);
+        expect(alertRule2.enabled).to.be(true);
+        expect(signalRule.enabled).to.be(true);
+
+        // Disable only alert rules via filter
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_disable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ filter: 'kind: alert' });
+
+        expect(response.status).to.be(200);
+        expect(response.body.errors).to.be.an('array');
+        expect(response.body.errors.length).to.be(0);
+
+        const disabledIds = response.body.rules.map((r: { id: string }) => r.id);
+        expect(disabledIds).to.contain(alertRule1.id);
+        expect(disabledIds).to.contain(alertRule2.id);
+        expect(disabledIds).not.to.contain(signalRule.id);
+
+        // Verify alert rules are disabled
+        const fetched1 = await getRule(roleAuthc, alertRule1.id);
+        expect(fetched1.enabled).to.be(false);
+
+        const fetched2 = await getRule(roleAuthc, alertRule2.id);
+        expect(fetched2.enabled).to.be(false);
+
+        // Verify signal rule is still enabled
+        const fetchedSignal = await getRule(roleAuthc, signalRule.id);
+        expect(fetchedSignal.enabled).to.be(true);
+      });
+
+      it('should return 400 when both ids and filter are provided', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_disable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ ids: ['some-id'], filter: 'some-filter' });
+
+        expect(response.status).to.be(400);
+      });
+
+      it('should return 400 when neither ids nor filter is provided', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_disable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({});
+
+        expect(response.status).to.be(400);
+      });
+    });
+
+    describe('Bulk Enable with filter', () => {
+      it('should enable all rules matching the filter', async () => {
+        const signalRule1 = await createRule(roleAuthc, 'signal-enable-1', { kind: 'signal' });
+        const signalRule2 = await createRule(roleAuthc, 'signal-enable-2', { kind: 'signal' });
+        const alertRule = await createRule(roleAuthc, 'alert-enable-1', { kind: 'alert' });
+
+        // Disable all rules first
+        await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_disable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ ids: [signalRule1.id, signalRule2.id, alertRule.id] });
+
+        // Enable only signal rules via filter
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_enable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ filter: 'kind: signal' });
+
+        expect(response.status).to.be(200);
+        expect(response.body.errors).to.be.an('array');
+        expect(response.body.errors.length).to.be(0);
+
+        const enabledIds = response.body.rules.map((r: { id: string }) => r.id);
+        expect(enabledIds).to.contain(signalRule1.id);
+        expect(enabledIds).to.contain(signalRule2.id);
+        expect(enabledIds).not.to.contain(alertRule.id);
+
+        // Verify signal rules are enabled
+        const fetched1 = await getRule(roleAuthc, signalRule1.id);
+        expect(fetched1.enabled).to.be(true);
+
+        const fetched2 = await getRule(roleAuthc, signalRule2.id);
+        expect(fetched2.enabled).to.be(true);
+
+        // Verify alert rule is still disabled
+        const fetchedAlert = await getRule(roleAuthc, alertRule.id);
+        expect(fetchedAlert.enabled).to.be(false);
+      });
+
+      it('should return empty results when filter matches nothing', async () => {
+        await createRule(roleAuthc, 'no-match-rule');
+
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_enable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({
+            filter: 'metadata.name: nonexistent-rule-xyz',
+          });
+
+        expect(response.status).to.be(200);
+        expect(response.body.rules).to.be.an('array');
+        expect(response.body.rules.length).to.be(0);
+        expect(response.body.errors.length).to.be(0);
+      });
+
+      it('should return 400 when both ids and filter are provided', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_enable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ ids: ['some-id'], filter: 'some-filter' });
+
+        expect(response.status).to.be(400);
+      });
+
+      it('should return 400 when neither ids nor filter is provided', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_enable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({});
+
+        expect(response.status).to.be(400);
       });
     });
   });

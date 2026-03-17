@@ -49,7 +49,7 @@ export interface RulesSavedObjectServiceContract {
   ): Promise<BulkUpdateResultItem[]>;
   delete(params: { id: string }): Promise<void>;
   bulkDelete(ids: string[]): Promise<BulkDeleteResult>;
-  find(params: { page: number; perPage: number }): Promise<{
+  find(params: { page: number; perPage: number; filter?: string }): Promise<{
     saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes }>;
     total: number;
   }>;
@@ -174,13 +174,14 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     });
   }
 
-  public async find({ page, perPage }: { page: number; perPage: number }) {
+  public async find({ page, perPage, filter }: { page: number; perPage: number; filter?: string }) {
     return this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       page,
       perPage,
       sortField: 'updatedAt',
       sortOrder: 'desc',
+      ...(filter ? { filter } : {}),
     });
   }
 }

@@ -8,7 +8,7 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { RulesApi } from '../services/rules_api';
+import { RulesApi, type BulkOperationParams } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 
 export const useBulkEnableRules = () => {
@@ -18,7 +18,7 @@ export const useBulkEnableRules = () => {
 
   return useMutation({
     mutationKey: ruleKeys.bulkEnable(),
-    mutationFn: (ids: string[]) => rulesApi.bulkEnableRules(ids),
+    mutationFn: (params: BulkOperationParams) => rulesApi.bulkEnableRules(params),
     onSuccess: (data) => {
       if (data.errors.length > 0) {
         toasts.addWarning(
@@ -54,7 +54,7 @@ export const useBulkDisableRules = () => {
 
   return useMutation({
     mutationKey: ruleKeys.bulkDisable(),
-    mutationFn: (ids: string[]) => rulesApi.bulkDisableRules(ids),
+    mutationFn: (params: BulkOperationParams) => rulesApi.bulkDisableRules(params),
     onSuccess: (data) => {
       if (data.errors.length > 0) {
         toasts.addWarning(

@@ -17,7 +17,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
 
-  async function createRule(roleAuthc: RoleCredentials, name: string) {
+  async function createRule(
+    roleAuthc: RoleCredentials,
+    name: string,
+    overrides: Record<string, unknown> = {}
+  ) {
     return supertestWithoutAuth
       .post(RULE_API_PATH)
       .set(roleAuthc.apiKeyHeader)
@@ -28,6 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         time_field: '@timestamp',
         schedule: { every: '5m' },
         evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+        ...overrides,
       });
   }
 
@@ -120,6 +125,80 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(secondPage.body.total).to.be(3);
       expect(secondPage.body.page).to.be(2);
       expect(secondPage.body.perPage).to.be(2);
+    });
+
+    describe('filter', () => {
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.clean({ types: [RULE_SO_TYPE] });
+      });
+
+      it('should filter rules by kind', async () => {
+        const alertResponse = await createRule(roleAuthc, 'alert-rule', { kind: 'alert' });
+        expect(alertResponse.status).to.be(200);
+
+        const signalResponse = await createRule(roleAuthc, 'signal-rule', { kind: 'signal' });
+        expect(signalResponse.status).to.be(200);
+
+        const response = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({
+            perPage: 1000,
+            filter: 'kind: signal',
+          })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(response.status).to.be(200);
+        expect(response.body.items.length).to.be(1);
+        expect(response.body.items[0].kind).to.be('signal');
+        expect(response.body.items[0].metadata.name).to.be('signal-rule');
+      });
+
+      it('should filter rules by enabled status', async () => {
+        const createResponse = await createRule(roleAuthc, 'enabled-rule');
+        expect(createResponse.status).to.be(200);
+
+        const createResponse2 = await createRule(roleAuthc, 'to-disable-rule');
+        expect(createResponse2.status).to.be(200);
+
+        // Disable the second rule
+        await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_disable`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ ids: [createResponse2.body.id] });
+
+        const response = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({
+            perPage: 1000,
+            filter: 'enabled: false',
+          })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(response.status).to.be(200);
+        expect(response.body.items.length).to.be(1);
+        expect(response.body.items[0].id).to.be(createResponse2.body.id);
+        expect(response.body.items[0].enabled).to.be(false);
+      });
+
+      it('should return all rules when no filter is provided', async () => {
+        const r1 = await createRule(roleAuthc, 'no-filter-a');
+        expect(r1.status).to.be(200);
+
+        const r2 = await createRule(roleAuthc, 'no-filter-b');
+        expect(r2.status).to.be(200);
+
+        const response = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ perPage: 1000 })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(response.status).to.be(200);
+        expect(response.body.items.length).to.be(2);
+      });
     });
   });
 }

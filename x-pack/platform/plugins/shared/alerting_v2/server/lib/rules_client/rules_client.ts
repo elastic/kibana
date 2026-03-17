@@ -38,6 +38,7 @@ import {
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
 } from './utils';
+import { buildRuleSoFilter } from './build_rule_filter';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 
 const withApm = withApmDecorator('RulesClient');
@@ -232,8 +233,13 @@ export class RulesClient {
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 20;
+    const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
 
-    const res = await this.rulesSavedObjectService.find({ page, perPage });
+    const res = await this.rulesSavedObjectService.find({
+      page,
+      perPage,
+      filter: soFilter,
+    });
 
     return {
       items: res.saved_objects.map((so) =>
@@ -245,10 +251,54 @@ export class RulesClient {
     };
   }
 
+  /**
+   * Resolves rule IDs from a BulkRulesParams. If `ids` are provided directly,
+   * returns them. If a `filter` is provided, paginates through all matching
+   * rules and collects their IDs.
+   */
+  private async resolveRuleIds(params: BulkRulesParams): Promise<string[]> {
+    if (params.ids && params.filter) {
+      throw Boom.badRequest('Only one of ids or filter can be provided');
+    }
+
+    if (params.ids) {
+      return params.ids;
+    }
+
+    const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    const allIds: string[] = [];
+    let currentPage = 1;
+    const pageSize = 100;
+
+    while (true) {
+      const res = await this.rulesSavedObjectService.find({
+        page: currentPage,
+        perPage: pageSize,
+        filter: soFilter,
+      });
+
+      for (const so of res.saved_objects) {
+        allIds.push(so.id);
+      }
+
+      if (allIds.length >= res.total) {
+        break;
+      }
+      currentPage++;
+    }
+
+    return allIds;
+  }
+
   @withApm
-  public async bulkDeleteRules({ ids }: BulkRulesParams): Promise<BulkOperationResponse> {
+  public async bulkDeleteRules(params: BulkRulesParams): Promise<BulkOperationResponse> {
     const { spaceId } = this.getSpaceContext();
     const errors: BulkOperationError[] = [];
+    const ids = await this.resolveRuleIds(params);
+
+    if (ids.length === 0) {
+      return { rules: [], errors: [] };
+    }
 
     // Remove associated task manager tasks (best-effort)
     const taskIds = ids.map((id) => getRuleExecutorTaskId({ ruleId: id, spaceId }));
@@ -275,10 +325,15 @@ export class RulesClient {
   }
 
   @withApm
-  public async bulkEnableRules({ ids }: BulkRulesParams): Promise<BulkOperationResponse> {
+  public async bulkEnableRules(params: BulkRulesParams): Promise<BulkOperationResponse> {
     const { spaceId } = this.getSpaceContext();
     const errors: BulkOperationError[] = [];
     const rules: RuleResponse[] = [];
+    const ids = await this.resolveRuleIds(params);
+
+    if (ids.length === 0) {
+      return { rules: [], errors: [] };
+    }
 
     const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
 
@@ -357,10 +412,15 @@ export class RulesClient {
   }
 
   @withApm
-  public async bulkDisableRules({ ids }: BulkRulesParams): Promise<BulkOperationResponse> {
+  public async bulkDisableRules(params: BulkRulesParams): Promise<BulkOperationResponse> {
     const { spaceId } = this.getSpaceContext();
     const errors: BulkOperationError[] = [];
     const rules: RuleResponse[] = [];
+    const ids = await this.resolveRuleIds(params);
+
+    if (ids.length === 0) {
+      return { rules: [], errors: [] };
+    }
 
     const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
 

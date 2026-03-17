@@ -31,6 +31,10 @@ export interface BulkOperationResponse {
   errors: BulkOperationError[];
 }
 
+export type BulkOperationParams =
+  | { ids: string[]; filter?: undefined }
+  | { filter: string; ids?: undefined };
+
 @injectable()
 export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
@@ -61,24 +65,24 @@ export class RulesApi {
     await this.http.delete(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`);
   }
 
-  public async bulkDeleteRules(ids: string[]) {
+  public async bulkDeleteRules(params: BulkOperationParams) {
     return this.http.post<BulkOperationResponse>(
       `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk_delete`,
-      { body: JSON.stringify({ ids }) }
+      { body: JSON.stringify(params) }
     );
   }
 
-  public async bulkEnableRules(ids: string[]) {
+  public async bulkEnableRules(params: BulkOperationParams) {
     return this.http.post<BulkOperationResponse>(
       `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk_enable`,
-      { body: JSON.stringify({ ids }) }
+      { body: JSON.stringify(params) }
     );
   }
 
-  public async bulkDisableRules(ids: string[]) {
+  public async bulkDisableRules(params: BulkOperationParams) {
     return this.http.post<BulkOperationResponse>(
       `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk_disable`,
-      { body: JSON.stringify({ ids }) }
+      { body: JSON.stringify(params) }
     );
   }
 }
