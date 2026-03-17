@@ -103,9 +103,7 @@ paths:
       x-codegen-enabled: true
       x-internal: true
       description: >-
-        Uploads samples to a data stream. Provide either samples (from file upload)
-        or sourceIndex (backend fetches up to 1000 random event.original values from
-        that index). Exactly one of samples or sourceIndex must be set.
+        Uploads samples to a data stream.
       tags:
         - Automatic Import Integrations
       parameters:
@@ -135,11 +133,11 @@ paths:
                   type: array
                   items:
                     type: string
-                  description: The samples to upload (when source is file). Omit when using sourceIndex.
+                  description: The samples to upload (when source is file)
                 sourceIndex:
                   type: string
                   minLength: 1
-                  description: Index name to pick samples from. Omit when using samples.
+                  description: Index name to pick samples from.
                 originalSource:
                   description: The original source of the samples (file name or index name)
                   $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/OriginalSource"

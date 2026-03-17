@@ -110,9 +110,7 @@ export const getAllIntegrations = async ({
 export interface UploadSamplesRequest {
   integrationId: string;
   dataStreamId: string;
-  /** Provided when uploading from a file */
   samples?: string[];
-  /** Provided when uploading from an existing index (backend fetches event.original) */
   sourceIndex?: string;
   originalSource: OriginalSource;
 }

@@ -173,11 +173,11 @@ export type UploadSamplesToDataStreamRequestBody = z.infer<
 >;
 export const UploadSamplesToDataStreamRequestBody = z.object({
   /**
-   * The samples to upload (when source is file). Omit when using sourceIndex.
+   * The samples to upload (when source is file)
    */
   samples: z.array(z.string()).optional(),
   /**
-   * Index name to pick samples from. Omit when using samples.
+   * Index name to pick samples from.
    */
   sourceIndex: z.string().min(1).optional(),
   /**

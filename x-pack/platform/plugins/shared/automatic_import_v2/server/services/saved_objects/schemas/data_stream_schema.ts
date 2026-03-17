@@ -47,7 +47,6 @@ export const dataStreamSchemaV1 = schema.object({
           },
         })
       ),
-      /** When samples were loaded from a file or index, record the source for display/audit */
       original_source: schema.maybe(
         schema.object({
           source_type: schema.oneOf([schema.literal('file'), schema.literal('index')]),

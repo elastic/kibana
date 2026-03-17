@@ -123,7 +123,7 @@ describe('Data stream routes - upload samples', () => {
           query: {
             function_score: {
               query: { exists: { field: 'event.original' } },
-              random_score: {},
+              functions: [{ random_score: {} }],
             },
           },
         })
