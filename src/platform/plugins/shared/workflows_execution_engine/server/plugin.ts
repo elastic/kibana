@@ -866,6 +866,25 @@ export class WorkflowsExecutionEnginePlugin
         cancelledBy: 'system', // TODO: set user if available
       });
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
+
+      // For queue-strategy workflows, a RUNNING execution holds a semaphore slot.
+      // After a Kibana crash its TM task is orphaned (forceRunIdleTasks is a no-op),
+      // so the slot would be phantom-locked forever unless we release it here.
+      // Releasing eagerly is safe even when the TM task is live: the Painless
+      // releaseSlot script is idempotent, and the task will terminate once it reads
+      // cancelRequested. The double call to releaseSlotAndPromote in the task's
+      // finally block will simply find the slot already gone (no-op).
+      if (
+        workflowExecution.concurrencyGroupKey &&
+        workflowExecution.workflowDefinition?.settings?.concurrency?.strategy === 'queue' &&
+        request
+      ) {
+        await this.releaseSlotAndPromote(workflowExecutionId, spaceId, request).catch((err) =>
+          this.logger.error(
+            `Promotion failed after cancelling RUNNING execution ${workflowExecutionId}: ${err}`
+          )
+        );
+      }
     };
 
     const workflowEventLoggerService = new WorkflowEventLoggerService(
@@ -1152,6 +1171,9 @@ export class WorkflowsExecutionEnginePlugin
       return;
     }
 
+    // Track concurrency groups that need semaphore reconciliation
+    const groupsToReconcile = new Set<string>();
+
     // Revert stuck PENDING executions from queue-strategy workflows back to QUEUED.
     // A PENDING execution without a running TM task blocks the concurrency slot forever.
     // On restart, it's safe to revert because any legitimate TM task from the previous
@@ -1168,9 +1190,6 @@ export class WorkflowsExecutionEnginePlugin
       },
       10000
     );
-
-    // Track concurrency groups that need semaphore reconciliation
-    const groupsToReconcile = new Set<string>();
 
     for (const hit of stuckPending) {
       const doc = hit._source;
@@ -1211,8 +1230,87 @@ export class WorkflowsExecutionEnginePlugin
       }
     }
 
+    // Terminate stuck RUNNING/WAITING/WAITING_FOR_INPUT executions from queue-strategy workflows.
+    // When Kibana crashes, these executions lose their TM task but remain in an active state,
+    // phantom-locking semaphore slots. The PENDING recovery above does not cover these because
+    // RUNNING executions were never handled. Without this fix, all concurrency slots stay
+    // occupied after a restart and the queue is permanently stuck.
+    // Mark them FAILED (or CANCELLED if cancellation was already requested) and add their
+    // groups to the reconcile set so the semaphore is cleaned up below.
+    const stuckActive = await this.workflowExecutionRepository.searchWorkflowExecutions(
+      {
+        bool: {
+          filter: [
+            {
+              terms: {
+                status: [
+                  ExecutionStatus.RUNNING,
+                  ExecutionStatus.WAITING,
+                  ExecutionStatus.WAITING_FOR_INPUT,
+                ],
+              },
+            },
+            { exists: { field: 'concurrencyGroupKey' } },
+          ],
+        },
+      },
+      10000
+    );
+
+    for (const hit of stuckActive) {
+      const doc = hit._source;
+      if (doc?.id && doc.workflowDefinition?.settings?.concurrency?.strategy === 'queue') {
+        if (doc.concurrencyGroupKey) {
+          groupsToReconcile.add(`${doc.spaceId}:${doc.concurrencyGroupKey}`);
+        }
+
+        if (doc.cancelRequested) {
+          this.logger.info(
+            `Completing cancellation of orphaned ${doc.status} execution ${doc.id} (cancel was requested)`
+          );
+          await this.workflowExecutionRepository
+            .updateWorkflowExecution(
+              {
+                id: doc.id,
+                status: ExecutionStatus.CANCELLED,
+                finishedAt: new Date().toISOString(),
+              },
+              { refresh: 'wait_for' }
+            )
+            .catch((err) =>
+              this.logger.error(
+                `Failed to cancel orphaned ${doc.status} execution ${doc.id}: ${err}`
+              )
+            );
+        } else {
+          this.logger.info(
+            `Marking orphaned ${doc.status} execution ${doc.id} as FAILED (lost TM task on restart)`
+          );
+          await this.workflowExecutionRepository
+            .updateWorkflowExecution(
+              {
+                id: doc.id,
+                status: ExecutionStatus.FAILED,
+                finishedAt: new Date().toISOString(),
+                error: {
+                  type: 'KibanaRestartError',
+                  message:
+                    'Execution interrupted: Kibana restarted while the workflow was running.',
+                },
+              },
+              { refresh: 'wait_for' }
+            )
+            .catch((err) =>
+              this.logger.error(
+                `Failed to mark orphaned ${doc.status} execution ${doc.id} as FAILED: ${err}`
+              )
+            );
+        }
+      }
+    }
+
     // Reconcile semaphore documents for affected concurrency groups.
-    // After reverting stuck PENDING executions, the semaphore's activeSlots may contain
+    // After terminating stuck executions, the semaphore's activeSlots may contain
     // stale IDs from executions that are no longer running. Query the actual active
     // executions and overwrite the semaphore to match reality.
     if (this.concurrencySemaphoreRepository) {
@@ -1241,9 +1339,10 @@ export class WorkflowsExecutionEnginePlugin
       { bool: { filter: [{ term: { status: ExecutionStatus.QUEUED } }] } },
       1
     );
-    if (hasQueued.length > 0 || stuckPending.length > 0) {
+    if (hasQueued.length > 0 || stuckPending.length > 0 || stuckActive.length > 0) {
       this.logger.info(
         `Queue recovery: cleaned up ${stuckPending.length} stuck PENDING executions, ` +
+          `terminated ${stuckActive.length} orphaned active executions, ` +
           `reconciled ${groupsToReconcile.size} semaphore group(s). ` +
           `QUEUED executions remain and will drain on the next trigger.`
       );

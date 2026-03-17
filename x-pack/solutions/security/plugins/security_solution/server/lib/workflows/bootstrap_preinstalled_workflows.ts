@@ -200,7 +200,8 @@ export class PreinstalledWorkflowsBootstrap {
    * If true, will override changes made by the user.
    */
   private shouldUpdate(existingYaml: string, fileYaml: string): boolean {
-    return this.normalizeYaml(existingYaml) !== this.normalizeYaml(fileYaml);
+    return false;
+    // return this.normalizeYaml(existingYaml) !== this.normalizeYaml(fileYaml);
   }
 
   /**

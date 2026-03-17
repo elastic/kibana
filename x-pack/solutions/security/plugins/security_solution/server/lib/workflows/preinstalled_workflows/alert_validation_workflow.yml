@@ -139,6 +139,10 @@ steps:
           # -------------------------------------------------------------------
           - name: add_execution_started_note_to_alert
             type: kibana.request
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
             with:
               method: PATCH
               path: /api/note
@@ -907,7 +911,7 @@ steps:
           - name: onechat_runAgent_step
             type: ai.agent
             agent-id: "elastic-ai-agent"
-            connector-id: gpt41Azure
+            connector-id: Anthropic-Claude-Sonnet-4-5
             create-conversation: true
             on-failure:
               retry:
@@ -962,6 +966,10 @@ steps:
             steps:
               - name: add_no_data_note_to_alert
                 type: kibana.request
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
                 with:
                   method: PATCH
                   path: /api/note
@@ -982,6 +990,10 @@ steps:
               # -------------------------------------------------------------------
               - name: add_verdict_note_to_alert
                 type: kibana.request
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
                 with:
                   method: PATCH
                   path: /api/note
