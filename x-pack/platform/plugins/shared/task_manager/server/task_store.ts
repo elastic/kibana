@@ -235,7 +235,7 @@ export class TaskStore {
 
   private async regenerateApiKeyFromRequest(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
     const hasEncryptedFields = docs.some((doc) => (doc.apiKey || doc.uiamApiKey) && doc.userScope);
-    const apiKeysToRemove: ApiKeyToMarkForInvalidation[] = [];
+    const apiKeyIdsToRemoveMap = new Map<string, ApiKeyToMarkForInvalidation>();
     let apiKeyAndUserScopeMap: Map<string, ApiKeyAndUserScope> | null = null;
 
     // If a task with an API key is updated with a request
@@ -247,10 +247,15 @@ export class TaskStore {
         if ((apiKey || uiamApiKey) && userScope && !userScope.apiKeyCreatedByUser) {
           docsWithApiKeys.push(taskInstance);
           if (apiKey && userScope.apiKeyId) {
-            apiKeysToRemove.push({ apiKeyId: userScope.apiKeyId });
-          }
-          if (uiamApiKey && userScope.uiamApiKeyId) {
-            apiKeysToRemove.push({ apiKeyId: userScope.uiamApiKeyId, uiamApiKey });
+            apiKeyIdsToRemoveMap.set(taskInstance.id, {
+              apiKeyId: userScope.apiKeyId,
+              ...(uiamApiKey && userScope.uiamApiKeyId ? { uiamApiKey } : {}),
+            });
+          } else if (uiamApiKey && userScope.uiamApiKeyId) {
+            apiKeyIdsToRemoveMap.set(taskInstance.id, {
+              apiKeyId: userScope.uiamApiKeyId,
+              uiamApiKey,
+            });
           }
         }
       });
@@ -261,7 +266,7 @@ export class TaskStore {
       }
     }
 
-    return { apiKeyAndUserScopeMap, apiKeysToRemove };
+    return { apiKeyAndUserScopeMap, apiKeyIdsToRemoveMap };
   }
 
   private getSoClientForUpdate(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
@@ -745,7 +750,7 @@ export class TaskStore {
     const soClientToUpdate = this.getSoClientForUpdate(docs, options);
     const regenerateResult = await this.regenerateApiKeyFromRequest(docs, options);
     const apiKeyAndUserScopeMap = regenerateResult.apiKeyAndUserScopeMap || new Map();
-    const apiKeysToRemove = regenerateResult.apiKeysToRemove || [];
+    const apiKeyIdsToRemoveMap = regenerateResult.apiKeyIdsToRemoveMap;
 
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
@@ -798,6 +803,7 @@ export class TaskStore {
       throw e;
     }
 
+    const apiKeysToInvalidate: ApiKeyToMarkForInvalidation[] = [];
     const updates = updatedSavedObjects.map((updatedSavedObject) => {
       if (updatedSavedObject.error !== undefined) {
         return asErr({
@@ -817,14 +823,18 @@ export class TaskStore {
       const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
         validate,
       });
+
+      const oldApiKey = apiKeyIdsToRemoveMap.get(updatedSavedObject.id);
+      if (oldApiKey) {
+        apiKeysToInvalidate.push(oldApiKey);
+      }
+
       return asOk(result);
     });
 
-    // after successful updates we should invalidate the old API keys (ES and/or UIAM)
-    const allSucceeded = updatedSavedObjects.every((so) => !so.error);
-    if (apiKeysToRemove.length && allSucceeded) {
+    if (apiKeysToInvalidate.length > 0) {
       await bulkMarkApiKeysForInvalidation({
-        apiKeysToInvalidate: apiKeysToRemove,
+        apiKeysToInvalidate,
         logger: this.logger,
         savedObjectsClient: this.savedObjectsRepository,
       });

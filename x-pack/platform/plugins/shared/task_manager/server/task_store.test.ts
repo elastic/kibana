@@ -1969,10 +1969,7 @@ describe('TaskStore', () => {
       });
 
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
-        apiKeysToInvalidate: [
-          { apiKeyId: 'apiKeyId' },
-          { apiKeyId: 'uiamKeyId', uiamApiKey: mockUiamApiKey },
-        ],
+        apiKeysToInvalidate: [{ apiKeyId: 'apiKeyId', uiamApiKey: mockUiamApiKey }],
         logger,
         savedObjectsClient,
       });
