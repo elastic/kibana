@@ -10,6 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  DEFAULT_DATA_CONTROL_STATE,
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
   OPTIONS_LIST_CONTROL,
@@ -37,7 +38,8 @@ import type {
 export const controlGroupStateBuilder = {
   addDataControlFromField: async (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: Omit<DataControlState & Partial<FlattenedPinnedControlState>, 'type'>,
+    controlState: Partial<Omit<DataControlState & FlattenedPinnedControlState, 'type'>> &
+      Pick<DataControlState, 'data_view_id' | 'field_name'>,
     uiActionsService: UiActionsStart,
     controlId?: string
   ) => {
@@ -55,6 +57,8 @@ export const controlGroupStateBuilder = {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_DATA_CONTROL_STATE,
+        ...DEFAULT_PINNED_CONTROL_STATE,
         type,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
@@ -94,6 +98,8 @@ export const controlGroupStateBuilder = {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_DATA_CONTROL_STATE,
+        ...DEFAULT_PINNED_CONTROL_STATE,
         type: RANGE_SLIDER_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,

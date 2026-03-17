@@ -16,13 +16,13 @@ import type {
   DataControlState,
 } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { HasUniqueId, PublishingSubject } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 import type { DataControlApi, PublishesField } from '../types';
 import type { EditorState } from './editor_state_manager';
 import type { SelectionsState } from './selections_manager';
 import type { TemporaryState } from './temporay_state_manager';
-import type { OptionsListSuggestions } from '../../../../common/options_list';
+import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../../types';
 
 export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListControlState> &
   DataControlApi & {
@@ -30,12 +30,6 @@ export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListControlState
     clearSelections: () => void;
     hasSelections$: PublishingSubject<boolean | undefined>;
   };
-
-export interface PublishesOptions {
-  availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
-  invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
-  totalCardinality$: PublishingSubject<number>;
-}
 
 /**
  * A type consisting of only the properties that the options list control puts into state managers
@@ -45,31 +39,29 @@ export interface PublishesOptions {
 export type OptionsListComponentState = Pick<DataControlState, 'field_name'> &
   SelectionsState &
   EditorState &
-  TemporaryState & {
+  TemporaryState<OptionsListSelection> & {
     sort: OptionsListSortingType | undefined;
   };
 
-type PublishesOptionsListComponentState = SubjectsOf<
+type PublishesDSLOptionsListComponentState = SubjectsOf<
   /**
    * For API consistency, we continue to refer to the control's label as `title`; however, to avoid
    * being impacted by default embeddable title handling, we switch to `label` for the implementation
    */
   Omit<OptionsListComponentState, 'title'> & { label: string }
 >;
-type OptionsListComponentStateSetters = Partial<SettersOf<OptionsListComponentState>> &
-  SettersOf<Pick<OptionsListComponentState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
+type DSLOptionsListComponentStateSetters = SettersOf<
+  Pick<OptionsListComponentState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>
+>;
 
-export type DSLOptionsListComponentApi = PublishesField &
-  PublishesOptions &
-  PublishesOptionsListComponentState &
+export type DSLOptionsListComponentApi = HasUniqueId &
+  PublishesField &
+  OptionsListPublishesOptions<OptionsListSelection> &
+  PublishesDSLOptionsListComponentState &
   DataControlApi &
-  OptionsListComponentStateSetters & {
-    deselectOption: (key: string | undefined) => void;
-    makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
+  DSLOptionsListComponentStateSetters &
+  OptionsListSelectionsApi & {
     loadMoreSubject: Subject<void>;
-    selectAll: (keys: string[]) => void;
-    deselectAll: (keys: string[]) => void;
-    uuid: string;
   };
 
 export interface OptionsListCustomStrings {

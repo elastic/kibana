@@ -45,18 +45,12 @@ export const OptionsListPopoverSuggestions = ({
   const conditionalApiSubjects: [
     PublishingSubject<boolean>,
     DSLOptionsListComponentApi['sort$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['searchString$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['searchTechnique$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['invalidSelections$'] | PublishingSubject<undefined>,
     DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>
   ] = useMemo(() => {
     const isDSLControl = isDSLOptionsListApi(componentApi);
     return [
       isDSLControl ? componentApi.existsSelected$ : new BehaviorSubject(false),
       isDSLControl ? componentApi.sort$ : new BehaviorSubject(undefined),
-      isDSLControl ? componentApi.searchString$ : new BehaviorSubject(undefined),
-      isDSLControl ? componentApi.searchTechnique$ : new BehaviorSubject(undefined),
-      isDSLControl ? componentApi.invalidSelections$ : new BehaviorSubject(undefined),
       isDSLControl ? componentApi.fieldFormatter : new BehaviorSubject(undefined),
     ];
   }, [componentApi]);
@@ -67,11 +61,11 @@ export const OptionsListPopoverSuggestions = ({
     selectedOptions,
     totalCardinality,
     label,
-    existsSelected,
-    sort,
     searchString,
     searchTechnique,
     invalidSelections,
+    existsSelected,
+    sort,
     fieldFormatter,
   ] = useBatchedPublishingSubjects(
     componentApi.availableOptions$,
@@ -79,6 +73,9 @@ export const OptionsListPopoverSuggestions = ({
     componentApi.selectedOptions$,
     componentApi.totalCardinality$,
     componentApi.label$,
+    componentApi.searchString$,
+    componentApi.searchTechnique$,
+    componentApi.invalidSelections$,
     ...conditionalApiSubjects
   );
 
@@ -93,7 +90,9 @@ export const OptionsListPopoverSuggestions = ({
     [availableOptions, totalCardinality, showOnlySelected]
   );
 
-  const suggestions = useMemo<OptionsListSuggestions | OptionsListSelection[]>(() => {
+  const suggestions = useMemo<
+    OptionsListSuggestions<OptionsListSelection> | OptionsListSelection[]
+  >(() => {
     return (showOnlySelected ? selectedOptions : availableOptions) ?? [];
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
@@ -124,7 +123,7 @@ export const OptionsListPopoverSuggestions = ({
         checked: (selectedOptions ?? []).includes(suggestion.value as string) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
-          showOnlySelected && invalidSelections?.has(suggestion.value)
+          showOnlySelected && invalidSelections?.has(suggestion.value as string)
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
         append:

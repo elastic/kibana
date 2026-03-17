@@ -9,64 +9,41 @@
 import type {
   OptionsListESQLControlState,
   OptionsListSearchTechnique,
-  OptionsListSelection,
 } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-// import type { Filter } from '@kbn/es-query';
 import type { PublishesESQLVariable } from '@kbn/esql-types';
 import type {
   HasEditCapabilities,
+  HasUniqueId,
   PublishesDataLoading,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import type { OptionsListSuggestions } from '../../../common/options_list';
-// import type { OptionsListCom+ponentState } from '../data_controls/options_list_control/types';
+import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
+import type { TemporaryState } from '../data_controls/options_list_control/temporay_state_manager';
+import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../types';
+import type { initializeLabelManager } from '../control_labels';
 
 export type ESQLControlApi = DefaultEmbeddableApi<OptionsListESQLControlState> &
   PublishesESQLVariable &
   HasEditCapabilities &
-  PublishesDataLoading;
+  PublishesDataLoading &
+  ReturnType<typeof initializeLabelManager>['api'];
 
-export interface ESQLOptionsListComponentApi {
-  uuid: string;
-  availableOptions$: PublishingSubject<OptionsListSuggestions>;
-  invalidSelections$: PublishingSubject<Set<string | number>>;
-  variableName$: PublishingSubject<OptionsListESQLControlState['variable_name']>;
-  selectedOptions$: PublishingSubject<OptionsListSelection[]>;
-  dataLoading$: PublishingSubject<boolean | undefined>;
-  label$: PublishingSubject<string>;
-  totalCardinality$: PublishingSubject<number>;
-  singleSelect$: PublishingSubject<boolean>;
-  searchString$: PublishingSubject<string>;
-  searchStringValid$: PublishingSubject<boolean>;
-  searchTechnique$: PublishingSubject<OptionsListSearchTechnique>;
-  makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
-  deselectOption: (key: string | undefined) => void;
-  setSearchString: (next: string) => void;
-  setDataLoading: (loading: boolean | undefined) => void;
-  selectAll: (keys: string[]) => void;
-  deselectAll: () => void;
-}
+export type ESQLOptionsListComponentState = Pick<
+  OptionsListESQLControlState,
+  'single_select' | 'selected_options'
+> & {
+  /**
+   * For API consistency, we continue to refer to the control's label as `title`; however, to avoid
+   * being impacted by default embeddable title handling, we switch to `label` for the implementation
+   */
+  label: string;
+} & Omit<TemporaryState<string>, 'requestSize'>;
 
-// type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;
-// type HideExistsUnusedState = Pick<OptionsListComponentState, 'exists_selected'>;
-// type HideSortUnusedState = Pick<OptionsListComponentState, 'sort'>;
-// type DisableLoadSuggestionsUnusedState = Pick<
-//   OptionsListComponentState,
-//   'requestSize' | 'run_past_timeout'
-// >;
-// type DisableInvalidSelectionsUnusedState = Pick<OptionsListComponentState, 'invalidSelections'>;
-
-// export type OptionsListESQLUnusedState = HideExcludeUnusedState &
-//   HideExistsUnusedState &
-//   HideSortUnusedState &
-//   DisableLoadSuggestionsUnusedState &
-//   DisableInvalidSelectionsUnusedState &
-//   Pick<OptionsListComponentState, 'field_name'> & {
-//     use_global_filters: boolean;
-//     ignore_validations: boolean;
-//     data_view_id: string;
-//     blockingError?: Error;
-//     filtersLoading: boolean;
-//     appliedFilters: Filter[] | undefined;
-//   };
+export type ESQLOptionsListComponentApi = HasUniqueId &
+  OptionsListPublishesOptions<string> &
+  SubjectsOf<ESQLOptionsListComponentState> &
+  SettersOf<Pick<TemporaryState<string>, 'dataLoading'>> &
+  OptionsListSelectionsApi & {
+    searchTechnique$: PublishingSubject<OptionsListSearchTechnique>; // this is currently static and not stored
+  };

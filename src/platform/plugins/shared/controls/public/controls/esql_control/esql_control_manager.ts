@@ -106,12 +106,12 @@ export function initializeESQLControlManager(
   );
 
   const searchString$ = new BehaviorSubject<string>('');
-  const displayedAvailableOptions$ = new BehaviorSubject<OptionsListSuggestions>(
+  const displayedAvailableOptions$ = new BehaviorSubject<OptionsListSuggestions<string>>(
     initialState.available_options?.map((value) => ({ value })) ?? []
   );
 
   // Use it for incompatible suggestions
-  const temporaryStateManager = initializeTemporayStateManager();
+  const temporaryStateManager = initializeTemporayStateManager<string>();
 
   function setSearchString(next: string) {
     searchString$.next(next);
@@ -209,7 +209,7 @@ export function initializeESQLControlManager(
 
         // Check if current selections are still compatible
         const currentSelections = selectedOptions$.getValue() ?? [];
-        const incompatibleSelections = new Set<OptionsListSelection>();
+        const incompatibleSelections = new Set<string>();
 
         currentSelections.forEach((selection) => {
           if (!newAvailableOptions.includes(selection)) {
@@ -334,7 +334,7 @@ export function initializeESQLControlManager(
       };
     },
     internalApi: {
-      selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[]>,
+      selectedOptions$,
       availableOptions$: displayedAvailableOptions$,
       totalCardinality$,
       setSelectedOptions,

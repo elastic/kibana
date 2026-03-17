@@ -22,7 +22,11 @@ import {
 } from 'rxjs';
 
 import { OPTIONS_LIST_CONTROL, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
-import type { OptionsListControlState, OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type {
+  OptionsListSelection,
+  OptionsListControlState,
+  OptionsListDSLControlState,
+} from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
@@ -73,7 +77,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         throw new Error('ES|QL control state handling not yet implemented');
       }
       const editorStateManager = initializeEditorStateManager(state);
-      const temporaryStateManager = initializeTemporayStateManager();
+      const temporaryStateManager = initializeTemporayStateManager<OptionsListSelection>();
       const selectionsManager = initializeSelectionsManager(state);
 
       const dataControlManager: DataControlStateManager =

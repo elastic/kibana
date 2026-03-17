@@ -9,6 +9,7 @@
 
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { pick } from 'lodash';
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -68,7 +69,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         },
       });
 
-      const api = finalizeApi({
+      const api: ESQLControlApi = finalizeApi({
         ...unsavedChangesApi,
         ...selections.api,
         ...labelManager.api,
@@ -118,9 +119,8 @@ export const getESQLControlFactory = (): EmbeddableFactory<
       });
 
       const componentApi: ESQLOptionsListComponentApi = {
-        ...api,
+        ...pick(api, ['dataLoading$', 'label$']),
         ...selections.internalApi,
-        ...labelManager.api,
         uuid,
         setDataLoading,
 

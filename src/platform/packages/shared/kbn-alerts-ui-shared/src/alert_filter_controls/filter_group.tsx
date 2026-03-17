@@ -268,8 +268,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
     overridingControls = overridingControls.map((item) => {
       return {
-        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         // give default value to params which are coming from the URL
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         field_name: item.field_name,
         title: item.title,
         selected_options: item.selected_options ?? [],
