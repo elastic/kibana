@@ -30,15 +30,39 @@ jest.mock('../../red_team', () => {
   return {
     createRedTeamRunner: jest.fn(),
     ALL_MODULES: [
-      { name: 'prompt-injection', category: 'prompt-injection', generate: jest.fn(() => [mockExamples[0]]) },
-      { name: 'privilege-escalation', category: 'privilege-escalation', generate: jest.fn(() => [mockExamples[1]]) },
+      {
+        name: 'prompt-injection',
+        category: 'prompt-injection',
+        generate: jest.fn(() => [mockExamples[0]]),
+      },
+      {
+        name: 'privilege-escalation',
+        category: 'privilege-escalation',
+        generate: jest.fn(() => [mockExamples[1]]),
+      },
       { name: 'info-extraction', category: 'info-extraction', generate: jest.fn(() => []) },
       { name: 'jailbreaking', category: 'jailbreaking', generate: jest.fn(() => []) },
     ],
-    promptInjectionModule: { name: 'prompt-injection', category: 'prompt-injection', generate: jest.fn(() => [mockExamples[0]]) },
-    privilegeEscalationModule: { name: 'privilege-escalation', category: 'privilege-escalation', generate: jest.fn(() => [mockExamples[1]]) },
-    infoExtractionModule: { name: 'info-extraction', category: 'info-extraction', generate: jest.fn(() => []) },
-    jailbreakingModule: { name: 'jailbreaking', category: 'jailbreaking', generate: jest.fn(() => []) },
+    promptInjectionModule: {
+      name: 'prompt-injection',
+      category: 'prompt-injection',
+      generate: jest.fn(() => [mockExamples[0]]),
+    },
+    privilegeEscalationModule: {
+      name: 'privilege-escalation',
+      category: 'privilege-escalation',
+      generate: jest.fn(() => [mockExamples[1]]),
+    },
+    infoExtractionModule: {
+      name: 'info-extraction',
+      category: 'info-extraction',
+      generate: jest.fn(() => []),
+    },
+    jailbreakingModule: {
+      name: 'jailbreaking',
+      category: 'jailbreaking',
+      generate: jest.fn(() => []),
+    },
   };
 });
 
@@ -104,16 +128,25 @@ const createMockSummary = (overrides: Partial<RedTeamRunSummary> = {}): RedTeamR
     'prompt-injection': { total: 1, passed: 1, failed: 0 },
     'privilege-escalation': { total: 1, passed: 1, failed: 0 },
     'info-extraction': { total: 1, passed: 1, failed: 0 },
-    'jailbreaking': { total: 1, passed: 1, failed: 0 },
+    jailbreaking: { total: 1, passed: 1, failed: 0 },
   },
   results: [],
   ...overrides,
 });
 
-const mockCreateRedTeamRunner = createRedTeamRunner as jest.MockedFunction<typeof createRedTeamRunner>;
-const mockCreateToolPoisoningEvaluator = createToolPoisoningEvaluator as jest.MockedFunction<typeof createToolPoisoningEvaluator>;
-const mockCreatePromptLeakDetectionEvaluator = createPromptLeakDetectionEvaluator as jest.MockedFunction<typeof createPromptLeakDetectionEvaluator>;
-const mockCreateScopeViolationEvaluator = createScopeViolationEvaluator as jest.MockedFunction<typeof createScopeViolationEvaluator>;
+const mockCreateRedTeamRunner = createRedTeamRunner as jest.MockedFunction<
+  typeof createRedTeamRunner
+>;
+const mockCreateToolPoisoningEvaluator = createToolPoisoningEvaluator as jest.MockedFunction<
+  typeof createToolPoisoningEvaluator
+>;
+const mockCreatePromptLeakDetectionEvaluator =
+  createPromptLeakDetectionEvaluator as jest.MockedFunction<
+    typeof createPromptLeakDetectionEvaluator
+  >;
+const mockCreateScopeViolationEvaluator = createScopeViolationEvaluator as jest.MockedFunction<
+  typeof createScopeViolationEvaluator
+>;
 
 describe('redTeamCmd', () => {
   let log: ReturnType<typeof createMockLog>;
@@ -158,9 +191,9 @@ describe('redTeamCmd', () => {
   describe('flag validation', () => {
     it('throws when --suite is missing', async () => {
       const flagsReader = createMockFlagsReader({});
-      await expect(
-        redTeamCmd.run({ log, flagsReader } as any)
-      ).rejects.toThrow('--suite is required.');
+      await expect(redTeamCmd.run({ log, flagsReader } as any)).rejects.toThrow(
+        '--suite is required.'
+      );
     });
 
     it('throws when no module selection flag is provided', async () => {
@@ -169,9 +202,9 @@ describe('redTeamCmd', () => {
         all: false,
         'guardrails-only': false,
       });
-      await expect(
-        redTeamCmd.run({ log, flagsReader } as any)
-      ).rejects.toThrow('Specify --module <name>, --all, or --guardrails-only.');
+      await expect(redTeamCmd.run({ log, flagsReader } as any)).rejects.toThrow(
+        'Specify --module <name>, --all, or --guardrails-only.'
+      );
     });
 
     it('includes available module names in error when no selection is provided', async () => {
@@ -180,9 +213,9 @@ describe('redTeamCmd', () => {
         all: false,
         'guardrails-only': false,
       });
-      await expect(
-        redTeamCmd.run({ log, flagsReader } as any)
-      ).rejects.toThrow(/prompt-injection, privilege-escalation, info-extraction, jailbreaking/);
+      await expect(redTeamCmd.run({ log, flagsReader } as any)).rejects.toThrow(
+        /prompt-injection, privilege-escalation, info-extraction, jailbreaking/
+      );
     });
 
     it('throws for an unknown module name', async () => {
@@ -192,9 +225,9 @@ describe('redTeamCmd', () => {
         all: false,
         'guardrails-only': false,
       });
-      await expect(
-        redTeamCmd.run({ log, flagsReader } as any)
-      ).rejects.toThrow('Unknown module "nonexistent-module"');
+      await expect(redTeamCmd.run({ log, flagsReader } as any)).rejects.toThrow(
+        'Unknown module "nonexistent-module"'
+      );
     });
 
     it('includes available modules in unknown module error', async () => {
@@ -204,9 +237,9 @@ describe('redTeamCmd', () => {
         all: false,
         'guardrails-only': false,
       });
-      await expect(
-        redTeamCmd.run({ log, flagsReader } as any)
-      ).rejects.toThrow(/Available: prompt-injection, privilege-escalation, info-extraction, jailbreaking/);
+      await expect(redTeamCmd.run({ log, flagsReader } as any)).rejects.toThrow(
+        /Available: prompt-injection, privilege-escalation, info-extraction, jailbreaking/
+      );
     });
   });
 
