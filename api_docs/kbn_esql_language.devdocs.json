@@ -3595,7 +3595,7 @@
         "label": "EsqlFunctionNames",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated/function_names.ts",
-        "lineNumber": 257,
+        "lineNumber": 258,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
