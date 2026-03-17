@@ -77,6 +77,7 @@ steps:
         'event',
         'kibanaUrl',
         'now',
+        'output',
         'workflow',
         'parent',
         'steps',
@@ -90,6 +91,7 @@ steps:
         '"{{ event$0 }}"',
         '"{{ execution$0 }}"',
         '"{{ kibanaUrl$0 }}"',
+        '"{{ output$0 }}"',
         '"{{ workflow$0 }}"',
         '"{{ inputs$0 }}"',
         '"{{ consts$0 }}"',
@@ -119,6 +121,7 @@ steps:
         '{{ event$0 }}',
         '{{ execution$0 }}',
         '{{ kibanaUrl$0 }}',
+        '{{ output$0 }}',
         '{{ workflow$0 }}',
         '{{ inputs$0 }}',
         '{{ consts$0 }}',
@@ -607,6 +610,120 @@ steps:
         (s) => s.label === 'threshold' || s.label === 'inputs'
       );
       expect(inputsSuggestions.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('workflow.output with: block autocomplete', () => {
+    it('should not suggest output fields when cursor is on the same line as with: (aligned with other steps)', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+outputs:
+  - name: result
+    type: string
+triggers:
+  - type: manual
+steps:
+  - name: emit
+    type: workflow.output
+    with:  |<-
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const labels = suggestions.map((s) => s.label);
+      // No output key suggestions on the "with:" line (same as console/custom property behavior)
+      expect(labels).not.toContain('result');
+    });
+
+    it('should not suggest output keys when cursor is in a value position (after key:)', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+outputs:
+  - name: result
+    type: string
+  - name: count
+    type: number
+triggers:
+  - type: manual
+steps:
+  - name: emit
+    type: workflow.output
+    with:
+      a: |<-
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const labels = suggestions.map((s) => s.label);
+      expect(labels).not.toContain('result');
+      expect(labels).not.toContain('count');
+    });
+
+    it('should suggest declared output fields inside workflow.output with: block', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+outputs:
+  - name: result
+    type: string
+  - name: count
+    type: number
+triggers:
+  - type: manual
+steps:
+  - name: emit
+    type: workflow.output
+    with:
+      |<-
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const labels = suggestions.map((s) => s.label);
+      expect(labels).toContain('result');
+      expect(labels).toContain('count');
+    });
+
+    it('should not suggest already provided output keys', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+outputs:
+  - name: result
+    type: string
+  - name: count
+    type: number
+triggers:
+  - type: manual
+steps:
+  - name: emit
+    type: workflow.output
+    with:
+      result: "hello"
+      |<-
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const labels = suggestions.map((s) => s.label);
+      expect(labels).not.toContain('result');
+      expect(labels).toContain('count');
+    });
+
+    it('should not suggest output fields when none are declared', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+outputs:
+  - name: result
+    type: string
+triggers:
+  - type: manual
+steps:
+  - name: emit
+    type: workflow.output
+    with:
+      result: "done"
+      |<-
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const labels = suggestions.map((s) => s.label);
+      // When all outputs are already provided, no more output field suggestions
+      expect(labels).not.toContain('result');
     });
   });
 });
