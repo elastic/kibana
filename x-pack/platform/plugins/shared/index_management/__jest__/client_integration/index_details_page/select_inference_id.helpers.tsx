@@ -27,6 +27,12 @@ export const mockResendRequest = jest.fn();
 
 export const DEFAULT_ENDPOINTS: InferenceAPIConfigResponse[] = [
   {
+    inference_id: '.jina-embeddings-v5-text-small',
+    task_type: 'text_embedding',
+    service: 'jina',
+    service_settings: { model_id: 'jina-embeddings-v5-text-small' },
+  },
+  {
     inference_id: '.preconfigured-elser',
     task_type: 'sparse_embedding',
     service: 'elastic',
