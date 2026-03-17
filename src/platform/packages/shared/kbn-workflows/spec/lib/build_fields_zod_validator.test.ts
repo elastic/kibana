@@ -426,8 +426,8 @@ describe('buildFieldsZodValidator', () => {
       type: 'object',
       properties: { name: { type: 'string' } },
       additionalProperties: false,
-    } as Parameters<typeof buildInputsZodValidator>[0];
-    const validator = buildInputsZodValidator(schema);
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
     expect(validator.safeParse({ name: 'Alice', extra: 'should fail' }).success).toBe(false);
     expect(validator.safeParse({ name: 'Alice' }).success).toBe(true);
   });

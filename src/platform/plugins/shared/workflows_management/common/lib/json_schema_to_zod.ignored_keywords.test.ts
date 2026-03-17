@@ -8,7 +8,10 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import { convertJsonSchemaToZod, convertJsonSchemaToZodWithRefs } from './json_schema_to_zod';
+import {
+  convertJsonSchemaToZod,
+  convertJsonSchemaToZodWithRefs,
+} from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 
 /**
  * Documents JSON Schema keywords that the convertJsonSchemaToZod wrapper does NOT
@@ -17,14 +20,14 @@ import { convertJsonSchemaToZod, convertJsonSchemaToZodWithRefs } from './json_s
  *
  * When a keyword is implemented:
  *   - its test here will start FAILING (the assertion `toBe(true)` no longer holds)
- *   - move it to json_schema_to_zod.test.ts with the expectation flipped to `toBe(false)`
+ *   - move it to build_fields_zod_validator.test.ts with the expectation flipped to `toBe(false)`
  *
  * Run:
  *   yarn test:jest src/platform/plugins/shared/workflows_management/common/lib/json_schema_to_zod.ignored_keywords.test.ts
  */
 describe('convertJsonSchemaToZod – unimplemented keyword gaps', () => {
   // ─── additionalProperties: {schema} ─────────────────────────────────────────
-  // additionalProperties: false IS enforced (see json_schema_to_zod.test.ts).
+  // additionalProperties: false IS enforced (see build_fields_zod_validator.test.ts).
   // The schema-value form requires superRefine to validate extra keys — tracked here.
   // Same recursive-traversal limitation applies for deeply nested cases.
   describe('additionalProperties: schema', () => {
@@ -70,7 +73,7 @@ describe('convertJsonSchemaToZod – unimplemented keyword gaps', () => {
   });
 
   // ─── $ref / definitions ─────────────────────────────────────────────────────
-  // Note: convertJsonSchemaToZodWithRefs + buildInputsZodValidator DO resolve
+  // Note: convertJsonSchemaToZodWithRefs + buildFieldsZodValidator DO resolve
   // $ref at the property level. This test confirms convertJsonSchemaToZod alone
   // (used for nested schemas without a root) still does not.
   describe('$ref / definitions', () => {
