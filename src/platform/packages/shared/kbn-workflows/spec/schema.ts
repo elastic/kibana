@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
+import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { timezoneNames } from './schema/triggers/timezone_names';
 
@@ -624,6 +624,24 @@ export const WorkflowExecuteAsyncStepOutputSchema = z.object({
   startedAt: z.string().optional(),
 });
 
+export const WorkflowOutputStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.output'),
+  status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
+  with: z.record(z.string(), z.any()),
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
+
+export const WorkflowFailStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.fail'),
+  with: z
+    .object({
+      message: z.string().optional(),
+      reason: z.string().optional(),
+    })
+    .optional(),
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
+
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
@@ -671,6 +689,11 @@ export const WorkflowInputSchema = z.union([
 ]);
 export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
+/* --- Outputs --- */
+// Outputs use the same format as inputs (name, type, required, etc.); default is ignored at runtime for outputs.
+export const WorkflowOutputSchema = WorkflowInputSchema;
+export type WorkflowOutput = z.infer<typeof WorkflowOutputSchema>;
+
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
   z.string(),
@@ -698,6 +721,8 @@ const StepSchema = z.lazy(() =>
     MergeStepSchema,
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
+    WorkflowOutputStepSchema,
+    WorkflowFailStepSchema,
     LoopBreakStepSchema,
     LoopContinueStepSchema,
     BaseConnectorStepSchema,
@@ -720,6 +745,8 @@ export const BuiltInStepTypes = [
   WaitStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
+  WorkflowOutputStepSchema.shape.type.value,
+  WorkflowFailStepSchema.shape.type.value,
   LoopBreakStepSchema.shape.type.value,
   LoopContinueStepSchema.shape.type.value,
 ];
@@ -742,34 +769,34 @@ const WorkflowSchemaBase = z.object({
       z.array(WorkflowInputSchema),
     ])
     .optional(),
+  outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
 });
 
+/** Normalize inputs or outputs from either JSON Schema or legacy array format to JsonModelSchema. */
+function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
+  if (!value) return undefined;
+  if (typeof value === 'object' && !Array.isArray(value) && 'properties' in value) {
+    return value as z.infer<typeof JsonModelSchema>;
+  }
+  if (Array.isArray(value)) {
+    return convertLegacyFieldsToJsonSchema(value);
+  }
+  return undefined;
+}
+
 export const WorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(TriggerSchema).min(1),
 }).transform((data) => {
-  // Transform inputs from legacy array format to JSON Schema format
-  let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
-  if (data.inputs) {
-    if (
-      'properties' in data.inputs &&
-      typeof data.inputs === 'object' &&
-      !Array.isArray(data.inputs)
-    ) {
-      normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
-    } else if (Array.isArray(data.inputs)) {
-      normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
-    }
-  }
+  const normalizedInputs = normalizeFieldsToJsonSchema(data.inputs);
+  const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
-  // Return the data with normalized inputs, preserving all other fields as-is
-  // This preserves the optionality of fields since we're not explicitly listing them all
-  // Exclude inputs from spread to ensure it's always the normalized JSON Schema format (or undefined)
-  const { inputs: _, ...rest } = data;
+  const { inputs: _, outputs: __, ...rest } = data;
   return {
     ...rest,
     ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
+    ...(normalizedOutputs !== undefined && { outputs: normalizedOutputs }),
   };
 });
 
@@ -799,6 +826,20 @@ const WorkflowSchemaForAutocompleteBase = z
         // New JSON Schema format
         JsonModelSchema,
         // Legacy array format (for backward compatibility during parsing)
+        z.array(
+          z
+            .object({
+              name: z.string().catch(''),
+              type: z.string().catch(''),
+            })
+            .passthrough()
+        ),
+      ])
+      .optional()
+      .catch(undefined),
+    outputs: z
+      .union([
+        JsonModelSchema,
         z.array(
           z
             .object({
@@ -924,6 +965,17 @@ export const WorkflowContextSchema = z.object({
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
   inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
+  output: z
+    .record(
+      z.string(),
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
+      ])
+    )
+    .optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
   parent: z
@@ -938,8 +990,9 @@ export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
 export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
-  // extending with actual inputs and consts of different types
+  // extending with actual inputs, outputs and consts of different types
   inputs: z.object({}),
+  output: z.object({}),
   consts: z.object({}),
   // overriding event with base event schema (spaceId only) so it can be
   // dynamically extended with trigger-specific properties (e.g., alerts, rule)
