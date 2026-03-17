@@ -1,17 +1,19 @@
 {
-  "sha1": "b62bb77d48c8edac0e8fd294bc9e27701d4749b8",
+  "sha1": "0a44e5cc066b0051042f5fcea2d1a3f40c1a0636",
   "tests": [
     {
       "id": "ace16ea93cb8904-1f34fdab863ed0b",
       "title": "Getting Started - Admin verifies page elements are rendered correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 17,
+        "line": 18,
         "column": 7
       }
     },
@@ -20,12 +22,14 @@
       "title": "Getting Started - Admin Add data button navigates to correct pages",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 94,
+        "line": 95,
         "column": 7
       }
     },
@@ -34,12 +38,14 @@
       "title": "Getting Started - Admin Skip and go to Home button navigates to home page",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 113,
+        "line": 114,
         "column": 7
       }
     },
@@ -48,12 +54,14 @@
       "title": "Getting Started - Admin Elasticsearch endpoint copy button shows feedback",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 118,
+        "line": 119,
         "column": 7
       }
     },
@@ -62,12 +70,14 @@
       "title": "Getting Started - Admin Connection details flyout works correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 7
       }
     },
@@ -76,12 +86,14 @@
       "title": "Getting Started - Admin Tutorial cards open embedded console",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 143,
+        "line": 144,
         "column": 7
       }
     },
@@ -90,12 +102,14 @@
       "title": "Getting Started - Admin Language selector shows correct code examples",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 166,
+        "line": 167,
         "column": 7
       }
     },
