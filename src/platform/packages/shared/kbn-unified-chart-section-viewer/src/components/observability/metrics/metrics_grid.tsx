@@ -269,10 +269,11 @@ const ChartItem = React.memo(
       return createM4DownsampledESQLQuery({
         metric,
         whereStatements,
+        splitAccessors: dimensions.map((dim) => dim.name),
         sourceBuckets: AVG_TARGET_BUCKETS,
         targetBuckets: M4_TARGET_BUCKETS,
       });
-    }, [metric, whereStatements, isM4Compatible]);
+    }, [metric, whereStatements, dimensions, isM4Compatible]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const standardChartLayers = useChartLayers({
@@ -298,9 +299,11 @@ const ChartItem = React.memo(
               ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
             },
           ],
+          breakdown:
+            dimensions.length > 0 ? dimensions.map((dim) => dim.name) : undefined,
         },
       ],
-      [metric.name, metric.unit, color]
+      [metric.name, metric.unit, color, dimensions]
     );
 
     const activeQuery = isM4Compatible ? m4Query : standardQuery;

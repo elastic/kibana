@@ -76,6 +76,7 @@ export function createESQLQuery({
 interface CreateM4DownsampledESQLQueryParams {
   metric: MetricField;
   whereStatements?: string[];
+  splitAccessors?: string[];
   sourceBuckets?: number;
   targetBuckets?: number;
   timestampField?: string;
@@ -101,6 +102,7 @@ interface CreateM4DownsampledESQLQueryParams {
 export function createM4DownsampledESQLQuery({
   metric,
   whereStatements = [],
+  splitAccessors = [],
   sourceBuckets = 1000,
   targetBuckets = 100,
   timestampField = '@timestamp',
@@ -121,13 +123,17 @@ export function createM4DownsampledESQLQuery({
     metricName: metricField,
   });
 
-  const firstStage = `STATS agg_val = ${aggFunction} BY _ts = BUCKET(${timestampField}, ${sourceBuckets}, ?_tstart, ?_tend)`;
+  const escapedSplitAccessors = splitAccessors.map((field) => sanitazeESQLInput(field) ?? field);
+  const splitBy = escapedSplitAccessors.length > 0 ? `, ${escapedSplitAccessors.join(', ')}` : '';
+
+  const firstStage = `STATS agg_val = ${aggFunction} BY _ts = BUCKET(${timestampField}, ${sourceBuckets}, ?_tstart, ?_tend)${splitBy}`;
 
   const m4Stage = createM4Pipeline({
     metricField: 'agg_val',
     targetBuckets,
     timestampField: '_ts',
     outputTimestampField: timestampField,
+    splitAccessors: escapedSplitAccessors,
   });
 
   return `${basePipeline.toString()}\n  | ${firstStage}\n  | ${m4Stage}`;

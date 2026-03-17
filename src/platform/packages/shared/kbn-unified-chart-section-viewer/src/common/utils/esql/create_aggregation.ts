@@ -183,17 +183,23 @@ export function createM4Pipeline({
   targetBuckets = 100,
   timestampField = '@timestamp',
   outputTimestampField = '@timestamp',
+  splitAccessors = [],
 }: {
   metricField: string;
   targetBuckets?: number;
   timestampField?: string;
   outputTimestampField?: string;
+  splitAccessors?: string[];
 }): string {
   const ts = timestampField;
   const outTs = outputTimestampField;
   const val = metricField;
   const bucket = `BUCKET(${ts}, ${targetBuckets}, ?_tstart, ?_tend)`;
-  const limit = targetBuckets * 4;
+  const hasSplit = splitAccessors.length > 0;
+  const splitBy = hasSplit ? `, ${splitAccessors.join(', ')}` : '';
+  const keepFields = [outTs, M4_VALUE_COLUMN, ...splitAccessors].join(', ');
+  const maxSeries = hasSplit ? 1000 : 1;
+  const rowLimit = targetBuckets * 4 * maxSeries;
 
   return [
     `STATS`,
@@ -205,14 +211,14 @@ export function createM4Pipeline({
     `    max_v = MAX(${val}),`,
     `    min_v_t = TOP(${val}, 1, "asc", ${ts}),`,
     `    max_v_t = TOP(${val}, 1, "desc", ${ts})`,
-    `  BY _m4_bucket = ${bucket}`,
+    `  BY _m4_bucket = ${bucket}${splitBy}`,
     `| EVAL idx = [0, 1, 2, 3]`,
     `| MV_EXPAND idx`,
     `| EVAL`,
     `    ${outTs} = CASE(idx == 0, first_t, idx == 1, last_t, idx == 2, min_v_t, idx == 3, max_v_t),`,
     `    ${M4_VALUE_COLUMN} = CASE(idx == 0, first_t_v, idx == 1, last_t_v, idx == 2, min_v, idx == 3, max_v)`,
-    `| KEEP ${outTs}, ${M4_VALUE_COLUMN}`,
+    `| KEEP ${keepFields}`,
     `| SORT ${outTs} ASC`,
-    `| LIMIT ${limit}`,
+    `| LIMIT ${rowLimit}`,
   ].join('\n  ');
 }
