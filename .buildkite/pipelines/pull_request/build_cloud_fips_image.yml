@@ -1,6 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/fips/build_cloud_fips_image.sh
     label: 'Build Cloud FIPS Image'
+    key: build_cloud_fips_image
     agents:
       machineType: n2-standard-2
       preemptible: true

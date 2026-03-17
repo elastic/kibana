@@ -16,6 +16,8 @@ import {
 } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
 
+const timeFieldCache = new Map<string, string | undefined>();
+
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
   if (crypto.subtle) {
@@ -74,21 +76,37 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  const encodedQuery = encodeURIComponent(query);
-  const response = (await http?.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
-    // eslint-disable-next-line no-console
-    console.error('Failed to fetch the timefield', error);
-    return undefined;
-  })) as { timeField?: string } | undefined;
-  const timeField = response?.timeField;
+  if (options?.createNewInstanceEvenIfCachedOneAvailable) {
+    timeFieldCache.delete(query);
+  }
+
+  let timeField: string | undefined;
+  if (timeFieldCache.has(query)) {
+    timeField = timeFieldCache.get(query);
+  } else if (http) {
+    const encodedQuery = encodeURIComponent(query);
+    const response = (await http.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch the timefield', error);
+      return undefined;
+    })) as { timeField?: string } | undefined;
+    timeField = response?.timeField;
+    if (response !== undefined) {
+      timeFieldCache.set(query, timeField);
+    }
+  }
+
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const prefix = options?.idPrefix ?? 'esql';
-  const dataViewId = await sha256(`${prefix}-${indexPattern}`);
+  const dataViewId = await sha256(
+    timeField ? `${prefix}-${indexPattern}-${timeField}` : `${prefix}-${indexPattern}`
+  );
 
   if (options?.createNewInstanceEvenIfCachedOneAvailable) {
     // overwise it might return a cached data view with a different time field
     dataViewsService.clearInstanceCache(dataViewId);
   }
+
   const skipFetchFields = options?.skipFetchFields ?? false;
 
   const dataView = await dataViewsService.create(
