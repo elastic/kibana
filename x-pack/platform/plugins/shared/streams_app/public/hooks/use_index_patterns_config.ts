@@ -9,8 +9,6 @@ import { useMemo } from 'react';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 import { useKibana } from './use_kibana';
 
-const DEFAULT_INDEX_PATTERNS = ['logs*'];
-
 /**
  * Client-side utility to check if a stream matches index patterns.
  */
@@ -30,6 +28,7 @@ function streamMatchesIndexPatterns(streamName: string, indexPatterns: string[])
 
 /**
  * Hook to get configured index patterns and utilities.
+ * Uses indexPatternsResolved from the API (server applies default); no client-side default.
  */
 export function useIndexPatternsConfig() {
   const {
@@ -46,22 +45,17 @@ export function useIndexPatternsConfig() {
     [streams.streamsRepositoryClient]
   );
 
-  const indexPatterns = useMemo(() => {
-    const configuredPatterns = settingsFetch.value?.indexPatterns;
-    if (!configuredPatterns || configuredPatterns.trim() === '') {
-      return DEFAULT_INDEX_PATTERNS;
-    }
-
-    // Split by comma and trim whitespace
-    return configuredPatterns
-      .split(',')
-      .map((pattern) => pattern.trim())
-      .filter((pattern) => pattern.length > 0);
-  }, [settingsFetch.value?.indexPatterns]);
+  const indexPatterns = useMemo(
+    () => settingsFetch.value?.indexPatternsResolved ?? [],
+    [settingsFetch.value?.indexPatternsResolved]
+  );
 
   const filterStreamsByIndexPatterns = useMemo(() => {
-    return (streams: Array<{ stream: { name: string } }>) => {
-      return streams.filter((streamItem) =>
+    return (streamsToFilter: Array<{ stream: { name: string } }>) => {
+      if (indexPatterns.length === 0) {
+        return streamsToFilter;
+      }
+      return streamsToFilter.filter((streamItem) =>
         streamMatchesIndexPatterns(streamItem.stream.name, indexPatterns)
       );
     };
