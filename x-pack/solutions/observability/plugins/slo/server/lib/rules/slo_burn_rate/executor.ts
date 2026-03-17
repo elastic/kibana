@@ -18,7 +18,7 @@ import {
   ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
+import { SLOS_BASE_PATH } from '../../../../common/locators/paths';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
