@@ -55,6 +55,7 @@ const SUPPORTED_DATE_FORMATS = [
   'MMM D YYYY', // e.g. "Feb 3 2016"
   'MMM D, YYYY', // e.g. "feb 3, 2016"
   'YYYY-MM-DD',
+  'YYYY-MM-DDTHH:mm:ss.SSS',
   'YYYY-MM-DDTHH:mm:ss.SSSZ',
   'YYYY-MM-DDTHH:mm:ssZ',
   'YYYY-MM-DDTHH:mm',
@@ -250,12 +251,18 @@ function textInstantToDateString(text: string): DateString | null {
     return trimmed; // Return original, it's valid
   }
 
-  // Only try dateMath for strings that could be datemath or ISO
-  if (!/^(now|[+-]|\d)/.test(trimmed)) {
+  // Only try dateMath for strings that look like ISO dates (YYYY-MM-DD…) or
+  // datemath expressions (now/d, now||+1d, …). Bare `now` and shorthand like
+  // `now-7m` or `+7d` are already handled above. A loose prefix check here
+  // would let strings like "2025-01-01 to" through to dateMath.parse, which
+  // internally calls moment(string) without an explicit format and triggers a
+  // deprecation warning for non-ISO/RFC 2822 input.
+  const isIsoDate = /^\d{4}-\d{2}-\d{2}([T|]|$)/.test(trimmed);
+  const isDateMath = /^now[/|+-]/.test(trimmed);
+  if (!isIsoDate && !isDateMath) {
     return null;
   }
 
-  // Try parsing as absolute date via dateMath (ISO, RFC 2822, datemath, etc.)
   const parsed = dateMath.parse(trimmed);
   if (parsed?.isValid()) {
     return trimmed; // Return original, it's valid
