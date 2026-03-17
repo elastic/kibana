@@ -13,7 +13,7 @@ import {
   ENTRY_LEADER_START,
   ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_USER_NAME,
-  ENTRY_LEADER_WORKING_DIRECTORY,
+  GROUP_LEADER_WORKING_DIRECTORY,
   PROCESS_COMMAND_LINE,
 } from '../constants/field_names';
 import { getUserDisplayName, useProcessData } from './use_process_data';
@@ -64,7 +64,7 @@ describe('useProcessData', () => {
       [ENTRY_LEADER_START]: ['test'],
       [ALERT_RULE_NAME]: ['test'],
       [ALERT_RULE_UUID]: ['test'],
-      [ENTRY_LEADER_WORKING_DIRECTORY]: ['test'],
+      [GROUP_LEADER_WORKING_DIRECTORY]: ['test'],
       [PROCESS_COMMAND_LINE]: ['test'],
     });
     const hookResult = renderHook(() => useProcessData(hit));

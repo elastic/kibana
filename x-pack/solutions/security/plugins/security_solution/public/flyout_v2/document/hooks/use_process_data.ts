@@ -13,7 +13,7 @@ import {
   ENTRY_LEADER_START,
   ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_USER_NAME,
-  ENTRY_LEADER_WORKING_DIRECTORY,
+  GROUP_LEADER_WORKING_DIRECTORY,
   PROCESS_COMMAND_LINE,
 } from '../constants/field_names';
 
@@ -46,7 +46,7 @@ export const useProcessData = (hit: DataTableRecord) => {
       startAt: getFieldValue(hit, ENTRY_LEADER_START) as string,
       ruleName: getFieldValue(hit, ALERT_RULE_NAME) as string,
       ruleId: getFieldValue(hit, ALERT_RULE_UUID) as string,
-      workdir: getFieldValue(hit, ENTRY_LEADER_WORKING_DIRECTORY) as string,
+      workdir: getFieldValue(hit, GROUP_LEADER_WORKING_DIRECTORY) as string,
       command: getFieldValue(hit, PROCESS_COMMAND_LINE) as string,
     }),
     [hit]

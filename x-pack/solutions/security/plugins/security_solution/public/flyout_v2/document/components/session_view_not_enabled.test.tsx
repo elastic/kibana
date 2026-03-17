@@ -9,10 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestProviders } from '../../../common/mock';
-import {
-  SESSION_VIEW_UPSELL_TEST_ID,
-  SESSION_VIEW_NO_DATA_TEST_ID,
-} from '../../../flyout/document_details/shared/components/test_ids';
+import { SESSION_VIEW_NO_DATA_TEST_ID, SESSION_VIEW_UPSELL_TEST_ID } from './test_ids';
 import { SessionViewNotEnabled } from './session_view_not_enabled';
 
 const NO_DATA_MESSAGE =

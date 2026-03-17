@@ -10,10 +10,7 @@ import React from 'react';
 import { EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
-import {
-  SESSION_VIEW_UPSELL_TEST_ID,
-  SESSION_VIEW_NO_DATA_TEST_ID,
-} from '../../../flyout/document_details/shared/components/test_ids';
+import { SESSION_VIEW_NO_DATA_TEST_ID, SESSION_VIEW_UPSELL_TEST_ID } from './test_ids';
 
 export interface SessionViewNotEnabledProps {
   /**
