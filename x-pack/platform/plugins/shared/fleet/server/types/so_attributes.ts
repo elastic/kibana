@@ -82,6 +82,7 @@ export interface AgentPolicySOAttributes {
   has_agent_version_conditions?: boolean;
   min_agent_version?: string | null;
   package_agent_version_conditions?: AgentPolicyAgentVersionCondition[] | null;
+  package_agent_version_conditions_v2?: AgentPolicyAgentVersionCondition[] | null;
 }
 
 export interface AgentSOAttributes {

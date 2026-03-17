@@ -36,6 +36,10 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
     unenroll_timeout,
   } = attributes || {};
 
+  const packageAgentVersionConditions =
+    attributes?.package_agent_version_conditions_v2 ??
+    attributes?.package_agent_version_conditions;
+
   return {
     id,
     version,
@@ -58,5 +62,6 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
     package_policies,
     agents,
     ...attributes,
+    package_agent_version_conditions: packageAgentVersionConditions,
   };
 };

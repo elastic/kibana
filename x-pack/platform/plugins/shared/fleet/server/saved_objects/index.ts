@@ -37,6 +37,7 @@ import {
 import {
   AgentPolicySchemaV3,
   AgentPolicySchemaV4,
+  AgentPolicySchemaV5,
   EpmPackagesSchemaV6,
   EpmPackagesSchemaV7,
   SettingsSchemaV5,
@@ -115,6 +116,7 @@ import {
   migratePackagePolicySetRequiresRootToV8150,
 } from './migrations/to_v8_15_0';
 import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
+import { backfillAgentPolicyPackageAgentVersionConditionsV2 } from './model_versions/agent_policy_v5';
 import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
@@ -351,7 +353,7 @@ export const getSavedObjectTypes = (
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
           min_agent_version: { type: 'keyword' },
-          package_agent_version_conditions: { dynamic: false, properties: {} },
+          package_agent_version_conditions: { type: 'flattened', index: false },
         },
       },
       migrations: {
@@ -459,13 +461,31 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 min_agent_version: { type: 'keyword' },
-                package_agent_version_conditions: { dynamic: false, properties: {} },
+                package_agent_version_conditions: { type: 'flattened', index: false },
               },
             },
           ],
           schemas: {
             forwardCompatibility: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '10': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                package_agent_version_conditions_v2: { dynamic: false, properties: {} },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyPackageAgentVersionConditionsV2,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
@@ -519,7 +539,7 @@ export const getSavedObjectTypes = (
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
           min_agent_version: { type: 'keyword' },
-          package_agent_version_conditions: { dynamic: false, properties: {} },
+          package_agent_version_conditions: { type: 'flattened', index: false },
         },
       },
       modelVersions: {
@@ -561,13 +581,31 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 min_agent_version: { type: 'keyword' },
-                package_agent_version_conditions: { dynamic: false, properties: {} },
+                package_agent_version_conditions: { type: 'flattened', index: false },
               },
             },
           ],
           schemas: {
             forwardCompatibility: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV4.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '5': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                package_agent_version_conditions_v2: { dynamic: false, properties: {} },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyPackageAgentVersionConditionsV2,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
           },
         },
       },

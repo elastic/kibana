@@ -305,6 +305,23 @@ export const AgentPolicySchemaV4 = AgentPolicySchemaV3.extends({
   ),
 });
 
+const packageAgentVersionConditionsSchema = schema.maybe(
+  schema.nullable(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        title: schema.string(),
+        version_condition: schema.string(),
+      }),
+      { maxSize: 1000 }
+    )
+  )
+);
+
+export const AgentPolicySchemaV5 = AgentPolicySchemaV4.extends({
+  package_agent_version_conditions_v2: packageAgentVersionConditionsSchema,
+});
+
 export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
   supports_agentless: schema.maybe(
     schema.oneOf([

@@ -275,7 +275,7 @@ class AgentPolicyService {
           ? { min_agent_version: options.minAgentVersion }
           : {}),
         ...(options.packageAgentVersionConditions !== undefined
-          ? { package_agent_version_conditions: options.packageAgentVersionConditions }
+          ? { package_agent_version_conditions_v2: options.packageAgentVersionConditions }
           : {}),
       })
       .catch(catchAndSetErrorStackTrace.withMessage(`SO update to agent policy [${id}] failed`));
