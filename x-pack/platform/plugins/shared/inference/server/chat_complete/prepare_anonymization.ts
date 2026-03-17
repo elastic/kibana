@@ -118,7 +118,7 @@ export const prepareAnonymization = async ({
               // migration). Fall back to generating a fresh document rather than hard-erroring —
               // callers that persisted an old ID before migration should not receive a 409.
               logger.warn(
-                `[inference.anonymization.namespace_mismatch] replacements_id=${carriedReplacementsId} requested_namespace=${namespace} actual_namespace=${error.actualNamespace} — falling back to new replacements document`
+                `[inference.anonymization.namespace_mismatch] replacements_id=${carriedReplacementsId} requested_namespace=${namespace} actual_namespace=${error.meta.actualNamespace} — falling back to new replacements document`
               );
               replacementsId = uuidv4();
               return null;

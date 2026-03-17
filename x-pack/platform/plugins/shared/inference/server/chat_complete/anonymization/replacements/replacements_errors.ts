@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-export class ReplacementsNamespaceMismatchError extends Error {
-  public readonly statusCode = 409;
+import { ServerSentEventError } from '@kbn/sse-utils';
 
-  constructor(
-    public readonly replacementsId: string,
-    public readonly requestedNamespace: string,
-    public readonly actualNamespace: string
-  ) {
-    super(`Replacements namespace mismatch for id "${replacementsId}": access denied`);
+export class ReplacementsNamespaceMismatchError extends ServerSentEventError<
+  'namespaceMismatch',
+  { replacementsId: string; requestedNamespace: string; actualNamespace: string }
+> {
+  constructor(replacementsId: string, requestedNamespace: string, actualNamespace: string) {
+    super(
+      'namespaceMismatch',
+      `Replacements namespace mismatch for id "${replacementsId}": access denied`,
+      {
+        replacementsId,
+        requestedNamespace,
+        actualNamespace,
+      }
+    );
     this.name = 'ReplacementsNamespaceMismatchError';
   }
 }
