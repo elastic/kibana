@@ -163,7 +163,7 @@ export const getExceptionsPreImportHandler = (
 const validateCanEndpointArtifactsBeImported = (
   data: PromiseFromStreams,
   experimentalFeatures: ExperimentalFeatures
-) => {
+): void => {
   if (experimentalFeatures.endpointExceptionsMovedUnderManagement) {
     return;
   }
@@ -196,7 +196,7 @@ const validateCanEndpointArtifactsBeImported = (
 const provideSpaceAwarenessCompatibilityForOldEndpointExceptions = (
   data: PromiseFromStreams,
   logger: Logger
-) => {
+): void => {
   const adjustedImportItems: PromiseFromStreams['items'] = [];
 
   for (const item of data.items) {
@@ -232,7 +232,7 @@ const deleteExistingItemsForOverwrite = async ({
   request: KibanaRequest | undefined;
   importedListId: string;
   logger: Logger;
-}) => {
+}): Promise<void> => {
   if (!request) {
     throw new EndpointArtifactExceptionValidationError(
       'Unable to determine space id. Missing HTTP Request object',
