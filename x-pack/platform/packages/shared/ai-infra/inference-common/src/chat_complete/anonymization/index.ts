@@ -20,3 +20,4 @@ export type {
   AnonymizationResponseMetadata,
   DeanonymizedMessageData,
 } from './types';
+export { extractReplacementsId } from './extract_replacements_id';

@@ -102,6 +102,7 @@ export type {
   AnonymizationResponseMetadata,
   DeanonymizedMessageData,
 } from './anonymization';
+export { extractReplacementsId } from './anonymization';
 
 export type {
   InferenceCallbacks,

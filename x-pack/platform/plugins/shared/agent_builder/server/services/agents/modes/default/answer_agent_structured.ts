@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ChatCompleteAnonymizationMetadata } from '@kbn/inference-common';
+import { extractReplacementsId } from '@kbn/inference-common';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
 import { wrapJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
@@ -18,7 +19,6 @@ import { getRandomAnsweringMessage } from './i18n';
 import { tags } from './constants';
 import type { StateType } from './state';
 import { processStructuredAnswerResponse } from './action_utils';
-import { extractReplacementsId } from './replacements_id';
 
 const structuredOutputZodSchema = z.object({
   response: z.string().describe("The response to the user's query"),

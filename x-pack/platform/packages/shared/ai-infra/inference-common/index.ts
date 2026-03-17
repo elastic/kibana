@@ -86,6 +86,7 @@ export {
   type ToolCallbackResult,
   type InferenceCallbacks,
   type InferenceEventEmitter,
+  extractReplacementsId,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';

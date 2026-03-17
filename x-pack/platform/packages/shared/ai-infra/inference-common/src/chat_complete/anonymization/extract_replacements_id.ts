@@ -12,6 +12,14 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null;
 };
 
+/**
+ * Extracts the replacements ID from LangChain additional_kwargs.
+ * Inference-langchain puts anonymization metadata in additional_kwargs when converting
+ * inference chunks to AIMessageChunk format.
+ *
+ * @param additionalKwargs - The additional_kwargs object (e.g. from AIMessageChunk)
+ * @returns The replacements ID if valid, or undefined
+ */
 export function extractReplacementsId(additionalKwargs: unknown): string | undefined {
   if (!isRecord(additionalKwargs)) {
     return undefined;
