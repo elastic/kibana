@@ -102,3 +102,17 @@ export type LensApiAllOperations =
   | LensApiAllMetricOrFormulaOperations
   | LensApiBucketOperations
   | LensApiStaticValueOperation;
+
+/**
+ * Supported chart types in the Lens API
+ *
+ * @note snake cased
+ */
+export type LensApiStateChartType = LensApiState['type'];
+
+/**
+ * Map of Lens API state types to their corresponding config type
+ */
+export type LensApiStateByType = {
+  [K in LensApiState['type']]: Extract<LensApiState, { type: K }>;
+};
