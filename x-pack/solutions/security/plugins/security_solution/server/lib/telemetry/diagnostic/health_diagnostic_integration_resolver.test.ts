@@ -23,6 +23,7 @@ const INSTALLED_PACKAGES = [
     data_streams: [
       { dataset: 'endpoint.events.process', type: 'logs' },
       { dataset: 'endpoint.events.network', type: 'logs' },
+      { dataset: 'endpoint.events.network', type: 'traces' },
     ],
   },
   {
@@ -66,44 +67,97 @@ describe('IntegrationResolverImpl', () => {
   });
 
   describe('v2 queries', () => {
-    test.each([
-      [
-        'exact name',
-        ['endpoint'],
-        1,
-        ['logs-endpoint.events.process-*', 'logs-endpoint.events.network-*'],
-      ],
-      [
-        'regex pattern',
-        ['endpoint.*'],
-        1,
-        ['logs-endpoint.events.process-*', 'logs-endpoint.events.network-*'],
-      ],
-      ['multiple patterns (OR logic)', ['endpoint', 'fleet_server'], 2, null],
-    ])(
-      'resolves to ExecutableQuery — %s',
-      async (_label, integrations, matchCount, expectedIndices) => {
-        const query = createMockQueryV2(QueryType.DSL, { integrations });
+    it('produces one ExecutableQuery per matched integration (exact name)', async () => {
+      const query = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint'] });
+      const results = await resolver.resolve([query]);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].kind).toBe('executable');
+      if (results[0].kind !== 'executable') throw new Error('type guard');
+      expect(results[0].query.version).toBe(2);
+
+      const resolution = (results[0] as { resolution: IntegrationResolution }).resolution;
+      expect(resolution.name).toBe('endpoint');
+      expect(resolution.version).toBe('8.14.2');
+      expect(resolution.indices).toContain('logs-endpoint.events.process-*');
+      expect(resolution.indices).toContain('logs-endpoint.events.network-*');
+    });
+
+    it('produces one ExecutableQuery per matched integration (regex pattern)', async () => {
+      const query = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint.*'] });
+      const results = await resolver.resolve([query]);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].kind).toBe('executable');
+    });
+
+    it('produces N ExecutableQueries for N matched integrations', async () => {
+      const query = createMockQueryV2(QueryType.DSL, {
+        integrations: ['endpoint', 'fleet_server'],
+      });
+      const results = await resolver.resolve([query]);
+
+      expect(results).toHaveLength(2);
+      expect(results.every((r) => r.kind === 'executable')).toBe(true);
+      const names = results.map(
+        (r) => (r as { resolution: IntegrationResolution }).resolution.name
+      );
+      expect(names).toContain('endpoint');
+      expect(names).toContain('fleet_server');
+    });
+
+    describe('datastreamTypes filtering', () => {
+      it('includes only datastreams matching the type patterns', async () => {
+        const query = createMockQueryV2(QueryType.DSL, {
+          integrations: ['endpoint'],
+          datastreamTypes: ['logs'],
+        });
         const results = await resolver.resolve([query]);
 
+        expect(results).toHaveLength(1);
+        const resolution = (results[0] as { resolution: IntegrationResolution }).resolution;
+        expect(resolution.indices).toHaveLength(2);
+        expect(resolution.indices).toContain('logs-endpoint.events.process-*');
+        expect(resolution.indices).toContain('logs-endpoint.events.network-*');
+      });
+
+      it('skips an integration when no datastreams match the type pattern', async () => {
+        const query = createMockQueryV2(QueryType.DSL, {
+          integrations: ['endpoint'],
+          datastreamTypes: ['metrics'],
+        });
+        const results = await resolver.resolve([query]);
+
+        expect(results).toHaveLength(1);
+        expect(results[0].kind).toBe('skipped');
+        if (results[0].kind !== 'skipped') throw new Error('type guard');
+        expect(results[0].reason).toBe('integration_not_installed');
+      });
+
+      it('supports regex patterns in datastreamTypes', async () => {
+        const query = createMockQueryV2(QueryType.DSL, {
+          integrations: ['endpoint'],
+          datastreamTypes: ['log.*'],
+        });
+        const results = await resolver.resolve([query]);
+
+        expect(results).toHaveLength(1);
         expect(results[0].kind).toBe('executable');
-        if (results[0].kind !== 'executable') throw new Error('type guard');
-        expect(results[0].query.version).toBe(2);
+      });
+
+      it('includes all datastreams when datastreamTypes is absent', async () => {
+        const query = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint'] });
+        const results = await resolver.resolve([query]);
 
         const resolution = (results[0] as { resolution: IntegrationResolution }).resolution;
-        expect(resolution.matched).toHaveLength(matchCount);
-        if (expectedIndices) {
-          expectedIndices.forEach((idx: string) =>
-            expect(resolution.resolvedIndices).toContain(idx)
-          );
-        }
-      }
-    );
+        expect(resolution.indices).toHaveLength(3);
+      });
+    });
 
     test.each([
       ['pattern matches nothing', ['nonexistent.*']],
       ['package exists but is not_installed', ['system']],
-    ])('returns SkippedQuery — %s', async (_label, integrations) => {
+    ])('returns a single SkippedQuery — %s', async (_label, integrations) => {
       const query = createMockQueryV2(QueryType.DSL, { integrations });
       const results = await resolver.resolve([query]);
 
@@ -111,8 +165,7 @@ describe('IntegrationResolverImpl', () => {
       expect(results[0].kind).toBe('skipped');
       if (results[0].kind !== 'skipped') throw new Error('type guard');
       expect(results[0].reason).toBe('integration_not_installed');
-      expect(results[0].resolution?.matched).toHaveLength(0);
-      expect(results[0].resolution?.resolvedIndices).toHaveLength(0);
+      expect('resolution' in results[0]).toBe(false);
     });
 
     it('calls Fleet only once even for multiple v2 queries', async () => {
@@ -144,11 +197,19 @@ describe('IntegrationResolverImpl', () => {
 
       const results = await resolver.resolve([v1, v2, unknown]);
 
-      expect(results).toHaveLength(3);
+      expect(results).toHaveLength(3); // 1 v1 + 1 v2 (1 integration) + 1 unknown
       expect(results[0].kind).toBe('executable');
       expect(results[1].kind).toBe('executable');
       expect(results[2].kind).toBe('skipped');
       expect(packageService.asInternalUser.getPackages).toHaveBeenCalledTimes(1);
+    });
+
+    it('expands v2 with two matched integrations to two ExecutableQueries', async () => {
+      const v2 = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint', 'fleet_server'] });
+      const results = await resolver.resolve([v2]);
+
+      expect(results).toHaveLength(2);
+      expect(results.every((r) => r.kind === 'executable')).toBe(true);
     });
   });
 });

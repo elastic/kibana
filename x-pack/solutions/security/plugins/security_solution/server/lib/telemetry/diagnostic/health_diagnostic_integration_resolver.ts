@@ -28,13 +28,13 @@ export class IntegrationResolverImpl implements IntegrationResolver {
     const hasV2 = queries.some((q) => 'version' in q && q.version === 2);
     const installedPackages = hasV2 ? await this.fetchInstalledPackages() : [];
 
-    return queries.map((query) => {
+    return queries.flatMap((query) => {
       if ('version' in query && query.version === 1) {
-        return this.resolveV1(query);
+        return [this.resolveV1(query)];
       } else if ('version' in query && query.version === 2) {
         return this.resolveV2(query, installedPackages);
       } else {
-        return this.resolveUnknown(query);
+        return [this.resolveUnknown(query)];
       }
     });
   }
@@ -46,8 +46,8 @@ export class IntegrationResolverImpl implements IntegrationResolver {
   private resolveV2(
     query: HealthDiagnosticQueryV2,
     installedPackages: InstalledPackage[]
-  ): ResolvedQuery {
-    const { integrations: patterns } = query;
+  ): ResolvedQuery[] {
+    const { integrations: patterns, datastreamTypes: typePatterns } = query;
     const matched = installedPackages.filter((pkg) =>
       patterns.some((pattern) => {
         try {
@@ -59,24 +59,39 @@ export class IntegrationResolverImpl implements IntegrationResolver {
       })
     );
 
-    const resolvedIndices = matched.flatMap((pkg) =>
-      (pkg.data_streams ?? []).map((ds) => `${ds.type}-${ds.dataset}-*`)
-    );
-
-    const resolution: IntegrationResolution = {
-      patterns,
-      matched: matched.map(({ name, version }) => ({ name, version })),
-      resolvedIndices,
-    };
-
     if (matched.length === 0) {
       this.logger.debug('No matching integrations found, skipping query', {
         queryName: query.name,
       } as LogMeta);
-      return { kind: 'skipped', query, reason: 'integration_not_installed', resolution };
+      return [{ kind: 'skipped', query, reason: 'integration_not_installed' }];
     }
 
-    return { kind: 'executable', query, resolution };
+    return matched.map((pkg) => {
+      const dataStreams = (pkg.data_streams ?? []).filter((ds) => {
+        if (!typePatterns || typePatterns.length === 0) return true;
+        return typePatterns.some((pattern) => {
+          try {
+            return new RegExp(`^${pattern}$`).test(ds.type);
+          } catch {
+            this.logger.warn(`Invalid regex pattern in datastreamTypes field: ${pattern}`);
+            return false;
+          }
+        });
+      });
+
+      if (dataStreams.length === 0) {
+        this.logger.debug('Integration matched but no datastreams passed type filter, skipping', {
+          queryName: query.name,
+          integration: pkg.name,
+          typePatterns,
+        } as LogMeta);
+        return { kind: 'skipped', query, reason: 'integration_not_installed' } as SkippedQuery;
+      }
+
+      const indices = dataStreams.map((ds) => `${ds.type}-${ds.dataset}-*`);
+      const resolution: IntegrationResolution = { name: pkg.name, version: pkg.version, indices };
+      return { kind: 'executable', query, resolution } as ExecutableQuery;
+    });
   }
 
   private resolveUnknown(query: HealthDiagnosticQuery): SkippedQuery {
