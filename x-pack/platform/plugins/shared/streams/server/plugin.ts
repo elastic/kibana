@@ -45,6 +45,7 @@ import type {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
+import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
@@ -269,6 +270,10 @@ export class StreamsPlugin
     });
 
     registerFeatureFlags(core, this.logger);
+
+    if (plugins.agentBuilder) {
+      registerStreamsAgentBuilder({ agentBuilder: plugins.agentBuilder, getScopedClients });
+    }
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
