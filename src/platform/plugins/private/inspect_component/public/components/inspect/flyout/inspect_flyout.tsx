@@ -33,9 +33,7 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
   'data-test-subj': INSPECT_FLYOUT_ID,
   id: INSPECT_FLYOUT_ID,
   maxWidth: INSPECT_FLYOUT_MAX_WIDTH,
-  maskProps: {
-    headerZindexLocation: 'above',
-  },
+  container: null,
 };
 
 export const InspectFlyout = ({ componentData, target, branch }: Props) => {

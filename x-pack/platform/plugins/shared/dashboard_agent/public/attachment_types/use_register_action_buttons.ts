@@ -8,7 +8,6 @@
 import { useEffect } from 'react';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
-import type { DashboardAttachmentOrigin } from '@kbn/dashboard-agent-common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -22,11 +21,11 @@ export type SavedObjectStatus =
 interface UseRegisterActionButtonsParams {
   dashboardApi: DashboardApi | undefined;
   registerActionButtons: (buttons: ActionButton[]) => void;
-  updateOrigin: (origin: DashboardAttachmentOrigin) => Promise<unknown>;
+  updateOrigin: (origin: string) => Promise<unknown>;
   timeRange: { from: string; to: string };
   dashboardState: Pick<DashboardState, 'title' | 'description' | 'panels' | 'time_range'>;
   linkedSavedObjectId: string | undefined;
-  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }
 
 export const useRegisterActionButtons = ({
@@ -36,7 +35,7 @@ export const useRegisterActionButtons = ({
   timeRange,
   dashboardState,
   linkedSavedObjectId,
-  doesSavedDashboardExist,
+  checkSavedDashboardExist,
 }: UseRegisterActionButtonsParams) => {
   const timeRangeRef = useLatest(timeRange);
   const linkedSavedObjectIdRef = useLatest(linkedSavedObjectId);
@@ -60,7 +59,7 @@ export const useRegisterActionButtons = ({
         handler: async () => {
           const existingDashboardId =
             linkedSavedObjectIdRef.current &&
-            (await doesSavedDashboardExist(linkedSavedObjectIdRef.current))
+            (await checkSavedDashboardExist(linkedSavedObjectIdRef.current))
               ? linkedSavedObjectIdRef.current
               : undefined;
           await locator.navigate({
@@ -81,7 +80,7 @@ export const useRegisterActionButtons = ({
       handler: async () => {
         const existingDashboardId =
           linkedSavedObjectIdRef.current &&
-          (await doesSavedDashboardExist(linkedSavedObjectIdRef.current))
+          (await checkSavedDashboardExist(linkedSavedObjectIdRef.current))
             ? linkedSavedObjectIdRef.current
             : undefined;
         if (existingDashboardId) {
@@ -91,7 +90,7 @@ export const useRegisterActionButtons = ({
         const result = await dashboardApi.runInteractiveSave();
         const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
         if (nextSavedObjectId && nextSavedObjectId !== existingDashboardId) {
-          await updateOrigin({ savedObjectId: nextSavedObjectId });
+          await updateOrigin(nextSavedObjectId);
         }
       },
     });
@@ -100,7 +99,7 @@ export const useRegisterActionButtons = ({
     dashboardApi,
     registerActionButtons,
     updateOrigin,
-    doesSavedDashboardExist,
+    checkSavedDashboardExist,
     timeRangeRef,
     linkedSavedObjectIdRef,
     dashboardStateRef,
