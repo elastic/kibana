@@ -23,3 +23,9 @@ export {
   createDetectionRuleTool,
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
 } from './create_detection_rule_tool';
+export { findRulesTool, SECURITY_FIND_RULES_TOOL_ID } from './find_rules_tool';
+export { manageRulesTool, SECURITY_MANAGE_RULES_TOOL_ID } from './manage_rules_tool';
+export { previewRuleTool, SECURITY_PREVIEW_RULE_TOOL_ID } from './preview_rule_tool';
+export { manageExceptionsTool, SECURITY_MANAGE_EXCEPTIONS_TOOL_ID } from './manage_exceptions_tool';
+export { coverageOverviewTool, SECURITY_COVERAGE_OVERVIEW_TOOL_ID } from './coverage_overview_tool';
+export { ruleMonitoringTool, SECURITY_RULE_MONITORING_TOOL_ID } from './rule_monitoring_tool';
