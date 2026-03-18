@@ -2,7 +2,7 @@
 reviews:
   inheritance: true
   review_status: false
-  poem: false
+  poem: true
   auto_review:
     labels:
       - reviewer:coderabbit
