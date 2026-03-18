@@ -11,7 +11,14 @@ import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Page Display without Agent Builder Privileges',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete, ...tags.serverless.security.complete, ...tags.serverless.search] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.search,
+    ],
+  },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsNonAgentBuilderUser();

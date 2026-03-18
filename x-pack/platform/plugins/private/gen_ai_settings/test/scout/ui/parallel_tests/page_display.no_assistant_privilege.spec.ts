@@ -13,7 +13,14 @@ import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Page Display without AI Assistants Privileges',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete, ...tags.serverless.security.complete, ...tags.serverless.search] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.search,
+    ],
+  },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
       await scoutSpace.uiSettings.set({ [AI_CHAT_EXPERIENCE_TYPE]: AIChatExperience.Agent });
