@@ -8,29 +8,33 @@
 import type { Logger } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
 import type { MonitoringEntitySourceDescriptorClient } from '../../../privilege_monitoring/saved_objects';
+import type { EntityStoreEntityIdsByType } from '../../entities/service';
 
-export type SourceProcessor = (source: MonitoringEntitySource) => Promise<void>;
+export type SourceProcessor = (
+  source: MonitoringEntitySource,
+  entityStoreEntityIdsByType: EntityStoreEntityIdsByType
+) => Promise<void>;
 
 export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
   const syncBySourceIds = async ({
     descriptorClient,
-    sourceIds,
+    sources,
     process,
   }: {
     descriptorClient: MonitoringEntitySourceDescriptorClient;
-    sourceIds: string[];
+    sources: { sourceId: string; entityStoreEntityIdsByType: EntityStoreEntityIdsByType }[];
     process: SourceProcessor;
   }): Promise<void> => {
-    if (sourceIds.length === 0) {
+    if (sources.length === 0) {
       logger.debug('[WatchlistSync] No entity sources linked to watchlist. Skipping sync.');
       return;
     }
 
     // Process sources sequentially to avoid race conditions
-    for (const sourceId of sourceIds) {
+    for (const { sourceId, entityStoreEntityIdsByType } of sources) {
       try {
         const source = await descriptorClient.get(sourceId);
-        await process(source);
+        await process(source, entityStoreEntityIdsByType);
       } catch (error) {
         logger.warn(`[WatchlistSync] Source processing failed for ${sourceId}: ${String(error)}`);
       }

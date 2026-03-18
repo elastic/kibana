@@ -6,22 +6,21 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { Entity as EntityStoreEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { getIndexForWatchlist } from './utils';
 import type { WatchlistEntityDoc } from './types';
+import type { IntegrationType } from '../../privilege_monitoring/data_sources';
 
 export type WatchlistEntitiesService = ReturnType<typeof createWatchlistEntitiesService>;
 
 export type EntityStoreEntityIdsByType = Record<EntityType, string[]>;
 
-const DEFAULT_ENTITY_STORE_PAGE = 1;
-const DEFAULT_ENTITY_STORE_PER_PAGE = 10_000;
-const DEFAULT_ENTITY_STORE_SORT_FIELD = '@timestamp';
-const DEFAULT_ENTITY_STORE_SORT_ORDER: SortOrder = 'desc';
+export type IdentityProvider =
+  | { type: 'integration'; name: IntegrationType }
+  | { type: 'index'; field: string };
 
 const createEmptyEntityStoreEntityIdsByType = (): EntityStoreEntityIdsByType => ({
   [EntityType.user]: [],
@@ -29,6 +28,11 @@ const createEmptyEntityStoreEntityIdsByType = (): EntityStoreEntityIdsByType => 
   [EntityType.service]: [],
   [EntityType.generic]: [],
 });
+
+const integrationToStoreNamespaceMap: Record<IntegrationType, string> = {
+  entityanalytics_okta: 'okta',
+  entityanalytics_ad: 'active_directory',
+};
 
 const getEntityType = (record: EntityStoreEntity): EntityType => {
   const entityType = record.entity.EngineMetadata?.Type || record.entity.type;
@@ -70,14 +74,24 @@ export const createWatchlistEntitiesService = ({
       );
   };
 
-  const listEntityStoreEntities = async (): Promise<EntityStoreEntityIdsByType> => {
+  const listEntityStoreEntities = async (
+    idp: IdentityProvider
+  ): Promise<EntityStoreEntityIdsByType> => {
+    const query =
+      idp.type === 'integration'
+        ? {
+            term: {
+              'entity.namespace': integrationToStoreNamespaceMap[idp.name],
+            },
+          }
+        : {
+            exists: {
+              field: idp.field,
+            },
+          };
     const response = await esClient.search<EntityStoreEntity>({
       index: getLatestEntitiesIndexName(namespace),
-      query: {
-        term: {
-          'entity.namespace': 'okta',
-        },
-      },
+      query,
     });
 
     const entityIdsByType = createEmptyEntityStoreEntityIdsByType();

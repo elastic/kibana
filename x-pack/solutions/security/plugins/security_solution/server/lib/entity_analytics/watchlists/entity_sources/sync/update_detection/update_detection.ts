@@ -139,9 +139,16 @@ export const createUpdateDetectionService = ({
     let maxTimestamp: string | undefined;
 
     while (fetchMore) {
+      const query = buildEntitiesSearchBody(
+        entityType,
+        afterKey,
+        pageSize,
+        syncMarker,
+        allowedEntityIds
+      );
       const response = await esClient.search<never, EntitiesAggregation>({
         index: source.indexPattern,
-        ...buildEntitiesSearchBody(entityType, afterKey, pageSize, syncMarker, allowedEntityIds),
+        ...query,
       });
 
       const agg = response.aggregations?.entities;
