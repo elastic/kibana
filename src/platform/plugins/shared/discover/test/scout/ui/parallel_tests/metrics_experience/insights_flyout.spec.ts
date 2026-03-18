@@ -63,11 +63,8 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Overview tab has no a11y violations', async () => {
-          // The dimensions list wrapper has a known scrollable-region-focusable
-          // violation (overflow-y: auto without tabindex). Scope to the
-          // description list which is the primary overview content.
           const { violations } = await page.checkA11y({
-            include: ['[data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"]'],
+            include: ['[data-test-subj="metricsExperienceFlyoutOverviewTabContent"]'],
           });
           expect(violations).toHaveLength(0);
         });
@@ -81,7 +78,7 @@ spaceTest.describe(
 
         await spaceTest.step('ES|QL Query tab has no a11y violations', async () => {
           const { violations } = await page.checkA11y({
-            include: ['[data-test-subj="metricsExperienceFlyoutEsqlQueryCodeBlock"]'],
+            include: ['[data-test-subj="metricsExperienceFlyoutEsqlQueryTabContent"]'],
           });
           expect(violations).toHaveLength(0);
         });
