@@ -21,6 +21,7 @@ interface UseNavigateToHostDetailsParams {
   hasMisconfigurationFindings: boolean;
   hasVulnerabilitiesFindings: boolean;
   hasNonClosedAlerts: boolean;
+  hasVulnerabilityPostureAlerts?: boolean;
   isPreviewMode: boolean;
   contextID: string;
 }
@@ -32,18 +33,19 @@ export const useNavigateToHostDetails = ({
   hasMisconfigurationFindings,
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
+  hasVulnerabilityPostureAlerts,
   isPreviewMode,
   contextID,
 }: UseNavigateToHostDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
 
-  telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
-    entity: EntityType.host,
-  });
-
   return useCallback(
     (path?: EntityDetailsPath) => {
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
+        entity: EntityType.host,
+      });
+
       const left = {
         id: HostDetailsPanelKey,
         params: {
@@ -54,6 +56,7 @@ export const useNavigateToHostDetails = ({
           hasMisconfigurationFindings,
           hasVulnerabilitiesFindings,
           hasNonClosedAlerts,
+          hasVulnerabilityPostureAlerts,
         },
       };
 
@@ -73,6 +76,7 @@ export const useNavigateToHostDetails = ({
       }
     },
     [
+      telemetry,
       isPreviewMode,
       openFlyout,
       openLeftPanel,
@@ -82,6 +86,7 @@ export const useNavigateToHostDetails = ({
       hasMisconfigurationFindings,
       hasVulnerabilitiesFindings,
       hasNonClosedAlerts,
+      hasVulnerabilityPostureAlerts,
       contextID,
     ]
   );

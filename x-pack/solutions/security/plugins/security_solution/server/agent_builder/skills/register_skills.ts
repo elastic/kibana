@@ -13,6 +13,8 @@ import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { getSecurityMlJobsSkill } from './security_ml_jobs';
+import { createVulnerabilityDemoSkill } from './vulnerability_demo';
+import { createVulnerabilityAnalysisSkill } from './vulnerability_demo/vulnerability_analysis_skill';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -49,4 +51,10 @@ export const registerSkills = async ({
     getEntityAnalyticsSkill({ getStartServices, isEntityStoreV2Enabled, kibanaVersion, logger })
   );
   await agentBuilder.skills.register(getSecurityMlJobsSkill({ getStartServices, logger, ml }));
+
+  agentBuilder.skills.register(
+    createVulnerabilityDemoSkill(options.endpointAppContextService)
+  );
+
+  agentBuilder.skills.register(createVulnerabilityAnalysisSkill());
 };

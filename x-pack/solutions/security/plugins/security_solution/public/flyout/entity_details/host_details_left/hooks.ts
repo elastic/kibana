@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskInputTab,
   getInsightsInputTab,
+  getVulnerabilityPostureTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import type {
   LeftPanelTabsType,
@@ -31,17 +32,20 @@ export const useSelectedTab = (params: HostDetailsPanelProps, tabs: LeftPanelTab
     return tabs.find((tab) => tab.id === path.tab)?.id ?? defaultTab;
   }, [path, tabs]);
 
-  const setSelectedTabId = (tabId: EntityDetailsLeftPanelTab) => {
-    openLeftPanel({
-      id: HostDetailsPanelKey,
-      params: {
-        ...params,
-        path: {
-          tab: tabId,
+  const setSelectedTabId = useCallback(
+    (tabId: EntityDetailsLeftPanelTab) => {
+      openLeftPanel({
+        id: HostDetailsPanelKey,
+        params: {
+          ...params,
+          path: {
+            tab: tabId,
+          },
         },
-      },
-    });
-  };
+      });
+    },
+    [openLeftPanel, params]
+  );
 
   return { setSelectedTabId, selectedTabId };
 };
@@ -53,6 +57,7 @@ export const useTabs = ({
   hasMisconfigurationFindings,
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
+  hasVulnerabilityPostureAlerts,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   return useMemo(() => {
     const isRiskScoreTabAvailable = isRiskScoreExist && name;
@@ -66,7 +71,12 @@ export const useTabs = ({
         ? [getInsightsInputTab({ name, fieldName: EntityIdentifierFields.hostName, scopeId })]
         : [];
 
-    return [...riskScoreTab, ...insightsTab];
+    const vulnPostureTab =
+      hasVulnerabilityPostureAlerts && name
+        ? [getVulnerabilityPostureTab({ hostName: name })]
+        : [];
+
+    return [...riskScoreTab, ...insightsTab, ...vulnPostureTab];
   }, [
     isRiskScoreExist,
     name,
@@ -74,5 +84,6 @@ export const useTabs = ({
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
+    hasVulnerabilityPostureAlerts,
   ]);
 };

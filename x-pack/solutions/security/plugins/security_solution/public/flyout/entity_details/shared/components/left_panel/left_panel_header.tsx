@@ -24,6 +24,7 @@ export enum EntityDetailsLeftPanelTab {
   ENTRA = 'entra_document',
   CSP_INSIGHTS = 'csp_insights',
   FIELDS_TABLE = 'fields_table',
+  VULNERABILITY_POSTURE = 'vulnerability_posture',
 }
 
 export enum CspInsightLeftPanelSubTab {

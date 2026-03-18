@@ -31,6 +31,7 @@ import { useObservedHost } from './hooks/use_observed_host';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -61,6 +62,7 @@ export const HostPanel = ({
 }: HostPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+  const vulnerabilityCheckerEnabled = useIsExperimentalFeatureEnabled('vulnerabilityCheckerEnabled');
 
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
@@ -119,6 +121,7 @@ export const HostPanel = ({
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
+    hasVulnerabilityPostureAlerts: vulnerabilityCheckerEnabled,
     isPreviewMode,
     contextID,
   });
@@ -142,7 +145,8 @@ export const HostPanel = ({
           isRiskScoreExist ||
           hasMisconfigurationFindings ||
           hasVulnerabilitiesFindings ||
-          hasNonClosedAlerts
+          hasNonClosedAlerts ||
+          vulnerabilityCheckerEnabled
         }
         expandDetails={openDefaultPanel}
         isPreviewMode={isPreviewMode}

@@ -79,7 +79,12 @@ export const HostPanelContent = ({
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
       />
-      <VulnerabilityPostureInsight hostName={hostName} />
+      <VulnerabilityPostureInsight
+        hostName={hostName}
+        scopeId={scopeId}
+        contextID={contextID}
+        isPreviewMode={isPreviewMode}
+      />
       <ObservedDataSection
         hostName={hostName}
         observedHost={observedHost}
