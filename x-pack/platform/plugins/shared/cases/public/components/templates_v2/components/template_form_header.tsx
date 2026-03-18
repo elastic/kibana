@@ -115,13 +115,15 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={isEnabled ? i18n.TEMPLATE_ENABLED : i18n.TEMPLATE_DISABLED}
-                checked={isEnabled}
-                onChange={(e) => onIsEnabledChange(e.target.checked)}
-                disabled={isLoading || isSaving}
-                data-test-subj="templateEnabledSwitch"
-              />
+              <EuiToolTip content={i18n.TEMPLATE_DISABLED_CANNOT_CREATE_CASES}>
+                <EuiSwitch
+                  label={i18n.TEMPLATE_ENABLED}
+                  checked={isEnabled}
+                  onChange={(e) => onIsEnabledChange(e.target.checked)}
+                  disabled={isLoading || isSaving}
+                  data-test-subj="templateEnabledSwitch"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={saveTooltipContent}>

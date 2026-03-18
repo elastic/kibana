@@ -17,7 +17,7 @@ import { css } from '@emotion/react';
 import { TemplatesSearch } from './templates_search';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../../all_cases/multi_select_filter';
 import type { TemplatesFindRequest } from '../../../../common/types/api/template/v1';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 
 export interface TemplatesTableFiltersProps {
   queryParams: TemplatesFindRequest;

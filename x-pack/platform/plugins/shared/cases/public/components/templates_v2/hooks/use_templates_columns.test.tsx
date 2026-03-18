@@ -23,6 +23,7 @@ describe('useTemplatesColumns', () => {
     onClone: jest.fn(),
     onExport: jest.fn(),
     onDelete: jest.fn(),
+    onIsEnabledChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -39,8 +40,8 @@ describe('useTemplatesColumns', () => {
   it('returns expected number of columns', () => {
     const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
 
-    // Expected columns: name, description, fieldCount, tags, author, lastUsedAt, usageCount, actions
-    expect(result.current.columns.length).toBeGreaterThanOrEqual(8);
+    // Expected columns: name, isEnabled, description, fieldCount, tags, author, lastUsedAt, usageCount, actions
+    expect(result.current.columns.length).toBeGreaterThanOrEqual(9);
   });
 
   it('includes name column', () => {
@@ -49,6 +50,16 @@ describe('useTemplatesColumns', () => {
     const nameColumn = result.current.columns.find((col) => 'field' in col && col.field === 'name');
     expect(nameColumn).toBeDefined();
     expect(nameColumn).toHaveProperty('sortable', true);
+  });
+
+  it('includes enabled column', () => {
+    const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
+
+    const enabledColumn = result.current.columns.find(
+      (col) => 'field' in col && col.field === 'isEnabled'
+    );
+    expect(enabledColumn).toBeDefined();
+    expect(enabledColumn).toHaveProperty('sortable', false);
   });
 
   it('includes description column', () => {

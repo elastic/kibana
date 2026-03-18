@@ -21,9 +21,9 @@ import {
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiLink,
   EuiPopover,
+  EuiSwitch,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -31,7 +31,7 @@ import type { Template } from '../../../../common/types/domain/template/v1';
 import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { getEmptyCellValue } from '../../empty_value';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import { LINE_CLAMP } from '../constants';
 
 type TemplatesColumns =
@@ -165,6 +165,7 @@ export interface UseTemplatesColumnsProps {
   onExport: (template: Template) => void;
   onDelete: (template: Template) => void;
   disableActions?: boolean;
+  onIsEnabledChange: (template: Template) => void;
 }
 
 export const useTemplatesColumns = ({
@@ -173,6 +174,7 @@ export const useTemplatesColumns = ({
   onExport,
   onDelete,
   disableActions = false,
+  onIsEnabledChange,
 }: UseTemplatesColumnsProps) => {
   const { euiTheme } = useEuiTheme();
   const columns: TemplatesColumns[] = useMemo(
@@ -184,33 +186,11 @@ export const useTemplatesColumns = ({
         render: (name: string, template: Template) =>
           name ? (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {template.isEnabled === false && (
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    type="lock"
-                    content={i18n.TEMPLATE_DISABLED}
-                    iconProps={{ size: 's', color: 'subdued' }}
-                    data-test-subj="template-column-disabled-icon"
-                  />
-                </EuiFlexItem>
-              )}
               <EuiFlexItem grow={false}>
                 <EuiLink onClick={() => onEdit(template)} data-test-subj="template-column-name">
                   {name}
                 </EuiLink>
               </EuiFlexItem>
-              {template.isDefault && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge
-                    css={css`
-                      border-radius: ${euiTheme.border.radius.small};
-                    `}
-                    data-test-subj="template-column-default-badge"
-                  >
-                    {i18n.DEFAULT}
-                  </EuiBadge>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           ) : (
             getEmptyCellValue()
@@ -382,6 +362,29 @@ export const useTemplatesColumns = ({
         width: '8%',
       },
       {
+        field: 'isEnabled',
+        name: i18n.COLUMN_ENABLED,
+        sortable: false,
+        align: 'center',
+        render: (_isEnabled: boolean | undefined, template: Template) => {
+          const isEnabled = template.isEnabled !== false;
+
+          return (
+            <EuiToolTip content={i18n.TEMPLATE_DISABLED_CANNOT_CREATE_CASES}>
+              <EuiSwitch
+                checked={isEnabled}
+                onChange={() => onIsEnabledChange(template)}
+                label={i18n.COLUMN_ENABLED}
+                showLabel={false}
+                compressed
+                data-test-subj="template-column-enabled-knob"
+              />
+            </EuiToolTip>
+          );
+        },
+        width: '90px',
+      },
+      {
         name: i18n.ACTIONS,
         align: 'right',
         render: (template: Template) => (
@@ -401,6 +404,7 @@ export const useTemplatesColumns = ({
       onEdit,
       euiTheme.size.xs,
       euiTheme.border.radius.small,
+      onIsEnabledChange,
       onClone,
       onExport,
       onDelete,
