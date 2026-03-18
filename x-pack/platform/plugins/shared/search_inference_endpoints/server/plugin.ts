@@ -140,7 +140,9 @@ export class SearchInferenceEndpointsPlugin
 
   public stop() {
     if (this.dynamicConnectorsPoller) {
-      this.dynamicConnectorsPoller.stop();
+      const dynamicConnectorsPoller = this.dynamicConnectorsPoller;
+      this.dynamicConnectorsPoller = undefined;
+      dynamicConnectorsPoller.stop();
     }
   }
 }
