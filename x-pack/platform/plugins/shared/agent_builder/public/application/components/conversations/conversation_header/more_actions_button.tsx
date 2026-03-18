@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { DATA_SOURCES_APP_ID } from '@kbn/deeplinks-data-sources';
 import { css } from '@emotion/react';
@@ -29,6 +29,8 @@ import {
   useAgentId,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useKibana } from '../../../hooks/use_kibana';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
@@ -96,6 +98,12 @@ const fullscreenLabels = {
       defaultMessage: 'Open in new tab',
     }
   ),
+  view: i18n.translate('xpack.agentBuilder.conversationActions.viewSection', {
+    defaultMessage: 'View',
+  }),
+  fullScreen: i18n.translate('xpack.agentBuilder.conversationActions.fullScreen', {
+    defaultMessage: 'Full screen',
+  }),
 };
 
 const popoverMinWidthStyles = css`
@@ -122,16 +130,22 @@ const MenuSectionTitle = ({ title }: { title: string }) => {
 
 interface MoreActionsButtonProps {
   onRenameConversation: () => void;
+  onCloseSidebar?: () => void;
 }
 
-export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameConversation }) => {
+export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({
+  onRenameConversation,
+  onCloseSidebar,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const hasActiveConversation = useHasActiveConversation();
   const hasPersistedConversation = useHasPersistedConversation();
   const agentId = useAgentId();
   const isAgentReadOnly = useIsAgentReadOnly(agentId);
-  const { createAgentBuilderUrl } = useNavigation();
+  const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
+  const { isEmbeddedContext } = useConversationContext();
+  const conversationId = useConversationId();
   const { euiTheme } = useEuiTheme();
   const { manageAgents } = useUiPrivileges();
 
@@ -150,7 +164,41 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     setIsPopoverOpen(!isPopoverOpen);
   };
 
+  const handleOpenFullScreen = useCallback(() => {
+    if (!application) {
+      return;
+    }
+    setIsPopoverOpen(false);
+    onCloseSidebar?.();
+    const path = conversationId
+      ? appPaths.chat.conversation({ conversationId })
+      : appPaths.chat.new;
+    const params =
+      !conversationId && agentId ? { [searchParamNames.agentId]: agentId } : undefined;
+    navigateToAgentBuilderUrl(path, params, { shouldStickToBottom: false });
+  }, [
+    application,
+    agentId,
+    conversationId,
+    navigateToAgentBuilderUrl,
+    onCloseSidebar,
+  ]);
+
   const menuItems = [
+    ...(isEmbeddedContext && application
+      ? [
+          <MenuSectionTitle key="view-title" title={fullscreenLabels.view} />,
+          <EuiContextMenuItem
+            key="full-screen"
+            icon="fullScreen"
+            size="s"
+            data-test-subj="agentBuilderFullScreenMenuItem"
+            onClick={handleOpenFullScreen}
+          >
+            {fullscreenLabels.fullScreen}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     ...(hasPersistedConversation
       ? [
           <MenuSectionTitle
