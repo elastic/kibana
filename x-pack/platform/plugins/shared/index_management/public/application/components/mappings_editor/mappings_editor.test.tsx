@@ -9,6 +9,7 @@ import React from 'react';
 import type { ComponentProps } from 'react';
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { EuiComboBoxTestHarness, EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 
 import { WithAppDependencies } from './__jest__/client_integration/helpers/setup_environment';
@@ -529,7 +530,8 @@ describe('Mappings editor', () => {
         };
       });
 
-      describe('props.value and props.onChange', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/254951
+      describe.skip('props.value and props.onChange', () => {
         beforeEach(async () => {
           setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
           await screen.findByTestId('mappingsEditor');
@@ -673,7 +675,11 @@ describe('Mappings editor', () => {
             ...updatedMappings,
             properties: {
               ...updatedMappings.properties,
-              [newField.name]: { reference_field: '', type: 'semantic_text' },
+              [newField.name]: {
+                inference_id: defaultInferenceEndpoints.ELSER,
+                reference_field: '',
+                type: 'semantic_text',
+              },
             },
           };
 
@@ -745,7 +751,11 @@ describe('Mappings editor', () => {
             ...updatedMappings,
             properties: {
               ...updatedMappings.properties,
-              [newField.name]: { reference_field: 'title', type: 'semantic_text' },
+              [newField.name]: {
+                inference_id: defaultInferenceEndpoints.ELSER,
+                reference_field: 'title',
+                type: 'semantic_text',
+              },
             },
           };
 

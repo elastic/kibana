@@ -67,6 +67,7 @@ export const LogRateAnalysisPage: FC = () => {
               'observabilityAIAssistant',
               'embeddable',
               'cases',
+              'cps',
             ]),
           }}
         />

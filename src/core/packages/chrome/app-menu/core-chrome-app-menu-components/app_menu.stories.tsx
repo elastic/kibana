@@ -60,14 +60,14 @@ const dashboardEditModeConfig: AppMenuConfig = {
       order: 1,
       label: 'exit edit',
       testId: 'exitEditButton',
-      iconType: 'exit',
+      iconType: 'logOut',
     },
     {
       id: 'export',
       order: 2,
       label: 'export',
       testId: 'exportButton',
-      iconType: 'exportAction',
+      iconType: 'upload',
       popoverWidth: 150,
       items: [
         {
@@ -91,7 +91,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
           id: 'exportCSV',
           order: 3,
           label: 'CSV reports',
-          iconType: 'exportAction',
+          iconType: 'upload',
           testId: 'exportCSVButton',
         },
       ],
@@ -125,7 +125,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
     id: 'add',
     label: 'add',
     testId: 'addButton',
-    iconType: 'plusInCircle',
+    iconType: 'plusCircle',
     color: 'success',
     minWidth: false,
     popoverWidth: 200,
@@ -143,7 +143,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
         id: 'newPanel',
         order: 2,
         label: 'New panel',
-        iconType: 'plusInCircle',
+        iconType: 'plusCircle',
         testId: 'openAddPanelFlyoutButton',
       },
       {
@@ -158,7 +158,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
         id: 'controls',
         order: 4,
         label: 'Controls',
-        iconType: 'controlsHorizontal',
+        iconType: 'controls',
         testId: 'controls-menu-button',
         items: [
           {
@@ -211,7 +211,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
     popoverWidth: 150,
     splitButtonProps: {
       secondaryButtonAriaLabel: 'Save options',
-      secondaryButtonIcon: 'arrowDown',
+      secondaryButtonIcon: 'chevronSingleDown',
       notifcationIndicatorTooltipContent: 'You have unsaved changes',
       showNotificationIndicator: true,
       items: [
@@ -228,7 +228,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
           id: 'resetChanges',
           order: 2,
           label: 'Reset changes',
-          iconType: 'editorUndo',
+          iconType: 'undo',
           testId: 'discardChangesMenuItem',
         },
       ],

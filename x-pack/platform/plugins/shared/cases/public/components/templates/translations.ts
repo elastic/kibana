@@ -90,13 +90,161 @@ export const IMPORT_TEMPLATE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const IMPORT_SELECTED = i18n.translate('xpack.cases.templates.importSelected', {
-  defaultMessage: 'Import selected',
-});
+export const IMPORT_SELECTED = (count: number) =>
+  i18n.translate('xpack.cases.templates.importSelected', {
+    values: { count },
+    defaultMessage: 'Import {count} {count, plural, one {template} other {templates}}',
+  });
+
+export const SUCCESS_IMPORTING_TEMPLATES = (created: number, updated: number) =>
+  i18n.translate('xpack.cases.templates.successImportingTemplates', {
+    values: { created, updated },
+    defaultMessage:
+      'Successfully imported: {created, plural, one {# template created} other {# templates created}}, {updated, plural, one {# template updated} other {# templates updated}}',
+  });
+
+export const ERROR_IMPORTING_TEMPLATES = i18n.translate(
+  'xpack.cases.templates.errorImportingTemplates',
+  {
+    defaultMessage: 'Failed to import templates',
+  }
+);
+
+export const IMPORT_PARTIAL_FAILURE = (succeeded: number, failed: number) =>
+  i18n.translate('xpack.cases.templates.importPartialFailure', {
+    values: { succeeded, failed },
+    defaultMessage:
+      '{succeeded, plural, one {# template} other {# templates}} imported, {failed, plural, one {# template} other {# templates}} failed',
+  });
 
 export const CANCEL = i18n.translate('xpack.cases.templates.cancel', {
   defaultMessage: 'Cancel',
 });
+
+export const STEP_UPLOAD_YAML = i18n.translate('xpack.cases.templates.stepUploadYaml', {
+  defaultMessage: 'Upload YAML files',
+});
+
+export const STEP_SELECT_TEMPLATES = i18n.translate('xpack.cases.templates.stepSelectTemplates', {
+  defaultMessage: 'Select templates',
+});
+
+export const NEXT = i18n.translate('xpack.cases.templates.next', {
+  defaultMessage: 'Next',
+});
+
+export const BACK = i18n.translate('xpack.cases.templates.back', {
+  defaultMessage: 'Back',
+});
+
+export const FILE_PICKER_PROMPT = i18n.translate('xpack.cases.templates.filePickerPrompt', {
+  defaultMessage: 'Select or drag and drop multiple YAML files',
+});
+
+export const VALIDATION_ERRORS_TITLE = i18n.translate(
+  'xpack.cases.templates.validationErrorsTitle',
+  {
+    defaultMessage: 'Some files could not be validated',
+  }
+);
+
+export const FILES_VALIDATED = (count: number) =>
+  i18n.translate('xpack.cases.templates.filesValidated', {
+    values: { count },
+    defaultMessage: '{count} {count, plural, one {file} other {files}} validated successfully',
+  });
+
+export const NEW_TEMPLATES_DETECTED = (count: number) =>
+  i18n.translate('xpack.cases.templates.newTemplatesDetected', {
+    values: { count },
+    defaultMessage: '{count} new {count, plural, one {template} other {templates}} detected',
+  });
+
+export const OVERLAPPING_TEMPLATES_DETECTED = (count: number) =>
+  i18n.translate('xpack.cases.templates.overlappingTemplatesDetected', {
+    values: { count },
+    defaultMessage:
+      '{count} overlapping {count, plural, one {template} other {templates}} detected',
+  });
+
+export const OVERLAPPING_TEMPLATES_NOTE = i18n.translate(
+  'xpack.cases.templates.overlappingTemplatesNote',
+  {
+    defaultMessage:
+      'These templates already exist and will be saved as a new version of the existing template.',
+  }
+);
+
+export const PARSE_ERRORS_TITLE = i18n.translate('xpack.cases.templates.parseErrorsTitle', {
+  defaultMessage: 'Some templates could not be parsed',
+});
+
+export const NO_TEMPLATES_FOUND = i18n.translate('xpack.cases.templates.noTemplatesFound', {
+  defaultMessage: 'No templates found',
+});
+
+export const NO_TEMPLATES_FOUND_BODY = i18n.translate(
+  'xpack.cases.templates.noTemplatesFoundBody',
+  {
+    defaultMessage:
+      'The uploaded files do not contain any valid templates. Please check the YAML format and try again.',
+  }
+);
+
+export const INVALID_FILE_TYPE = (fileName: string) =>
+  i18n.translate('xpack.cases.templates.invalidFileType', {
+    values: { fileName },
+    defaultMessage: '{fileName}: invalid file type. Only .yaml and .yml files are accepted.',
+  });
+
+export const FILE_TOO_LARGE = (fileName: string, maxSize: string) =>
+  i18n.translate('xpack.cases.templates.fileTooLarge', {
+    values: { fileName, maxSize },
+    defaultMessage: '{fileName}: file exceeds the maximum allowed size of {maxSize}.',
+  });
+
+export const TOO_MANY_FILES = (max: number) =>
+  i18n.translate('xpack.cases.templates.tooManyFiles', {
+    values: { max },
+    defaultMessage: 'Too many files. A maximum of {max} files can be uploaded at once.',
+  });
+
+export const INVALID_FILE_NAME = (fileName: string) =>
+  i18n.translate('xpack.cases.templates.invalidFileName', {
+    values: { fileName },
+    defaultMessage: '{fileName}: file name contains invalid characters.',
+  });
+
+export const EMPTY_FILE = (fileName: string) =>
+  i18n.translate('xpack.cases.templates.emptyFile', {
+    values: { fileName },
+    defaultMessage: '{fileName}: file is empty.',
+  });
+
+export const INVALID_YAML_SYNTAX = (fileName: string, reason: string) =>
+  i18n.translate('xpack.cases.templates.invalidYamlSyntax', {
+    values: { fileName, reason },
+    defaultMessage: '{fileName}: invalid YAML syntax. {reason}',
+  });
+
+export const TOO_MANY_TEMPLATES_IN_FILE = (fileName: string, max: number) =>
+  i18n.translate('xpack.cases.templates.tooManyTemplatesInFile', {
+    values: { fileName, max },
+    defaultMessage:
+      '{fileName}: file contains more than {max} templates. Only the first {max} will be processed.',
+  });
+
+export const TOO_MANY_TEMPLATES_TOTAL = (max: number) =>
+  i18n.translate('xpack.cases.templates.tooManyTemplatesTotal', {
+    values: { max },
+    defaultMessage: 'You can import a maximum of {max} templates at a time.',
+  });
+
+export const TEMPLATE_VALIDATION_ERROR = (fileName: string, index: number, issues: string) =>
+  i18n.translate('xpack.cases.templates.templateValidationError', {
+    values: { fileName, index, issues },
+    defaultMessage: '{fileName}, template {index}: validation failed. {issues}',
+  });
 
 export const CREATE_TEMPLATE = i18n.translate('xpack.cases.templates.createTemplate', {
   defaultMessage: 'Create template',
@@ -216,12 +364,6 @@ export const SUCCESS_UPDATING_TEMPLATE = i18n.translate(
   }
 );
 
-export const SUCCESS_SET_AS_DEFAULT_TEMPLATE = (templateName: string) =>
-  i18n.translate('xpack.cases.templates.successSetAsDefaultTemplate', {
-    defaultMessage: 'Template {templateName} was set as default',
-    values: { templateName },
-  });
-
 export const SUCCESS_CLONING_TEMPLATE = (templateName: string) =>
   i18n.translate('xpack.cases.templates.successCloningTemplate', {
     defaultMessage: '{templateName} was cloned successfully',
@@ -309,8 +451,20 @@ export const COLUMN_TAGS = i18n.translate('xpack.cases.templates.column.tags', {
   defaultMessage: 'Tags',
 });
 
+export const COLUMN_CATEGORY = i18n.translate('xpack.cases.templates.column.category', {
+  defaultMessage: 'Category',
+});
+
+export const COLUMN_SEVERITY = i18n.translate('xpack.cases.templates.column.severity', {
+  defaultMessage: 'Severity',
+});
+
 export const COLUMN_AUTHOR = i18n.translate('xpack.cases.templates.column.author', {
   defaultMessage: 'Author',
+});
+
+export const CLOSE_PREVIEW = i18n.translate('xpack.cases.templates.closePreview', {
+  defaultMessage: 'Close preview',
 });
 
 export const COLUMN_LAST_UPDATE = i18n.translate('xpack.cases.templates.column.lastUpdate', {
@@ -337,13 +491,6 @@ export const EDIT_TEMPLATE = i18n.translate('xpack.cases.templates.editTemplate'
 export const CLONE_TEMPLATE = i18n.translate('xpack.cases.templates.cloneTemplate', {
   defaultMessage: 'Clone',
 });
-
-export const SET_AS_DEFAULT_TEMPLATE = i18n.translate(
-  'xpack.cases.templates.setAsDefaultTemplate',
-  {
-    defaultMessage: 'Set as default',
-  }
-);
 
 export const EXPORT_TEMPLATE = i18n.translate('xpack.cases.templates.exportTemplate', {
   defaultMessage: 'Export',

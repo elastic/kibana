@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/classic';
+import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema';
 import { badData } from '@hapi/boom';
 import type { Streams } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { getErrorMessage } from '../../../lib/streams/errors/parse_error';

@@ -7,8 +7,7 @@
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
-import { conditionToQueryDsl } from '@kbn/streamlang';
-import type { Streams, System } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateStreamDescriptionPrompt } from './prompt';
 
@@ -17,7 +16,6 @@ import { createGenerateStreamDescriptionPrompt } from './prompt';
  */
 export async function generateStreamDescription({
   stream,
-  system,
   start,
   end,
   esClient,
@@ -27,7 +25,6 @@ export async function generateStreamDescription({
   systemPrompt,
 }: {
   stream: Streams.all.Definition;
-  system?: System;
   start: number;
   end: number;
   esClient: ElasticsearchClient;
@@ -36,11 +33,7 @@ export async function generateStreamDescription({
   logger: Logger;
   systemPrompt: string;
 }): Promise<{ description: string; tokensUsed?: ChatCompletionTokenCount }> {
-  logger.debug(
-    `Generating stream description for stream ${stream.name}${
-      system ? ` using system ${system.name}` : ''
-    }`
-  );
+  logger.debug(`Generating stream description for stream ${stream.name}`);
 
   logger.trace('Describing dataset for stream description');
   const analysis = await withSpan('describe_dataset_for_stream_description', () =>
@@ -49,7 +42,6 @@ export async function generateStreamDescription({
       end,
       esClient,
       index: stream.name,
-      filter: system ? conditionToQueryDsl(system.filter) : undefined,
     })
   );
 
@@ -69,7 +61,7 @@ export async function generateStreamDescription({
   const response = await withSpan('generate_stream_description', () =>
     inferenceClient.prompt({
       input: {
-        name: system?.name || stream.name,
+        name: stream.name,
         dataset_analysis: JSON.stringify(formattedAnalysis),
       },
       prompt,

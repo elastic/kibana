@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { ListId, ListType } from '../model/list_common.gen';
 import { List } from '../model/list_schemas.gen';

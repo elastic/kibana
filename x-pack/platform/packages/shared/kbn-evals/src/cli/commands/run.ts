@@ -11,6 +11,7 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolveEvalSuites } from '../suites';
+import { promptForSuite, promptForConnector, isTTY } from '../prompts';
 
 const EXECUTORS = ['phoenix', 'kibana'] as const;
 type Executor = (typeof EXECUTORS)[number];
@@ -48,8 +49,9 @@ export const runSuiteCmd: Command<void> = {
   Run an evaluation suite.
 
   Examples:
-    node scripts/evals run --suite agent-builder --evaluation-connector-id bedrock-claude
-    node scripts/evals run --suite obs-ai-assistant --project azure-gpt4o --repetitions 3
+    node scripts/evals run --suite agent-builder --judge bedrock-claude
+    node scripts/evals run --suite obs-ai-assistant --model azure-gpt4o --repetitions 3
+    node scripts/evals run --suite agent-builder --grep "product documentation"
     node scripts/evals run --suite streams --dry-run
   `,
   flags: {
@@ -60,24 +62,33 @@ export const runSuiteCmd: Command<void> = {
       'executor',
       'evaluation-connector-id',
       'repetitions',
+      'grep',
       'trace-es-url',
       'trace-es-api-key',
       'evaluations-es-url',
       'evaluations-es-api-key',
+      'evaluations-kbn-url',
+      'evaluations-kbn-api-key',
       'phoenix-base-url',
       'phoenix-api-key',
     ],
     boolean: ['dry-run'],
+    alias: { model: 'project', judge: 'evaluation-connector-id' },
     default: { 'dry-run': false },
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
-    const suiteId = flagsReader.string('suite');
+    let suiteId = flagsReader.string('suite');
     const configPath = flagsReader.string('config');
     const executor = flagsReader.enum('executor', EXECUTORS) as Executor | undefined;
 
     if (!suiteId && !configPath) {
-      throw createFlagError('Missing --suite (or provide --config).');
+      if (isTTY()) {
+        const selected = await promptForSuite(repoRoot, log);
+        suiteId = selected.id;
+      } else {
+        throw createFlagError('Missing --suite (or provide --config).');
+      }
     }
 
     if (suiteId && configPath) {
@@ -89,13 +100,17 @@ export const runSuiteCmd: Command<void> = {
       ? suite.absoluteConfigPath
       : Path.resolve(repoRoot, configPath as string);
 
-    const evaluationConnectorId =
+    let evaluationConnectorId =
       flagsReader.string('evaluation-connector-id') ?? process.env.EVALUATION_CONNECTOR_ID;
 
     if (!evaluationConnectorId) {
-      throw createFlagError(
-        'EVALUATION_CONNECTOR_ID is required. Set --evaluation-connector-id or env.'
-      );
+      if (isTTY()) {
+        evaluationConnectorId = await promptForConnector(repoRoot, log);
+      } else {
+        throw createFlagError(
+          'EVALUATION_CONNECTOR_ID is required. Set --evaluation-connector-id or env.'
+        );
+      }
     }
 
     const envOverrides: Record<string, string> = {
@@ -135,6 +150,16 @@ export const runSuiteCmd: Command<void> = {
       envOverrides.EVALUATIONS_ES_API_KEY = evaluationsEsApiKey;
     }
 
+    const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
+    if (evaluationsKbnUrl) {
+      envOverrides.EVALUATIONS_KBN_URL = evaluationsKbnUrl;
+    }
+
+    const evaluationsKbnApiKey = flagsReader.string('evaluations-kbn-api-key');
+    if (evaluationsKbnApiKey) {
+      envOverrides.EVALUATIONS_KBN_API_KEY = evaluationsKbnApiKey;
+    }
+
     const phoenixBaseUrl = flagsReader.string('phoenix-base-url');
     if (phoenixBaseUrl) {
       envOverrides.PHOENIX_BASE_URL = phoenixBaseUrl;
@@ -149,6 +174,11 @@ export const runSuiteCmd: Command<void> = {
     const project = flagsReader.string('project');
     if (project) {
       args.push('--project', project);
+    }
+
+    const grep = flagsReader.string('grep');
+    if (grep) {
+      args.push('--grep', grep);
     }
 
     const positionals = flagsReader.getPositionals();
