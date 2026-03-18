@@ -10,6 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiButtonEmpty, EuiText, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { Change } from 'diff';
 import { diffLines } from 'diff';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
@@ -44,18 +45,13 @@ const HIDDEN_REGION_WIDGET_HEIGHT = 24;
  * Estimates the pixel height Monaco's inline diff editor will occupy
  * after hideUnchangedRegions collapses unchanged hunks.
  *
- * Uses `diffLines` to identify changed/unchanged regions, then
- * accounts for edge regions (start/end of file) only getting
- * one-sided context instead of two-sided.
+ * Accepts pre-computed diff parts to avoid redundant `diffLines` calls.
  */
 const estimateContentHeight = (
-  beforeYaml: string,
-  afterYaml: string,
+  parts: Change[],
   contextLineCount: number,
   minimumLineCount: number
 ): number => {
-  const parts = diffLines(beforeYaml, afterYaml);
-
   const lineRanges: Array<{ kind: 'changed' | 'unchanged'; lineCount: number }> = [];
   for (const part of parts) {
     const count = part.count ?? part.value.replace(/\n$/, '').split('\n').length;
@@ -109,10 +105,10 @@ const MonacoDiffViewer: React.FC<{
   const contextLineCount = 3;
   const minimumLineCount = 3;
 
-  const estimatedHeight = useMemo(
-    () => estimateContentHeight(beforeYaml, afterYaml, contextLineCount, minimumLineCount),
-    [beforeYaml, afterYaml]
-  );
+  const estimatedHeight = useMemo(() => {
+    const parts = diffLines(beforeYaml, afterYaml);
+    return estimateContentHeight(parts, contextLineCount, minimumLineCount);
+  }, [beforeYaml, afterYaml]);
 
   const contentHeight = measuredHeight ?? estimatedHeight;
   const collapsedHeight = Math.min(contentHeight, COLLAPSED_HEIGHT);

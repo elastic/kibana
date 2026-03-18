@@ -7,19 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type Document,
-  isMap,
-  isPair,
-  isScalar,
-  isSeq,
-  type Node,
-  parseDocument,
-  stringify,
-  type YAMLMap,
-  type YAMLSeq,
-} from 'yaml';
-import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml';
+import { isEqual } from 'lodash';
+import { Document, isMap, isPair, isScalar, isSeq, parseDocument, stringify } from 'yaml';
+import type { Node, YAMLMap, YAMLSeq } from 'yaml';
 
 interface StepDefinition {
   name: string;
@@ -52,13 +42,10 @@ const ROOT_PROPERTY_ORDER = [
 ];
 
 const parseForEditing = (yaml: string): { doc: Document; error?: string } => {
-  const { document } = parseYamlToJSONWithoutValidation(yaml);
-
-  if (document.errors.length > 0) {
-    return { doc: document, error: `YAML parse errors: ${document.errors[0].message}` };
-  }
-
   const doc = parseDocument(yaml);
+  if (doc.errors.length > 0) {
+    return { doc, error: `YAML parse errors: ${doc.errors[0].message}` };
+  }
   return { doc };
 };
 
@@ -143,6 +130,8 @@ const mergePreservingFormat = (existing: Node | null, fresh: Node | null): void 
   }
 };
 
+const nodeFactory = new Document();
+
 /**
  * Like `stringifyValue` but preserves the quoting style of unchanged scalars
  * by comparing against the original AST node.
@@ -153,11 +142,10 @@ const stringifyValuePreservingFormat = (
   depth: number,
   originalNode: Node
 ): string => {
-  const tempDoc = parseDocument('null');
-  const freshNode = tempDoc.createNode(value);
+  const freshNode = nodeFactory.createNode(value);
   mergePreservingFormat(originalNode, freshNode);
 
-  const raw = stringify(tempDoc.createNode(freshNode), { indent: indentUnit, lineWidth: 0 });
+  const raw = stringify(freshNode, { indent: indentUnit, lineWidth: 0 });
   if (depth === 0) return raw;
 
   const pad = ' '.repeat(indentUnit * depth);
@@ -223,7 +211,7 @@ const findCorruptedProperty = (
 ): string | undefined => {
   const changed = Object.keys(beforeJson)
     .filter((key) => !skipKeys.has(key))
-    .find((key) => JSON.stringify(beforeJson[key]) !== JSON.stringify(afterJson[key]));
+    .find((key) => !isEqual(beforeJson[key], afterJson[key]));
   if (changed) return changed;
 
   return Object.keys(afterJson)
@@ -240,7 +228,7 @@ const findCorruptedStep = (
     .filter((s) => s.name != null && s.name !== excludeStepName)
     .find((step) => {
       const afterStep = afterSteps.find((s) => s.name === step.name);
-      return !afterStep || JSON.stringify(step) !== JSON.stringify(afterStep);
+      return !afterStep || !isEqual(step, afterStep);
     });
 };
 

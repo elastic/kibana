@@ -60,6 +60,7 @@ export class ProposalManager {
 
   private mouseMoveDisposable: monaco.IDisposable | null = null;
   private contentChangeDisposable: monaco.IDisposable | null = null;
+  private mouseMoveRafId: ReturnType<typeof requestAnimationFrame> | null = null;
 
   /**
    * Guard flag: true while proposeChange / rejectProposal / revertAllSilently
@@ -99,15 +100,20 @@ export class ProposalManager {
       const lineNumber = e.target.position?.lineNumber;
       if (lineNumber == null) return;
 
-      for (const [id, proposal] of this.proposals.entries()) {
-        const decoEnd = proposal.startLine + proposal.newContentLineCount - 1;
-        if (lineNumber >= proposal.startLine && lineNumber <= decoEnd) {
-          if (this.focusedProposalId !== id) {
-            this.focusProposal(id);
+      // Request animation frame acting as a debounce
+      if (this.mouseMoveRafId != null) cancelAnimationFrame(this.mouseMoveRafId);
+      this.mouseMoveRafId = requestAnimationFrame(() => {
+        this.mouseMoveRafId = null;
+        for (const [id, proposal] of this.proposals.entries()) {
+          const decoEnd = proposal.startLine + proposal.newContentLineCount - 1;
+          if (lineNumber >= proposal.startLine && lineNumber <= decoEnd) {
+            if (this.focusedProposalId !== id) {
+              this.focusProposal(id);
+            }
+            return;
           }
-          return;
         }
-      }
+      });
     });
 
     const model = editor.getModel();
@@ -342,6 +348,10 @@ export class ProposalManager {
 
     this.mouseMoveDisposable?.dispose();
     this.mouseMoveDisposable = null;
+    if (this.mouseMoveRafId != null) {
+      cancelAnimationFrame(this.mouseMoveRafId);
+      this.mouseMoveRafId = null;
+    }
     this.contentChangeDisposable?.dispose();
     this.contentChangeDisposable = null;
 
