@@ -12,17 +12,28 @@ import type { PublicStepDefinition } from './step_registry/types';
 import type { PublicTriggerDefinition } from './trigger_registry/types';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
+export type PublicStepDefinitionOrLoader<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> =
+  | PublicStepDefinition<Input, Output, Config>
+  | (() => Promise<PublicStepDefinition<Input, Output, Config>>);
+
+export type PublicTriggerDefinitionOrLoader<EventSchema extends z.ZodType = z.ZodType> =
+  | PublicTriggerDefinition<EventSchema>
+  | (() => Promise<PublicTriggerDefinition<EventSchema>>);
+
 /**
  * Public-side plugin setup contract.
  * Exposes methods for other plugins to register public-side step and trigger definitions.
  */
-
 export interface WorkflowsExtensionsPublicPluginSetup {
   /**
    * Register user-facing definition for a workflow step.
    * This should be called during the plugin's setup phase.
    *
-   * @param definition - The public-side step definition
+   * @param definition - The public-side step definition, or a function that returns a promise of the definition (e.g. for dynamic imports)
    * @throws Error if definition for the same step type ID is already registered
    */
   registerStepDefinition<
@@ -30,7 +41,7 @@ export interface WorkflowsExtensionsPublicPluginSetup {
     Output extends z.ZodType = z.ZodType,
     Config extends z.ZodObject = z.ZodObject
   >(
-    definition: PublicStepDefinition<Input, Output, Config>
+    definition: PublicStepDefinitionOrLoader<Input, Output, Config>
   ): void;
 
   /**
@@ -42,7 +53,7 @@ export interface WorkflowsExtensionsPublicPluginSetup {
    * @throws Error if definition for the same trigger id is already registered
    */
   registerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType>(
-    definition: PublicTriggerDefinition<EventSchema>
+    definition: PublicTriggerDefinitionOrLoader<EventSchema>
   ): void;
 }
 
@@ -60,7 +71,14 @@ export interface TriggerRegistryStartContract {
  * Exposes methods for retrieving registered step and trigger definitions.
  */
 export type WorkflowsExtensionsPublicPluginStart =
-  WorkflowsExtensionsStartContract<PublicStepDefinition> & TriggerRegistryStartContract;
+  WorkflowsExtensionsStartContract<PublicStepDefinition> &
+    TriggerRegistryStartContract & {
+      /**
+       * Resolves when all async loaders have settled.
+       * Use before rendering the workflows UI to guarantee the registries are ready.
+       */
+      isReady(): Promise<void>;
+    };
 
 /**
  * Dependencies for the public plugin setup phase.

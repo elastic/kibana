@@ -12,9 +12,20 @@ import {
   registerStart,
   registerStatus,
   registerForceLogExtraction,
+  registerStartMaintainer,
+  registerStopMaintainer,
+  registerGetMaintainers,
+  registerInitMaintainers,
+  registerRunMaintainer,
+  registerForceCcsExtractToUpdates,
+  registerForceHistorySnapshot,
   registerCRUDUpsert,
   registerCRUDUpsertBulk,
   registerCRUDDelete,
+  registerResolutionLink,
+  registerResolutionUnlink,
+  registerResolutionGroup,
+  registerUpdate,
 } from './apis';
 import type { EntityStorePluginRouter } from '../types';
 
@@ -24,8 +35,19 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerStatus(router);
   registerUninstall(router);
   registerForceLogExtraction(router);
+  registerForceCcsExtractToUpdates(router);
+  registerForceHistorySnapshot(router);
   registerCRUDUpsert(router);
   registerCRUDUpsertBulk(router);
   registerCRUDDelete(router);
   registerStart(router);
+  registerUpdate(router);
+  registerResolutionLink(router);
+  registerResolutionUnlink(router);
+  registerResolutionGroup(router);
+  registerStartMaintainer(router);
+  registerStopMaintainer(router);
+  registerGetMaintainers(router);
+  registerInitMaintainers(router);
+  registerRunMaintainer(router);
 }

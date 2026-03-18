@@ -10,7 +10,7 @@ import { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './pain
 
 describe('getEuidPainlessEvaluation', () => {
   describe('snapshots per entity type', () => {
-    Object.values(EntityType.Values).forEach((entityType) => {
+    Object.values(EntityType.enum).forEach((entityType) => {
       it(`generates the expected Painless script for ${entityType}`, () => {
         const script = getEuidPainlessEvaluation(entityType);
         expect(script).toMatchSnapshot();
@@ -20,7 +20,7 @@ describe('getEuidPainlessEvaluation', () => {
 });
 
 describe('getEuidPainlessRuntimeMapping', () => {
-  Object.values(EntityType.Values).forEach((entityType) => {
+  Object.values(EntityType.enum).forEach((entityType) => {
     it(`returns a keyword runtime mapping that wraps getEuidPainlessEvaluation for ${entityType}`, () => {
       const returnScript = getEuidPainlessEvaluation(entityType);
       const mapping = getEuidPainlessRuntimeMapping(entityType);

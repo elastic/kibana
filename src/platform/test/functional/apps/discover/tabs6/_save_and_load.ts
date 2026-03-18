@@ -19,12 +19,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
   ]);
   const dataViews = getService('dataViews');
+  const esql = getService('esql');
   const monacoEditor = getService('monacoEditor');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
   describe('tabs saving and loading', function () {
+    before(async () => {
+      await browser.setWindowSize(1600, 1200);
+    });
+
     afterEach(async () => {
       await discover.resetQueryMode();
     });
@@ -203,6 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           adHocTabLabel,
           esqlTabLabel,
         ]);
+        expect(await dataViews.getSelectedName()).to.be(persistedTabDataView);
 
         // Save the Discover session
         await discover.saveSearch(sessionName, undefined, { storeTimeRange: true });
@@ -291,6 +297,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Load the Discover session
         await discover.loadSavedSearch(sessionName);
         await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(persistedTabDataView);
 
         // Prepare unsaved changes per tab
         const persistedUnsaved = {
@@ -320,6 +327,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Ad hoc data view tab
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(adHocTabDataView);
         await timePicker.setAbsoluteRange(adHocUnsaved.time.start, adHocUnsaved.time.end);
         await queryBar.setQuery(adHocUnsaved.query);
         await queryBar.submitQuery();
@@ -352,6 +360,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql(
           persistedUnsaved.columns
         );
+        expect(await dataViews.getSelectedName()).to.be(persistedTabDataView);
         expect(await discover.getHitCount()).to.be(persistedUnsavedCount);
 
         // Validate ad hoc data view tab
@@ -362,6 +371,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql(
           adHocUnsaved.columns
         );
+        expect(await dataViews.getSelectedName()).to.be(adHocTabDataView);
         expect(await discover.getHitCount()).to.be(adHocUnsavedCount);
 
         // Validate ES|QL tab
@@ -408,6 +418,155 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Validate cleared tabs
         expect(await unifiedTabs.getTabLabels()).to.eql(['Untitled']);
+      });
+
+      it('should restore the correct data view or ES|QL query for uninitialized tabs after page refresh and save', async () => {
+        const uninitializedSessionName = 'Uninitialized tabs session';
+        const persistedDataView1 = 'logstash-*';
+        const persistedDataView2 = 'kibana_sample_data_flights';
+        const adHocDataView1 = 'logst*';
+        const adHocDataView2 = 'log*';
+        const esqlQuery1 = 'FROM logstash-* | LIMIT 100';
+        const esqlQuery2 = 'FROM kibana_sample_data_flights | LIMIT 50';
+
+        // Tab 0: persisted data view (default)
+        expect(await dataViews.getSelectedName()).to.be(persistedDataView1);
+
+        // Tab 1: ad-hoc data view 1
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await dataViews.createFromSearchBar({
+          name: 'logst',
+          adHoc: true,
+          hasTimeField: true,
+        });
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(adHocDataView1);
+
+        // Tab 2: ES|QL 1
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+        await esql.setEsqlEditorQuery(esqlQuery1);
+        await esql.submitEsqlEditorQuery();
+        await discover.waitUntilTabIsLoaded();
+        expect(await esql.getEsqlEditorQuery()).to.be(esqlQuery1);
+
+        // Tab 3: persisted data view 2
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await discover.selectDataViewMode({ discardModal: true });
+        await discover.waitUntilTabIsLoaded();
+        await dataViews.switchToAndValidate(persistedDataView2);
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(persistedDataView2);
+
+        // Tab 4: ad-hoc data view 2
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await dataViews.createFromSearchBar({
+          name: 'log',
+          adHoc: true,
+          hasTimeField: true,
+        });
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(adHocDataView2);
+
+        // Tab 5: ES|QL 2
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+        await esql.setEsqlEditorQuery(esqlQuery2);
+        await esql.submitEsqlEditorQuery();
+        await discover.waitUntilTabIsLoaded();
+        expect(await esql.getEsqlEditorQuery()).to.be(esqlQuery2);
+
+        // Refresh the page
+        await browser.refresh();
+        await discover.waitUntilTabIsLoaded();
+
+        // Validate Tab 5 (ES|QL 2) - current tab after refresh
+        expect(await esql.getEsqlEditorQuery()).to.be(esqlQuery2);
+
+        await unifiedTabs.selectTab(4);
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(adHocDataView2);
+
+        await unifiedTabs.selectTab(3);
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(persistedDataView2);
+
+        await unifiedTabs.selectTab(2);
+        await discover.waitUntilTabIsLoaded();
+        expect(await esql.getEsqlEditorQuery()).to.be(esqlQuery1);
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(adHocDataView1);
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(persistedDataView1);
+
+        // Save as a new session
+        await discover.saveSearch(uninitializedSessionName);
+        expect(await discover.getSavedSearchTitle()).to.be(uninitializedSessionName);
+
+        expect(await dataViews.getSelectedName()).to.be(persistedDataView1);
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(adHocDataView1);
+
+        await unifiedTabs.selectTab(2);
+        await discover.waitUntilTabIsLoaded();
+        expect(await esql.getEsqlEditorQuery()).to.be(esqlQuery1);
+
+        await unifiedTabs.selectTab(3);
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(persistedDataView2);
+
+        await unifiedTabs.selectTab(4);
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(adHocDataView2);
+
+        await unifiedTabs.selectTab(5);
+        await discover.waitUntilTabIsLoaded();
+        expect(await esql.getEsqlEditorQuery()).to.be(esqlQuery2);
+
+        // Start a new search to clear the session and local storage
+        await discover.clickNewSearchButton();
+        await discover.waitUntilTabIsLoaded();
+        expect(await discover.getSavedSearchTitle()).to.be(undefined);
+
+        // Load the saved search
+        await discover.loadSavedSearch(uninitializedSessionName);
+        await discover.waitUntilTabIsLoaded();
+        expect(await discover.getSavedSearchTitle()).to.be(uninitializedSessionName);
+
+        expect(await dataViews.getSelectedName()).to.be(persistedDataView1);
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(adHocDataView1);
+
+        await unifiedTabs.selectTab(2);
+        await discover.waitUntilTabIsLoaded();
+        expect(await esql.getEsqlEditorQuery()).to.be(esqlQuery1);
+
+        await unifiedTabs.selectTab(3);
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(persistedDataView2);
+
+        await unifiedTabs.selectTab(4);
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataViews.getSelectedName()).to.be(adHocDataView2);
+
+        await unifiedTabs.selectTab(5);
+        await discover.waitUntilTabIsLoaded();
+        expect(await esql.getEsqlEditorQuery()).to.be(esqlQuery2);
       });
     });
 

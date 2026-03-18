@@ -25,6 +25,7 @@ const previouslyRegisteredTypes = [
   'apm-service-group',
   'apm-services-telemetry',
   'apm-telemetry',
+  'anonymization-salt',
   'app_search_telemetry',
   'application_usage_daily',
   'application_usage_totals',
@@ -66,6 +67,7 @@ const previouslyRegisteredTypes = [
   'privmon-api-key',
   'entity-discovery-api-key',
   'entity-engine-descriptor-v2',
+  'entity-store-global-state',
   'epm-packages',
   'epm-packages-assets',
   'event_loop_delays_daily',
@@ -100,6 +102,7 @@ const previouslyRegisteredTypes = [
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'infra-custom-dashboards',
+  'inference-settings',
   'ingest-agent-policies',
   'ingest-download-sources',
   'ingest-outputs',
@@ -115,6 +118,7 @@ const previouslyRegisteredTypes = [
   'maintenance-window',
   'map',
   'maps-telemetry',
+  'markdown',
   'metrics-data-source',
   'metrics-explorer-view',
   'ml-job',
@@ -122,6 +126,7 @@ const previouslyRegisteredTypes = [
   'ml-module',
   'ml-telemetry',
   'monitoring-telemetry',
+  'oauth_state',
   'observability-onboarding-state',
   'osquery-pack',
   'osquery-pack-asset',
@@ -169,6 +174,7 @@ const previouslyRegisteredTypes = [
   'timelion-sheet',
   'tsvb-validation-telemetry',
   'threshold-explorer-view',
+  'uiam_api_keys_provisioning_status',
   'ui-counter',
   'ui-metric',
   'upgrade-assistant-ml-upgrade-operation',
@@ -180,10 +186,12 @@ const previouslyRegisteredTypes = [
   'url',
   'usage-counter', // added in 8.16.0: richer mappings, located in .kibana_usage_counters
   'usage-counters', // deprecated in favor of 'usage-counter'
+  'user_connector_token',
   'visualization',
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
+  'streams-significant-events-settings',
 ].sort();
 
 describe('SO type registrations', () => {

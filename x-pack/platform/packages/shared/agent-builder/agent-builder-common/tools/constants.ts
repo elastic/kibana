@@ -30,6 +30,9 @@ export const platformCoreTools = {
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
+  // SML tools
+  smlSearch: platformCoreTool('sml_search'),
+  smlAttach: platformCoreTool('sml_attach'),
 } as const;
 
 export const attachmentTools = {
@@ -56,6 +59,8 @@ export const isFilestoreTool = (toolName: string) =>
 export const isInternalTool = (toolName: string) =>
   isAttachmentTool(toolName) || isFilestoreTool(toolName);
 
+export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
+
 /**
  * List of tool types which can be created / edited by a user.
  */
@@ -72,6 +77,8 @@ export const defaultAgentToolIds = [
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
   platformCoreTools.getWorkflowExecutionStatus,
+  platformCoreTools.smlSearch,
+  platformCoreTools.smlAttach,
 ];
 
 /**

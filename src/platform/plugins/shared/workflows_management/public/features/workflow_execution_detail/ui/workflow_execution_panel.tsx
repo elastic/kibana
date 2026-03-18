@@ -27,6 +27,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { selectIsYamlSyntaxValid } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -34,8 +35,8 @@ import {
   setIsTestModalOpen,
   setReplayExecutionId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
-import { useCapabilities } from '../../../hooks/use_capabilities';
 import { getTestRunTooltipContent } from '../../../shared/ui/workflow_action_buttons/get_workflow_tooltip_content';
+import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {
@@ -57,6 +58,8 @@ export interface WorkflowExecutionPanelProps {
   selectedId: string | null;
   showBackButton?: boolean;
   onClose: () => void;
+  childExecutionsMap?: ChildWorkflowExecutionsMap;
+  isLoadingChildExecutions?: boolean;
 }
 export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
   ({
@@ -67,6 +70,8 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     onStepExecutionClick,
     selectedId: selectedStepExecutionId,
     onClose,
+    childExecutionsMap,
+    isLoadingChildExecutions,
   }) => {
     const styles = useMemoCss(componentStyles);
     const showCancelButton = useMemo<boolean>(
@@ -120,6 +125,8 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               error={error}
               onStepExecutionClick={onStepExecutionClick}
               selectedId={selectedStepExecutionId ?? null}
+              childExecutionsMap={childExecutionsMap}
+              isLoadingChildExecutions={isLoadingChildExecutions}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -182,7 +189,7 @@ const ReplayExecutionButton = React.memo<{ executionId: string }>(({ executionId
   }, [executionId, dispatch]);
 
   const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
-  const { canExecuteWorkflow } = useCapabilities();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { isRunDisabled, runDisabledTooltipContent } = useMemo<{
     isRunDisabled: boolean;
     runDisabledTooltipContent: string | null;

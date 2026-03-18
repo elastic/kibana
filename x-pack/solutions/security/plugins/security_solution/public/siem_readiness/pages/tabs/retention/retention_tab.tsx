@@ -5,24 +5,487 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
+import {
+  EuiSpacer,
+  EuiLoadingSpinner,
+  EuiCallOut,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
+import type {
+  RetentionInfo,
+  RetentionStatus,
+  RetentionType,
+  MainCategories,
+} from '@kbn/siem-readiness';
+import {
+  CategoryAccordionTable,
+  type CategoryData,
+  type FilterOption,
+} from '../../components/category_accordion_table';
+import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
+import { useBasePath } from '../../../../common/lib/kibana';
+import { RetentionWarningPrompt } from './retention_warning_prompt';
+import { buildRetentionCaseDescription, getRetentionCaseTitle } from './retention_add_case_details';
+import { ViewCasesButton } from '../../components/view_cases_button';
+import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
+import { isRetentionNonCompliant } from '../../../hooks/visibility_status_utils';
+import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
-export const RetentionTab: React.FC = () => {
+const RETENTION_CASE_TAGS = ['siem-readiness', 'retention', 'data-lifecycle'];
+
+const getIlmPoliciesUrl = (basePath: string, policyName?: string): string => {
+  const baseUrl = `${basePath}/app/management/data/index_lifecycle_management/policies`;
+  return policyName ? `${baseUrl}?policy=${encodeURIComponent(policyName)}` : baseUrl;
+};
+const getDataStreamUrl = (basePath: string, dataStreamName: string): string => {
+  return `${basePath}/app/management/data/index_management/data_streams/${encodeURIComponent(
+    dataStreamName
+  )}`;
+};
+const getIndexDetailsUrl = (basePath: string, indexName: string): string => {
+  return `${basePath}/app/management/data/index_management/indices/index_details?indexName=${encodeURIComponent(
+    indexName
+  )}`;
+};
+// Extended RetentionInfo for table compatibility
+interface RetentionInfoWithStatus extends RetentionInfo, Record<string, unknown> {}
+
+export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
+  activeCategories,
+}) => {
+  const basePath = useBasePath();
+  const { openNewCaseFlyout } = useSiemReadinessCases();
+  const { getReadinessCategories, getReadinessRetention } = useSiemReadinessApi();
+  const {
+    data: categoriesData,
+    isLoading: categoriesLoading,
+    error: categoriesError,
+  } = getReadinessCategories;
+  const {
+    data: retentionData,
+    isLoading: retentionLoading,
+    error: retentionError,
+  } = getReadinessRetention;
+
+  const isLoading = categoriesLoading || retentionLoading;
+  const error = categoriesError || retentionError;
+
+  // Match data streams to categories by checking if backing index contains data stream name
+  const categories: Array<CategoryData<RetentionInfoWithStatus>> = useMemo(() => {
+    const result: Array<CategoryData<RetentionInfoWithStatus>> = [];
+
+    for (const category of categoriesData?.mainCategoriesMap ?? []) {
+      const isActive = activeCategories.includes(category.category as MainCategories);
+      if (isActive) {
+        const matchingRetention: RetentionInfoWithStatus[] = [];
+        for (const retention of retentionData?.items ?? []) {
+          const hasMatch = category.indices.some((idx) =>
+            idx.indexName.includes(retention.indexName)
+          );
+          if (hasMatch) {
+            matchingRetention.push(retention as RetentionInfoWithStatus);
+          }
+        }
+
+        if (matchingRetention.length > 0) {
+          result.push({ category: category.category, items: matchingRetention });
+        }
+      }
+    }
+
+    return result;
+  }, [categoriesData?.mainCategoriesMap, retentionData?.items, activeCategories]);
+
+  // Check if any matched items exist ignoring activeCategories filter (for hasUnfilteredData prop)
+  const hasUnfilteredData = useMemo(() => {
+    for (const category of categoriesData?.mainCategoriesMap ?? []) {
+      for (const retention of retentionData?.items ?? []) {
+        const hasMatch = category.indices.some((idx) =>
+          idx.indexName.includes(retention.indexName)
+        );
+        if (hasMatch) return true;
+      }
+    }
+    return false;
+  }, [categoriesData?.mainCategoriesMap, retentionData?.items]);
+
+  // Count non-compliant items (deduplicated by indexName)
+  const nonCompliantStats = useMemo(() => {
+    const seen = new Set<string>();
+    let nonCompliantCount = 0;
+
+    for (const category of categories) {
+      for (const item of category.items) {
+        if (!seen.has(item.indexName)) {
+          seen.add(item.indexName);
+          if (isRetentionNonCompliant(item.status)) {
+            nonCompliantCount++;
+          }
+        }
+      }
+    }
+
+    return { totalNonCompliant: nonCompliantCount, hasIssues: nonCompliantCount > 0 };
+  }, [categories]);
+
+  // Case description
+  const caseDescription = useMemo(
+    () => buildRetentionCaseDescription(categories, basePath),
+    [categories, basePath]
+  );
+
+  const handleCreateCase = useCallback(() => {
+    openNewCaseFlyout({
+      title: getRetentionCaseTitle(),
+      description: caseDescription,
+      tags: RETENTION_CASE_TAGS,
+    });
+  }, [openNewCaseFlyout, caseDescription]);
+
+  // Render function for accordion extra action (right side badges/stats)
+  const renderExtraAction = (category: CategoryData<RetentionInfoWithStatus>) => {
+    const nonCompliantCount = category.items.filter((item) =>
+      isRetentionNonCompliant(item.status)
+    ).length;
+
+    const hasIssues = nonCompliantCount > 0;
+
+    return (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.securitySolution.siemReadiness.retention.status.label', {
+              defaultMessage: 'Status:',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={hasIssues ? 'warning' : 'success'}>
+            {hasIssues
+              ? i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.accordionStatus.actionsRequired',
+                  { defaultMessage: 'Actions required' }
+                )
+              : i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.accordionStatus.healthy',
+                  { defaultMessage: 'Healthy' }
+                )}
+          </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {'|'}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.securitySolution.siemReadiness.retention.dataStreams.label', {
+              defaultMessage: 'Data streams:',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{category.items.length}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  // Filter options for the component
+  const filterOptions: FilterOption[] = [
+    {
+      value: 'all',
+      label: i18n.translate('xpack.securitySolution.siemReadiness.retention.filter.all', {
+        defaultMessage: 'All',
+      }),
+    },
+    {
+      value: 'non-compliant',
+      label: i18n.translate('xpack.securitySolution.siemReadiness.retention.filter.nonCompliant', {
+        defaultMessage: 'Non-compliant',
+      }),
+    },
+    {
+      value: 'healthy',
+      label: i18n.translate('xpack.securitySolution.siemReadiness.retention.filter.healthy', {
+        defaultMessage: 'Healthy',
+      }),
+    },
+  ];
+
+  // Define columns for the data stream table
+  const columns: Array<EuiBasicTableColumn<RetentionInfoWithStatus>> = useMemo(
+    () => [
+      {
+        field: 'indexName',
+        name: i18n.translate(
+          'xpack.securitySolution.siemReadiness.retention.table.column.dataStream',
+          {
+            defaultMessage: 'Data streams/indices',
+          }
+        ),
+        sortable: true,
+        truncateText: true,
+        width: '30%',
+      },
+      {
+        field: 'retentionType',
+        name: i18n.translate(
+          'xpack.securitySolution.siemReadiness.retention.table.column.retentionType',
+          {
+            defaultMessage: 'Managed by',
+          }
+        ),
+        width: '10%',
+        render: (retentionType: RetentionType) => {
+          if (retentionType === 'dsl') {
+            return <EuiText size="xs">{'DSL'}</EuiText>;
+          }
+          if (retentionType === 'ilm') {
+            return <EuiText size="xs">{'ILM'}</EuiText>;
+          }
+          return (
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.securitySolution.siemReadiness.retention.managedBy.none', {
+                defaultMessage: 'None',
+              })}
+            </EuiText>
+          );
+        },
+      },
+      {
+        field: 'retentionPeriod',
+        name: i18n.translate(
+          'xpack.securitySolution.siemReadiness.retention.table.column.currentRetention',
+          {
+            defaultMessage: 'Current retention',
+          }
+        ),
+        sortable: (item: RetentionInfoWithStatus) => item?.retentionDays ?? 0,
+        width: '20%',
+        render: (retentionPeriod: string | null, item: RetentionInfoWithStatus) => {
+          if (!retentionPeriod) {
+            return (
+              <EuiText size="xs" color="subdued">
+                {i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.period.notConfigured',
+                  {
+                    defaultMessage: 'Not configured',
+                  }
+                )}
+              </EuiText>
+            );
+          }
+          const daysText =
+            item.retentionDays !== null
+              ? i18n.translate('xpack.securitySolution.siemReadiness.retention.period.days', {
+                  defaultMessage: '{days} days',
+                  values: { days: item.retentionDays },
+                })
+              : retentionPeriod;
+          return <EuiText size="xs">{daysText}</EuiText>;
+        },
+      },
+      {
+        name: i18n.translate(
+          'xpack.securitySolution.siemReadiness.retention.table.column.baselineRetentionFedRAMP',
+          {
+            defaultMessage: 'Baseline retention (FedRAMP)',
+          }
+        ),
+        width: '20%',
+        render: () => {
+          return i18n.translate('xpack.securitySolution.siemReadiness.retention.baseline.value', {
+            defaultMessage: '12 months',
+          });
+        },
+      },
+      {
+        name: i18n.translate('xpack.securitySolution.siemReadiness.retention.table.column.status', {
+          defaultMessage: 'Status',
+        }),
+        field: 'status',
+        sortable: true,
+        width: '15%',
+        render: (status: RetentionStatus) => {
+          const statusConfig: Record<
+            RetentionStatus,
+            { color: 'success' | 'danger'; label: string }
+          > = {
+            healthy: {
+              color: 'success',
+              label: i18n.translate(
+                'xpack.securitySolution.siemReadiness.retention.status.healthy',
+                {
+                  defaultMessage: 'Healthy',
+                }
+              ),
+            },
+            'non-compliant': {
+              color: 'danger',
+              label: i18n.translate(
+                'xpack.securitySolution.siemReadiness.retention.status.nonCompliant',
+                {
+                  defaultMessage: 'Non-compliant',
+                }
+              ),
+            },
+          };
+
+          const config = statusConfig[status];
+          return <EuiBadge color={config.color}>{config.label}</EuiBadge>;
+        },
+      },
+      {
+        name: i18n.translate('xpack.securitySolution.siemReadiness.retention.table.column.action', {
+          defaultMessage: 'Action',
+        }),
+        width: '10%',
+        render: (item: RetentionInfoWithStatus) => {
+          let href: string;
+          let label: string;
+
+          const isDsl = item.retentionType === 'dsl';
+          const isUnmanagedDataStream = item.isDataStream && item.retentionType === null;
+          const isUnmanagedIndex = !item.isDataStream && item.retentionType === null;
+
+          if (isDsl || isUnmanagedDataStream) {
+            href = getDataStreamUrl(basePath, item.indexName);
+            label = i18n.translate(
+              'xpack.securitySolution.siemReadiness.retention.action.viewDataStream',
+              { defaultMessage: 'View Data Stream' }
+            );
+          } else if (item.retentionType === 'ilm' && item.policyName) {
+            href = getIlmPoliciesUrl(basePath, item.policyName);
+            label = i18n.translate(
+              'xpack.securitySolution.siemReadiness.retention.action.viewIlm',
+              { defaultMessage: 'View ILM policies' }
+            );
+          } else if (isUnmanagedIndex) {
+            href = getIndexDetailsUrl(basePath, item.indexName);
+            label = i18n.translate(
+              'xpack.securitySolution.siemReadiness.retention.action.viewIndex',
+              { defaultMessage: 'View Index' }
+            );
+          } else {
+            return null;
+          }
+
+          return (
+            <div style={{ textAlign: 'right' }}>
+              <EuiButtonEmpty
+                size="xs"
+                href={href}
+                target="_blank"
+                iconType="popout"
+                iconSide="right"
+              >
+                {label}
+              </EuiButtonEmpty>
+            </div>
+          );
+        },
+      },
+    ],
+    [basePath]
+  );
+
+  if (isLoading) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={i18n.translate('xpack.securitySolution.siemReadiness.retention.error.title', {
+            defaultMessage: 'Error loading retention data',
+          })}
+          color="danger"
+          iconType="error"
+          announceOnMount
+        >
+          <p>{(error as Error).message}</p>
+        </EuiCallOut>
+      </>
+    );
+  }
+
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiText>
-        <p>
-          {i18n.translate(
-            'xpack.securitySolution.siemReadiness.visibility.retention.tab.placeholder',
-            {
-              defaultMessage: 'Retention tab content will be implemented here.',
-            }
-          )}
-        </p>
-      </EuiText>
+      {nonCompliantStats.hasIssues && (
+        <>
+          <RetentionWarningPrompt />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.securitySolution.siemReadiness.retention.description', {
+              defaultMessage:
+                'Check if your log data meets recommended retention periods across key categories.',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        {nonCompliantStats.hasIssues && (
+          <>
+            <EuiFlexItem grow={false}>
+              <ViewCasesButton
+                caseTagsArray={RETENTION_CASE_TAGS}
+                data-test-subj="retentionViewCasesButton"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconSide="right"
+                size="s"
+                iconType="plusInCircle"
+                onClick={handleCreateCase}
+                data-test-subj="retentionCreateNewCaseButton"
+              >
+                {i18n.translate('xpack.securitySolution.siemReadiness.retention.createCase', {
+                  defaultMessage: 'Create new case',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <CategoryAccordionTable<RetentionInfoWithStatus>
+        categories={categories}
+        columns={columns}
+        filterOptions={filterOptions}
+        searchField="indexName"
+        filterField="status"
+        renderExtraAction={renderExtraAction}
+        defaultSortField="retentionDays"
+        defaultSortDirection="asc"
+        itemName="data streams / indices"
+        storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
+        isFilterActive={activeCategories.length < CATEGORY_ORDER.length && hasUnfilteredData}
+        hasUnfilteredData={hasUnfilteredData}
+      />
     </>
   );
 };

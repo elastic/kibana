@@ -22,6 +22,7 @@ import type {
   MessageSigningServiceInterface,
 } from '@kbn/fleet-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -464,6 +465,23 @@ export class EndpointAppContextService {
     return this.startDependencies.spacesService.getActiveSpace(httpRequest);
   }
 
+  public getActiveSpaceId(httpRequest: KibanaRequest): string {
+    if (!this.startDependencies?.spacesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.spacesService.getSpaceId(httpRequest);
+  }
+
+  public getAccessibleSpaces(httpRequest: KibanaRequest): Promise<Space[]> {
+    if (!this.startDependencies?.spacesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    const spacesClient = this.startDependencies.spacesService.createSpacesClient(httpRequest);
+    return spacesClient.getAll();
+  }
+
   public getReferenceDataClient(): ReferenceDataClientInterface {
     if (!this.startDependencies?.savedObjectsServiceStart) {
       throw new EndpointAppContentServicesNotStartedError();
@@ -489,11 +507,16 @@ export class EndpointAppContextService {
     return this.startDependencies.config[key];
   }
 
-  getScriptsLibraryClient(spaceId: string, username: string): ScriptsLibraryClientInterface {
+  getScriptsLibraryClient(
+    spaceId: string,
+    username: string,
+    rulesClient?: RulesClient
+  ): ScriptsLibraryClientInterface {
     return new ScriptsLibraryClient({
       spaceId,
       username,
       endpointService: this,
+      rulesClient,
     });
   }
 }

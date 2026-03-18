@@ -26,6 +26,7 @@ export interface ConnectorIdItem extends BaseItem {
 
 export interface VariableItem extends BaseItem {
   type: 'regexp' | 'foreach';
+  offset?: number;
 }
 
 export interface CustomPropertyItem extends BaseItem {
@@ -127,9 +128,27 @@ interface YamlValidationResultTriggerConditionError extends YamlValidationResult
   owner: 'trigger-condition-validation';
 }
 
+interface YamlValidationResultWorkflowOutput extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'workflow-output-validation';
+}
+
+interface YamlValidationResultIfConditionError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'if-condition-validation';
+}
+
 export type CustomPropertyValidationResult =
   | YamlValidationResultCustomPropertyError
   | YamlValidationResultCustomPropertyValid;
+
+interface YamlValidationResultWorkflowInputsError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'workflow-inputs-validation';
+}
 
 export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'step-name-validation',
@@ -138,7 +157,10 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'connector-id-validation',
   'json-schema-default-validation',
   'custom-property-validation',
+  'workflow-inputs-validation',
   'trigger-condition-validation',
+  'workflow-output-validation',
+  'if-condition-validation',
 ] as const;
 
 export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
@@ -158,4 +180,7 @@ export type YamlValidationResult =
   | YamlValidationResultJsonSchemaDefault
   | YamlValidationResultCustomPropertyError
   | YamlValidationResultCustomPropertyValid
-  | YamlValidationResultTriggerConditionError;
+  | YamlValidationResultWorkflowInputsError
+  | YamlValidationResultTriggerConditionError
+  | YamlValidationResultWorkflowOutput
+  | YamlValidationResultIfConditionError;

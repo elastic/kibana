@@ -6,9 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { timeRangeSchema } from '@kbn/es-query-server';
 import { mlEntityFieldSchema } from '@kbn/ml-anomaly-utils/schemas';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 
 export const severityThresholdSchema = schema.object({
   min: schema.number(),
@@ -24,7 +26,7 @@ export const anomalyChartsEmbeddableRuntimeStateSchema = schema.object({
 
 export const anomalyChartsEmbeddableOverridableStateSchema = schema.object({
   ...anomalyChartsEmbeddableRuntimeStateSchema.getPropSchemas(),
-  timeRange: schema.maybe(timeRangeSchema),
+  ...serializedTimeRangeSchema.getPropSchemas(),
 });
 
 export const anomalyChartsEmbeddableStateSchema = schema.object({

@@ -3,10 +3,6 @@
 ## Cloud settings
 xpack.cloud.serverless.product_tier: complete
 
-# Cross Project Search
-cps.enabled: true
-cps.cpsEnabled: false
-
 ## Enabled plugins
 xpack.infra.enabled: true
 xpack.slo.enabled: true
@@ -20,6 +16,8 @@ xpack.features.overrides:
   ml:
     category: 'observability'
     order: 1200
+  ### Inference Endpoints feature privilege should be hidden
+  searchInferenceEndpoints.hidden: true
   ### Stack alerts is hidden in Role management since it's not needed.
   stackAlerts.hidden: true
   ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.

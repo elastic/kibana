@@ -25,9 +25,9 @@ export async function getEventsForInsightType(
   options: EventRetrieverOptions
 ) {
   switch (insightType) {
-    case DefendInsightType.Enum.incompatible_antivirus:
+    case DefendInsightType.enum.incompatible_antivirus:
       return getFileEvents(esClient, options);
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       return getPolicyResponseFailureEvents(esClient, options);
     default:
       throw new Error(`Unsupported insight type: ${insightType}`);

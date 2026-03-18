@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -16,7 +16,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   // TODO: Remove when vislib is removed
-  describe('visualize app - new charts library visualize', () => {
+  describe('visualize app - new charts library visualize group1', () => {
     before(async () => {
       log.debug('Starting visualize before method');
       await browser.setWindowSize(1280, 800);
@@ -30,13 +30,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.update({
         'histogram:maxBars': 100,
-      });
-      await browser.refresh();
-    });
-
-    after(async () => {
-      await kibanaServer.uiSettings.update({
-        'histogram:maxBars': 1000,
       });
       await browser.refresh();
     });
