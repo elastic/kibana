@@ -537,7 +537,8 @@ export class WorkflowsExecutionEnginePlugin
     this.concurrencySemaphoreRepository = concurrencySemaphoreRepository;
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
-      workflowExecutionRepository
+      workflowExecutionRepository,
+      concurrencySemaphoreRepository
     );
 
     const dependencies: ContextDependencies = {

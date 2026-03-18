@@ -9,6 +9,7 @@
 
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import type { ConcurrencySemaphoreRepository } from '../repositories/concurrency_semaphore_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
@@ -21,22 +22,27 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
  * - Enforcing concurrency limits per group
  * - Implementing collision strategies (drop, cancel-in-progress, queue)
  *
- * The 'queue' strategy always enqueues new executions and relies on the
- * plugin's promoteFromQueue() to atomically acquire semaphore slots and
- * schedule Task Manager tasks in FIFO order.
+ * The 'queue' strategy uses a two-path approach:
+ * - Fast path: if no executions are already queued, acquire a semaphore slot directly
+ *   and return true so the caller proceeds immediately in the current TM task.
+ * - Slow path: if the queue is non-empty, always join the back of the queue (FIFO
+ *   fairness). Slot acquisition and TM-task scheduling happen in promoteFromQueue().
  */
 export class ConcurrencyManager {
   private readonly templatingEngine: WorkflowTemplatingEngine;
   private readonly workflowTaskManager: WorkflowTaskManager;
   private readonly workflowExecutionRepository: WorkflowExecutionRepository;
+  private readonly concurrencySemaphoreRepository: ConcurrencySemaphoreRepository;
 
   constructor(
     workflowTaskManager: WorkflowTaskManager,
-    workflowExecutionRepository: WorkflowExecutionRepository
+    workflowExecutionRepository: WorkflowExecutionRepository,
+    concurrencySemaphoreRepository: ConcurrencySemaphoreRepository
   ) {
     this.templatingEngine = new WorkflowTemplatingEngine();
     this.workflowTaskManager = workflowTaskManager;
     this.workflowExecutionRepository = workflowExecutionRepository;
+    this.concurrencySemaphoreRepository = concurrencySemaphoreRepository;
   }
 
   /**
@@ -78,9 +84,12 @@ export class ConcurrencyManager {
    * Checks concurrency limits and applies the collision strategy if needed.
    *
    * For 'queue' strategy:
-   * - Always enqueues the new execution (FIFO fairness — older queued items run first)
+   * - Fast path: if the queue is empty, acquire a semaphore slot directly and
+   *   return true — the caller proceeds immediately in the current TM task with
+   *   no QUEUED state and no extra round-trip.
+   * - Slow path: if the queue is non-empty, join the back of the queue (FIFO).
+   *   Slot acquisition happens in promoteFromQueue() when a slot frees up.
    * - Skips if the queue is already at maxQueueSize
-   * - Slot acquisition and promotion happen separately via promoteFromQueue()
    *
    * For 'drop' strategy:
    * - Queries for non-terminal executions with the same concurrency group key
@@ -108,11 +117,7 @@ export class ConcurrencyManager {
 
     const maxConcurrency = concurrencySettings.max ?? 1;
 
-    // --- Queue strategy: always enqueue, promote separately ---
-    // New executions always join the back of the queue to guarantee FIFO
-    // ordering. Slot acquisition happens in promoteFromQueue(), which the
-    // caller invokes after this method returns false. This prevents a new
-    // trigger from jumping ahead of older queued executions.
+    // --- Queue strategy: fast path + FIFO slow path ---
     if (concurrencySettings.strategy === 'queue') {
       const maxQueueSize = concurrencySettings.maxQueueSize;
       const queued = await this.workflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup(
@@ -132,14 +137,28 @@ export class ConcurrencyManager {
         return false;
       }
 
-      // Use refresh: 'wait_for' so the QUEUED document is immediately visible
-      // to the promoteFromQueue() search that the caller runs right after this
-      // returns false. Without it, NRT lag (~1s) can hide the just-written doc
-      // and leave the execution stuck in QUEUED when slots are actually free.
-      await this.workflowExecutionRepository.updateWorkflowExecution(
-        { id: currentExecutionId, status: ExecutionStatus.QUEUED },
-        { refresh: 'wait_for' }
-      );
+      // Fast path: no executions are waiting, so try to acquire a slot directly.
+      // This lets the caller proceed immediately in the current TM task —
+      // no QUEUED write, no extra TM round-trip.
+      // FIFO is preserved: if there ARE queued items we skip this and join the
+      // back of the queue below, preventing new arrivals from jumping the line.
+      if (queued.length === 0) {
+        const acquired = await this.concurrencySemaphoreRepository.tryAcquireSlot(
+          concurrencyGroupKey,
+          spaceId,
+          currentExecutionId,
+          maxConcurrency
+        );
+        if (acquired) {
+          return true;
+        }
+      }
+
+      // Slow path: queue is non-empty or all slots are taken — join the queue.
+      await this.workflowExecutionRepository.updateWorkflowExecution({
+        id: currentExecutionId,
+        status: ExecutionStatus.QUEUED,
+      });
       return false;
     }
 
