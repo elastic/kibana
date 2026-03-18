@@ -51,7 +51,7 @@ import {
 import { IconResponseActionHistory } from '../common/icons/response_action_history';
 import { IconEndpoints } from '../common/icons/endpoints';
 import { IconPolicies } from '../common/icons/policies';
-import { IconTrustedApplications } from '../common/icons/trusted_applications';
+import { IconArtifacts } from '../common/icons/artifacts';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { IconAssetCriticality } from '../common/icons/asset_criticality';
 import { IconScriptLibrary } from '../common/icons/script_library';
@@ -137,7 +137,7 @@ export const links: LinkItem = {
         defaultMessage:
           'Manage endpoint exceptions, trusted applications, event filters, host isolation exceptions, and blocklist.',
       }),
-      landingIcon: IconTrustedApplications,
+      landingIcon: IconArtifacts,
       path: TRUSTED_APPS_PATH,
       skipUrlState: true,
       hideTimeline: true,
