@@ -113,7 +113,7 @@ export interface AttachmentStateManager {
   /** Update description without creating new version */
   rename(id: string, description: string, actor?: AttachmentRefActor): boolean;
   /** Update the origin reference for an attachment */
-  updateOrigin(id: string, origin: unknown, actor?: AttachmentRefActor): Promise<boolean>;
+  updateOrigin(id: string, origin: string, actor?: AttachmentRefActor): Promise<boolean>;
   /** Evaluate staleness for all active attachments. Only attachments with origin are checked via the type's isStale; others are considered not stale. */
   evaluateStalenessForActiveAttachments(
     context: AttachmentResolveContext
@@ -299,22 +299,13 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
         throw new Error(`Attachment type "${input.type}" does not support resolving from origin`);
       }
 
-      let validatedOrigin: unknown = input.origin;
-      if (typeDefinition.validateOrigin) {
-        const originResult = await typeDefinition.validateOrigin(input.origin);
-        if (!originResult.valid) {
-          throw new Error(`Invalid origin data for type "${input.type}": ${originResult.error}`);
-        }
-        validatedOrigin = originResult.data;
-      }
-
       if (!resolveContext) {
         throw new Error(
           `Resolve context is required to add attachment of type "${input.type}" with origin`
         );
       }
 
-      const resolved = await typeDefinition.resolve(validatedOrigin, resolveContext);
+      const resolved = await typeDefinition.resolve(input.origin, resolveContext);
       if (resolved === undefined) {
         throw new Error(
           `Failed to resolve content from origin for attachment type "${input.type}"`
@@ -477,7 +468,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     return true;
   }
 
-  async updateOrigin(id: string, origin: unknown, actor?: AttachmentRefActor): Promise<boolean> {
+  async updateOrigin(id: string, origin: string, actor?: AttachmentRefActor): Promise<boolean> {
     const attachment = this.attachments.get(id);
     const now = new Date().toISOString();
     if (!attachment) {
@@ -488,18 +479,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return false;
     }
 
-    // Validate origin using the type definition (same pattern as add())
-    const typeDefinition = this.options.getTypeDefinition(attachment.type);
-    let validatedOrigin: unknown = origin;
-    if (typeDefinition?.validateOrigin) {
-      const originResult = await typeDefinition.validateOrigin(origin);
-      if (!originResult.valid) {
-        throw new Error(`Invalid origin data for type "${attachment.type}": ${originResult.error}`);
-      }
-      validatedOrigin = originResult.data;
-    }
-
-    attachment.origin = validatedOrigin;
+    attachment.origin = origin;
     attachment.origin_snapshot_at = now;
     this.dirty = true;
     this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
