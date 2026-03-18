@@ -58,10 +58,25 @@ export class AlertActionsClient {
 
   public async bulkGet(episodeIds: string[]): Promise<BulkGetAlertActionsRecord[]> {
     const query = getBulkGetAlertActionsQuery(episodeIds);
-
-    return queryResponseToRecords<BulkGetAlertActionsRecord>(
+    const records = queryResponseToRecords<BulkGetAlertActionsRecord>(
       await this.queryService.executeQuery({ query: query.query })
     );
+
+    const returnedEpisodeIds = new Set(records.map((r) => r.episode_id));
+    for (const episodeId of episodeIds) {
+      if (!returnedEpisodeIds.has(episodeId)) {
+        records.push({
+          episode_id: episodeId,
+          rule_id: null,
+          group_hash: null,
+          last_ack_action: null,
+          last_deactivate_action: null,
+          last_snooze_action: null,
+        });
+      }
+    }
+
+    return records;
   }
 
   public async createBulkActions(
@@ -191,8 +206,8 @@ interface AlertEventRecord {
 
 export interface BulkGetAlertActionsRecord {
   episode_id: string;
-  rule_id: string;
-  group_hash: string;
+  rule_id: string | null;
+  group_hash: string | null;
   last_ack_action: string | null;
   last_deactivate_action: string | null;
   last_snooze_action: string | null;

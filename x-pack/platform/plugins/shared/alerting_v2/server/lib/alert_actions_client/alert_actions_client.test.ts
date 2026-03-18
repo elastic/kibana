@@ -231,28 +231,48 @@ describe('AlertActionsClient', () => {
       ]);
     });
 
-    it('should return an empty array when no actions found', async () => {
+    it('should return default records with nulls for episodes without actions', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
 
       const result = await client.bulkGet(['unknown-episode']);
 
-      expect(result).toEqual([]);
+      expect(result).toEqual([
+        {
+          episode_id: 'unknown-episode',
+          rule_id: null,
+          group_hash: null,
+          last_ack_action: null,
+          last_deactivate_action: null,
+          last_snooze_action: null,
+        },
+      ]);
     });
 
-    it('should only return episodes that have actions', async () => {
+    it('should include both matched and unmatched episodes', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(
         getBulkGetAlertActionsESQLResponse([{ episode_id: 'episode-1', last_ack_action: 'ack' }])
       );
 
       const result = await client.bulkGet(['episode-1', 'episode-2']);
 
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({
-        episode_id: 'episode-1',
-        rule_id: 'test-rule-id',
-        group_hash: 'test-group-hash',
-        last_ack_action: 'ack',
-      });
+      expect(result).toEqual([
+        {
+          episode_id: 'episode-1',
+          rule_id: 'test-rule-id',
+          group_hash: 'test-group-hash',
+          last_ack_action: 'ack',
+          last_deactivate_action: null,
+          last_snooze_action: null,
+        },
+        {
+          episode_id: 'episode-2',
+          rule_id: null,
+          group_hash: null,
+          last_ack_action: null,
+          last_deactivate_action: null,
+          last_snooze_action: null,
+        },
+      ]);
     });
   });
 });
