@@ -10,7 +10,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { skip } from 'rxjs';
@@ -81,7 +80,7 @@ export function QuickFilters({
               width: 'small',
               grow: true,
               title: STATUS_LABEL,
-              exclude: statusFilter?.meta?.negate ?? DEFAULT_DSL_OPTIONS_LIST_STATE.exclude,
+              exclude: statusFilter?.meta?.negate,
               selected_options: getSelectedOptions(statusFilter),
               exists_selected: Boolean(statusFilter?.query?.exists?.field === 'status'),
               display_settings: { placeholder: ALL_LABEL },
@@ -97,7 +96,7 @@ export function QuickFilters({
               width: 'small',
               grow: false,
               selected_options: getSelectedOptions(tagsFilter),
-              exclude: statusFilter?.meta?.negate ?? DEFAULT_DSL_OPTIONS_LIST_STATE.exclude,
+              exclude: statusFilter?.meta?.negate,
               exists_selected: Boolean(tagsFilter?.query?.exists?.field === 'slo.tags'),
               display_settings: { placeholder: ALL_LABEL },
             },
