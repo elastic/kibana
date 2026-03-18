@@ -17,61 +17,18 @@ import type {
   UnfreezeAction,
 } from '../../../../../../common/types';
 import type { IndexStateContext } from './context';
-import type { ReindexState } from './use_reindex';
-import type { UpdateIndexState } from './use_update_index';
 import { ReindexActionCell } from './actions_table_cell';
-import { LoadingState } from '../../../types';
+import {
+  createIndexContext,
+  createReindexState,
+  createUpdateIndexState,
+} from '../test_utils/helpers';
 
 const mockUseIndexContext = jest.fn<IndexStateContext, []>();
 
 jest.mock('./context', () => ({
   useIndexContext: () => mockUseIndexContext(),
 }));
-
-const createReindexState = (overrides?: Partial<ReindexState>): ReindexState => ({
-  loadingState: LoadingState.Success,
-  errorMessage: null,
-  reindexTaskPercComplete: null,
-  status: undefined,
-  lastCompletedStep: undefined,
-  cancelLoadingState: undefined,
-  reindexWarnings: undefined,
-  hasRequiredPrivileges: true,
-  meta: {
-    indexName: 'test-index',
-    reindexName: 'test-index-reindexed',
-    aliases: [],
-    isFrozen: false,
-    isReadonly: false,
-    isInDataStream: false,
-    isClosedIndex: false,
-    isFollowerIndex: false,
-  },
-  ...overrides,
-});
-
-const createUpdateIndexState = (overrides?: Partial<UpdateIndexState>): UpdateIndexState => ({
-  failedBefore: false,
-  status: 'incomplete',
-  ...overrides,
-});
-
-const createIndexContext = ({
-  deprecation,
-  reindexState,
-  updateIndexState,
-}: {
-  deprecation: EnrichedDeprecationInfo;
-  reindexState: ReindexState;
-  updateIndexState: UpdateIndexState;
-}): IndexStateContext => ({
-  deprecation,
-  reindexState,
-  updateIndexState,
-  startReindex: jest.fn<Promise<void>, []>(),
-  cancelReindex: jest.fn<Promise<void>, []>(),
-  updateIndex: jest.fn<Promise<void>, []>(),
-});
 
 const baseDeprecation = {
   level: 'critical',

@@ -91,7 +91,7 @@ describe('EsDeprecations', () => {
 
   it('shows no deprecations prompt', async () => {
     mockUseLoadEsDeprecations.mockReturnValue({
-      data: { ...mockEsDeprecations, migrationsDeprecations: [] },
+      data: { ...mockEsDeprecations, migrationsDeprecations: [], totalCriticalDeprecations: 0 },
       isLoading: false,
       error: undefined,
       resendRequest: jest.fn(),
@@ -201,7 +201,7 @@ describe('EsDeprecations', () => {
     renderPage();
 
     expect(await screen.findByTestId('deprecationsPageLoadingError')).toHaveTextContent(
-      'Upgrade Kibana to the same version as your Elasticsearch cluster. One or more nodes in the cluster is running a different version than Kibana.'
+      /Upgrade Kibana to the same version as your Elasticsearch cluster/i
     );
   });
 

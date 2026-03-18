@@ -100,22 +100,60 @@ export const mockEsDeprecations = {
 } satisfies ESUpgradeStatus;
 
 export const createEsDeprecations = (numDeprecationsPerType: number): ESUpgradeStatus => {
+  const cloneCorrectiveAction = (
+    correctiveAction: EnrichedDeprecationInfo['correctiveAction']
+  ): EnrichedDeprecationInfo['correctiveAction'] => {
+    if (!correctiveAction) {
+      return undefined;
+    }
+
+    switch (correctiveAction.type) {
+      case 'mlSnapshot':
+        return { ...correctiveAction };
+      case 'indexSetting':
+        return {
+          ...correctiveAction,
+          deprecatedSettings: [...correctiveAction.deprecatedSettings],
+        };
+      case 'clusterSetting':
+        return {
+          ...correctiveAction,
+          deprecatedSettings: [...correctiveAction.deprecatedSettings],
+        };
+      case 'reindex':
+        return {
+          ...correctiveAction,
+          metadata: { ...correctiveAction.metadata },
+        };
+      default:
+        return { ...correctiveAction };
+    }
+  };
+
+  const cloneDeprecation = (deprecation: EnrichedDeprecationInfo): EnrichedDeprecationInfo => ({
+    ...deprecation,
+    correctiveAction: cloneCorrectiveAction(deprecation.correctiveAction),
+  });
+
   const repeat = (deprecation: EnrichedDeprecationInfo) =>
-    Array.from({ length: numDeprecationsPerType }, () => deprecation);
+    Array.from({ length: numDeprecationsPerType }, () => cloneDeprecation(deprecation));
 
   const mlDeprecations = repeat(mockMlDeprecation);
   const indexSettingsDeprecations = repeat(mockIndexSettingDeprecation);
+  const clusterSettingsDeprecations = repeat(mockClusterSettingDeprecation);
   const reindexDeprecations = repeat(mockReindexDeprecation);
   const defaultDeprecations = repeat(mockDefaultDeprecation);
+  const migrationsDeprecations = [
+    ...defaultDeprecations,
+    ...reindexDeprecations,
+    ...indexSettingsDeprecations,
+    ...clusterSettingsDeprecations,
+    ...mlDeprecations,
+  ];
 
   return {
-    totalCriticalDeprecations: mlDeprecations.length + reindexDeprecations.length,
-    migrationsDeprecations: [
-      ...defaultDeprecations,
-      ...reindexDeprecations,
-      ...indexSettingsDeprecations,
-      ...mlDeprecations,
-    ],
+    totalCriticalDeprecations: migrationsDeprecations.filter((d) => d.level === 'critical').length,
+    migrationsDeprecations,
     totalCriticalHealthIssues: mockEsDeprecations.totalCriticalHealthIssues,
     enrichedHealthIndicators: mockEsDeprecations.enrichedHealthIndicators,
   };

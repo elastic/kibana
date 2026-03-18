@@ -39,22 +39,24 @@ describe('DataStreamReindexResolutionCell', () => {
     mockUseDataStreamMigrationContext.mockReset();
   });
 
+  const makeDefaultMigrationContextMock = (): MigrationStateContext => ({
+    loadDataStreamMetadata: jest.fn<Promise<void>, []>(),
+    initMigration: jest.fn<void, [resolutionType: 'reindex' | 'readonly']>(),
+    startReindex: jest.fn<Promise<void>, []>(),
+    cancelReindex: jest.fn<Promise<void>, []>(),
+    startReadonly: jest.fn<Promise<void>, []>(),
+    cancelReadonly: jest.fn<Promise<void>, []>(),
+    migrationState: {
+      loadingState: LoadingState.Success,
+      status: DataStreamMigrationStatus.notStarted,
+      taskPercComplete: null,
+      errorMessage: null,
+      meta: null,
+    },
+  });
+
   it('recommends set to read-only by default', () => {
-    mockUseDataStreamMigrationContext.mockReturnValue({
-      loadDataStreamMetadata: jest.fn<Promise<void>, []>(),
-      initMigration: jest.fn<void, [resolutionType: 'reindex' | 'readonly']>(),
-      startReindex: jest.fn<Promise<void>, []>(),
-      cancelReindex: jest.fn<Promise<void>, []>(),
-      startReadonly: jest.fn<Promise<void>, []>(),
-      cancelReadonly: jest.fn<Promise<void>, []>(),
-      migrationState: {
-        loadingState: LoadingState.Success,
-        status: DataStreamMigrationStatus.notStarted,
-        taskPercComplete: null,
-        errorMessage: null,
-        meta: null,
-      },
-    });
+    mockUseDataStreamMigrationContext.mockReturnValue(makeDefaultMigrationContextMock());
 
     renderWithI18n(<DataStreamReindexResolutionCell correctiveAction={baseCorrectiveAction} />);
 
@@ -70,21 +72,7 @@ describe('DataStreamReindexResolutionCell', () => {
       },
     };
 
-    mockUseDataStreamMigrationContext.mockReturnValue({
-      loadDataStreamMetadata: jest.fn<Promise<void>, []>(),
-      initMigration: jest.fn<void, [resolutionType: 'reindex' | 'readonly']>(),
-      startReindex: jest.fn<Promise<void>, []>(),
-      cancelReindex: jest.fn<Promise<void>, []>(),
-      startReadonly: jest.fn<Promise<void>, []>(),
-      cancelReadonly: jest.fn<Promise<void>, []>(),
-      migrationState: {
-        loadingState: LoadingState.Success,
-        status: DataStreamMigrationStatus.notStarted,
-        taskPercComplete: null,
-        errorMessage: null,
-        meta: null,
-      },
-    });
+    mockUseDataStreamMigrationContext.mockReturnValue(makeDefaultMigrationContextMock());
 
     renderWithI18n(<DataStreamReindexResolutionCell correctiveAction={correctiveAction} />);
 

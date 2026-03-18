@@ -43,6 +43,9 @@ describe('RemoveClusterSettingsFlyout', () => {
     expect(screen.getByTestId('flyoutTitle')).toHaveTextContent(
       mockClusterSettingDeprecation.message
     );
+    expect(screen.getByTestId('flyoutBody')).toHaveTextContent(
+      mockClusterSettingDeprecation.details
+    );
     expect(screen.getByTestId('documentationLink')).toHaveAttribute(
       'href',
       mockClusterSettingDeprecation.url

@@ -54,20 +54,36 @@ const createMigrationState = (overrides: Partial<MigrationState>): MigrationStat
   ...overrides,
 });
 
+const renderChecklistFlyout = ({
+  migrationState,
+  executeAction = jest.fn(),
+  cancelAction = jest.fn(),
+  dataStreamName = 'my-ds',
+}: {
+  migrationState: MigrationState;
+  executeAction?: () => void;
+  cancelAction?: () => void;
+  dataStreamName?: string;
+}) => {
+  renderWithI18n(
+    <ChecklistFlyoutStep
+      closeFlyout={jest.fn()}
+      migrationState={migrationState}
+      executeAction={executeAction}
+      cancelAction={cancelAction}
+      dataStreamName={dataStreamName}
+    />
+  );
+};
+
 describe('ChecklistFlyoutStep (data streams)', () => {
   it('renders fetch-failed callout and hides main action button on fetchFailed', () => {
-    renderWithI18n(
-      <ChecklistFlyoutStep
-        closeFlyout={jest.fn()}
-        migrationState={createMigrationState({
-          status: DataStreamMigrationStatus.fetchFailed,
-          errorMessage: 'fetch failed',
-        })}
-        executeAction={jest.fn()}
-        cancelAction={jest.fn()}
-        dataStreamName="my-ds"
-      />
-    );
+    renderChecklistFlyout({
+      migrationState: createMigrationState({
+        status: DataStreamMigrationStatus.fetchFailed,
+        errorMessage: 'fetch failed',
+      }),
+    });
 
     expect(screen.getByTestId('dataStreamMigrationChecklistFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('fetchFailedCallout')).toHaveTextContent('true');
@@ -75,18 +91,12 @@ describe('ChecklistFlyoutStep (data streams)', () => {
   });
 
   it('shows try-again button on failed status', () => {
-    renderWithI18n(
-      <ChecklistFlyoutStep
-        closeFlyout={jest.fn()}
-        migrationState={createMigrationState({
-          status: DataStreamMigrationStatus.failed,
-          errorMessage: 'failed',
-        })}
-        executeAction={jest.fn()}
-        cancelAction={jest.fn()}
-        dataStreamName="my-ds"
-      />
-    );
+    renderChecklistFlyout({
+      migrationState: createMigrationState({
+        status: DataStreamMigrationStatus.failed,
+        errorMessage: 'failed',
+      }),
+    });
 
     expect(screen.getByTestId('fetchFailedCallout')).toHaveTextContent('false');
     expect(screen.getByTestId('startDataStreamMigrationButton')).toHaveTextContent('Try again');
@@ -95,17 +105,12 @@ describe('ChecklistFlyoutStep (data streams)', () => {
   it('shows cancel button when migration is in progress', () => {
     const cancelAction = jest.fn();
 
-    renderWithI18n(
-      <ChecklistFlyoutStep
-        closeFlyout={jest.fn()}
-        migrationState={createMigrationState({
-          status: DataStreamMigrationStatus.inProgress,
-        })}
-        executeAction={jest.fn()}
-        cancelAction={cancelAction}
-        dataStreamName="my-ds"
-      />
-    );
+    renderChecklistFlyout({
+      migrationState: createMigrationState({
+        status: DataStreamMigrationStatus.inProgress,
+      }),
+      cancelAction,
+    });
 
     fireEvent.click(screen.getByTestId('cancelDataStreamMigrationButton'));
     expect(cancelAction).toHaveBeenCalledTimes(1);

@@ -62,8 +62,25 @@ describe('EsDeprecationsTable', () => {
   };
 
   const getPaginationItemsCount = () => {
-    const pagination = screen.getByTestId('esDeprecationsPagination');
-    return pagination.querySelectorAll('.euiPagination__item').length;
+    return within(screen.getByTestId('esDeprecationsPagination')).getAllByTestId(
+      /^pagination-button-\d+$/
+    ).length;
+  };
+
+  const openStatusFilter = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(
+      within(screen.getByTestId('searchBarContainer')).getByRole('button', { name: /Status/i })
+    );
+  };
+
+  const openTypeFilter = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(
+      within(screen.getByTestId('searchBarContainer')).getByRole('button', { name: /Type/i })
+    );
+  };
+
+  const clickFilterOption = async (user: ReturnType<typeof userEvent.setup>, label: string) => {
+    await user.click(await screen.findByText(label));
   };
 
   it('calls reload when refresh is clicked', async () => {
@@ -120,25 +137,31 @@ describe('EsDeprecationsTable', () => {
 
     await renderTable(migrationsDeprecations);
 
-    const searchBar = screen.getByTestId('searchBarContainer');
-    const filterButtons = searchBar.querySelectorAll('button.euiFilterButton');
-    await user.click(filterButtons[0]);
-
-    const criticalFilterButton = await waitFor(() => {
-      const el = document.body.querySelector('.euiSelectableListItem[title="Critical"]');
-      expect(el).not.toBeNull();
-      return el;
-    });
-
-    expect(criticalFilterButton).not.toBeNull();
-    if (criticalFilterButton) {
-      await user.click(criticalFilterButton);
-    }
+    await openStatusFilter(user);
+    await clickFilterOption(user, 'Critical');
 
     await waitFor(() => {
       expect(getPaginationItemsCount()).toEqual(Math.ceil(criticalDeprecations.length / 50));
       expect(screen.getAllByTestId('deprecationTableRow')).toHaveLength(
         Math.min(criticalDeprecations.length, 50)
+      );
+    });
+  });
+
+  it('updates pagination when type filter changes', async () => {
+    const user = userEvent.setup();
+    const { migrationsDeprecations } = createEsDeprecations(20);
+    const mlDeprecations = migrationsDeprecations.filter((d) => d.type === 'ml_settings');
+
+    await renderTable(migrationsDeprecations);
+
+    await openTypeFilter(user);
+    await clickFilterOption(user, 'Machine Learning');
+
+    await waitFor(() => {
+      expect(getPaginationItemsCount()).toEqual(Math.ceil(mlDeprecations.length / 50));
+      expect(screen.getAllByTestId('deprecationTableRow')).toHaveLength(
+        Math.min(mlDeprecations.length, 50)
       );
     });
   });
@@ -171,9 +194,7 @@ describe('EsDeprecationsTable', () => {
 
     const getFirstRowMessageCellText = () => {
       const row = screen.getAllByTestId('deprecationTableRow')[0];
-      const messageCell = row.querySelector('[data-test-subj$="-message"]');
-      expect(messageCell).not.toBeNull();
-      return messageCell?.textContent;
+      return within(row).getByTestId(/-message$/).textContent;
     };
 
     expect(getPaginationItemsCount()).toBeGreaterThan(1);

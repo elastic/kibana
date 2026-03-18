@@ -136,6 +136,8 @@ describe('IndexSettingsTableRow', () => {
       await removeIndexSettings('my_index', ['index.routing.allocation.include._tier']);
     });
 
+    expect(mockRemoveContent).not.toHaveBeenCalled();
+
     const resolutionCell = within(
       screen.getByTestId('indexSettingsTableCell-correctiveAction')
     ).getByTestId('indexSettingsResolutionStatusCell');

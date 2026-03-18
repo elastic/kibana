@@ -10,24 +10,13 @@ import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
-import type {
-  DataStreamMigrationWarning,
-  DataStreamMetadata,
-} from '../../../../../../../../../common/types';
 import type { WarningCheckboxProps } from './warnings';
 import { ConfirmMigrationReadonlyFlyoutStep } from './readonly_confirm_step';
-
-const mockLoadNodeDiskSpace = jest.fn<
-  {
-    data: Array<{
-      nodeName: string;
-      availableBytes: number;
-      lowDiskSpace: boolean;
-      shards: string[];
-    }>;
-  },
-  []
->();
+import {
+  createWarnings,
+  mockLoadNodeDiskSpace,
+  mockMeta,
+} from './test_utils/confirm_step_test_scaffold';
 
 jest.mock('../../../../../../../app_context', () => ({
   useAppContext: () => ({
@@ -59,7 +48,7 @@ jest.mock('./warnings', () => ({
       checked={isChecked}
       onChange={onChange}
       id={id}
-      data-testid={id}
+      data-test-subj={id}
       aria-label={id}
     />
   ),
@@ -69,7 +58,7 @@ jest.mock('./warnings', () => ({
       checked={isChecked}
       onChange={onChange}
       id={id}
-      data-testid={id}
+      data-test-subj={id}
       aria-label={id}
     />
   ),
@@ -79,22 +68,7 @@ jest.mock('../../../../../common/nodes_low_disk_space', () => ({
   NodesLowSpaceCallOut: () => <div data-test-subj="nodesLowDiskSpaceCallout" />,
 }));
 
-const mockMeta: DataStreamMetadata = {
-  dataStreamName: 'my-data-stream',
-  documentationUrl: 'https://example.invalid/meta-docs',
-  lastIndexRequiringUpgradeCreationDate: 1700000000000,
-  allIndices: ['.ds-my-data-stream-000001', '.ds-my-data-stream-000002'],
-  allIndicesCount: 2,
-  indicesRequiringUpgradeCount: 1,
-  indicesRequiringUpgrade: ['.ds-my-data-stream-000001'],
-  indicesRequiringUpgradeDocsCount: 10,
-  indicesRequiringUpgradeDocsSize: 1024,
-};
-
-const mockWarnings: DataStreamMigrationWarning[] = [
-  { warningType: 'incompatibleDataStream', meta: {}, resolutionType: 'readonly' },
-  { warningType: 'affectExistingSetups', meta: {}, resolutionType: 'readonly' },
-];
+const mockWarnings = createWarnings('readonly');
 
 describe('ConfirmMigrationReadonlyFlyoutStep', () => {
   beforeEach(() => {
@@ -105,7 +79,7 @@ describe('ConfirmMigrationReadonlyFlyoutStep', () => {
   it('blocks start until all warning checkboxes are checked', () => {
     const startAction = jest.fn();
 
-    const { container } = renderWithI18n(
+    renderWithI18n(
       <ConfirmMigrationReadonlyFlyoutStep
         closeModal={jest.fn()}
         startAction={startAction}
@@ -124,11 +98,9 @@ describe('ConfirmMigrationReadonlyFlyoutStep', () => {
     const startButton = screen.getByTestId('startActionButton');
     expect(startButton).toBeDisabled();
 
-    const checkboxes = container.querySelectorAll(
-      'input[type="checkbox"][data-testid^="migrationWarning-"]'
-    );
-    expect(checkboxes.length).toBe(2);
-    checkboxes.forEach((checkbox) => fireEvent.click(checkbox));
+    const checkboxes = screen.getAllByTestId(/^migrationWarning-\d+$/);
+    expect(checkboxes).toHaveLength(2);
+    checkboxes.forEach((checkboxEl) => fireEvent.click(checkboxEl));
 
     expect(startButton).not.toBeDisabled();
     fireEvent.click(startButton);
