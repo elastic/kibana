@@ -8,8 +8,7 @@ source .buildkite/scripts/common/util.sh
 
 echo --- Check API Contracts
 
-echo "Installing bump-cli dependencies..."
-cd oas_docs && npm install --no-save && cd ..
+export OASDIFF_BIN="${OASDIFF_BIN:-oasdiff}"
 
 BASE_BRANCH="${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-main}"
 MERGE_BASE_ARGS=()

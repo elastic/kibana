@@ -530,6 +530,7 @@ export function ApmServicesTable({
           serviceName: item.serviceName,
           transactionType: indexType === 'traces' ? item.transactionType : undefined,
           environment,
+          sortDirection: 'DESC',
         },
         indexSettings,
       });
