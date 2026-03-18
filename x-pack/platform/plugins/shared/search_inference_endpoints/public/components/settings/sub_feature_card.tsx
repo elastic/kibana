@@ -169,7 +169,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                           content={endpointId}
                           position="top"
                         >
-                          <EuiText size="s">
+                          <EuiText size="s" tabIndex={0}>
                             {endpointDisplayMap.get(endpointId)?.label ?? endpointId}
                           </EuiText>
                         </EuiToolTip>
