@@ -81,7 +81,7 @@ describe('InternalStateStore', () => {
         },
       },
     };
-    store.dispatch(internalStateActions.openInNewTab(params));
+    await store.dispatch(internalStateActions.openInNewTab(params));
     const tabsState = store.getState().tabs;
     expect(tabsState.allIds).toHaveLength(2);
     expect(tabsState.unsafeCurrentId).not.toBe(initialTabId);
@@ -380,7 +380,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    store.dispatch(
+    await store.dispatch(
       internalStateActions.openInNewTab({
         tabLabel: 'Second tab',
       })
