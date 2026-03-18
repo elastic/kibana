@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface KIDuplicationEvaluationDataset {
+export interface KIFeatureDuplicationEvaluationDataset {
   name: string;
   description: string;
   input: {
@@ -17,9 +17,9 @@ export interface KIDuplicationEvaluationDataset {
   };
 }
 
-export const KI_DUPLICATION_DATASETS: KIDuplicationEvaluationDataset[] = [
+export const KI_FEATURE_DUPLICATION_DATASETS: KIFeatureDuplicationEvaluationDataset[] = [
   {
-    name: 'KI duplication (synthtrace sample_logs)',
+    name: 'KI feature duplication (synthtrace sample_logs)',
     description:
       'Indexes one synthtrace LogHub system into a dedicated stream, then runs KI identification multiple times to measure duplicated KIs across runs.',
     input: {
