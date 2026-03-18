@@ -19,17 +19,14 @@ import { TaskStatus } from '@kbn/streams-schema';
 import React, { useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { Insight } from '@kbn/streams-schema';
-import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../util/errors';
-import { ConnectorListButton } from '../../../connector_list_button/connector_list_button';
 import { FeedbackButtons } from './feedback_buttons';
 import { InsightCard } from './insight_card';
 
 export function Summary({ count }: { count: number }) {
-  const aiFeatures = useAIFeatures();
   const {
     core: { notifications },
   } = useKibana();
@@ -39,7 +36,7 @@ export function Summary({ count }: { count: number }) {
     getInsightsDiscoveryTaskStatus,
     acknowledgeInsightsDiscoveryTask,
     cancelInsightsDiscoveryTask,
-  } = useInsightsDiscoveryApi(aiFeatures?.genAiConnectors.selectedConnector);
+  } = useInsightsDiscoveryApi();
 
   const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
   const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async () => {
@@ -129,7 +126,7 @@ export function Summary({ count }: { count: number }) {
                     data-test-subj="significant_events_regenerate_insights_button"
                   >
                     {i18n.translate('xpack.streams.insights.regenerateButtonLabel', {
-                      defaultMessage: 'Re-generate insights',
+                      defaultMessage: 'Re-discover Significant Events',
                     })}
                   </EuiButton>
                 </EuiFlexItem>
@@ -185,32 +182,30 @@ export function Summary({ count }: { count: number }) {
                   'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundDescription',
                   {
                     defaultMessage:
-                      'Start extracting insights from your logs, and understand what they mean with the power of AI and Elastic Observability.',
+                      'Discover Significant Events from your logs, and understand what they mean with the power of AI and Elastic Observability.',
                   }
                 )}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
-                <ConnectorListButton
-                  buttonProps={{
-                    fill: true,
-                    size: 'm',
-                    iconType: 'sparkles',
-                    children:
-                      task?.status === TaskStatus.InProgress
-                        ? i18n.translate('xpack.streams.insights.generatingButtonLabel', {
-                            defaultMessage: 'Generating insights',
-                          })
-                        : i18n.translate('xpack.streams.insights.generateButtonLabel', {
-                            defaultMessage: 'Generate insights',
-                          }),
-                    onClick: onGenerateInsightsClick,
-                    isDisabled: isGenerateButtonPending,
-                    isLoading: isGenerateButtonPending,
-                    'data-test-subj': 'significant_events_generate_insights_button',
-                  }}
-                />
+                <EuiButton
+                  fill
+                  size="m"
+                  iconType="sparkles"
+                  onClick={onGenerateInsightsClick}
+                  isDisabled={isGenerateButtonPending}
+                  isLoading={isGenerateButtonPending}
+                  data-test-subj="significant_events_generate_insights_button"
+                >
+                  {task?.status === TaskStatus.InProgress
+                    ? i18n.translate('xpack.streams.insights.generatingButtonLabel', {
+                        defaultMessage: 'Discovering Significant Events',
+                      })
+                    : i18n.translate('xpack.streams.insights.generateButtonLabel', {
+                        defaultMessage: 'Discover Significant Events',
+                      })}
+                </EuiButton>
 
                 {(task?.status === TaskStatus.InProgress || isCancellingTask) && (
                   <EuiButton

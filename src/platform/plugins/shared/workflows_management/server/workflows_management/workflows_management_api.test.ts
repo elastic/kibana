@@ -304,6 +304,8 @@ steps:
     beforeEach(() => {
       mockWorkflowsExecutionEngine = jest.mocked<WorkflowsExecutionEnginePluginStart>({} as any);
       mockWorkflowsExecutionEngine.executeWorkflow = jest.fn();
+      mockWorkflowsExecutionEngine.isEventDrivenExecutionEnabled = jest.fn().mockReturnValue(true);
+      mockWorkflowsExecutionEngine.isLogTriggerEventsEnabled = jest.fn().mockReturnValue(true);
 
       mockGetWorkflowsExecutionEngine = jest.fn().mockResolvedValue(mockWorkflowsExecutionEngine);
 
@@ -608,6 +610,50 @@ steps:
         mockRequest
       );
       expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('scheduleWorkflow', () => {
+    it('should pass event-driven trigger id (TriggerId) through to execution engine context', async () => {
+      const mockWorkflowsExecutionEngine = {
+        scheduleWorkflow: jest
+          .fn()
+          .mockResolvedValue({ workflowExecutionId: 'scheduled-exec-123' }),
+        isEventDrivenExecutionEnabled: jest.fn().mockReturnValue(true),
+        isLogTriggerEventsEnabled: jest.fn().mockReturnValue(true),
+      };
+      mockGetWorkflowsExecutionEngine.mockResolvedValue(mockWorkflowsExecutionEngine);
+
+      const workflow = {
+        id: 'wf-1',
+        name: 'Test Workflow',
+        enabled: true,
+        definition: { triggers: [{ type: 'cases.updated' }], steps: [] },
+        yaml: 'name: Test Workflow\ntriggers: [{ type: "cases.updated" }]\nsteps: []',
+      };
+      const spaceId = 'default';
+      const eventPayload = { caseId: 'case-1', status: 'open' };
+      const inputs = { event: eventPayload };
+      const triggeredBy = 'cases.updated';
+
+      const result = await api.scheduleWorkflow(
+        workflow as any,
+        spaceId,
+        inputs,
+        mockRequest,
+        triggeredBy
+      );
+
+      expect(mockGetWorkflowsExecutionEngine).toHaveBeenCalled();
+      expect(mockWorkflowsExecutionEngine.scheduleWorkflow).toHaveBeenCalledTimes(1);
+      const [passedWorkflow, passedContext, passedRequest] =
+        mockWorkflowsExecutionEngine.scheduleWorkflow.mock.calls[0];
+      expect(passedWorkflow).toEqual(workflow);
+      expect(passedContext.triggeredBy).toBe('cases.updated');
+      expect(passedContext.spaceId).toBe(spaceId);
+      expect(passedContext.event).toEqual(eventPayload);
+      expect(passedRequest).toBe(mockRequest);
+      expect(result).toBe('scheduled-exec-123');
     });
   });
 });

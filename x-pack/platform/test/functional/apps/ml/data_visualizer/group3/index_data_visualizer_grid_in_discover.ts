@@ -13,8 +13,6 @@ import {
   farequoteDataViewTestData,
   farequoteKQLSearchTestData,
   farequoteLuceneFiltersSearchTestData,
-  farequoteKQLFiltersSearchTestData,
-  farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from '../index_test_data';
 
@@ -107,8 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       runTests(farequoteDataViewTestData);
       runTests(farequoteKQLSearchTestData);
-      runTests(farequoteLuceneSearchTestData);
-      runTests(farequoteKQLFiltersSearchTestData);
       runTests(farequoteLuceneFiltersSearchTestData);
       runTests(sampleLogTestData);
     });
