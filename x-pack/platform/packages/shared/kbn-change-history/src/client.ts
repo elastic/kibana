@@ -17,7 +17,7 @@ import type { ClientCreateRequest } from '@kbn/data-streams/src/types/es_api';
 import type { Logger } from '@kbn/logging';
 import { changeHistoryMappings } from './mappings';
 import {
-  FEATURE_ENABLED,
+  FLAGS,
   DATA_STREAM_NAME,
   SEPARATOR_CHAR,
   ECS_VERSION,
@@ -101,7 +101,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @throws An error if the data stream is not initialized properly.
    */
   async initialize(elasticsearchClient: ElasticsearchClient) {
-    if (!FEATURE_ENABLED) {
+    if (!FLAGS.FEATURE_ENABLED) {
       const error = new Error(`Change history is disabled. Skipping initialization.`);
       this.logger.error(error);
       throw error;

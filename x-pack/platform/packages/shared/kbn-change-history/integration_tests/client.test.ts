@@ -10,6 +10,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
+import { FLAGS } from '../src/constants';
 import { ChangeHistoryClient } from '..';
 import { DATA_STREAM_NAME } from '../src/client';
 import type { ChangeHistoryDocument, ObjectChange } from '..';
@@ -45,6 +46,7 @@ describe('ChangeHistoryClient', () => {
   };
 
   beforeAll(async () => {
+    FLAGS.FEATURE_ENABLED = true;
     jest.setTimeout(30_000);
     esServer = createTestEsCluster({
       log: new ToolingLog({ writeTo: process.stdout, level: 'debug' }),
@@ -54,6 +56,7 @@ describe('ChangeHistoryClient', () => {
 
   afterAll(async () => {
     await esServer.stop();
+    FLAGS.FEATURE_ENABLED = false;
   });
 
   afterEach(async () => {
