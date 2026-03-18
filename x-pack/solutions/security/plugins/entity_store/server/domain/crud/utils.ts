@@ -50,7 +50,7 @@ export function validateAndTransformDocForUpsert(
   doc: Entity,
   generatedId: string | undefined,
   force: boolean
-): Record<string, unknown> {
+): [string, Record<string, unknown>] {
   if (!doc.entity?.id && generatedId) {
     doc.entity.id = generatedId as string;
   }
@@ -60,7 +60,7 @@ export function validateAndTransformDocForUpsert(
     const fieldDescriptions = getFieldDescriptions(flat, definition);
     assertOnlyNonForcedAttributesInReq(fieldDescriptions);
   }
-  return transformDocForUpsert(entityType, doc);
+  return [doc.entity.id, transformDocForUpsert(entityType, doc)];
 }
 
 function getFieldDescriptions(

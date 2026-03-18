@@ -17,7 +17,6 @@ import type { EntityType } from '../../../common';
 import { getEuidFromObject } from '../../../common/domain/euid';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { BadCRUDRequestError, EntityNotFoundError } from '../errors';
-import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import {
   hashEuid,
   validateAndTransformDocForUpsert,
@@ -154,26 +153,83 @@ export class CRUDClient {
   // and used if correct
   // 3. no ID and identifying data: ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
-    const id = getEuidFromObject(entityType, doc);
-    validateUpdateDocIdentification(doc, id);
-    const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, id, force);
-    const { result } = await this.esClient.update({
+    const generatedId = getEuidFromObject(entityType, doc);
+    validateUpdateDocIdentification(doc, generatedId);
+    const [id, readyDoc] = validateAndTransformDocForUpsert(
+      entityType,
+      this.namespace,
+      doc,
+      generatedId,
+      force
+    );
+    try {
+      const { result } = await this.esClient.update({
+        index: getLatestEntitiesIndexName(this.namespace),
+        id: hashEuid(id),
+        doc: readyDoc,
+        retry_on_conflict: RETRY_ON_CONFLICT,
+        refresh: 'wait_for',
+      });
+
+      switch (result as Result) {
+        case 'updated':
+          this.logger.debug(`Updated entity ID ${id}`);
+          break;
+        case 'noop':
+          this.logger.debug(`Updated entity ID ${id} (no change)`);
+          break;
+      }
+    } catch (error) {
+      if (error.statusCode === 404) {
+        throw new EntityNotFoundError(id);
+      }
+      throw error;
+    }
+
+    return;
+  }
+
+  public async bulkUpsertEntity({
+    objects,
+    force = false,
+  }: UpsertEntitiesBulkParams): Promise<BulkObjectResponse[]> {
+    const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
+    this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
+    for (const { type: entityType, doc } of objects) {
+      const generatedId = getEuidFromObject(entityType, doc);
+      validateUpdateDocIdentification(doc, generatedId);
+      const [_, readyDoc] = validateAndTransformDocForUpsert(
+        entityType,
+        this.namespace,
+        doc,
+        generatedId,
+        force
+      );
+      operations.push({ update: { retry_on_conflict: RETRY_ON_CONFLICT } }, readyDoc);
+    }
+    this.logger.debug(`Bulk upserting ${objects.length} entities`);
+    const resp = await this.esClient.bulk({
       index: getLatestEntitiesIndexName(this.namespace),
-      id: hashEuid(doc.entity.id),
-      doc: readyDoc,
-      retry_on_conflict: RETRY_ON_CONFLICT,
+      operations,
       refresh: 'wait_for',
     });
 
-    switch (result as Result) {
-      case 'updated':
-        this.logger.debug(`Updated entity ID ${id}`);
-        break;
-      case 'noop':
-        this.logger.debug(`Updated entity ID ${id} (no change)`);
-        break;
+    if (!resp.errors) {
+      this.logger.debug(`Successfully bulk upserted ${objects.length} entities`);
+      return [];
     }
-    return;
+    this.logger.debug(`Bulk upserted ${objects.length} entities with errors`);
+    return resp.items
+      .map((item) => Object.entries(item)[0][1])
+      .filter((value) => value.error !== undefined || value.status >= 400)
+      .map((value) => {
+        return {
+          _id: value._id,
+          status: value.status,
+          type: value.error?.type,
+          reason: value.error?.reason,
+        } as BulkObjectResponse;
+      });
   }
 
   // createEntity generates EUID and creates the entity in the LATEST index
@@ -198,96 +254,6 @@ export class CRUDClient {
     }
 
     return;
-  }
-
-  /*
-    // Check if document has identifying data
-    const { identitySourceFields } = getEuidSourceFields(entityType);
-    const flat = getFlattenedObject(doc);
-    const presentIdentifyingFields = Object.keys(flat).find((k) =>
-      identitySourceFields.includes(k)
-    );
-    const hasIdentifyingFields = presentIdentifyingFields !== undefined && presentIdentifyingFields.length > 0;
-  */
-
-  // upsertEntity takes a single entity and tries to either create or update
-  // (if an entity with the same EUID already exists) it directly in the LATEST
-  // index. This is considered a single synchronous upsert.
-  public async upsertEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
-    const id = getEuidFromObject(entityType, doc);
-    if (id === undefined) {
-      throw new BadCRUDRequestError(`Could not derive entity EUID from document`);
-    }
-    this.logger.debug(`Upserting entity ID ${id}`);
-
-    if (!doc.entity?.id) {
-      doc.entity.id = id;
-    }
-
-    const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, force);
-
-    const { result } = await this.esClient.update({
-      index: getLatestEntitiesIndexName(this.namespace),
-      id: hashEuid(id),
-      doc: readyDoc,
-      doc_as_upsert: true,
-      retry_on_conflict: RETRY_ON_CONFLICT,
-      refresh: 'wait_for',
-    });
-
-    switch (result as Result) {
-      case 'created':
-        this.logger.debug(`Created entity ID ${id}`);
-        break;
-      case 'updated':
-        this.logger.debug(`Updated entity ID ${id}`);
-        break;
-      case 'noop':
-        this.logger.debug(`Updated entity ID ${id} (no change)`);
-        break;
-    }
-    return;
-  }
-
-  // upsertEntitiesBulk takes one or more entities and creates documents in
-  // UPDATES index for log extraction task to pick up. This will result in
-  // appropriate Entities being created or updated on next log extraction run.
-  // This is considered a bulk asynchronous upsert.
-  public async upsertEntitiesBulk({
-    objects,
-    force = false,
-  }: UpsertEntitiesBulkParams): Promise<BulkObjectResponse[]> {
-    const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
-
-    this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
-    for (const { type: entityType, doc } of objects) {
-      const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, force);
-      operations.push({ create: {} }, readyDoc);
-    }
-
-    this.logger.debug(`Bulk upserting ${objects.length} entities`);
-    const resp = await this.esClient.bulk({
-      index: getUpdatesEntitiesDataStreamName(this.namespace),
-      operations,
-      refresh: 'wait_for',
-    });
-
-    if (!resp.errors) {
-      this.logger.debug(`Successfully bulk upserted ${objects.length} entities`);
-      return [];
-    }
-    this.logger.debug(`Bulk upserted ${objects.length} entities with errors`);
-    return resp.items
-      .map((item) => Object.entries(item)[0][1])
-      .filter((value) => value.error !== undefined || value.status >= 400)
-      .map((value) => {
-        return {
-          _id: value._id,
-          status: value.status,
-          type: value.error?.type,
-          reason: value.error?.reason,
-        } as BulkObjectResponse;
-      });
   }
 
   public async deleteEntity(id: string): Promise<void> {
