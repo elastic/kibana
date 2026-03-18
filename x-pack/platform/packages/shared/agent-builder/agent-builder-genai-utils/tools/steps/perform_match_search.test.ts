@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { MappingField } from '../utils/mappings';
@@ -103,6 +104,47 @@ describe('performMatchSearch', () => {
       expect(Object.keys(searchCall.highlight.fields)).toEqual(
         expect.arrayContaining(['title', 'body'])
       );
+    });
+  });
+
+  describe('response size guardrail', () => {
+    it('throws a human-readable error when the response exceeds the max size', async () => {
+      const esClient = {
+        search: jest
+          .fn()
+          .mockRejectedValue(new errors.RequestAbortedError('Response content length exceeded')),
+      } as unknown as ElasticsearchClient;
+      const logger = createMockLogger();
+
+      await expect(
+        performMatchSearch({
+          term: 'test query',
+          index: 'my-local-index',
+          fields: [textField('title')],
+          size: 10,
+          esClient,
+          logger,
+        })
+      ).rejects.toThrow('Search response exceeded the maximum allowed size of 20MB.');
+    });
+
+    it('rethrows non-size errors unchanged', async () => {
+      const originalError = new Error('some other ES error');
+      const esClient = {
+        search: jest.fn().mockRejectedValue(originalError),
+      } as unknown as ElasticsearchClient;
+      const logger = createMockLogger();
+
+      await expect(
+        performMatchSearch({
+          term: 'test query',
+          index: 'my-local-index',
+          fields: [textField('title')],
+          size: 10,
+          esClient,
+          logger,
+        })
+      ).rejects.toThrow(originalError);
     });
   });
 });
