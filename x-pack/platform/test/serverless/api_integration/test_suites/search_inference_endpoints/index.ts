@@ -12,6 +12,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./inference_settings'));
-    loadTestFile(require.resolve('./inference_features'));
   });
 }

@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { createTestConfig } from '../../config.base';
-
-const inferenceEndpointsFixturePlugin = resolve(
-  __dirname,
-  '../../../../api_integration/plugins/search_inference_endpoints_fixture'
-);
 
 export default createTestConfig({
   serverlessProject: 'es',
@@ -56,6 +50,5 @@ export default createTestConfig({
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
     `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
-    `--plugin-path=${inferenceEndpointsFixturePlugin}`,
   ],
 });
