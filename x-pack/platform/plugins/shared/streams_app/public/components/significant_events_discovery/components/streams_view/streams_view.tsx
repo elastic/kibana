@@ -17,7 +17,12 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
+import type {
+  IdentifyFeaturesResult,
+  OnboardingResult,
+  SignificantEventsQueriesGenerationResult,
+  TaskResult,
+} from '@kbn/streams-schema';
 import { TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -26,20 +31,29 @@ import type { TableRow } from './utils';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
+import { useFeaturesQueriesSubtaskApi } from '../../../../hooks/use_features_queries_subtask_api';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
+import { useFeaturesIdentificationStatusUpdateQueue } from '../../hooks/use_features_identification_status_update_queue';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
+import { useQueriesGenerationStatusUpdateQueue } from '../../hooks/use_queries_generation_status_update_queue';
 import {
   DISCOVER_INSIGHTS_BUTTON_LABEL,
   getInsightsCompleteToastTitle,
   INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON,
   INSIGHTS_SCHEDULING_FAILURE_TITLE,
+  KI_FEATURE_GENERATION_FAILURE_TITLE,
+  KI_FEATURE_GENERATION_SCHEDULING_FAILURE_TITLE,
+  KI_QUERY_GENERATION_FAILURE_TITLE,
+  KI_QUERY_GENERATION_SCHEDULING_FAILURE_TITLE,
   NO_INSIGHTS_TOAST_TITLE,
   ONBOARDING_FAILURE_TITLE,
   ONBOARDING_SCHEDULING_FAILURE_TITLE,
+  RUN_BULK_KI_FEATURE_GENERATION_BUTTON_LABEL,
+  RUN_BULK_KI_QUERY_GENERATION_BUTTON_LABEL,
   RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
@@ -84,9 +98,17 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const [streamOnboardingResultMap, setStreamOnboardingResultMap] = useState<
     Record<string, TaskResult<OnboardingResult>>
   >({});
+  const [streamFeaturesResultMap, setStreamFeaturesResultMap] = useState<
+    Record<string, TaskResult<IdentifyFeaturesResult>>
+  >({});
+  const [streamQueriesResultMap, setStreamQueriesResultMap] = useState<
+    Record<string, TaskResult<SignificantEventsQueriesGenerationResult>>
+  >({});
   const router = useStreamsAppRouter();
   const aiFeatures = useAIFeatures();
   const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi();
+  const { scheduleFeaturesIdentificationTask, scheduleQueriesGenerationTask } =
+    useFeaturesQueriesSubtaskApi();
   const { scheduleInsightsDiscoveryTask, getInsightsDiscoveryTaskStatus } =
     useInsightsDiscoveryApi();
   const [{ value: insightsTask }, getInsightsTaskStatus] = useAsyncFn(
@@ -191,6 +213,49 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const { onboardingStatusUpdateQueue, processStatusUpdateQueue } =
     useOnboardingStatusUpdateQueue(onStreamStatusUpdate);
 
+  const onFeaturesStatusUpdate = useCallback(
+    (streamName: string, taskResult: TaskResult<IdentifyFeaturesResult>) => {
+      setStreamFeaturesResultMap((currentMap) => ({
+        ...currentMap,
+        [streamName]: taskResult,
+      }));
+      if (taskResult.status === TaskStatus.Failed) {
+        toasts.addError(getFormattedError(new Error(taskResult.error)), {
+          title: KI_FEATURE_GENERATION_FAILURE_TITLE,
+        });
+      }
+    },
+    [toasts]
+  );
+
+  const onQueriesStatusUpdate = useCallback(
+    (streamName: string, taskResult: TaskResult<SignificantEventsQueriesGenerationResult>) => {
+      setStreamQueriesResultMap((currentMap) => ({
+        ...currentMap,
+        [streamName]: taskResult,
+      }));
+      if (taskResult.status === TaskStatus.Failed) {
+        toasts.addError(getFormattedError(new Error(taskResult.error)), {
+          title: KI_QUERY_GENERATION_FAILURE_TITLE,
+        });
+      }
+      if (taskResult.status === TaskStatus.Completed) {
+        refreshUnbackedQueriesCount();
+      }
+    },
+    [refreshUnbackedQueriesCount, toasts]
+  );
+
+  const {
+    featuresIdentificationStatusUpdateQueue,
+    processStatusUpdateQueue: processFeaturesStatusUpdateQueue,
+  } = useFeaturesIdentificationStatusUpdateQueue(onFeaturesStatusUpdate);
+
+  const {
+    queriesGenerationStatusUpdateQueue,
+    processStatusUpdateQueue: processQueriesStatusUpdateQueue,
+  } = useQueriesGenerationStatusUpdateQueue(onQueriesStatusUpdate);
+
   const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
     if (query) setSearchQuery(query);
   };
@@ -202,11 +267,23 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
 
     streamsListFetch.data.streams.forEach((item) => {
       onboardingStatusUpdateQueue.add(item.stream.name);
+      featuresIdentificationStatusUpdateQueue.add(item.stream.name);
+      queriesGenerationStatusUpdateQueue.add(item.stream.name);
     });
     processStatusUpdateQueue().finally(() => {
       isInitialStatusUpdateDone.current = true;
     });
-  }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.data]);
+    processFeaturesStatusUpdateQueue();
+    processQueriesStatusUpdateQueue();
+  }, [
+    onboardingStatusUpdateQueue,
+    processStatusUpdateQueue,
+    streamsListFetch.data,
+    featuresIdentificationStatusUpdateQueue,
+    processFeaturesStatusUpdateQueue,
+    queriesGenerationStatusUpdateQueue,
+    processQueriesStatusUpdateQueue,
+  ]);
 
   const bulkScheduleOnboardingTask = async (streamList: string[]) => {
     try {
@@ -253,6 +330,76 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     cancelOnboardingTask(streamName);
   };
 
+  const bulkScheduleFeaturesIdentificationTask = async (streamList: string[]) => {
+    try {
+      await pMap(
+        streamList,
+        async (streamName) => {
+          await scheduleFeaturesIdentificationTask(streamName);
+        },
+        { concurrency: 10 }
+      );
+    } catch (error) {
+      toasts.addError(getFormattedError(error), {
+        title: KI_FEATURE_GENERATION_SCHEDULING_FAILURE_TITLE,
+      });
+    }
+  };
+
+  const bulkScheduleQueriesGenerationTask = async (streamList: string[]) => {
+    try {
+      await pMap(
+        streamList,
+        async (streamName) => {
+          await scheduleQueriesGenerationTask(streamName);
+        },
+        { concurrency: 10 }
+      );
+    } catch (error) {
+      toasts.addError(getFormattedError(error), {
+        title: KI_QUERY_GENERATION_SCHEDULING_FAILURE_TITLE,
+      });
+    }
+  };
+
+  const onBulkKIFeatureGenerationClick = async () => {
+    const streamList = selectedStreams
+      .filter((item) => {
+        const result = streamFeaturesResultMap[item.stream.name];
+        return (
+          !result || ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)
+        );
+      })
+      .map((item) => item.stream.name);
+
+    setSelectedStreams([]);
+
+    await bulkScheduleFeaturesIdentificationTask(streamList);
+    streamList.forEach((streamName) => {
+      featuresIdentificationStatusUpdateQueue.add(streamName);
+    });
+    processFeaturesStatusUpdateQueue();
+  };
+
+  const onBulkKIQueryGenerationClick = async () => {
+    const streamList = selectedStreams
+      .filter((item) => {
+        const result = streamQueriesResultMap[item.stream.name];
+        return (
+          !result || ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)
+        );
+      })
+      .map((item) => item.stream.name);
+
+    setSelectedStreams([]);
+
+    await bulkScheduleQueriesGenerationTask(streamList);
+    streamList.forEach((streamName) => {
+      queriesGenerationStatusUpdateQueue.add(streamName);
+    });
+    processQueriesStatusUpdateQueue();
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
@@ -291,6 +438,22 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
             disabled={selectedStreams.length === 0}
           >
             {RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL}
+          </EuiButtonEmpty>
+
+          <EuiButtonEmpty
+            onClick={onBulkKIFeatureGenerationClick}
+            iconType="indexMapping"
+            disabled={selectedStreams.length === 0}
+          >
+            {RUN_BULK_KI_FEATURE_GENERATION_BUTTON_LABEL}
+          </EuiButtonEmpty>
+
+          <EuiButtonEmpty
+            onClick={onBulkKIQueryGenerationClick}
+            iconType="search"
+            disabled={selectedStreams.length === 0}
+          >
+            {RUN_BULK_KI_QUERY_GENERATION_BUTTON_LABEL}
           </EuiButtonEmpty>
 
           <EuiButtonEmpty

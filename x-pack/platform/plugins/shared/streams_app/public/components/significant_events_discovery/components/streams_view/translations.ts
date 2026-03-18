@@ -72,6 +72,20 @@ export const RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   }
 );
 
+export const RUN_BULK_KI_FEATURE_GENERATION_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.runBulkKIFeatureGenerationButtonLabel',
+  {
+    defaultMessage: 'KI Feature generation',
+  }
+);
+
+export const RUN_BULK_KI_QUERY_GENERATION_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.runBulkKIQueryGenerationButtonLabel',
+  {
+    defaultMessage: 'KI Query generation',
+  }
+);
+
 export const RUN_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.runStreamOnboardingButtonEmptyLabel',
   {
@@ -104,6 +118,34 @@ export const ONBOARDING_SCHEDULING_FAILURE_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.schedulingErrorTitle',
   {
     defaultMessage: 'Could not schedule a task to onboard stream',
+  }
+);
+
+export const KI_FEATURE_GENERATION_FAILURE_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.kiFeatureGenerationErrorTitle',
+  {
+    defaultMessage: 'Could not complete KI feature generation',
+  }
+);
+
+export const KI_FEATURE_GENERATION_SCHEDULING_FAILURE_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.kiFeatureGenerationSchedulingErrorTitle',
+  {
+    defaultMessage: 'Could not schedule KI feature generation',
+  }
+);
+
+export const KI_QUERY_GENERATION_FAILURE_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.kiQueryGenerationErrorTitle',
+  {
+    defaultMessage: 'Could not complete KI query generation',
+  }
+);
+
+export const KI_QUERY_GENERATION_SCHEDULING_FAILURE_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.kiQueryGenerationSchedulingErrorTitle',
+  {
+    defaultMessage: 'Could not schedule KI query generation',
   }
 );
 
