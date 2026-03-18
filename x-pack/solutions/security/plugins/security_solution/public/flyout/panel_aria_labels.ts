@@ -173,3 +173,8 @@ export const VULNERABILITY_DETAIL_PREVIEW_PANEL_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityDetailPreview',
   { defaultMessage: 'Vulnerability preview' }
 );
+
+export const WATCHLISTS_PANEL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.panelAriaLabel.watchlists',
+  { defaultMessage: 'Watchlists' }
+);
