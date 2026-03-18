@@ -183,6 +183,7 @@ export class WorkflowsPlugin
       api: this.api,
       logger: this.logger,
       getTriggerEventsClient: () => this.triggerEventsClient,
+      getWorkflowExecutionEngine,
       resolveMatchingWorkflowSubscriptions: resolveMatchingWorkflowSubscriptionsFn,
     });
 
@@ -192,7 +193,7 @@ export class WorkflowsPlugin
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
 
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger, this.spaces);
+    defineRoutes(router, this.api, this.logger, this.spaces, getWorkflowExecutionEngine);
 
     void core.plugins
       .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
