@@ -11,14 +11,7 @@ import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Page Display',
-  {
-    tag: [
-      ...tags.stateful.classic,
-      ...tags.serverless.observability.complete,
-      ...tags.serverless.security.complete,
-      ...tags.serverless.search,
-    ],
-  },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete, ...tags.serverless.security.complete, ...tags.serverless.search] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsFullAIPrivilegesUser();

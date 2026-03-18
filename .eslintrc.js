@@ -2739,7 +2739,10 @@ module.exports = {
         'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
         'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
       ],
-      excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
+      excludedFiles: [
+        'src/platform/packages/shared/kbn-scout/test/**',
+        'x-pack/platform/packages/private/kbn-scout-release-testing/test/**',
+      ],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
         '@kbn/eslint/scout_max_one_describe': 'error',
