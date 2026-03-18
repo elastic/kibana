@@ -326,7 +326,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
     getState,
     { searchSessionManager, runtimeStateManager, services }
   ) {
-    const { scopedEbtManager$, stateContainer$ } = selectTabRuntimeState(
+    const { scopedEbtManager$, dataStateContainer$ } = selectTabRuntimeState(
       runtimeStateManager,
       tabId
     );
@@ -347,7 +347,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       addLog('onQuerySubmit triggers data fetching');
-      stateContainer$.getValue()?.dataState.fetch();
+      dataStateContainer$.getValue()?.fetch();
     }
   };
 
@@ -360,8 +360,8 @@ export const fetchData: InternalStateThunkActionCreator<
 > = ({ tabId, initial }) =>
   function fetchDataThunkFn(dispatch, getState, { runtimeStateManager }) {
     addLog('fetchData', { initial });
-    const { stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const dataStateContainer = stateContainer$.getValue()?.dataState;
+    const { dataStateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const dataStateContainer = dataStateContainer$.getValue();
     if (!initial || dataStateContainer?.getInitialFetchStatus() === FetchStatus.LOADING) {
       dataStateContainer?.fetch();
     }

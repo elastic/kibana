@@ -586,12 +586,6 @@ export class SearchService {
     request: KibanaRequest;
     opts?: AsScopedOptions;
   }) => {
-    return opts?.projectRouting === 'space'
-      ? client.asScoped(request, { projectRouting: 'space' })
-      : opts?.projectRouting === 'all'
-      ? client.asScoped(request, { projectRouting: 'all' })
-      : opts?.projectRouting === 'origin-only'
-      ? client.asScoped(request, { projectRouting: 'origin-only' })
-      : client.asScoped(request);
+    return opts ? client.asScoped(request, opts) : client.asScoped(request);
   };
 }
