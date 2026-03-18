@@ -54,4 +54,22 @@ export class HostsPage {
     await this.page.getByTestId('euiFlyoutCloseButton').click();
     await this.waitForTableToLoad();
   }
+
+  public async openFilterControl(fieldName: string) {
+    const controlTestId = `optionsList-control-${fieldName}`;
+    const control = this.page.getByTestId(controlTestId);
+    await control.click();
+  }
+
+  public async enableExcludeMode() {
+    const excludeButton = this.page.getByTestId('optionsList__excludeResults');
+    await excludeButton.click();
+  }
+
+  public async selectFilterOption(optionValue: string) {
+    const optionTestId = `optionsList-control-selection-${optionValue}`;
+    const option = this.page.getByTestId(optionTestId);
+    await option.click();
+    await this.waitForTableToLoad();
+  }
 }

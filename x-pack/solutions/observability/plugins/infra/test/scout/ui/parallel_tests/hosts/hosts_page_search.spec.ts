@@ -63,5 +63,56 @@ test.describe(
         await expect(assetDetailsPage.metadataTab.tableRows).not.toHaveCount(1);
       });
     });
+
+    test('Filter hosts using the Cloud Provider control', async ({
+      pageObjects: { hostsPage },
+    }) => {
+      await test.step('verify all hosts are visible before filtering', async () => {
+        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+      });
+
+      await test.step('select a cloud provider option (include mode)', async () => {
+        await hostsPage.openFilterControl('cloud.provider');
+        await hostsPage.enableExcludeMode();
+        await hostsPage.selectFilterOption('gcp');
+      });
+
+      await test.step('verify only hosts with selected cloud provider are visible', async () => {
+        const filteredCount = await hostsPage.tableRows.count();
+        expect(filteredCount).toBeLessThan(HOSTS.length);
+      });
+
+      await test.step('clear the filter and verify all hosts are visible again', async () => {
+        await hostsPage.selectFilterOption('gcp');
+        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+      });
+    });
+
+    test('Filter hosts using the Operating System control', async ({
+      pageObjects: { hostsPage },
+    }) => {
+      await test.step('verify all hosts are visible before filtering', async () => {
+        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+      });
+
+      await test.step('open the Operating System filter control', async () => {
+        await hostsPage.openFilterControl('host.os.name');
+        await hostsPage.enableExcludeMode();
+      });
+
+      await test.step('select an operating system option (include mode)', async () => {
+        await hostsPage.selectFilterOption('Linux');
+      });
+
+      await test.step('verify only hosts with selected operating system are visible', async () => {
+        const filteredCount = await hostsPage.tableRows.count();
+        expect(filteredCount).toBeLessThanOrEqual(HOSTS.length);
+      });
+
+      await test.step('clear the filter and verify all hosts are visible again', async () => {
+        await hostsPage.selectFilterOption('Linux');
+        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+      });
+    });
   }
 );
