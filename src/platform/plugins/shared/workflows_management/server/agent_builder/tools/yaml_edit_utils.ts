@@ -10,6 +10,7 @@
 import { isEqual } from 'lodash';
 import { Document, isMap, isPair, isScalar, isSeq, parseDocument, stringify } from 'yaml';
 import type { Node, YAMLMap, YAMLSeq } from 'yaml';
+import { getStepNode } from '../../../common/lib/yaml/get_step_node';
 
 interface StepDefinition {
   name: string;
@@ -153,20 +154,6 @@ const stringifyValuePreservingFormat = (
     .split('\n')
     .map((line, i) => (i === 0 || line === '' ? line : `${pad}${line}`))
     .join('\n');
-};
-
-const findStepNode = (doc: Document, stepName: string): { node: YAMLMap; index: number } | null => {
-  const stepsNode = doc.getIn(['steps']) as YAMLSeq | undefined;
-  if (!isSeq(stepsNode)) return null;
-
-  for (let i = 0; i < stepsNode.items.length; i++) {
-    const item = stepsNode.items[i];
-    if (isMap(item)) {
-      const nameVal = item.get('name');
-      if (nameVal === stepName) return { node: item, index: i };
-    }
-  }
-  return null;
 };
 
 /**
@@ -342,10 +329,10 @@ export const modifyStep = (
   const { doc, error } = parseForEditing(yaml);
   if (error) return { success: false, yaml, error };
 
-  const found = findStepNode(doc, stepName);
-  if (!found) return { success: false, yaml, error: `Step "${stepName}" not found` };
+  const stepNode = getStepNode(doc, stepName);
+  if (!stepNode) return { success: false, yaml, error: `Step "${stepName}" not found` };
 
-  const range = nodeRange(found.node);
+  const range = nodeRange(stepNode);
   if (!range) return { success: false, yaml, error: 'Cannot determine step range' };
 
   const indentUnit = detectIndent(yaml);
@@ -354,12 +341,7 @@ export const modifyStep = (
   const currentIndent = lastNewline >= 0 ? range[0] - lastNewline - 1 : range[0];
   const depth = Math.floor(currentIndent / indentUnit);
 
-  const stepYaml = stringifyValuePreservingFormat(
-    updatedStep,
-    indentUnit,
-    depth,
-    found.node as Node
-  );
+  const stepYaml = stringifyValuePreservingFormat(updatedStep, indentUnit, depth, stepNode as Node);
   const replacement = `${stepYaml.trimEnd()}\n`;
 
   return checkedResult(yaml, spliceYaml(yaml, range[0], range[1], replacement), {
@@ -377,10 +359,10 @@ export const modifyStepProperty = (
   const { doc, error } = parseForEditing(yaml);
   if (error) return { success: false, yaml, error };
 
-  const found = findStepNode(doc, stepName);
-  if (!found) return { success: false, yaml, error: `Step "${stepName}" not found` };
+  const stepNode = getStepNode(doc, stepName);
+  if (!stepNode) return { success: false, yaml, error: `Step "${stepName}" not found` };
 
-  const pair = findPairInMap(found.node, property);
+  const pair = findPairInMap(stepNode, property);
   const indentUnit = detectIndent(yaml);
 
   const scope: EditScope = { type: 'step', stepName };
@@ -417,7 +399,7 @@ export const modifyStepProperty = (
     }
   }
 
-  const stepRange = nodeRange(found.node);
+  const stepRange = nodeRange(stepNode);
   if (!stepRange) return { success: false, yaml, error: 'Cannot determine step range' };
 
   const leadingWs = yaml.slice(Math.max(0, stepRange[0] - 40), stepRange[0]);
@@ -525,10 +507,10 @@ export const deleteStep = (yaml: string, stepName: string): EditResult => {
   const { doc, error } = parseForEditing(yaml);
   if (error) return { success: false, yaml, error };
 
-  const found = findStepNode(doc, stepName);
-  if (!found) return { success: false, yaml, error: `Step "${stepName}" not found` };
+  const stepNode = getStepNode(doc, stepName);
+  if (!stepNode) return { success: false, yaml, error: `Step "${stepName}" not found` };
 
-  const range = nodeRange(found.node);
+  const range = nodeRange(stepNode);
   if (!range) return { success: false, yaml, error: 'Cannot determine step range' };
 
   let deleteStart = range[0];
