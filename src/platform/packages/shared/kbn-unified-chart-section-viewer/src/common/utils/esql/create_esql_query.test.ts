@@ -284,7 +284,7 @@ TS metrics-*
 
   it('should preserve multiple non-empty WHERE statements and ignore empty entries', () => {
     const query = createESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       splitAccessors: ['host.name'],
       whereStatements: [' host.name == "host-01" ', '', 'cpu.cores > 4', '   '],
     });
@@ -315,7 +315,7 @@ TS metrics-*
 
   it('should handle undefined whereStatements without throwing error', () => {
     const query = createESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       whereStatements: undefined,
     });
 
