@@ -15,6 +15,72 @@ import type { Logger } from '@kbn/logging';
 import { retryEs } from '../retry_es';
 import type { AnyDataStreamDefinition } from '../types';
 
+function normalizeLifecycle(
+  lifecycle: api.IndicesDataStreamLifecycleWithRollover | undefined
+): api.IndicesDataStreamLifecycle | undefined {
+  if (!lifecycle) {
+    return undefined;
+  }
+  return {
+    ...lifecycle,
+    // Set enabled `true` to make comparison with ES response stable
+    enabled: lifecycle.enabled ?? true,
+  };
+}
+
+function lifecycleDefinitionChanged({
+  existingIndexTemplate,
+  dataStream,
+}: {
+  existingIndexTemplate: api.IndicesGetIndexTemplateIndexTemplateItem | undefined;
+  dataStream: AnyDataStreamDefinition;
+}) {
+  const currentLifecycle = normalizeLifecycle(
+    existingIndexTemplate?.index_template.template?.lifecycle
+  );
+  const desiredLifecycle = normalizeLifecycle(dataStream.template.lifecycle);
+
+  return JSON.stringify(currentLifecycle) !== JSON.stringify(desiredLifecycle);
+}
+
+async function applyDataStreamLifecycle({
+  logger,
+  elasticsearchClient,
+  dataStream,
+}: {
+  logger: Logger;
+  elasticsearchClient: ElasticsearchClient;
+  dataStream: AnyDataStreamDefinition;
+}) {
+  const lifecycle = dataStream.template.lifecycle;
+
+  if (lifecycle) {
+    logger.debug(`Updating lifecycle on existing data stream: ${dataStream.name}`);
+    await retryEs(() =>
+      elasticsearchClient.indices.putDataLifecycle({
+        name: dataStream.name,
+        ...normalizeLifecycle(lifecycle),
+      })
+    );
+    return;
+  }
+
+  logger.debug(`Removing lifecycle from existing data stream: ${dataStream.name}`);
+  try {
+    await retryEs(() =>
+      elasticsearchClient.indices.deleteDataLifecycle({
+        name: dataStream.name,
+      })
+    );
+  } catch (error) {
+    if (error instanceof EsErrors.ResponseError && error.statusCode === 404) {
+      // Data stream has no lifecycle configuration, treat as idempotent remove.
+      return;
+    }
+    throw error;
+  }
+}
+
 /**
  * https://www.elastic.co/docs/manage-data/data-store/data-streams/set-up-data-stream
  *
@@ -87,6 +153,19 @@ export async function initializeDataStream({
           ...mappings,
         })
       );
+    }
+
+    if (
+      lifecycleDefinitionChanged({
+        existingIndexTemplate,
+        dataStream,
+      })
+    ) {
+      await applyDataStreamLifecycle({
+        logger,
+        elasticsearchClient,
+        dataStream,
+      });
     }
 
     // data stream updated successfully
