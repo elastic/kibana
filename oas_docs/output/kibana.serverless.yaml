@@ -1292,6 +1292,13 @@ paths:
                     instructions:
                       description: Optional system instructions that define the agent behavior.
                       type: string
+                    plugin_ids:
+                      description: Array of plugin IDs to assign to the agent.
+                      items:
+                        description: Plugin ID to assign to the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     skill_ids:
                       description: Array of skill IDs to be available to the agent.
                       items:
@@ -1772,6 +1779,13 @@ paths:
                     instructions:
                       description: Updated system instructions that define the agent behavior.
                       type: string
+                    plugin_ids:
+                      description: Array of plugin IDs to assign to the agent.
+                      items:
+                        description: Plugin ID to assign to the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     skill_ids:
                       description: Array of skill IDs to be available to the agent.
                       items:
