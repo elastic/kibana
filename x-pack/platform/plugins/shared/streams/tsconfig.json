@@ -82,6 +82,5 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-server",
-    "@kbn/core-http-server-utils",
   ]
 }
