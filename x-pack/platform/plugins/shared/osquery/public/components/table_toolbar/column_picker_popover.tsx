@@ -57,7 +57,10 @@ const ColumnPickerPopoverComponent: React.FC<ColumnPickerPopoverProps> = ({
 
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
-  const panelProps = useMemo(() => ({ 'data-test-subj': `${dataTestSubj}-popover` }), [dataTestSubj]);
+  const panelProps = useMemo(
+    () => ({ 'data-test-subj': `${dataTestSubj}-popover` }),
+    [dataTestSubj]
+  );
 
   const buttonLabel = i18n.translate('xpack.osquery.tableToolbar.columnsCountLabel', {
     defaultMessage: 'Columns: {count}',

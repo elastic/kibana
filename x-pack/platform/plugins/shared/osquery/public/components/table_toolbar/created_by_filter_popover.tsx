@@ -90,7 +90,10 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
 
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
-  const panelProps = useMemo(() => ({ 'data-test-subj': `${dataTestSubj}-popover` }), [dataTestSubj]);
+  const panelProps = useMemo(
+    () => ({ 'data-test-subj': `${dataTestSubj}-popover` }),
+    [dataTestSubj]
+  );
 
   const searchProps = useMemo(
     () => ({
