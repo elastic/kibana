@@ -6,25 +6,9 @@
  */
 
 import { useMemo } from 'react';
+import { streamMatchesIndexPatterns } from '@kbn/streams-plugin/common';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 import { useKibana } from './use_kibana';
-
-/**
- * Client-side utility to check if a stream matches index patterns.
- */
-function streamMatchesIndexPatterns(streamName: string, indexPatterns: string[]): boolean {
-  return indexPatterns.some((pattern) => {
-    // Convert glob pattern to regex
-    // Escape dots first, then convert glob wildcards
-    const regexPattern = pattern
-      .replace(/\./g, '\\.') // Escape literal dots first
-      .replace(/\*/g, '.*') // Convert * to .*
-      .replace(/\?/g, '.'); // Convert ? to .
-
-    const regex = new RegExp(`^${regexPattern}$`, 'i');
-    return regex.test(streamName);
-  });
-}
 
 /**
  * Hook to get configured index patterns and utilities.
@@ -51,7 +35,7 @@ export function useIndexPatternsConfig() {
   );
 
   const filterStreamsByIndexPatterns = useMemo(() => {
-    return (streamsToFilter: Array<{ stream: { name: string } }>) => {
+    return <T extends { stream: { name: string } }>(streamsToFilter: T[]): T[] => {
       if (indexPatterns.length === 0) {
         return streamsToFilter;
       }

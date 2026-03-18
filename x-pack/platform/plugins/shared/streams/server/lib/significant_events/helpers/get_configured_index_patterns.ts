@@ -45,20 +45,4 @@ export function getDefaultIndexPatterns(): string[] {
   return DEFAULT_INDEX_PATTERNS.split(',').map((pattern) => pattern.trim());
 }
 
-/**
- * Checks if a stream name matches the configured index patterns.
- * This replaces the hardcoded check for streams starting with 'logs'.
- */
-export function streamMatchesIndexPatterns(streamName: string, indexPatterns: string[]): boolean {
-  return indexPatterns.some((pattern) => {
-    // Convert glob pattern to regex
-    // Escape dots first, then convert glob wildcards
-    const regexPattern = pattern
-      .replace(/\./g, '\\.') // Escape literal dots first
-      .replace(/\*/g, '.*') // Convert * to .*
-      .replace(/\?/g, '.'); // Convert ? to .
-
-    const regex = new RegExp(`^${regexPattern}$`, 'i');
-    return regex.test(streamName);
-  });
-}
+export { streamMatchesIndexPatterns } from '../../../../common/stream_matches_index_patterns';

@@ -29,3 +29,5 @@ export {
   isKqlQueryValid,
   buildEsqlFilter,
 } from './query_helpers';
+
+export { streamMatchesIndexPatterns } from './stream_matches_index_patterns';
