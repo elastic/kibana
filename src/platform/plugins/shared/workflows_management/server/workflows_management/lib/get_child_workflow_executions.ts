@@ -13,7 +13,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
+import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
 
 export interface ChildWorkflowExecutionItem {
@@ -38,7 +38,6 @@ interface ChildRef {
   childExecutionId: string;
 }
 
-const WORKFLOW_EXECUTE_STEP_TYPE = 'workflow.execute';
 const STEP_SOURCE_EXCLUDES = ['input', 'output'];
 const PARENT_SOURCE_INCLUDES = ['spaceId', 'stepExecutionIds'];
 const CHILD_SOURCE_INCLUDES = [
@@ -53,7 +52,7 @@ const extractChildRefs = (steps: EsWorkflowStepExecution[]): ChildRef[] =>
   steps
     .filter(
       (step) =>
-        step.stepType === WORKFLOW_EXECUTE_STEP_TYPE &&
+        isExecuteSyncStepType(step.stepType) &&
         isTerminalStatus(step.status) &&
         typeof step.state?.executionId === 'string'
     )

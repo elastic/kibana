@@ -14,7 +14,7 @@ import type {
   WorkflowExecutionDto,
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
+import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export interface ChildWorkflowExecutionInfo {
@@ -28,8 +28,6 @@ export interface ChildWorkflowExecutionInfo {
 
 export type ChildWorkflowExecutionsMap = Map<string, ChildWorkflowExecutionInfo>;
 
-const WORKFLOW_EXECUTE_STEP_TYPE = 'workflow.execute';
-
 export function useChildWorkflowExecutions(
   parentExecution: WorkflowExecutionDto | undefined | null
 ): { childExecutions: ChildWorkflowExecutionsMap; isLoading: boolean } {
@@ -40,9 +38,7 @@ export function useChildWorkflowExecutions(
   const terminalChildKey = useMemo(() => {
     if (!parentExecution?.stepExecutions) return '';
     return parentExecution.stepExecutions
-      .filter(
-        (step) => step.stepType === WORKFLOW_EXECUTE_STEP_TYPE && isTerminalStatus(step.status)
-      )
+      .filter((step) => isExecuteSyncStepType(step.stepType) && isTerminalStatus(step.status))
       .map((step) => step.id)
       .join(',');
   }, [parentExecution?.stepExecutions]);

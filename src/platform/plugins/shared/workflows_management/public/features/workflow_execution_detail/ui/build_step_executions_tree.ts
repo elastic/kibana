@@ -11,7 +11,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
 
 import type { StackFrame, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 export interface StepListTreeItem {
@@ -223,7 +223,7 @@ export function injectChildWorkflowSteps(
   const childStepExecutions: WorkflowStepExecutionDto[] = [];
 
   function processNode(node: StepExecutionTreeItem): StepExecutionTreeItem {
-    const isWorkflowExecuteStep = node.stepType === 'workflow.execute' && node.stepExecutionId;
+    const isWorkflowExecuteStep = isExecuteSyncStepType(node.stepType) && node.stepExecutionId;
 
     if (!isWorkflowExecuteStep) {
       return {

@@ -25,7 +25,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
+import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
@@ -78,7 +78,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
     const isTriggerPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
-    const isWorkflowExecuteStep = stepExecution?.stepType === 'workflow.execute';
+    const isWorkflowExecuteStep = isExecuteSyncStepType(stepExecution?.stepType);
 
     const handleWorkflowLinkClick = useCallback(
       (e: React.MouseEvent) => {
