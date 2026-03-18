@@ -44,7 +44,7 @@ const ID_CONSISTENCY_OUTPUT_SCHEMA = {
 
 export const IdConsistencyPrompt = createPrompt({
   name: 'id_consistency_analysis',
-  description: 'Evaluate id consistency of extracted features across runs',
+  description: 'Evaluate id consistency of extracted KIs across runs',
   input: z.object({
     stream_name: z.string(),
     context: z.string(),

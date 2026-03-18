@@ -16,7 +16,7 @@ const SEMANTIC_UNIQUENESS_OUTPUT_SCHEMA = {
     k: {
       type: 'number',
       description:
-        'Number of semantic clusters you formed — each cluster = one unique real-world concept. K is always <= N (the total number of unique-by-id features provided in the input). (integer)',
+        'Number of semantic clusters you formed — each cluster = one unique real-world concept. K is always <= N (the total number of unique-by-id KIs provided in the input). (integer)',
     },
     explanation: {
       type: 'string',
@@ -31,7 +31,7 @@ const SEMANTIC_UNIQUENESS_OUTPUT_SCHEMA = {
           ids: {
             type: 'array',
             items: { type: 'string' },
-            description: 'Feature ids that form the duplicate cluster',
+            description: 'KI ids that form the duplicate cluster',
           },
           identity_statement: {
             type: 'string',
@@ -49,11 +49,11 @@ const SEMANTIC_UNIQUENESS_OUTPUT_SCHEMA = {
 
 export const SemanticUniquenessPrompt = createPrompt({
   name: 'semantic_uniqueness_analysis',
-  description: 'Evaluate semantic uniqueness of extracted features',
+  description: 'Evaluate semantic uniqueness of extracted KIs',
   input: z.object({
     stream_name: z.string(),
     totals: z.string(),
-    unique_features_by_id: z.string(),
+    unique_kis_by_id: z.string(),
   }),
 })
   .version({

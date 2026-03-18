@@ -13,9 +13,9 @@ import { SemanticUniquenessPrompt } from './semantic_uniqueness/prompt';
 import { IdConsistencyPrompt } from './id_consistency/prompt';
 
 /**
- * Checks that all unique-by-id features are semantically distinct.
+ * Checks that all unique-by-id KIs are semantically distinct.
  * Score = K / N, where K = semantic clusters and N = unique ids.
- * A score < 1 means there are semantic duplicates in the feature set.
+ * A score < 1 means there are semantic duplicates in the KI set.
  */
 export const createSemanticUniquenessEvaluator = ({
   inferenceClient,
@@ -32,28 +32,24 @@ export const createSemanticUniquenessEvaluator = ({
     output: { runs?: Array<{ features: BaseFeature[] }> };
   }) => {
     const runs: Array<{ features: BaseFeature[] }> = output?.runs ?? [];
-    const allFeatures = runs.flatMap((run) => run.features);
+    const allKIs = runs.flatMap((run) => run.features);
 
-    if (runs.length === 0 || allFeatures.length === 0) {
+    if (runs.length === 0 || allKIs.length === 0) {
       return { score: 1, explanation: 'No features to evaluate' };
     }
 
-    const featuresUniqueById = uniqBy(allFeatures, (feature) => feature.id.toLowerCase());
-    const uniqueById = featuresUniqueById.length;
-    const uniqueByFingerprint = uniqWith(featuresUniqueById, hasSameFingerprint).length;
+    const kisUniqueById = uniqBy(allKIs, (ki) => ki.id.toLowerCase());
+    const uniqueById = kisUniqueById.length;
+    const uniqueByFingerprint = uniqWith(kisUniqueById, hasSameFingerprint).length;
 
-    const compactUniqueFeatures = featuresUniqueById
-      .map((feature) => ({
-        id: feature.id.toLowerCase(),
-        type: feature.type,
-        subtype: feature.subtype,
-        title: feature.title,
-        properties: feature.properties,
-        description: feature.description?.slice(0, 300),
-      }))
-      .sort((a, b) =>
-        `${a.type}:${a.subtype ?? ''}:${a.id}`.localeCompare(`${b.type}:${b.subtype ?? ''}:${b.id}`)
-      );
+    const compactUniqueKIs = kisUniqueById.map((ki) => ({
+      id: ki.id.toLowerCase(),
+      type: ki.type,
+      subtype: ki.subtype,
+      title: ki.title,
+      properties: ki.properties,
+      description: ki.description?.slice(0, 300),
+    }));
 
     const response = await executeUntilValid({
       prompt: SemanticUniquenessPrompt,
@@ -62,11 +58,11 @@ export const createSemanticUniquenessEvaluator = ({
         stream_name: input?.stream_name,
         totals: JSON.stringify({
           runs: runs.length,
-          total_features: allFeatures.length,
+          total_kis: allKIs.length,
           unique_by_id: uniqueById,
           unique_by_fingerprint: uniqueByFingerprint,
         }),
-        unique_features_by_id: JSON.stringify(compactUniqueFeatures),
+        unique_kis_by_id: JSON.stringify(compactUniqueKIs),
       },
       finalToolChoice: { function: 'analyze' as const },
       maxRetries: 3,
@@ -80,11 +76,11 @@ export const createSemanticUniquenessEvaluator = ({
             );
           }
 
-          const knownIds = new Set(compactUniqueFeatures.map((f) => f.id.toLowerCase()));
+          const knownIds = new Set(compactUniqueKIs.map((ki) => ki.id.toLowerCase()));
           for (const cluster of duplicate_clusters) {
             for (const id of cluster.ids ?? []) {
               if (!knownIds.has(id.toLowerCase())) {
-                throw new Error(`duplicate_clusters references unknown feature id "${id}"`);
+                throw new Error(`duplicate_clusters references unknown KI id "${id}"`);
               }
             }
           }
@@ -241,16 +237,16 @@ export const createIdConsistencyEvaluator = ({
  * Score = 1 - (missed_duplicates / unique_by_id).
  */
 export const kiDuplicationEvaluator = {
-  name: 'features_duplication',
+  name: 'ki_duplication',
   kind: 'CODE' as const,
   evaluate: async ({ output }: { output: { runs?: Array<{ features: BaseFeature[] }> } }) => {
-    const allFeatures = output.runs?.flatMap((run) => run.features) || [];
+    const allKIs = output.runs?.flatMap((run) => run.features) || [];
 
-    if (allFeatures.length === 0) {
-      return { score: 1, explanation: 'No features to evaluate' };
+    if (allKIs.length === 0) {
+      return { score: 1, explanation: 'No KIs to evaluate' };
     }
 
-    const uniqueById = uniqBy(allFeatures, (feature) => feature.id.toLowerCase());
+    const uniqueById = uniqBy(allKIs, (ki) => ki.id.toLowerCase());
     const dedupedByFingerprint = uniqWith(uniqueById, hasSameFingerprint);
     const uniqueByFingerprint = dedupedByFingerprint.length;
 
@@ -272,7 +268,7 @@ export const kiDuplicationEvaluator = {
     return {
       score,
       metadata: {
-        total_features: allFeatures.length,
+        total_kis: allKIs.length,
         unique_by_id: uniqueById.length,
         unique_by_fingerprint: uniqueByFingerprint,
         missed_duplicates: missedDuplicates,

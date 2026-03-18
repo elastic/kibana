@@ -5,7 +5,7 @@ Evaluate the following feature set for semantic uniqueness:
 **Totals**:
 {{{totals}}}
 
-**Unique features by id**:
+**Unique KIs by id**:
 {{{unique_features_by_id}}}
 
-Please analyze the features and call the `analyze` tool with your findings.
+Please analyze the KIs and call the `analyze` tool with your findings.
