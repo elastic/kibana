@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import { assertReadOnly, escapeLikePattern } from '../generic_db/generic_db_connector';
 import {
   DescribeTableInputSchema,
   ListDatabasesInputSchema,
@@ -21,20 +22,6 @@ import {
   type QueryInput,
   type SearchRowsInput,
 } from './types';
-
-const buildBaseUrl = (ctx: ActionContext) => {
-  const host = (ctx.config?.host as string).trim();
-  const port = ctx.config?.port as number;
-  return `${host}:${port}`;
-};
-
-const escapeIdentifier = (identifier: string): string => {
-  return `\`${identifier.replace(/`/g, '``')}\``;
-};
-
-const escapeLikeValue = (value: string): string => {
-  return value.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_').replace(/'/g, "''");
-};
 
 export const MysqlConnector: ConnectorSpec = {
   metadata: {
@@ -57,7 +44,8 @@ export const MysqlConnector: ConnectorSpec = {
       .min(1)
       .describe(
         i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.description', {
-          defaultMessage: 'The MySQL HTTP proxy host (URL, hostname, or IP address)',
+          defaultMessage:
+            'The MySQL HTTP proxy host — must include the protocol (http:// or https://)',
         })
       )
       .meta({
@@ -68,7 +56,8 @@ export const MysqlConnector: ConnectorSpec = {
         placeholder: 'https://your-mysql-proxy.example.com',
         helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.helpText', {
           defaultMessage:
-            'The hostname, IP address, or URL of the MySQL HTTP proxy (e.g. https://proxy.example.com, 192.168.1.1, localhost)',
+            'The URL of the MySQL HTTP proxy, including protocol ' +
+            '(e.g. https://proxy.example.com). Use http:// for local development only.',
         }),
       }),
     port: z.coerce
@@ -109,104 +98,124 @@ export const MysqlConnector: ConnectorSpec = {
           defaultMessage: 'The name of the default database to query',
         }),
       }),
+    username: z
+      .string()
+      .min(1)
+      .describe(
+        i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.description', {
+          defaultMessage: 'The MySQL username',
+        })
+      )
+      .meta({
+        widget: 'text',
+        label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.label', {
+          defaultMessage: 'Username',
+        }),
+        placeholder: 'root',
+        helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.helpText', {
+          defaultMessage: 'The MySQL user to authenticate as',
+        }),
+      }),
+    password: z
+      .string()
+      .min(1)
+      .describe(
+        i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.description', {
+          defaultMessage: 'The MySQL password',
+        })
+      )
+      .meta({
+        widget: 'password',
+        sensitive: true,
+        label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.label', {
+          defaultMessage: 'Password',
+        }),
+        helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.password.helpText', {
+          defaultMessage: 'The password for the MySQL user',
+        }),
+      }),
   }),
 
   actions: {
-    // Execute a read-only SQL query
     query: {
       isTool: false,
       input: QueryInputSchema,
-      handler: async (ctx, input: QueryInput) => {
-        const baseUrl = buildBaseUrl(ctx);
-        const response = await ctx.client.post(`${baseUrl}/query`, {
-          sql: input.sql,
-          database: ctx.config?.database,
-          maxRows: input.maxRows ?? 100,
-        });
-        return response.data;
-      },
+      handler: async (ctx, input: QueryInput) =>
+        executeQuery(ctx, input.sql, ctx.config?.database as string, input.maxRows ?? 100),
     },
 
-    // List all databases accessible to the user
     listDatabases: {
       isTool: false,
       input: ListDatabasesInputSchema,
       handler: async (ctx) => {
-        const baseUrl = buildBaseUrl(ctx);
-        const response = await ctx.client.post(`${baseUrl}/query`, {
+        const response = await ctx.client.post(`${buildBaseUrl(ctx)}/query`, {
+          ...resolveCredentials(ctx),
           sql: 'SHOW DATABASES',
         });
         return response.data;
       },
     },
 
-    // List tables in a database
     listTables: {
       isTool: false,
       input: ListTablesInputSchema,
       handler: async (ctx, input: ListTablesInput) => {
-        const db = input.database ?? (ctx.config?.database as string);
-        const baseUrl = buildBaseUrl(ctx);
-        const response = await ctx.client.post(`${baseUrl}/query`, {
-          sql: `SHOW TABLES FROM ${escapeIdentifier(db)}`,
+        const db = resolveDatabase(input.database, ctx);
+        const response = await ctx.client.post(`${buildBaseUrl(ctx)}/query`, {
+          ...resolveCredentials(ctx),
+          sql: `SHOW TABLES FROM ${quoteIdentifier(db)}`,
           database: db,
         });
         return response.data;
       },
     },
 
-    // Describe a table's schema
     describeTable: {
       isTool: false,
       input: DescribeTableInputSchema,
       handler: async (ctx, input: DescribeTableInput) => {
-        const db = input.database ?? (ctx.config?.database as string);
-        const baseUrl = buildBaseUrl(ctx);
-        const response = await ctx.client.post(`${baseUrl}/query`, {
-          sql: `DESCRIBE ${escapeIdentifier(db)}.${escapeIdentifier(input.table)}`,
+        const db = resolveDatabase(input.database, ctx);
+        const response = await ctx.client.post(`${buildBaseUrl(ctx)}/query`, {
+          ...resolveCredentials(ctx),
+          sql: `DESCRIBE ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}`,
           database: db,
         });
         return response.data;
       },
     },
 
-    // Search across tables using LIKE patterns on specified columns
     searchRows: {
       isTool: false,
       input: SearchRowsInputSchema,
       handler: async (ctx, input: SearchRowsInput) => {
-        const db = input.database ?? (ctx.config?.database as string);
-        const baseUrl = buildBaseUrl(ctx);
-        const escaped = escapeLikeValue(input.searchTerm);
+        const db = resolveDatabase(input.database, ctx);
+        const escaped = escapeLikePattern(input.searchTerm);
         const whereClause = input.columns
-          .map((col: string) => `${escapeIdentifier(col)} LIKE '%${escaped}%'`)
+          .map((col) => `${quoteIdentifier(col)} LIKE '%${escaped}%' ESCAPE '!'`)
           .join(' OR ');
-        const response = await ctx.client.post(`${baseUrl}/query`, {
-          sql: `SELECT * FROM ${escapeIdentifier(db)}.${escapeIdentifier(
-            input.table
-          )} WHERE ${whereClause} LIMIT ${input.maxRows ?? 50}`,
-          database: db,
-        });
-        return response.data;
+        const sql =
+          `SELECT * FROM ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}` +
+          ` WHERE ${whereClause} LIMIT ${Math.floor(input.maxRows ?? 50)}`;
+        return executeQuery(ctx, sql, db, input.maxRows ?? 50);
       },
     },
   },
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.mysql.test.description', {
-      defaultMessage: 'Verifies MySQL connection by listing accessible databases',
+      defaultMessage: 'Verifies MySQL connection by running a lightweight query',
     }),
     handler: async (ctx) => {
       try {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.post(`${baseUrl}/query`, {
+          ...resolveCredentials(ctx),
           sql: 'SELECT 1',
         });
         return {
           ok: true,
-          message: `Successfully connected to MySQL at ${baseUrl}: ${JSON.stringify(
-            response.data
-          )}`,
+          message:
+            `Successfully connected to MySQL at ${baseUrl}: ` + JSON.stringify(response.data),
         };
       } catch (error) {
         return { ok: false, message: error.message };
@@ -214,3 +223,72 @@ export const MysqlConnector: ConnectorSpec = {
     },
   },
 };
+
+// ---------------------------------------------------------------------------
+// MySQL-specific utilities
+// ---------------------------------------------------------------------------
+
+/**
+ * Quote a MySQL identifier (table, column, or database name) with backticks,
+ * escaping any embedded backtick characters.
+ * Note: MySQL uses backticks; this is not portable to other SQL dialects.
+ */
+const quoteIdentifier = (identifier: string): string => `\`${identifier.replace(/`/g, '``')}\``;
+
+/**
+ * Execute a read-only SQL query via the HTTP proxy. Shared by the `query` and
+ * `searchRows` actions so both go through the same validation and transport.
+ */
+const executeQuery = async (
+  ctx: ActionContext,
+  sql: string,
+  database: string | undefined,
+  maxRows: number
+) => {
+  assertReadOnly(sql);
+  const response = await ctx.client.post(`${buildBaseUrl(ctx)}/query`, {
+    ...resolveCredentials(ctx),
+    sql,
+    database,
+    maxRows,
+  });
+  return response.data;
+};
+
+// ---------------------------------------------------------------------------
+// HTTP connector helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Build the base URL for the HTTP proxy from connector config.
+ * Expects config.host to include the protocol (http:// or https://).
+ */
+const buildBaseUrl = (ctx: ActionContext): string => {
+  const host = (ctx.config?.host as string).trim();
+  const port = ctx.config?.port as number;
+  return `${host}:${port}`;
+};
+
+/**
+ * Resolve the target database, preferring the per-action override then the
+ * connector-level default. Throws rather than silently producing a bogus
+ * identifier if neither is set.
+ */
+const resolveDatabase = (inputDb: string | undefined, ctx: ActionContext): string => {
+  const db = inputDb ?? (ctx.config?.database as string | undefined);
+  if (!db) {
+    throw new Error(
+      'No database specified and no default database is configured for this connector'
+    );
+  }
+  return db;
+};
+
+/**
+ * Extract credentials from connector config to include in each request to the
+ * HTTP proxy.
+ */
+const resolveCredentials = (ctx: ActionContext) => ({
+  username: ctx.config?.username as string,
+  password: ctx.config?.password as string,
+});
