@@ -13,15 +13,15 @@ import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { Feature } from '@kbn/streams-schema';
 import type { GcsConfig } from '../../../src/data_generators/replay';
 import {
-  canonicalKIsFromExpectedGroundTruth,
+  canonicalKIFeaturesFromExpectedGroundTruth,
   cleanSignificantEventsDataStreams,
   listAvailableSnapshots,
-  loadKIsFromSnapshot,
+  loadKIFeaturesFromSnapshot,
   replayIntoManagedStream,
   SIGEVENTS_SNAPSHOT_RUN,
 } from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
-import { createRuleGenerationEvaluators } from '../../../src/evaluators/rule_generation_evaluators';
+import { createKIQueryGenerationEvaluators } from '../../../src/evaluators/ki_query_generation_evaluators';
 import { createScenarioCriteriaLlmEvaluator } from '../../../src/evaluators/scenario_criteria_llm_evaluator';
 import {
   getActiveDatasets,
@@ -29,24 +29,24 @@ import {
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
 } from '../datasets';
-import { KI_SOURCES_TO_RUN } from './resolve_ki_sources';
+import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
 import { extractLogTextFromSourceDoc } from './extract_log_text';
-import { getComputedKIsFromDocs } from './get_computed_kis_from_docs';
+import { getComputedKIFeaturesFromDocs } from './get_computed_ki_features_from_docs';
 
 const SAMPLE_DOCS_SIZE = 500;
 
 const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.basePathPrefix}`;
 
-evaluate.describe('Rule generation', { tag: tags.serverless.observability.complete }, () => {
+evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
-  const ruleGenerationRuns = activeDatasets.flatMap((dataset) =>
-    dataset.ruleGeneration.map((scenario) => ({ dataset, scenario }))
+  const kiQueryGenerationRuns = activeDatasets.flatMap((dataset) =>
+    dataset.kiQueryGeneration.map((scenario) => ({ dataset, scenario }))
   );
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
   evaluate.beforeAll(async ({ esClient, log }) => {
     const uniqueCatalogSources = new Map<string, GcsConfig>();
-    for (const { dataset, scenario } of ruleGenerationRuns) {
+    for (const { dataset, scenario } of kiQueryGenerationRuns) {
       const source = resolveScenarioSnapshotSource({
         scenarioId: scenario.input.scenario_id,
         datasetGcs: dataset.gcs,
@@ -61,8 +61,8 @@ evaluate.describe('Rule generation', { tag: tags.serverless.observability.comple
     }
   });
 
-  for (const { dataset, scenario } of ruleGenerationRuns) {
-    for (const kiSource of KI_SOURCES_TO_RUN) {
+  for (const { dataset, scenario } of kiQueryGenerationRuns) {
+    for (const kiSource of KI_FEATURE_SOURCES_TO_RUN) {
       evaluate.describe(`${dataset.id} / ${scenario.input.scenario_id} (${kiSource})`, () => {
         let sampleLogs: string[] = [];
         let kis: Feature[] = [];
@@ -98,12 +98,12 @@ evaluate.describe('Rule generation', { tag: tags.serverless.observability.comple
           await apiServices.streams.disable().catch(() => {});
           await apiServices.streams.enable();
 
-          const extractionScenario = dataset.kiExtraction.find(
+          const extractionScenario = dataset.kiFeatureExtraction.find(
             (item) => item.input.scenario_id === scenario.input.scenario_id
           );
           const canonicalKIs =
             extractionScenario?.output.expected_ground_truth != null
-              ? canonicalKIsFromExpectedGroundTruth({
+              ? canonicalKIFeaturesFromExpectedGroundTruth({
                   streamName: scenario.input.stream_name,
                   scenarioId: scenario.input.scenario_id,
                   expectedGroundTruth: extractionScenario.output.expected_ground_truth,
@@ -115,7 +115,7 @@ evaluate.describe('Rule generation', { tag: tags.serverless.observability.comple
 
           const resolvedKIs = shouldUseCanonicalKIs
             ? canonicalKIs
-            : await loadKIsFromSnapshot(
+            : await loadKIFeaturesFromSnapshot(
                 esClient,
                 log,
                 source.snapshotName,
@@ -164,7 +164,7 @@ evaluate.describe('Rule generation', { tag: tags.serverless.observability.comple
               .map((hit) => hit._source)
               .filter((doc): doc is Record<string, unknown> => doc != null);
 
-            const computedKIs = getComputedKIsFromDocs({
+            const computedKIs = getComputedKIFeaturesFromDocs({
               streamName: scenario.input.stream_name,
               docs: sourceDocs,
             });
@@ -185,7 +185,7 @@ evaluate.describe('Rule generation', { tag: tags.serverless.observability.comple
         });
 
         evaluate(
-          'rule generation',
+          'KI query generation',
           async ({
             executorClient,
             evaluators,
@@ -199,7 +199,7 @@ evaluate.describe('Rule generation', { tag: tags.serverless.observability.comple
             await executorClient.runExperiment(
               {
                 dataset: {
-                  name: `sigevents: rule generation: ${scenario.input.scenario_id} (${dataset.id}) (${kiSource})`,
+                  name: `sigevents: KI query generation: ${scenario.input.scenario_id} (${dataset.id}) (${kiSource})`,
                   description: `[${dataset.id}] ${scenario.input.stream_description}`,
                   examples: [
                     {
@@ -231,7 +231,7 @@ evaluate.describe('Rule generation', { tag: tags.serverless.observability.comple
                   }, {});
 
                   logger.info(
-                    `[DEBUG] Rule generation input: scenario=${scenario.input.scenario_id}, ` +
+                    `[DEBUG] KI query generation input: scenario=${scenario.input.scenario_id}, ` +
                       `ki_source=${kiSource}, total_kis=${kis.length}, ` +
                       `ki_types=${JSON.stringify(kiTypeCounts)}, sample_logs=${sampleLogs.length}`
                   );
@@ -256,7 +256,7 @@ evaluate.describe('Rule generation', { tag: tags.serverless.observability.comple
                 },
               },
               [
-                ...createRuleGenerationEvaluators(
+                ...createKIQueryGenerationEvaluators(
                   esClient,
                   {
                     criteriaFn: evaluators.criteria.bind(evaluators),
@@ -274,7 +274,7 @@ evaluate.describe('Rule generation', { tag: tags.serverless.observability.comple
         );
 
         evaluate.afterAll(async ({ esClient, apiServices, log }) => {
-          log.debug('Cleaning up rule-generation test data');
+          log.debug('Cleaning up KI query generation test data');
           await apiServices.streams.disable().catch(() => {});
           await cleanSignificantEventsDataStreams(esClient, log);
         });
@@ -293,7 +293,7 @@ evaluate.describe('Rule generation', { tag: tags.serverless.observability.comple
     });
 
     evaluate(
-      'rule generation',
+      'KI query generation',
       async ({ executorClient, evaluators, esClient, inferenceClient, logger, apiServices }) => {
         if (!emptyDataStreamTestIndex) {
           throw new Error('Missing temporary test index for empty datastream evaluation');
@@ -302,8 +302,8 @@ evaluate.describe('Rule generation', { tag: tags.serverless.observability.comple
         await executorClient.runExperiment(
           {
             dataset: {
-              name: 'sigevents: rule generation: empty datastream',
-              description: 'Significant events rule generation with empty stream data',
+              name: 'sigevents: KI query generation: empty datastream',
+              description: 'Significant events KI query generation with empty stream data',
               examples: [
                 {
                   input: {},

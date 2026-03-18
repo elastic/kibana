@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { FieldValue, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { MANAGED_STREAM_SEARCH_PATTERN, type KIExtractionScenario } from '../datasets';
+import { MANAGED_STREAM_SEARCH_PATTERN, type KIFeatureExtractionScenario } from '../datasets';
 
 const SAMPLE_DOCS_TARGET_UNIQUE_APPS = 8;
 const SAMPLE_DOCS_MAX = 60;
@@ -22,7 +22,7 @@ const getAppNameFromLogDoc = (doc: Record<string, unknown>): string | undefined 
   return typeof app === 'string' && app.length > 0 ? app : undefined;
 };
 
-const extractRequiredAppsFromCriteria = (scenario: KIExtractionScenario): string[] => {
+const extractRequiredAppsFromCriteria = (scenario: KIFeatureExtractionScenario): string[] => {
   const apps = new Set<string>();
 
   for (const criteria of scenario.output.criteria) {
@@ -94,7 +94,7 @@ export const collectSampleDocuments = async ({
   log,
 }: {
   esClient: Client;
-  scenario: KIExtractionScenario;
+  scenario: KIFeatureExtractionScenario;
   log: ToolingLog;
 }): Promise<Array<SearchHit<Record<string, unknown>>>> => {
   const query = scenario.input.log_query_filter ?? { match_all: {} };
