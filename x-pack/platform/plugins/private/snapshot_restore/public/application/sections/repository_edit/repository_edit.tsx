@@ -218,7 +218,11 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         <p>
           <FormattedMessage
             id="xpack.snapshotRestore.editRepository.confirmDefaultModal.description"
-            defaultMessage="Changing the default repository will update the snapshot repository used by all data streams."
+            defaultMessage="By making this change, all data streams will now write their snapshots to {newDefault} instead of {currentDefault}. Are you sure you wish to proceed?"
+            values={{
+              currentDefault: <strong>'{defaultRepository}'</strong>,
+              newDefault: <strong>'{pendingRepository?.name}'</strong>,
+            }}
           />
         </p>
       </EuiConfirmModal>
