@@ -68,6 +68,50 @@ export const getProposedChangesStyles = (euiThemeContext: UseEuiTheme) => {
       pointer-events: auto;
     }
 
+    .wfDiffNavSection {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 0 ${euiTheme.size.xs};
+      border-right: 1px solid ${euiTheme.colors.borderBaseSubdued};
+      margin-right: 1px;
+    }
+
+    .wfDiffNavBtn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: ${euiTheme.size.l};
+      height: ${euiTheme.size.l};
+      border-radius: ${euiTheme.border.radius.small};
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      pointer-events: auto;
+      color: ${euiTheme.colors.textSubdued};
+      padding: 0;
+      outline: none;
+    }
+
+    .wfDiffNavBtn:hover {
+      background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+      color: ${euiTheme.colors.textParagraph};
+    }
+
+    .wfDiffNavBtn:active {
+      background: ${euiTheme.colors.backgroundBaseInteractiveSelect};
+    }
+
+    .wfDiffNavCounter {
+      font-family: ${euiTheme.font.family};
+      font-size: ${euiTheme.size.m};
+      font-weight: ${euiTheme.font.weight.medium};
+      color: ${euiTheme.colors.textSubdued};
+      white-space: nowrap;
+      user-select: none;
+      padding: 0 2px;
+    }
+
     .wfDiffAcceptBtn,
     .wfDiffDeclineBtn {
       display: flex;

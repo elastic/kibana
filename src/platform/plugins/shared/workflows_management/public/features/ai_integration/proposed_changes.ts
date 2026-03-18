@@ -13,6 +13,10 @@ const ICON_SVG_CHECK =
   '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8.5l3 3 5-6.5"/></svg>';
 const ICON_SVG_CROSS =
   '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>';
+const ICON_SVG_ARROW_UP =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 12V4M4 7l4-4 4 4"/></svg>';
+const ICON_SVG_ARROW_DOWN =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 4v8M4 9l4 4 4-4"/></svg>';
 
 const parseSvgIcon = (svgMarkup: string): Node =>
   new DOMParser().parseFromString(svgMarkup, 'image/svg+xml').documentElement;
@@ -50,6 +54,10 @@ export class ProposalManager {
   private options: ProposalManagerOptions = {};
   private bulkBar: HTMLDivElement | null = null;
   private bulkBarSpacerZoneId: string | null = null;
+  private focusedProposalId: string | null = null;
+  private pillElements = new Map<string, HTMLDivElement>();
+
+  private mouseMoveDisposable: monaco.IDisposable | null = null;
 
   initialize(editor: monaco.editor.IStandaloneCodeEditor, options?: ProposalManagerOptions): void {
     this.editor = editor;
@@ -76,6 +84,22 @@ export class ProposalManager {
 
       domNode.addEventListener('keydown', this.keydownHandler, true);
     }
+
+    this.mouseMoveDisposable = editor.onMouseMove((e) => {
+      if (!this.hasPendingProposals()) return;
+      const lineNumber = e.target.position?.lineNumber;
+      if (lineNumber == null) return;
+
+      for (const [id, proposal] of this.proposals.entries()) {
+        const decoEnd = proposal.startLine + proposal.newContentLineCount - 1;
+        if (lineNumber >= proposal.startLine && lineNumber <= decoEnd) {
+          if (this.focusedProposalId !== id) {
+            this.focusProposal(id);
+          }
+          return;
+        }
+      }
+    });
   }
 
   proposeChange(change: ProposedChange): void {
@@ -148,6 +172,8 @@ export class ProposalManager {
     });
 
     this.editor.revealLineInCenter(change.startLine);
+    this.focusedProposalId = this.getSortedProposalIds()[0] ?? null;
+    this.updatePillVisibility();
     this.updateBulkBar();
   }
 
@@ -157,6 +183,7 @@ export class ProposalManager {
 
     this.clearProposal(proposalId);
     this.options.onAccept?.(proposalId);
+    this.updatePillVisibility();
     this.updateBulkBar();
   }
 
@@ -187,6 +214,7 @@ export class ProposalManager {
 
     this.clearProposal(proposalId);
     this.options.onReject?.(proposalId);
+    this.updatePillVisibility();
     this.updateBulkBar();
   }
 
@@ -224,6 +252,9 @@ export class ProposalManager {
     this.rejectAll();
     this.removeBulkBar();
 
+    this.mouseMoveDisposable?.dispose();
+    this.mouseMoveDisposable = null;
+
     if (this.editor && this.keydownHandler) {
       const domNode = this.editor.getDomNode();
       if (domNode) {
@@ -235,6 +266,7 @@ export class ProposalManager {
       collection.clear();
     }
     this.decorationCollections.clear();
+    this.pillElements.clear();
 
     this.keydownHandler = null;
     this.editor = null;
@@ -322,6 +354,68 @@ export class ProposalManager {
           accessor.removeZone(zoneId);
         });
         this.bulkBarSpacerZoneId = null;
+      }
+    }
+  }
+
+  private getSortedProposalIds(): string[] {
+    return Array.from(this.proposals.entries())
+      .sort(([, a], [, b]) => a.startLine - b.startLine)
+      .map(([id]) => id);
+  }
+
+  private focusProposal(proposalId: string): void {
+    this.focusedProposalId = proposalId;
+    this.updatePillVisibility();
+  }
+
+  private navigateProposal(direction: 'up' | 'down'): void {
+    const sorted = this.getSortedProposalIds();
+    if (sorted.length === 0) return;
+
+    const currentIdx = this.focusedProposalId ? sorted.indexOf(this.focusedProposalId) : -1;
+    let nextIdx: number;
+    if (direction === 'up') {
+      nextIdx = currentIdx <= 0 ? sorted.length - 1 : currentIdx - 1;
+    } else {
+      nextIdx = currentIdx >= sorted.length - 1 ? 0 : currentIdx + 1;
+    }
+
+    const nextId = sorted[nextIdx];
+    this.focusProposal(nextId);
+
+    const proposal = this.proposals.get(nextId);
+    if (proposal && this.editor) {
+      this.editor.revealLineInCenter(proposal.startLine);
+    }
+  }
+
+  private updatePillVisibility(): void {
+    const sorted = this.getSortedProposalIds();
+
+    if (
+      sorted.length > 0 &&
+      (!this.focusedProposalId || !this.proposals.has(this.focusedProposalId))
+    ) {
+      this.focusedProposalId = sorted[0];
+    }
+
+    const focusedIdx = this.focusedProposalId ? sorted.indexOf(this.focusedProposalId) : 0;
+
+    for (const [id, pill] of this.pillElements.entries()) {
+      const isFocused = id === this.focusedProposalId;
+      pill.style.display = isFocused ? 'flex' : 'none';
+
+      if (isFocused) {
+        const counter = pill.querySelector('.wfDiffNavCounter') as HTMLSpanElement | null;
+        if (counter) {
+          counter.textContent = `${focusedIdx + 1} of ${sorted.length}`;
+        }
+
+        const navSection = pill.querySelector('.wfDiffNavSection') as HTMLElement | null;
+        if (navSection) {
+          navSection.style.display = sorted.length > 1 ? 'flex' : 'none';
+        }
       }
     }
   }
@@ -420,6 +514,39 @@ export class ProposalManager {
 
     const pill = document.createElement('div');
     pill.className = 'wfDiffButtonsPill';
+    pill.style.display = 'none';
+
+    const navSection = document.createElement('div');
+    navSection.className = 'wfDiffNavSection';
+
+    const upButton = document.createElement('button');
+    upButton.className = 'wfDiffNavBtn';
+    upButton.appendChild(parseSvgIcon(ICON_SVG_ARROW_UP));
+    upButton.addEventListener('mousedown', (e) => e.stopPropagation());
+    upButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.navigateProposal('up');
+    });
+    navSection.appendChild(upButton);
+
+    const counter = document.createElement('span');
+    counter.className = 'wfDiffNavCounter';
+    counter.textContent = '1 of 1';
+    navSection.appendChild(counter);
+
+    const downButton = document.createElement('button');
+    downButton.className = 'wfDiffNavBtn';
+    downButton.appendChild(parseSvgIcon(ICON_SVG_ARROW_DOWN));
+    downButton.addEventListener('mousedown', (e) => e.stopPropagation());
+    downButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.navigateProposal('down');
+    });
+    navSection.appendChild(downButton);
+
+    pill.appendChild(navSection);
 
     const acceptButton = document.createElement('button');
     acceptButton.className = 'wfDiffAcceptBtn';
@@ -454,6 +581,12 @@ export class ProposalManager {
       this.rejectProposal(change.proposalId);
     });
     pill.appendChild(declineButton);
+
+    this.pillElements.set(change.proposalId, pill);
+
+    wrapper.addEventListener('mouseenter', () => {
+      this.focusProposal(change.proposalId);
+    });
 
     wrapper.appendChild(pill);
 
@@ -500,6 +633,8 @@ export class ProposalManager {
       collection.clear();
       this.decorationCollections.delete(proposalId);
     }
+
+    this.pillElements.delete(proposalId);
 
     this.editor.changeViewZones((accessor) => {
       accessor.removeZone(proposal.viewZoneId);

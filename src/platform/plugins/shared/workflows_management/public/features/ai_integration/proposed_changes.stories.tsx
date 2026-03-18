@@ -13,6 +13,7 @@ import { useDispatch } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import type { monaco } from '@kbn/monaco';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { computeChanges } from './attachment_bridge';
 import type { ProposedChange } from './proposed_changes';
 import { ProposalManager } from './proposed_changes';
 import { kibanaReactDecorator } from '../../../.storybook/decorators';
@@ -88,6 +89,161 @@ const DELETE_PROPOSAL: ProposedChange = {
   endLine: 7,
   newText: '',
 };
+
+const PR_REPORT_YAML = `version: '1'
+name: Open PRs Report for Team One Workflow
+description: Fetches open PRs labeled "Team:One Workflow" from elastic/kibana via the GitHub API daily at 9:00 AM (Europe/Madrid), groups them by author, and posts a formatted summary to Slack.
+
+enabled: true
+tags:
+  - github
+  - slack
+  - team-one-workflow
+
+inputs:
+  properties:
+    label:
+      type: string
+      description: "GitHub label to filter PRs by"
+      default: "Team:One Workflow"
+  required:
+    - label
+  additionalProperties: false
+
+consts:
+  github_search_url: "https://api.github.com/search/issues?q=is%3Apr+label%3A%22{{ inputs.label | url_encode }}%22+is%3Aopen+repo%3Aelastic%2Fkibana&per_page=100"
+
+triggers:
+  - type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        byhour:
+          - 9
+        byminute:
+          - 0
+        tzid: Europe/Madrid
+
+steps:
+  - name: get_prs_from_github
+    type: http
+    with:
+      url: "{{ consts.github_search_url }}"
+      method: GET
+      headers:
+        Accept: application/vnd.github+json
+
+  - name: build_pr_list
+    type: data.map
+    items: "\${{ steps.get_prs_from_github.output.data.items }}"
+    with:
+      fields:
+        title: \${{ item.title }}
+        url: \${{ item.html_url }}
+        author: \${{ item.user.login }}
+        created_at: \${{ item.created_at }}
+        number: \${{ item.number }}
+        time_ago: '{% assign now_epoch = "now" | date: "%s" | plus: 0 %}{% assign created_epoch = item.created_at | date: "%s" | plus: 0 %}{% assign diff_seconds = now_epoch | minus: created_epoch %}{% assign diff_minutes = diff_seconds | divided_by: 60 %}{% assign diff_hours = diff_minutes | divided_by: 60 %}{% assign diff_days = diff_hours | divided_by: 24 %}{% if diff_days > 0 %}{{ diff_days }} days ago{% elsif diff_hours > 0 %}{{ diff_hours }} hours ago{% else %}{{ diff_minutes }} minutes ago{% endif %}'
+
+  - name: format_slack_message
+    type: data.set
+    with:
+      pr_count: "{{ steps.get_prs_from_github.output.data.total_count }}"
+      message: |-
+        :github: *Open PRs for {{ inputs.label }}* ({{ steps.get_prs_from_github.output.data.total_count }} total)
+
+        {% assign grouped = steps.build_pr_list.output | group_by: "author" %}{% for group in grouped %}*{{ group.name }}:*
+        {% for pr in group.items %}\u2022 <{{ pr.url }}|#{{ pr.number }} \u2014 {{ pr.title }}> \u2014 opened {{ pr.time_ago }}
+        {% endfor %}
+        {% endfor %}
+
+  - name: send_slack_message
+    type: slack
+    connector-id: 0ee5d857-3653-4ee2-930f-638cf2a1d990
+    with:
+      message: "{{ steps.format_slack_message.output.message }}"
+`;
+
+const PR_REPORT_AFTER_YAML = `version: '1'
+name: Open PRs Report for Team One Workflow
+description: Fetches open PRs labeled "Team:One Workflow" from elastic/kibana via the GitHub API on manual trigger, groups them by author, and posts a formatted summary to Slack.
+
+enabled: true
+tags:
+  - github
+  - slack
+  - team-one-workflow
+
+inputs:
+  properties:
+    label:
+      type: string
+      description: GitHub label to filter PRs by
+      default: Team:One Workflow
+    repo:
+      type: string
+      description: GitHub repository in owner/repo format
+      default: elastic/kibana
+  required:
+    - label
+    - repo
+  additionalProperties: false
+
+consts:
+  github_search_url: https://api.github.com/search/issues?q=is%3Apr+label%3A%22{{ inputs.label | url_encode }}%22+is%3Aopen+repo%3A{{ inputs.repo | url_encode }}&per_page=100
+
+triggers:
+  # - type: scheduled
+  #   with:
+  #     rrule:
+  #       freq: DAILY
+  #       interval: 1
+  #       byhour:
+  #         - 9
+  #       byminute:
+  #         - 0
+  #       tzid: Europe/Madrid
+  - type: manual
+steps:
+  - name: get_prs_from_github
+    type: http
+    with:
+      url: "{{ consts.github_search_url }}"
+      method: GET
+      headers:
+        Accept: application/vnd.github+json
+
+  - name: build_pr_list
+    type: data.map
+    items: "\${{ steps.get_prs_from_github.output.data.items }}"
+    with:
+      fields:
+        title: \${{ item.title }}
+        url: \${{ item.html_url }}
+        author: \${{ item.user.login }}
+        created_at: \${{ item.created_at }}
+        number: \${{ item.number }}
+        time_ago: '{% assign now_epoch = "now" | date: "%s" | plus: 0 %}{% assign created_epoch = item.created_at | date: "%s" | plus: 0 %}{% assign diff_seconds = now_epoch | minus: created_epoch %}{% assign diff_minutes = diff_seconds | divided_by: 60 %}{% assign diff_hours = diff_minutes | divided_by: 60 %}{% assign diff_days = diff_hours | divided_by: 24 %}{% if diff_days > 0 %}{{ diff_days }} days ago{% elsif diff_hours > 0 %}{{ diff_hours }} hours ago{% else %}{{ diff_minutes }} minutes ago{% endif %}'
+
+  - name: format_slack_message
+    type: data.set
+    with:
+      pr_count: "{{ steps.get_prs_from_github.output.data.total_count }}"
+      message: |-
+        :github: *Open PRs for {{ inputs.label }}* ({{ steps.get_prs_from_github.output.data.total_count }} total)
+
+        {% assign grouped = steps.build_pr_list.output | group_by: "author" %}{% for group in grouped %}*{{ group.name }}:*
+        {% for pr in group.items %}\u2022 <{{ pr.url }}|#{{ pr.number }} \u2014 {{ pr.title }}> \u2014 opened {{ pr.time_ago }}
+        {% endfor %}
+        {% endfor %}
+
+  - name: send_slack_message
+    type: slack
+    connector-id: 0ee5d857-3653-4ee2-930f-638cf2a1d990
+    with:
+      message: "{{ steps.format_slack_message.output.message }}"
+`;
 
 const LARGE_YAML = `version: 1
 name: 'Space Missions Demo'
@@ -534,13 +690,15 @@ const LARGE_REPLACE_PROPOSAL: ProposedChange = {
 
 interface EditorWithProposalsProps {
   yaml?: string;
-  proposals: ProposedChange[];
+  proposals?: ProposedChange[];
+  afterYaml?: string;
   onStepRun: (params: { stepId: string; actionType: string }) => void;
 }
 
 const EditorWithProposals: React.FC<EditorWithProposalsProps> = ({
   yaml = SAMPLE_YAML,
   proposals,
+  afterYaml,
   onStepRun,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -558,7 +716,8 @@ const EditorWithProposals: React.FC<EditorWithProposalsProps> = ({
 
     const interval = setInterval(() => {
       const editor = editorRef.current;
-      if (!editor?.getModel()) return;
+      const model = editor?.getModel();
+      if (!editor || !model) return;
 
       clearInterval(interval);
       proposalsApplied.current = true;
@@ -567,8 +726,16 @@ const EditorWithProposals: React.FC<EditorWithProposalsProps> = ({
       manager.initialize(editor);
       managerRef.current = manager;
 
-      for (const proposal of proposals) {
-        manager.proposeChange(proposal);
+      if (afterYaml) {
+        const currentContent = model.getValue();
+        const changes = computeChanges(currentContent, afterYaml, 'story-proposal');
+        for (let i = changes.length - 1; i >= 0; i--) {
+          manager.proposeChange({ ...changes[i], proposalId: `story-proposal::${i}` });
+        }
+      } else if (proposals) {
+        for (const proposal of proposals) {
+          manager.proposeChange(proposal);
+        }
       }
     }, 100);
 
@@ -578,7 +745,7 @@ const EditorWithProposals: React.FC<EditorWithProposalsProps> = ({
       managerRef.current = null;
       proposalsApplied.current = false;
     };
-  }, [proposals]);
+  }, [proposals, afterYaml]);
 
   return <WorkflowYAMLEditor editorRef={editorRef} onStepRun={onStepRun} />;
 };
@@ -587,7 +754,7 @@ const StoryProviders: Decorator = (story: () => React.ReactElement, _context: St
   <QueryClientProvider client={storyQueryClient}>
     <MemoryRouter>
       <WorkflowDetailStoreProvider>
-        <div css={{ height: '600px', display: 'flex', flexDirection: 'column' }}>{story()}</div>
+        <div css={{ height: '98vh', display: 'flex', flexDirection: 'column' }}>{story()}</div>
       </WorkflowDetailStoreProvider>
     </MemoryRouter>
   </QueryClientProvider>
@@ -642,6 +809,14 @@ export const LargeReplace: Story = {
   args: {
     yaml: LARGE_YAML,
     proposals: [LARGE_REPLACE_PROPOSAL],
+    onStepRun: () => {},
+  },
+};
+
+export const MultipleProposals: Story = {
+  args: {
+    yaml: PR_REPORT_YAML,
+    afterYaml: PR_REPORT_AFTER_YAML,
     onStepRun: () => {},
   },
 };
