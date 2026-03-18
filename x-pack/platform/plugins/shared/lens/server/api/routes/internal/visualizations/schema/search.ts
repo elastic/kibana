@@ -54,5 +54,5 @@ export const lensSearchResponseBodySchema = schema.object(
     data: schema.arrayOf(lensResponseItemSchema, { maxSize: 100 }),
     meta: lensSearchResponseMetaSchema,
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'forbid', meta: { id: 'visualizationListResponse' } }
 );
