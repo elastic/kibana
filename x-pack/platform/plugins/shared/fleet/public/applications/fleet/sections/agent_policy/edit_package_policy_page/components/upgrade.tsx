@@ -164,7 +164,7 @@ const InputMigrationCallout = ({
   >
     <FormattedMessage
       id="xpack.fleet.upgradePackagePolicy.statusCallout.inputMigrationContent"
-      defaultMessage="This upgrade replaces one or more input types. Your existing configuration has been automatically carried over."
+      defaultMessage="This upgrade replaces the input used for data collection. Your existing configuration has been automatically carried over."
     />
   </EuiCallOut>
 );

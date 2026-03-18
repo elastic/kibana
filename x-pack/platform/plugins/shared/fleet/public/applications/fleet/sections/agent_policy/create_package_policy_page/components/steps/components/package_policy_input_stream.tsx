@@ -81,6 +81,7 @@ interface Props {
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  isUpgrade?: boolean;
   totalStreams?: number;
   showDescriptionColumn?: boolean;
   varGroupSelections?: Record<string, string>;
@@ -95,6 +96,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     inputStreamValidationResults,
     forceShowErrors,
     isEditPage,
+    isUpgrade,
     totalStreams,
     showDescriptionColumn = true,
     varGroupSelections = {},
@@ -306,6 +308,22 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                 content={streamDeprecationTooltip}
                               />
                             </span>
+                          </EuiFlexItem>
+                        )}
+                        {isUpgrade && packagePolicyInputStream.migrate_from && (
+                          <EuiFlexItem grow={false}>
+                            <EuiIconTip
+                              type="info"
+                              color="subdued"
+                              content={i18n.translate(
+                                'xpack.fleet.createPackagePolicy.stepConfigure.streamMigratedTooltip',
+                                {
+                                  defaultMessage:
+                                    'This data stream was automatically migrated from {migrateFrom}.',
+                                  values: { migrateFrom: packagePolicyInputStream.migrate_from },
+                                }
+                              )}
+                            />
                           </EuiFlexItem>
                         )}
                       </EuiFlexGroup>

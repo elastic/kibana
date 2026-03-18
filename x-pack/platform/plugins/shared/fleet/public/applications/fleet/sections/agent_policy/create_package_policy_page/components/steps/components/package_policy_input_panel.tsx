@@ -271,16 +271,36 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           {isSingleInputAndStreams ? (
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3
-                  data-test-subj="PackagePolicy.InputStreamConfig.title"
-                  style={
-                    isDeprecatedInput ? { color: theme.euiTheme.colors.textSubdued } : undefined
-                  }
-                >
-                  {packageInput.title || packageInput.type}
-                </h3>
-              </EuiTitle>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h3
+                      data-test-subj="PackagePolicy.InputStreamConfig.title"
+                      style={
+                        isDeprecatedInput ? { color: theme.euiTheme.colors.textSubdued } : undefined
+                      }
+                    >
+                      {packageInput.title || packageInput.type}
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {isUpgrade && packagePolicyInput.migrate_from && !isDeprecatedInput && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      type="info"
+                      color="subdued"
+                      content={i18n.translate(
+                        'xpack.fleet.createPackagePolicy.stepConfigure.inputMigratedTooltip',
+                        {
+                          defaultMessage:
+                            'This input was automatically migrated from {migrateFrom}.',
+                          values: { migrateFrom: packagePolicyInput.migrate_from },
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
               <EuiSpacer size="s" />
               {showTopLevelDescription && topLevelDescription}
             </EuiFlexItem>
@@ -454,6 +474,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   totalStreams={inputStreams.length}
                   packagePolicyInputStream={packagePolicyInputStream!}
                   showDescriptionColumn={!isSingleInputAndStreams}
+                  isUpgrade={isUpgrade}
                   updatePackagePolicyInputStream={(
                     updatedStream: Partial<PackagePolicyInputStream>
                   ) => {
