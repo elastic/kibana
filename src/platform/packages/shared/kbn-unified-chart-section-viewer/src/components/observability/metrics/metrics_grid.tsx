@@ -11,9 +11,12 @@ import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
+  EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -36,6 +39,7 @@ import {
 } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
+import { executeEsqlQuery } from './utils/execute_esql_query';
 
 const AVG_TARGET_BUCKETS = 100000;
 const M4_TARGET_BUCKETS = 400;
@@ -252,9 +256,7 @@ const ChartItem = React.memo(
     const instrument = firstNonNullable(metricItem.metricTypes);
     const fieldType = firstNonNullable(metricItem.fieldTypes);
     const isM4Compatible =
-      useM4Downsampling &&
-      instrument !== 'counter' &&
-      instrument !== 'histogram';
+      useM4Downsampling && instrument !== 'counter' && instrument !== 'histogram';
 
     const standardQuery = useMemo(() => {
       const isSupported = fieldType !== 'unsigned_long';
@@ -267,7 +269,7 @@ const ChartItem = React.memo(
         useFrom: isM4Compatible,
         targetBuckets: isM4Compatible ? AVG_TARGET_BUCKETS : undefined,
       });
-    }, [metricItem, dimensions, whereStatements, isM4Compatible]);
+    }, [fieldType, metricItem, dimensions, whereStatements, isM4Compatible]);
 
     const m4Query = useMemo(() => {
       if (!isM4Compatible) return '';
@@ -281,7 +283,7 @@ const ChartItem = React.memo(
         sourceBuckets: AVG_TARGET_BUCKETS,
         targetBuckets: M4_TARGET_BUCKETS,
       });
-    }, [metricItem, whereStatements, dimensions, isM4Compatible]);
+    }, [isM4Compatible, fieldType, metricItem, whereStatements, dimensions]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const metricUnit = firstNonNullable(metricItem.units);
@@ -308,8 +310,7 @@ const ChartItem = React.memo(
               ...(metricUnit ? getLensMetricFormat(metricUnit) : {}),
             },
           ],
-          breakdown:
-            dimensions.length > 0 ? dimensions.map((dim) => dim.name) : undefined,
+          breakdown: dimensions.length > 0 ? dimensions.map((dim) => dim.name) : undefined,
         },
       ],
       [metricItem.metricName, metricUnit, color, dimensions]
@@ -320,6 +321,91 @@ const ChartItem = React.memo(
       () => onViewDetails(index, activeQuery, metricItem),
       [index, activeQuery, metricItem, onViewDetails]
     );
+
+    const standardLoadStartRef = useRef<number>(0);
+    const m4LoadStartRef = useRef<number>(0);
+    const [standardDisplayMs, setStandardDisplayMs] = useState<number | null>(null);
+    const [m4DisplayMs, setM4DisplayMs] = useState<number | null>(null);
+    const [measureResult, setMeasureResult] = useState<{
+      standardRequestMs: number;
+      standardRows: number;
+      standardPayloadBytes: number;
+      m4RequestMs: number;
+      m4Rows: number;
+      m4PayloadBytes: number;
+    } | null>(null);
+    const [isMeasurePopoverOpen, setIsMeasurePopoverOpen] = useState(false);
+    const [isMeasuring, setIsMeasuring] = useState(false);
+
+    const onStandardLoad = useCallback((loading: boolean) => {
+      if (loading) {
+        standardLoadStartRef.current = Date.now();
+      } else {
+        setStandardDisplayMs(Math.round(Date.now() - standardLoadStartRef.current));
+      }
+    }, []);
+    const onM4Load = useCallback((loading: boolean) => {
+      if (loading) {
+        m4LoadStartRef.current = Date.now();
+      } else {
+        setM4DisplayMs(Math.round(Date.now() - m4LoadStartRef.current));
+      }
+    }, []);
+
+    const handleMeasureClick = useCallback(async () => {
+      if (!fetchParams.dataView || !standardQuery || !m4Query || isMeasuring) {
+        return;
+      }
+      setIsMeasuring(true);
+      setMeasureResult(null);
+      setIsMeasurePopoverOpen(true);
+      const controller = new AbortController();
+      const { dataView, timeRange, filters, esqlVariables } = fetchParams;
+      const baseParams = {
+        search: services.data.search.search,
+        signal: controller.signal,
+        dataView,
+        timeRange: timeRange ?? undefined,
+        filters: filters ?? [],
+        variables: esqlVariables,
+        uiSettings: services.uiSettings,
+      };
+      try {
+        const t0 = performance.now();
+        const standardRows = await executeEsqlQuery({
+          ...baseParams,
+          esqlQuery: standardQuery,
+        });
+        const standardRequestMs = Math.round(performance.now() - t0);
+        const standardPayloadBytes = new Blob([JSON.stringify(standardRows)]).size;
+        const t1 = performance.now();
+        const m4Rows = await executeEsqlQuery({
+          ...baseParams,
+          esqlQuery: m4Query,
+        });
+        const m4RequestMs = Math.round(performance.now() - t1);
+        const m4PayloadBytes = new Blob([JSON.stringify(m4Rows)]).size;
+        setMeasureResult({
+          standardRequestMs,
+          standardRows: standardRows.length,
+          standardPayloadBytes,
+          m4RequestMs,
+          m4Rows: m4Rows.length,
+          m4PayloadBytes,
+        });
+      } catch {
+        setMeasureResult(null);
+      } finally {
+        setIsMeasuring(false);
+      }
+    }, [
+      fetchParams,
+      standardQuery,
+      m4Query,
+      isMeasuring,
+      services.data.search.search,
+      services.uiSettings,
+    ]);
 
     const sharedChartProps = {
       size: isM4Compatible ? ('m' as ChartSize) : size,
@@ -342,11 +428,162 @@ const ChartItem = React.memo(
           isFocused={isFocused}
           onFocus={onFocusCell}
         >
-          <EuiFlexGroup gutterSize="none" responsive={false}>
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
                 <strong>{metricItem.metricName}</strong>
               </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="timeline"
+                    onClick={handleMeasureClick}
+                    isLoading={isMeasuring}
+                    isDisabled={!standardQuery || !m4Query || isMeasuring}
+                  >
+                    {i18n.translate('metricsExperience.m4Comparison.measureButton', {
+                      defaultMessage: 'Measure performance',
+                    })}
+                  </EuiButtonEmpty>
+                }
+                isOpen={isMeasurePopoverOpen}
+                closePopover={() => setIsMeasurePopoverOpen(false)}
+                anchorPosition="downLeft"
+              >
+                {measureResult ? (
+                  <div css={css({ padding: euiTheme.size.s, minWidth: 300 })}>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('metricsExperience.m4Comparison.whySimilarRequest', {
+                        defaultMessage:
+                          'Request time can be similar—both run the same aggregation. M4 wins on payload size and client-side render.',
+                      })}
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    <EuiText size="xs">
+                      <strong>
+                        {i18n.translate('metricsExperience.m4Comparison.payloadSection', {
+                          defaultMessage: 'Payload (what the client receives)',
+                        })}
+                      </strong>
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('metricsExperience.m4Comparison.payloadStandard', {
+                        defaultMessage: 'Standard: {rows} rows · {size}',
+                        values: {
+                          rows: measureResult.standardRows.toLocaleString(),
+                          size:
+                            measureResult.standardPayloadBytes >= 1024 * 1024
+                              ? `${(measureResult.standardPayloadBytes / (1024 * 1024)).toFixed(
+                                  1
+                                )} MB`
+                              : `${(measureResult.standardPayloadBytes / 1024).toFixed(1)} KB`,
+                        },
+                      })}
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('metricsExperience.m4Comparison.payloadM4', {
+                        defaultMessage: 'M4: {rows} rows · {size}',
+                        values: {
+                          rows: measureResult.m4Rows.toLocaleString(),
+                          size:
+                            measureResult.m4PayloadBytes >= 1024 * 1024
+                              ? `${(measureResult.m4PayloadBytes / (1024 * 1024)).toFixed(1)} MB`
+                              : `${(measureResult.m4PayloadBytes / 1024).toFixed(1)} KB`,
+                        },
+                      })}
+                    </EuiText>
+                    {measureResult.standardRows > 0 &&
+                      measureResult.m4Rows > 0 &&
+                      measureResult.m4PayloadBytes > 0 && (
+                        <EuiText
+                          size="xs"
+                          css={css({ fontWeight: 600, marginTop: euiTheme.size.xs })}
+                        >
+                          {i18n.translate('metricsExperience.m4Comparison.reduction', {
+                            defaultMessage:
+                              '{rowFactor}× fewer rows, {payloadFactor}× smaller payload',
+                            values: {
+                              rowFactor: Math.round(
+                                measureResult.standardRows / measureResult.m4Rows
+                              ).toLocaleString(),
+                              payloadFactor: Math.round(
+                                measureResult.standardPayloadBytes / measureResult.m4PayloadBytes
+                              ).toLocaleString(),
+                            },
+                          })}
+                        </EuiText>
+                      )}
+                    <EuiSpacer size="s" />
+                    <EuiText size="xs">
+                      <strong>
+                        {i18n.translate('metricsExperience.m4Comparison.requestMetrics', {
+                          defaultMessage: 'Round-trip (request)',
+                        })}
+                      </strong>
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('metricsExperience.m4Comparison.requestStandard', {
+                        defaultMessage: 'Standard: {ms} ms',
+                        values: { ms: measureResult.standardRequestMs },
+                      })}
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('metricsExperience.m4Comparison.requestM4', {
+                        defaultMessage: 'M4: {ms} ms',
+                        values: { ms: measureResult.m4RequestMs },
+                      })}
+                    </EuiText>
+                    <EuiSpacer size="xs" />
+                    <EuiText size="xs">
+                      <strong>
+                        {i18n.translate('metricsExperience.m4Comparison.displayMetrics', {
+                          defaultMessage: 'Display (request + render)',
+                        })}
+                      </strong>
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
+                      {standardDisplayMs != null
+                        ? i18n.translate('metricsExperience.m4Comparison.displayStandard', {
+                            defaultMessage: 'Standard: {ms} ms',
+                            values: { ms: standardDisplayMs },
+                          })
+                        : i18n.translate('metricsExperience.m4Comparison.displayPending', {
+                            defaultMessage: 'Standard: — (load chart to see)',
+                          })}
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
+                      {m4DisplayMs != null
+                        ? i18n.translate('metricsExperience.m4Comparison.displayM4', {
+                            defaultMessage: 'M4: {ms} ms',
+                            values: { ms: m4DisplayMs },
+                          })
+                        : i18n.translate('metricsExperience.m4Comparison.displayPendingM4', {
+                            defaultMessage: 'M4: — (load chart to see)',
+                          })}
+                    </EuiText>
+                  </div>
+                ) : isMeasuring ? (
+                  <div css={css({ padding: euiTheme.size.s })}>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('metricsExperience.m4Comparison.measuring', {
+                        defaultMessage: 'Running both queries…',
+                      })}
+                    </EuiText>
+                  </div>
+                ) : (
+                  <div css={css({ padding: euiTheme.size.s })}>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('metricsExperience.m4Comparison.measureHint', {
+                        defaultMessage:
+                          'Click to run both queries and compare request time + row count.',
+                      })}
+                    </EuiText>
+                  </div>
+                )}
+              </EuiPopover>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -367,6 +604,7 @@ const ChartItem = React.memo(
                 titleHighlight={searchTerm}
                 onViewDetails={handleViewDetailsCallback}
                 userMessages={userMessages}
+                onLoad={onStandardLoad}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -386,6 +624,7 @@ const ChartItem = React.memo(
                 titleHighlight={searchTerm}
                 onViewDetails={handleViewDetailsCallback}
                 userMessages={userMessages}
+                onLoad={onM4Load}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

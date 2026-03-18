@@ -26,6 +26,7 @@ export type LensWrapperProps = {
   abortController: AbortController | undefined;
   disabledActions?: string[];
   extraDisabledActions?: string[];
+  onLoad?: (isLoading: boolean) => void;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
@@ -42,6 +43,7 @@ export function LensWrapper({
   syncTooltips,
   syncCursor,
   extraDisabledActions = [],
+  onLoad,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -124,6 +126,7 @@ export function LensWrapper({
           onFilter={onFilter}
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
+          onLoad={onLoad ? (loading, _adapters, _dataLoading$) => onLoad(loading) : undefined}
         />
       </PresentationPanelQuickActionContext.Provider>
     </div>

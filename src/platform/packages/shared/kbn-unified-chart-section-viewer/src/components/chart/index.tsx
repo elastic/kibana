@@ -36,6 +36,7 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     isLoading?: boolean;
     error?: Error;
     userMessages?: EmbeddableComponentProps['userMessages'];
+    onLoad?: (isLoading: boolean) => void;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -59,6 +60,7 @@ export const Chart = ({
   isLoading = false,
   error,
   userMessages,
+  onLoad,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -103,6 +105,7 @@ export const Chart = ({
             titleHighlight={titleHighlight}
             syncTooltips={syncTooltips}
             extraDisabledActions={extraDisabledActions}
+            onLoad={onLoad}
           />
           {isSaveModalVisible && (
             <SaveModalComponent
