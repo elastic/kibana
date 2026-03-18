@@ -57,7 +57,7 @@ export function registerCreateRoute(
             description: 'Indicates that this call is forbidden.',
           },
           409: {
-            description: 'Indicates that a dashboard with the specified ID already exists.',
+            description: 'Indicates that a dashboard with the given ID already exists.',
           },
         },
       }),
