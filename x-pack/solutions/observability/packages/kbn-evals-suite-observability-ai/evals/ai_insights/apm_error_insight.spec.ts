@@ -75,33 +75,36 @@ function createScenarioTest(scenario: ApmErrorScenario) {
         log.info(`Found APM error with ID: ${errorId}`);
       });
 
-      evaluate(`APM error AI insight correctness (${scenario.id})`, async ({ aiInsightClient, evaluateDataset }) => {
-        await evaluateDataset<ErrorInsightParams>({
-          getInsight: (params) => aiInsightClient.getErrorInsight(params),
-          dataset: {
-            name: 'ai insights: APM error analysis',
-            description:
-              'Evaluates correctness of APM error AI insight summaries against ground truth',
-            examples: [
-              {
-                input: {
-                  requestPayload: {
-                    errorId,
-                    serviceName: scenario.errorQuery.serviceName,
-                    start,
-                    end,
+      evaluate(
+        `APM error AI insight correctness (${scenario.id})`,
+        async ({ aiInsightClient, evaluateDataset }) => {
+          await evaluateDataset<ErrorInsightParams>({
+            getInsight: (params) => aiInsightClient.getErrorInsight(params),
+            dataset: {
+              name: 'ai insights: APM error analysis',
+              description:
+                'Evaluates correctness of APM error AI insight summaries against ground truth',
+              examples: [
+                {
+                  input: {
+                    requestPayload: {
+                      errorId,
+                      serviceName: scenario.errorQuery.serviceName,
+                      start,
+                      end,
+                    },
+                    question:
+                      'Analyze this APM error and provide an error summary, identify where the failure occurred (application code vs dependency), assess the impact and scope, and recommend 2-4 immediate actions.',
                   },
-                  question:
-                    'Analyze this APM error and provide an error summary, identify where the failure occurred (application code vs dependency), assess the impact and scope, and recommend 2-4 immediate actions.',
+                  output: {
+                    expected: scenario.expectedOutput,
+                  },
                 },
-                output: {
-                  expected: scenario.expectedOutput,
-                },
-              },
-            ],
-          },
-        });
-      });
+              ],
+            },
+          });
+        }
+      );
 
       evaluate.afterAll(async ({ esClient, log }) => {
         log.debug('Cleaning up indices');
