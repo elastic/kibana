@@ -6,23 +6,20 @@
  */
 import React from 'react';
 import {
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
-  EuiLink,
   EuiPanel,
   EuiTitle,
   EuiSpacer,
   EuiText,
   EuiButtonEmpty,
-  EuiButtonIcon,
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import { SearchHomepageVersionBadge } from '@kbn/search-shared-ui';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
 import { PLUGIN_NAME } from '../../../common';
@@ -86,45 +83,14 @@ export const SearchGettingStartedHeader: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiLink
-                      data-test-subj="gettingStarted-kibana-version"
-                      color="text"
-                      target="_blank"
-                      href={
-                        !cloud?.isServerlessEnabled
-                          ? docLinks.hostedCloudReleaseNotes
-                          : docLinks.serverlessReleaseNotes
-                      }
-                    >
-                      <FormattedMessage
-                        id="xpack.search.gettingStarted.versionTextLabel"
-                        defaultMessage="{version}"
-                        values={{
-                          version: !cloud?.isServerlessEnabled ? `v${kibanaVersion}` : 'Changelog',
-                        }}
-                      />
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiCopy textToCopy={`v${kibanaVersion}`}>
-                      {(copy) => (
-                        <EuiButtonIcon
-                          aria-label={i18n.translate(
-                            'xpack.search.gettingStarted.versionCopyButton',
-                            { defaultMessage: 'Copy version to clipboard' }
-                          )}
-                          data-test-subj="gettingStarted-copy-version"
-                          iconType="copyClipboard"
-                          color="text"
-                          size="xs"
-                          onClick={copy}
-                        />
-                      )}
-                    </EuiCopy>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <SearchHomepageVersionBadge
+                  docLink={
+                    !cloud?.isServerlessEnabled
+                      ? docLinks.hostedCloudReleaseNotes
+                      : docLinks.serverlessReleaseNotes
+                  }
+                  kibanaVersion={!cloud?.isServerlessEnabled ? `v${kibanaVersion}` : 'Changelog'}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
