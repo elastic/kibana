@@ -8,10 +8,13 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
-import { EuiLink, EuiMark } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiMark, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
+import {
+  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
+  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
+} from '../../../../../common/constants';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
@@ -20,10 +23,14 @@ import { setActiveTabTimeline } from '../../../../timelines/store/actions';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
-import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import {
+  ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID,
+  ANALYZER_PREVIEW_TEST_ID,
+} from './test_ids';
 import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const timelineId = 'timeline-1';
 
@@ -31,6 +38,11 @@ const timelineId = 'timeline-1';
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
  */
 export const AnalyzerPreviewContainer: React.FC = () => {
+  const { uiSettings } = useKibana().services;
+  const isColdAndFrozenTiersExcluded = uiSettings.get<boolean>(
+    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER
+  );
+
   const { dataAsNestedObject, isRulePreview, eventId, indexName, scopeId, isPreviewMode } =
     useDocumentDetailsContext();
 
@@ -91,6 +103,36 @@ export const AnalyzerPreviewContainer: React.FC = () => {
     return !isPreviewMode;
   }, [isNewNavigationEnabled, isPreviewMode, isEnabled, isRulePreview]);
 
+  const coldAndFrozenTiersBadge = (
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="xpack.securitySolution.flyoutV2.right.visualizations.analyzerPreview.coldAndFrozenTiers.excludedTooltip"
+          defaultMessage="{state}, go to Advanced Settings or contact your administrator."
+          values={{
+            state: isColdAndFrozenTiersExcluded
+              ? 'Cold and frozen tiers are excluded to improve performance. To include them'
+              : 'This view loads more slowly because cold and frozen tiers are included. To change this',
+          }}
+        />
+      }
+    >
+      <EuiBadge
+        color="hollow"
+        iconSide="left"
+        iconType="snowflake"
+        tabIndex={0}
+        data-test-subj={ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID}
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.flyoutV2.right.visualizations.analyzerPreview.coldAndFrozenTiers.excludedLabel"
+          defaultMessage="Cold/Frozen tiers {state}"
+          values={{ state: isColdAndFrozenTiersExcluded ? 'off' : 'on' }}
+        />
+      </EuiBadge>
+    </EuiToolTip>
+  );
+
   return (
     <ExpandablePanel
       header={{
@@ -117,6 +159,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
             ),
           },
         }),
+        headerContent: <>{coldAndFrozenTiersBadge}</>,
       }}
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
     >
