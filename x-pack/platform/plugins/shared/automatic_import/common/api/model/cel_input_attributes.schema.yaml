@@ -63,7 +63,6 @@ components:
           additionalProperties: true
         program:
           type: string
-          maxLength: 500000
         needsAuthConfigBlock:
           type: boolean
         stateSettings:
@@ -71,10 +70,9 @@ components:
           additionalProperties: true
         redactVars:
           type: array
-          maxItems: 100
           items:
             type: string
-    
+
     CelInput:
       type: object
       description: Optional CEL input details.

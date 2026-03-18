@@ -54,10 +54,10 @@ export const CelDetails = z.object({
 export type GeneratedCelDetails = z.infer<typeof GeneratedCelDetails>;
 export const GeneratedCelDetails = z.object({
   configFields: z.object({}).catchall(z.unknown()),
-  program: z.string().max(500000),
+  program: z.string(),
   needsAuthConfigBlock: z.boolean(),
   stateSettings: z.object({}).catchall(z.unknown()),
-  redactVars: z.array(z.string()).max(100),
+  redactVars: z.array(z.string()),
 });
 
 /**

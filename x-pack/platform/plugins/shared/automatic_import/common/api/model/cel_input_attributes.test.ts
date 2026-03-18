@@ -6,7 +6,7 @@
  */
 
 import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
-import { CelDetails, GeneratedCelDetails, OpenApiDetails } from './cel_input_attributes.gen';
+import { CelDetails, OpenApiDetails } from './cel_input_attributes.gen';
 
 describe('CEL input attributes schema validation', () => {
   describe('CelDetails.path', () => {
@@ -67,33 +67,4 @@ describe('CEL input attributes schema validation', () => {
     });
   });
 
-  describe('GeneratedCelDetails.redactVars', () => {
-    const baseDetails = {
-      configFields: {},
-      program: 'state.with({})',
-      needsAuthConfigBlock: false,
-      stateSettings: {},
-      redactVars: [],
-    };
-
-    test('accepts valid generated details', () => {
-      expectParseSuccess(GeneratedCelDetails.safeParse(baseDetails));
-    });
-
-    test('rejects more than 100 redactVars', () => {
-      const result = GeneratedCelDetails.safeParse({
-        ...baseDetails,
-        redactVars: new Array(101).fill('var'),
-      });
-      expectParseError(result);
-    });
-
-    test('accepts exactly 100 redactVars', () => {
-      const result = GeneratedCelDetails.safeParse({
-        ...baseDetails,
-        redactVars: new Array(100).fill('var'),
-      });
-      expectParseSuccess(result);
-    });
-  });
 });
