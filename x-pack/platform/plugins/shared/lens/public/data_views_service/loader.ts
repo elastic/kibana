@@ -27,10 +27,7 @@ import { documentField } from '../datasources/form_based/document_field';
 import { sortDataViewRefs } from '../utils';
 
 type ErrorHandler = (err: Error) => void;
-type MinimalDataViewsContract = Pick<
-  DataViewsContract,
-  'get' | 'getIdsWithTitle' | 'create' | 'clearInstanceCache'
->;
+type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
 
 /**
  * All these functions will be used by the Embeddable instance too,
