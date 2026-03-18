@@ -167,6 +167,30 @@ describe('relevanceSearch', () => {
       );
     });
 
+    it('filters out fields with searchable set to false', async () => {
+      resolveResourceMock.mockResolvedValue({
+        fields: [
+          { path: 'content', type: 'text', meta: {}, searchable: true },
+          { path: 'non_indexed', type: 'text', meta: {}, searchable: false },
+          { path: 'embedding', type: 'semantic_text', meta: {}, searchable: false },
+        ],
+      });
+
+      await relevanceSearch({
+        term: 'test',
+        target: 'my-index',
+        esClient,
+        model,
+        logger,
+      });
+
+      expect(performMatchSearchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fields: [{ path: 'content', type: 'text', meta: {}, searchable: true }],
+        })
+      );
+    });
+
     it('throws an error when no searchable text fields are found', async () => {
       resolveResourceMock.mockResolvedValue({
         fields: [

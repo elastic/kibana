@@ -11,6 +11,7 @@ import moment from 'moment';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
@@ -26,8 +27,9 @@ export const initComponent = memoize(
       (props: PersistableStateAttachmentViewProps) => {
         const { persistableStateAttachmentState, caseData } = props;
 
-        const inputProps =
-          persistableStateAttachmentState as unknown as SingleMetricViewerEmbeddableState;
+        const inputProps = transformTimeRangeOut(
+          persistableStateAttachmentState as unknown as SingleMetricViewerEmbeddableState
+        );
 
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
