@@ -33,7 +33,7 @@ import { getFromCommandHelper } from '../shared/resources_helpers';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
-import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
+import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
@@ -213,21 +213,29 @@ export async function suggest(
   }
 
   if (astContext.type === 'expression') {
+    let columnMapPromise: Promise<ColumnsMap> | undefined;
+    const getColumnMapOnce = () => {
+      if (!columnMapPromise) {
+        columnMapPromise = getColumnMap();
+      }
+
+      return columnMapPromise;
+    };
+
     const commands = [...(root.header ?? []), ...root.commands];
     const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       fullText,
       commands,
       astContext,
       getColumnsByType,
-      getColumnMap,
+      getColumnMapOnce,
       resourceRetriever,
       offset,
       hasMinimumLicenseRequired
     );
 
     return attachReplacementRanges(innerText, commandsSpecificSuggestions, {
-      // TODO: avoid rebuilding the column map here; reuse a memoized result across this suggest() call.
-      columns: await getColumnMap(),
+      columns: await getColumnMapOnce(),
     });
   }
   return [];

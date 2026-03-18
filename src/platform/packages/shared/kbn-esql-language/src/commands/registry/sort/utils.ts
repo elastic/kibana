@@ -119,7 +119,8 @@ export const getSuggestionsAfterCompleteExpression = (
 
   // does the query end with whitespace?
   if (/\s$/.test(innerText)) {
-    // if so, comma needs to be sent back a column to replace the trailing space
+    // Replace the trailing space so `field ` + `, ` becomes `field, `.
+    // This is one small local explicit-range case.
     commaSuggestion.rangeToReplace = {
       start: innerText.length - 1,
       end: innerText.length,
