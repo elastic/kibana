@@ -14,18 +14,3 @@ export const FEATURE_EXTRACTION_POLL_INTERVAL_MS = 10_000;
 export const FEATURE_EXTRACTION_TIMEOUT_MS = 5 * 60 * 1000;
 export const POD_READY_TIMEOUT_S = 300;
 export const POD_READY_POLL_INTERVAL_MS = 5_000;
-
-// OTel Demo namespace
-export const OTEL_DEMO_NAMESPACE = 'otel-demo';
-export const OTEL_DEMO_GCS_BASE_PATH_PREFIX = OTEL_DEMO_NAMESPACE;
-
-// OTel Demo scenarios
-export const SCENARIOS = [
-  { id: 'healthy-baseline', isFailure: false },
-  { id: 'payment-unreachable', isFailure: true },
-  { id: 'cart-redis-cutoff', isFailure: true },
-  { id: 'currency-unreachable', isFailure: true },
-  { id: 'checkout-memory-starvation', isFailure: true },
-  { id: 'flagd-unreachable', isFailure: true },
-  { id: 'load-generator-ramp', isFailure: true },
-] as const;

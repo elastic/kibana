@@ -9,7 +9,15 @@ import { run } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
 import moment from 'moment';
-import { GCS_BUCKET, BASELINE_WAIT_MS, FAILURE_WAIT_MS, SCENARIOS } from './lib/constants';
+import {
+  patchScenarios,
+  getDemoScenarios,
+  listAvailableDemos,
+  deployDemo,
+  teardownDemo,
+} from '@kbn/otel-demo';
+import type { DemoType, FailureScenario } from '@kbn/otel-demo';
+import { GCS_BUCKET, BASELINE_WAIT_MS, FAILURE_WAIT_MS } from './lib/constants';
 import { getConnectionConfig, type ConnectionConfig } from './lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from './lib/gcs';
 import { sleep } from './lib/sleep';
@@ -23,16 +31,10 @@ import {
   triggerSigEventsFeatureExtraction,
   waitForSigEventsFeatureExtraction,
 } from './lib/significant_events_workflow';
-import {
-  ensureMinikube,
-  deployOtelDemo,
-  patchScenario,
-  teardownOtelDemo,
-  waitForPodsReady,
-} from './lib/otel_demo';
+import { ensureMinikube } from './lib/otel_demo';
 
 run(
-  async ({ log, flags, addCleanupTask }) => {
+  async ({ log, flags }) => {
     const config = await getConnectionConfig(flags, log);
     const esClient = new Client({
       node: config.esUrl,
@@ -57,21 +59,72 @@ run(
       );
     }
 
-    const controller = new AbortController();
-    addCleanupTask(() => controller.abort());
+    // Validate --demo-app
+    const demoType = String(flags['demo-app'] || 'otel-demo');
+    const availableDemos = listAvailableDemos();
+    if (!availableDemos.includes(demoType as DemoType)) {
+      throw new Error(
+        `Invalid --demo-app "${demoType}". Valid values: ${availableDemos.join(', ')}`
+      );
+    }
+
+    // Validate --baseline-wait
+    let baselineWaitMs = BASELINE_WAIT_MS;
+    if (flags['baseline-wait'] !== undefined) {
+      const rawBaselineWait = String(flags['baseline-wait']);
+      if (rawBaselineWait.includes('.')) {
+        throw new Error(
+          `--baseline-wait must be a whole number of minutes (no decimals). Got: "${rawBaselineWait}"`
+        );
+      }
+      const parsedBaselineWait = parseInt(rawBaselineWait, 10);
+      if (isNaN(parsedBaselineWait)) {
+        throw new Error(
+          `--baseline-wait must be a whole number of minutes. Got: "${rawBaselineWait}"`
+        );
+      }
+      baselineWaitMs = parsedBaselineWait * 60_000;
+    }
+
+    // Validate --failure-wait
+    let failureWaitMs = FAILURE_WAIT_MS;
+    if (flags['failure-wait'] !== undefined) {
+      const rawFailureWait = String(flags['failure-wait']);
+      if (rawFailureWait.includes('.')) {
+        throw new Error(
+          `--failure-wait must be a whole number of minutes (no decimals). Got: "${rawFailureWait}"`
+        );
+      }
+      const parsedFailureWait = parseInt(rawFailureWait, 10);
+      if (isNaN(parsedFailureWait)) {
+        throw new Error(
+          `--failure-wait must be a whole number of minutes. Got: "${rawFailureWait}"`
+        );
+      }
+      failureWaitMs = parsedFailureWait * 60_000;
+    }
+
+    const allScenarios = getDemoScenarios(demoType as DemoType);
+    if (allScenarios.length === 0) {
+      log.warning(`No scenarios registered for demo app "${demoType}". Aborting.`);
+      return;
+    }
 
     const selectedScenarios =
       scenariosToRun.length > 0
-        ? SCENARIOS.filter((s) => scenariosToRun.includes(s.id))
-        : [...SCENARIOS];
+        ? allScenarios.filter((s) => scenariosToRun.includes(s.id))
+        : [...allScenarios];
 
     if (selectedScenarios.length === 0) {
-      throw new Error(`No matching scenarios. Available: ${SCENARIOS.map((s) => s.id).join(', ')}`);
+      throw new Error(
+        `No matching scenarios. Available: ${allScenarios.map((s) => s.id).join(', ')}`
+      );
     }
 
     const basePath = generateGcsBasePath({ runId });
     log.info(`Creating ${selectedScenarios.length} snapshot(s) → GCS ${GCS_BUCKET}/${basePath}`);
     log.info(`Run ID: ${runId}`);
+    log.info(`Demo app: ${demoType}`);
     log.info(`LLM connector: ${connectorId}`);
     log.info(`Elasticsearch: ${config.esUrl} | Kibana: ${config.kibanaUrl}`);
 
@@ -93,7 +146,17 @@ run(
     await registerGcsRepository(esClient, log, runId);
 
     for (const scenario of selectedScenarios) {
-      await processScenario(scenario, config, connectorId, runId, esClient, log);
+      await processScenario(
+        scenario,
+        config,
+        connectorId,
+        runId,
+        esClient,
+        log,
+        demoType as DemoType,
+        baselineWaitMs,
+        failureWaitMs
+      );
     }
 
     log.info('');
@@ -117,12 +180,12 @@ run(
   },
   {
     description: `
-      Automates creation of OTel Demo snapshots for Significant Events evaluations.
+      Automates creation of demo app snapshots for Significant Events evaluations.
 
       For each scenario the script:
-        1. Deploys the OTel Demo on minikube
-        2. Waits for pods and baseline traffic (~5 min)
-        3. Optionally patches a failure scenario and waits (~10 min)
+        1. Deploys the demo app on minikube
+        2. Waits for baseline traffic
+        3. Optionally patches a failure scenario and waits
         4. Enables streams and triggers LLM feature extraction
         5. Snapshots logs + extracted features to GCS
         6. Cleans up and tears down the demo
@@ -139,6 +202,7 @@ run(
         node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --scenario healthy-baseline
         node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --run-id 2026-02-19
         node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --dry-run
+        node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --demo-app online-boutique
     `,
     flags: {
       string: [
@@ -149,13 +213,19 @@ run(
         'connector-id',
         'scenario',
         'run-id',
+        'demo-app',
+        'baseline-wait',
+        'failure-wait',
       ],
       boolean: ['dry-run'],
       help: `
         --connector-id     (required) LLM connector ID for feature extraction (e.g.: bedrock-opus-46)
         --run-id           Run identifier used as GCS subfolder (default: today's date in format YYYY-MM-DD)
-        --scenario         Process only specific scenario(s) - can be repeated. Omit for all 7.
+        --scenario         Process only specific scenario(s) - can be repeated. Omit for all.
         --dry-run          Print what would happen without executing
+        --demo-app         Demo app to use (default: otel-demo). Must be a registered demo type.
+        --baseline-wait    Minutes to wait for baseline traffic (whole number, default: 3)
+        --failure-wait     Minutes to wait after applying failure scenario (whole number, default: 5)
         --es-url           Elasticsearch URL (default: from kibana.dev.yml)
         --kibana-url       Kibana URL (default: from kibana.dev.yml, with basePath)
         --es-username      ES username (default: from kibana.dev.yml)
@@ -166,72 +236,65 @@ run(
 );
 
 async function processScenario(
-  scenario: (typeof SCENARIOS)[number],
+  scenario: FailureScenario,
   config: ConnectionConfig,
   connectorId: string,
   runId: string,
   esClient: Client,
-  log: ToolingLog
+  log: ToolingLog,
+  demoType: DemoType,
+  baselineWaitMs: number,
+  failureWaitMs: number
 ): Promise<void> {
+  const isFailure = scenario.steps.length > 0;
+
   log.info('');
   log.info('='.repeat(70));
-  log.info(`SCENARIO: ${scenario.id}${scenario.isFailure ? ' (failure)' : ' (baseline)'}`);
+  log.info(`SCENARIO: ${scenario.id}${isFailure ? ' (failure)' : ' (baseline)'}`);
   log.info('='.repeat(70));
 
   // Step 0 — Ensure the `logs` data stream exists so that feature extraction can run.
   // (Streams' /internal/streams/{name}/features/_task requires a concrete data stream to exist.)
   await ensureLogsDataStream(esClient, log);
 
-  // Step 1 — Deploy OTel Demo (this will stream logs into `logs`)
-  log.info('[1/7] Deploying OTel Demo...');
-  const { child, deployedPromise } = deployOtelDemo(log);
+  // Step 1+2 — Deploy the demo app. Resolves once pods are ready (no log streaming).
+  log.info('[1/7] Deploying demo app...');
+  await deployDemo({ demoType, log, logsIndex: 'logs' });
+  log.info('[2/7] Deployment complete');
 
-  try {
-    // Step 2 — Wait for the Otel Demo to finish deploying, then verify pods
-    log.info('[2/7] Waiting for OTel Demo deployment...');
-    await deployedPromise;
-    log.info('[2/7] Verifying that the pods are ready...');
-    await waitForPodsReady(log);
+  // Step 3 — Accumulate baseline traffic
+  log.info('[3/7] Accumulating baseline traffic...');
+  await sleep(baselineWaitMs, log, 'baseline traffic');
 
-    // Step 3 — Accumulate baseline traffic
-    log.info('[3/7] Accumulating baseline traffic...');
-    await sleep(BASELINE_WAIT_MS, log, 'baseline traffic');
+  // Step 4 — Apply failure (if applicable)
+  if (isFailure) {
+    log.info(`[4/7] Applying failure scenario "${scenario.id}"...`);
+    await patchScenarios({ demoType, scenarioIds: [scenario.id], log });
 
-    // Step 4 — Apply failure (if applicable)
-    if (scenario.isFailure) {
-      log.info(`[4/7] Applying failure scenario "${scenario.id}"...`);
-      await patchScenario(log, scenario.id);
-
-      log.info('[4/7] Accumulating failure data...');
-      await sleep(FAILURE_WAIT_MS, log, 'failure data');
-    } else {
-      log.info('[4/7] Skipped (healthy baseline)');
-    }
-
-    // Step 5 — Run feature extraction (the task generates both inferred and computed features)
-    // Extracted features will be stored as part of the snapshot
-    log.info('[5/7] Running feature extraction...');
-    await enableSignificantEvents(config, log);
-    await triggerSigEventsFeatureExtraction(config, log, connectorId);
-    await waitForSigEventsFeatureExtraction(config, log);
-    await logSigEventsExtractedFeatures(config, log);
-    await persistSigEventsExtractedFeaturesForSnapshot(config, esClient, log, scenario.id);
-
-    // Step 6 — Create a snapshot of the logs and extracted features
-    log.info('[6/7] Creating GCS snapshot...');
-    await createSnapshot({ esClient, log, snapshotName: scenario.id, runId });
-  } finally {
-    // Kill the Otel Demo background process (log streamer)
-    if (!child.killed) {
-      child.kill('SIGTERM');
-    }
+    log.info('[4/7] Accumulating failure data...');
+    await sleep(failureWaitMs, log, 'failure data');
+  } else {
+    log.info('[4/7] Skipped (healthy baseline)');
   }
 
-  // Step 7 — Cleanup (this will clean up the ES data and the Otel Demo)
+  // Step 5 — Run feature extraction (the task generates both inferred and computed features)
+  // Extracted features will be stored as part of the snapshot
+  log.info('[5/7] Running feature extraction...');
+  await enableSignificantEvents(config, log);
+  await triggerSigEventsFeatureExtraction(config, log, connectorId);
+  await waitForSigEventsFeatureExtraction(config, log);
+  await logSigEventsExtractedFeatures(config, log);
+  await persistSigEventsExtractedFeaturesForSnapshot(config, esClient, log, scenario.id);
+
+  // Step 6 — Create a snapshot of the logs and extracted features
+  log.info('[6/7] Creating GCS snapshot...');
+  await createSnapshot({ esClient, log, snapshotName: scenario.id, runId });
+
+  // Step 7 — Cleanup
   log.info('[7/7] Cleaning up...');
   await disableStreams(config, log);
   await cleanupSigEventsExtractedFeaturesData(esClient, log);
-  await teardownOtelDemo(log);
+  await teardownDemo({ demoType, log });
 
   log.info(`Scenario "${scenario.id}" — done`);
 }

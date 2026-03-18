@@ -8,7 +8,16 @@
  */
 
 // Main functions
-export { ensureOtelDemo, patchScenarios } from './src/ensure_otel_demo';
+export {
+  ensureOtelDemo,
+  deployDemo,
+  streamDemoLogs,
+  teardownDemo,
+  patchScenarios,
+} from './src/ensure_otel_demo';
+
+// Deploy result type
+export type { DeployResult } from './src/ensure_otel_demo';
 
 // Type definitions
 export type {
