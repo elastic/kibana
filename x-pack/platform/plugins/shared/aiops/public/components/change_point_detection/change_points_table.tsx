@@ -174,6 +174,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       sortable: true,
       truncateText: false,
       render: (type: ChangePointAnnotation['type']) => <EuiBadge color="hollow">{type}</EuiBadge>,
+      width: '150px',
     },
     {
       id: 'pValue',
@@ -192,6 +193,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       truncateText: false,
       render: (pValue: ChangePointAnnotation['p_value']) =>
         pValue !== undefined ? pValue.toPrecision(3) : '-',
+      width: '130px',
     },
     ...(fieldConfig.splitField
       ? [
@@ -204,7 +206,6 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             }),
             truncateText: false,
             sortable: true,
-            width: '15%',
           },
           ...(hasActions
             ? [
