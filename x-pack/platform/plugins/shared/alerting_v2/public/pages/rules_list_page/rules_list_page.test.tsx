@@ -13,11 +13,20 @@ import { MemoryRouter } from 'react-router-dom';
 import { RulesListPage } from './rules_list_page';
 
 const mockNavigateToUrl = jest.fn();
+const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
+  const path = options?.path ?? '';
+  return `/app/${appId}${path}`;
+});
+const mockSetBreadcrumbs = jest.fn();
+const mockDocTitleChange = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl };
+      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+    }
+    if (token === 'chrome') {
+      return { setBreadcrumbs: mockSetBreadcrumbs, docTitle: { change: mockDocTitleChange } };
     }
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
@@ -214,9 +223,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('createRuleButton'));
-
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+    expect(screen.getByTestId('createRuleButton')).toHaveAttribute(
+      'href',
       '/app/management/insightsAndAlerting/alerting_v2/create'
     );
   });
