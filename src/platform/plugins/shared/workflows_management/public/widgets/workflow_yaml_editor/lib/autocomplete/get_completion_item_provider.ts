@@ -10,7 +10,8 @@
 import { monaco } from '@kbn/monaco';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
-import { getSuggestions } from './suggestions/get_suggestions';
+import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
+import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow_outputs_suggestions';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
@@ -29,6 +30,13 @@ const DEPRECATED_TYPE_ALIASES = new Set([
   'kibana.updateCaseDefaultSpace',
   'kibana.addCaseCommentDefaultSpace',
 ]);
+
+/**
+ * Step types that are only valid inside loop bodies (foreach / while).
+ * The monaco-yaml schema provider suggests them everywhere, so the
+ * completion provider must strip them when the cursor is outside a loop.
+ */
+const LOOP_ONLY_STEP_TYPES = new Set(['loop.break', 'loop.continue']);
 
 /**
  * Get the deduplication key for a suggestion.
@@ -105,13 +113,17 @@ export function getCompletionItemProvider(
       // Incremental deduplication accumulator
       const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
 
+      // Inside workflow.output's with: block, show only declared output field names so the user
+      // doesn't get generic YAML/JSON Schema keys; skip the YAML provider in that case.
+      const shouldUseExclusiveSuggestions = isInWorkflowOutputWithBlock(
+        autocompleteContext.focusedStepInfo
+      );
+
       let isIncomplete = false;
 
-      {
-        // Get suggestions from all stored YAML providers (excluding workflow provider)
+      if (!shouldUseExclusiveSuggestions) {
         const allYamlProviders = getAllYamlProviders();
 
-        // Call all stored providers and add their suggestions incrementally
         for (const yamlProvider of allYamlProviders) {
           if (yamlProvider.provideCompletionItems) {
             try {
@@ -134,8 +146,7 @@ export function getCompletionItemProvider(
         }
       }
 
-      // Then, get workflow-specific suggestions (variables, connectors, etc.)
-      // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
+      // Workflow-specific suggestions (variables, connectors, workflow outputs, etc.)
       const workflowSuggestions = await getSuggestions({
         ...autocompleteContext,
         model,
@@ -143,8 +154,18 @@ export function getCompletionItemProvider(
       });
       mapSuggestions(deduplicatedMap, workflowSuggestions);
 
+      let suggestions = Array.from(deduplicatedMap.values());
+
+      if (!isInsideLoopBody(autocompleteContext)) {
+        suggestions = suggestions.filter((s) => {
+          const label = typeof s.label === 'string' ? s.label : s.label.label;
+          const text = typeof s.insertText === 'string' ? s.insertText : '';
+          return !LOOP_ONLY_STEP_TYPES.has(label) && !LOOP_ONLY_STEP_TYPES.has(text);
+        });
+      }
+
       return {
-        suggestions: Array.from(deduplicatedMap.values()),
+        suggestions,
         incomplete: isIncomplete,
       };
     },
