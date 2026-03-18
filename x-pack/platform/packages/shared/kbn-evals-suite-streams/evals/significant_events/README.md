@@ -1,6 +1,6 @@
 # Significant Events Evaluations
 
-Evaluations for Streams Significant Events, which assess the quality of LLM-based feature extraction, ES|QL query generation, and feature deduplication across failure scenarios.
+Evaluations for Streams Significant Events, which assess the quality of LLM-based Knowledge Indicator (KI) extraction, rule generation, and KI deduplication across failure scenarios.
 These evaluations support both qualitative (LLM-as-a-judge + deterministic CODE evaluators) and quantitative (trace-based) metrics.
 
 For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../../../../../platform/packages/shared/kbn-evals/README.md).
@@ -9,9 +9,9 @@ For general information about writing evaluation tests, configuration, and usage
 
 | Suite | Spec | What it measures |
 | --- | --- | --- |
-| **Feature extraction** | `feature_extraction/feature_extraction.spec.ts` | Can the LLM identify entities, dependencies, and infrastructure from raw log samples? |
-| **Query generation** | `query_generation/query_generation.spec.ts` | Can the LLM produce valid, hit-producing ES\|QL queries for significant event detection? |
-| **Feature duplication** | `feature_duplication/features_duplication.spec.ts` | Are features stable and semantically unique across repeated extraction runs? |
+| **KI extraction** | `ki_extraction/ki_extraction.spec.ts` | Can the LLM identify entities, dependencies, and infrastructure from raw log samples? |
+| **Rule generation** | `rule_generation/rule_generation.spec.ts` | Can the LLM produce valid, hit-producing ES\|QL rules for significant event detection? |
+| **KI duplication** | `ki_duplication/ki_duplication.spec.ts` | Are KIs stable and semantically unique across repeated extraction runs? |
 
 ## Prerequisites
 
@@ -114,7 +114,7 @@ node scripts/evals run \
   --suite streams/significant-events \
   --project <connector-id> \
   --judge <gemini-3-pro-connector-id> \
-  feature_extraction.spec.ts
+  ki_extraction.spec.ts
 ```
 
 ### CLI options
@@ -134,7 +134,7 @@ node scripts/evals run \
 | --- | --- | --- |
 | `SIGEVENTS_SNAPSHOT_RUN` | Run ID subfolder in GCS to replay snapshots from | `2026-02-25` |
 | `SIGEVENTS_DATASET` | Dataset(s) to run (comma-separated or `all`) | `all` |
-| `SIGEVENTS_QUERYGEN_FEATURES_SOURCE` | Feature source for query generation (`canonical`, `snapshot`, `both`) | `both` |
+| `RULE_GENERATION_KI_SOURCE` | KI source for rule generation (`canonical`, `snapshot`, `both`) | `both` |
 | `GCS_CREDENTIALS` | GCS service account JSON for snapshot access | — |
 | `TRACING_ES_URL` | Elasticsearch URL for trace queries (if traces are in a separate cluster) | Falls back to test cluster |
 | `TRACING_ES_API_KEY` | API key for the trace Elasticsearch cluster | — |
@@ -145,21 +145,21 @@ node scripts/evals run \
 
 | Evaluator | Suite | Description |
 | --- | --- | --- |
-| **type_validation** | Feature extraction | All feature types are valid (`entity`, `infrastructure`, `technology`, `dependency`, `schema`) |
-| **evidence_grounding** | Feature extraction | Evidence strings are grounded in input documents; `evidence_doc_ids` reference real docs |
-| **feature_count** | Feature extraction | Feature count falls within expected bounds |
-| **confidence_bounds** | Feature extraction | No feature exceeds the maximum confidence threshold |
-| **type_assertions** | Feature extraction | Required types are present; forbidden types are absent |
-| **query_generation_code_evaluator** | Query generation | ES\|QL syntax validity and execution hit rate |
-| **features_duplication** | Feature duplication | Structural deduplication |
+| **type_validation** | KI extraction | All KI types are valid (`entity`, `infrastructure`, `technology`, `dependency`, `schema`) |
+| **evidence_grounding** | KI extraction | Evidence strings are grounded in input documents; `evidence_doc_ids` reference real docs |
+| **ki_count** | KI extraction | KI count falls within expected bounds |
+| **confidence_bounds** | KI extraction | No KI exceeds the maximum confidence threshold |
+| **type_assertions** | KI extraction | Required types are present; forbidden types are absent |
+| **rule_generation_code_evaluator** | Rule generation | ES\|QL syntax validity and execution hit rate |
+| **ki_duplication** | KI duplication | Structural deduplication |
 
 ### LLM-as-a-judge evaluators
 
 | Evaluator | Suite | Description |
 | --- | --- | --- |
-| **scenario_criteria** | Feature extraction, Query generation | Scenario-specific criteria (e.g. "must identify payment service") |
-| **llm_semantic_uniqueness** | Feature duplication | Semantic deduplication across features |
-| **llm_id_consistency** | Feature duplication | Same feature ID refers to the same concept across runs |
+| **scenario_criteria** | KI extraction, Rule generation | Scenario-specific criteria (e.g. "must identify payment service") |
+| **llm_semantic_uniqueness** | KI duplication | Semantic deduplication across KIs |
+| **llm_id_consistency** | KI duplication | Same KI ID refers to the same concept across runs |
 
 ### Trace-based evaluators
 
@@ -181,11 +181,11 @@ A capture script typically:
 1. Connects to Elasticsearch and Kibana (via `getConnectionConfig`)
 2. Registers a GCS snapshot repository (via `registerGcsRepository`)
 3. Generates or ingests log data into `logs*` (dataset-specific — e.g. deploy an app, run synthtrace, replay from an external source)
-4. Enables Streams and triggers feature extraction (via the shared `significant_events_workflow` helpers)
-5. Snapshots `logs*` and extracted features to GCS (via `createSnapshot`)
+4. Enables Streams and triggers KI extraction (via the shared `significant_events_workflow` helpers)
+5. Snapshots `logs*` and extracted KIs to GCS (via `createSnapshot`)
 6. Cleans up between scenarios
 
-The shared helpers in `scripts/significant_events_snapshots/lib/` handle GCS registration, snapshot creation, feature extraction orchestration, and ES/Kibana connection — the capture script only needs to provide the data generation logic specific to its dataset.
+The shared helpers in `scripts/significant_events_snapshots/lib/` handle GCS registration, snapshot creation, KI extraction orchestration, and ES/Kibana connection — the capture script only needs to provide the data generation logic specific to its dataset.
 
 Register the script entry point in `scripts/` (e.g. `scripts/capture_sigevents_my_app_snapshots.js`) so it can be run with:
 
@@ -208,6 +208,6 @@ SIGEVENTS_DATASET=my-app node scripts/evals run --suite streams/significant-even
 ## Adding a new eval spec
 
 1. Create a spec file under `evals/significant_events/` (e.g. `my_eval/my_eval.spec.ts`)
-2. Add evaluators in `src/evaluators/` (e.g. `my_eval_evaluators.ts`) — code evaluators for deterministic checks and LLM-as-a-judge evaluators for qualitative criteria. See the existing files for reference (e.g. [`feature_extraction_evaluators.ts`](../../src/evaluators/feature_extraction_evaluators.ts))
+2. Add evaluators in `src/evaluators/` (e.g. `my_eval_evaluators.ts`) — code evaluators for deterministic checks and LLM-as-a-judge evaluators for qualitative criteria. See the existing files for reference (e.g. [`ki_extraction_evaluators.ts`](../../src/evaluators/ki_extraction_evaluators.ts))
 3. If the dataset defines evaluation criteria per scenario, you can reuse the [`scenario_criteria_llm_evaluator`](../../src/evaluators/scenario_criteria_llm_evaluator.ts) - it automatically scores LLM output against the dataset's criteria using an LLM judge, so you don't need to write custom LLM evaluators for each spec
 4. Wire up the spec with the dataset scenarios and evaluators
