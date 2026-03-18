@@ -246,6 +246,8 @@ evaluate.describe(
                 criteria: [
                   'Return at least 2 results with log ins from multiple locations',
                   `Mention at least 1 job id from the list: ${securityAuthJobIds.join(', ')}`,
+                  'Mention at least 1 seeded user name such as svc-account-1, admin-user-1, dormant-admin-account, or john.doe',
+                  'Mention at least 1 seeded IP address such as 203.0.113.45, 198.51.100.23, or 172.16.0.45',
                 ],
                 toolCalls: [
                   {
@@ -269,6 +271,8 @@ evaluate.describe(
                   `Mentions high number of authentication attempts`,
                   `Mentions unusual login activity`,
                   `Mentions unusually high file transfer activity`,
+                  'Mention at least 1 seeded user such as svc-backup, admin-user, or svc-data-export',
+                  'Mention at least 1 seeded host such as web-server-prod-01, db-server-prod-02, or file-server-prod-01',
                 ],
                 toolCalls: [
                   {
@@ -288,8 +292,9 @@ evaluate.describe(
               output: {
                 criteria: [
                   'Return at least 2 accounts performing unusual administrative actions',
-                  'Mentions curl, nc, wget processes',
+                  'Mentions at least 1 of the following processes: curl, nc, wget, python',
                   'Mentions privileged commands',
+                  'Mention at least 1 seeded user such as root, sudo-user-1, privileged-user-1, or privileged-user-2',
                 ],
                 toolCalls: [
                   {
@@ -311,6 +316,8 @@ evaluate.describe(
                 criteria: [
                   'Return at least 1 result with data uploaded to external domains',
                   'Mentions specific IP addresses or domain names involved in the data exfiltration',
+                  'Mention at least 1 seeded user such as insider, data.thief, or ceo',
+                  'Mention at least 1 seeded destination IP such as 5.144.128.1, 5.144.128.2, or 45.12.10.1',
                 ],
                 toolCalls: [
                   {
@@ -331,8 +338,9 @@ evaluate.describe(
               output: {
                 criteria: [
                   'Return at least 2 unusual access attempts to privileged accounts',
-                  'Mentions curl, nc, wget processes',
+                  'Mentions at least 1 of the following processes: curl, nc, wget, python',
                   'Mentions privileged commands',
+                  'Mention at least 1 seeded user such as root, sudo-user-1, privileged-user-1, or privileged-user-2',
                 ],
                 toolCalls: [
                   {
@@ -353,8 +361,9 @@ evaluate.describe(
               output: {
                 criteria: [
                   'Return at least 2 results with suspicious login patterns',
-                  'Mentions unusual IP addresses',
+                  'Mentions at least 1 seeded IP address such as 203.0.113.45, 198.51.100.23, 203.0.113.78, or 203.0.113.92',
                   'Mentions unusual hours of access',
+                  'Mention at least 1 seeded user such as user-suspicious-1, dormant-admin-account, or former-employee-2020',
                 ],
                 toolCalls: [
                   {
@@ -399,8 +408,9 @@ evaluate.describe(
               output: {
                 criteria: [
                   'Return the users who downloaded unusually large data.',
-                  'Mentions high volume of data',
+                  'Mentions high volume of data (1GB or more)',
                   'Mentions suspicious exfiltrations',
+                  'Mention at least 1 seeded user such as insider, data.thief, or ceo',
                 ],
                 toolCalls: [
                   {
@@ -442,8 +452,8 @@ evaluate.describe(
               output: {
                 criteria: [
                   'Return the users that are accessing sensitive data from new locations.',
-                  'Mentions dormant accounts',
-                  'Mentions former employees',
+                  'Mentions at least 1 dormant or former employee account such as dormant-admin-account or former-employee-2020',
+                  'Mentions at least 1 seeded source location such as China (CN), Russia (RU), or Brazil (BR)',
                 ],
                 toolCalls: [
                   {
@@ -472,6 +482,52 @@ evaluate.describe(
                       `returns at least 1 active job id from the list: ${securityAuthJobIds.join(
                         ', '
                       )}`,
+                      `returns at least 1 index to query`,
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
+            {
+              input: {
+                question: 'Which service accounts have unusual access patterns?',
+              },
+              output: {
+                criteria: [
+                  'Return at least 1 service account with unusual access patterns',
+                  'Mentions unusual authentication or access behavior for service accounts',
+                  'Mention at least 1 seeded service account such as svc-account-1, svc-account-2, or service-account-xyz',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.ml.jobs',
+                    criteria: [
+                      `returns at least 1 active job id from the list: ${securityAuthJobIds.join(
+                        ', '
+                      )}`,
+                      `returns at least 1 index to query`,
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
+            {
+              input: {
+                question: 'Are there privileged accounts with unusual command patterns?',
+              },
+              output: {
+                criteria: [
+                  'Return at least 1 privileged account with unusual command execution patterns',
+                  'Mentions at least 1 of the following rare processes: nc, wget, curl, python, or rm',
+                  'Mention at least 1 seeded user such as root, sudo-user-1, privileged-user-1, or privileged-user-2',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.ml.jobs',
+                    criteria: [
+                      `returns at least 1 active job id from the list: ${padJobIds.join(', ')}`,
                       `returns at least 1 index to query`,
                     ],
                   },
