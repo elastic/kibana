@@ -396,6 +396,7 @@ export class AdHocTaskRunner implements CancellableTask {
       this.ruleId = rule.id;
       this.alertingEventLogger.addOrUpdateRuleData({
         id: rule.id,
+        uuid: typeof rule.params.ruleId === 'string' ? rule.params.ruleId : undefined,
         type: ruleType,
         name: rule.name,
         consumer: rule.consumer,

@@ -17,7 +17,6 @@ import type { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
 import type {
   AlertInstanceState,
   ConsumerExecutionMetrics,
-  ConsumerRuleExecutionContext,
   RuleExecutionStatus,
 } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
@@ -30,6 +29,7 @@ const Millis2Nanos = 1000 * 1000;
 
 export interface RuleContext {
   id: string;
+  uuid?: string;
   type: UntypedNormalizedRuleType;
   consumer?: string;
   name?: string;
@@ -65,7 +65,6 @@ interface DoneOpts {
   status?: RuleExecutionStatus;
   metrics?: RuleRunMetrics | null;
   consumerMetrics?: Partial<ConsumerExecutionMetrics> | null;
-  consumerContext?: Partial<ConsumerRuleExecutionContext> | null;
   backfill?: BackfillOpts;
 }
 
@@ -222,12 +221,14 @@ export class AlertingEventLogger {
   public addOrUpdateRuleData({
     name,
     id,
+    uuid: ruleUuid,
     consumer,
     type,
     revision,
   }: {
     name?: string;
     id?: string;
+    uuid?: string;
     consumer?: string;
     revision?: number;
     type?: UntypedNormalizedRuleType;
@@ -242,6 +243,10 @@ export class AlertingEventLogger {
         id,
         type,
       };
+    }
+
+    if (ruleUuid) {
+      this.ruleData.uuid = ruleUuid;
     }
 
     if (name) {
@@ -274,6 +279,7 @@ export class AlertingEventLogger {
     updateEventWithRuleData(this.event, {
       ruleName: name,
       ruleId: id,
+      ruleUuid,
       ruleType: type,
       consumer,
       revision,
@@ -353,7 +359,7 @@ export class AlertingEventLogger {
     );
   }
 
-  public done({ status, metrics, consumerMetrics, consumerContext, timings, backfill }: DoneOpts) {
+  public done({ status, metrics, consumerMetrics, timings, backfill }: DoneOpts) {
     if (!this.isInitialized || !this.event || !this.context) {
       throw new Error('AlertingEventLogger not initialized');
     }
@@ -395,10 +401,6 @@ export class AlertingEventLogger {
 
     if (consumerMetrics) {
       updateEvent(this.event, { consumerMetrics });
-    }
-
-    if (consumerContext) {
-      updateEvent(this.event, { consumerContext });
     }
 
     if (timings) {
@@ -624,7 +626,6 @@ interface UpdateEventOpts {
   reason?: string;
   metrics?: RuleRunMetrics;
   consumerMetrics?: Partial<ConsumerExecutionMetrics>;
-  consumerContext?: Partial<ConsumerRuleExecutionContext>;
   timings?: TaskRunnerTimings;
   backfill?: BackfillOpts;
   maintenanceWindowIds?: string[];
@@ -633,6 +634,7 @@ interface UpdateEventOpts {
 interface UpdateRuleOpts {
   ruleName?: string;
   ruleId?: string;
+  ruleUuid?: string;
   consumer?: string;
   ruleType?: UntypedNormalizedRuleType;
   revision?: number;
@@ -640,7 +642,7 @@ interface UpdateRuleOpts {
 }
 
 export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
-  const { ruleName, ruleId, consumer, ruleType, revision, savedObjects } = opts;
+  const { ruleName, ruleId, ruleUuid, consumer, ruleType, revision, savedObjects } = opts;
   if (!event) {
     throw new Error('Cannot update event because it is not initialized.');
   }
@@ -656,6 +658,13 @@ export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
     event.rule = {
       ...event.rule,
       id: ruleId,
+    };
+  }
+
+  if (ruleUuid) {
+    event.rule = {
+      ...event.rule,
+      uuid: ruleUuid,
     };
   }
 
@@ -720,7 +729,6 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     reason,
     metrics,
     consumerMetrics,
-    consumerContext,
     timings,
     alertingOutcome,
     backfill,
@@ -805,10 +813,6 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
         isUndefined
       )
     );
-  }
-
-  if (consumerContext?.ruleUuid) {
-    set(event, 'rule.uuid', consumerContext.ruleUuid);
   }
 
   if (backfill) {

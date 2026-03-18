@@ -12,7 +12,6 @@ import type {
   RuleMonitoringHistory,
   PublicRuleMonitoringService,
   ConsumerExecutionMetrics,
-  ConsumerRuleExecutionContext,
 } from '../types';
 
 export class RuleMonitoringService {
@@ -20,8 +19,6 @@ export class RuleMonitoringService {
   private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());
   // Rule executor metrics. Essential metrics get written to rule's SO.
   private metrics: Partial<ConsumerExecutionMetrics> = {};
-  // Rule info to be logged like correlation ids
-  private context: Partial<ConsumerRuleExecutionContext> = {};
 
   public setLastRunMetricsDuration(duration: number) {
     this.monitoring.run.last_run.metrics.duration = duration;
@@ -52,10 +49,6 @@ export class RuleMonitoringService {
     );
 
     return result;
-  }
-
-  public getConsumerContext(): Partial<ConsumerRuleExecutionContext> {
-    return { ...this.context };
   }
 
   public getExecutorMetrics(): Partial<ConsumerExecutionMetrics> {
@@ -95,15 +88,10 @@ export class RuleMonitoringService {
 
   public getSetters(): PublicRuleMonitoringService {
     return {
-      setContext: this.setConsumerContext.bind(this),
       setMetric: this.setMetric.bind(this),
       setMetrics: this.setMetrics.bind(this),
       clearGapRange: this.clearGapRange.bind(this),
     };
-  }
-
-  private setConsumerContext(ctx: Partial<ConsumerRuleExecutionContext>): void {
-    Object.assign(this.context, ctx);
   }
 
   private clearGapRange(): void {

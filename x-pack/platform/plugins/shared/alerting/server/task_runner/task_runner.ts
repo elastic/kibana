@@ -574,6 +574,10 @@ export class TaskRunner<
         name: runRuleParams.rule.name,
         consumer: runRuleParams.rule.consumer,
         revision: runRuleParams.rule.revision,
+        uuid:
+          typeof runRuleParams.rule.params.ruleId === 'string'
+            ? runRuleParams.rule.params.ruleId
+            : undefined,
       });
 
       // Set rule monitoring data
@@ -688,7 +692,6 @@ export class TaskRunner<
         executionStatus,
         executionMetrics: executionMetrics,
         consumerExecutionMetrics: this.ruleMonitoring.getExecutorMetrics(),
-        consumerContext: this.ruleMonitoring.getConsumerContext(),
       };
     });
 
@@ -696,7 +699,6 @@ export class TaskRunner<
       status: result.executionStatus,
       metrics: result.executionMetrics,
       consumerMetrics: result.consumerExecutionMetrics,
-      consumerContext: result.consumerContext,
       timings: this.timer.toJson(),
     });
   }

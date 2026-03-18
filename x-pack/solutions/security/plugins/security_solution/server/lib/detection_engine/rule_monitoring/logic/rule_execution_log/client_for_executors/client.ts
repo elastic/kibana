@@ -52,10 +52,6 @@ export function createRuleExecutionLogClientForExecutors(
   const baseLogMeta = baseCorrelationIds.getLogMeta();
   const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId } = context;
 
-  ruleMonitoringService.setContext({
-    ruleUuid: ruleUuid,
-  });
-
   // Buffers the execution related data
   const executionResultBuffer: ExecutionResultBuffer = {
     errors: [],

@@ -464,12 +464,7 @@ export interface ConsumerExecutionMetrics {
   indices_found_count: number;
 }
 
-export interface ConsumerRuleExecutionContext {
-  ruleUuid: string;
-}
-
 export interface PublicRuleMonitoringService {
-  setContext: (context: Partial<ConsumerRuleExecutionContext>) => void;
   setMetric: <MetricName extends keyof ConsumerExecutionMetrics>(
     metricName: MetricName,
     value: ConsumerExecutionMetrics[MetricName]
