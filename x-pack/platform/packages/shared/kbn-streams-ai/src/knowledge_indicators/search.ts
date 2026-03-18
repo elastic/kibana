@@ -10,6 +10,7 @@ import type { Feature, QueryLink } from '@kbn/streams-schema';
 import type {
   KnowledgeIndicator,
   KnowledgeIndicatorFeature,
+  KnowledgeIndicatorQuery,
   SearchKnowledgeIndicatorsInput,
   SearchKnowledgeIndicatorsOutput,
 } from './types';
@@ -17,17 +18,108 @@ import { featureToKnowledgeIndicatorFeature, queryLinkToKnowledgeIndicatorQuery 
 
 export const DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT = 50;
 
-function byKindThenScore(a: KnowledgeIndicator, b: KnowledgeIndicator): number {
-  if (a.kind !== b.kind) return a.kind === 'feature' ? -1 : 1;
-  if (a.kind === 'feature' && b.kind === 'feature') {
-    const d = (b.feature.confidence ?? 0) - (a.feature.confidence ?? 0);
-    return d !== 0 ? d : a.feature.id.localeCompare(b.feature.id);
-  }
-  if (a.kind === 'query' && b.kind === 'query') {
-    const d = (b.query.severity_score ?? -1) - (a.query.severity_score ?? -1);
-    return d !== 0 ? d : a.query.id.localeCompare(b.query.id);
-  }
-  return 0;
+interface NormalizedParams {
+  searchText: string | undefined;
+  limit: number;
+  minConfidence: number | undefined;
+  includeFeatures: boolean;
+  includeQueries: boolean;
+}
+
+const isFeatureIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorFeature =>
+  ki.kind === 'feature';
+
+const isQueryIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorQuery =>
+  ki.kind === 'query';
+
+const compareFeatures = (a: KnowledgeIndicatorFeature, b: KnowledgeIndicatorFeature): number => {
+  const byConfidence = (b.feature.confidence ?? 0) - (a.feature.confidence ?? 0);
+  return byConfidence !== 0 ? byConfidence : a.feature.id.localeCompare(b.feature.id);
+};
+
+const compareQueries = (a: KnowledgeIndicatorQuery, b: KnowledgeIndicatorQuery): number => {
+  const byScore = (b.query.severity_score ?? -1) - (a.query.severity_score ?? -1);
+  return byScore !== 0 ? byScore : a.query.id.localeCompare(b.query.id);
+};
+
+function normalizeParams(params: SearchKnowledgeIndicatorsInput): NormalizedParams {
+  const searchText = trim(params.search_text ?? '') || undefined;
+  const limit =
+    typeof params.limit === 'number' && params.limit > 0
+      ? Math.floor(params.limit)
+      : DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT;
+  const minConfidence =
+    typeof params.min_confidence === 'number' ? clamp(params.min_confidence, 0, 100) : undefined;
+  const kinds = params.kind?.length ? params.kind : undefined;
+
+  return {
+    searchText,
+    limit,
+    minConfidence,
+    includeFeatures: !kinds || kinds.includes('feature'),
+    includeQueries: !kinds || kinds.includes('query'),
+  };
+}
+
+async function resolveStreamNames(
+  params: SearchKnowledgeIndicatorsInput,
+  getStreamNames: () => Promise<string[]>
+): Promise<string[]> {
+  const accessible = await getStreamNames();
+  const requested = params.stream_names?.length
+    ? intersection(uniq(params.stream_names), accessible)
+    : accessible;
+  return compact(requested.filter((name) => typeof name === 'string' && name.length > 0));
+}
+
+async function fetchFeatureIndicators({
+  streamNames,
+  minConfidence,
+  limit,
+  getFeatures,
+  onFeatureFetchError,
+}: {
+  streamNames: string[];
+  minConfidence: number | undefined;
+  limit: number;
+  getFeatures: (
+    streamName: string,
+    options: { min_confidence?: number; limit?: number }
+  ) => Promise<Feature[]>;
+  onFeatureFetchError?: (streamName: string, error: unknown) => void;
+}): Promise<KnowledgeIndicatorFeature[]> {
+  const results = await Promise.allSettled(
+    streamNames.map((name) => getFeatures(name, { min_confidence: minConfidence, limit }))
+  );
+
+  const indicators: KnowledgeIndicatorFeature[] = [];
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      onFeatureFetchError?.(streamNames[index], result.reason);
+      return;
+    }
+    result.value.forEach((feature) => indicators.push(featureToKnowledgeIndicatorFeature(feature)));
+  });
+
+  return indicators;
+}
+
+async function fetchQueryIndicators(
+  streamNames: string[],
+  searchText: string | undefined,
+  getQueries: (streamNames: string[], search_text?: string) => Promise<QueryLink[]>
+): Promise<KnowledgeIndicatorQuery[]> {
+  const links = await getQueries(streamNames, searchText);
+  return links.map(queryLinkToKnowledgeIndicatorQuery);
+}
+
+function sortIndicators(indicators: KnowledgeIndicator[]): KnowledgeIndicator[] {
+  return [...indicators].sort((a, b) => {
+    if (a.kind !== b.kind) return a.kind === 'feature' ? -1 : 1;
+    if (isFeatureIndicator(a) && isFeatureIndicator(b)) return compareFeatures(a, b);
+    if (isQueryIndicator(a) && isQueryIndicator(b)) return compareQueries(a, b);
+    return 0;
+  });
 }
 
 export async function searchKnowledgeIndicators({
@@ -46,47 +138,29 @@ export async function searchKnowledgeIndicators({
   onFeatureFetchError?: (streamName: string, error: unknown) => void;
   params: SearchKnowledgeIndicatorsInput;
 }): Promise<SearchKnowledgeIndicatorsOutput> {
-  // Step 1: Normalize params
-  const searchText =
-    typeof params.search_text === 'string' && trim(params.search_text)
-      ? trim(params.search_text)
-      : undefined;
-  const limit =
-    typeof params.limit === 'number' && params.limit > 0
-      ? Math.floor(params.limit)
-      : DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT;
-  const minConf =
-    typeof params.min_confidence === 'number' ? clamp(params.min_confidence, 0, 100) : undefined;
-  const kinds = Array.isArray(params.kind) && params.kind.length > 0 ? params.kind : null;
-  const includeFeatures = !kinds || kinds.includes('feature');
-  const includeQueries = !kinds || kinds.includes('query');
+  // Step 1: Normalize inputs.
+  const normalized = normalizeParams(params);
 
-  // Step 2: Resolve stream names (requested ∩ accessible)
-  const accessible = await getStreamNames();
-  const streams = params.stream_names?.length
-    ? intersection(uniq(params.stream_names), accessible)
-    : accessible;
-  const streamNames = compact(streams.filter((s) => typeof s === 'string' && s.length > 0));
+  // Step 2: Resolve streams (requested ∩ accessible).
+  const streamNames = await resolveStreamNames(params, getStreamNames);
 
-  // Step 3: Fetch features (allSettled, best-effort)
-  const features: KnowledgeIndicatorFeature[] = [];
-  if (includeFeatures) {
-    const settled = await Promise.allSettled(
-      streamNames.map((n) => getFeatures(n, { min_confidence: minConf, limit }))
-    );
-    settled.forEach((r, i) => {
-      if (r.status === 'rejected') onFeatureFetchError?.(streamNames[i], r.reason);
-      else r.value.forEach((f) => features.push(featureToKnowledgeIndicatorFeature(f)));
-    });
-  }
-
-  // Step 4: Fetch queries
-  const queries = includeQueries
-    ? (await getQueries(streamNames, searchText)).map(queryLinkToKnowledgeIndicatorQuery)
+  // Step 3: Fetch features (best-effort per stream).
+  const features = normalized.includeFeatures
+    ? await fetchFeatureIndicators({
+        streamNames,
+        minConfidence: normalized.minConfidence,
+        limit: normalized.limit,
+        getFeatures,
+        onFeatureFetchError,
+      })
     : [];
 
-  // Step 5: Sort and limit
-  const sorted = [...features, ...queries].sort(byKindThenScore);
+  // Step 4: Fetch queries.
+  const queries = normalized.includeQueries
+    ? await fetchQueryIndicators(streamNames, normalized.searchText, getQueries)
+    : [];
 
-  return { knowledge_indicators: sorted.slice(0, limit) };
+  // Step 5: Merge, sort, and limit.
+  const sorted = sortIndicators([...features, ...queries]);
+  return { knowledge_indicators: sorted.slice(0, normalized.limit) };
 }
