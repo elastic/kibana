@@ -79,7 +79,24 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
 ];
 
-export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
+// K8s MCP tools (persisted via MCP connector) — PoC only
+const K8S_TOOL_IDS = [
+  'k8s.pods_list',
+  'k8s.pods_get',
+  'k8s.pods_log',
+  'k8s.pods_list_in_namespace',
+  'k8s.events_list',
+  'k8s.namespaces_list',
+  'k8s.resources_get',
+  'k8s.pods_delete',
+  'k8s.resources_scale',
+];
+
+export const OBSERVABILITY_AGENT_TOOL_IDS = [
+  ...PLATFORM_TOOL_IDS,
+  ...OBSERVABILITY_TOOL_IDS,
+  ...K8S_TOOL_IDS,
+];
 
 export async function registerTools({
   core,

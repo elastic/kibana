@@ -83,6 +83,32 @@ export const OutputSchema = z.object({
     .describe(
       'Conversation ID associated with this step execution. Present when create_conversation is enabled or conversation_id is provided.'
     ),
+  awaiting_human_input: z
+    .boolean()
+    .optional()
+    .describe(
+      'When true, the agent is awaiting human approval before proceeding. The pending_prompt field contains the prompt details.'
+    ),
+  pending_prompt: z
+    .object({
+      id: z
+        .string()
+        .describe(
+          'Unique identifier for the prompt. Use this to respond to the prompt via the converse API.'
+        ),
+      type: z.string().describe('The type of prompt (e.g., "confirmation").'),
+      title: z.string().optional().describe('Optional title for the prompt.'),
+      message: z
+        .string()
+        .optional()
+        .describe('Optional message describing what the agent wants to do.'),
+      confirm_text: z.string().optional().describe('Optional label for the confirm button.'),
+      cancel_text: z.string().optional().describe('Optional label for the cancel button.'),
+    })
+    .optional()
+    .describe(
+      'Present when awaiting_human_input is true. Contains the prompt details needed to approve or deny the agent action.'
+    ),
 });
 
 /**

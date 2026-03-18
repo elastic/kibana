@@ -12,6 +12,10 @@ import type { ToolTypeDefinition } from '../tool_types';
 import type { ToolTypeConversionContext } from '../tool_types/definitions';
 import type { ToolPersistedDefinition } from './client';
 
+// PoC: K8s write tools that require HITL approval
+const HITL_TOOL_IDS = ['k8s.pods_delete', 'k8s.resources_scale', 'k8s.pods_exec'];
+const isWriteTool = (toolId: string) => HITL_TOOL_IDS.includes(toolId);
+
 export const convertPersistedDefinition = <
   TType extends ToolType,
   TConfig extends object,
@@ -45,7 +49,7 @@ export const convertPersistedDefinition = <
     configuration: convertedConfiguration,
     readonly: false,
     confirmation: {
-      askUser: 'never',
+      askUser: isWriteTool(id) ? 'always' : 'never',
     },
     isAvailable: () => {
       // persisted tools are always available atm (space check is done via the persistence client)

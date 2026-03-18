@@ -7,6 +7,7 @@
 
 import {
   agentBuilderDefaultAgentId,
+  ConversationRoundStatus,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
@@ -95,11 +96,29 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           outputConversationId = conversationEvent.data.conversation_id;
         }
 
+        const isAwaitingPrompt = round.status === ConversationRoundStatus.awaitingPrompt;
+
         return {
           output: {
             message: outputMessage,
             structured_output: round.response.structured_output,
             ...(outputConversationId && { conversation_id: outputConversationId }),
+            ...(isAwaitingPrompt &&
+              round.pending_prompt && {
+                awaiting_human_input: true,
+                pending_prompt: {
+                  id: round.pending_prompt.id,
+                  type: round.pending_prompt.type,
+                  ...(round.pending_prompt.title && { title: round.pending_prompt.title }),
+                  ...(round.pending_prompt.message && { message: round.pending_prompt.message }),
+                  ...(round.pending_prompt.confirm_text && {
+                    confirm_text: round.pending_prompt.confirm_text,
+                  }),
+                  ...(round.pending_prompt.cancel_text && {
+                    cancel_text: round.pending_prompt.cancel_text,
+                  }),
+                },
+              }),
           },
         };
       } catch (error) {
