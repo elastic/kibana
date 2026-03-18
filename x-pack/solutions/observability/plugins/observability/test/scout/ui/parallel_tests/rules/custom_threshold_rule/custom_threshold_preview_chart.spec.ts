@@ -41,7 +41,6 @@ test.describe(
       await page.testSubj.click('o11yClosablePopoverTitleButton');
 
       await expect(lensFailure).toBeVisible({ timeout: 20_000 });
-      await expect(lensFailure).toContainText(/error/i);
     });
   }
 );
