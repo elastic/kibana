@@ -10,17 +10,11 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SO_TYPE = 'streams-significant-events-settings';
 
-const sigEventsSkillSchema = schema.object({
-  enabled: schema.boolean(),
-  content: schema.maybe(schema.string()),
-  toolIds: schema.maybe(schema.arrayOf(schema.string())),
-});
-
 export const streamsSignificantEventsSettingsSOAttributesV1 = schema.object({
   connectorIdKnowledgeIndicatorExtraction: schema.maybe(schema.string()),
   connectorIdRuleGeneration: schema.maybe(schema.string()),
   connectorIdDiscovery: schema.maybe(schema.string()),
-  sigEventsSkill: schema.maybe(sigEventsSkillSchema),
+  sigEventsSkillEnabled: schema.maybe(schema.boolean()),
 });
 
 export type SigEventsSettingsAttributes = TypeOf<

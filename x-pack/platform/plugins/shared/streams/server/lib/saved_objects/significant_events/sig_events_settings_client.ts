@@ -13,15 +13,6 @@ import {
 import type { SigEventsSettingsAttributes } from './sig_events_settings_config';
 
 /**
- * SigEvents skill state persisted in the significant events settings saved object.
- */
-export interface SigEventsSkillSettings {
-  enabled: boolean;
-  content?: string;
-  toolIds?: string[];
-}
-
-/**
  * SigEvents settings as stored or returned by the API.
  * Each property is undefined when no saved object exists or the value was never set.
  */
@@ -29,7 +20,7 @@ export interface SigEventsSettings {
   connectorIdKnowledgeIndicatorExtraction?: string;
   connectorIdRuleGeneration?: string;
   connectorIdDiscovery?: string;
-  sigEventsSkill?: SigEventsSkillSettings;
+  sigEventsSkillEnabled?: boolean;
 }
 
 export interface SigEventsSettingsClient {
@@ -69,18 +60,11 @@ export class SigEventsSettingsClientImpl implements SigEventsSettingsClient {
         connectorIdKnowledgeIndicatorExtraction: undefined,
         connectorIdRuleGeneration: undefined,
         connectorIdDiscovery: undefined,
-        sigEventsSkill: undefined,
+        sigEventsSkillEnabled: undefined,
       };
     }
 
     const toOptional = (v: string | undefined) => (v != null && v.trim() !== '' ? v : undefined);
-    const sigEventsSkill = attributes.sigEventsSkill
-      ? {
-          enabled: attributes.sigEventsSkill.enabled,
-          content: toOptional(attributes.sigEventsSkill.content),
-          toolIds: attributes.sigEventsSkill.toolIds,
-        }
-      : undefined;
 
     return {
       connectorIdKnowledgeIndicatorExtraction: toOptional(
@@ -88,7 +72,7 @@ export class SigEventsSettingsClientImpl implements SigEventsSettingsClient {
       ),
       connectorIdRuleGeneration: toOptional(attributes.connectorIdRuleGeneration),
       connectorIdDiscovery: toOptional(attributes.connectorIdDiscovery),
-      sigEventsSkill,
+      sigEventsSkillEnabled: attributes.sigEventsSkillEnabled,
     };
   }
 
@@ -98,18 +82,18 @@ export class SigEventsSettingsClientImpl implements SigEventsSettingsClient {
       Object.entries(settings).filter(([, v]) => v !== undefined)
     ) as Partial<SigEventsSettingsAttributes>;
 
-    const mergedSigEventsSkill =
-      updates.sigEventsSkill !== undefined
-        ? { ...current.sigEventsSkill, ...updates.sigEventsSkill }
-        : current.sigEventsSkill;
-
     const merged: SigEventsSettings = {
       ...current,
       ...updates,
-      sigEventsSkill: mergedSigEventsSkill,
     };
+
     const toWrite = Object.fromEntries(
-      Object.entries(merged).filter(([, v]) => v !== undefined)
+      Object.entries({
+        connectorIdKnowledgeIndicatorExtraction: merged.connectorIdKnowledgeIndicatorExtraction,
+        connectorIdRuleGeneration: merged.connectorIdRuleGeneration,
+        connectorIdDiscovery: merged.connectorIdDiscovery,
+        sigEventsSkillEnabled: merged.sigEventsSkillEnabled,
+      }).filter(([, v]) => v !== undefined)
     ) as SigEventsSettingsAttributes;
 
     await this.soClient.create<SigEventsSettingsAttributes>(

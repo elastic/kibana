@@ -55,7 +55,7 @@ import { TaskService } from './lib/tasks/task_service';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
-import { restoreSigEventsSkillPerSpaceOnStartup } from './lib/agent_builder/restore_sig_events_skill_on_startup';
+import { registerSigEventsSkillGloballyOnStartup } from './lib/agent_builder/register_sig_events_skill_globally_on_startup';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -388,13 +388,12 @@ export class StreamsPlugin
         });
       });
 
-    restoreSigEventsSkillPerSpaceOnStartup({
+    registerSigEventsSkillGloballyOnStartup({
       core,
-      plugins,
       server: this.server,
       logger: this.logger,
     }).catch((err: Error) => {
-      this.logger.error(`Failed to restore SigEvents skill on startup: ${err?.message}`, {
+      this.logger.error(`Failed to register SigEvents skill globally on startup: ${err?.message}`, {
         error: err,
       });
     });

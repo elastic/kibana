@@ -15,7 +15,6 @@ import {
   type DisableSigEventsSkillResult,
 } from '../../../../lib/agent_builder/sig_events_skill_enablement';
 import { registerSigEventsTools } from '../../../../lib/agent_builder/register_tools';
-import { SIG_EVENTS_TOOL_IDS } from '../../../../lib/agent_builder/tools/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
 const enableRoute = createServerRoute({
@@ -24,50 +23,14 @@ const enableRoute = createServerRoute({
     access: 'internal',
     summary: 'Enable SigEvents skill in Agent Builder',
     description:
-      'Registers the SigEvents skill. Appends it to the default agent skill_ids only when that list is already non-empty; otherwise the default agent keeps implicit built-in skills (enable_elastic_capabilities). Optionally restrict tools via body.tool_ids and override skill content via body.content.',
+      'Registers Sig Events tools and the SigEvents skill in the global Agent Builder registry. Does not modify the default agent. In any space, agents with enable_elastic_capabilities (or skill_ids that include sig-events) can use this skill and its tools.',
   },
-  params: z.object({
-    body: z
-      .object({
-        tool_ids: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Tool IDs this skill should expose. If omitted, all Sig Events tools are used. Must be a subset of the allowed Sig Events tool IDs.'
-          ),
-        content: z
-          .string()
-          .optional()
-          .describe(
-            'Override the default skill content (markdown) shown to the model. If omitted, the default content is used.'
-          ),
-      })
-      .nullish(),
-  }),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  handler: async ({
-    request,
-    server,
-    getScopedClients,
-    params,
-  }): Promise<EnableSigEventsSkillResult> => {
-    const requestedToolIds = params?.body?.tool_ids;
-    if (requestedToolIds && requestedToolIds.length > 0) {
-      const allowedToolIds = new Set<string>(Object.values(SIG_EVENTS_TOOL_IDS));
-      const invalidToolIds = requestedToolIds.filter((id) => !allowedToolIds.has(id));
-      if (invalidToolIds.length > 0) {
-        throw new Error(
-          `Invalid tool_ids: ${invalidToolIds.join(
-            ', '
-          )}. Must be a subset of allowed Sig Events tool IDs.`
-        );
-      }
-    }
-
+  handler: async ({ request, server, getScopedClients }): Promise<EnableSigEventsSkillResult> => {
     const { licensing, uiSettingsClient, sigEventsSettingsClient } = await getScopedClients({
       request,
     });
@@ -78,7 +41,6 @@ const enableRoute = createServerRoute({
     }
     if (server.agentBuilderSetup) {
       try {
-        // Note: There is no way to unregister tools so this is a one way operation.
         registerSigEventsTools(server.agentBuilderSetup, getScopedClients, server);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -87,16 +49,8 @@ const enableRoute = createServerRoute({
         }
       }
     }
-    const result = await enableSigEventsSkill(server.agentBuilderStart, request, {
-      toolIds: requestedToolIds,
-      content: params?.body?.content,
-    });
-    const sigEventsSkill: { enabled: true; content?: string; toolIds?: string[] } = {
-      enabled: true,
-      ...(params?.body?.content !== undefined && { content: params.body.content }),
-      ...(params?.body?.tool_ids !== undefined && { toolIds: params.body.tool_ids }),
-    };
-    await sigEventsSettingsClient.updateSettings({ sigEventsSkill });
+    const result = await enableSigEventsSkill(server.agentBuilderStart);
+    await sigEventsSettingsClient.updateSettings({ sigEventsSkillEnabled: true });
     return result;
   },
 });
@@ -106,7 +60,8 @@ const disableRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Disable SigEvents skill in Agent Builder',
-    description: 'Removes the SigEvents skill from the default agent and unregisters the skill.',
+    description:
+      'Turns off Sig Events skill for this space in settings. Unregisters the global skill only if no other space still has it enabled.',
   },
   security: {
     authz: {
@@ -127,12 +82,8 @@ const disableRoute = createServerRoute({
     if (!server.agentBuilderStart) {
       throw new Error('Agent Builder is not available. Ensure the agentBuilder plugin is enabled.');
     }
-    // We cannot unregister tools so we only clean up the skill and restore the default agent.
-    const result = await disableSigEventsSkill(server.agentBuilderStart, request, logger);
-    await sigEventsSettingsClient.updateSettings({
-      sigEventsSkill: { enabled: false },
-    });
-    return result;
+    await sigEventsSettingsClient.updateSettings({ sigEventsSkillEnabled: false });
+    return disableSigEventsSkill(server.agentBuilderStart, server.core, logger);
   },
 });
 

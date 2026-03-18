@@ -9,11 +9,7 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { SigEventsSettingsClient } from './sig_events_settings_client';
 import { SigEventsSettingsClientImpl } from './sig_events_settings_client';
 
-export type {
-  SigEventsSettings,
-  SigEventsSkillSettings,
-  SigEventsSettingsClient,
-} from './sig_events_settings_client';
+export type { SigEventsSettings, SigEventsSettingsClient } from './sig_events_settings_client';
 
 export class SigEventsSettingsService {
   constructor(private readonly logger: Logger) {}
