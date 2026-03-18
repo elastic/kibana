@@ -34,6 +34,17 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
             }),
           }),
         },
+        response: {
+          200: {
+            description: 'Indicates the dashboard was deleted successfully',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the dashboard with the given ID was not found.',
+          },
+        },
       },
     },
     async (ctx, req, res) => {
@@ -50,7 +61,7 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }
-        return res.badRequest();
+        return res.badRequest(e.message);
       }
 
       return res.noContent();

@@ -31,6 +31,10 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => searchResponseBodySchema,
+            description: 'Indicates the search was successful and the dashboards were retrieved',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
           },
         },
       },
@@ -44,7 +48,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
           return res.forbidden();
         }
 
-        return res.badRequest();
+        return res.badRequest(e.message);
       }
 
       return res.ok({ body: result });

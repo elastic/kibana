@@ -54,6 +54,13 @@ export function registerUpdateRoute(
         response: {
           200: {
             body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
+            description: 'Indicates the dashboard was updated successfully',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the dashboard was not found.',
           },
         },
       }),

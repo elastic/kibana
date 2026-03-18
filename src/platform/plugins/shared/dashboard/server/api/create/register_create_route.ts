@@ -48,6 +48,16 @@ export function registerCreateRoute(
         response: {
           201: {
             body: () => getCreateResponseBodySchema(isDashboardAppRequest),
+            description: 'Indicates the dashboard was created successfully',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          409: {
+            description: 'Indicates that a dashboard with the specified ID already exists.',
           },
         },
       }),
@@ -75,7 +85,7 @@ export function registerCreateRoute(
           return res.forbidden();
         }
 
-        return res.badRequest({ body: e });
+        return res.badRequest(e.message);
       }
     }
   );

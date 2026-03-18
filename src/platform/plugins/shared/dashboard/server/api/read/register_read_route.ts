@@ -50,6 +50,13 @@ export function registerReadRoute(
         response: {
           200: {
             body: () => getReadResponseBodySchema(isDashboardAppRequest),
+            description: 'Indicates the dashboard was retrieved successfully',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the dashboard with the given ID was not found.',
           },
         },
       }),
