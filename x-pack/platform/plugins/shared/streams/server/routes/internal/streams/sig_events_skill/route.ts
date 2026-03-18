@@ -24,7 +24,7 @@ const enableRoute = createServerRoute({
     access: 'internal',
     summary: 'Enable SigEvents skill in Agent Builder',
     description:
-      'Registers the SigEvents skill and adds it to the default agent. Optionally restrict tools via body.tool_ids and override skill content via body.content. Exposed for toggling via API (e.g. when the SigEvents feature is enabled).',
+      'Registers the SigEvents skill. Appends it to the default agent skill_ids only when that list is already non-empty; otherwise the default agent keeps implicit built-in skills (enable_elastic_capabilities). Optionally restrict tools via body.tool_ids and override skill content via body.content.',
   },
   params: z.object({
     body: z

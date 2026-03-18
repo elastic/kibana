@@ -31,9 +31,10 @@ export interface EnableSigEventsSkillOptions {
 }
 
 /**
- * Registers the SigEvents skill and adds it to the default agent's skill selection.
- * Pass toolIds to restrict which tools the skill exposes; omit for all tools.
- * Pass content to override the default skill content.
+ * Registers the SigEvents skill. If the default agent already has an explicit
+ * `skill_ids` list, appends SigEvents to it. If `skill_ids` is empty or unset,
+ * does not change the agent — `enable_elastic_capabilities` already enables
+ * built-in skills; the registered skill is available without listing it.
  */
 export async function enableSigEventsSkill(
   agentBuilder: AgentBuilderPluginStart,
@@ -64,6 +65,14 @@ export async function enableSigEventsSkill(
         skillRegistered,
         defaultAgentUpdated: false,
         message: 'SigEvents skill was already on the default agent.',
+      };
+    }
+    if (currentSkillIds.length === 0) {
+      return {
+        skillRegistered,
+        defaultAgentUpdated: false,
+        message:
+          'SigEvents skill registered. Default agent has no explicit skill_ids list; built-in skills stay enabled.',
       };
     }
     const newSkillIds = [...currentSkillIds, SIG_EVENTS_SKILL_ID];

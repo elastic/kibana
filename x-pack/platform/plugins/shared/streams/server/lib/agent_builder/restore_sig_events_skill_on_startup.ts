@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import type { FakeRawRequest } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { CoreStart } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../types';
 import type { StreamsServer } from '../../types';
-import { enableSigEventsSkill } from './sig_events_skill_enablement';
+import {
+  STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SO_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SINGLETON_ID,
+  type SigEventsSettingsAttributes,
+} from '../saved_objects/significant_events/sig_events_settings_config';
+import { createSigEventsSkill } from './skills/sig_events_skill';
 import { registerSigEventsTools } from './register_tools';
 
+/**
+ * Restores the SigEvents skill and tools on startup using the internal Kibana user.
+ * Resolves spaces and sig-events settings via the internal Saved Objects repository
+ * so no user request (and no credentials) is needed. Registers the skill and tools only;
+ * the default agent's skill_ids are already persisted, so we do not update the agent.
+ */
 export async function restoreSigEventsSkillPerSpaceOnStartup({
   core,
   plugins,
@@ -28,78 +34,85 @@ export async function restoreSigEventsSkillPerSpaceOnStartup({
   server: StreamsServer | undefined;
   logger: Logger;
 }): Promise<void> {
-  if (
-    !server?.agentBuilderSetup ||
-    !server?.agentBuilderStart ||
-    !server?.sigEventsSettingsService ||
-    !server?.getScopedClients ||
-    !plugins.spaces
-  ) {
+  if (!server?.agentBuilderSetup || !server?.agentBuilderStart || !server?.getScopedClients) {
     return;
   }
 
-  const defaultSpaceRequest = createRequestForSpace(core, DEFAULT_SPACE_ID);
-  let spaces: Array<{ id: string }>;
-  try {
-    const spacesClient = plugins.spaces.spacesService.createSpacesClient(defaultSpaceRequest);
-    spaces = await spacesClient.getAll();
-  } catch (err) {
-    logger.warn(`Could not get spaces for SigEvents skill restore: ${(err as Error).message}`);
-    return;
-  }
-
-  let toolsRegistered = false;
   const logPrefix = 'restoreSigEventsSkillOnStartup';
 
-  for (const space of spaces) {
+  let spaceIds: string[];
+  try {
+    const spaceRepo = core.savedObjects.createInternalRepository(['space']);
+    const { saved_objects: spaceObjects } = await spaceRepo.find({
+      type: 'space',
+      perPage: 1000,
+    });
+    spaceIds = spaceObjects.map((so) => so.id);
+  } catch (err) {
+    logger.warn(`${logPrefix}: could not get spaces: ${(err as Error).message}`);
+    return;
+  }
+
+  const internalRepo = core.savedObjects.createInternalRepository();
+  let firstEnabledSettings: { content?: string; toolIds?: string[] } | null = null;
+
+  for (const spaceId of spaceIds) {
     try {
-      const request = createRequestForSpace(core, space.id);
-      const clients = await server.getScopedClients!({ request });
-      const settings = await clients.sigEventsSettingsClient.getSettings();
-      if (!settings.sigEventsSkill?.enabled) {
+      const so = await internalRepo.get<SigEventsSettingsAttributes>(
+        STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SO_TYPE,
+        STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SINGLETON_ID,
+        { namespace: spaceId }
+      );
+      const skill = so.attributes?.sigEventsSkill;
+      if (!skill?.enabled) {
         continue;
       }
-
-      if (!toolsRegistered && server.agentBuilderSetup) {
-        try {
-          registerSigEventsTools(server.agentBuilderSetup, server.getScopedClients!, server);
-        } catch (err) {
-          const message = (err as Error).message;
-          if (!message.includes('already registered')) {
-            throw err;
-          }
-        }
-        toolsRegistered = true;
+      if (!firstEnabledSettings) {
+        firstEnabledSettings = {
+          content: skill.content?.trim() || undefined,
+          toolIds: skill.toolIds,
+        };
       }
-
-      await enableSigEventsSkill(server.agentBuilderStart!, request, {
-        content: settings.sigEventsSkill.content,
-        toolIds: settings.sigEventsSkill.toolIds,
-      });
-      logger.debug(`${logPrefix}: restored SigEvents skill for space ${space.id}`);
+      logger.debug(`${logPrefix}: SigEvents skill was enabled in space ${spaceId}`);
     } catch (err) {
-      logger.warn(
-        `${logPrefix}: failed to restore SigEvents skill for space ${space.id}: ${
-          (err as Error).message
-        }`,
-        { error: err as Error }
-      );
+      const statusCode =
+        (err as { output?: { statusCode?: number }; statusCode?: number })?.output?.statusCode ??
+        (err as { statusCode?: number })?.statusCode;
+      if (statusCode !== 404) {
+        logger.warn(
+          `${logPrefix}: failed to read settings for space ${spaceId}: ${(err as Error).message}`
+        );
+      }
     }
   }
-}
 
-/**
- * Creates a fake Kibana request that resolves to the given space (basePath and
- * URL pathname). Used for startup-only restore of the SigEvents skill per space.
- * Space is derived from the request by getScopedClients / SO client / Spaces.
- */
-function createRequestForSpace(core: CoreStart, spaceId: string): KibanaRequest {
-  const path = addSpaceIdToPath('/', spaceId);
-  const rawRequest: FakeRawRequest = {
-    headers: {},
-    path: '/',
-  };
-  const request = kibanaRequestFactory(rawRequest);
-  core.http.basePath.set(request, path);
-  return request;
+  if (!firstEnabledSettings) {
+    return;
+  }
+
+  if (server.agentBuilderSetup) {
+    try {
+      registerSigEventsTools(server.agentBuilderSetup, server.getScopedClients, server);
+    } catch (err) {
+      const message = (err as Error).message;
+      if (!message.includes('already registered')) {
+        throw err;
+      }
+    }
+  }
+
+  try {
+    const skill = createSigEventsSkill(firstEnabledSettings.toolIds, firstEnabledSettings.content);
+    await server.agentBuilderStart!.skills.register(skill);
+    logger.debug(
+      `${logPrefix}: registered SigEvents skill (default agent already has skill_ids persisted).`
+    );
+  } catch (err) {
+    const message = (err as Error).message;
+    if (!message.includes('already registered')) {
+      logger.warn(`${logPrefix}: failed to register SigEvents skill: ${message}`, {
+        error: err instanceof Error ? err : new Error(String(err)),
+      });
+    }
+  }
 }
