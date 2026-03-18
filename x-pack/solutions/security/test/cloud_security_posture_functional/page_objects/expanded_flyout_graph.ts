@@ -128,9 +128,12 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     nodeId: string,
     popoverId: string = GRAPH_NODE_EXPAND_POPOVER_TEST_ID
   ): Promise<void> {
-    const node = await this.selectNode(nodeId);
-    const expandButton = await node.findByTestSubject(NODE_EXPAND_BUTTON_TEST_ID);
-    await expandButton.click();
+    const retry = this.ctx.getService('retry');
+    await retry.try(async () => {
+      const node = await this.selectNode(nodeId);
+      const expandButton = await node.findByTestSubject(NODE_EXPAND_BUTTON_TEST_ID);
+      await expandButton.click();
+    });
     await this.testSubjects.existOrFail(popoverId);
   }
 
