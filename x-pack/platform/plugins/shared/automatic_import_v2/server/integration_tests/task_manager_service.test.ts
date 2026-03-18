@@ -175,7 +175,9 @@ describe('TaskManagerService Integration Tests', () => {
 
       const taskParams = {
         integrationId: integrationSavedObject.id,
+        integrationName: integrationParams.title,
         dataStreamId: 'test-ds-456', // Use the ID we plan to create
+        dataStreamName: 'Test Data Stream',
         connectorId: 'test-connector-id',
       };
 
@@ -274,7 +276,9 @@ describe('TaskManagerService Integration Tests', () => {
           // Schedule AI workflow task
           const taskParams = {
             integrationId: integration.id,
+            integrationName: integrationParams.title,
             dataStreamId,
+            dataStreamName: `Concurrent Data Stream ${i}`,
             connectorId: 'test-connector-id',
           };
 
@@ -324,7 +328,9 @@ describe('TaskManagerService Integration Tests', () => {
         const firstObject = createdObjects[0];
         const duplicateTaskParams = {
           integrationId: firstObject.integration.id,
+          integrationName: firstObject.integration.attributes.title,
           dataStreamId: firstObject.dataStream.attributes.data_stream_id,
+          dataStreamName: firstObject.dataStream.attributes.title,
           connectorId: 'test-connector-id',
         };
 
