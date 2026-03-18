@@ -22,6 +22,16 @@ jest.mock('./header_title', () => ({
   ),
 }));
 
+jest.mock('./header_timestamp', () => ({
+  HeaderTimestamp: ({ hit }: { hit: DataTableRecord }) => (
+    <div
+      data-test-subj="mockHeaderTimestamp"
+      data-hit-id={hit.id}
+      data-timestamp={String(hit.flattened['@timestamp'] ?? '')}
+    />
+  ),
+}));
+
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',
@@ -61,4 +71,11 @@ describe('<DocumentHeader />', () => {
       'https://example.com/rule/123'
     );
   });
+
+  it('should pass hit to HeaderTimestamp', () => {
+    const { getByTestId } = renderDocumentHeader({ hit: alertHit });
+
+    expect(getByTestId('mockHeaderTimestamp')).toHaveAttribute('data-hit-id', '1');
+  });
+
 });

@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { HeaderTitle } from './header_title';
+import { HeaderTimestamp } from './header_timestamp';
 
 export interface DocumentHeaderProps {
   /**
@@ -23,10 +24,14 @@ export interface DocumentHeaderProps {
 
 /**
  * Document header container for the flyout.
- * Currently renders only the title; future PRs will add severity, timestamp, and metadata blocks.
  */
 export const DocumentHeader: FC<DocumentHeaderProps> = memo(({ hit, titleHref }) => {
-  return <HeaderTitle hit={hit} titleHref={titleHref} />;
+  return (
+    <>
+      <HeaderTimestamp hit={hit} />
+      <HeaderTitle hit={hit} titleHref={titleHref} />
+    </>
+  );
 });
 
 DocumentHeader.displayName = 'DocumentHeader';
