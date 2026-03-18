@@ -217,18 +217,18 @@ export const SharedLists = React.memo(() => {
 
   const handleExport = useCallback(
     ({
-      id,
-      listId,
-      name,
-      namespaceType,
-      includeExpiredExceptions,
-    }: {
-      id: string;
-      listId: string;
-      name: string;
-      namespaceType: NamespaceType;
-      includeExpiredExceptions: boolean;
-    }) =>
+        id,
+        listId,
+        name,
+        namespaceType,
+        includeExpiredExceptions,
+      }: {
+        id: string;
+        listId: string;
+        name: string;
+        namespaceType: NamespaceType;
+        includeExpiredExceptions: boolean;
+      }) =>
       async () => {
         await exportExceptionList({
           id,
@@ -296,16 +296,16 @@ export const SharedLists = React.memo(() => {
 
   const handleDuplicate = useCallback(
     ({
-      listId,
-      name,
-      namespaceType,
-      includeExpiredExceptions,
-    }: {
-      listId: string;
-      name: string;
-      namespaceType: NamespaceType;
-      includeExpiredExceptions: boolean;
-    }) =>
+        listId,
+        name,
+        namespaceType,
+        includeExpiredExceptions,
+      }: {
+        listId: string;
+        name: string;
+        namespaceType: NamespaceType;
+        includeExpiredExceptions: boolean;
+      }) =>
       async () => {
         await duplicateExceptionList({
           includeExpiredExceptions,
