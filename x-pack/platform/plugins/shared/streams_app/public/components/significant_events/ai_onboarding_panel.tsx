@@ -281,7 +281,6 @@ export function AiOnboardingPanel({ onStartListening }: AiOnboardingPanelProps) 
       <div
         css={css`
           display: flex;
-          flex-wrap: wrap;
           align-items: center;
           justify-content: space-between;
           width: 100%;
@@ -289,7 +288,7 @@ export function AiOnboardingPanel({ onStartListening }: AiOnboardingPanelProps) 
         `}
       >
         {/* Left: beta badge + status message */}
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+        <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false} wrap={false}>
           <EuiFlexItem grow={false}>
             <EuiBadge color="accent">
               {i18n.translate('xpack.streams.significantEvents.onboarding.betaBadge', {
@@ -305,7 +304,7 @@ export function AiOnboardingPanel({ onStartListening }: AiOnboardingPanelProps) 
                       'xpack.streams.significantEvents.onboarding.completeStatusText',
                       {
                         defaultMessage:
-                          '1,293 Knowledge indicators were generated. For some of them you cancreate rules and start discovering Significant events.',
+                          '1,293 Knowledge indicators were generated. Create rules and start discovering Significant events.',
                       }
                     )
                   : i18n.translate('xpack.streams.significantEvents.onboarding.loadingStatusText', {

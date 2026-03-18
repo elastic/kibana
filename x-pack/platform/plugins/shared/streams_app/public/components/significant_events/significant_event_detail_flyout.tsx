@@ -552,7 +552,7 @@ export function SignificantEventDetailFlyout({
   return (
     <EuiFlyout
       type="push"
-      size="s"
+      size="m"
       onClose={onClose}
       aria-labelledby="sigEventDetailFlyoutTitle"
       paddingSize="none"
