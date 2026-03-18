@@ -1,0 +1,162 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { parseHealthDiagnosticQueries } from './health_diagnostic_query_parser';
+import {
+  QueryType,
+  Action,
+  type UnknownVersionQuery,
+  type HealthDiagnosticQueryV1,
+  type HealthDiagnosticQueryV2,
+} from './health_diagnostic_service.types';
+
+const V1_NO_VERSION_YAML = `---
+id: q1
+name: my-v1-query
+index: logs-endpoint.*
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+
+const V1_EXPLICIT_YAML = `---
+version: 1
+id: q1
+name: my-v1-query
+index: logs-endpoint.*
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+
+const V2_YAML = `---
+version: 2
+id: q2
+name: my-v2-query
+integrations: 'endpoint.*,fleet_server'
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+
+const UNKNOWN_VERSION_YAML = `---
+version: 99
+id: q-future
+name: future-query
+someNewField: something`;
+
+describe('parseHealthDiagnosticQueries', () => {
+  describe('v1 parsing', () => {
+    test.each([
+      ['no version field (legacy)', V1_NO_VERSION_YAML],
+      ['explicit version: 1', V1_EXPLICIT_YAML],
+    ])('parses as v1 — %s', (_label, yaml) => {
+      const queries = parseHealthDiagnosticQueries(yaml);
+      const q = queries[0] as unknown as HealthDiagnosticQueryV1;
+      expect(q.version).toBe(1);
+      if (q.version !== 1) throw new Error('type guard');
+      expect(q.index).toBe('logs-endpoint.*');
+      expect(q.id).toBe('q1');
+      expect(q.type).toBe(QueryType.DSL);
+      expect(q.filterlist).toEqual({ 'user.name': Action.KEEP });
+    });
+
+    it('returns UnknownVersionQuery when v1 descriptor is missing required index field', () => {
+      const yaml = `---
+id: bad
+name: bad
+type: DSL
+query: 'x'
+scheduleCron: 5m
+filterlist:
+  user.name: keep`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      // parseV1 throws (missing index) → caught → parseUnknown
+      // version is absent in raw → parseUnknown returns version: -1
+      expect((q as UnknownVersionQuery)._raw).toBeDefined();
+      expect((q as UnknownVersionQuery).id).toBe('bad');
+    });
+  });
+
+  describe('v2 parsing', () => {
+    it('parses a descriptor with version: 2 as v2', () => {
+      const queries = parseHealthDiagnosticQueries(V2_YAML);
+      const q = queries[0] as unknown as HealthDiagnosticQueryV2;
+      expect(q.version).toBe(2);
+      if (q.version !== 2) throw new Error('type guard');
+      expect(q.integrations).toEqual(['endpoint.*', 'fleet_server']);
+      expect(q.id).toBe('q2');
+    });
+
+    it('returns UnknownVersionQuery when v2 descriptor is missing required integrations field', () => {
+      const yaml = `---
+version: 2
+id: bad-v2
+name: bad-v2
+type: DSL
+query: 'x'
+scheduleCron: 5m
+filterlist:
+  user.name: keep`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      // parseV2 throws (missing integrations) → caught → parseUnknown
+      // version is present as 2 in raw → parseUnknown returns version: 2
+      expect((q as UnknownVersionQuery)._raw).toBeDefined();
+    });
+  });
+
+  describe('unknown version', () => {
+    it('returns UnknownVersionQuery for an unrecognised version', () => {
+      const [q] = parseHealthDiagnosticQueries(UNKNOWN_VERSION_YAML);
+      expect((q as UnknownVersionQuery)._raw).toBeDefined();
+      expect((q as UnknownVersionQuery).id).toBe('q-future');
+    });
+  });
+
+  describe('multi-document artifact', () => {
+    it('parses multiple YAML documents, each independently', () => {
+      const multiDoc = [V1_NO_VERSION_YAML, V2_YAML, UNKNOWN_VERSION_YAML].join('\n');
+      const queries = parseHealthDiagnosticQueries(multiDoc);
+      expect(queries).toHaveLength(3);
+      expect((queries[0] as HealthDiagnosticQueryV1).version).toBe(1);
+      expect((queries[1] as HealthDiagnosticQueryV2).version).toBe(2);
+      expect((queries[2] as UnknownVersionQuery)._raw).toBeDefined();
+    });
+
+    it('a malformed document becomes UnknownVersionQuery without dropping others', () => {
+      const goodDoc = `---
+id: good
+name: good
+index: logs-*
+type: DSL
+query: 'x'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      const badDoc = `---
+version: 2
+id: bad
+name: bad
+type: DSL
+query: 'x'
+scheduleCron: 5m
+filterlist:
+  user.name: keep`;
+      const queries = parseHealthDiagnosticQueries(`${goodDoc}\n${badDoc}`);
+      expect(queries).toHaveLength(2);
+      expect((queries[0] as HealthDiagnosticQueryV1).version).toBe(1);
+      expect((queries[1] as UnknownVersionQuery)._raw).toBeDefined();
+    });
+  });
+});
