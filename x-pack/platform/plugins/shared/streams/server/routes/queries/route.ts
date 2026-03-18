@@ -99,6 +99,7 @@ const upsertQueryRoute = createServerRoute({
     await queryClient.upsert(definition, {
       id: queryId,
       title: body.title,
+      description: body.description,
       esql: body.esql,
       severity_score: body.severity_score,
       evidence: body.evidence,

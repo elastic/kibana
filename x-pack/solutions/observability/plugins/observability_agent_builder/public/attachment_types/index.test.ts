@@ -15,6 +15,7 @@ import {
   OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
 } from '../../common/constants';
 import { registerAttachmentUiDefinitions } from '.';
 
@@ -28,10 +29,9 @@ describe('registerAttachmentUiDefinitions', () => {
     jest.clearAllMocks();
   });
 
-  it('registers all eight attachment types', () => {
+  it('registers all nine attachment types', () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
-
-    expect(mockAddAttachmentType).toHaveBeenCalledTimes(8);
+    expect(mockAddAttachmentType).toHaveBeenCalledTimes(9);
   });
 
   it('registers AI Insight attachment type with correct config', () => {
@@ -82,7 +82,7 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(logCall).toBeDefined();
 
     const config = logCall![1];
-    expect(config.getIcon()).toBe('logPatternAnalysis');
+    expect(config.getIcon()).toBe('pattern');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Log entry');
   });
 
@@ -184,5 +184,18 @@ describe('registerAttachmentUiDefinitions', () => {
     const config = transactionCall![1];
     expect(config.getIcon()).toBe('merge');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Transaction');
+  });
+
+  it('registers monitor attachment type with correct config', () => {
+    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+
+    const monitorCall = mockAddAttachmentType.mock.calls.find(
+      (call) => call[0] === OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID
+    );
+    expect(monitorCall).toBeDefined();
+
+    const config = monitorCall![1];
+    expect(config.getIcon()).toBe('online');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Monitor');
   });
 });

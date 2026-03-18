@@ -36,5 +36,8 @@ export const API_VERSIONS = {
 
 export enum QUERY_TIMEOUT {
   DEFAULT = 60, // 60 seconds
-  MAX = 60 * 60 * 24, // 24 hours
+  MAX = 900, // 15 minutes (matches backend inRangeRt(60, 60 * 15))
 }
+
+export const MAX_TAGS_PER_ACTION = 20;
+export const MAX_TAG_LENGTH = 256;
