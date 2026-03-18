@@ -1389,7 +1389,7 @@
     "liquidjs": "10.25.0",
     "load-json-file": "6.2.0",
     "lodash": "4.17.23",
-    "lru-cache": "11.2.5",
+    "lru-cache": "11.2.6",
     "lz-string": "1.5.0",
     "magic-bytes.js": "1.12.1",
     "mapbox-gl-draw-rectangle-mode": "1.0.4",
