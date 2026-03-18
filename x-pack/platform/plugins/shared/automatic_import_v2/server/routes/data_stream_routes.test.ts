@@ -118,7 +118,7 @@ describe('Data stream routes - upload samples', () => {
       expect(mockEsSearch).toHaveBeenCalledWith(
         expect.objectContaining({
           index: 'logs-*',
-          size: 1000,
+          size: 100,
           _source: ['event.original'],
           query: {
             function_score: {
