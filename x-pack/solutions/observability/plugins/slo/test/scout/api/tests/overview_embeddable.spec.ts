@@ -8,9 +8,12 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
-import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH } from '../fixtures';
-
-const SLO_OVERVIEW_EMBEDDABLE_ID = 'SLO_EMBEDDABLE';
+import {
+  apiTest,
+  COMMON_HEADERS,
+  DASHBOARD_API_PATH,
+  SLO_OVERVIEW_EMBEDDABLE_ID,
+} from '../fixtures';
 
 apiTest.describe(
   'SLO Overview Embeddable',
