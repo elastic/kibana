@@ -89,15 +89,12 @@ export const isScoutStale = (
     return { stale: true, reason: 'KIBANA_TESTING_AI_CONNECTORS changed' };
   }
 
-  const runningConfigSet = entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET;
-  const targetConfigSet = requestedConfigSet ?? DEFAULT_SERVER_CONFIG_SET;
-
-  if (runningConfigSet !== targetConfigSet) {
+  if (requestedConfigSet && entry.serverConfigSet !== requestedConfigSet) {
     return {
       stale: true,
       reason: `serverConfigSet changed (running: ${
         entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET
-      }, requested: ${targetConfigSet})`,
+      }, requested: ${requestedConfigSet})`,
     };
   }
 
