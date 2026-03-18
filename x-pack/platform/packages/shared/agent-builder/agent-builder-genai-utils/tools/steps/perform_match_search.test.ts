@@ -112,9 +112,7 @@ describe('performMatchSearch', () => {
       const esClient = {
         search: jest
           .fn()
-          .mockRejectedValue(
-            new errors.RequestAbortedError('Response content length exceeded')
-          ),
+          .mockRejectedValue(new errors.RequestAbortedError('Response content length exceeded')),
       } as unknown as ElasticsearchClient;
       const logger = createMockLogger();
 
