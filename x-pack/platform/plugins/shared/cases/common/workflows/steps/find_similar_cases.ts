@@ -10,6 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
 import * as i18n from '../translations';
+import { MAX_CASES_PER_PAGE, MAX_DOCS_PER_PAGE } from '../../constants';
 
 export const FindSimilarCasesStepTypeId = 'cases.findSimilarCases';
 
@@ -28,11 +29,11 @@ const SimilarCaseSchema = CaseResponsePropertiesSchema.extend({
 export const InputSchema = z.object({
   case_id: z.string().min(1, 'case_id is required'),
   page: z.number().int().positive().optional().default(1),
-  perPage: z.number().int().positive().max(100).optional().default(20),
+  perPage: z.number().int().positive().max(MAX_CASES_PER_PAGE).optional().default(20),
 });
 
 export const OutputSchema = z.object({
-  cases: z.array(SimilarCaseSchema).max(100),
+  cases: z.array(SimilarCaseSchema).max(MAX_DOCS_PER_PAGE),
   page: z.number().int(),
   per_page: z.number().int(),
   total: z.number().int(),

@@ -14,6 +14,7 @@ import {
   CasesStepCaseIdSchema,
   CasesStepSingleCaseOutputSchema,
 } from './shared';
+import { MAX_OBSERVABLES_PER_CASE } from '../../constants';
 
 export const AddObservablesStepTypeId = 'cases.addObservables';
 
@@ -24,7 +25,7 @@ const ObservableInputSchema = z.object({
 });
 
 export const InputSchema = CasesStepCaseIdSchema.extend({
-  observables: z.array(ObservableInputSchema).min(1).max(1000),
+  observables: z.array(ObservableInputSchema).min(1).max(MAX_OBSERVABLES_PER_CASE),
 });
 
 export const OutputSchema = CasesStepSingleCaseOutputSchema;

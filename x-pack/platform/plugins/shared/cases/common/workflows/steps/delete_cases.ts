@@ -9,10 +9,14 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import * as i18n from '../translations';
+import { MAX_DELETE_IDS_LENGTH } from '../../constants';
 
 export const DeleteCasesStepTypeId = 'cases.deleteCases';
 
-const CaseIdsSchema = z.array(z.string().min(1, 'case_ids values are required')).min(1).max(100);
+const CaseIdsSchema = z
+  .array(z.string().min(1, 'case_ids values are required'))
+  .min(1)
+  .max(MAX_DELETE_IDS_LENGTH);
 
 export const InputSchema = z.object({
   case_ids: CaseIdsSchema,

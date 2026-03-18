@@ -22,6 +22,7 @@ import {
   StringArray,
 } from '../../bundled-types.gen';
 import * as i18n from '../translations';
+import { MAX_CASES_PER_PAGE, MAX_DOCS_PER_PAGE } from '../../constants';
 
 export const FindCasesStepTypeId = 'cases.findCases';
 
@@ -52,7 +53,7 @@ export const InputSchema = z.object({
   from: z.string().optional(),
   owner: z.union([Owner, Owners]).optional(),
   page: z.number().int().positive().optional().default(1),
-  perPage: z.number().int().positive().max(100).optional().default(20),
+  perPage: z.number().int().positive().max(MAX_CASES_PER_PAGE).optional().default(20),
   reporters: z.union([String, StringArray]).optional(),
   search: z.string().optional(),
   searchFields: z.union([FindCasesSearchFieldSchema, FindCasesSearchFieldArraySchema]).optional(),
@@ -65,7 +66,7 @@ export const InputSchema = z.object({
 });
 
 export const OutputSchema = z.object({
-  cases: z.array(CaseResponsePropertiesSchema).max(10000),
+  cases: z.array(CaseResponsePropertiesSchema).max(MAX_DOCS_PER_PAGE),
   count_closed_cases: z.number().int(),
   count_in_progress_cases: z.number().int(),
   count_open_cases: z.number().int(),

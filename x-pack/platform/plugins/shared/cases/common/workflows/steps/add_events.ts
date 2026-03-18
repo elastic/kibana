@@ -14,6 +14,7 @@ import {
   CasesStepCaseIdSchema,
   CasesStepSingleCaseOutputSchema,
 } from './shared';
+import { MAX_ALERTS_PER_CASE } from '../../constants';
 
 export const AddEventsStepTypeId = 'cases.addEvents';
 
@@ -23,7 +24,7 @@ const EventInputSchema = z.object({
 });
 
 export const InputSchema = CasesStepCaseIdSchema.extend({
-  events: z.array(EventInputSchema).min(1).max(1000),
+  events: z.array(EventInputSchema).min(1).max(MAX_ALERTS_PER_CASE),
 });
 
 export const OutputSchema = CasesStepSingleCaseOutputSchema;
