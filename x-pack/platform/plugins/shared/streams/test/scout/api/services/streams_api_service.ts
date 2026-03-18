@@ -12,7 +12,7 @@ import { getImpactLevel, type Insight } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
 
 export type { Insight };
 
