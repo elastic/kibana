@@ -4,10 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
-export default createPlaywrightEvalsConfig({
-  testDir: `${__dirname}/evals`,
-  repetitions: 1,
-  timeout: 60 * 60_000,
-});
+export const MAX_ES_RESPONSE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
