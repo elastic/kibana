@@ -40,7 +40,7 @@ import {
 import type { LayerSettingsSchema } from '../schema/shared';
 import type { LensApiFilterType } from '../schema/filter';
 import type { DatasetType, DatasetTypeESQL, DatasetTypeNoESQL } from '../schema/dataset';
-import type { LayerTypeESQL } from '../schema/charts/xy';
+import type { LayerTypeESQL, XScaleSchemaType } from '../schema/charts/xy';
 
 export type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -293,16 +293,23 @@ function buildDatasourceStatesLayer(
     i: number,
     index: { index: string; timeFieldName: string | undefined }
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
-  getValueColumns: (layer: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
+  getValueColumns: (
+    layer: unknown,
+    i: number,
+    xAxisScale?: XScaleSchemaType
+  ) => TextBasedLayerColumn[], // ValueBasedLayerColumn[]
+  fullConfig: LensApiState
 ): [LensDatasourceId, DataSourceStateLayer | undefined] {
   function buildValueLayer(
     config: unknown,
     ds: NarrowByType<DatasetType, 'table'>
   ): TextBasedPersistedState['layers'][0] {
     const table = ds.table as LensDatatableDataset;
+    const xAxisScale =
+      fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
     const newLayer = {
       table,
-      columns: getValueColumns(config, i),
+      columns: getValueColumns(config, i, xAxisScale),
       allColumns: table.columns.map(
         (column): TextBasedLayerColumn => ({
           fieldName: column.name,
@@ -321,7 +328,9 @@ function buildDatasourceStatesLayer(
     config: unknown,
     ds: NarrowByType<DatasetType, 'esql'>
   ): TextBasedPersistedState['layers'][0] {
-    const columns = getValueColumns(config, i);
+    const xAxisScale =
+      fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
+    const columns = getValueColumns(config, i, xAxisScale);
 
     return {
       index: datasetIndex.index,
@@ -358,7 +367,7 @@ export const buildDatasourceStates = (
     i: number,
     index: { index: string; timeFieldName: string | undefined }
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
-  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[]
+  getValueColumns: (config: any, i: number, xAxisScale?: XScaleSchemaType) => TextBasedLayerColumn[]
 ): {
   layers: LensAttributes['state']['datasourceStates'];
   usedDataviews: Record<string, APIDataView | APIAdHocDataView>;
@@ -389,7 +398,8 @@ export const buildDatasourceStates = (
       dataset,
       index!,
       buildDataLayers,
-      getValueColumns
+      getValueColumns,
+      config
     );
     if (layerConfig) {
       layers = {
