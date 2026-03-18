@@ -14,6 +14,7 @@ import type {
   RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
@@ -41,6 +42,14 @@ export interface DataStreamTaskParams extends DataStreamParams {
 export interface DataStreamParams {
   integrationId: string;
   dataStreamId: string;
+}
+
+export function isUnrecoverableByStatus(error: unknown): boolean {
+  const s =
+    (error as { statusCode?: number })?.statusCode ??
+    (error as { meta?: { status?: number } })?.meta?.status ??
+    (error as { output?: { statusCode?: number } })?.output?.statusCode;
+  return s !== undefined && s !== 200 && s !== 201;
 }
 
 export class TaskManagerService {
@@ -271,6 +280,25 @@ export class TaskManagerService {
       };
     } catch (error) {
       this.logger.error(`Task ${taskId} failed: ${JSON.stringify(error)}`);
+
+      try {
+        await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
+          integrationId,
+          dataStreamId,
+          status: TASK_STATUSES.failed,
+        });
+        this.logger.debug(
+          `Data stream ${dataStreamId} marked as failed for integration ${integrationId}`
+        );
+      } catch (updateError) {
+        this.logger.error(
+          `Failed to mark data stream ${dataStreamId} as failed: ${JSON.stringify(updateError)}`
+        );
+      }
+
+      if (isUnrecoverableByStatus(error))
+        throwUnrecoverableError(error instanceof Error ? error : new Error(String(error)));
+
       return { state: { task_status: TASK_STATUSES.failed }, error };
     }
   }
