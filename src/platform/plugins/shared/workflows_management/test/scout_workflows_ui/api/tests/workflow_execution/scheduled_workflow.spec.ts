@@ -53,7 +53,7 @@ steps:
 
 const getScheduledWorkflowYaml = (interval: string) => `
 name: Scout Scheduled Save/Update Test
-enabled: false
+enabled: true
 description: Scheduled workflow for save/update interval change test
 triggers:
   - type: scheduled
@@ -73,7 +73,7 @@ spaceTest.describe('Scheduled workflow save and update', { tag: tags.deploymentA
 
   spaceTest.beforeAll(async ({ apiServices }) => {
     workflowsApi = apiServices.workflowsApi;
-    const created = await workflowsApi.create(getScheduledWorkflowYaml('30s'));
+    const created = await workflowsApi.create(getScheduledWorkflowYaml('5s'));
     workflowId = created.id;
   });
 
@@ -82,10 +82,17 @@ spaceTest.describe('Scheduled workflow save and update', { tag: tags.deploymentA
   });
 
   spaceTest('updating a scheduled workflow with a changed interval succeeds', async () => {
+    await waitForConditionOrThrow({
+      action: () => workflowsApi.getExecutions(workflowId),
+      condition: ({ results: r }) => r.length >= 1,
+      interval: 1000,
+      timeout: 10000,
+      errorMessage: 'No executions appeared after enabling the workflow',
+    });
     const getBefore = await workflowsApi.rawGetWorkflow(workflowId);
     expect(getBefore.status).toBe(200);
     workflowBeforeUpdate = getBefore.data;
-    expect(workflowBeforeUpdate.yaml).toContain('every: 30s');
+    expect(workflowBeforeUpdate.yaml).toContain('every: 5s');
 
     const updateResponse = await workflowsApi.rawUpdate(workflowId, {
       yaml: getScheduledWorkflowYaml('1m'),
