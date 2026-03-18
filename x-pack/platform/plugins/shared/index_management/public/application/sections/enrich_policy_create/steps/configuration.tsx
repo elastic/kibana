@@ -349,7 +349,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
             fill
             color="primary"
             iconSide="right"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             disabled={form.isValid === false}
             data-test-subj="nextButton"
             onClick={onSubmit}
