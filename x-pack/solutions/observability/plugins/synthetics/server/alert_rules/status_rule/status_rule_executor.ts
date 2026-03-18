@@ -390,8 +390,20 @@ export class StatusRuleExecutor {
     const recoveryStrategy = this.params?.condition?.recoveryStrategy ?? DEFAULT_RECOVERY_STRATEGY;
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
 
+    const validDownConfigs: AlertStatusConfigs = {};
+
+    for (const [downConfigId, config] of Object.entries(downConfigs)) {
+      if (!config.latestPing?.monitor) {
+        this.debug(
+          `Skipping down config ${downConfigId}: latestPing is missing or corrupted (configId: ${config.configId})`
+        );
+        continue;
+      }
+
+      validDownConfigs[downConfigId] = config;
+    }
     if (groupBy === 'locationId' && locationsThreshold === 1) {
-      for (const [idWithLocation, statusConfig] of Object.entries(downConfigs)) {
+      for (const [idWithLocation, statusConfig] of Object.entries(validDownConfigs)) {
         // Skip scheduling if recoveryStrategy is 'firstUp' and latest ping is up
         if (recoveryStrategy === 'firstUp' && (statusConfig.latestPing.summary?.up ?? 0) > 0) {
           continue;
@@ -422,7 +434,7 @@ export class StatusRuleExecutor {
         }
       }
     } else {
-      const downConfigsById = getConfigsByIds(downConfigs);
+      const downConfigsById = getConfigsByIds(validDownConfigs);
 
       for (const [configId, locationConfigs] of downConfigsById) {
         // If recoveryStrategy is 'firstUp', we only consider configs that are not up
