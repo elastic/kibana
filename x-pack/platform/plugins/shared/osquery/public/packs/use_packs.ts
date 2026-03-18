@@ -9,6 +9,7 @@ import { useQuery } from '@kbn/react-query';
 
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
 
@@ -17,26 +18,61 @@ export interface UsePacksResponse {
   data: PackSavedObject[];
 }
 
+const sanitizeSearch = (value: string | undefined): string | undefined => {
+  if (!value) return undefined;
+  const sanitized = value.replace(/[*?\\{}()|"<>]/g, '').trim();
+
+  return sanitized || undefined;
+};
+
 export const usePacks = ({
   isLive = false,
   pageIndex = 0,
   pageSize = 100,
   sortField = 'updated_at',
   sortOrder = 'desc',
+  search,
+  createdBy,
+  enabled,
+}: {
+  isLive?: boolean;
+  pageIndex?: number;
+  pageSize?: number;
+  sortField?: string;
+  sortOrder?: string;
+  search?: string;
+  createdBy?: string;
+  enabled?: string;
 }) => {
   const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
+  const sanitizedSearch = sanitizeSearch(search);
 
-  return useQuery<UsePacksResponse>(
-    [PACKS_ID, { pageIndex, pageSize, sortField, sortOrder }],
+  return useQuery<UsePacksResponse, { body: { error: string; message: string } }>(
+    [PACKS_ID, { pageIndex, pageSize, sortField, sortOrder, search, createdBy, enabled }],
     () =>
       http.get('/api/osquery/packs', {
         version: API_VERSIONS.public.v1,
-        query: { pageIndex, pageSize, sortField, sortOrder },
+        query: {
+          page: pageIndex + 1,
+          pageSize,
+          sort: sortField,
+          sortOrder,
+          ...(sanitizedSearch && { search: sanitizedSearch }),
+          ...(createdBy && { createdBy }),
+          ...(enabled && { enabled }),
+        },
       }),
     {
       keepPreviousData: true,
-      // Refetch the data every 10 seconds
       refetchInterval: isLive ? 10000 : false,
+      onError: (error) => {
+        setErrorToast(error, {
+          title: error.body.error,
+          toastMessage: error.body.message,
+        });
+      },
+      refetchOnWindowFocus: !!isLive,
     }
   );
 };

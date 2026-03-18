@@ -256,6 +256,59 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
+    describe('find route sorting and description search', () => {
+      const sortPrefix = `SortTest-${Date.now()}`;
+      const sortPackIds: string[] = [];
+
+      before(async () => {
+        for (const [suffix, enabled] of [
+          ['charlie', true],
+          ['alpha', false],
+          ['bravo', true],
+        ] as const) {
+          const resp = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+            .send({
+              name: `${sortPrefix}-${suffix}`,
+              description: `Sort test pack for ${suffix}`,
+              enabled,
+              queries: { q1: { query: 'select 1;', interval: 3600 } },
+            })
+            .expect(200);
+          sortPackIds.push(resp.body.data.saved_object_id);
+        }
+      });
+
+      after(async () => {
+        for (const id of sortPackIds) {
+          await withOsqueryHeaders(supertest.delete(`/api/osquery/packs/${id}`)).expect(200);
+        }
+      });
+
+      it('sorts by created_by (keyword) without error', async () => {
+        const response = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs?search=${sortPrefix}&sort=created_by&sortOrder=asc`)
+        ).expect(200);
+        expect(response.body.total).to.be(3);
+      });
+
+      it('sorts by updated_at (date) without error', async () => {
+        const response = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs?search=${sortPrefix}&sort=updated_at&sortOrder=desc`)
+        ).expect(200);
+        expect(response.body.total).to.be(3);
+      });
+
+      it('searches by description field', async () => {
+        const response = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs?search=Sort test pack for alpha`)
+        ).expect(200);
+        expect(response.body.total).to.be.greaterThan(0);
+        expect(
+          response.body.data.some((p: { name: string }) => p.name === `${sortPrefix}-alpha`)
+        ).to.be(true);
+      });
+    });
+
     it('update route should return 200 and multi line query, but single line query in packs config', async () => {
       expect(packId).to.be.ok();
       const updatePackResponse = await withOsqueryHeaders(
