@@ -25,7 +25,6 @@ const resolveRequestedDatasetIds = (selectedDatasetIds: string | undefined): str
   const allIds = Object.keys(DATASETS);
   const normalizedSelectedDatasetIds = selectedDatasetIds?.trim();
 
-  // Run evals for all datasets by default
   if (!normalizedSelectedDatasetIds || normalizedSelectedDatasetIds === ALL_DATASETS_SELECTOR) {
     return allIds;
   }
@@ -91,7 +90,7 @@ export const snapshotSourceKey = ({
 
 export type {
   DatasetConfig,
-  QueryGenerationScenario,
-  FeatureExtractionScenario,
+  RuleGenerationScenario,
+  KIExtractionScenario,
   SnapshotSourceOverride,
 } from './types';

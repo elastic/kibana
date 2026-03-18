@@ -35,7 +35,7 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
 
         if (currentValue > QUERY_TIMEOUT.MAX) {
           return i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMaxNumberError', {
-            defaultMessage: 'The timeout value must be {timeoutInSeconds} seconds or or lower. ',
+            defaultMessage: 'The timeout value must be {timeoutInSeconds} seconds or lower.',
             values: { timeoutInSeconds: QUERY_TIMEOUT.MAX },
           });
         }
