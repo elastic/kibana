@@ -123,7 +123,6 @@ describe('PluginsService', () => {
       update: jest.fn(),
       delete: jest.fn(),
       deleteByPluginId: jest.fn(),
-      deleteByIds: jest.fn(),
     };
 
     mockCreateClient.mockReturnValue(mockClient);
@@ -408,17 +407,17 @@ describe('PluginsService', () => {
   });
 
   describe('deletePlugin', () => {
-    it('fetches the plugin, deletes its skills by ID, then deletes the plugin record', async () => {
+    it('deletes associated skills by plugin name, then deletes the plugin', async () => {
       mockClient.get.mockResolvedValue(
-        createMockPersistedPlugin({ id: 'plugin-1', skill_ids: ['skill-a', 'skill-b'] })
+        createMockPersistedPlugin({ id: 'plugin-1', name: 'my-plugin' })
       );
-      mockSkillClient.deleteByIds.mockResolvedValue(undefined);
+      mockSkillClient.deleteByPluginId.mockResolvedValue(undefined);
       mockClient.delete.mockResolvedValue(undefined);
 
       await start.deletePlugin({ request: mockRequest, pluginId: 'plugin-1' });
 
       expect(mockClient.get).toHaveBeenCalledWith('plugin-1');
-      expect(mockSkillClient.deleteByIds).toHaveBeenCalledWith(['skill-a', 'skill-b']);
+      expect(mockSkillClient.deleteByPluginId).toHaveBeenCalledWith('my-plugin');
       expect(mockClient.delete).toHaveBeenCalledWith('plugin-1');
     });
 
@@ -429,7 +428,7 @@ describe('PluginsService', () => {
         start.deletePlugin({ request: mockRequest, pluginId: 'missing-id' })
       ).rejects.toThrow('Not found');
 
-      expect(mockSkillClient.deleteByIds).not.toHaveBeenCalled();
+      expect(mockSkillClient.deleteByPluginId).not.toHaveBeenCalled();
       expect(mockClient.delete).not.toHaveBeenCalled();
     });
   });
