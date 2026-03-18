@@ -6,6 +6,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
 import { INFERENCE_SETTINGS_QUERY_KEY, ROUTE_VERSIONS } from '../../common/constants';
@@ -37,6 +38,18 @@ export const useSaveInferenceSettings = () => {
     },
     onSuccess: (data) => {
       queryClient.setQueryData([INFERENCE_SETTINGS_QUERY_KEY], data);
+      services.notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.searchInferenceEndpoints.settings.saveSuccess', {
+          defaultMessage: 'Changes saved',
+        }),
+      });
+    },
+    onError: () => {
+      services.notifications.toasts.addDanger({
+        title: i18n.translate('xpack.searchInferenceEndpoints.settings.saveError', {
+          defaultMessage: 'Failed to save settings',
+        }),
+      });
     },
   });
 };
