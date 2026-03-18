@@ -60,7 +60,6 @@ class RuleEditorFlyoutUI extends Component {
   static propTypes = {
     setShowFunction: PropTypes.func.isRequired,
     unsetShowFunction: PropTypes.func.isRequired,
-    selectedJob: PropTypes.object,
   };
 
   constructor(props) {
@@ -104,7 +103,7 @@ class RuleEditorFlyoutUI extends Component {
 
   showFlyout = (anomaly, focusTrapProps) => {
     let ruleIndex = -1;
-    const job = this.props.selectedJob ?? this.mlJobService.getJob(anomaly.jobId);
+    const job = this.mlJobService.getJob(anomaly.jobId);
     if (job === undefined) {
       // No details found for this job, display an error and
       // don't open the Flyout as no edits can be made without the job.
@@ -516,8 +515,9 @@ class RuleEditorFlyoutUI extends Component {
           onClose={this.closeFlyout}
           aria-labelledby="flyoutTitle"
           focusTrapProps={focusTrapProps}
+          data-test-subj="mlRuleEditorFlyout"
         >
-          <EuiFlyoutHeader hasBorder={true}>
+          <EuiFlyoutHeader hasBorder={true} data-test-subj="mlRuleEditorEditRulesTitle">
             <EuiTitle size="m">
               <h1 id="flyoutTitle">
                 <FormattedMessage
