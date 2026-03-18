@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { type InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
@@ -135,14 +135,14 @@ const resolveEndpointIds = async (
 
 /**
  * Fetches full inference endpoint objects from Elasticsearch by their IDs.
- * Returns the successfully fetched endpoints and warnings for any that were not found (404).
+ * Returns the successfully fetched endpoints as InferenceConnector and warnings for any that were not found (404).
  * Non-404 errors are propagated.
  */
 const fetchEndpoints = async (
   esClient: ElasticsearchClient,
   ids: string[]
 ): Promise<ResolvedInferenceEndpoints> => {
-  const endpoints: InferenceInferenceEndpointInfo[] = [];
+  const endpoints: InferenceConnector[] = [];
   const warnings: string[] = [];
 
   const results = await Promise.all(
@@ -161,7 +161,24 @@ const fetchEndpoints = async (
 
   for (const { id, endpoint } of results) {
     if (endpoint) {
-      endpoints.push(endpoint);
+      const serviceSettings = endpoint.service_settings as Record<string, unknown> | undefined;
+      const connector: InferenceConnector = {
+        type: InferenceConnectorType.Inference,
+        name: endpoint.inference_id,
+        connectorId: endpoint.inference_id,
+        config: {
+          inferenceId: endpoint.inference_id,
+          providerConfig: {
+            model_id: serviceSettings?.model_id,
+          },
+          taskType: endpoint.task_type,
+          service: endpoint.service,
+          serviceSettings,
+        },
+        capabilities: {},
+        isInferenceEndpoint: true,
+      };
+      endpoints.push(connector);
     } else {
       warnings.push(
         i18n.translate('xpack.searchInferenceEndpoints.endpoints.endpointNotFound', {

@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { type InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceFeatureConfig } from './types';
 import type { InferenceSettingsAttributes } from '../common/types';
@@ -31,6 +32,23 @@ const createEndpointInfo = (id: string): InferenceInferenceEndpointInfo =>
     task_type: 'text_embedding',
     service: 'elasticsearch',
   } as InferenceInferenceEndpointInfo);
+
+const createExpectedConnector = (id: string): InferenceConnector => ({
+  type: InferenceConnectorType.Inference,
+  name: id,
+  connectorId: id,
+  config: {
+    inferenceId: id,
+    providerConfig: {
+      model_id: undefined,
+    },
+    taskType: 'text_embedding',
+    service: 'elasticsearch',
+    serviceSettings: undefined,
+  },
+  capabilities: {},
+  isInferenceEndpoint: true,
+});
 
 const createSoClient = (
   features: InferenceSettingsAttributes['features'] | 'not_found' = []
@@ -95,7 +113,7 @@ describe('getForFeature', () => {
         createEsClient({ ep1: info }),
         'f1'
       )
-    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('ep1')], warnings: [] });
   });
 
   it('returns hydrated endpoints from recommendedEndpoints', async () => {
@@ -103,7 +121,7 @@ describe('getForFeature', () => {
     const info = createEndpointInfo('rec1');
     await expect(
       getForFeature(registry, createSoClient(), createEsClient({ rec1: info }), 'f1')
-    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('rec1')], warnings: [] });
   });
 
   it('walks the fallback chain to parent recommendedEndpoints', async () => {
@@ -112,7 +130,7 @@ describe('getForFeature', () => {
     const info = createEndpointInfo('prec1');
     await expect(
       getForFeature(registry, createSoClient(), createEsClient({ prec1: info }), 'child')
-    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('prec1')], warnings: [] });
   });
 
   it('walks the full chain: child -> parent -> grandparent', async () => {
@@ -124,7 +142,7 @@ describe('getForFeature', () => {
     const info = createEndpointInfo('gp_ep');
     await expect(
       getForFeature(registry, createSoClient(), createEsClient({ gp_ep: info }), 'child')
-    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('gp_ep')], warnings: [] });
   });
 
   it('prefers SO override over recommendedEndpoints', async () => {
@@ -137,7 +155,7 @@ describe('getForFeature', () => {
         createEsClient({ so_ep: soInfo, rec1: createEndpointInfo('rec1') }),
         'f1'
       )
-    ).resolves.toEqual({ endpoints: [soInfo], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('so_ep')], warnings: [] });
   });
 
   it('skips SO entry with empty endpoints and falls through to recommended', async () => {
@@ -150,7 +168,7 @@ describe('getForFeature', () => {
         createEsClient({ rec1: info }),
         'f1'
       )
-    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('rec1')], warnings: [] });
   });
 
   it('handles SO 404 and falls through to recommended', async () => {
@@ -158,7 +176,7 @@ describe('getForFeature', () => {
     const info = createEndpointInfo('rec1');
     await expect(
       getForFeature(registry, createSoClient('not_found'), createEsClient({ rec1: info }), 'f1')
-    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('rec1')], warnings: [] });
   });
 
   it('returns warning for ES endpoints that no longer exist (404)', async () => {
@@ -172,7 +190,7 @@ describe('getForFeature', () => {
       createEsClient({ ep1: 'not_found', ep2: info }),
       'f1'
     );
-    expect(result.endpoints).toEqual([info]);
+    expect(result.endpoints).toEqual([createExpectedConnector('ep2')]);
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings[0]).toContain('ep1');
   });
@@ -230,7 +248,7 @@ describe('getForFeature', () => {
         createEsClient({ child_ep: info, parent_ep: createEndpointInfo('parent_ep') }),
         'child'
       )
-    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('child_ep')], warnings: [] });
   });
 
   it('uses first recommendedEndpoints found in chain when child has none', async () => {
@@ -253,7 +271,7 @@ describe('getForFeature', () => {
         createEsClient({ parent_ep: info, gp_ep: createEndpointInfo('gp_ep') }),
         'child'
       )
-    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('parent_ep')], warnings: [] });
   });
 
   it('prefers parent SO override over child recommendedEndpoints', async () => {
@@ -273,7 +291,7 @@ describe('getForFeature', () => {
         createEsClient({ so_ep: soInfo, child_ep: createEndpointInfo('child_ep') }),
         'child'
       )
-    ).resolves.toEqual({ endpoints: [soInfo], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('so_ep')], warnings: [] });
   });
 
   it('uses grandparent recommendedEndpoints when parent has none', async () => {
@@ -285,7 +303,7 @@ describe('getForFeature', () => {
     const info = createEndpointInfo('gp_ep');
     await expect(
       getForFeature(registry, createSoClient(), createEsClient({ gp_ep: info }), 'child')
-    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('gp_ep')], warnings: [] });
   });
 
   it('prefers grandparent SO override over all recommendedEndpoints', async () => {
@@ -319,6 +337,6 @@ describe('getForFeature', () => {
         }),
         'child'
       )
-    ).resolves.toEqual({ endpoints: [soInfo], warnings: [] });
+    ).resolves.toEqual({ endpoints: [createExpectedConnector('gp_so')], warnings: [] });
   });
 });

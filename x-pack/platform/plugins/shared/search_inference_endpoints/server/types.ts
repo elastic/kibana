@@ -7,12 +7,10 @@
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type {
-  InferenceInferenceEndpointInfo,
-  InferenceTaskType,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceConnector } from '@kbn/inference-common';
 
-export type { InferenceInferenceEndpointInfo, InferenceTaskType };
+export type { InferenceTaskType, InferenceConnector };
 
 export interface InferenceFeatureConfig {
   featureId: string;
@@ -40,7 +38,7 @@ export interface SearchInferenceEndpointsPluginSetup {
 }
 
 export interface ResolvedInferenceEndpoints {
-  endpoints: InferenceInferenceEndpointInfo[];
+  endpoints: InferenceConnector[];
   warnings: string[];
 }
 
