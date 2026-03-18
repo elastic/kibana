@@ -82,10 +82,7 @@ spaceTest.describe(
       const { metricsExperience, datePicker } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
 
-      await datePicker.setAbsoluteRange({
-        from: 'Jan 1, 2025 @ 00:00:00.000',
-        to: 'Jun 30, 2025 @ 23:59:59.000',
-      });
+      await datePicker.setCommonlyUsedTime('Last_30 days');
 
       await expect(metricsExperience.grid).toBeVisible();
     });
