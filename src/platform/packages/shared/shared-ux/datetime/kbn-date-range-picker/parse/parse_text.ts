@@ -135,8 +135,11 @@ const configCache = new WeakMap<ParserConfig, CompiledConfig>();
 
 const escapeRegExp = (input: string) => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+/** The word delimiters recognised by the parser (excluding the universal dash). */
+export const PARSER_DELIMITERS: readonly string[] = DEFAULT_CONFIG.delimiters;
+
 /** Builds a regex that splits text on a word delimiter surrounded by whitespace. */
-function buildDelimiterPattern(delimiter: string): RegExp | null {
+export function buildDelimiterPattern(delimiter: string): RegExp | null {
   const trimmed = delimiter.trim();
   return trimmed ? new RegExp(`^(.+?)\\s+${escapeRegExp(trimmed)}\\s+(.+)$`) : null;
 }

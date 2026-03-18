@@ -32,6 +32,7 @@ import type {
 } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
+import { prettifyValue } from './parse/prettify_value';
 import {
   durationToDisplayShortText,
   timeRangeToDisplayText,
@@ -170,7 +171,9 @@ export function DateRangePickerProvider({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const isEditingRef = useRef(isEditing);
   isEditingRef.current = isEditing;
-  const [text, setText] = useState<string>(() => value ?? defaultValue ?? '');
+  const [text, setText] = useState<string>(() =>
+    prettifyValue(value ?? defaultValue ?? '', { presets })
+  );
   const timeRange: TimeRange = useMemo(
     () =>
       textToTimeRange(text, { presets, dateFormat, roundRelativeTime: settings.roundRelativeTime }),
@@ -194,9 +197,9 @@ export function DateRangePickerProvider({
 
   useEffect(() => {
     if (typeof value === 'string' && !isEditingRef.current) {
-      setText(value);
+      setText(prettifyValue(value, { presets }));
     }
-  }, [value]);
+  }, [value, presets]);
 
   const timeWindowButtonsConfig: TimeWindowButtonsConfig | false = useMemo(
     () =>
@@ -215,7 +218,7 @@ export function DateRangePickerProvider({
       }
       if (!editing) {
         if (typeof value === 'string') {
-          setText(value);
+          setText(prettifyValue(value, { presets }));
         } else if (lastValidText.current) {
           setText(lastValidText.current);
         }
