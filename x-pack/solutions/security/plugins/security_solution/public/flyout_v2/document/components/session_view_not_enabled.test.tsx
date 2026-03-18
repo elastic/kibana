@@ -8,16 +8,16 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { TestProviders } from '../../../../common/mock';
-import { SESSION_VIEW_UPSELL_TEST_ID, SESSION_VIEW_NO_DATA_TEST_ID } from './test_ids';
-import { SessionViewNoDataMessage } from './session_view_no_data_message';
+import { TestProviders } from '../../../common/mock';
+import { SESSION_VIEW_NO_DATA_TEST_ID, SESSION_VIEW_UPSELL_TEST_ID } from './test_ids';
+import { SessionViewNotEnabled } from './session_view_not_enabled';
 
 const NO_DATA_MESSAGE =
   'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View data(external, opens in a new tab or window) for more information.';
 
 const UPSELL_TEXT = 'This feature requires an Enterprise subscription';
 
-const renderSessionViewNoDataMessage = ({
+const renderSessionViewNotEnabled = ({
   isEnterprisePlus,
   hasSessionViewConfig,
 }: {
@@ -26,16 +26,16 @@ const renderSessionViewNoDataMessage = ({
 }) =>
   render(
     <TestProviders>
-      <SessionViewNoDataMessage
+      <SessionViewNotEnabled
         isEnterprisePlus={isEnterprisePlus}
         hasSessionViewConfig={hasSessionViewConfig}
       />
     </TestProviders>
   );
 
-describe('<SessionViewNoDataMessage />', () => {
+describe('<SessionViewNotEnabled />', () => {
   it('renders license upsell message if license is not Enterprise', () => {
-    const { getByTestId } = renderSessionViewNoDataMessage({
+    const { getByTestId } = renderSessionViewNotEnabled({
       isEnterprisePlus: false,
       hasSessionViewConfig: false,
     });
@@ -44,7 +44,7 @@ describe('<SessionViewNoDataMessage />', () => {
   });
 
   it('renders no session view message if hasSessionViewConfig is false', () => {
-    const { getByTestId } = renderSessionViewNoDataMessage({
+    const { getByTestId } = renderSessionViewNotEnabled({
       isEnterprisePlus: true,
       hasSessionViewConfig: false,
     });
@@ -52,7 +52,7 @@ describe('<SessionViewNoDataMessage />', () => {
   });
 
   it('renders null if neither is false', () => {
-    const { container } = renderSessionViewNoDataMessage({
+    const { container } = renderSessionViewNotEnabled({
       isEnterprisePlus: true,
       hasSessionViewConfig: true,
     });
