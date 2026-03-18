@@ -18,6 +18,7 @@ import {
   STREAMS_GET_STREAM_TOOL_ID as GET_STREAM,
   STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
 } from './tool_ids';
+import { classifyError } from './error_utils';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 
@@ -126,8 +127,6 @@ export const createGetSchemaTool = ({
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      const statusCode = (err as { statusCode?: number }).statusCode;
-      const notFound = statusCode === 404 || message.includes('not found');
       return {
         results: [
           {
@@ -136,9 +135,7 @@ export const createGetSchemaTool = ({
               message: `Failed to get schema for stream "${name}": ${message}`,
               stream: name,
               operation: 'get_schema',
-              likely_cause: notFound
-                ? `Stream not found. Use ${LIST_STREAMS} to discover available streams.`
-                : 'Insufficient permissions or server error.',
+              likely_cause: classifyError(err, LIST_STREAMS),
             },
           },
         ],

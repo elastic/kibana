@@ -18,6 +18,7 @@ import {
   STREAMS_GET_SCHEMA_TOOL_ID as GET_SCHEMA,
   STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
 } from './tool_ids';
+import { classifyError } from './error_utils';
 import { getEffectiveLifecycle } from '../../lib/streams/lifecycle/get_effective_lifecycle';
 import { ilmPhases } from '../../lib/streams/lifecycle/ilm_phases';
 
@@ -101,11 +102,10 @@ export const createGetLifecycleStatsTool = ({
             .getLifecycle({ name: lifecycle.ilm.policy })
             .then((policies) => policies[lifecycle.ilm.policy]);
 
-          const [{ indices: indicesIlmDetails }, { indices: indicesStats = {} }] =
-            await Promise.all([
-              esClient.ilm.explainLifecycle({ index: name }),
-              esClient.indices.stats({ index: dataStream.name }),
-            ]);
+          const { indices: indicesIlmDetails } = await esClient.ilm.explainLifecycle({
+            index: dataStream.name,
+          });
+          const indicesStats = statsResponse.indices ?? {};
 
           phases = ilmPhases({ policy, indicesIlmDetails, indicesStats });
         } catch {
@@ -130,8 +130,6 @@ export const createGetLifecycleStatsTool = ({
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      const statusCode = (err as { statusCode?: number }).statusCode;
-      const notFound = statusCode === 404 || message.includes('not found');
       return {
         results: [
           {
@@ -140,9 +138,7 @@ export const createGetLifecycleStatsTool = ({
               message: `Failed to get lifecycle stats for stream "${name}": ${message}`,
               stream: name,
               operation: 'get_lifecycle_stats',
-              likely_cause: notFound
-                ? `Stream not found. Use ${LIST_STREAMS} to discover available streams.`
-                : 'Insufficient permissions or server error.',
+              likely_cause: classifyError(err, LIST_STREAMS),
             },
           },
         ],

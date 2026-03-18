@@ -51,6 +51,7 @@ const NL_TO_ES_DSL_SYSTEM_PROMPT = dedent(`
   - Each field has a type and a capability tier. Use both to select the right DSL construct:
     keyword, aggregatable -> "term" for exact match, "terms" aggregation for top values, usable in sort
     text, not aggregatable -> "match" for search. CANNOT be used in aggregations or sorting
+    match_only_text, not aggregatable -> use "match" for full terms only. This type does NOT split tokens at periods or special characters (e.g. "chrome.exe" is one token, so "chrome" alone will NOT match). Always use the most specific/complete term. For substring matching, use "wildcard" with "*term*". CANNOT be used in aggregations or sorting
     long/integer/float/double, aggregatable -> numeric "range", metric aggregations (avg, sum, etc.)
     date, aggregatable -> "range" with date math, "date_histogram" for time bucketing
     unmapped, source-only -> NOT indexed. CANNOT be used in query, aggs, or sort. These fields only appear in returned document _source
@@ -80,6 +81,9 @@ const NL_TO_ES_DSL_SYSTEM_PROMPT = dedent(`
 
   Input: "document count over time in 1-hour buckets"
   Output: { "query": { "match_all": {} }, "aggs": { "over_time": { "date_histogram": { "field": "@timestamp", "fixed_interval": "1h" } } }, "size": 0 }
+
+  Input: "documents mentioning chrome" (message is match_only_text, not aggregatable)
+  Output: { "query": { "wildcard": { "message": { "value": "*chrome*" } } }, "sort": [{ "@timestamp": { "order": "desc" } }], "size": 20 }
 
   Input: "top 5 user names" (attributes.user.name is unmapped, source-only)
   Output: { "query": { "match_all": {} }, "sort": [{ "@timestamp": { "order": "desc" } }], "size": 100, "_warning": "Field 'attributes.user.name' is unmapped and can't be aggregated. Values were extracted from recent documents instead. To enable aggregations, map this field in the stream definition." }

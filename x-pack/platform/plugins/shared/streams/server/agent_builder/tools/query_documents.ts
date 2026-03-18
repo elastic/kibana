@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getFlattenedObject } from '@kbn/std';
+import { Streams } from '@kbn/streams-schema';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../routes/types';
@@ -19,10 +20,13 @@ import {
   STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
 } from './tool_ids';
 import { translateNlToEsDsl } from './nl_to_es_dsl';
+import { classifyError } from './error_utils';
 
 const DEFAULT_SIZE = 10;
 const MAX_DOCUMENTS = 25;
 const MAX_STRING_LENGTH = 200;
+const MAX_FIELDS_FOR_PROMPT = 1000;
+const MAX_FIELDS_PROMPT_CHARS = 20_000;
 
 const queryDocumentsSchema = z.object({
   name: z.string().describe('Exact stream name, e.g. "logs.nginx"'),
@@ -63,7 +67,18 @@ export const createQueryDocumentsTool = ({
       const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
       const esClient = scopedClusterClient.asCurrentUser;
 
-      await streamsClient.getStream(name); // Throws if stream not found
+      const definition = await streamsClient.getStream(name);
+
+      const definitionFieldTypes = new Map<string, string>();
+      if (Streams.WiredStream.Definition.is(definition)) {
+        for (const [fn, fd] of Object.entries(definition.ingest.wired.fields)) {
+          if (fd.type) definitionFieldTypes.set(fn, fd.type);
+        }
+      } else if (Streams.ClassicStream.Definition.is(definition)) {
+        for (const [fn, fd] of Object.entries(definition.ingest.classic.field_overrides || {})) {
+          if (fd.type) definitionFieldTypes.set(fn, fd.type);
+        }
+      }
 
       const [fieldCapsResponse, sampleDocs, model] = await Promise.all([
         esClient.fieldCaps({ index: name, fields: ['*'], ignore_unavailable: true }),
@@ -116,7 +131,7 @@ export const createQueryDocumentsTool = ({
         const firstCap = capEntries[0];
         if (firstCap.metadata_field) continue;
 
-        const type = firstCap.type ?? Object.keys(caps)[0];
+        const type = definitionFieldTypes.get(fieldName) ?? firstCap.type ?? Object.keys(caps)[0];
         const capability: FieldCapability = firstCap.aggregatable
           ? 'aggregatable'
           : 'not aggregatable';
@@ -125,6 +140,7 @@ export const createQueryDocumentsTool = ({
       }
 
       for (const hit of sampleDocs.hits.hits) {
+        if (!hit._source) continue;
         for (const field of Object.keys(
           getFlattenedObject(hit._source as Record<string, unknown>)
         )) {
@@ -135,17 +151,25 @@ export const createQueryDocumentsTool = ({
         }
       }
 
-      const availableFields = fieldEntries
-        .sort((a, b) => a.name.localeCompare(b.name))
+      const sortedEntries = fieldEntries.sort((a, b) => a.name.localeCompare(b.name));
+      const truncatedEntries = sortedEntries.slice(0, MAX_FIELDS_FOR_PROMPT);
+      let availableFields = truncatedEntries
         .map((f) => `${f.name} (${f.type}, ${f.capability})`)
         .join(', ');
+      if (availableFields.length > MAX_FIELDS_PROMPT_CHARS) {
+        availableFields = `${availableFields.slice(0, MAX_FIELDS_PROMPT_CHARS)}…`;
+      }
+      if (truncatedEntries.length < sortedEntries.length) {
+        const omitted = sortedEntries.length - truncatedEntries.length;
+        availableFields += ` (${omitted} more fields omitted)`;
+      }
 
       const translated = await translateNlToEsDsl({
         nlQuery,
         inferenceClient: model.inferenceClient,
         availableFields,
       });
-      const requestedSize = translated.size ?? DEFAULT_SIZE;
+      const requestedSize = Math.max(0, translated.size ?? DEFAULT_SIZE);
       const cappedSize =
         translated.aggs && translated.size === undefined
           ? 0
@@ -220,6 +244,15 @@ export const createQueryDocumentsTool = ({
 
       if (response.aggregations) {
         data.aggregations = response.aggregations;
+
+        const allBucketsEmpty = Object.values(response.aggregations).every((agg) => {
+          const buckets = (agg as { buckets?: unknown[] }).buckets;
+          return Array.isArray(buckets) ? buckets.length === 0 : false;
+        });
+        if (allBucketsEmpty && totalHits > 0) {
+          data.aggregation_note =
+            'All aggregations returned empty results. The field(s) may exist in the mapping but have no values in the data.';
+        }
       }
 
       if (translated._warning) {
@@ -236,8 +269,6 @@ export const createQueryDocumentsTool = ({
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      const statusCode = (err as { statusCode?: number }).statusCode;
-      const notFound = statusCode === 404 || message.includes('not found');
       return {
         results: [
           {
@@ -246,9 +277,7 @@ export const createQueryDocumentsTool = ({
               message: `Failed to query stream "${name}": ${message}`,
               stream: name,
               operation: 'query_documents',
-              likely_cause: notFound
-                ? `Stream not found. Use ${LIST_STREAMS} to discover available streams.`
-                : 'Insufficient permissions or server error.',
+              likely_cause: classifyError(err, LIST_STREAMS),
             },
           },
         ],

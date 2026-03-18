@@ -16,6 +16,7 @@ import {
   STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
   STREAMS_GET_STREAM_TOOL_ID as GET_STREAM,
 } from './tool_ids';
+import { classifyError } from './error_utils';
 
 const listStreamsSchema = z.object({});
 
@@ -75,6 +76,7 @@ export const createListStreamsTool = ({
             data: {
               message: `Failed to list streams: ${message}`,
               operation: 'list_streams',
+              likely_cause: classifyError(err, LIST_STREAMS),
             },
           },
         ],

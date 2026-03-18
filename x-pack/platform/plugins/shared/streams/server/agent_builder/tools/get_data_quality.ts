@@ -19,6 +19,7 @@ import {
   STREAMS_GET_LIFECYCLE_STATS_TOOL_ID as GET_LIFECYCLE_STATS,
   STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
 } from './tool_ids';
+import { classifyError } from './error_utils';
 import {
   getDegradedDocCountsForStreams,
   getDocCountsForStreams,
@@ -32,14 +33,14 @@ const getDataQualitySchema = z.object({
     .optional()
     .default('now-24h')
     .describe(
-      'Start of time range for failed doc counts (ES date math). Total and degraded counts are always computed over the full index lifecycle. Default: "now-24h"'
+      'Start of time range for failed doc counts (ES date math). Total and degraded counts cover the full index lifecycle. Default: "now-24h"'
     ),
   end: z
     .string()
     .optional()
     .default('now')
     .describe(
-      'End of time range for failed doc counts (ES date math). Total and degraded counts are always computed over the full index lifecycle. Default: "now"'
+      'End of time range for failed doc counts (ES date math). Total and degraded counts cover the full index lifecycle. Default: "now"'
     ),
 });
 
@@ -118,23 +119,20 @@ export const createGetDataQualityTool = ({
             type: ToolResultType.other,
             data: {
               stream: name,
-              total_docs: totalCount,
-              degraded_docs: degradedCount,
-              degraded_pct: Math.round(degradedPct * 100) / 100,
-              failed_docs: failedCount,
-              failed_pct: Math.round(failedPct * 100) / 100,
+              lifecycle_total_docs: totalCount,
+              lifecycle_degraded_docs: degradedCount,
+              lifecycle_degraded_pct: Math.round(degradedPct * 100) / 100,
+              recent_failed_docs: failedCount,
+              recent_failed_pct: Math.round(failedPct * 100) / 100,
+              recent_failed_time_range: { start, end },
               quality_score: qualityScore,
               failure_store_status: failureStoreStatus,
-              failed_docs_time_range: { start, end },
-              note: 'total_docs and degraded_docs are computed over the full index lifecycle. failed_docs is scoped to failed_docs_time_range.',
             },
           },
         ],
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      const statusCode = (err as { statusCode?: number }).statusCode;
-      const notFound = statusCode === 404 || message.includes('not found');
       return {
         results: [
           {
@@ -143,9 +141,7 @@ export const createGetDataQualityTool = ({
               message: `Failed to get data quality for stream "${name}": ${message}`,
               stream: name,
               operation: 'get_data_quality',
-              likely_cause: notFound
-                ? `Stream not found. Use ${LIST_STREAMS} to discover available streams.`
-                : 'Insufficient permissions or server error.',
+              likely_cause: classifyError(err, LIST_STREAMS),
             },
           },
         ],
