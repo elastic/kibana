@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
+  EuiTextTruncate,
   EuiTitle,
   EuiToolTip,
   euiDragDropReorder,
@@ -215,7 +216,9 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                   position="top"
                                 >
                                   <EuiText size="s" tabIndex={0}>
-                                    {endpointDisplayMap.get(endpointId)?.label ?? endpointId}
+                                    <EuiTextTruncate
+                                      text={endpointDisplayMap.get(endpointId)?.label ?? endpointId}
+                                    />
                                   </EuiText>
                                 </EuiToolTip>
                               </EuiFlexItem>
