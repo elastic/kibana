@@ -36,10 +36,20 @@ export interface LegacyAlertsState {
  * the toggle overrode the selection — user intended "all instances". Set slo_instance_id to "*".
  */
 function migrateSlos(slos: SloItem[], legacyShowAll: boolean): SloItem[] {
-  if (!legacyShowAll) return slos;
-  return slos.map((slo) =>
-    slo.slo_instance_id !== ALL_VALUE ? { ...slo, slo_instance_id: ALL_VALUE } : slo
-  );
+  const migrated = legacyShowAll
+    ? slos.map((slo) =>
+        slo.slo_instance_id !== ALL_VALUE ? { ...slo, slo_instance_id: ALL_VALUE } : slo
+      )
+    : slos;
+  // Deduplicate by (slo_id, slo_instance_id) — migration can produce identical entries
+  // e.g. 3 specific instances of the same SLO with toggle on all become { slo_id, slo_instance_id: '*' }
+  const seen = new Set<string>();
+  return migrated.filter((slo) => {
+    const key = `${slo.slo_id}\x1F${slo.slo_instance_id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /** Transforms SLO Alerts embeddable state for serialization. Migrates legacy camelCase to snake_case. */

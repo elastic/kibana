@@ -65,6 +65,16 @@ function parseOptionValue(value: string): [string, string] {
   return idx >= 0 ? [value.slice(0, idx), value.slice(idx + 1)] : [value, ''];
 }
 
+function deduplicateSloItems(slos: SloItem[]): SloItem[] {
+  const seen = new Set<string>();
+  return slos.filter((slo) => {
+    const key = `${slo.slo_id}${VALUE_SEP}${slo.slo_instance_id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function mapSlosToOptions(
   slos: SloItem[] | undefined,
   nameLookup?: Map<string, { name: string; groupBy?: string[] }>
@@ -189,10 +199,12 @@ function normalizeSelection(
 }
 
 export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {
+  const dedupedInitialSlosRef = useRef(deduplicateSloItems(initialSlos ?? []));
+  const dedupedInitialSlos = dedupedInitialSlosRef.current;
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     () => {
-      const cached = initialSlos?.length ? getNameLookupFromCache(initialSlos) : null;
-      return mapSlosToOptions(initialSlos, cached ?? undefined);
+      const cached = dedupedInitialSlos.length ? getNameLookupFromCache(dedupedInitialSlos) : null;
+      return mapSlosToOptions(dedupedInitialSlos, cached ?? undefined);
     }
   );
   const [searchValue, setSearchValue] = useState<string>('');
@@ -200,8 +212,8 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
   const query = `${searchValue}*`;
 
   const initialSloIds = useMemo(
-    () => (initialSlos?.length ? [...new Set(initialSlos.map((s) => s.slo_id))] : []),
-    [initialSlos]
+    () => (dedupedInitialSlos.length ? [...new Set(dedupedInitialSlos.map((s) => s.slo_id))] : []),
+    [dedupedInitialSlos]
   );
   const initialKql = useMemo(
     () => initialSloIds.map((id) => `slo.id:"${id}"`).join(' or '),
@@ -230,9 +242,9 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
   }, [initialSlosData]);
 
   useEffect(() => {
-    if (!initialSlos?.length || !nameLookup) return;
-    setSelectedOptions(mapSlosToOptions(initialSlos, nameLookup));
-  }, [initialSlos, nameLookup]);
+    if (!dedupedInitialSlos.length || !nameLookup) return;
+    setSelectedOptions(mapSlosToOptions(dedupedInitialSlos, nameLookup));
+  }, [dedupedInitialSlos, nameLookup]);
 
   const { isLoading, data: sloList } = useFetchSloList({
     kqlQuery: `slo.name: (${query}) or slo.instanceId.text: (${query})`,

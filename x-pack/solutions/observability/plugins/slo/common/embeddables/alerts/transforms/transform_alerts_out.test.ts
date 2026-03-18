@@ -188,6 +188,21 @@ describe('transformAlertsOut', () => {
     });
   });
 
+  it('should deduplicate when toggle-on migration produces multiple * entries for the same SLO', () => {
+    expect(
+      transformAlertsOut({
+        show_all_group_by_instances: true,
+        slos: [
+          { slo_id: 'slo-1', slo_instance_id: '28a4644d-588a-4885-9c0a-8ba0835a0eb5' },
+          { slo_id: 'slo-1', slo_instance_id: '604da781-44e2-4880-8cd4-b8ca97c101ab' },
+          { slo_id: 'slo-1', slo_instance_id: 'd399ed18-2ad2-421a-b937-2687251b850c' },
+        ],
+      } as unknown as AlertsEmbeddableState)
+    ).toEqual({
+      slos: [{ slo_id: 'slo-1', slo_instance_id: '*' }],
+    });
+  });
+
   it('should not migrate slo_instance_id when already *', () => {
     expect(
       transformAlertsOut({
