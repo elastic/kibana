@@ -1,8 +1,8 @@
-# Observability Agent Builder Tools
+# Observability Agent Builder — Development Guide
 
 ## About This Document
 
-**Audience**: LLM coding agents assisting with Observability tool development.
+**Audience**: LLM coding agents assisting with Observability Agent Builder development (tools, agents, AI insights).
 
 **Team mission**: The Observability AI team builds tools that help Site Reliability Engineers (SREs) investigate incidents and reduce Mean Time To Resolution (MTTR). Tools expose Observability data (logs, metrics, traces) to LLM agents that assist SREs during incident response.
 
@@ -203,15 +203,9 @@ Service destination metrics capture **outgoing** request metrics from a service 
 - API Tests: `x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder/tools/`
 - Synthtrace Scenarios: `src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/`
 
-### Synthtrace Scenarios
+### Ingesting Test Data
 
-Every tool MUST have a Synthtrace scenario. Run with:
-
-```bash
-node scripts/synthtrace \
-  src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/<tool_name>/<scenario>.ts \
-  --from "now-1h" --to "now" --clean
-```
+See [Data Ingestion](../DATA_INGESTION.md) for all available methods: ingestion scripts (RCAEval, OpenRCA), Synthtrace scenarios, and the OpenTelemetry Demo.
 
 ### Executing Tools Locally
 
@@ -271,21 +265,6 @@ All new tools **must** be added to the Agent Builder allow list:
 x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts
 ```
 
-### Cleaning Observability Data
-
-Delete all observability data streams (APM, OTel, logs, infrastructure metrics, synthetics) to avoid stale data polluting results:
-
-```bash
-curl -s -X DELETE "http://elastic:changeme@localhost:9200/_data_stream/traces-apm*,metrics-apm*,logs-apm*,metrics-*.otel*,traces-*.otel*,logs-*.otel*,logs-*-*,metrics-system*,metrics-kubernetes*,metrics-docker*,metrics-aws*,synthetics-*-*" | jq .
-```
-
-Verify that all data streams are gone:
-
-```bash
-curl -s "http://elastic:changeme@localhost:9200/_data_stream/*apm*,*otel*,logs-*,metrics-*,synthetics-*" | jq '[.data_streams[] | .name]'
-# Expected: []
-```
-
 ### Writing Logs to a File
 
 By default Kibana only logs to the terminal (`console` appender). When Kibana is running in a separate terminal window, a coding agent cannot easily read its output. To work around this, configure Kibana to also write logs to a file.
@@ -337,111 +316,7 @@ See [Phoenix REST API docs](https://arize.com/docs/phoenix/sdk-api-reference/res
 
 ---
 
-## 8. Testing with OpenTelemetry Demo
-
-The [OpenTelemetry Demo](https://github.com/elastic/opentelemetry-demo) is a microservices application that generates realistic Observability data (traces, logs, metrics) and supports feature flags to simulate various failure scenarios. Use it to validate the Observability Agent and individual tools against real-world-like incidents.
-
-### Starting the OTel Demo
-
-Clone the repo and start the demo, configured to send data to your local Elasticsearch:
-
-```bash
-cd /path/to/opentelemetry-demo
-
-# Create an API key for the demo
-API_KEY=$(curl -s -X POST "http://localhost:9200/_security/api_key" \
-  -u elastic:changeme \
-  -H "Content-Type: application/json" \
-  -d '{ "name": "opentelemetry-demo" }' | jq -r .encoded)
-
-sed -i '' -E "s|^ELASTICSEARCH_ENDPOINT=.*|ELASTICSEARCH_ENDPOINT=\"http://host.docker.internal:9200\"|" .env.override
-sed -i '' -E "s|^ELASTICSEARCH_API_KEY=.*|ELASTICSEARCH_API_KEY=$API_KEY|" .env.override
-
-# Start all services
-make start
-```
-
-This starts ~28 Docker containers. Wait for all containers to be healthy before proceeding. The demo sends data to the local Elasticsearch instance at `localhost:9200`.
-
-### Feature Flags
-
-Feature flags are configured via the `flagd` service. Edit the file:
-
-```
-/path/to/opentelemetry-demo/src/flagd/demo.flagd.json
-```
-
-Flagd watches this file for changes — edits take effect automatically (no restart needed).
-
-To enable a flag, change its `defaultVariant` from `"off"` to `"on"` (or to a specific variant for flags with multiple levels):
-
-```json
-"paymentUnreachable": {
-  "defaultVariant": "on",
-  ...
-}
-```
-
-To disable a flag, set `defaultVariant` back to `"off"`.
-
-Full list of available feature flags: [https://opentelemetry.io/docs/demo/feature-flags/](https://opentelemetry.io/docs/demo/feature-flags/)
-
-### Cleaning Data Between Test Runs
-
-Between test runs, clean all observability data streams — see [Cleaning Observability Data](#cleaning-observability-data) in section 7.
-
-### Wait for Data Accumulation
-
-After enabling feature flags and cleaning data, **wait at least 10 minutes** before running an investigation. This ensures enough metric rollups and trace data have been generated for meaningful analysis.
-
-When running the investigation tool, use a lookback window that matches the wait time:
-
-```bash
-curl -s --max-time 600 -X POST http://localhost:5601/api/agent_builder/tools/_execute \
-  -u elastic:changeme \
-  -H 'kbn-xsrf: true' \
-  -H 'x-elastic-internal-origin: kibana' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "tool_id": "observability.get_log_groups",
-    "tool_params": { "start": "now-10m", "end": "now" }
-  }'
-```
-
-### Full Test Workflow
-
-```
-1. Start OTel demo:
-See "Starting the OTel Demo" above
-
-2. Clean APM data:
-Delete data streams — see above
-
-3. Enable feature flag(s):
-Edit demo.flagd.json
-
-4. Wait 10 minutes:
-`sleep 600`
-
-5. Verify that expected data scenario is available in Elasticsearch
-Example: `curl http://elastic:changeme@localhost:9200/_search`
-
-6. Run investigation:
-Example: `curl ... get_log_groups with start=now-10m`
-
-7. Review results
-8. Review Phoenix Traces (if available)
-9. Disable feature flag(s): Reset defaultVariant to "off"
-10. Repeat from step 2 for next scenario
-```
-
-### Resetting All Feature Flags
-
-After testing, reset all flags to `"off"` by setting each `defaultVariant` back to `"off"` in `demo.flagd.json`. Verify no flags are accidentally left enabled — leftover flags cause confusing results in subsequent tests.
-
----
-
-## 9. Pre-Merge Checklist
+## 8. Pre-Merge Checklist
 
 - Tool added to `allow_lists.ts`
 - Works with both ECS and OTel data (where applicable)

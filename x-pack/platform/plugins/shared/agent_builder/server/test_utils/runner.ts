@@ -325,6 +325,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     skills: createSkillsServiceMock(),
     toolManager: createToolManagerMock(),
     savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
+    runContext: { runId: 'mock-run-id', stack: [] },
   };
 };
 
