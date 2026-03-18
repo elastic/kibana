@@ -452,16 +452,12 @@ export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappi
 export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
 
 export interface ConsumerExecutionMetrics {
-  total_search_duration_ms: number;
   total_indexing_duration_ms: number;
-  total_alerts_detected: number;
-  total_alerts_created: number;
   gap_duration_s: number;
   gap_range: { lte: string; gte: string };
   candidate_alerts_count: number;
   suppressed_alerts: number;
   frozen_indices_queried_count: number;
-  indices_found_count: number;
 }
 
 export interface PublicRuleMonitoringService {

@@ -14,9 +14,15 @@ import type {
   ConsumerExecutionMetrics,
 } from '../types';
 
+interface FrameworkMetrics {
+  total_search_duration_ms: number;
+}
+
 export class RuleMonitoringService {
   // Mirrors rule's SO state
   private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());
+  // Metrics calculated by the framework
+  private frameworkMetrics: Partial<FrameworkMetrics> = {};
   // Rule executor metrics. Essential metrics get written to rule's SO.
   private metrics: Partial<ConsumerExecutionMetrics> = {};
 
@@ -27,6 +33,7 @@ export class RuleMonitoringService {
   public setMonitoring(monitoringFromSO: RuleMonitoring | undefined) {
     if (monitoringFromSO) {
       this.monitoring = monitoringFromSO;
+      Object.assign(this.metrics, monitoringFromSO.run.last_run.metrics);
     }
   }
 
@@ -37,10 +44,8 @@ export class RuleMonitoringService {
       result.run.last_run.metrics,
       omitBy(
         {
-          total_search_duration_ms: this.metrics.total_search_duration_ms,
+          total_search_duration_ms: this.frameworkMetrics.total_search_duration_ms,
           total_indexing_duration_ms: this.metrics.total_indexing_duration_ms,
-          total_alerts_detected: this.metrics.total_alerts_detected,
-          total_alerts_created: this.metrics.total_alerts_created,
           gap_duration_s: this.metrics.gap_duration_s,
           gap_range: this.metrics.gap_range,
         },
@@ -55,6 +60,10 @@ export class RuleMonitoringService {
     return {
       ...this.metrics,
     };
+  }
+
+  public addFrameworkMetrics(fwkMetrics: Partial<FrameworkMetrics>): void {
+    this.frameworkMetrics = fwkMetrics;
   }
 
   public addHistory({

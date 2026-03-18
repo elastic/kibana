@@ -103,20 +103,6 @@ describe('RuleMonitoringService', () => {
       expect(ruleMonitoringService.getMonitoring()).toEqual(customMonitoring);
     });
 
-    it('should set totalSearchDurationMs', () => {
-      const ruleMonitoringService = new RuleMonitoringService();
-      const { setMetric } = ruleMonitoringService.getSetters();
-
-      setMetric('total_search_duration_ms', 123);
-
-      const {
-        run: {
-          last_run: { metrics },
-        },
-      } = ruleMonitoringService.getMonitoring();
-      expect(metrics.total_search_duration_ms).toEqual(123);
-    });
-
     it('should set totalIndexDurationMs', () => {
       const ruleMonitoringService = new RuleMonitoringService();
       const { setMetric } = ruleMonitoringService.getSetters();
@@ -129,34 +115,6 @@ describe('RuleMonitoringService', () => {
         },
       } = ruleMonitoringService.getMonitoring();
       expect(metrics.total_indexing_duration_ms).toEqual(234);
-    });
-
-    it('should set totalAlertsDetected', () => {
-      const ruleMonitoringService = new RuleMonitoringService();
-      const { setMetric } = ruleMonitoringService.getSetters();
-
-      setMetric('total_alerts_detected', 345);
-
-      const {
-        run: {
-          last_run: { metrics },
-        },
-      } = ruleMonitoringService.getMonitoring();
-      expect(metrics.total_alerts_detected).toEqual(345);
-    });
-
-    it('should set totalAlertsCreated', () => {
-      const ruleMonitoringService = new RuleMonitoringService();
-      const { setMetric } = ruleMonitoringService.getSetters();
-
-      setMetric('total_alerts_created', 456);
-
-      const {
-        run: {
-          last_run: { metrics },
-        },
-      } = ruleMonitoringService.getMonitoring();
-      expect(metrics.total_alerts_created).toEqual(456);
     });
 
     it('should set gapDurationS', () => {

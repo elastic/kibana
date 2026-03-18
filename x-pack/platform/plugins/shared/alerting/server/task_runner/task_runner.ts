@@ -655,6 +655,12 @@ export class TaskRunner<
         runDate: this.runDate,
       });
 
+      if (executionMetrics) {
+        this.ruleMonitoring.addFrameworkMetrics({
+          total_search_duration_ms: executionMetrics.totalSearchDurationMs,
+        });
+      }
+
       const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
       if (gap) {
         this.alertingEventLogger.reportGap({
