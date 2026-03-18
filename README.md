@@ -1,6 +1,6 @@
 # Kibana
 
-Kibana is the open source interface to query, analyze, visualize, and manage your data stored in Elasticsearch.
+Kibana is your window into the Elastic Stack. It is the open source interface to query, analyze, visualize, and manage your data stored in Elasticsearch.
 
 - [Getting Started](#getting-started)
   - [Using a Kibana Release](#using-a-kibana-release)
