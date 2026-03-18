@@ -12,7 +12,7 @@ import { tagcloudStateSchema } from './tagcloud';
 
 describe('Tagcloud Schema', () => {
   const baseTagcloudConfig = {
-    type: 'tagcloud',
+    type: 'tag_cloud',
     dataset: {
       type: 'dataView',
       id: 'test-data-view',
@@ -90,7 +90,7 @@ describe('Tagcloud Schema', () => {
                 color: { type: 'from_palette', palette: 'default', index: 0 },
               },
             ],
-            unassignedColor: { type: 'colorCode', value: '#cccccc' },
+            unassignedColor: { type: 'color_code', value: '#cccccc' },
           },
         },
       };
@@ -321,7 +321,7 @@ describe('Tagcloud Schema', () => {
 
       it('throw when missing DSL and esql operation in a configuration', () => {
         const input = {
-          type: 'tagcloud',
+          type: 'tag_cloud',
           dataset: {
             type: 'esql',
             query: 'FROM my-index | LIMIT 100',
@@ -386,8 +386,8 @@ describe('Tagcloud Schema', () => {
               mode: 'gradient',
               palette: 'kibana_palette',
               gradient: [
-                { type: 'colorCode', value: '#ff0000' },
-                { type: 'colorCode', value: '#00ff00' },
+                { type: 'color_code', value: '#ff0000' },
+                { type: 'color_code', value: '#00ff00' },
               ],
             },
           },
@@ -403,7 +403,7 @@ describe('Tagcloud Schema', () => {
 
       it('validates esql configuration', () => {
         const input = {
-          type: 'tagcloud',
+          type: 'tag_cloud',
           dataset: {
             type: 'esql',
             query: 'FROM my-index | STATS count() BY category | LIMIT 100',

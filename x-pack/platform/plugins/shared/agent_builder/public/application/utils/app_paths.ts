@@ -25,6 +25,9 @@ export const appPaths = {
       return `/conversations/${conversationId}`;
     },
   },
+  connectors: {
+    list: '/connectors',
+  },
   tools: {
     list: '/tools',
     new: '/tools/new',
@@ -35,5 +38,9 @@ export const appPaths = {
     list: '/skills',
     new: '/skills/new',
     details: ({ skillId }: { skillId: string }) => `/skills/${skillId}`,
+  },
+  plugins: {
+    list: '/plugins',
+    details: ({ pluginId }: { pluginId: string }) => `/plugins/${pluginId}`,
   },
 };

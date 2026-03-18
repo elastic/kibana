@@ -624,7 +624,7 @@ describe('ESQLExtensionsRegistry', () => {
       expect(result).toEqual([]);
     });
 
-    it('should include classic standalone queries in all solution views', () => {
+    it('should include classic standalone queries in all solution views when the source command matches', () => {
       const classicStandalone: RecommendedQuery = {
         name: 'Classic Standalone',
         query: 'TS metrics-*',
@@ -634,21 +634,21 @@ describe('ESQLExtensionsRegistry', () => {
       registry.setRecommendedQueries([classicStandalone], ESQL_CLASSIC_SOLUTION_ID);
 
       const resultOblt = registry.getRecommendedQueries(
-        'FROM logs-2023',
+        'TS metrics-*',
         availableDatasources,
         'oblt'
       );
       expect(resultOblt).toEqual([classicStandalone]);
 
       const resultSecurity = registry.getRecommendedQueries(
-        'FROM logs-2023',
+        'TS metrics-*',
         availableDatasources,
         'security'
       );
       expect(resultSecurity).toEqual([classicStandalone]);
 
       const resultClassic = registry.getRecommendedQueries(
-        'FROM logs-2023',
+        'TS metrics-*',
         availableDatasources,
         ESQL_CLASSIC_SOLUTION_ID
       );
@@ -685,7 +685,7 @@ describe('ESQLExtensionsRegistry', () => {
   });
 
   describe('isStandalone flag', () => {
-    it('should return standalone queries regardless of the current query index pattern', () => {
+    it('should return standalone queries even when the source command does not match', () => {
       availableDatasources = {
         indices: [{ name: 'logs-2023' }, { name: 'metrics-*' }],
         data_streams: [],
@@ -729,6 +729,56 @@ describe('ESQLExtensionsRegistry', () => {
 
       const result = registry.getRecommendedQueries('FROM logs-2023', availableDatasources, 'es');
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('source command filtering (FROM vs TS)', () => {
+    beforeEach(() => {
+      availableDatasources = {
+        indices: [{ name: 'metrics-system' }],
+        data_streams: [],
+        aliases: [],
+      };
+    });
+
+    it('should only return FROM queries when the current query uses FROM', () => {
+      const fromQuery: RecommendedQuery = {
+        name: 'FROM metrics query',
+        query: 'FROM metrics-system | STATS count()',
+      };
+      const tsQuery: RecommendedQuery = {
+        name: 'TS metrics query',
+        query: 'TS metrics-system | STATS SUM(RATE(system.network.out.bytes))',
+      };
+
+      registry.setRecommendedQueries([fromQuery, tsQuery], 'oblt');
+
+      const result = registry.getRecommendedQueries(
+        'FROM metrics-system',
+        availableDatasources,
+        'oblt'
+      );
+      expect(result).toEqual([fromQuery]);
+    });
+
+    it('should only return TS queries when the current query uses TS', () => {
+      const fromQuery: RecommendedQuery = {
+        name: 'FROM metrics query',
+        query: 'FROM metrics-system | STATS count()',
+      };
+      const tsQuery: RecommendedQuery = {
+        name: 'TS metrics query',
+        query: 'TS metrics-system | STATS SUM(RATE(system.network.out.bytes))',
+      };
+
+      registry.setRecommendedQueries([fromQuery, tsQuery], 'oblt');
+
+      const result = registry.getRecommendedQueries(
+        'TS metrics-system',
+        availableDatasources,
+        'oblt'
+      );
+      expect(result).toEqual([tsQuery]);
     });
   });
 });

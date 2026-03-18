@@ -23,8 +23,11 @@ const WORKFLOW_STATUS_TEST_ID = `${PREFIX}WorkflowStatus` as const;
 export const WORKFLOW_STATUS_TITLE_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Title` as const;
 export const WORKFLOW_STATUS_DETAILS_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Details` as const;
 
-/* Investigation */
+const MITRE_ATTACK_TEST_ID = `${PREFIX}MitreAttack` as const;
+export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as const;
+export const MITRE_ATTACK_DETAILS_TEST_ID = `${MITRE_ATTACK_TEST_ID}Details` as const;
 
+/* Investigation */
 export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
 export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button` as const;
 export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;
@@ -33,3 +36,11 @@ export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_I
 
 export const ANALYZER_PREVIEW_TEST_ID = `${PREFIX}AnalyzerPreview` as const;
 export const ANALYZER_PREVIEW_LOADING_TEST_ID = `${ANALYZER_PREVIEW_TEST_ID}Loading` as const;
+export const ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID =
+  `${ANALYZER_PREVIEW_TEST_ID}ColdFrozenTierBadge` as const;
+
+export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
+export const SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID =
+  `${SESSION_PREVIEW_TEST_ID}RuleDetailsLink` as const;
+export const SESSION_VIEW_UPSELL_TEST_ID = `${PREFIX}SessionViewUpsell` as const;
+export const SESSION_VIEW_NO_DATA_TEST_ID = `${PREFIX}SessionViewNoData` as const;

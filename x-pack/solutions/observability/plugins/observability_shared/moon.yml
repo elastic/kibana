@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-shared-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/observability-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-shared-plugin'
+  title: '@kbn/observability-shared-plugin'
   description: Moon project for @kbn/observability-shared-plugin
   channel: ''
   owner: '@elastic/observability-ui'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/observability_shared
+  sourceRoot: x-pack/solutions/observability/plugins/observability_shared
 dependsOn:
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'
@@ -55,6 +54,7 @@ dependsOn:
   - '@kbn/deeplinks-observability'
   - '@kbn/home-sample-data-tab'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/controls-constants'
 tags:
   - plugin
   - prod
@@ -72,14 +72,24 @@ fileGroups:
     - '!.storybook/**/*.js'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
