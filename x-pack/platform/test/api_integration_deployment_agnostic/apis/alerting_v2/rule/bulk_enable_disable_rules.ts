@@ -408,7 +408,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send({
-            filter: 'metadata.name: nonexistent-rule-xyz',
+            filter: 'kind: nonexistent',
           });
 
         expect(response.status).to.be(200);
