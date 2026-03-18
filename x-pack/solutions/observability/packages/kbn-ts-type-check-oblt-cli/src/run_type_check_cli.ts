@@ -135,10 +135,24 @@ run(
     }
 
     // ── Record freshness state ───────────────────────────────────────────────────
-    // After a successful full tsc run the local artifacts are up-to-date with HEAD.
-    // Writing the SHA allows subsequent runs to accurately compute staleness without
-    // relying on the (now-absent) GCS ancestor as a proxy.
-    if (!didTypeCheckFail && !projectFilter && !isCiEnvironment()) {
+    // After any full tsc run (success or failure) the local .tsbuildinfo files
+    // correspond to HEAD's sources. Writing the SHA here — even on failure —
+    // prevents the next run from re-invalidating projects tsc already processed.
+    //
+    // Why it is safe to write on failure:
+    //   tsc --build writes a .tsbuildinfo for every project it processes,
+    //   regardless of whether that project had errors. On the next run tsc reads
+    //   each .tsbuildinfo and decides whether to rebuild:
+    //     • project with no errors whose sources are unchanged → up-to-date, skipped
+    //     • project with stored errors whose sources are unchanged → errors replayed
+    //       from .tsbuildinfo (no recompile), which is what we want
+    //     • project whose sources changed → rebuilt from scratch
+    //   If we leave the state at the GCS archive SHA instead, resolveRestoreStrategy
+    //   will call detectStaleArtifacts(from: archiveSha, to: HEAD) on the next run,
+    //   see all post-archive projects as stale, call invalidateTsBuildInfoFiles to
+    //   delete their .tsbuildinfo, and force tsc to rebuild them all — including
+    //   projects that were already correct in the previous run.
+    if (!projectFilter && !isCiEnvironment()) {
       try {
         const headSha = await resolveCurrentCommitSha();
         if (headSha) {
