@@ -181,10 +181,14 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
     expect(ingestResult).toHaveLength(2);
     expect(esqlResult.documents).toHaveLength(2);
 
-    const ingestDoc1 = ingestResult.find((d: any) => d.should_sort === 'yes');
-    const ingestDoc2 = ingestResult.find((d: any) => d.should_sort === 'no');
-    const esqlDoc1 = esqlResult.documentsWithoutKeywords.find((d: any) => d.should_sort === 'yes');
-    const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.should_sort === 'no');
+    const ingestDoc1 = ingestResult.find((d: Record<string, unknown>) => d.should_sort === 'yes');
+    const ingestDoc2 = ingestResult.find((d: Record<string, unknown>) => d.should_sort === 'no');
+    const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
+      (d: Record<string, unknown>) => d.should_sort === 'yes'
+    );
+    const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
+      (d: Record<string, unknown>) => d.should_sort === 'no'
+    );
 
     expect(ingestDoc1).toStrictEqual(esqlDoc1);
     expect(ingestDoc1).toStrictEqual(
@@ -229,9 +233,9 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
       expect(esqlResult.documents).toHaveLength(2);
 
       // Document with tags should be sorted
-      const ingestDoc1 = ingestResult.find((d: any) => d.status === 'has_tags');
+      const ingestDoc1 = ingestResult.find((d: Record<string, unknown>) => d.status === 'has_tags');
       const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
-        (d: any) => d.status === 'has_tags'
+        (d: Record<string, unknown>) => d.status === 'has_tags'
       );
       expect(ingestDoc1).toStrictEqual(
         expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
@@ -241,8 +245,10 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
       );
 
       // Document without tags should pass through unchanged
-      const ingestDoc2 = ingestResult.find((d: any) => d.status === 'no_tags');
-      const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.status === 'no_tags');
+      const ingestDoc2 = ingestResult.find((d: Record<string, unknown>) => d.status === 'no_tags');
+      const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
+        (d: Record<string, unknown>) => d.status === 'no_tags'
+      );
       expect((ingestDoc2 as Record<string, unknown>).tags).toBeUndefined();
       expect(esqlDoc2).toStrictEqual(expect.objectContaining({ tags: null }));
     }
