@@ -80,7 +80,7 @@ export const useLeadingControlColumns = ({
       });
     }
 
-    if (isAgentBuilderEnabled && agentBuilder?.openConversationFlyout) {
+    if (isAgentBuilderEnabled && agentBuilder?.openChat) {
       columns.push({
         id: 'entity-analytics-ai-action',
         render: (Control, { record }) => {
@@ -99,7 +99,7 @@ export const useLeadingControlColumns = ({
               color="text"
               onClick={() => {
                 const attachmentId = `${SecurityAgentBuilderAttachments.entity}-${Date.now()}`;
-                agentBuilder.openConversationFlyout({
+                agentBuilder.openChat({
                   autoSendInitialMessage: false,
                   newConversation: true,
                   initialMessage: i18n.translate(

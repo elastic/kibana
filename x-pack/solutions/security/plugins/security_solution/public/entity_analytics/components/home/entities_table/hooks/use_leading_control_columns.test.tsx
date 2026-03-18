@@ -34,13 +34,13 @@ describe('useLeadingControlColumns', () => {
     expect(result.current.find((c) => c.id === 'entity-analytics-ai-action')).toBeUndefined();
   });
 
-  it('returns AI action when isAgentBuilderEnabled is true and agentBuilder has openConversationFlyout', () => {
+  it('returns AI action when isAgentBuilderEnabled is true and agentBuilder has openChat', () => {
     const { result } = renderHook(() =>
       useLeadingControlColumns({
         ...defaultArgs,
         isAgentBuilderEnabled: true,
         agentBuilder: {
-          openConversationFlyout: jest.fn(),
+          openChat: jest.fn(),
         } as unknown as AgentBuilderPluginStart,
       })
     );
