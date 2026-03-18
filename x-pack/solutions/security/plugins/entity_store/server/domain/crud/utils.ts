@@ -30,16 +30,16 @@ export function hashEuid(id: string): string {
 // expected by updateEntity() method. updateEntity() and bulkUpdateEntity()
 // methods are the only ones that consume this validator.
 export function validateUpdateDocIdentification(
-  doc: Entity,
+  doc: Record<string, unknown>,
   generatedId: string | undefined
 ): void {
-  if (!doc.entity?.id && generatedId === undefined) {
+  if (!doc[ENTITY_ID_FIELD] && generatedId === undefined) {
     throw new BadCRUDRequestError(`Could not derive EUID from document or find it in entity.id`);
   }
 
-  if (doc.entity?.id && generatedId !== undefined && doc.entity?.id !== generatedId) {
+  if (doc[ENTITY_ID_FIELD] && generatedId !== undefined && doc[ENTITY_ID_FIELD] !== generatedId) {
     throw new BadCRUDRequestError(
-      `Supplied ID ${doc.entity?.id} does not match generated EUID ${generatedId}`
+      `Supplied ID ${doc[ENTITY_ID_FIELD]} does not match generated EUID ${generatedId}`
     );
   }
 }
@@ -52,12 +52,12 @@ export interface ValidatedDoc {
 export function validateAndTransformDocForUpsert(
   entityType: EntityType,
   namespace: string,
-  doc: Entity,
+  doc: Record<string, unknown>,
   generatedId: string | undefined,
   force: boolean
 ): ValidatedDoc {
-  if (!doc.entity?.id && generatedId) {
-    doc.entity.id = generatedId;
+  if (!doc[ENTITY_ID_FIELD] && generatedId) {
+    doc[ENTITY_ID_FIELD] = generatedId;
   }
   const definition = getEntityDefinition(entityType, namespace);
   if (!force) {
@@ -65,7 +65,7 @@ export function validateAndTransformDocForUpsert(
     const fieldDescriptions = getFieldDescriptions(flat, definition);
     assertOnlyNonForcedAttributesInReq(fieldDescriptions);
   }
-  return { id: doc.entity.id, doc: transformDocForUpsert(entityType, doc) };
+  return { id: doc[ENTITY_ID_FIELD] as string, doc: transformDocForUpsert(entityType, doc) };
 }
 
 function getFieldDescriptions(

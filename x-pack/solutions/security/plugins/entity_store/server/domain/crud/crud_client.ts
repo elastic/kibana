@@ -23,6 +23,8 @@ import {
   validateUpdateDocIdentification,
 } from './utils';
 import { runWithSpan } from '../../telemetry/traces';
+import {getFlattenedObject} from '@kbn/std';
+import {omit} from 'lodash';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -154,11 +156,12 @@ export class CRUDClient {
   // 3. no ID and identifying data: ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     const generatedId = getEuidFromObject(entityType, doc);
-    validateUpdateDocIdentification(doc, generatedId);
+    const flatDoc = getFlattenedObject(doc);
+    validateUpdateDocIdentification(flatDoc, generatedId);
     const valid = validateAndTransformDocForUpsert(
       entityType,
       this.namespace,
-      doc,
+      flatDoc,
       generatedId,
       force
     );
@@ -197,11 +200,12 @@ export class CRUDClient {
     this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
     for (const { type: entityType, doc } of objects) {
       const generatedId = getEuidFromObject(entityType, doc);
-      validateUpdateDocIdentification(doc, generatedId);
+      const flatDoc = getFlattenedObject(doc);
+      validateUpdateDocIdentification(flatDoc, generatedId);
       const valid = validateAndTransformDocForUpsert(
         entityType,
         this.namespace,
-        doc,
+        flatDoc,
         generatedId,
         force
       );
@@ -242,9 +246,8 @@ export class CRUDClient {
     if (!id) {
       throw new BadCRUDRequestError(`Could not derive EUID from document`);
     }
-    doc.entity.id = id;
-
-    const valid = validateAndTransformDocForUpsert(entityType, this.namespace, doc, id, true);
+    const flatDoc = omit(getFlattenedObject(doc), 'entity.id');
+    const valid = validateAndTransformDocForUpsert(entityType, this.namespace, flatDoc, id, true);
     const { result } = await this.esClient.create({
       index: getLatestEntitiesIndexName(this.namespace),
       id: hashEuid(valid.id),
