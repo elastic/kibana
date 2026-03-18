@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getDocument, getFieldValue } from './commons';
+import { evaluateStreamlangCondition, getDocument, getFieldValue } from './commons';
 
 describe('getDocument', () => {
   it('returns _source when doc is an Elasticsearch hit', () => {
@@ -46,6 +46,175 @@ describe('getFieldValue', () => {
 
     it('returns undefined when path is missing', () => {
       expect(getFieldValue({ user: {} }, 'user.id')).toBeUndefined();
+    });
+  });
+});
+
+describe('evaluateStreamlangCondition', () => {
+  it('returns false when condition is null or undefined', () => {
+    expect(evaluateStreamlangCondition({ a: '1' }, null)).toBe(false);
+    expect(evaluateStreamlangCondition({ a: '1' }, undefined)).toBe(false);
+  });
+
+  it('returns false when condition is not an object', () => {
+    expect(evaluateStreamlangCondition({ a: '1' }, 'string')).toBe(false);
+    expect(evaluateStreamlangCondition({ a: '1' }, 42)).toBe(false);
+  });
+
+  it('always returns true for { always: true }', () => {
+    expect(evaluateStreamlangCondition({}, { always: true })).toBe(true);
+    expect(evaluateStreamlangCondition({ foo: 'bar' }, { always: true })).toBe(true);
+  });
+
+  it('always returns false for { never: true }', () => {
+    expect(evaluateStreamlangCondition({}, { never: true })).toBe(false);
+    expect(evaluateStreamlangCondition({ foo: 'bar' }, { never: true })).toBe(false);
+  });
+
+  describe('field predicates', () => {
+    it('eq: returns true when field value equals expected', () => {
+      expect(evaluateStreamlangCondition({ a: 'x' }, { field: 'a', eq: 'x' })).toBe(true);
+      expect(evaluateStreamlangCondition({ 'user.name': 'alice' }, { field: 'user.name', eq: 'alice' })).toBe(true);
+    });
+
+    it('eq: returns false when field value does not equal expected', () => {
+      expect(evaluateStreamlangCondition({ a: 'x' }, { field: 'a', eq: 'y' })).toBe(false);
+      expect(evaluateStreamlangCondition({ a: '1' }, { field: 'a', eq: 1 })).toBe(true); // String(1) === '1'
+    });
+
+    it('eq: returns false when field is missing', () => {
+      expect(evaluateStreamlangCondition({}, { field: 'a', eq: 'x' })).toBe(false);
+      expect(evaluateStreamlangCondition({ b: 'y' }, { field: 'a', eq: 'x' })).toBe(false);
+    });
+
+    it('neq: returns true when field value does not equal expected', () => {
+      expect(evaluateStreamlangCondition({ a: 'x' }, { field: 'a', neq: 'y' })).toBe(true);
+      expect(evaluateStreamlangCondition({ a: 'x' }, { field: 'a', neq: 'x' })).toBe(false);
+    });
+
+    it('neq: returns true when field is missing (undefined !== expected)', () => {
+      expect(evaluateStreamlangCondition({}, { field: 'a', neq: 'x' })).toBe(true);
+    });
+
+    it('exists: returns true when field has non-empty value', () => {
+      expect(evaluateStreamlangCondition({ a: 'x' }, { field: 'a', exists: true })).toBe(true);
+      expect(evaluateStreamlangCondition({ a: '' }, { field: 'a', exists: false })).toBe(true);
+    });
+
+    it('exists: returns false when field is missing or empty', () => {
+      expect(evaluateStreamlangCondition({}, { field: 'a', exists: true })).toBe(false);
+      expect(evaluateStreamlangCondition({ a: '' }, { field: 'a', exists: true })).toBe(false);
+      expect(evaluateStreamlangCondition({ a: 'x' }, { field: 'a', exists: false })).toBe(false);
+    });
+
+    it('includes: returns true when field value includes substring', () => {
+      expect(evaluateStreamlangCondition({ a: 'hello world' }, { field: 'a', includes: 'world' })).toBe(true);
+      expect(evaluateStreamlangCondition({ a: 'okta' }, { field: 'a', includes: 'okta' })).toBe(true);
+    });
+
+    it('includes: returns false when field does not include substring', () => {
+      expect(evaluateStreamlangCondition({ a: 'hello' }, { field: 'a', includes: 'world' })).toBe(false);
+    });
+
+    it('includes: returns false when field is missing', () => {
+      expect(evaluateStreamlangCondition({}, { field: 'a', includes: 'x' })).toBe(false);
+    });
+  });
+
+  describe('and', () => {
+    it('returns true when all sub-conditions are true', () => {
+      const doc = { a: 'x', b: 'y' };
+      const condition = {
+        and: [
+          { field: 'a', eq: 'x' },
+          { field: 'b', eq: 'y' },
+        ],
+      };
+      expect(evaluateStreamlangCondition(doc, condition)).toBe(true);
+    });
+
+    it('returns false when any sub-condition is false', () => {
+      const doc = { a: 'x', b: 'y' };
+      const condition = {
+        and: [
+          { field: 'a', eq: 'x' },
+          { field: 'b', eq: 'wrong' },
+        ],
+      };
+      expect(evaluateStreamlangCondition(doc, condition)).toBe(false);
+    });
+
+    it('returns true for empty and array', () => {
+      expect(evaluateStreamlangCondition({}, { and: [] })).toBe(true);
+    });
+  });
+
+  describe('or', () => {
+    it('returns true when any sub-condition is true', () => {
+      const doc = { a: 'x', b: 'y' };
+      const condition = {
+        or: [
+          { field: 'a', eq: 'wrong' },
+          { field: 'b', eq: 'y' },
+        ],
+      };
+      expect(evaluateStreamlangCondition(doc, condition)).toBe(true);
+    });
+
+    it('returns false when all sub-conditions are false', () => {
+      const doc = { a: 'x', b: 'y' };
+      const condition = {
+        or: [
+          { field: 'a', eq: 'wrong' },
+          { field: 'b', eq: 'wrong' },
+        ],
+      };
+      expect(evaluateStreamlangCondition(doc, condition)).toBe(false);
+    });
+
+    it('returns false for empty or array', () => {
+      expect(evaluateStreamlangCondition({}, { or: [] })).toBe(false);
+    });
+  });
+
+  describe('not', () => {
+    it('negates the inner condition', () => {
+      expect(evaluateStreamlangCondition({ a: 'x' }, { not: { field: 'a', eq: 'y' } })).toBe(true);
+      expect(evaluateStreamlangCondition({ a: 'x' }, { not: { field: 'a', eq: 'x' } })).toBe(false);
+    });
+
+    it('not always yields false', () => {
+      expect(evaluateStreamlangCondition({}, { not: { always: true } })).toBe(false);
+    });
+
+    it('not never yields true', () => {
+      expect(evaluateStreamlangCondition({}, { not: { never: true } })).toBe(true);
+    });
+  });
+
+  describe('nested conditions', () => {
+    it('evaluates and of or correctly', () => {
+      const doc = { a: 'x', b: 'y' };
+      const condition = {
+        and: [
+          { or: [{ field: 'a', eq: 'x' }, { field: 'a', eq: 'z' }] },
+          { or: [{ field: 'b', eq: 'y' }, { field: 'b', eq: 'w' }] },
+        ],
+      };
+      expect(evaluateStreamlangCondition(doc, condition)).toBe(true);
+    });
+
+    it('evaluates not of and correctly', () => {
+      const doc = { a: 'x', b: 'wrong' };
+      const condition = {
+        not: {
+          and: [
+            { field: 'a', eq: 'x' },
+            { field: 'b', eq: 'y' },
+          ],
+        },
+      };
+      expect(evaluateStreamlangCondition(doc, condition)).toBe(true);
     });
   });
 });

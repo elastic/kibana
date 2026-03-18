@@ -12,7 +12,9 @@ import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isNotEmptyCondition } from '../definitions/common_fields';
 import {
+  evaluateStreamlangCondition,
   getDocument,
+  getEffectiveEuidRanking,
   getFieldValue,
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
@@ -91,7 +93,8 @@ export function getEuidDslFilterBasedOnDocument(
   }
 
   doc = getDocument(doc);
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
     const value = getFieldValue(doc, identityField.singleField);
@@ -109,7 +112,15 @@ export function getEuidDslFilterBasedOnDocument(
     const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.condition) {
+    if (
+      evaluateStreamlangCondition(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg.condition)
+    ) {
+      doc = { ...doc, ...entityDefinition.whenConditionTrueSetFieldsPreAgg.fields };
+    }
+  }
+  const effectiveRanking = getEffectiveEuidRanking(doc, identityField);
+  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, effectiveRanking);
   if (fieldsToBeFilteredOn.rankingPosition === -1) {
     return undefined;
   }
@@ -131,10 +142,9 @@ export function getEuidDslFilterBasedOnDocument(
     },
   };
 
-  const toBeFilteredOut = getFieldsToBeFilteredOut(
-    identityField.euidFields,
-    fieldsToBeFilteredOn
-  ).filter((field) => !evaluatedDestinations.has(field));
+  const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
+    (field) => !evaluatedDestinations.has(field)
+  );
   if (toBeFilteredOut.length > 0) {
     dsl.bool = {
       ...dsl.bool,
@@ -145,6 +155,12 @@ export function getEuidDslFilterBasedOnDocument(
   if (identityField.fieldEvaluations?.length) {
     const filterList = Array.isArray(dsl.bool?.filter) ? dsl.bool.filter : [];
     for (const evaluation of identityField.fieldEvaluations) {
+      const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
+      const sourceFields = [...exactMatchFields, ...prefixMatchFields];
+      const hasEvaluatedSource = sourceFields.some((f) => evaluatedDestinations.has(f));
+      if (hasEvaluatedSource) {
+        continue;
+      }
       const spec = getSourceMatchSpec(doc, evaluation);
       filterList.push(buildSourceClauseDsl(evaluation, spec) as QueryDslQueryContainer);
     }

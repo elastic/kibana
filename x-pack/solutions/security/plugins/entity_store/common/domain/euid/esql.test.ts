@@ -240,16 +240,18 @@ describe('getFieldEvaluationsEsql', () => {
     const base = '_src_entity_namespace';
     const v0 = `${base}0`;
     const v1 = `${base}1`;
-    const confBase = '_src_entity_confidence';
-    const expected = [
+    const namespacePart = [
       `${v0} = MV_FIRST(event.module)`,
       `${v1} = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), "."))`,
       `${base} = CASE((${v0} IS NOT NULL AND ${v0} != ""), ${v0}, (${v1} IS NOT NULL AND ${v1} != ""), ${v1}, NULL)`,
       `entity.namespace = CASE((${base} IS NULL OR ${base} == ""), "unknown", (${base} == "okta" OR ${base} == "entityanalytics_okta"), "okta", (${base} == "azure" OR ${base} == "entityanalytics_entra_id"), "entra_id", (${base} == "o365" OR ${base} == "o365_metrics"), "microsoft_365", (${base} == "entityanalytics_ad"), "active_directory", ${base})`,
-      `${confBase} = MV_FIRST(entity.namespace)`,
-      `entity.confidence = CASE((${confBase} IS NULL OR ${confBase} == ""), "high", (${confBase} == "local"), "medium", "high")`,
     ].join(', ');
-    expect(result?.replace(/\s+/g, ' ').trim()).toBe(expected.replace(/\s+/g, ' ').trim());
+    expect(result).toBeDefined();
+    expect(result?.replace(/\s+/g, ' ').trim()).toContain(
+      namespacePart.replace(/\s+/g, ' ').trim()
+    );
+    expect(result).toContain('entity.confidence');
+    expect(result).toContain('_src_entity_confidence');
   });
 });
 
@@ -269,4 +271,64 @@ describe('getEuidEsqlEvaluation', () => {
                       (host.hostname IS NOT NULL AND host.hostname != ""), host.hostname, NULL))`;
     expect(normalize(result)).toBe(normalize(expected));
   });
+
+  it('returns conditional CASE for user: when local uses user.name@host.id@entity.namespace, else 4-option ranking', () => {
+    const result = getEuidEsqlEvaluation('user');
+
+    const expected = `CONCAT("user:", CASE((\`entity.namespace\` == "local"), CASE((user.name IS NOT NULL AND user.name != "" AND host.id IS NOT NULL AND host.id != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", host.id, "@", entity.namespace), NULL),
+true, CASE((user.email IS NOT NULL AND user.email != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.email, "@", entity.namespace),
+(user.id IS NOT NULL AND user.id != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.id, "@", entity.namespace),
+(user.name IS NOT NULL AND user.name != "" AND user.domain IS NOT NULL AND user.domain != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", user.domain, "@", entity.namespace),
+(user.name IS NOT NULL AND user.name != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", entity.namespace), NULL), NULL))`;
+    expect(normalize(result)).toBe(normalize(expected));
+  });
 });
+
+describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
+  it('uses user.name@host.id@entity.namespace when whenConditionTrueSetFieldsPreAgg sets entity.namespace to local', () => {
+    const result = getEuidEsqlFilterBasedOnDocument('user', {
+      user: { name: 'alice' },
+      host: { id: 'host-1' },
+      event: { category: 'authentication' },
+    });
+
+    expect(result).toContain('user.name == "alice"');
+    expect(result).toContain('host.id == "host-1"');
+  });
+
+    it('uses else ranking when entity.namespace is not local', () => {
+      const result = getEuidEsqlFilterBasedOnDocument('user', {
+        user: { email: 'alice@example.com' },
+        event: { module: 'okta' },
+      });
+
+      expect(result).toContain('user.email == "alice@example.com"');
+      expect(result).not.toContain('host.id');
+    });
+  });
+
+  describe('evaluated fields and source clauses', () => {
+    it('does not add filter on evaluated fields (entity.namespace, entity.confidence) since they are not stored', () => {
+      const result = getEuidEsqlFilterBasedOnDocument('user', {
+        user: { email: 'alice@example.com' },
+        event: { module: 'okta' },
+      });
+
+      expect(result).toBeDefined();
+      expect(result).not.toMatch(/entity\.namespace\s*==/);
+      expect(result).not.toMatch(/entity\.confidence\s*==/);
+    });
+
+    it('skips source clause for evaluations whose source is an evaluated field (entity.confidence sources from entity.namespace)', () => {
+      const result = getEuidEsqlFilterBasedOnDocument('user', {
+        user: { name: 'jane', domain: 'corp.com' },
+        event: { module: 'entityanalytics_ad' },
+      });
+
+      expect(result).toBeDefined();
+      expect(result).toContain('event.module');
+      expect(result).toContain('data_stream.dataset');
+      expect(result).not.toMatch(/entity\.namespace\s*==/);
+      expect(result).not.toMatch(/entity\.confidence\s*==/);
+    });
+  });

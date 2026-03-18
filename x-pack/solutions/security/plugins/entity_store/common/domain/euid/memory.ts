@@ -8,7 +8,13 @@
 import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { getDocument, getFieldValue, isEuidField } from './commons';
+import {
+  evaluateStreamlangCondition,
+  getDocument,
+  getEffectiveEuidRanking,
+  getFieldValue,
+  isEuidField,
+} from './commons';
 import { applyFieldEvaluations } from './field_evaluations';
 
 /**
@@ -53,7 +59,16 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  const composedId = getComposedFieldValues(doc, identityField.euidFields);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.condition) {
+    if (
+      evaluateStreamlangCondition(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg.condition)
+    ) {
+      doc = { ...doc, ...entityDefinition.whenConditionTrueSetFieldsPreAgg.fields };
+    }
+  }
+  const effectiveRanking = getEffectiveEuidRanking(doc, identityField);
+  const composedId = getComposedFieldValues(doc, effectiveRanking);
   if (composedId.length === 0) {
     return undefined;
   }

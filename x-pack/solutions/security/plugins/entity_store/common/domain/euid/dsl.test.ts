@@ -343,69 +343,7 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
   it('user: returns documentsFilter DSL (exclusions and at least one id field)', () => {
     const result = getEuidDslDocumentsContainsIdFilter('user');
 
-    expect(result).toEqual({
-      bool: {
-        must: [
-          {
-            bool: {
-              should: [
-                {
-                  bool: {
-                    must_not: {
-                      exists: {
-                        field: 'event.outcome',
-                      },
-                    },
-                  },
-                },
-                {
-                  bool: {
-                    must_not: {
-                      match: {
-                        'event.outcome': 'failure',
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          {
-            bool: {
-              should: [
-                {
-                  bool: {
-                    must_not: {
-                      exists: {
-                        field: 'event.kind',
-                      },
-                    },
-                  },
-                },
-                {
-                  bool: {
-                    must_not: {
-                      match: {
-                        'event.kind': 'enrichment',
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          {
-            bool: {
-              should: [
-                isNotEmptyClause('user.email'),
-                isNotEmptyClause('user.id'),
-                isNotEmptyClause('user.name'),
-              ],
-            },
-          },
-        ],
-      },
-    });
+    expect(result).toMatchSnapshot();
   });
 
   it('host: returns documentsFilter DSL (or of isNotEmpty for each identity field)', () => {

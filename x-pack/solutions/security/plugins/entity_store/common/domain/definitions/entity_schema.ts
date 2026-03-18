@@ -57,14 +57,22 @@ const fieldEvaluationSchema = z.object({
   useFallbackWhenNoClauseMatch: z.optional(z.boolean()),
 });
 
+const euidCompositionSchema = z.array(z.union([euidFieldSchema, euidSeparatorSchema]));
+const euidRankingBranchSchema = z.object({
+  when: streamlangConditionSchema.optional(),
+  ranking: z.array(euidCompositionSchema),
+});
+
+const euidRankingSchema = z.object({
+  branches: z.array(euidRankingBranchSchema),
+});
+
 // Any field used in the euid calculation must be mapped in the fields array,
 // otherwise we won't have guarantees of field being available
 const calculatedIdentityFieldLogicSchema = z.object({
-  // Sequential order of fields to be used to generate the identity field.
-  // The ids that are generated using the esqlEvaluation will also be prepended
-  // with the type (e.g. `host:`). The fields found on the default id won't be prepended.
-  // ALL THE FIELDS MUST BE OF MAPPING TYPE 'keyword'
-  euidFields: z.array(z.array(z.union([euidFieldSchema, euidSeparatorSchema]))),
+  // Ranking mechanism for EUID: branches evaluated in order; first matching branch wins.
+  // Branch with no `when` always matches (fallback). Used by ESQL, Painless, Memory, DSL.
+  euidRanking: euidRankingSchema,
 
   // Optional pre-evaluated fields (e.g. entity.namespace from event.module). Applied before
   // euid generation and translated to ESQL, Painless, and in-memory.
@@ -119,7 +127,7 @@ export const entitySchema = z.object({
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields
-export type CalculatedEntityIdentity = z.infer<typeof calculatedIdentityFieldLogicSchema>; // full identity (euidFields + documentsFilter + optional fieldEvaluations)
+export type CalculatedEntityIdentity = z.infer<typeof calculatedIdentityFieldLogicSchema>; // full identity (euidRanking + documentsFilter + optional fieldEvaluations)
 export type SingleFieldIdentity = z.infer<typeof singleFieldIdentitySchema>;
 export type EntityIdentity = z.infer<typeof identityFieldSchema>; // definition-time identity (full or singleField)
 export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
@@ -128,6 +136,8 @@ export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; /
 export type EuidField = z.infer<typeof euidFieldSchema>;
 export type EuidSeparator = z.infer<typeof euidSeparatorSchema>;
 export type EuidAttribute = EuidField | EuidSeparator;
+export type EuidRankingBranch = z.infer<typeof euidRankingBranchSchema>;
+export type EuidRanking = z.infer<typeof euidRankingSchema>;
 export type FieldEvaluationWhenClause = z.infer<typeof fieldEvaluationWhenClauseSchema>;
 export type FieldEvaluationSource = z.infer<typeof fieldEvaluationSourceSchema>;
 export type FieldEvaluation = z.infer<typeof fieldEvaluationSchema>;

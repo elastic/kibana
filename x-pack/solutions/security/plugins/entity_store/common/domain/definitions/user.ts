@@ -144,19 +144,36 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
         useFallbackWhenNoClauseMatch: true,
       },
     ],
-    // Ranking mechanism for the identity field
-    euidFields: [
-      [{ field: 'user.email' }, { sep: '@' }, { field: 'entity.namespace' }],
-      [{ field: 'user.id' }, { sep: '@' }, { field: 'entity.namespace' }],
-      [
-        { field: 'user.name' },
-        { sep: '@' },
-        { field: 'user.domain' },
-        { sep: '@' },
-        { field: 'entity.namespace' },
+    euidRanking: {
+      branches: [
+        {
+          when: { field: 'entity.namespace', eq: 'local' },
+          ranking: [
+            [
+              { field: 'user.name' },
+              { sep: '@' },
+              { field: 'host.id' },
+              { sep: '@' },
+              { field: 'entity.namespace' },
+            ],
+          ],
+        },
+        {
+          ranking: [
+            [{ field: 'user.email' }, { sep: '@' }, { field: 'entity.namespace' }],
+            [{ field: 'user.id' }, { sep: '@' }, { field: 'entity.namespace' }],
+            [
+              { field: 'user.name' },
+              { sep: '@' },
+              { field: 'user.domain' },
+              { sep: '@' },
+              { field: 'entity.namespace' },
+            ],
+            [{ field: 'user.name' }, { sep: '@' }, { field: 'entity.namespace' }],
+          ],
+        },
       ],
-      [{ field: 'user.name' }, { sep: '@' }, { field: 'entity.namespace' }],
-    ],
+    },
     /**
      * UEBA user documents filter (pre-aggregation: which documents enter the pipeline).
      * event.outcome not failure AND (idpDocumentFilter OR nonIdpDocumentFilter).

@@ -10,12 +10,15 @@ import type {
   EntityDefinitionWithoutId,
   FieldEvaluation,
   EntityType,
+  EuidAttribute,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
 import {
+  evaluateStreamlangCondition,
   getDocument,
+  getEffectiveEuidRanking,
   getFieldValue,
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
@@ -58,7 +61,8 @@ export function getEuidEsqlFilterBasedOnDocument(
   }
 
   doc = getDocument(doc);
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
     const value = getFieldValue(doc, identityField.singleField);
@@ -72,7 +76,14 @@ export function getEuidEsqlFilterBasedOnDocument(
     const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
+  const whenConditionTrueSetFieldsPreAgg = entityDefinition.whenConditionTrueSetFieldsPreAgg;
+  if (whenConditionTrueSetFieldsPreAgg?.condition) {
+    if (evaluateStreamlangCondition(doc, whenConditionTrueSetFieldsPreAgg.condition)) {
+      doc = { ...doc, ...whenConditionTrueSetFieldsPreAgg.fields };
+    }
+  }
+  const effectiveEuidRanking = getEffectiveEuidRanking(doc, identityField);
+  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, effectiveEuidRanking);
   if (fieldsToBeFilteredOn.rankingPosition === -1) {
     return undefined;
   }
@@ -86,7 +97,7 @@ export function getEuidEsqlFilterBasedOnDocument(
     .map(([field, value]) => `(${field} == "${escapeEsqlString(value)}")`);
 
   const toBeFilteredOut = getFieldsToBeFilteredOut(
-    identityField.euidFields,
+    effectiveEuidRanking,
     fieldsToBeFilteredOn
   ).filter((field) => !evaluatedDestinations.has(field));
   const outExpressions = toBeFilteredOut.map((field) => `${esqlIsNullOrEmpty(field)}`);
@@ -95,6 +106,12 @@ export function getEuidEsqlFilterBasedOnDocument(
 
   if (identityField.fieldEvaluations?.length) {
     for (const evaluation of identityField.fieldEvaluations) {
+      const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
+      const sourceFields = [...exactMatchFields, ...prefixMatchFields];
+      const hasEvaluatedSource = sourceFields.some((f) => evaluatedDestinations.has(f));
+      if (hasEvaluatedSource) {
+        continue;
+      }
       const spec = getSourceMatchSpec(doc, evaluation);
       allParts.push(buildSourceClauseEsql(evaluation, spec));
     }
@@ -255,35 +272,23 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
  * @param withTypeId - Whether to prepend the entity type to the evaluation. Defaults to true.
  * @returns An ESQL evaluation string that computes the entity id.
  */
-export function getEuidEsqlEvaluation(
-  entityType: EntityType,
-  { withTypeId = true }: { withTypeId?: boolean } = {}
-) {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
-  const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
-
-  if (isSingleFieldIdentity(identityField)) {
-    return appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId);
-  }
-
-  if (identityField.euidFields.length === 0) {
+function buildRankingCaseEsql(ranking: EuidAttribute[][]): string {
+  if (ranking.length === 0) {
     throw new Error('No euid fields found, invalid euid logic definition');
   }
 
-  // If only one instruction with single field, no CASE logic is needed
-  if (identityField.euidFields.length === 1) {
-    const comp = identityField.euidFields[0];
+  if (ranking.length === 1) {
+    const comp = ranking[0];
     const firstAttr = comp[0];
     if (isEuidSeparator(firstAttr)) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
     if (comp.length === 1 && isEuidField(firstAttr)) {
-      return appendTypeIdIfNeeded(entityType, firstAttr.field, mustPrependTypeId);
+      return (firstAttr as { field: string }).field;
     }
-    // single instruction but composed: fall through to multi-branch CASE
   }
 
-  const euidLogic = identityField.euidFields.map((composedField) => {
+  const euidLogic = ranking.map((composedField) => {
     if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
@@ -310,7 +315,39 @@ export function getEuidEsqlEvaluation(
     return `(${compositionConditions}), ${concatLogic}`;
   });
 
-  const idLogic = `CASE(${euidLogic.join(',\n')}, NULL)`;
+  return `CASE(${euidLogic.join(',\n')}, NULL)`;
+}
+
+export function getEuidEsqlEvaluation(
+  entityType: EntityType,
+  { withTypeId = true }: { withTypeId?: boolean } = {}
+) {
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
+
+  if (isSingleFieldIdentity(identityField)) {
+    return appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId);
+  }
+
+  const { euidRanking } = identityField;
+  const branches = euidRanking.branches;
+  const hasConditionalBranch = branches.some((b) => b.when != null);
+  if (!hasConditionalBranch && branches.length === 1) {
+    const idLogic = buildRankingCaseEsql(branches[0].ranking);
+    return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
+  }
+  const branchCaseParts: string[] = [];
+  for (const branch of branches) {
+    const rankingCase = buildRankingCaseEsql(branch.ranking);
+    if (branch.when) {
+      const whenCondition = conditionToESQL(branch.when);
+      branchCaseParts.push(`(${whenCondition}), ${rankingCase}`);
+    } else {
+      branchCaseParts.push(`true, ${rankingCase}`);
+    }
+  }
+  const idLogic =
+    branchCaseParts.length > 0 ? `CASE(${branchCaseParts.join(',\n')}, NULL)` : 'NULL';
   return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
 }
 

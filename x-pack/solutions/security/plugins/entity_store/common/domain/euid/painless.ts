@@ -60,15 +60,12 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     return `if (${condition}) { return ${prefixExpr}doc['${escaped}'].value; } return null;`;
   }
 
-  if (identityField.euidFields.length === 0) {
-    throw new Error('No euid fields found, invalid euid logic definition');
+  const { euidRanking } = identityField;
+  if (euidRanking.branches.length === 0) {
+    throw new Error('No euid ranking branches found, invalid euid logic definition');
   }
 
-  // Map of field names to their already evaluated variable names.
-  // Used to avoid re-evaluating the same field multiple times.
   const evaluatedVars = new Map<string, string>();
-
-  // Goes through field evaluations and creates the required parsing logic for them.
   let preamble = '';
   if (identityField.fieldEvaluations?.length) {
     const result = buildFieldEvaluationsPreamble(identityField.fieldEvaluations);
@@ -88,29 +85,52 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     return `doc['${escapePainlessField(field)}'].value`;
   };
 
-  // If there is only one euid field, we can simplify the logic.
-  if (identityField.euidFields.length === 1) {
-    const comp = identityField.euidFields[0];
-    const first = comp[0];
-    if (!isEuidField(first)) {
-      throw new Error('Separator found in single field, invalid euid logic definition');
-    }
-    const field = first.field;
-    const condition = fieldCondition(field);
-    const valueExpr = fieldValueExpr(field);
-    return `${preamble}if (${condition}) { return ${prefixExpr}${valueExpr}; } return null;`;
+  const buildBranchClauses = (ranking: EuidAttribute[][]) =>
+    ranking
+      .map((composedField) => {
+        const compositionCond = composedField
+          .filter(isEuidField)
+          .map((a) => fieldCondition(a.field))
+          .join(' && ');
+        const valueExpr = buildPainlessValueExprWithEvaluated(composedField, fieldValueExpr);
+        return `if (${compositionCond}) { return ${prefixExpr}${valueExpr}; }`;
+      })
+      .join(' ');
+
+  const hasConditionalBranch = euidRanking.branches.some((b) => b.when != null);
+  if (!hasConditionalBranch && euidRanking.branches.length === 1) {
+    return preamble + buildBranchClauses(euidRanking.branches[0].ranking) + ' return null;';
   }
 
-  const clauses = identityField.euidFields.map((composedField) => {
-    const compositionCond = composedField
-      .filter(isEuidField)
-      .map((a) => fieldCondition(a.field))
-      .join(' && ');
-    const valueExpr = buildPainlessValueExprWithEvaluated(composedField, fieldValueExpr);
-    return `if (${compositionCond}) { return ${prefixExpr}${valueExpr}; }`;
-  });
+  const buildWhenCondition = (when: unknown): string => {
+    if (!when || typeof when !== 'object') return 'false';
+    const c = when as Record<string, unknown>;
+    if ('field' in c && 'eq' in c && typeof c.field === 'string') {
+      const varName = evaluatedVars.get(c.field);
+      const val = escapePainlessString(String(c.eq));
+      if (varName) return `${varName} != null && ${varName} == "${val}"`;
+      return (
+        painlessFieldNonEmpty(c.field) +
+        ` && doc['${escapePainlessField(c.field)}'].value == "${val}"`
+      );
+    }
+    return 'false';
+  };
 
-  return preamble + clauses.join(' ') + ' return null;';
+  const branchParts: string[] = [];
+  for (let i = 0; i < euidRanking.branches.length; i++) {
+    const branch = euidRanking.branches[i];
+    const clauses = buildBranchClauses(branch.ranking);
+    if (branch.when) {
+      const cond = buildWhenCondition(branch.when);
+      const prefix = i === 0 ? 'if' : 'else if';
+      branchParts.push(`${prefix} (${cond}) { ${clauses} return null; }`);
+    } else {
+      branchParts.push(`else { ${clauses} return null; }`);
+    }
+  }
+  const branchLogic = branchParts.join(' ');
+  return preamble + branchLogic + ' return null;';
 }
 
 function painlessFieldNonEmpty(field: string): string {

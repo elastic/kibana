@@ -6,7 +6,11 @@
  */
 
 import { get } from 'lodash';
-import type { EuidAttribute, FieldEvaluationSource } from '../definitions/entity_schema';
+import type {
+  CalculatedEntityIdentity,
+  EuidAttribute,
+  FieldEvaluationSource,
+} from '../definitions/entity_schema';
 
 interface FieldValue {
   [key: string]: string;
@@ -59,6 +63,58 @@ export function getFieldValue(doc: any, field: string): string | undefined {
 
 export function getCompositionFields(composition: EuidAttribute[]): string[] {
   return composition.filter(isEuidField).map((attr) => attr.field);
+}
+
+/**
+ * Evaluates a streamlang condition against a document. Supports and, or, not, and field predicates.
+ */
+export function evaluateStreamlangCondition(doc: any, condition: unknown): boolean {
+  if (!condition || typeof condition !== 'object') return false;
+  const c = condition as Record<string, unknown>;
+  if ('and' in c && Array.isArray(c.and)) {
+    return (c.and as unknown[]).every((sub) => evaluateStreamlangCondition(doc, sub));
+  }
+  if ('or' in c && Array.isArray(c.or)) {
+    return (c.or as unknown[]).some((sub) => evaluateStreamlangCondition(doc, sub));
+  }
+  if ('not' in c) {
+    return !evaluateStreamlangCondition(doc, c.not);
+  }
+  if ('always' in c) return true;
+  if ('never' in c) return false;
+  if ('field' in c && typeof c.field === 'string') {
+    const value = getFieldValue(doc, c.field);
+    if ('eq' in c && c.eq !== undefined) return value === String(c.eq);
+    if ('neq' in c && c.neq !== undefined) return value !== String(c.neq);
+    if ('exists' in c) {
+      const exists = value !== undefined && value !== null && value !== '';
+      return c.exists === exists;
+    }
+    if ('includes' in c) {
+      const fieldVal = getFieldValue(doc, c.field);
+      if (fieldVal === undefined) return false;
+      return String(fieldVal).includes(String(c.includes));
+    }
+  }
+  return false;
+}
+
+/**
+ * Returns the effective euid ranking for a document. Iterates branches in order;
+ * returns the first matching branch's ranking. Doc must have fieldEvaluations and
+ * whenConditionTrueSetFieldsPreAgg already applied.
+ */
+export function getEffectiveEuidRanking(
+  doc: any,
+  identityField: CalculatedEntityIdentity
+): EuidAttribute[][] {
+  const { euidRanking } = identityField;
+  for (const branch of euidRanking.branches) {
+    if (!branch.when || evaluateStreamlangCondition(doc, branch.when)) {
+      return branch.ranking;
+    }
+  }
+  return euidRanking.branches[euidRanking.branches.length - 1]?.ranking ?? [];
 }
 
 export function getFieldsToBeFilteredOn(
