@@ -94,6 +94,6 @@ export type {
   DatasetConfig,
   RuleGenerationScenario,
   KIExtractionScenario,
-  FeatureSoftDeleteScenario,
+  KIFeatureSoftDeleteScenario,
   SnapshotSourceOverride,
 } from './types';

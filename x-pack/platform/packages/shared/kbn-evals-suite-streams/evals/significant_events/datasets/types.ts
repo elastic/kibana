@@ -54,7 +54,7 @@ export interface KIExtractionScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
-export interface FeatureSoftDeleteScenario {
+export interface KIFeatureSoftDeleteScenario {
   input: {
     scenario_id: string;
     sample_document_count: number;
@@ -80,5 +80,5 @@ export interface DatasetConfig {
   gcs: GcsConfig;
   ruleGeneration: RuleGenerationScenario[];
   kiExtraction: KIExtractionScenario[];
-  featureSoftDelete: FeatureSoftDeleteScenario[];
+  kiFeatureSoftDelete: KIFeatureSoftDeleteScenario[];
 }

@@ -20,7 +20,7 @@ import {
   resolveScenarioSnapshotSource,
   snapshotCatalogKey,
   MANAGED_STREAM_SEARCH_PATTERN,
-  type FeatureSoftDeleteScenario,
+  type KIFeatureSoftDeleteScenario,
 } from '../datasets';
 import { createSoftDeleteSemanticEvaluator } from '../../../src/evaluators/soft_delete';
 import { runSoftDeleteExperiment } from './run_soft_delete_experiment';
@@ -33,7 +33,7 @@ evaluate.describe(
   () => {
     const activeDatasets = getActiveDatasets();
     const softDeleteRuns = activeDatasets.flatMap((dataset) =>
-      dataset.featureSoftDelete.map((scenario) => ({ dataset, scenario }))
+      dataset.kiFeatureSoftDelete.map((scenario) => ({ dataset, scenario }))
     );
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
@@ -106,7 +106,7 @@ evaluate.describe(
                   description: `[${dataset.id}] Soft-delete ${scenario.input.delete_count} feature(s) from ${scenario.input.scenario_id}, verify exclusion across ${scenario.input.follow_up_runs} follow-up runs`,
                   examples: [{ input: scenario.input }],
                 },
-                task: async ({ input }: { input: FeatureSoftDeleteScenario['input'] }) => {
+                task: async ({ input }: { input: KIFeatureSoftDeleteScenario['input'] }) => {
                   const result = await runSoftDeleteExperiment({
                     esClient,
                     deleteCount: input.delete_count,
