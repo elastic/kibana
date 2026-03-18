@@ -1032,6 +1032,7 @@ x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/resp
 x-pack/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/form-generator @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/oauth-hooks @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/retry-service @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/rule_form @elastic/response-ops
