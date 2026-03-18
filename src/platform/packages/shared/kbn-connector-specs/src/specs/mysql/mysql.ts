@@ -71,8 +71,8 @@ export const MysqlConnector: ConnectorSpec = {
             'The hostname, IP address, or URL of the MySQL HTTP proxy (e.g. https://proxy.example.com, 192.168.1.1, localhost)',
         }),
       }),
-    port: z
-      .coerce.number()
+    port: z.coerce
+      .number()
       .int()
       .min(1)
       .max(65535)
