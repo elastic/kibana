@@ -33,6 +33,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AgentFormData } from '../agent_form';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { appPaths } from '../../../../utils/app_paths';
+import { labels } from '../../../../utils/i18n';
 
 interface PluginsTabProps {
   control: Control<AgentFormData>;
@@ -174,9 +175,7 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
           <EuiSearchBar
             box={{
               incremental: true,
-              placeholder: i18n.translate('xpack.agentBuilder.plugins.searchPluginsPlaceholder', {
-                defaultMessage: 'Search plugins',
-              }),
+              placeholder: labels.plugins.searchPluginsPlaceholder,
             }}
             onChange={({ queryText, error }) => {
               if (!error) {
@@ -212,13 +211,7 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
               start: <strong>{Math.min(pageIndex * pageSize + 1, filteredPlugins.length)}</strong>,
               end: <strong>{Math.min((pageIndex + 1) * pageSize, filteredPlugins.length)}</strong>,
               total: filteredPlugins.length,
-              plugins: (
-                <strong>
-                  {i18n.translate('xpack.agentBuilder.plugins.title', {
-                    defaultMessage: 'Plugins',
-                  })}
-                </strong>
-              ),
+              plugins: <strong>{labels.plugins.title}</strong>,
             }}
           />
         </EuiText>
@@ -243,12 +236,8 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
         }}
         noItemsMessage={
           plugins.length > 0
-            ? i18n.translate('xpack.agentBuilder.plugins.noPluginsMatchMessage', {
-                defaultMessage: 'No plugins match your search',
-              })
-            : i18n.translate('xpack.agentBuilder.plugins.noPluginsMessage', {
-                defaultMessage: 'No plugins installed',
-              })
+            ? labels.plugins.noPluginsMatchMessage
+            : labels.plugins.noPluginsMessage
         }
       />
     </div>
@@ -295,9 +284,7 @@ const ActivePluginsStatus: React.FC<{ activePluginsCount: number; totalPlugins: 
                   values={{
                     pluginsLink: (
                       <EuiLink href={createAgentBuilderUrl(appPaths.plugins.list)}>
-                        {i18n.translate('xpack.agentBuilder.plugins.title', {
-                          defaultMessage: 'Plugins',
-                        })}
+                        {labels.plugins.title}
                       </EuiLink>
                     ),
                   }}
@@ -370,8 +357,6 @@ const createPluginDetailsColumn = () => ({
 
 const createVersionColumn = () => ({
   field: 'version',
-  name: i18n.translate('xpack.agentBuilder.plugins.versionLabel', {
-    defaultMessage: 'Version',
-  }),
+  name: labels.plugins.versionLabel,
   render: (version: string) => <EuiBadge color="hollow">{version}</EuiBadge>,
 });
