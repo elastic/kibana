@@ -12,6 +12,8 @@ import { chatSystemIndex } from '@kbn/agent-builder-server';
 
 const conversationIndexName = chatSystemIndex('conversations');
 
+// Must match agent_builder's conversation storage schema exactly so both plugins
+// write to the same concrete index (StorageIndexAdapter hashes the schema).
 const storageSettings = {
   name: conversationIndexName,
   schema: {
