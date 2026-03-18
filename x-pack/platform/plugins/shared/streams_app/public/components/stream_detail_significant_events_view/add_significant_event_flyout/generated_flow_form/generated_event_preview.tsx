@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,14 +17,16 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiTextArea,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
-import { StreamsESQLEditor } from '../../../esql_query_editor';
+import { StreamsESQLEditor, validatePrefix } from '../../../esql_query_editor';
 import { validateQuery } from '../common/validate_query';
 import { SeveritySelector } from '../common/severity_selector';
+import { getValidPrefixes } from '../common/get_valid_prefixes';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
@@ -47,6 +49,11 @@ export function GeneratedEventPreview({
 
   const [touched, setTouched] = useState({ title: false, esql: false });
   const validation = validateQuery(query);
+  const prefix = useMemo(() => getValidPrefixes(definition), [definition]);
+  const prefixValidation = useMemo(
+    () => validatePrefix(query.esql.query, prefix),
+    [query.esql.query, prefix]
+  );
 
   return (
     <div
@@ -99,7 +106,11 @@ export function GeneratedEventPreview({
                     <EuiButton
                       size="s"
                       iconType="save"
-                      disabled={validation.title.isInvalid || validation.esql.isInvalid}
+                      disabled={
+                        validation.title.isInvalid ||
+                        validation.esql.isInvalid ||
+                        !prefixValidation.isValid
+                      }
                       onClick={() => {
                         setIsEditing(false);
                         onSave(query);
@@ -156,6 +167,34 @@ export function GeneratedEventPreview({
           label={
             <EuiFormLabel>
               {i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldDescriptionLabel',
+                { defaultMessage: 'Description' }
+              )}
+            </EuiFormLabel>
+          }
+        >
+          <EuiTextArea
+            compressed
+            value={query.description ?? ''}
+            disabled={!isEditing}
+            rows={2}
+            resize="vertical"
+            onChange={(event) => {
+              setQuery({ ...query, description: event.currentTarget.value });
+            }}
+            placeholder={i18n.translate(
+              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.descriptionPlaceholder',
+              {
+                defaultMessage: 'Describe what this query detects and why it matters',
+              }
+            )}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <EuiFormLabel>
+              {i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldSeverityLabel',
                 { defaultMessage: 'Severity' }
               )}
@@ -183,6 +222,7 @@ export function GeneratedEventPreview({
             setTouched((prev) => ({ ...prev, esql: true }));
             setQuery({ ...query, esql: { query: newQuery?.esql ?? '' } });
           }}
+          prefix={prefix}
         />
       </EuiForm>
 
@@ -191,7 +231,7 @@ export function GeneratedEventPreview({
       <PreviewDataSparkPlot
         definition={definition}
         query={query}
-        isQueryValid={!validation.esql.isInvalid}
+        isQueryValid={!validation.esql.isInvalid && prefixValidation.isValid}
       />
     </div>
   );

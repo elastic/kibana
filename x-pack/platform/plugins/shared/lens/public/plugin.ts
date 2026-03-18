@@ -376,6 +376,7 @@ export class LensPlugin {
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
         datasourceMap,
+        eventAnnotationService,
         theme: core.theme,
         uiSettings: core.uiSettings,
       };
@@ -427,7 +428,7 @@ export class LensPlugin {
             }
           );
         },
-        savedObjectType: LENS_EMBEDDABLE_TYPE,
+        savedObjectType: LENS_CONTENT_TYPE,
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {
           defaultMessage: 'Lens',
         }),

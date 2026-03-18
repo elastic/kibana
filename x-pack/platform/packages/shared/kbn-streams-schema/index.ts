@@ -7,14 +7,19 @@
 
 export { Streams } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
-export { Ingest } from './src/models/ingest';
-export { WiredIngest } from './src/models/ingest/wired';
-export { ClassicIngest } from './src/models/ingest/classic';
-export { Query } from './src/models/query';
+export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
+export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
+export {
+  ClassicIngest,
+  ClassicStream,
+  ClassicIngestUpsertRequest,
+} from './src/models/ingest/classic';
+export { Query, QueryStream } from './src/models/query';
 export {
   ESQL_VIEW_PREFIX,
   getEsqlViewName,
   getStreamNameFromViewName,
+  getWiredStreamViewQuery,
 } from './src/models/query/view_name';
 
 export {
@@ -29,7 +34,7 @@ export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
 export { isOtelStream } from './src/helpers/is_otel_stream';
-export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
@@ -53,6 +58,7 @@ export {
   extractWhereExpression,
   getFromSources,
   normalizeEsqlQuery,
+  replaceFromSources,
   rewriteFromSources,
 } from './src/helpers/esql_helpers';
 
@@ -64,7 +70,7 @@ export {
   flattenRecord,
   recursiveRecord,
 } from './src/shared/record_types';
-export { isSchema, createIsNarrowSchema } from './src/shared/type_guards';
+export { isSchema, createIsNarrowSchema, isRecord } from './src/shared/type_guards';
 
 export {
   isChildOf,
@@ -88,9 +94,15 @@ export {
   type FieldDefinition,
   type NamedFieldDefinitionConfig,
   type FieldDefinitionConfig,
+  type ClassicFieldDefinition,
+  type ClassicFieldDefinitionConfig,
   type InheritedFieldDefinitionConfig,
   type InheritedFieldDefinition,
   type FieldDefinitionConfigAdvancedParameters,
+  type FieldDefinitionType,
+  type AllFieldDefinitionType,
+  FIELD_DEFINITION_TYPES,
+  ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
 } from './src/fields';
@@ -168,6 +180,8 @@ export type {
 export { emptyAssets } from './src/helpers/empty_assets';
 export {
   validateStreamName,
+  type StreamNameValidationError,
+  type StreamNameValidationResult,
   MAX_STREAM_NAME_LENGTH,
   INVALID_STREAM_NAME_CHARACTERS,
 } from './src/helpers/stream_name_validation';
@@ -231,3 +245,5 @@ export {
 } from './src/insights';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
+export { streamsOasDefinitions } from './src/oas_definitions';
+export type { StreamsOasDefinitions } from './src/oas_definitions';

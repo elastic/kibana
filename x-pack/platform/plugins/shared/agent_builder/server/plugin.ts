@@ -30,8 +30,10 @@ import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
+import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/runner/model_provider';
+import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 
 export class AgentBuilderPlugin
   implements
@@ -43,9 +45,8 @@ export class AgentBuilderPlugin
     >
 {
   private logger: Logger;
-  // @ts-expect-error unused for now
   private config: AgentBuilderConfig;
-  private serviceManager = new ServiceManager();
+  private serviceManager: ServiceManager;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
@@ -53,6 +54,7 @@ export class AgentBuilderPlugin
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.serviceManager = new ServiceManager(this.config);
   }
 
   setup(
@@ -101,6 +103,19 @@ export class AgentBuilderPlugin
 
     registerFeatures({ features: setupDeps.features });
 
+    // Phantom capability: not a registered feature privilege. Used as an admin check
+    // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
+    coreSetup.capabilities.registerProvider(() => ({
+      agentBuilder: {
+        isAdmin: false,
+      },
+    }));
+
+    coreSetup.capabilities.registerSwitcher(
+      createAdminPrivilegeSwitcher(coreSetup.getStartServices, this.logger.get('capabilities')),
+      { capabilityPath: 'agentBuilder.*' }
+    );
+
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
     setupDeps.workflowsExtensions.registerStepDefinition(
@@ -135,6 +150,22 @@ export class AgentBuilderPlugin
     });
 
     registerSkillToolsLoaderHook(serviceSetups);
+
+    // Register connector lifecycle listener to auto-create workflows/tools
+    // when connectors with workflow definitions are created.
+    // The handler checks the connectors-enabled feature flag and workflows
+    // availability at runtime, so we always register.
+    const connectorLifecycleHandler = createConnectorLifecycleHandler({
+      serviceManager: this.serviceManager,
+      workflowsManagement: setupDeps.workflowsManagement,
+      logger: this.logger.get('connector-lifecycle'),
+    });
+
+    setupDeps.actions.registerConnectorLifecycleListener({
+      connectorTypes: '*',
+      onPostCreate: connectorLifecycleHandler.onPostCreate,
+      onPostDelete: connectorLifecycleHandler.onPostDelete,
+    });
 
     return {
       tools: {
@@ -201,11 +232,11 @@ export class AgentBuilderPlugin
       skills: {
         getRegistry: skills.getRegistry.bind(skills),
         register: skills.registerSkill.bind(skills),
-        unregister: skills.unregisterSkill.bind(skills),
       },
       execution: {
         executeAgent: execution.executeAgent.bind(execution),
         getExecution: execution.getExecution.bind(execution),
+        findExecutions: execution.findExecutions.bind(execution),
       },
       runtime: {
         createModelProvider: modelProviderFactory,

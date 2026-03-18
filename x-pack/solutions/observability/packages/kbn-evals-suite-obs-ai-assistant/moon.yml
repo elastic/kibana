@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-obs-ai-assistant'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-ai-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals-suite-obs-ai-assistant'
+  title: '@kbn/evals-suite-obs-ai-assistant'
   description: Moon project for @kbn/evals-suite-obs-ai-assistant
   channel: ''
   owner: '@elastic/obs-ai-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
+  sourceRoot: x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
 dependsOn:
   - '@kbn/synthtrace-client'
   - '@kbn/evals'
@@ -36,7 +35,6 @@ dependsOn:
   - '@kbn/some-dev-log'
   - '@kbn/synthtrace'
   - '@kbn/agent-builder-common'
-  - '@kbn/es-snapshot-loader'
 tags:
   - functional-tests
   - package
@@ -50,14 +48,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

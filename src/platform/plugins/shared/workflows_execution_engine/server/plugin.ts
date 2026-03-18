@@ -22,7 +22,10 @@ import type {
   EsWorkflowExecution,
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
-import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
+import {
+  WorkflowExecutionInvalidStatusError,
+  WorkflowExecutionNotFoundError,
+} from '@kbn/workflows/common/errors';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -40,6 +43,7 @@ import type {
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
+  ResumeWorkflowExecution,
   ScheduleWorkflow,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
@@ -50,6 +54,7 @@ import { generateExecutionTaskScope } from './utils';
 import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
+import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
@@ -167,6 +172,7 @@ export class WorkflowsExecutionEnginePlugin
                 actions: pluginsStart.actions,
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
+                config,
               };
 
               await runWorkflow({
@@ -179,6 +185,8 @@ export class WorkflowsExecutionEnginePlugin
                 dependencies,
                 workflowsExecutionEngine,
                 meteringService: this.meteringService,
+                isEventDrivenExecutionEnabled:
+                  workflowsExecutionEngine.isEventDrivenExecutionEnabled,
               });
             },
             cancel: async () => {
@@ -189,7 +197,7 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
     plugins.taskManager.registerTaskDefinitions({
-      'workflow:resume': {
+      [WORKFLOW_RESUME_TASK_TYPE]: {
         title: 'Resume Workflow',
         description: 'Resumes a paused workflow',
         // Set high timeout for long-running workflows.
@@ -244,6 +252,7 @@ export class WorkflowsExecutionEnginePlugin
                 actions: pluginsStart.actions,
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
+                config,
               };
 
               await resumeWorkflow({
@@ -330,6 +339,7 @@ export class WorkflowsExecutionEnginePlugin
                 actions: pluginsStart.actions,
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
+                config,
               };
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -503,6 +513,7 @@ export class WorkflowsExecutionEnginePlugin
       actions: plugins.actions,
       taskManager: plugins.taskManager,
       workflowsExtensions: plugins.workflowsExtensions,
+      config: this.config,
     };
 
     // Helper function to create and persist a workflow execution
@@ -524,6 +535,7 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
+      const metadata = context.metadata as Record<string, unknown> | undefined;
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId,
@@ -536,6 +548,7 @@ export class WorkflowsExecutionEnginePlugin
         createdAt: workflowCreatedAt.toISOString(),
         executedBy,
         triggeredBy,
+        ...(metadata ? { metadata } : {}),
       };
 
       const concurrencyGroupKey = this.getConcurrencyGroupKey(
@@ -783,6 +796,44 @@ export class WorkflowsExecutionEnginePlugin
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
+    const resumeWorkflowExecution: ResumeWorkflowExecution = async (
+      executionId,
+      spaceId,
+      input,
+      request
+    ) => {
+      await checkLicense(plugins.licensing);
+
+      await this.initialize(coreStart);
+      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+        executionId,
+        spaceId
+      );
+
+      if (!workflowExecution) {
+        throw new WorkflowExecutionNotFoundError(executionId);
+      }
+
+      if (workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
+        throw new WorkflowExecutionInvalidStatusError(
+          executionId,
+          workflowExecution.status,
+          ExecutionStatus.WAITING_FOR_INPUT
+        );
+      }
+
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: executionId,
+        context: { ...workflowExecution.context, resumeInput: input },
+      });
+
+      await workflowTaskManager.scheduleImmediateResume({
+        executionId,
+        spaceId,
+        fakeRequest: request,
+      });
+    };
+
     const workflowEventLoggerService = new WorkflowEventLoggerService(
       coreStart.dataStreams,
       this.logger,
@@ -795,10 +846,21 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflowStep,
       scheduleWorkflow,
       cancelWorkflowExecution,
+      resumeWorkflowExecution,
+      isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
+      isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),
     };
   }
 
   public stop() {}
+
+  private isEventDrivenExecutionEnabled(): boolean {
+    return this.config?.eventDriven?.enabled ?? true;
+  }
+
+  private isLogTriggerEventsEnabled(): boolean {
+    return this.config?.eventDriven?.logEvents ?? true;
+  }
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {

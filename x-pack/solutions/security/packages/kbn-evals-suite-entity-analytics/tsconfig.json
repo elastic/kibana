@@ -19,6 +19,10 @@
     "@kbn/detections-response-ftr-services",
     "@kbn/es-archiver",
     "@kbn/scout-security",
+    "@kbn/test",
+    "@kbn/test-suites-xpack-platform",
+    "@kbn/core-http-common",
+    "@kbn/ml-plugin",
   ]
 }
 
