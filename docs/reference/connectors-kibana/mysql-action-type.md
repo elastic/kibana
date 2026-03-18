@@ -76,10 +76,32 @@ To use the MySQL connector, you need:
 2. A bearer token that grants read access to the databases you want to query through the proxy.
 3. The proxy must be accessible from your Kibana instance over HTTPS.
 
+## Security and read-only enforcement [mysql-security]
+
+The MySQL connector enforces read-only access at the application level by rejecting any SQL that does not begin with a read-only keyword (`SELECT`, `SHOW`, `DESCRIBE`, `EXPLAIN`, or `WITH`) and by blocking multi-statement input.
+
+Because the connector communicates through an HTTP proxy rather than maintaining a persistent MySQL connection, it cannot set `SESSION TRANSACTION READ ONLY` directly. To add a second layer of enforcement at the database level, configure your proxy to connect to MySQL using a dedicated read-only user:
+
+```sql
+-- Create a read-only user and grant only SELECT on the target databases
+CREATE USER 'kibana_readonly'@'%' IDENTIFIED BY '<password>';
+GRANT SELECT ON my_database.* TO 'kibana_readonly'@'%';
+FLUSH PRIVILEGES;
+```
+
+If your proxy supports session initialization hooks, you can also configure it to issue the following statement on every new connection:
+
+```sql
+SET SESSION TRANSACTION READ ONLY;
+```
+
+Using a least-privilege MySQL user is the recommended approach and provides the strongest guarantee against unintended writes.
+
 ## Get API credentials [mysql-api-credentials]
 
 To obtain credentials:
 
 1. Deploy or identify the HTTP proxy that wraps your MySQL server.
-2. Generate or retrieve a bearer token with read-only access to the target databases.
-3. Note the proxy host (URL, hostname, or IP), port, and the default database name.
+2. Create a dedicated read-only MySQL user and grant it `SELECT` access to the target databases (see [Security and read-only enforcement](#mysql-security)).
+3. Generate or retrieve a bearer token that the proxy accepts for authentication.
+4. Note the proxy host (URL, hostname, or IP), port, and the default database name.
