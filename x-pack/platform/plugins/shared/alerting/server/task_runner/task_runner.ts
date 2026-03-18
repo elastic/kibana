@@ -637,6 +637,13 @@ export class TaskRunner<
 
       if (apm.currentTransaction) {
         apm.currentTransaction.setOutcome(outcome);
+        apm.setCustomContext({
+          execution_outcome: {
+            ...this.ruleMonitoring.getExecutorMetrics(),
+            error: executionStatus.error,
+            warning: executionStatus.warning,
+          },
+        });
       }
 
       // set start and duration based on event log
