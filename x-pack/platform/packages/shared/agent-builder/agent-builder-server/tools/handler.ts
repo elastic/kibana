@@ -67,10 +67,10 @@ export const isToolHandlerStandardReturn = (
 /**
  * Tool handler function for {@link BuiltinToolDefinition} handlers.
  */
-export type ToolHandlerFn<TParams extends Record<string, unknown> = Record<string, unknown>> = (
-  args: TParams,
-  context: ToolHandlerContext
-) => MaybePromise<ToolHandlerReturn>;
+export type ToolHandlerFn<
+  TParams extends Record<string, unknown> = Record<string, unknown>,
+  TResult extends ToolResult = ToolResult
+> = (args: TParams, context: ToolHandlerContext) => MaybePromise<ToolHandlerReturn<TResult>>;
 
 /**
  * Scoped context which can be used during tool execution to access

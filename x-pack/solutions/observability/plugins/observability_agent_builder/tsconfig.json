@@ -49,6 +49,7 @@
     "@kbn/slo-schema",
     "@kbn/apm-types-shared",
     "@kbn/observability-utils-server",
+    "@kbn/calculate-auto",
   ],
   "exclude": ["target/**/*"]
 }
