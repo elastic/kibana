@@ -68,9 +68,5 @@ export const createIndexAdapter = ({
   return new StorageIndexAdapter<
     AutomaticImportSamplesIndexAdapterSettings,
     AutomaticImportSamplesProperties
-  >(
-    esClient,
-    logger,
-    automaticImportSamplesIndexAdapterSettings
-  ) as AutomaticImportSamplesIndexAdapter;
+  >(esClient, logger, automaticImportSamplesIndexAdapterSettings);
 };

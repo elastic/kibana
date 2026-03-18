@@ -18,7 +18,6 @@ export interface UseFetchIndicesResult {
 
 const INDEX_MANAGEMENT_INDICES_PATH = '/api/index_management/indices';
 
-/** Minimal shape from Index Management list API */
 interface IndexManagementListItem {
   name: string;
   hidden?: boolean;
