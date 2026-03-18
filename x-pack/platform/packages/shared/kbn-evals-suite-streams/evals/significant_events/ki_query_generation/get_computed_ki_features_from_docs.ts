@@ -6,7 +6,7 @@
  */
 
 import type { Feature } from '@kbn/streams-schema';
-import { CANONICAL_LAST_SEEN } from '../../../src/data_generators/canonical_kis';
+import { CANONICAL_LAST_SEEN } from '../../../src/data_generators/canonical_ki_features';
 
 const ERROR_KEYWORDS = ['error', 'exception', 'fatal', 'fail', 'panic', 'timeout', 'traceback'];
 const MAX_FIELD_VALUE_SAMPLES = 5;
@@ -61,7 +61,7 @@ const pickDiverseSamples = (
 };
 
 /**
- * Converts a flat doc into the log_samples KI format where each
+ * Converts a flat doc into the log_samples feature format where each
  * field value is wrapped in an array.
  */
 const docToSampleFormat = (doc: Record<string, unknown>): Record<string, unknown[]> => {
@@ -208,10 +208,10 @@ const buildErrorLogs = (streamName: string, flatDocs: Array<Record<string, unkno
 };
 
 /**
- * Builds computed KIs (dataset_analysis, log_samples, log_patterns,
- * error_logs) from ES search hits for canonical KIs.
+ * Builds computed KI features (dataset_analysis, log_samples, log_patterns,
+ * error_logs) from ES search hits for canonical KI features.
  */
-export const getComputedKIsFromDocs = ({
+export const getComputedKIFeaturesFromDocs = ({
   streamName,
   docs,
 }: {

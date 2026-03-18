@@ -15,15 +15,15 @@ import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { evaluate } from '../../../src/evaluate';
-import { KI_DUPLICATION_DATASETS } from './ki_duplication_datasets';
+import { KI_FEATURE_DUPLICATION_DATASETS } from './ki_feature_duplication_datasets';
 import { indexSynthtraceScenario } from '../../synthtrace_helpers';
 import {
-  kiDuplicationEvaluator,
+  kiFeatureDuplicationEvaluator,
   createSemanticUniquenessEvaluator,
   createIdConsistencyEvaluator,
-} from '../../../src/evaluators/ki_duplication_evaluators';
+} from '../../../src/evaluators/ki_feature_duplication_evaluators';
 
-evaluate.describe('KI duplication (harness)', () => {
+evaluate.describe('KI feature duplication (harness)', () => {
   const from = kbnDatemath.parse('now-10m')!;
   const to = kbnDatemath.parse('now')!;
 
@@ -72,7 +72,7 @@ evaluate.describe('KI duplication (harness)', () => {
     return { runs: outputs };
   }
 
-  KI_DUPLICATION_DATASETS.forEach((dataset) => {
+  KI_FEATURE_DUPLICATION_DATASETS.forEach((dataset) => {
     evaluate.describe(dataset.name, { tag: tags.stateful.classic }, () => {
       evaluate.beforeAll(async ({ apiServices }) => {
         await apiServices.streams.enable();
@@ -136,7 +136,7 @@ evaluate.describe('KI duplication (harness)', () => {
               },
             },
             [
-              kiDuplicationEvaluator,
+              kiFeatureDuplicationEvaluator,
               createSemanticUniquenessEvaluator({ inferenceClient: evaluatorInferenceClient }),
               createIdConsistencyEvaluator({ inferenceClient: evaluatorInferenceClient }),
               evaluators.traceBasedEvaluators.inputTokens,
