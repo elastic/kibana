@@ -186,6 +186,29 @@ export class CRUDClient {
     return;
   }
 
+  public async createEntity(entityType: EntityType, doc: Entity): Promise<void> {
+    const id = getEuidFromObject(entityType, doc);
+
+    if (!id) {
+      throw new BadCRUDRequestError(`Could not derive EUID from document`);
+    }
+    doc.entity.id = id;
+
+    const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, true);
+    const { result } = await this.esClient.create({
+      index: getLatestEntitiesIndexName(this.namespace),
+      id: hashEuid(doc.entity.id),
+      document: readyDoc,
+      refresh: 'wait_for',
+    });
+
+    if (result === 'created') {
+      this.logger.debug(`Created entity ID ${id}`);
+    }
+
+    return;
+  }
+
   /*
     // Check if document has identifying data
     const { identitySourceFields } = getEuidSourceFields(entityType);
