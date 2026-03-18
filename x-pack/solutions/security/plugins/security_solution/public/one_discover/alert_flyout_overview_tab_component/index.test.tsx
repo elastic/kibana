@@ -20,6 +20,10 @@ jest.mock('../../flyout_v2/document/tabs/overview_tab', () => ({
   OverviewTab: () => <div>{'MockOverviewTab'}</div>,
 }));
 
+jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
+  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 const mockUseInitDataViewManager = jest.fn();
 jest.mock('../../data_view_manager/hooks/use_init_data_view_manager', () => ({
   useInitDataViewManager: () => mockUseInitDataViewManager(),
@@ -36,6 +40,9 @@ describe('AlertFlyoutOverviewTab', () => {
     core: { overlays: {} },
     uiActions: {
       getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+    },
+    application: {
+      capabilities: {},
     },
   } as unknown as StartServices;
 

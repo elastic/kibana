@@ -14,9 +14,16 @@ import { createStore } from 'redux';
 import type { StartServices } from '../../../types';
 import { flyoutProviders } from './flyout_provider';
 
+jest.mock('../../../common/components/user_privileges/user_privileges_context', () => ({
+  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 const services = {
   uiActions: {
     getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+  },
+  application: {
+    capabilities: {},
   },
 } as unknown as StartServices;
 
