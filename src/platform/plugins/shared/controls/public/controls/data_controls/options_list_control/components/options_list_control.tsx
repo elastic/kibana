@@ -160,7 +160,7 @@ export const OptionsListControl = ({
                         const text = `${fieldFormatter ? fieldFormatter(value) : value}${
                           i + 1 === length ? '' : delimiter
                         }`;
-                        const isInvalid = invalidSelections?.has(value);
+                        const isInvalid = invalidSelections?.has(value as string);
                         return (
                           <span
                             key={value}

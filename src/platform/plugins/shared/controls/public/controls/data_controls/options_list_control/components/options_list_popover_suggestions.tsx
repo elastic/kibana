@@ -90,9 +90,7 @@ export const OptionsListPopoverSuggestions = ({
     [availableOptions, totalCardinality, showOnlySelected]
   );
 
-  const suggestions = useMemo<
-    OptionsListSuggestions<OptionsListSelection> | OptionsListSelection[]
-  >(() => {
+  const suggestions = useMemo<OptionsListSuggestions | OptionsListSelection[]>(() => {
     return (showOnlySelected ? selectedOptions : availableOptions) ?? [];
   }, [availableOptions, selectedOptions, showOnlySelected]);
 

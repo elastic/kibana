@@ -50,9 +50,7 @@ type PublishesDSLOptionsListComponentState = SubjectsOf<
    */
   Omit<OptionsListComponentState, 'title'> & { label: string }
 >;
-type DSLOptionsListComponentStateSetters = SettersOf<
-  Pick<OptionsListComponentState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>
->;
+type DSLOptionsListComponentStateSetters = SettersOf<OptionsListComponentState>;
 
 export type DSLOptionsListComponentApi = HasUniqueId &
   PublishesField &

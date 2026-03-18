@@ -36,7 +36,7 @@ export const isOptionsListESQLControlState = (
  * ----------------------------------------------------------------
  */
 
-export type OptionsListSuggestions<SelectionType> = Array<{
+export type OptionsListSuggestions<SelectionType = OptionsListSelection> = Array<{
   value: SelectionType;
   docCount?: number;
 }>;

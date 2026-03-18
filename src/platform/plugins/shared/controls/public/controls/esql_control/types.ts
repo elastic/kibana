@@ -43,7 +43,12 @@ export type ESQLOptionsListComponentState = Pick<
 export type ESQLOptionsListComponentApi = HasUniqueId &
   OptionsListPublishesOptions<string> &
   SubjectsOf<ESQLOptionsListComponentState> &
-  SettersOf<Pick<TemporaryState<string>, 'dataLoading'>> &
+  SettersOf<
+    Omit<
+      TemporaryState<string>,
+      'availableOptions' | 'requestSize' | 'searchStringValid' | 'totalCardinality'
+    >
+  > &
   OptionsListSelectionsApi & {
     searchTechnique$: PublishingSubject<OptionsListSearchTechnique>; // this is currently static and not stored
   };
