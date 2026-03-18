@@ -27,6 +27,7 @@ import type {
   SearchInferenceEndpointsPluginStartDependencies,
 } from './types';
 import {
+  ELASTIC_INFERENCE_SERVICE_APP_ID,
   INFERENCE_ENDPOINTS_APP_ID,
   INFERENCE_SETTINGS_SO_TYPE,
   MODEL_SETTINGS_APP_ID,
@@ -77,7 +78,7 @@ export class SearchInferenceEndpointsPlugin
       app: [],
       catalogue: [],
       management: {
-        ml: [INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
+        ml: [ELASTIC_INFERENCE_SERVICE_APP_ID, INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
       },
       privileges: {
         all: {
@@ -85,7 +86,11 @@ export class SearchInferenceEndpointsPlugin
           api: [ApiPrivileges.manage(PLUGIN_ID)],
           catalogue: [],
           management: {
-            ml: [INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
+            ml: [
+              ELASTIC_INFERENCE_SERVICE_APP_ID,
+              INFERENCE_ENDPOINTS_APP_ID,
+              MODEL_SETTINGS_APP_ID,
+            ],
           },
           savedObject: {
             all: [INFERENCE_SETTINGS_SO_TYPE],
