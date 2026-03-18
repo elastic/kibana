@@ -48,6 +48,7 @@ export const Playground: Story = {
       { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
       { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
       { start: 'now-30d', end: 'now', label: 'Last 30 days' },
+      { start: 'now-42d', end: 'now/w', label: 'Something nice' },
       { start: 'now-3M', end: 'now', label: 'Last 3 months' },
       { start: 'now-1y', end: 'now', label: 'Last 1 year' },
     ],
