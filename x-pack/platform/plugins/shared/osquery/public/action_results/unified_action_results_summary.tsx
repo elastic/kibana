@@ -6,7 +6,6 @@
  */
 
 import { EuiProgress, EuiTablePagination, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
