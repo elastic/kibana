@@ -85,7 +85,6 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
     const [inputsJson, setInputsJson] = React.useState<string>(
       JSON.stringify(stepContextOverride, null, 2)
     );
-    const [stepInputs, setStepInputs] = useState<Record<string, unknown>>(stepContextOverride);
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
     const [executionInputWarnings, setExecutionInputWarnings] = useState<string | null>(null);
 
@@ -134,7 +133,6 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
     const handleChangeTab = useCallback(
       (tab: StepInputTab) => {
         setInputsJson(JSON.stringify(stepContextOverride, null, 2));
-        setStepInputs(stepContextOverride);
         setExecutionInputErrors(null);
         setSelectedTab(tab);
       },
@@ -143,9 +141,9 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
 
     const handleSubmit = useCallback(() => {
       if (onSubmit) {
-        onSubmit({ stepInputs });
+        onSubmit({ stepInputs: JSON.parse(inputsJson) });
       }
-    }, [onSubmit, stepInputs]);
+    }, [onSubmit, inputsJson]);
 
     const isSubmitDisabled =
       (selectedTab === 'historical' && executionInputErrors !== null) ||
