@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiPageTemplate, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
-import type { IngestFlowRegistration } from './types';
+import type { IngestFlow } from './types';
 import { IngestFlowCategory } from './components/ingest_flow_category';
 import { IngestFlowFlyout } from './components/ingest_flow_flyout';
 
 interface IngestHubAppProps {
-  coreStart: CoreStart;
-  ingestFlows: IngestFlowRegistration[];
+  ingestFlows: IngestFlow[];
 }
 
-const groupByCategory = (
-  flows: IngestFlowRegistration[]
-): Map<string, IngestFlowRegistration[]> => {
-  const grouped = new Map<string, IngestFlowRegistration[]>();
+const groupByCategory = (flows: IngestFlow[]): Map<string, IngestFlow[]> => {
+  const grouped = new Map<string, IngestFlow[]>();
   for (const flow of flows) {
     const existing = grouped.get(flow.category) ?? [];
     existing.push(flow);
@@ -46,21 +42,17 @@ export const IngestHubApp: React.FC<IngestHubAppProps> = ({ ingestFlows }) => {
 
   return (
     <EuiPageTemplate>
-      <EuiPageTemplate.Header>
-        <EuiTitle size="l">
-          <h1>
-            {i18n.translate('xpack.ingestHub.pageTitle', {
-              defaultMessage: 'Ingest Hub',
-            })}
-          </h1>
-        </EuiTitle>
-      </EuiPageTemplate.Header>
+      <EuiPageTemplate.Header
+        pageTitle={i18n.translate('xpack.ingestHub.pageTitle', {
+          defaultMessage: 'Ingest Hub',
+        })}
+      />
       <EuiPageTemplate.Section>
         {[...categorizedFlows.entries()].map(([category, flows]) => (
-          <React.Fragment key={category}>
+          <Fragment key={category}>
             <IngestFlowCategory category={category} flows={flows} onFlowClick={setSelectedFlowId} />
             <EuiSpacer size="xl" />
-          </React.Fragment>
+          </Fragment>
         ))}
       </EuiPageTemplate.Section>
 

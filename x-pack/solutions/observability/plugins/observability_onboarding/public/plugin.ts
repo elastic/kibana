@@ -32,6 +32,8 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { i18n } from '@kbn/i18n';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
@@ -176,17 +178,25 @@ export class ObservabilityOnboardingPlugin
 
     plugins.ingestHub.registerIngestFlow({
       id: 'kubernetes',
-      title: 'Kubernetes',
-      description: 'Monitor your Kubernetes cluster with Elastic Agent',
+      title: i18n.translate('xpack.observability_onboarding.ingestHub.kubernetes.title', {
+        defaultMessage: 'Kubernetes',
+      }),
+      description: i18n.translate(
+        'xpack.observability_onboarding.ingestHub.kubernetes.description',
+        { defaultMessage: 'Monitor your Kubernetes cluster with Elastic Agent' }
+      ),
       icon: 'logoKubernetes',
-      category: 'Containers',
-      getComponent: async () => {
-        const [{ createIngestFlowComponent }, { KubernetesPanel }] = await Promise.all([
+      category: i18n.translate('xpack.observability_onboarding.ingestHub.category.containers', {
+        defaultMessage: 'Containers',
+      }),
+      component: dynamic(() =>
+        Promise.all([
           import('./ingest_hub/render_ingest_flow'),
           import('./application/quickstart_flows/kubernetes'),
-        ]);
-        return createIngestFlowComponent(deps, KubernetesPanel);
-      },
+        ]).then(([{ createIngestFlowComponent }, { KubernetesPanel }]) => ({
+          default: createIngestFlowComponent(deps, KubernetesPanel),
+        }))
+      ),
     });
   }
 }

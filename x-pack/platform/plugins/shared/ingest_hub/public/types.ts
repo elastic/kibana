@@ -8,18 +8,18 @@
 import type { ComponentType } from 'react';
 import type { IconType } from '@elastic/eui';
 
-export interface IngestFlowRegistration {
+export interface IngestFlow {
   id: string;
   title: string;
   description: string;
   icon: IconType;
   category: string;
   order?: number;
-  getComponent: () => Promise<ComponentType>;
+  component: ComponentType;
 }
 
 export type IngestHubSetup = Record<string, never>;
 
 export interface IngestHubStart {
-  registerIngestFlow: (flow: IngestFlowRegistration) => void;
+  registerIngestFlow: (flow: IngestFlow) => void;
 }

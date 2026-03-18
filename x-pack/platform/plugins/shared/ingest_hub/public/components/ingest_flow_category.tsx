@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
+import { sortBy } from 'lodash';
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { IngestFlowRegistration } from '../types';
+import type { IngestFlow } from '../types';
 import { IngestFlowTile } from './ingest_flow_tile';
 
 interface IngestFlowCategoryProps {
   category: string;
-  flows: IngestFlowRegistration[];
+  flows: IngestFlow[];
   onFlowClick: (flowId: string) => void;
 }
 
@@ -21,7 +22,7 @@ export const IngestFlowCategory: React.FC<IngestFlowCategoryProps> = ({
   flows,
   onFlowClick,
 }) => {
-  const sortedFlows = [...flows].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const sortedFlows = sortBy(flows, (f) => f.order ?? 0);
 
   return (
     <div>

@@ -405,14 +405,14 @@ function createNavTree({
     ],
     footer: [
       {
-        link: 'ingestHub' as const,
+        link: 'ingestHub',
         title: i18n.translate('xpack.observability.obltNav.ingestHub', {
           defaultMessage: 'Ingest Hub',
         }),
         icon: 'launch',
         children: [
           {
-            link: 'ingestHub' as const,
+            link: 'ingestHub',
             title: i18n.translate('xpack.observability.obltNav.ingestHub.getStarted', {
               defaultMessage: 'Get started',
             }),

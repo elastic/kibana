@@ -12,16 +12,15 @@ import { DEFAULT_APP_CATEGORIES, type CoreSetup, type Plugin } from '@kbn/core/p
 import { i18n } from '@kbn/i18n';
 import { from, map, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { IngestHubSetup, IngestHubStart, IngestFlowRegistration } from './types';
-
-const INGEST_HUB_ENABLED_FLAG = 'ingestHub.enabled';
+import type { IngestHubSetup, IngestHubStart, IngestFlow } from './types';
+import { INGEST_HUB_ENABLED_FLAG } from '../common/constants';
 
 const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))
 );
 
 export class IngestHubPlugin implements Plugin<IngestHubSetup, IngestHubStart> {
-  private readonly ingestFlows: IngestFlowRegistration[] = [];
+  private readonly ingestFlows: IngestFlow[] = [];
 
   setup(coreSetup: CoreSetup): IngestHubSetup {
     const startServicesPromise = coreSetup.getStartServices();
@@ -47,7 +46,7 @@ export class IngestHubPlugin implements Plugin<IngestHubSetup, IngestHubStart> {
         )
       ),
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await coreSetup.getStartServices();
+        const [coreStart] = await startServicesPromise;
         const isEnabled = coreStart.featureFlags.getBooleanValue(INGEST_HUB_ENABLED_FLAG, false);
         const { element } = params;
 
@@ -57,9 +56,7 @@ export class IngestHubPlugin implements Plugin<IngestHubSetup, IngestHubStart> {
         }
 
         ReactDOM.render(
-          coreStart.rendering.addContext(
-            <IngestHubApp coreStart={coreStart} ingestFlows={this.ingestFlows} />
-          ),
+          coreStart.rendering.addContext(<IngestHubApp ingestFlows={this.ingestFlows} />),
           element
         );
         return () => ReactDOM.unmountComponentAtNode(element);
@@ -71,7 +68,7 @@ export class IngestHubPlugin implements Plugin<IngestHubSetup, IngestHubStart> {
 
   start(): IngestHubStart {
     return {
-      registerIngestFlow: (flow: IngestFlowRegistration) => {
+      registerIngestFlow: (flow: IngestFlow) => {
         this.ingestFlows.push(flow);
       },
     };
