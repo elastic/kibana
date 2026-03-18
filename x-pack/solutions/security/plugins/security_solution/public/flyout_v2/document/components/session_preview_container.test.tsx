@@ -6,38 +6,20 @@
  */
 
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { TestProviders } from '../../../common/mock';
 import React from 'react';
-import { DocumentDetailsContext } from '../../shared/context';
 import { SessionPreviewContainer } from './session_preview_container';
-import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
-import { useLicense } from '../../../../common/hooks/use_license';
+import { useSessionViewConfig } from '../hooks/use_session_view_config';
+import { useLicense } from '../../../common/hooks/use_license';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
-} from '../../../../flyout_v2/shared/components/test_ids';
-import { mockContextValue } from '../../shared/mocks/mock_context';
+} from '../../shared/components/test_ids';
 
-jest.mock('../../shared/hooks/use_session_view_config');
-jest.mock('../../../../common/hooks/use_license');
-jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
-);
-
-const mockNavigateToSessionView = jest.fn();
-jest.mock('../../shared/hooks/use_navigate_to_session_view', () => {
-  return { useNavigateToSessionView: () => ({ navigateToSessionView: mockNavigateToSessionView }) };
-});
-
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
-
-  return {
-    ...original,
-    useDispatch: () => jest.fn(),
-  };
-});
+jest.mock('../hooks/use_session_view_config');
+jest.mock('../../../common/hooks/use_license');
 
 const sessionViewConfig = {
   index: {},
@@ -45,12 +27,35 @@ const sessionViewConfig = {
   sessionStartTime: 'sessionStartTime',
 };
 
-const renderSessionPreview = (context = mockContextValue) =>
+const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
+  ({
+    id: '1',
+    raw: {},
+    flattened,
+    isAnchor: false,
+  } as DataTableRecord);
+
+const hit = createMockHit({
+  'event.kind': 'signal',
+});
+
+const onShowSessionView = jest.fn();
+
+const renderSessionPreview = ({
+  disableNavigation = false,
+  showIcon = true,
+}: {
+  disableNavigation?: boolean;
+  showIcon?: boolean;
+} = {}) =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={context}>
-        <SessionPreviewContainer />
-      </DocumentDetailsContext.Provider>
+      <SessionPreviewContainer
+        hit={hit}
+        disableNavigation={disableNavigation}
+        showIcon={showIcon}
+        onShowSessionView={onShowSessionView}
+      />
     </TestProviders>
   );
 
@@ -61,7 +66,7 @@ describe('SessionPreviewContainer', () => {
     (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
   });
 
-  it('should open left panel visualization tab when visualization in flyout flag is on', () => {
+  it('should call onShowSessionView when navigation link is clicked', () => {
     const { getByTestId } = renderSessionPreview();
 
     expect(
@@ -69,14 +74,11 @@ describe('SessionPreviewContainer', () => {
     ).toBeInTheDocument();
     getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID)).click();
 
-    expect(mockNavigateToSessionView).toHaveBeenCalled();
+    expect(onShowSessionView).toHaveBeenCalled();
   });
 
-  it('should not render link to session viewer if flyout is open in rule preview', () => {
-    const { getByTestId, queryByTestId } = renderSessionPreview({
-      ...mockContextValue,
-      isRulePreview: true,
-    });
+  it('should not render link to session viewer when navigation is disabled', () => {
+    const { getByTestId, queryByTestId } = renderSessionPreview({ disableNavigation: true });
 
     expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
     expect(
@@ -87,11 +89,8 @@ describe('SessionPreviewContainer', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should render link to session viewer if flyout is open in preview mode', () => {
-    const { getByTestId } = renderSessionPreview({
-      ...mockContextValue,
-      isPreviewMode: true,
-    });
+  it('should render link to session viewer when icon is hidden', () => {
+    const { getByTestId } = renderSessionPreview({ showIcon: false });
 
     expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
     expect(
@@ -99,6 +98,6 @@ describe('SessionPreviewContainer', () => {
     ).toBeInTheDocument();
 
     getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID)).click();
-    expect(mockNavigateToSessionView).toHaveBeenCalled();
+    expect(onShowSessionView).toHaveBeenCalled();
   });
 });

@@ -10,9 +10,9 @@ import React from 'react';
 import { EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
-import { SESSION_VIEW_UPSELL_TEST_ID, SESSION_VIEW_NO_DATA_TEST_ID } from './test_ids';
+import { SESSION_VIEW_NO_DATA_TEST_ID, SESSION_VIEW_UPSELL_TEST_ID } from './test_ids';
 
-interface SessionViewNoDataMessageProps {
+export interface SessionViewNotEnabledProps {
   /**
    * Whether the user has an Enterprise Plus license
    */
@@ -26,7 +26,7 @@ interface SessionViewNoDataMessageProps {
 /**
  * Message displayed when the user does not have access to Session View
  */
-export const SessionViewNoDataMessage: FC<SessionViewNoDataMessageProps> = ({
+export const SessionViewNotEnabled: FC<SessionViewNotEnabledProps> = ({
   isEnterprisePlus,
   hasSessionViewConfig,
 }) => {
@@ -84,4 +84,4 @@ export const SessionViewNoDataMessage: FC<SessionViewNoDataMessageProps> = ({
   ) : null;
 };
 
-SessionViewNoDataMessage.displayName = 'SessionViewNoDataMessage';
+SessionViewNotEnabled.displayName = 'SessionViewNotEnabled';
