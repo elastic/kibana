@@ -104,7 +104,13 @@ describe('transformWorkpadOut', () => {
       expect(embeddableService.getTransforms).toHaveBeenCalledWith('visualization');
       expect(mockVisualizationTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'embeddable-id' },
-        []
+        [
+          {
+            id: 'embeddable-id',
+            name: 'savedObjectRef',
+            type: 'visualization',
+          },
+        ]
       );
     });
 
@@ -201,7 +207,13 @@ describe('legacy expressions', () => {
       expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens-dashboard-app');
       expect(mockLensTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'lens-id' },
-        []
+        [
+          {
+            id: 'lens-id',
+            name: 'savedObjectRef',
+            type: 'lens',
+          },
+        ]
       );
     });
   });
@@ -329,7 +341,13 @@ describe('legacy expressions', () => {
       expect(embeddableService.getTransforms).toHaveBeenCalledWith('visualization');
       expect(mockVisualizationTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'vis-id' },
-        []
+        [
+          {
+            id: 'vis-id',
+            name: 'savedObjectRef',
+            type: 'visualization',
+          },
+        ]
       );
     });
   });
@@ -469,7 +487,13 @@ describe('legacy expressions', () => {
       expect(embeddableService.getTransforms).toHaveBeenCalledWith('map');
       expect(mockMapTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'map-id', hiddenLayers: [] },
-        []
+        [
+          {
+            id: 'map-id',
+            name: 'savedObjectRef',
+            type: 'map',
+          },
+        ]
       );
     });
   });

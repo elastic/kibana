@@ -67,6 +67,7 @@ export interface ConnectorMetadata {
     | 'generativeAIForSearchPlayground'
     | 'endpointSecurity'
     | 'workflows'
+    | 'agentBuilder'
   >;
 }
 
