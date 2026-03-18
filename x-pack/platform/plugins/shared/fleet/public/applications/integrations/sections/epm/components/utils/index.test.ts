@@ -237,4 +237,50 @@ describe('wrapTitleWithDeprecated', () => {
       expect(wrapTitleWithDeprecated({ packageInfo })).toBe('Legacy Integration (Deprecated)');
     });
   });
+
+  describe('upcoming deprecation exclusion', () => {
+    it('should NOT add (Deprecated) when currentVersion < deprecated.since (upcoming deprecation)', () => {
+      const packageInfo = {
+        title: 'My Integration',
+        version: '1.0.0',
+        deprecated: { description: 'Will be deprecated', since: '2.0.0' },
+      } as PackageInfo;
+
+      expect(wrapTitleWithDeprecated({ packageInfo })).toBe('My Integration');
+    });
+
+    it('should add (Deprecated) when currentVersion >= deprecated.since (already deprecated)', () => {
+      const packageInfo = {
+        title: 'My Integration',
+        version: '2.0.0',
+        deprecated: { description: 'Deprecated now', since: '2.0.0' },
+      } as PackageInfo;
+
+      expect(wrapTitleWithDeprecated({ packageInfo })).toBe('My Integration (Deprecated)');
+    });
+
+    it('should add (Deprecated) when deprecated has no since field (already deprecated)', () => {
+      const packageInfo = {
+        title: 'My Integration',
+        version: '1.0.0',
+        deprecated: { description: 'Deprecated with no since' },
+      } as PackageInfo;
+
+      expect(wrapTitleWithDeprecated({ packageInfo })).toBe('My Integration (Deprecated)');
+    });
+
+    it('should NOT add (Deprecated) for upcoming integrationInfo deprecation', () => {
+      const packageInfo = {
+        title: 'Package Title',
+        version: '1.0.0',
+        policy_templates: [{ name: 'a' }, { name: 'b' }],
+      } as unknown as PackageInfo;
+      const integrationInfo = {
+        title: 'Integration Title',
+        deprecated: { description: 'Will be deprecated', since: '2.0.0' },
+      } as unknown as RegistryPolicyTemplate;
+
+      expect(wrapTitleWithDeprecated({ packageInfo, integrationInfo })).toBe('Integration Title');
+    });
+  });
 });
