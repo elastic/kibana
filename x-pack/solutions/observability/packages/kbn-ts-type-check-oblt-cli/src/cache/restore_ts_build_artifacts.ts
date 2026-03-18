@@ -11,6 +11,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { TsProject } from '@kbn/ts-projects';
 import execa from 'execa';
+import { asyncForEachWithLimit } from '@kbn/std';
 import {
   ARTIFACTS_STATE_FILE,
   CACHE_INVALIDATION_FILES,
@@ -21,6 +22,7 @@ import { GcsFileSystem } from './file_system/gcs_file_system';
 import { LocalFileSystem } from './file_system/local_file_system';
 import {
   buildCandidateShaList,
+  cleanTypeCheckArtifacts,
   getPullRequestNumber,
   isCiEnvironment,
   readMainBranchCommitShas,
@@ -32,6 +34,101 @@ import { detectStaleArtifacts } from './detect_stale_artifacts';
 import { isCacheServerAvailable, tryRestoreFromCacheServer } from './cache_server_client';
 
 const STALE_RESTORE_THRESHOLD = 10;
+
+/**
+ * Deletes the .tsbuildinfo file for each project in the given set of
+ * tsconfig.type_check.json paths. This forces tsc to re-type-check those
+ * projects on the next --build run even when their source file hashes still
+ * match the stored .tsbuildinfo — which can happen when a historical
+ * successful compilation is on disk but the code has since become invalid
+ * (e.g. a dependency's re-exported API changed without the re-export file
+ * itself changing).
+ *
+ * Only deletes the .tsbuildinfo; the compiled .d.ts outputs in target/types
+ * are left intact so other projects can still reference them.
+ */
+async function invalidateTsBuildInfoFiles(
+  projectPaths: Set<string>,
+  log: SomeDevLog
+): Promise<void> {
+  let deleted = 0;
+
+  await asyncForEachWithLimit([...projectPaths], 20, async (tsConfigPath) => {
+    const projectDir = Path.dirname(tsConfigPath);
+    const tsBuildInfoPath = Path.join(
+      projectDir,
+      'target',
+      'types',
+      'tsconfig.type_check.tsbuildinfo'
+    );
+
+    try {
+      await Fs.promises.unlink(tsBuildInfoPath);
+      deleted++;
+    } catch (err: unknown) {
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+        log.verbose(
+          `[Cache] Could not delete ${tsBuildInfoPath}: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    }
+  });
+
+  if (deleted > 0) {
+    log.verbose(
+      `[Cache] Invalidated ${deleted} stale .tsbuildinfo file(s) to force tsc to recheck them.`
+    );
+  }
+}
+
+/**
+ * Returns the subset of CACHE_INVALIDATION_FILES that changed between the
+ * given commit SHA and HEAD. Used to detect whether local build artifacts
+ * were created against different node_modules (e.g. after a yarn.lock update)
+ * and therefore can no longer be trusted for incremental tsc correctness.
+ */
+async function getChangedInvalidationFiles(fromSha: string): Promise<string[]> {
+  try {
+    const { stdout } = await execa(
+      'git',
+      ['diff', '--name-only', fromSha, 'HEAD', '--', ...CACHE_INVALIDATION_FILES],
+      { cwd: REPO_ROOT }
+    );
+    return stdout
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Returns true if any cache-invalidation file changed between the given commit
+ * SHA and HEAD, meaning the GCS archive at that SHA was built against a
+ * different node_modules and cannot be safely used as incremental tsc input.
+ * Logs a warning when the check fires so the reason is visible to the user.
+ */
+async function archiveInvalidatedByNodeModulesChange(
+  archiveSha: string,
+  log: SomeDevLog
+): Promise<boolean> {
+  const changed = await getChangedInvalidationFiles(archiveSha);
+  if (changed.length > 0) {
+    log.warning(
+      `[Cache check] Cache-invalidation file(s) changed since archive ${archiveSha.slice(
+        0,
+        12
+      )}: ` +
+        `${changed.join(', ')}. ` +
+        `The archive was built against a different node_modules — skipping restore.`
+    );
+    return true;
+  }
+  return false;
+}
 
 /**
  * Writes the given commit SHA to the per-clone state file, recording what
@@ -182,7 +279,10 @@ export async function resolveRestoreStrategy(
 
     if (!bestSha) {
       log.info('[Cache check] No GCS archive available — tsc will build from scratch.');
+      return { shouldRestore: false };
+    }
 
+    if (await archiveInvalidatedByNodeModulesChange(bestSha, log)) {
       return { shouldRestore: false };
     }
 
@@ -199,10 +299,51 @@ export async function resolveRestoreStrategy(
 
     if (!bestSha) {
       log.info('[Cache check] No GCS archive available — tsc will handle staleness incrementally.');
-
       return { shouldRestore: false };
     }
 
+    if (await archiveInvalidatedByNodeModulesChange(bestSha, log)) {
+      return { shouldRestore: false };
+    }
+
+    return { shouldRestore: true, bestSha, staleProjects: [] };
+  }
+
+  // Phase 1.5: cache-invalidation file check — git diff, no network I/O.
+  // Changes to yarn.lock, .nvmrc, or .node-version mean node_modules may have
+  // changed since the local artifacts were built. tsc's .tsbuildinfo incremental
+  // check compares the hashes of dependency .d.ts outputs in target/types — if
+  // those outputs are still from the old node_modules version, tsc considers
+  // downstream projects "up-to-date" without rechecking them, silently masking
+  // type errors (e.g. Zod v3 → v4 API incompatibilities).
+  // When invalidation files changed, wipe the local artifacts, then check if GCS
+  // has an archive built *after* the invalidating change (which would be safe to
+  // restore). If not, tsc rebuilds everything from scratch.
+  const changedInvalidationFiles = await getChangedInvalidationFiles(localStateSha);
+  if (changedInvalidationFiles.length > 0) {
+    log.warning(
+      `[Cache check] Cache-invalidation file(s) changed since ${localStateSha.slice(0, 12)}: ` +
+        `${changedInvalidationFiles.join(', ')}. ` +
+        `Local artifacts may be stale — cleaning them.`
+    );
+    await cleanTypeCheckArtifacts(log);
+    await writeArtifactsState('');
+
+    const bestSha = await resolveBestGcsSha(log, gcsFs);
+
+    if (!bestSha) {
+      log.info('[Cache check] No GCS archive available — tsc will build from scratch.');
+      return { shouldRestore: false };
+    }
+
+    if (await archiveInvalidatedByNodeModulesChange(bestSha, log)) {
+      log.info('[Cache check] GCS archive also predates the change — tsc will build from scratch.');
+      return { shouldRestore: false };
+    }
+
+    log.info(
+      `[Cache check] Found compatible GCS archive at ${bestSha.slice(0, 12)} — will restore.`
+    );
     return { shouldRestore: true, bestSha, staleProjects: [] };
   }
 
@@ -238,9 +379,19 @@ export async function resolveRestoreStrategy(
 
   if (effectiveRebuildSet.size <= STALE_RESTORE_THRESHOLD) {
     log.info(
-      `[Cache check] ✓ Cache freshness is good — only ${effectiveRebuildSet.size} project(s) ` +
-        `need rebuilding.`
+      `[Cache check] ✓ Cache freshness is good${
+        effectiveRebuildSet.size === 1
+          ? ' — only one project needs rebuilding'
+          : effectiveRebuildSet.size > 1
+          ? ' — only ${effectiveRebuildSet.size} projects need rechecking'
+          : ' — no projects need rechecking'
+      }`
     );
+    // Invalidate .tsbuildinfo for stale projects so tsc is forced to recheck
+    // them. Without this, tsc may treat a project as "up-to-date" if its source
+    // file hashes match a historical successful build, even when the code is
+    // now invalid (e.g. a dependency's API changed in the same zod package version).
+    await invalidateTsBuildInfoFiles(effectiveRebuildSet, log);
     return { shouldRestore: false, bestSha: undefined };
   }
 
@@ -251,6 +402,7 @@ export async function resolveRestoreStrategy(
     log.info(
       `[Cache check] No GCS archive found — proceeding with ${effectiveRebuildSet.size} local rebuilds.`
     );
+    await invalidateTsBuildInfoFiles(effectiveRebuildSet, log);
     return { shouldRestore: false };
   }
 
@@ -273,6 +425,11 @@ export async function resolveRestoreStrategy(
   }
 
   if (gcsEffectiveCount < effectiveRebuildSet.size) {
+    if (await archiveInvalidatedByNodeModulesChange(bestGcsSha, log)) {
+      log.info('[Cache check] Skipping restore — tsc will rebuild locally with current artifacts.');
+      return { shouldRestore: false };
+    }
+
     log.info(
       `[Cache check] Having archive for ${bestGcsSha.slice(0, 12)} would reduce rebuild count ` +
         `from ${effectiveRebuildSet.size} to ${gcsEffectiveCount} — will restore.`
@@ -288,10 +445,27 @@ export async function resolveRestoreStrategy(
       `count (${gcsEffectiveCount} vs ${effectiveRebuildSet.size} locally) — skipping restore.`
   );
 
+  // GCS restore would not help, but we still need to ensure tsc rechecks the
+  // stale projects. Invalidate their .tsbuildinfo files so tsc cannot treat
+  // them as up-to-date based on a historical (possibly incorrect) build.
+  await invalidateTsBuildInfoFiles(effectiveRebuildSet, log);
+
   return { shouldRestore: false, bestSha: undefined };
 }
 
-function buildReverseDependencyMap(tsProjects: TsProject[]): Map<string, Set<string>> {
+/** Maps each project's typeCheckConfigPath to the set of its direct dependency typeCheckConfigPaths. */
+export function buildForwardDependencyMap(tsProjects: TsProject[]): Map<string, Set<string>> {
+  const map = new Map<string, Set<string>>();
+  for (const p of tsProjects) {
+    map.set(
+      p.typeCheckConfigPath,
+      new Set(p.getKbnRefs(tsProjects).map((dep) => dep.typeCheckConfigPath))
+    );
+  }
+  return map;
+}
+
+export function buildReverseDependencyMap(tsProjects: TsProject[]): Map<string, Set<string>> {
   const reverseDeps = new Map<string, Set<string>>();
 
   for (const project of tsProjects) {
