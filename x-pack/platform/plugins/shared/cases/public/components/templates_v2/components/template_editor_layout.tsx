@@ -24,6 +24,7 @@ interface TemplateEditorLayoutProps {
   isLoading?: boolean;
   yamlValue: string;
   onYamlChange: (value: string) => void;
+  onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
   isYamlSaving: boolean;
   isYamlSaved: boolean;
   previewWidth: number;
@@ -34,6 +35,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   isLoading,
   yamlValue,
   onYamlChange,
+  onFieldDefaultChange,
   isYamlSaving,
   isYamlSaved,
   previewWidth,
@@ -65,7 +67,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
       minFlexPanelSize={MIN_EDITOR_WIDTH}
       fixedPanel={
         <div css={styles.previewPanel}>
-          <TemplatePreview />
+          <TemplatePreview onFieldDefaultChange={onFieldDefaultChange} />
         </div>
       }
       fixedPanelSize={previewWidth}

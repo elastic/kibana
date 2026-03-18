@@ -31,6 +31,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_service_topology`,
   `${internalNamespaces.observability}.get_traces`,
   `${internalNamespaces.observability}.get_runtime_metrics`,
+  `${internalNamespaces.observability}.get_logs`,
 
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
@@ -38,6 +39,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.get_entity`,
+  `${internalNamespaces.security}.search_entities`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,

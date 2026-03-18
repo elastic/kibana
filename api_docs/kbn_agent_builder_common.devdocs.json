@@ -7803,6 +7803,48 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.TimeRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeRange",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/attachment_types.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.TimeRange.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/attachment_types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.TimeRange.to",
+            "type": "string",
+            "tags": [],
+            "label": "to",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/attachment_types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.ToolCallEventData",
         "type": "Interface",
         "tags": [],
@@ -9034,7 +9076,7 @@
         "label": "ToolResultType",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10222,7 +10264,7 @@
           ".error, Object>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 149,
+        "lineNumber": 152,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10248,7 +10290,7 @@
           ".esqlResults, Object>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 88,
+        "lineNumber": 91,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10548,7 +10590,7 @@
           ".other, T>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 136,
+        "lineNumber": 139,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10620,7 +10662,7 @@
           ".query, Object>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 106,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10735,7 +10777,7 @@
           ".resource, Object>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 70,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11085,7 +11127,7 @@
           "UnknownToolResult"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
