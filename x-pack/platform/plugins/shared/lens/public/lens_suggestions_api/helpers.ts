@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { getDatasourceId } from '@kbn/visualization-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -42,7 +45,7 @@ export const injectESQLQueryIntoLensLayers = (
   const datasourceId = getDatasourceId(attributes.state.datasourceStates);
 
   // if the datasource is formBased, we should not fix the query
-  if (!datasourceId || datasourceId === 'formBased') {
+  if (!datasourceId || datasourceId === LENS_DATASOURCE_ID.FORM_BASED) {
     return attributes;
   }
 
@@ -61,7 +64,7 @@ export const injectESQLQueryIntoLensLayers = (
 
   const datasourceState = structuredClone(attributes.state.datasourceStates[datasourceId]);
 
-  // Update each layer with the new query and index pattern if needed
+  // Update each layer with the new query, index pattern, and timeField
   if (datasourceState?.layers) {
     Object.values(datasourceState.layers).forEach((layer) => {
       if (!isEqual(layer.query, query)) {
@@ -70,8 +73,15 @@ export const injectESQLQueryIntoLensLayers = (
         if (index) {
           layer.index = index;
         }
+        if (indexPatternRef) {
+          layer.timeField = indexPatternRef.timeField;
+        }
       }
     });
+  }
+
+  if (indexPatternRef && datasourceHasIndexPatternRefs(datasourceState)) {
+    datasourceState.indexPatternRefs = [indexPatternRef];
   }
   return {
     ...attributes,
@@ -107,11 +117,11 @@ export function mergeSuggestionWithVisContext({
     return suggestion;
   }
 
-  // it should be one of 'formBased'/'textBased' and have value
+  // it should be one of LENS_DATASOURCE_ID.FORM_BASED/LENS_DATASOURCE_ID.TEXT_BASED and have value
   const datasourceId = getDatasourceId(visAttributes.state.datasourceStates);
 
   // if the datasource is formBased, we should not merge
-  if (!datasourceId || datasourceId === 'formBased') {
+  if (!datasourceId || datasourceId === LENS_DATASOURCE_ID.FORM_BASED) {
     return suggestion;
   }
 

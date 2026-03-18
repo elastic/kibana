@@ -11,7 +11,7 @@ import type { FormatterFn } from './formatting_utils';
 import {
   arrayToJsonFormatter,
   stringToJsonFormatter,
-  secondsToCronFormatter,
+  privateTimeoutFormatter,
 } from './formatting_utils';
 
 export type Formatter = null | FormatterFn;
@@ -47,7 +47,7 @@ export const commonFormatters: CommonFormatMap = {
       `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`
     ),
   [ConfigKey.TAGS]: arrayToJsonFormatter,
-  [ConfigKey.TIMEOUT]: secondsToCronFormatter,
+  [ConfigKey.TIMEOUT]: privateTimeoutFormatter,
   // @ts-expect-error upgrade typescript v5.1.6
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,
