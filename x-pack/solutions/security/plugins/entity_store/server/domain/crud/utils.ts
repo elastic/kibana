@@ -44,15 +44,20 @@ export function validateUpdateDocIdentification(
   }
 }
 
+export interface ValidatedDoc {
+  id: string;
+  doc: Record<string, unknown>;
+}
+
 export function validateAndTransformDocForUpsert(
   entityType: EntityType,
   namespace: string,
   doc: Entity,
   generatedId: string | undefined,
   force: boolean
-): [string, Record<string, unknown>] {
+): ValidatedDoc {
   if (!doc.entity?.id && generatedId) {
-    doc.entity.id = generatedId as string;
+    doc.entity.id = generatedId;
   }
   const definition = getEntityDefinition(entityType, namespace);
   if (!force) {
@@ -60,7 +65,7 @@ export function validateAndTransformDocForUpsert(
     const fieldDescriptions = getFieldDescriptions(flat, definition);
     assertOnlyNonForcedAttributesInReq(fieldDescriptions);
   }
-  return [doc.entity.id, transformDocForUpsert(entityType, doc)];
+  return { id: doc.entity.id, doc: transformDocForUpsert(entityType, doc) };
 }
 
 function getFieldDescriptions(

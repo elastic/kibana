@@ -155,7 +155,7 @@ export class CRUDClient {
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     const generatedId = getEuidFromObject(entityType, doc);
     validateUpdateDocIdentification(doc, generatedId);
-    const [id, readyDoc] = validateAndTransformDocForUpsert(
+    const valid = validateAndTransformDocForUpsert(
       entityType,
       this.namespace,
       doc,
@@ -165,23 +165,23 @@ export class CRUDClient {
     try {
       const { result } = await this.esClient.update({
         index: getLatestEntitiesIndexName(this.namespace),
-        id: hashEuid(id),
-        doc: readyDoc,
+        id: hashEuid(valid.id),
+        doc: valid.doc,
         retry_on_conflict: RETRY_ON_CONFLICT,
         refresh: 'wait_for',
       });
 
       switch (result as Result) {
         case 'updated':
-          this.logger.debug(`Updated entity ID ${id}`);
+          this.logger.debug(`Updated entity ID ${valid.id}`);
           break;
         case 'noop':
-          this.logger.debug(`Updated entity ID ${id} (no change)`);
+          this.logger.debug(`Updated entity ID ${valid.id} (no change)`);
           break;
       }
     } catch (error) {
       if (error.statusCode === 404) {
-        throw new EntityNotFoundError(id);
+        throw new EntityNotFoundError(valid.id);
       }
       throw error;
     }
@@ -198,14 +198,17 @@ export class CRUDClient {
     for (const { type: entityType, doc } of objects) {
       const generatedId = getEuidFromObject(entityType, doc);
       validateUpdateDocIdentification(doc, generatedId);
-      const [_, readyDoc] = validateAndTransformDocForUpsert(
+      const valid = validateAndTransformDocForUpsert(
         entityType,
         this.namespace,
         doc,
         generatedId,
         force
       );
-      operations.push({ update: { retry_on_conflict: RETRY_ON_CONFLICT } }, readyDoc);
+      operations.push(
+        { update: { _id: hashEuid(valid.id), retry_on_conflict: RETRY_ON_CONFLICT } },
+        valid.doc
+      );
     }
     this.logger.debug(`Bulk upserting ${objects.length} entities`);
     const resp = await this.esClient.bulk({
@@ -241,11 +244,11 @@ export class CRUDClient {
     }
     doc.entity.id = id;
 
-    const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, id, true);
+    const valid = validateAndTransformDocForUpsert(entityType, this.namespace, doc, id, true);
     const { result } = await this.esClient.create({
       index: getLatestEntitiesIndexName(this.namespace),
-      id: hashEuid(doc.entity.id),
-      document: readyDoc,
+      id: hashEuid(valid.id),
+      document: valid.doc,
       refresh: 'wait_for',
     });
 
