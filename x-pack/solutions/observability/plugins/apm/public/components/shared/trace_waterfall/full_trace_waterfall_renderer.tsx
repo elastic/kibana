@@ -26,6 +26,7 @@ export function FullTraceWaterfallRenderer({
   rangeTo,
   serviceName,
   highlightedSpanId,
+  scrollToSpanId,
   scrollElement,
   scrollStrategy,
   onNodeClick,
@@ -74,6 +75,7 @@ export function FullTraceWaterfallRenderer({
       errors={data.errors}
       onClick={onNodeClick}
       highlightedSpanId={highlightedSpanId}
+      scrollToSpanId={scrollToSpanId}
       scrollElement={scrollElement}
       scrollStrategy={scrollStrategy}
       isEmbeddable

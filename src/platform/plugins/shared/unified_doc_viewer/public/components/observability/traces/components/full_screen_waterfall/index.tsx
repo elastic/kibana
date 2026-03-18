@@ -33,7 +33,7 @@ export interface FullScreenWaterfallProps {
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
   serviceName?: string;
-  highlightedSpanId?: string;
+  scrollToSpanId?: string;
   docId: string | null;
   docIndex?: string;
   activeFlyoutType: DocumentType | null;
@@ -51,7 +51,7 @@ export const FullScreenWaterfall = ({
   rangeTo,
   dataView,
   serviceName,
-  highlightedSpanId,
+  scrollToSpanId,
   docId,
   docIndex,
   activeFlyoutType,
@@ -136,6 +136,8 @@ export const FullScreenWaterfall = ({
   // TODO: Remove this deferred-mount workaround once EUI exposes a prop to
   // disable the flyout open animation at mount time.
   // Tracking issue: https://github.com/elastic/kibana/issues/256531
+  const [highlightedSpanId, setHighlightedSpanId] = useState<string | undefined>(scrollToSpanId);
+
   const [isWaterfallReady, setIsWaterfallReady] = useState(Boolean(skipOpenAnimation));
 
   useEffect(() => {
@@ -198,9 +200,6 @@ export const FullScreenWaterfall = ({
           .euiFlyoutBody__overflow {
             overflow: hidden;
           }
-          .euiFlyoutBody__overflowContent {
-            padding: 0;
-          }
         `}
       >
         {isWaterfallReady ? (
@@ -217,8 +216,12 @@ export const FullScreenWaterfall = ({
               rangeTo={rangeTo}
               serviceName={serviceName}
               highlightedSpanId={highlightedSpanId}
+              scrollToSpanId={scrollToSpanId}
               scrollStrategy="parent"
-              onNodeClick={onNodeClick}
+              onNodeClick={(nodeSpanId) => {
+                setHighlightedSpanId(nodeSpanId);
+                onNodeClick(nodeSpanId);
+              }}
               onErrorClick={onErrorClick}
             />
           </div>
@@ -235,7 +238,10 @@ export const FullScreenWaterfall = ({
           traceId={traceId}
           dataView={dataView}
           dataTestSubj="traceWaterfallDocumentFlyout"
-          onCloseFlyout={onCloseFlyout}
+          onCloseFlyout={() => {
+            setHighlightedSpanId(undefined);
+            onCloseFlyout();
+          }}
           activeSection={activeSection}
         />
       ) : null}

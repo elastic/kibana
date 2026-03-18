@@ -10,6 +10,7 @@ export interface FullTraceWaterfallProps {
   rangeTo: string;
   serviceName?: string;
   highlightedSpanId?: string;
+  scrollToSpanId?: string;
   scrollElement?: Element;
   scrollStrategy?: 'parent' | 'window';
   onNodeClick?: (nodeSpanId: string) => void;

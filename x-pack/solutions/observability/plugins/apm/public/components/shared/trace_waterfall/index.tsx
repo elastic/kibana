@@ -48,6 +48,7 @@ interface BaseTraceWaterfallProps {
   serviceName?: string;
   isFiltered?: boolean;
   agentMarks?: Record<string, number>;
+  scrollToSpanId?: string;
   showCriticalPathControl?: boolean;
   showCriticalPath?: boolean;
   defaultShowCriticalPath?: boolean;
@@ -82,6 +83,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
     onShowCriticalPathChange,
     children,
     entryTransactionId,
+    scrollToSpanId,
   } = props;
   const highlightedSpanId = props.highlightedSpanId;
 
@@ -106,6 +108,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
       defaultShowCriticalPath={defaultShowCriticalPath}
       onShowCriticalPathChange={onShowCriticalPathChange}
       entryTransactionId={entryTransactionId}
+      scrollToSpanId={scrollToSpanId}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
@@ -250,6 +253,7 @@ function TraceTree() {
     margin: { left, right },
     agentMarks,
     errorMarks,
+    scrollToSpanId,
   } = useTraceWaterfallContext();
 
   const marks = useMemo(() => [...agentMarks, ...errorMarks], [agentMarks, errorMarks]);
@@ -275,10 +279,10 @@ function TraceTree() {
   );
 
   const scrollToIndex = useMemo(() => {
-    if (scrollStrategy === 'window' || !highlightedSpanId) return undefined;
-    const index = visibleList.findIndex((item) => item.id === highlightedSpanId);
+    if (!scrollToSpanId) return undefined;
+    const index = visibleList.findIndex((item) => item.id === scrollToSpanId);
     return index >= 0 ? index : undefined;
-  }, [highlightedSpanId, visibleList, scrollStrategy]);
+  }, [scrollToSpanId, visibleList]);
 
   const rowRenderer: ListRowRenderer = useCallback(
     ({ index, style, key, parent }) => {
@@ -308,8 +312,7 @@ function TraceTree() {
     deferredMeasurementCache: rowHeightCache.current,
     rowHeight: rowHeightCache.current.rowHeight,
     rowRenderer,
-    scrollToAlignment: 'center' as const,
-    containerRole: 'rowgroup' as const,
+    containerRole: 'rowgroup',
   };
 
   const verticalLines = (
@@ -348,6 +351,8 @@ function TraceTree() {
                     rowHeight={rowHeightCache.current.rowHeight}
                     rowRenderer={rowRenderer}
                     containerRole="rowgroup"
+                    scrollToIndex={scrollToIndex}
+                    scrollToAlignment="center"
                   />
                 </div>
               )}
@@ -369,7 +374,13 @@ function TraceTree() {
       <AutoSizer>
         {({ width, height }) => (
           <div data-test-subj="waterfall">
-            <List {...listProps} scrollToIndex={scrollToIndex} height={height} width={width} />
+            <List
+              {...listProps}
+              scrollToIndex={scrollToIndex}
+              scrollToAlignment="center"
+              height={height}
+              width={width}
+            />
           </div>
         )}
       </AutoSizer>

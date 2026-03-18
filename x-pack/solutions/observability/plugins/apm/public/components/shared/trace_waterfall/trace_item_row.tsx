@@ -90,7 +90,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           padding: 6px 0;
           ${isHighlighted ? `background-color: ${euiTheme.colors.lightestShade};` : undefined}
           ${
-            !highlightedSpanId &&
+            !!onClick &&
             ` &:hover {
             background-color: ${euiTheme.colors.lightestShade};
           }`
