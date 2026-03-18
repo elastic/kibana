@@ -14,6 +14,8 @@ import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import { registerDashboardAttachmentUiDefinition } from '.';
 
+const updateOrigin = jest.fn();
+
 describe('registerDashboardAttachmentUiDefinition', () => {
   let deps: ReturnType<typeof createMockDeps>;
   let uiDefinition: AttachmentUIDefinition<DashboardAttachment>;
@@ -110,13 +112,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId('new-dashboard-id');
 
-      expect(deps.updateAttachmentOrigin).toHaveBeenCalledWith(
-        'conv-1',
-        'attachment-1',
+      expect(updateOrigin).toHaveBeenCalledWith(
         'new-dashboard-id'
       );
       cleanup?.();
@@ -125,16 +125,13 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     it('updates origin when the same dashboard is saved again', () => {
       const { getAttachment } = createMockAttachment('attachment-1', 'existing-dashboard-id');
       const mockApi = createMockDashboardApi('existing-dashboard-id');
+      
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId('new-saved-as-id');
 
-      expect(deps.updateAttachmentOrigin).toHaveBeenCalledWith(
-        'conv-1',
-        'attachment-1',
-        'new-saved-as-id'
-      );
+      expect(updateOrigin).toHaveBeenCalledWith('new-saved-as-id');
       cleanup?.();
     });
 
@@ -142,37 +139,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1', 'original-dashboard-id');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId('unrelated-dashboard-id');
-
-      expect(deps.updateAttachmentOrigin).not.toHaveBeenCalled();
-      cleanup?.();
-    });
-
-    it('does NOT update origin when navigating after origin was already set', () => {
-      const { getAttachment, setOrigin } = createMockAttachment('attachment-1');
-      const mockApi = createMockDashboardApi();
-
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
-      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-
-      // First save - should update origin
-      mockApi.setSavedObjectId('first-dashboard-id');
-      expect(deps.updateAttachmentOrigin).toHaveBeenCalledWith(
-        'conv-1',
-        'attachment-1',
-        'first-dashboard-id'
-      );
-
-      // Simulate the origin being updated (as would happen after updateAttachmentOrigin succeeds)
-      setOrigin('first-dashboard-id');
-      deps.updateAttachmentOrigin.mockClear();
-
-      // Navigate to a different dashboard - should NOT update origin
-      mockApi.setSavedObjectId('second-dashboard-id');
-      expect(deps.updateAttachmentOrigin).not.toHaveBeenCalled();
-
+      expect(updateOrigin).not.toHaveBeenCalled();
       cleanup?.();
     });
 
@@ -180,11 +150,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId(undefined);
 
-      expect(deps.updateAttachmentOrigin).not.toHaveBeenCalled();
+      expect(updateOrigin).not.toHaveBeenCalled();
       cleanup?.();
     });
 
@@ -192,11 +162,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1', 'same-dashboard-id');
       const mockApi = createMockDashboardApi('same-dashboard-id');
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId('same-dashboard-id');
 
-      expect(deps.updateAttachmentOrigin).not.toHaveBeenCalled();
+      expect(updateOrigin).not.toHaveBeenCalled();
       cleanup?.();
     });
 
@@ -204,35 +174,87 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       cleanup?.();
 
       mockApi.setSavedObjectId('new-id-after-cleanup');
 
-      expect(deps.updateAttachmentOrigin).not.toHaveBeenCalled();
+      expect(updateOrigin).not.toHaveBeenCalled();
     });
 
     it('cleans up savedObjectId subscription when dashboard API becomes unavailable', () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-
       mockApi.setSavedObjectId('first-dashboard-id');
-      expect(deps.updateAttachmentOrigin).toHaveBeenCalledWith(
-        'conv-1',
-        'attachment-1',
-        'first-dashboard-id'
-      );
-
-      deps.updateAttachmentOrigin.mockClear();
+      expect(updateOrigin).toHaveBeenCalledWith('first-dashboard-id');
+      updateOrigin.mockClear();
       deps.dashboardAppClientApi$.next(undefined);
       mockApi.setSavedObjectId('second-dashboard-id');
 
-      expect(deps.updateAttachmentOrigin).not.toHaveBeenCalled();
+      expect(updateOrigin).not.toHaveBeenCalled();
       cleanup?.();
+    });
+
+    describe('subscription guards', () => {
+      it('does NOT subscribe when attachment has origin and dashboard has different ID', () => {
+        const { getAttachment } = createMockAttachment('attachment-1', 'origin-dashboard-id');
+        const mockApi = createMockDashboardApi('different-dashboard-id');
+
+        const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
+        deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+
+        // Even if the dashboard saves with a new ID, we should not update origin
+        mockApi.setSavedObjectId('newly-saved-id');
+
+        expect(updateOrigin).not.toHaveBeenCalled();
+        cleanup?.();
+      });
+
+      it('does NOT subscribe when attachment has no origin but dashboard has an ID (navigated to existing dashboard)', () => {
+        const { getAttachment } = createMockAttachment('attachment-1'); // no origin
+        const mockApi = createMockDashboardApi('existing-dashboard-id');
+
+        const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
+        deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+
+        // Even if the dashboard saves with a new ID, we should not update origin
+        mockApi.setSavedObjectId('newly-saved-id');
+
+        expect(updateOrigin).not.toHaveBeenCalled();
+        cleanup?.();
+      });
+
+      it('subscribes when attachment has origin matching dashboard ID', () => {
+        const { getAttachment } = createMockAttachment('attachment-1', 'same-dashboard-id');
+        const mockApi = createMockDashboardApi('same-dashboard-id');
+
+        const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
+        deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+
+        // Save As to a new ID should trigger update
+        mockApi.setSavedObjectId('new-saved-as-id');
+
+        expect(updateOrigin).toHaveBeenCalledWith('new-saved-as-id');
+        cleanup?.();
+      });
+
+      it('subscribes when attachment has no origin and dashboard has no ID (new dashboard)', () => {
+        const { getAttachment } = createMockAttachment('attachment-1'); // no origin
+        const mockApi = createMockDashboardApi(); // no savedObjectId
+
+        const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
+        deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+
+        // First save should trigger update
+        mockApi.setSavedObjectId('first-save-id');
+
+        expect(updateOrigin).toHaveBeenCalledWith('first-save-id');
+        cleanup?.();
+      });
     });
   });
 

@@ -27,6 +27,8 @@ const createMockAttachmentsService = (
     getAttachmentUiDefinition: jest.fn((type: string) => uiDefinitions[type]),
   } as unknown as AttachmentsService);
 
+const mockInvalidateConversation = jest.fn();
+
 describe('useAttachmentLifecycle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,6 +45,7 @@ describe('useAttachmentLifecycle', () => {
         attachments: [createMockAttachment('1'), createMockAttachment('2')],
         conversationId: 'conv-1',
         attachmentsService,
+        invalidateConversation: mockInvalidateConversation,
       })
     );
 
@@ -61,6 +64,7 @@ describe('useAttachmentLifecycle', () => {
           attachments,
           conversationId: 'conv-1',
           attachmentsService,
+          invalidateConversation: mockInvalidateConversation,
         }),
       {
         initialProps: { attachments: [createMockAttachment('1')] },
@@ -87,6 +91,7 @@ describe('useAttachmentLifecycle', () => {
           attachments,
           conversationId: 'conv-1',
           attachmentsService,
+          invalidateConversation: mockInvalidateConversation,
         }),
       {
         initialProps: { attachments: [createMockAttachment('1')] },
@@ -122,6 +127,7 @@ describe('useAttachmentLifecycle', () => {
           attachments,
           conversationId: 'conv-1',
           attachmentsService,
+          invalidateConversation: mockInvalidateConversation,
         }),
       {
         initialProps: {
@@ -150,6 +156,7 @@ describe('useAttachmentLifecycle', () => {
         attachments: [createMockAttachment('1'), createMockAttachment('2')],
         conversationId: 'conv-1',
         attachmentsService,
+        invalidateConversation: mockInvalidateConversation,
       })
     );
 
@@ -173,6 +180,7 @@ describe('useAttachmentLifecycle', () => {
           attachments: [createMockAttachment('1')],
           conversationId: 'conv-1',
           attachmentsService,
+          invalidateConversation: mockInvalidateConversation,
         })
       )
     ).not.toThrow();
@@ -187,6 +195,7 @@ describe('useAttachmentLifecycle', () => {
           attachments: [createMockAttachment('1', 'unknown_type')],
           conversationId: 'conv-1',
           attachmentsService,
+          invalidateConversation: mockInvalidateConversation,
         })
       )
     ).not.toThrow();
@@ -204,6 +213,7 @@ describe('useAttachmentLifecycle', () => {
           attachments,
           conversationId: 'conv-1',
           attachmentsService,
+          invalidateConversation: mockInvalidateConversation,
         }),
       {
         initialProps: { attachments: [createMockAttachment('1')] },
@@ -240,12 +250,13 @@ describe('useAttachmentLifecycle', () => {
         attachments: [attachment],
         conversationId: 'conv-1',
         attachmentsService,
+        invalidateConversation: mockInvalidateConversation,
       })
     );
 
     expect(onAttachmentMount).toHaveBeenCalledWith({
       getAttachment: expect.any(Function),
-      conversationId: 'conv-1',
+      updateOrigin: expect.any(Function),
     });
 
     const { getAttachment } = onAttachmentMount.mock.calls[0][0];

@@ -11,6 +11,7 @@ import React from 'react';
 import { useConversation, useConversationRounds } from '../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAttachmentLifecycle } from '../../../hooks/use_attachment_lifecycle';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { RoundLayout } from './round_layout';
 
 const CONVERSATION_ROUNDS_ID = 'agentBuilderConversationRoundsContainer';
@@ -25,11 +26,13 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
   const { conversation } = useConversation();
   const conversationRounds = useConversationRounds();
   const { attachmentsService } = useAgentBuilderServices();
+  const { conversationActions } = useConversationContext();
 
   useAttachmentLifecycle({
     attachments: conversation?.attachments,
     conversationId: conversation?.id,
     attachmentsService,
+    invalidateConversation: conversationActions.invalidateConversation,
   });
 
   return (

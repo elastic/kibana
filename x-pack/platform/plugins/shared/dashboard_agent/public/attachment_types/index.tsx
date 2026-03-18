@@ -22,7 +22,7 @@ import { handlePreviewInDashboard } from './handle_preview_in_dashboard';
 import { createAttachmentMountHandler } from './create_attachment_mount_handler';
 
 export const registerDashboardAttachmentUiDefinition = ({
-  agentBuilder: { attachments, updateAttachmentOrigin },
+  agentBuilder: { attachments },
   dashboardLocator,
   unifiedSearch,
   dashboardPlugin,
@@ -54,7 +54,7 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    onAttachmentMount: createAttachmentMountHandler({ dashboardPlugin, updateAttachmentOrigin }),
+    onAttachmentMount: createAttachmentMountHandler({ dashboardPlugin }),
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}

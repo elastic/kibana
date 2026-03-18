@@ -13,6 +13,7 @@ interface UseAttachmentLifecycleParams {
   attachments: VersionedAttachment[] | undefined;
   conversationId: string | undefined;
   attachmentsService: AttachmentsService;
+  invalidateConversation: () => void;
 }
 
 /**
@@ -24,6 +25,7 @@ export const useAttachmentLifecycle = ({
   attachments,
   conversationId,
   attachmentsService,
+  invalidateConversation,
 }: UseAttachmentLifecycleParams): void => {
   const cleanupFunctionsRef = useRef<Map<string, () => void>>(new Map());
   const previousAttachmentIdsRef = useRef<Set<string>>(new Set());
@@ -57,7 +59,15 @@ export const useAttachmentLifecycle = ({
                 hidden: current.hidden,
               };
             },
-            conversationId,
+            updateOrigin: async (origin: string) => {
+              const result = await attachmentsService.updateOrigin(
+                conversationId,
+                attachmentId,
+                origin
+              );
+              invalidateConversation();
+              return result;
+            },
           });
 
           if (cleanup) {
@@ -79,7 +89,7 @@ export const useAttachmentLifecycle = ({
     }
 
     previousAttachmentIdsRef.current = currentAttachmentIds;
-  }, [attachments, conversationId, attachmentsService]);
+  }, [attachments, conversationId, attachmentsService, invalidateConversation]);
 
   // Cleanup all on unmount
   useEffect(() => {

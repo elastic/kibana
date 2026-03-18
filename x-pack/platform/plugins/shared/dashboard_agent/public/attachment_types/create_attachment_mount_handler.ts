@@ -10,11 +10,9 @@ import { pairwise, startWith } from 'rxjs';
 import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 
 interface CreateAttachmentMountHandlerParams {
   dashboardPlugin: DashboardStart;
-  updateAttachmentOrigin: AgentBuilderPluginStart['updateAttachmentOrigin'];
 }
 
 /**
@@ -26,11 +24,10 @@ interface CreateAttachmentMountHandlerParams {
  */
 export const createAttachmentMountHandler = ({
   dashboardPlugin,
-  updateAttachmentOrigin,
 }: CreateAttachmentMountHandlerParams) => {
   return ({
     getAttachment,
-    conversationId,
+    updateOrigin,
   }: AttachmentLifecycleParams<DashboardAttachment>): (() => void) => {
     let savedObjectIdSubscription: Subscription | undefined;
 
@@ -41,20 +38,36 @@ export const createAttachmentMountHandler = ({
 
       if (!api) return;
 
-      savedObjectIdSubscription = api.savedObjectId$
-        .pipe(startWith<string | undefined>(getAttachment().origin), pairwise())
-        .subscribe(([previousId, currentId]) => {
-          const currentAttachment = getAttachment();
-          // Only update origin if:
-          // 1. The attachment has no origin (unsaved), OR
-          // 2. The previous savedObjectId matches the attachment origin (we're on the same dashboard)
-          // This prevents linking to unrelated dashboards when navigating
-          const shouldUpdate = !currentAttachment.origin || previousId === currentAttachment.origin;
+      const attachmentOrigin = getAttachment().origin;
+      const currentDashboardId = api.savedObjectId$.value;
 
-          if (currentId && currentId !== currentAttachment.origin && shouldUpdate) {
-            updateAttachmentOrigin(conversationId, currentAttachment.id, currentId);
-          }
-        });
+      // only subscribe if:
+      // the attachment has no origin yet and we are a new dashboard
+      // OR we are on the same dashboard as the attachment
+      const shouldSubscribe =
+        (!currentDashboardId && !attachmentOrigin) ||
+        (currentDashboardId && currentDashboardId === attachmentOrigin);
+
+      if (shouldSubscribe) {
+        savedObjectIdSubscription = api.savedObjectId$
+          .pipe(startWith<string | undefined>(attachmentOrigin), pairwise())
+          .subscribe(([previousId, currentId]) => {
+            const currentAttachment = getAttachment();
+            // Only update origin if:
+            // there is an id to update to (currentId is not undefined)
+            // the id is different from the current origin (currentId !== currentAttachment.origin)
+            // 1. The attachment has no origin yet (unsaved), OR
+            // 2. The previous savedObjectId matches the attachment origin (we're on the same dashboard)
+            // This prevents linking to unrelated dashboards when navigating
+            const shouldUpdate =
+              currentId &&
+              currentId !== currentAttachment.origin &&
+              (!currentAttachment.origin || previousId === currentAttachment.origin);
+            if (shouldUpdate) {
+              updateOrigin(currentId);
+            }
+          });
+      }
     });
 
     return () => {

@@ -97,8 +97,8 @@ export interface AttachmentLifecycleParams<
 > {
   /** Returns the current attachment state */
   getAttachment: () => TAttachment;
-  /** The conversation ID containing this attachment */
-  conversationId: string;
+  /** Update the attachment's origin reference (e.g., after saving to library) */
+  updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
 }
 
 /**
