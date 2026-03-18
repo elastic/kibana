@@ -60,6 +60,7 @@ export const FilterBarToggleButton: React.FC<{}> = () => {
         onClick={onClickToggleButton}
         css={styles.filterButtonStyle}
         size="s"
+        data-test-subj="filterBarToggleButton"
       >
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem>
