@@ -15,7 +15,7 @@ The MySQL connector enables you to connect to a MySQL database to search and que
 
 ## Create connectors in {{kib}} [define-mysql-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. 
 
 ### Connector configuration [mysql-connector-configuration]
 
