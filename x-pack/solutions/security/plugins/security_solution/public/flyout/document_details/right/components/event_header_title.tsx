@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
+import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { DocumentSeverity } from './severity';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../../shared/context';

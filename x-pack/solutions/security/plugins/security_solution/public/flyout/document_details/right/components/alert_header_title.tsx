@@ -25,7 +25,7 @@ import {
   RISK_SCORE_TITLE_TEST_ID,
 } from './test_ids';
 import { Assignees } from './assignees';
-import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
+import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { getAlertTitle } from '../../shared/utils';
 import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
 
