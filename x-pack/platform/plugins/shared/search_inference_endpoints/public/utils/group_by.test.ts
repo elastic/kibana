@@ -94,7 +94,7 @@ describe('group by utils', () => {
         expect(result.Anthropic.endpoints).toEqual(anthropicEndpoints);
       });
 
-      it('groups Elastic-branded endpoints (jina, elser, rerank) under the elastic group', () => {
+      it('groups Elastic-branded endpoints (elser, rerank) under the elastic group', () => {
         const elasticModelEndpoints = InferenceEndpoints.filter((e) =>
           ['.elser-2-elastic', '.rerank-v1-elasticsearch'].includes(e.inference_id)
         );
