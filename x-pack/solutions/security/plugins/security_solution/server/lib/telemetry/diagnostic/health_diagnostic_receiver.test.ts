@@ -197,7 +197,6 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     ];
 
     beforeEach(() => {
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true });
     });
 
@@ -277,7 +276,6 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
 
   describe('ES|QL queries', () => {
     beforeEach(() => {
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true });
     });
 
@@ -501,7 +499,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
   });
 
   describe('Permission checking', () => {
-    test('should proceed when index exists and has read privileges', (done) => {
+    test('should proceed when has read privileges', (done) => {
       const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
@@ -511,10 +509,6 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       executeObservableTest(
         queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
         () => {
-          expect(mockEsClient.indices.exists).toHaveBeenCalledWith({
-            index: ['test-index'],
-            allow_no_indices: false,
-          });
           expect(mockEsClient.security.hasPrivileges).toHaveBeenCalledWith({
             index: [{ names: ['test-index'], privileges: ['read'] }],
           });
@@ -525,48 +519,10 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       );
     });
 
-    test('should throw PermissionError when indices.exists returns false', (done) => {
-      const execQuery = mkExecV1(QueryType.DSL);
-      const circuitBreaker = createMockCircuitBreaker(true);
-
-      mockEsClient.indices.exists.mockResolvedValue(false);
-
-      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-        next: () => {},
-        error: (error) => {
-          expect(error).toBeInstanceOf(PermissionError);
-          expect(error.message).toContain('Index does not exist');
-          expect(mockEsClient.openPointInTime).not.toHaveBeenCalled();
-          done();
-        },
-        complete: () => done(new Error('Should not complete successfully')),
-      });
-    });
-
-    test('should throw PermissionError when indices.exists throws', (done) => {
-      const execQuery = mkExecV1(QueryType.DSL);
-      const circuitBreaker = createMockCircuitBreaker(true);
-
-      mockEsClient.indices.exists.mockRejectedValue(new Error('index_not_found_exception'));
-
-      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-        next: () => {},
-        error: (error) => {
-          expect(error).toBeInstanceOf(PermissionError);
-          expect(error.message).toContain('Error accessing index');
-          expect(error.message).toContain('index_not_found_exception');
-          expect(mockEsClient.openPointInTime).not.toHaveBeenCalled();
-          done();
-        },
-        complete: () => done(new Error('Should not complete successfully')),
-      });
-    });
-
     test('should throw PermissionError when missing read privileges', (done) => {
       const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
 
       queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
@@ -585,7 +541,6 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockRejectedValue(new Error('security_exception'));
 
       queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
@@ -605,7 +560,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       const execQuery = mkExecV1(QueryType.DSL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      mockEsClient.indices.exists.mockRejectedValue(new Error('no access'));
+      mockEsClient.security.hasPrivileges.mockRejectedValue(new Error('no access'));
 
       queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
         next: () => {},
@@ -619,29 +574,10 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       });
     });
 
-    test('should throw PermissionError for EQL when index does not exist', (done) => {
-      const execQuery = mkExecV1(QueryType.EQL);
-      const circuitBreaker = createMockCircuitBreaker(true);
-
-      mockEsClient.indices.exists.mockResolvedValue(false);
-
-      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-        next: () => {},
-        error: (error) => {
-          expect(error).toBeInstanceOf(PermissionError);
-          expect(error.message).toContain('Index does not exist');
-          expect(mockEsClient.eql.search).not.toHaveBeenCalled();
-          done();
-        },
-        complete: () => done(new Error('Should not complete successfully')),
-      });
-    });
-
     test('should throw PermissionError for EQL when missing read privileges', (done) => {
       const execQuery = mkExecV1(QueryType.EQL);
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
 
       queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
@@ -656,29 +592,10 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       });
     });
 
-    test('should throw PermissionError for ESQL when index does not exist', (done) => {
-      const execQuery = mkExecV1(QueryType.ESQL, { query: 'stats count() by user.name' });
-      const circuitBreaker = createMockCircuitBreaker(true);
-
-      mockEsClient.indices.exists.mockResolvedValue(false);
-
-      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-        next: () => {},
-        error: (error) => {
-          expect(error).toBeInstanceOf(PermissionError);
-          expect(error.message).toContain('Index does not exist');
-          expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
-          done();
-        },
-        complete: () => done(new Error('Should not complete successfully')),
-      });
-    });
-
     test('should throw PermissionError for ESQL when missing read privileges', (done) => {
       const execQuery = mkExecV1(QueryType.ESQL, { query: 'stats count() by user.name' });
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      mockEsClient.indices.exists.mockResolvedValue(true);
       mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
 
       queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
