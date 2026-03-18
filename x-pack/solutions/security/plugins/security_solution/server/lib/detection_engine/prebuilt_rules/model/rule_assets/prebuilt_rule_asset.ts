@@ -65,3 +65,17 @@ export const PrebuiltRuleAsset = PrebuiltAssetBaseProps.and(TypeSpecificCreatePr
     version: RuleVersion,
   })
 );
+
+/**
+ * Minimal schema for deprecated prebuilt rule assets. These are installed by Fleet
+ * as "security-rule" SOs with `deprecated: true` and carry only identification fields.
+ * They are excluded from all install/upgrade flows and surfaced separately.
+ */
+export type DeprecatedPrebuiltRuleAsset = z.infer<typeof DeprecatedPrebuiltRuleAsset>;
+export const DeprecatedPrebuiltRuleAsset = z.object({
+  rule_id: RuleSignatureId,
+  version: RuleVersion,
+  deprecated: z.literal(true),
+  name: z.string(),
+  deprecated_reason: z.string().optional(),
+});

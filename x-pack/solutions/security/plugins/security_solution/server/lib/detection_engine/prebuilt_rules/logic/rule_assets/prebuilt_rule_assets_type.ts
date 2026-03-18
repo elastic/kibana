@@ -37,6 +37,25 @@ const securityRuleV2 = securityRuleV1.extends(
   { unknowns: 'allow' }
 );
 
+/**
+ * V3 relaxes severity and risk_score to be optional so that deprecated rule stubs
+ * (which only carry rule_id, version, name, deprecated, and optionally deprecated_reason)
+ * can pass SO create validation when Fleet installs them via bulkCreate.
+ */
+const securityRuleV3 = schema.object(
+  {
+    rule_id: schema.string(),
+    version: schema.number(),
+    name: schema.string(),
+    tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_RULE })),
+    severity: schema.maybe(schema.string()),
+    risk_score: schema.maybe(schema.number()),
+    deprecated: schema.maybe(schema.boolean()),
+    deprecated_reason: schema.maybe(schema.string()),
+  },
+  { unknowns: 'allow' }
+);
+
 const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
@@ -63,6 +82,12 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
     },
     risk_score: {
       type: 'float',
+    },
+    deprecated: {
+      type: 'boolean',
+    },
+    deprecated_reason: {
+      type: 'keyword',
     },
   },
 };
@@ -114,6 +139,25 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: securityRuleV2,
         create: securityRuleV2,
+      },
+    },
+    '3': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            deprecated: {
+              type: 'boolean',
+            },
+            deprecated_reason: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: securityRuleV3,
+        create: securityRuleV3,
       },
     },
   },
