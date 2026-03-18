@@ -114,8 +114,10 @@ export const useCloseCaseModal = ({
   } = useKibana<{ uiSettings: IUiSettingsClient }>();
 
   const initialCloseReasonOptions = useMemo(() => {
-    const customClosingReasons =
-      uiSettings.get<string[]>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY) ?? [];
+    const customClosingReasons = uiSettings.get<string[]>(
+      CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY,
+      []
+    );
 
     return [
       ...DEFAULT_CLOSING_REASON_OPTIONS,

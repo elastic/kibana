@@ -30,7 +30,7 @@ const ClosingReasonPanelComponent: React.FC<ClosingReasonPanelProps> = ({ onSubm
   } = useKibana<{ uiSettings: IUiSettingsClient }>();
 
   const customClosingReasons = useMemo(
-    () => uiSettings.get<string[]>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY) ?? [],
+    () => uiSettings.get<string[]>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY, []),
     [uiSettings]
   );
 
