@@ -25,13 +25,11 @@ export function FullTraceWaterfallRenderer({
   rangeFrom,
   rangeTo,
   serviceName,
-  highlightedSpanId,
-  scrollToSpanId,
   scrollElement,
-  scrollStrategy,
   onNodeClick,
   onErrorClick,
   core,
+  ...scrollProps
 }: Props) {
   useEffectOnce(() => {
     createCallApmApi(core);
@@ -74,10 +72,8 @@ export function FullTraceWaterfallRenderer({
       traceItems={data.traceItems}
       errors={data.errors}
       onClick={onNodeClick}
-      highlightedSpanId={highlightedSpanId}
-      scrollToSpanId={scrollToSpanId}
       scrollElement={scrollElement}
-      scrollStrategy={scrollStrategy}
+      {...scrollProps}
       isEmbeddable
       showLegend
       serviceName={serviceName}

@@ -216,7 +216,7 @@ export const FullScreenWaterfall = ({
               rangeTo={rangeTo}
               serviceName={serviceName}
               highlightedSpanId={highlightedSpanId}
-              scrollToSpanId={scrollToSpanId}
+              scrollToHighlightedOnMount={scrollToSpanId != null}
               scrollStrategy="parent"
               onNodeClick={(nodeSpanId) => {
                 setHighlightedSpanId(nodeSpanId);

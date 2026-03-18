@@ -45,7 +45,7 @@ export interface TraceWaterfallContextProps {
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
   highlightedSpanId?: string;
-  scrollToSpanId?: string;
+  scrollToHighlightedOnMount?: boolean;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable: boolean;
   legends: IWaterfallLegend[];
@@ -118,7 +118,7 @@ interface Props {
   defaultShowCriticalPath?: boolean;
   onShowCriticalPathChange?: (value: boolean) => void;
   entryTransactionId?: string;
-  scrollToSpanId?: string;
+  scrollToHighlightedOnMount?: boolean;
   scrollElement?: Element;
 }
 
@@ -145,7 +145,7 @@ export function TraceWaterfallContextProvider({
   defaultShowCriticalPath = false,
   onShowCriticalPathChange,
   entryTransactionId,
-  scrollToSpanId,
+  scrollToHighlightedOnMount,
 }: Props) {
   const { duration, traceWaterfall, rootItem, legends, colorBy, traceState, message, errorMarks } =
     useTraceWaterfall({
@@ -251,7 +251,7 @@ export function TraceWaterfallContextProvider({
         onClick,
         onErrorClick,
         highlightedSpanId,
-        scrollToSpanId,
+        scrollToHighlightedOnMount,
         getRelatedErrorsHref,
         isEmbeddable,
         legends,

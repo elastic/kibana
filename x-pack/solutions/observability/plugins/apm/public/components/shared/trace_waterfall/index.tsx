@@ -7,7 +7,7 @@
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   AutoSizer,
   List,
@@ -23,11 +23,7 @@ import type { TraceItem } from '../../../../common/waterfall/unified_trace_item'
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
 import { CriticalPathToggle } from './critical_path';
-import type {
-  OnErrorClick,
-  OnNodeClick,
-  TraceWaterfallScrollStrategy,
-} from './trace_waterfall_context';
+import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
@@ -48,7 +44,6 @@ interface BaseTraceWaterfallProps {
   serviceName?: string;
   isFiltered?: boolean;
   agentMarks?: Record<string, number>;
-  scrollToSpanId?: string;
   showCriticalPathControl?: boolean;
   showCriticalPath?: boolean;
   defaultShowCriticalPath?: boolean;
@@ -57,11 +52,12 @@ interface BaseTraceWaterfallProps {
   entryTransactionId?: string;
 }
 
-/** Default: 'window' (page scroll). Use 'parent' for flyout (enables scroll-to-span for highlightedSpanId). */
-export interface TraceWaterfallProps extends BaseTraceWaterfallProps {
-  scrollStrategy?: TraceWaterfallScrollStrategy;
-  highlightedSpanId?: string;
-}
+/** Default: 'window' (page scroll). Use 'parent' for flyout. */
+export type TraceWaterfallProps = BaseTraceWaterfallProps &
+  (
+    | { scrollStrategy?: 'window'; highlightedSpanId?: string }
+    | { scrollStrategy: 'parent'; highlightedSpanId?: string; scrollToHighlightedOnMount?: boolean }
+  );
 
 export function TraceWaterfall(props: TraceWaterfallProps) {
   const {
@@ -83,9 +79,10 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
     onShowCriticalPathChange,
     children,
     entryTransactionId,
-    scrollToSpanId,
   } = props;
   const highlightedSpanId = props.highlightedSpanId;
+  const scrollToHighlightedOnMount =
+    props.scrollStrategy === 'parent' ? props.scrollToHighlightedOnMount : undefined;
 
   return (
     <TraceWaterfallContextProvider
@@ -108,7 +105,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
       defaultShowCriticalPath={defaultShowCriticalPath}
       onShowCriticalPathChange={onShowCriticalPathChange}
       entryTransactionId={entryTransactionId}
-      scrollToSpanId={scrollToSpanId}
+      scrollToHighlightedOnMount={scrollToHighlightedOnMount}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
@@ -253,7 +250,7 @@ function TraceTree() {
     margin: { left, right },
     agentMarks,
     errorMarks,
-    scrollToSpanId,
+    scrollToHighlightedOnMount,
   } = useTraceWaterfallContext();
 
   const marks = useMemo(() => [...agentMarks, ...errorMarks], [agentMarks, errorMarks]);
@@ -278,11 +275,27 @@ function TraceTree() {
     [visibleList]
   );
 
+  const [scrollComplete, setScrollComplete] = useState(false);
+
   const scrollToIndex = useMemo(() => {
-    if (!scrollToSpanId) return undefined;
-    const index = visibleList.findIndex((item) => item.id === scrollToSpanId);
+    if (!scrollToHighlightedOnMount || scrollStrategy !== 'parent') return undefined;
+    if (scrollComplete || !highlightedSpanId || visibleList.length === 0) return undefined;
+    const index = visibleList.findIndex((item) => item.id === highlightedSpanId);
     return index >= 0 ? index : undefined;
-  }, [scrollToSpanId, visibleList]);
+  }, [scrollToHighlightedOnMount, scrollStrategy, scrollComplete, highlightedSpanId, visibleList]);
+
+  const onRowsRendered = useCallback(
+    ({ startIndex, stopIndex }: { startIndex: number; stopIndex: number }) => {
+      if (
+        scrollToIndex !== undefined &&
+        startIndex <= scrollToIndex &&
+        scrollToIndex <= stopIndex
+      ) {
+        setScrollComplete(true);
+      }
+    },
+    [scrollToIndex]
+  );
 
   const rowRenderer: ListRowRenderer = useCallback(
     ({ index, style, key, parent }) => {
@@ -351,8 +364,6 @@ function TraceTree() {
                     rowHeight={rowHeightCache.current.rowHeight}
                     rowRenderer={rowRenderer}
                     containerRole="rowgroup"
-                    scrollToIndex={scrollToIndex}
-                    scrollToAlignment="center"
                   />
                 </div>
               )}
@@ -378,6 +389,7 @@ function TraceTree() {
               {...listProps}
               scrollToIndex={scrollToIndex}
               scrollToAlignment="center"
+              onRowsRendered={onRowsRendered}
               height={height}
               width={width}
             />
