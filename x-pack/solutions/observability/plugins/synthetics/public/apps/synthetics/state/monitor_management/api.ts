@@ -29,9 +29,23 @@ export const createMonitorAPI = async ({
   });
 };
 
+export interface PackagePolicyLink {
+  locationId: string;
+  locationLabel: string;
+  agentPolicyId: string;
+  packagePolicyId: string;
+}
+
 export interface MonitorInspectResponse {
   publicConfigs: any[];
   privateConfig: PackagePolicy | null;
+}
+
+export interface InspectMonitorAPIResponse {
+  result: MonitorInspectResponse;
+  decodedCode: string;
+  packagePolicyLinks: PackagePolicyLink[];
+  hasMissingReferences: boolean;
 }
 
 export const inspectMonitorAPI = async ({
@@ -40,7 +54,7 @@ export const inspectMonitorAPI = async ({
 }: {
   hideParams?: boolean;
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
-}): Promise<{ result: MonitorInspectResponse; decodedCode: string }> => {
+}): Promise<InspectMonitorAPIResponse> => {
   return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT, monitor, undefined, {
     hideParams,
   });

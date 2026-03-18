@@ -10,6 +10,8 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiBasicTable,
+  EuiCallOut,
   EuiFlyout,
   EuiButton,
   EuiCodeBlock,
@@ -17,6 +19,7 @@ import {
   EuiTitle,
   EuiFlyoutFooter,
   EuiHorizontalRule,
+  EuiLink,
   EuiSpacer,
   EuiFlyoutBody,
   EuiToolTip,
@@ -24,21 +27,26 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 
 import yaml from 'js-yaml';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import type { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
-import type { MonitorInspectResponse } from '../../../state/monitor_management/api';
+import type {
+  MonitorInspectResponse,
+  PackagePolicyLink,
+} from '../../../state/monitor_management/api';
 import { inspectMonitorAPI } from '../../../state/monitor_management/api';
 
 interface InspectorProps {
   isValid: boolean;
   monitorFields: SyntheticsMonitor;
+  isEditFlow?: boolean;
 }
 
-export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
+export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: InspectorProps) => {
   const { isDev } = useSyntheticsSettingsContext();
 
   const [hideParams, setHideParams] = useState(() => !isDev);
@@ -111,6 +119,15 @@ export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
                 {formatContent(data.result, asJson)}
               </EuiCodeBlock>
               {data.decodedCode && <MonitorCode code={data.decodedCode} />}
+              {isEditFlow && data.packagePolicyLinks.length > 0 && (
+                <>
+                  <EuiHorizontalRule />
+                  <PackagePolicyLinksTable
+                    links={data.packagePolicyLinks}
+                    hasMissingReferences={data.hasMissingReferences}
+                  />
+                </>
+              )}
             </>
           ) : loading && !error ? (
             <LoadingState />
@@ -145,6 +162,81 @@ export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
       </EuiToolTip>
 
       {flyout}
+    </>
+  );
+};
+
+const PackagePolicyLinksTable = ({
+  links,
+  hasMissingReferences,
+}: {
+  links: PackagePolicyLink[];
+  hasMissingReferences: boolean;
+}) => {
+  const { basePath } = useSyntheticsSettingsContext();
+
+  const columns: Array<EuiBasicTableColumn<PackagePolicyLink>> = [
+    {
+      field: 'locationLabel',
+      name: PRIVATE_LOCATION_LABEL,
+    },
+    {
+      field: 'agentPolicyId',
+      name: AGENT_POLICY_LABEL,
+      render: (agentPolicyId: string) => (
+        <EuiLink
+          data-test-subj="syntheticsPackagePolicyAgentPolicyLink"
+          href={`${basePath}/app/fleet/policies/${agentPolicyId}`}
+          target="_blank"
+          external
+        >
+          {agentPolicyId}
+        </EuiLink>
+      ),
+    },
+    {
+      field: 'packagePolicyId',
+      name: PACKAGE_POLICY_LABEL,
+      render: (packagePolicyId: string, item: PackagePolicyLink) => (
+        <EuiLink
+          data-test-subj="syntheticsPackagePolicyLink"
+          href={`${basePath}/app/fleet/policies/${item.agentPolicyId}/edit-integration/${packagePolicyId}`}
+          target="_blank"
+          external
+        >
+          {packagePolicyId}
+        </EuiLink>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <EuiTitle size="s">
+        <h3>{LINKED_POLICIES_LABEL}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      {hasMissingReferences && (
+        <>
+          <EuiCallOut
+            title={MISSING_REFERENCES_TITLE}
+            color="warning"
+            iconType="warning"
+            size="s"
+            announceOnMount
+            data-test-subj="syntheticsPackagePolicyMissingReferencesCallout"
+          >
+            <p>{MISSING_REFERENCES_DESCRIPTION}</p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <EuiBasicTable
+        tableCaption={LINKED_POLICIES_LABEL}
+        items={links}
+        columns={columns}
+        data-test-subj="syntheticsPackagePolicyLinksTable"
+      />
     </>
   );
 };
@@ -219,3 +311,40 @@ const HIDE_PARAMS = i18n.translate('xpack.synthetics.monitorInspect.hideParams',
 const AS_JSON = i18n.translate('xpack.synthetics.monitorInspect.asJson', {
   defaultMessage: 'As JSON',
 });
+
+const LINKED_POLICIES_LABEL = i18n.translate(
+  'xpack.synthetics.monitorInspect.linkedPoliciesLabel',
+  {
+    defaultMessage: 'Linked Fleet policies',
+  }
+);
+
+const PRIVATE_LOCATION_LABEL = i18n.translate(
+  'xpack.synthetics.monitorInspect.privateLocationLabel',
+  {
+    defaultMessage: 'Private location',
+  }
+);
+
+const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorInspect.agentPolicyLabel', {
+  defaultMessage: 'Agent policy',
+});
+
+const PACKAGE_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorInspect.packagePolicyLabel', {
+  defaultMessage: 'Package policy',
+});
+
+const MISSING_REFERENCES_TITLE = i18n.translate(
+  'xpack.synthetics.monitorInspect.missingReferencesTitle',
+  {
+    defaultMessage: 'Package policy references not found',
+  }
+);
+
+const MISSING_REFERENCES_DESCRIPTION = i18n.translate(
+  'xpack.synthetics.monitorInspect.missingReferencesDescription',
+  {
+    defaultMessage:
+      'This monitor has private locations but no saved references to package policies. Save the monitor to populate the references.',
+  }
+);
