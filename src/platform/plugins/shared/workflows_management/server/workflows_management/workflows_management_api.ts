@@ -33,6 +33,7 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { z } from '@kbn/zod/v4';
+import type { ChildWorkflowExecutionItem } from './lib/get_child_workflow_executions';
 import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
@@ -359,6 +360,13 @@ export class WorkflowsManagementApi {
     options?: { includeInput?: boolean; includeOutput?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId, options);
+  }
+
+  public async getChildWorkflowExecutions(
+    parentExecutionId: string,
+    spaceId: string
+  ): Promise<ChildWorkflowExecutionItem[]> {
+    return this.workflowsService.getChildWorkflowExecutions(parentExecutionId, spaceId);
   }
 
   public async getWorkflowExecutionLogs(params: {
