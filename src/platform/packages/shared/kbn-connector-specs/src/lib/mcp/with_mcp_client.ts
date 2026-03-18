@@ -19,7 +19,7 @@ export const withMcpClient = async <T>(
   ctx: ActionContext,
   fn: (mcp: ReturnType<typeof createMcpClientFromAxios>) => Promise<T>
 ): Promise<T> => {
-  const serverUrl = (ctx.config?.serverUrl as string) ?? '';
+  const serverUrl = typeof ctx.config?.serverUrl === 'string' ? ctx.config.serverUrl : '';
   if (!serverUrl) {
     throw new Error('config.serverUrl is required');
   }

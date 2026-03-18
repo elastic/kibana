@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
-import { withMcpClient } from '../../lib/mcp/with_mcp_client';
+import { withMcpClient } from '../../lib/mcp';
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
 
@@ -28,7 +28,7 @@ export const GithubConnector: ConnectorSpec = {
   metadata: {
     id: '.github',
     displayName: 'GitHub',
-    description: i18n.translate('core.kibanaConnectorSpecs.githubMcp.metadata.description', {
+    description: i18n.translate('connectorSpecs.github.metadata.description', {
       defaultMessage:
         'Connect to GitHub via the Copilot MCP server to search and read repositories, issues, pull requests, and more.',
     }),
@@ -47,10 +47,10 @@ export const GithubConnector: ConnectorSpec = {
       .meta({
         widget: 'text',
         placeholder: 'https://api.githubcopilot.com/mcp/',
-        label: i18n.translate('core.kibanaConnectorSpecs.githubMcp.config.serverUrl.label', {
+        label: i18n.translate('connectorSpecs.github.config.serverUrl.label', {
           defaultMessage: 'MCP Server URL',
         }),
-        helpText: i18n.translate('core.kibanaConnectorSpecs.githubMcp.config.serverUrl.helpText', {
+        helpText: i18n.translate('connectorSpecs.github.config.serverUrl.helpText', {
           defaultMessage: 'The URL of the GitHub Copilot MCP server.',
         }),
       }),
@@ -64,10 +64,9 @@ export const GithubConnector: ConnectorSpec = {
 
     getMe: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.getMe.description',
-        { defaultMessage: 'Get the authenticated GitHub user profile.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.getMe.description', {
+        defaultMessage: 'Get the authenticated GitHub user profile.',
+      }),
       input: z.object({}),
       handler: async (ctx) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -79,14 +78,13 @@ export const GithubConnector: ConnectorSpec = {
 
     searchCode: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.searchCode.description',
-        { defaultMessage: 'Search for code across GitHub repositories.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.searchCode.description', {
+        defaultMessage: 'Search for code across GitHub repositories.',
+      }),
       input: z.object({
         query: z.string().min(1).describe('GitHub code search query'),
-        page: z.number().default(1).optional(),
-        perPage: z.number().default(10).optional(),
+        page: z.number().optional().default(1),
+        perPage: z.number().optional().default(10),
       }),
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -102,13 +100,13 @@ export const GithubConnector: ConnectorSpec = {
     searchRepositories: {
       isTool: true,
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.searchRepositories.description',
+        'connectorSpecs.github.actions.searchRepositories.description',
         { defaultMessage: 'Search for GitHub repositories.' }
       ),
       input: z.object({
         query: z.string().min(1).describe('GitHub repository search query'),
-        page: z.number().default(1).optional(),
-        perPage: z.number().default(10).optional(),
+        page: z.number().optional().default(1),
+        perPage: z.number().optional().default(10),
       }),
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -123,16 +121,15 @@ export const GithubConnector: ConnectorSpec = {
 
     searchIssues: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.searchIssues.description',
-        { defaultMessage: 'Search for issues across GitHub repositories.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.searchIssues.description', {
+        defaultMessage: 'Search for issues across GitHub repositories.',
+      }),
       input: z.object({
         query: z.string().min(1).describe('GitHub issue search query'),
-        order: z.enum(['asc', 'desc']).default('desc').optional(),
-        sort: z.string().default('created').optional(),
-        page: z.number().default(1).optional(),
-        perPage: z.number().default(10).optional(),
+        order: z.enum(['asc', 'desc']).optional().default('desc'),
+        sort: z.string().optional().default('created'),
+        page: z.number().optional().default(1),
+        perPage: z.number().optional().default(10),
       }),
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -154,15 +151,15 @@ export const GithubConnector: ConnectorSpec = {
     searchPullRequests: {
       isTool: true,
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.searchPullRequests.description',
+        'connectorSpecs.github.actions.searchPullRequests.description',
         { defaultMessage: 'Search for pull requests across GitHub repositories.' }
       ),
       input: z.object({
         query: z.string().min(1).describe('GitHub pull request search query'),
-        order: z.enum(['asc', 'desc']).default('desc').optional(),
-        sort: z.string().default('created').optional(),
-        page: z.number().default(1).optional(),
-        perPage: z.number().default(10).optional(),
+        order: z.enum(['asc', 'desc']).optional().default('desc'),
+        sort: z.string().optional().default('created'),
+        page: z.number().optional().default(1),
+        perPage: z.number().optional().default(10),
       }),
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -183,14 +180,13 @@ export const GithubConnector: ConnectorSpec = {
 
     searchUsers: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.searchUsers.description',
-        { defaultMessage: 'Search for GitHub users.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.searchUsers.description', {
+        defaultMessage: 'Search for GitHub users.',
+      }),
       input: z.object({
         query: z.string().min(1).describe('GitHub user search query'),
-        page: z.number().default(1).optional(),
-        perPage: z.number().default(10).optional(),
+        page: z.number().optional().default(1),
+        perPage: z.number().optional().default(10),
       }),
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -205,15 +201,14 @@ export const GithubConnector: ConnectorSpec = {
 
     listIssues: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.listIssues.description',
-        { defaultMessage: 'List issues in a GitHub repository. Uses cursor-based pagination.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.listIssues.description', {
+        defaultMessage: 'List issues in a GitHub repository. Uses cursor-based pagination.',
+      }),
       input: z.object({
         owner: z.string().min(1).describe('Repository owner (user or org)'),
         repo: z.string().min(1).describe('Repository name'),
-        state: z.enum(['open', 'closed', 'all']).default('open').optional(),
-        first: z.number().default(10).optional().describe('Number of results to return'),
+        state: z.enum(['open', 'closed', 'all']).optional().default('open'),
+        first: z.number().optional().default(10).describe('Number of results to return'),
         after: z
           .string()
           .optional()
@@ -239,7 +234,7 @@ export const GithubConnector: ConnectorSpec = {
     listPullRequests: {
       isTool: true,
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.listPullRequests.description',
+        'connectorSpecs.github.actions.listPullRequests.description',
         {
           defaultMessage:
             'List pull requests in a GitHub repository. Uses cursor-based pagination.',
@@ -248,8 +243,8 @@ export const GithubConnector: ConnectorSpec = {
       input: z.object({
         owner: z.string().min(1).describe('Repository owner (user or org)'),
         repo: z.string().min(1).describe('Repository name'),
-        state: z.enum(['open', 'closed', 'all']).default('open').optional(),
-        first: z.number().default(10).optional().describe('Number of results to return'),
+        state: z.enum(['open', 'closed', 'all']).optional().default('open'),
+        first: z.number().optional().default(10).describe('Number of results to return'),
         after: z
           .string()
           .optional()
@@ -274,15 +269,14 @@ export const GithubConnector: ConnectorSpec = {
 
     listCommits: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.listCommits.description',
-        { defaultMessage: 'List commits in a GitHub repository. Uses cursor-based pagination.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.listCommits.description', {
+        defaultMessage: 'List commits in a GitHub repository. Uses cursor-based pagination.',
+      }),
       input: z.object({
         owner: z.string().min(1).describe('Repository owner (user or org)'),
         repo: z.string().min(1).describe('Repository name'),
         sha: z.string().optional().describe('Branch name or commit SHA to start listing from'),
-        first: z.number().default(10).optional().describe('Number of results to return'),
+        first: z.number().optional().default(10).describe('Number of results to return'),
         after: z
           .string()
           .optional()
@@ -307,14 +301,13 @@ export const GithubConnector: ConnectorSpec = {
 
     listBranches: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.listBranches.description',
-        { defaultMessage: 'List branches in a GitHub repository. Uses cursor-based pagination.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.listBranches.description', {
+        defaultMessage: 'List branches in a GitHub repository. Uses cursor-based pagination.',
+      }),
       input: z.object({
         owner: z.string().min(1).describe('Repository owner (user or org)'),
         repo: z.string().min(1).describe('Repository name'),
-        first: z.number().default(10).optional().describe('Number of results to return'),
+        first: z.number().optional().default(10).describe('Number of results to return'),
         after: z
           .string()
           .optional()
@@ -338,14 +331,13 @@ export const GithubConnector: ConnectorSpec = {
 
     listReleases: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.listReleases.description',
-        { defaultMessage: 'List releases in a GitHub repository. Uses cursor-based pagination.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.listReleases.description', {
+        defaultMessage: 'List releases in a GitHub repository. Uses cursor-based pagination.',
+      }),
       input: z.object({
         owner: z.string().min(1).describe('Repository owner (user or org)'),
         repo: z.string().min(1).describe('Repository name'),
-        first: z.number().default(10).optional().describe('Number of results to return'),
+        first: z.number().optional().default(10).describe('Number of results to return'),
         after: z
           .string()
           .optional()
@@ -369,14 +361,13 @@ export const GithubConnector: ConnectorSpec = {
 
     listTags: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.listTags.description',
-        { defaultMessage: 'List tags in a GitHub repository. Uses cursor-based pagination.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.listTags.description', {
+        defaultMessage: 'List tags in a GitHub repository. Uses cursor-based pagination.',
+      }),
       input: z.object({
         owner: z.string().min(1).describe('Repository owner (user or org)'),
         repo: z.string().min(1).describe('Repository name'),
-        first: z.number().default(10).optional().describe('Number of results to return'),
+        first: z.number().optional().default(10).describe('Number of results to return'),
         after: z
           .string()
           .optional()
@@ -400,10 +391,9 @@ export const GithubConnector: ConnectorSpec = {
 
     getCommit: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.getCommit.description',
-        { defaultMessage: 'Get details of a specific commit.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.getCommit.description', {
+        defaultMessage: 'Get details of a specific commit.',
+      }),
       input: z.object({
         owner: z.string().min(1).describe('Repository owner (user or org)'),
         repo: z.string().min(1).describe('Repository name'),
@@ -423,7 +413,7 @@ export const GithubConnector: ConnectorSpec = {
     getLatestRelease: {
       isTool: true,
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.getLatestRelease.description',
+        'connectorSpecs.github.actions.getLatestRelease.description',
         { defaultMessage: 'Get the latest release of a GitHub repository.' }
       ),
       input: z.object({
@@ -443,10 +433,9 @@ export const GithubConnector: ConnectorSpec = {
 
     pullRequestRead: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.githubMcp.actions.pullRequestRead.description',
-        { defaultMessage: 'Read the full details of a specific pull request.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.pullRequestRead.description', {
+        defaultMessage: 'Read the full details of a specific pull request.',
+      }),
       input: z.object({
         owner: z.string().min(1).describe('Repository owner (user or org)'),
         repo: z.string().min(1).describe('Repository name'),
@@ -465,7 +454,7 @@ export const GithubConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.githubMcp.test.description', {
+    description: i18n.translate('connectorSpecs.github.test.description', {
       defaultMessage:
         'Verifies connection to the GitHub Copilot MCP server by listing available tools.',
     }),

@@ -23,17 +23,16 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
     const method = (init?.method ?? 'GET').toUpperCase();
     const headers: Record<string, string> = {};
     if (init?.headers) {
-      const h = init.headers as Headers;
-      if (typeof h.forEach === 'function') {
-        h.forEach((value, key) => {
+      if (init.headers instanceof Headers) {
+        init.headers.forEach((value, key) => {
           headers[key] = value;
         });
-      } else if (Array.isArray(h)) {
-        for (const [key, value] of h) {
+      } else if (Array.isArray(init.headers)) {
+        for (const [key, value] of init.headers) {
           headers[key] = value;
         }
       } else {
-        Object.assign(headers, h);
+        Object.assign(headers, init.headers);
       }
     }
 
