@@ -101,6 +101,13 @@ export const COLUMN_ENABLED = i18n.translate('xpack.cases.templates.columnEnable
   defaultMessage: 'Enabled',
 });
 
+export const TEMPLATE_ENABLED_CAN_CREATE_CASES = i18n.translate(
+  'xpack.cases.templates.enabledCanCreateCases',
+  {
+    defaultMessage: 'This template is enabled and can be used to create new cases.',
+  }
+);
+
 export const TEMPLATE_DISABLED_CANNOT_CREATE_CASES = i18n.translate(
   'xpack.cases.templates.disabledCannotCreateCases',
   {

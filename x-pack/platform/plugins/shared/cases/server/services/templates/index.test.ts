@@ -472,7 +472,7 @@ describe('TemplatesService', () => {
         );
       });
 
-      it('adds must_not isEnabled:false filter when isEnabled is true', async () => {
+      it('adds isEnabled:true filter when isEnabled is true', async () => {
         const service = createService();
         unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
@@ -487,10 +487,10 @@ describe('TemplatesService', () => {
           expect.arrayContaining([
             expect.objectContaining({
               bool: expect.objectContaining({
-                must_not: expect.arrayContaining([
+                should: expect.arrayContaining([
                   expect.objectContaining({
-                    term: expect.objectContaining({
-                      [`${CASE_TEMPLATE_SAVED_OBJECT}.isEnabled`]: false,
+                    match: expect.objectContaining({
+                      [`${CASE_TEMPLATE_SAVED_OBJECT}.isEnabled`]: true,
                     }),
                   }),
                 ]),
@@ -500,7 +500,7 @@ describe('TemplatesService', () => {
         );
       });
 
-      it('adds term isEnabled:false filter when isEnabled is false', async () => {
+      it('adds isEnabled:false filter when isEnabled is false', async () => {
         const service = createService();
         unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
@@ -514,8 +514,14 @@ describe('TemplatesService', () => {
         expect(query.bool.filter).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              term: expect.objectContaining({
-                [`${CASE_TEMPLATE_SAVED_OBJECT}.isEnabled`]: false,
+              bool: expect.objectContaining({
+                should: expect.arrayContaining([
+                  expect.objectContaining({
+                    match: expect.objectContaining({
+                      [`${CASE_TEMPLATE_SAVED_OBJECT}.isEnabled`]: false,
+                    }),
+                  }),
+                ]),
               }),
             }),
           ])

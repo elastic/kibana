@@ -137,6 +137,34 @@ describe('TemplatesTableSettings', () => {
     expect(onShowOnlyDisabledChange).toHaveBeenCalled();
   });
 
+  it('renders show only disabled switch as unchecked when showOnlyDisabled is false', async () => {
+    renderWithTestingProviders(
+      <TemplatesTableSettings {...defaultProps} showOnlyDisabled={false} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-disabled-filter-link')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('templates-disabled-filter-link')).toHaveAttribute(
+      'aria-checked',
+      'false'
+    );
+  });
+
+  it('renders show only disabled switch as checked when showOnlyDisabled is true', async () => {
+    renderWithTestingProviders(
+      <TemplatesTableSettings {...defaultProps} showOnlyDisabled={true} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-disabled-filter-link')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('templates-disabled-filter-link')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
   it('renders bulk actions when templates are selected', async () => {
     renderWithTestingProviders(
       <TemplatesTableSettings {...defaultProps} selectedTemplates={[mockTemplate]} />

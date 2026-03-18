@@ -370,7 +370,13 @@ export const useTemplatesColumns = ({
           const isEnabled = template.isEnabled !== false;
 
           return (
-            <EuiToolTip content={i18n.TEMPLATE_DISABLED_CANNOT_CREATE_CASES}>
+            <EuiToolTip
+              content={
+                isEnabled
+                  ? i18n.TEMPLATE_ENABLED_CAN_CREATE_CASES
+                  : i18n.TEMPLATE_DISABLED_CANNOT_CREATE_CASES
+              }
+            >
               <EuiSwitch
                 checked={isEnabled}
                 onChange={() => onIsEnabledChange(template)}

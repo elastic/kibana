@@ -143,10 +143,14 @@ export class TemplatesService {
 
     const filters = [
       ...(isDeleted ? [] : [toElasticsearchQuery(fromKueryExpression(`NOT ${SO}.deletedAt: *`))]),
-      ...(isEnabled === true
-        ? [{ bool: { must_not: [{ term: { [`${SO}.isEnabled`]: false } }] } }]
-        : isEnabled === false
-        ? [{ term: { [`${SO}.isEnabled`]: false } }]
+      // ...(isEnabled === true
+      //   ? [{ bool: { must_not: [{ term: { [`${SO}.isEnabled`]: false } }] } }]
+      //   : isEnabled === false
+      //   ? [{ term: { [`${SO}.isEnabled`]: false } }]
+      //   : []),
+
+      ...(isEnabled !== undefined
+        ? [toElasticsearchQuery(fromKueryExpression(`${SO}.isEnabled: ${isEnabled}`))]
         : []),
       ...(templateId
         ? [toElasticsearchQuery(fromKueryExpression(`${SO}.templateId: "${templateId}"`))]
