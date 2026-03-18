@@ -13,6 +13,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const EVALS_DIR = 'target/evals';
 const STATE_FILE = 'target/evals/services.json';
+const DEFAULT_SERVER_CONFIG_SET = 'evals_tracing';
 
 export type ServiceName = 'edot' | 'scout';
 
@@ -88,12 +89,15 @@ export const isScoutStale = (
     return { stale: true, reason: 'KIBANA_TESTING_AI_CONNECTORS changed' };
   }
 
-  if (requestedConfigSet && entry.serverConfigSet !== requestedConfigSet) {
+  const runningConfigSet = entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET;
+  const targetConfigSet = requestedConfigSet ?? DEFAULT_SERVER_CONFIG_SET;
+
+  if (runningConfigSet !== targetConfigSet) {
     return {
       stale: true,
       reason: `serverConfigSet changed (running: ${
-        entry.serverConfigSet ?? 'evals_tracing'
-      }, requested: ${requestedConfigSet})`,
+        entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET
+      }, requested: ${targetConfigSet})`,
     };
   }
 

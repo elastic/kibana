@@ -314,7 +314,7 @@ export const startCmd: Command<void> = {
       }
 
       // --- Step 2: Scout server ---
-      const serverConfigSet = suite?.serverConfigSet;
+      const serverConfigSet = suite?.serverConfigSet ?? 'evals_tracing';
       const scoutAlive = isServiceRunning(repoRoot, 'scout');
       const staleCheck = scoutAlive ? isScoutStale(repoRoot, serverConfigSet) : { stale: false };
 
@@ -331,9 +331,8 @@ export const startCmd: Command<void> = {
           Fs.unlinkSync(scoutConfigPath);
         }
 
-        const configSetLabel = serverConfigSet ?? 'evals_tracing';
         log.info(
-          `[2/4] Starting Scout server (backgrounded, stateful/classic, ${configSetLabel})...`
+          `[2/4] Starting Scout server (backgrounded, stateful/classic, ${serverConfigSet})...`
         );
         startService(
           repoRoot,
@@ -343,7 +342,7 @@ export const startCmd: Command<void> = {
           log,
           {
             connectorsHash: connectorsHash(),
-            serverConfigSet: configSetLabel,
+            serverConfigSet,
           }
         );
 
