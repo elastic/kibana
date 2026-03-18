@@ -99,11 +99,6 @@ export interface SkillsStart {
    * Only affects future conversations (existing ones snapshot skills at creation time).
    */
   register: (skill: SkillDefinition) => Promise<void>;
-  /**
-   * Unregister a previously registered skill by ID.
-   * Returns true if the skill was found and removed.
-   */
-  unregister: (skillId: string) => Promise<boolean>;
 }
 
 /**

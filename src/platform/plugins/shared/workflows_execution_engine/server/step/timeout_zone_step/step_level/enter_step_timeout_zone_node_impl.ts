@@ -8,7 +8,7 @@
  */
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
-
+import { ExecutionError } from '@kbn/workflows/server';
 import { parseDuration } from '../../../utils';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -36,9 +36,10 @@ export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, Monitor
 
     if (currentStepDuration > timeoutMs) {
       monitoredContext.abortController.abort();
-      throw new Error(
-        `TimeoutError: Step execution exceeded the configured timeout of ${this.node.timeout}.`
-      );
+      throw new ExecutionError({
+        type: 'TimeoutError',
+        message: `Step execution exceeded the configured timeout of ${this.node.timeout}.`,
+      });
     }
   }
 }
