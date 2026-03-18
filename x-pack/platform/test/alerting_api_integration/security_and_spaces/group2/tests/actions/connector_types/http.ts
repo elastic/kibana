@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type httpProxy from 'http-proxy';
+import httpProxy from 'http-proxy';
 import type http from 'http';
 import expect from '@kbn/expect';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
@@ -641,6 +641,71 @@ export default function httpTest({ getService }: FtrProviderContext) {
         const httpSimulatorHeaders = await httpSimulatorHeadersRaw.json();
         expect(httpSimulatorHeaders.length).to.be(2);
         expect(JSON.parse(httpSimulatorHeaders[1]).authorization).to.equal('Bearer test-token-2');
+      });
+    });
+
+    describe('Proxy settings', () => {
+      let connectorProxyServer: httpProxy;
+      let connectorProxyUrl: string;
+      let connectorProxyHaveBeenCalled = false;
+
+      before(async () => {
+        const connectorProxyPort = await getPort({ port: getPort.makeRange(9200, 9300) });
+        connectorProxyServer = httpProxy.createProxyServer({
+          target: httpSimulatorURL,
+          secure: false,
+          selfHandleResponse: false,
+        });
+        connectorProxyServer.on('proxyRes', () => {
+          connectorProxyHaveBeenCalled = true;
+        });
+        connectorProxyServer.listen(connectorProxyPort);
+        connectorProxyUrl = `http://localhost:${connectorProxyPort}`;
+      });
+
+      beforeEach(() => {
+        connectorProxyHaveBeenCalled = false;
+        proxyHaveBeenCalled = false;
+      });
+
+      after(() => {
+        connectorProxyServer.close();
+      });
+
+      it('should use the connector-level proxy instead of the global proxy', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'test')
+          .send({
+            name: 'A generic Http action',
+            connector_type_id: '.http',
+            secrets: {
+              user: 'username',
+              password: 'mypassphrase',
+            },
+            config: {
+              url: httpSimulatorURL,
+              proxyUrl: connectorProxyUrl,
+            },
+          })
+          .expect(200);
+
+        objectRemover.add('default', createdAction.id, 'connector', 'actions', false);
+
+        const { body: result } = await supertest
+          .post(`/api/actions/connector/${createdAction.id}/_execute`)
+          .set('kbn-xsrf', 'test')
+          .send({
+            params: {
+              method: 'POST',
+              body: 'success_post_method',
+            },
+          })
+          .expect(200);
+
+        expect(result.status).to.eql('ok');
+        expect(connectorProxyHaveBeenCalled).to.equal(true);
+        expect(proxyHaveBeenCalled).to.equal(false);
       });
     });
 
