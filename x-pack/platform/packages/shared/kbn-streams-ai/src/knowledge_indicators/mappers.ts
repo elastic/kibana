@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
-import type { KnowledgeIndicatorFeature, KnowledgeIndicatorQuery, QueryLink } from './types';
+import type { Feature, QueryLink } from '@kbn/streams-schema';
+import type { KnowledgeIndicatorFeature, KnowledgeIndicatorQuery } from './types';
 
 export const featureToKnowledgeIndicatorFeature = (feature: Feature): KnowledgeIndicatorFeature => {
   return {

@@ -9,6 +9,7 @@ import { clamp, compact, intersection, trim, uniq } from 'lodash';
 import type { Feature, QueryLink } from '@kbn/streams-schema';
 import type {
   KnowledgeIndicator,
+  KnowledgeIndicatorFeature,
   SearchKnowledgeIndicatorsInput,
   SearchKnowledgeIndicatorsOutput,
 } from './types';
@@ -22,8 +23,11 @@ function byKindThenScore(a: KnowledgeIndicator, b: KnowledgeIndicator): number {
     const d = (b.feature.confidence ?? 0) - (a.feature.confidence ?? 0);
     return d !== 0 ? d : a.feature.id.localeCompare(b.feature.id);
   }
-  const d = (b.query.severity_score ?? -1) - (a.query.severity_score ?? -1);
-  return d !== 0 ? d : a.query.id.localeCompare(b.query.id);
+  if (a.kind === 'query' && b.kind === 'query') {
+    const d = (b.query.severity_score ?? -1) - (a.query.severity_score ?? -1);
+    return d !== 0 ? d : a.query.id.localeCompare(b.query.id);
+  }
+  return 0;
 }
 
 export async function searchKnowledgeIndicators({
@@ -65,7 +69,7 @@ export async function searchKnowledgeIndicators({
   const streamNames = compact(streams.filter((s) => typeof s === 'string' && s.length > 0));
 
   // Step 3: Fetch features (allSettled, best-effort)
-  const features: KnowledgeIndicator[] = [];
+  const features: KnowledgeIndicatorFeature[] = [];
   if (includeFeatures) {
     const settled = await Promise.allSettled(
       streamNames.map((n) => getFeatures(n, { min_confidence: minConf, limit }))
@@ -77,7 +81,7 @@ export async function searchKnowledgeIndicators({
   }
 
   // Step 4: Fetch queries
-  const queries: KnowledgeIndicator[] = includeQueries
+  const queries = includeQueries
     ? (await getQueries(streamNames, searchText)).map(queryLinkToKnowledgeIndicatorQuery)
     : [];
 
