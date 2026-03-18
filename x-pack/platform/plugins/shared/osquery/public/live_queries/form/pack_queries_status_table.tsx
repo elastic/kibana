@@ -462,6 +462,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           actionId={actionId}
           agentIds={agentIds}
           addToTimeline={addToTimeline}
+          isScheduled={!!scheduleId}
         />
       )}
       <EuiBasicTable
