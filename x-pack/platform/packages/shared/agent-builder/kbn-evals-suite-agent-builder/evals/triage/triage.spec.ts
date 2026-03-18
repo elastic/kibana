@@ -188,67 +188,61 @@ evaluate.describe(
       }
     );
 
-    evaluate(
-      'L1 triage classifies benign alert correctly',
-      async ({ evaluateDataset }) => {
-        if (!triageAgentId) {
-          throw new Error('Expected triageAgentId to be set in beforeAll');
-        }
-
-        await evaluateDataset({
-          dataset: {
-            name: 'agentic-triage: l1-triage-benign',
-            description:
-              'Validates that the agent classifies a clearly benign alert as benign with high confidence.',
-            examples: [
-              {
-                input: {
-                  question: `Classify this alert based on the L1 investigation findings.\n\n=== L1 INVESTIGATION FINDINGS ===\n${MOCK_BENIGN_INVESTIGATION}\n\n=== ALERT CONTEXT ===\n${MOCK_ALERT_CONTEXT}`,
-                },
-                output: {
-                  expected:
-                    'JSON output with assessment "benign" and confidence "high", since the investigation clearly concludes this is a false positive from IT automation.',
-                },
-                metadata: {
-                  agentId: triageAgentId,
-                },
-              },
-            ],
-          },
-        });
+    evaluate('L1 triage classifies benign alert correctly', async ({ evaluateDataset }) => {
+      if (!triageAgentId) {
+        throw new Error('Expected triageAgentId to be set in beforeAll');
       }
-    );
 
-    evaluate(
-      'L1 triage classifies suspicious alert correctly',
-      async ({ evaluateDataset }) => {
-        if (!triageAgentId) {
-          throw new Error('Expected triageAgentId to be set in beforeAll');
-        }
-
-        await evaluateDataset({
-          dataset: {
-            name: 'agentic-triage: l1-triage-suspicious',
-            description:
-              'Validates that the agent classifies a suspicious alert as suspicious or malicious.',
-            examples: [
-              {
-                input: {
-                  question: `Classify this alert based on the L1 investigation findings.\n\n=== L1 INVESTIGATION FINDINGS ===\n${MOCK_SUSPICIOUS_INVESTIGATION}\n\n=== ALERT CONTEXT ===\n${MOCK_ALERT_CONTEXT}`,
-                },
-                output: {
-                  expected:
-                    'JSON output with assessment "suspicious" or "malicious" since the investigation shows obfuscated osascript with curl to known C2, multi-country logins, and correlated alerts.',
-                },
-                metadata: {
-                  agentId: triageAgentId,
-                },
+      await evaluateDataset({
+        dataset: {
+          name: 'agentic-triage: l1-triage-benign',
+          description:
+            'Validates that the agent classifies a clearly benign alert as benign with high confidence.',
+          examples: [
+            {
+              input: {
+                question: `Classify this alert based on the L1 investigation findings.\n\n=== L1 INVESTIGATION FINDINGS ===\n${MOCK_BENIGN_INVESTIGATION}\n\n=== ALERT CONTEXT ===\n${MOCK_ALERT_CONTEXT}`,
               },
-            ],
-          },
-        });
+              output: {
+                expected:
+                  'JSON output with assessment "benign" and confidence "high", since the investigation clearly concludes this is a false positive from IT automation.',
+              },
+              metadata: {
+                agentId: triageAgentId,
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('L1 triage classifies suspicious alert correctly', async ({ evaluateDataset }) => {
+      if (!triageAgentId) {
+        throw new Error('Expected triageAgentId to be set in beforeAll');
       }
-    );
+
+      await evaluateDataset({
+        dataset: {
+          name: 'agentic-triage: l1-triage-suspicious',
+          description:
+            'Validates that the agent classifies a suspicious alert as suspicious or malicious.',
+          examples: [
+            {
+              input: {
+                question: `Classify this alert based on the L1 investigation findings.\n\n=== L1 INVESTIGATION FINDINGS ===\n${MOCK_SUSPICIOUS_INVESTIGATION}\n\n=== ALERT CONTEXT ===\n${MOCK_ALERT_CONTEXT}`,
+              },
+              output: {
+                expected:
+                  'JSON output with assessment "suspicious" or "malicious" since the investigation shows obfuscated osascript with curl to known C2, multi-country logins, and correlated alerts.',
+              },
+              metadata: {
+                agentId: triageAgentId,
+              },
+            },
+          ],
+        },
+      });
+    });
 
     evaluate(
       'Orchestrator produces full triage report with all sections',
