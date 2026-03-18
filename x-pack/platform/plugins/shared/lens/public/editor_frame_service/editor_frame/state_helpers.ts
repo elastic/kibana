@@ -128,7 +128,6 @@ export async function initializeDataViews(
     initialContext,
     adHocDataViews: persistedAdHocDataViews,
     annotationGroups,
-    http,
   }: {
     dataViews: DataViewsContract;
     datasourceMap: DatasourceMap;
@@ -139,7 +138,6 @@ export async function initializeDataViews(
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
     annotationGroups: Record<string, EventAnnotationGroupConfig>;
-    http?: HttpStart;
   },
   options?: InitializationOptions
 ) {
@@ -286,7 +284,6 @@ export async function initializeSources(
       references,
       adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
-      http,
     },
     options
   );
@@ -450,7 +447,6 @@ export async function persistedStateToExpression(
       defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
       adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
-      http: services.http,
     },
     { isFullEditor: false }
   );
