@@ -55,6 +55,7 @@
     "@kbn/ingest-pipelines-plugin",
     "@kbn/utility-types",
     "@kbn/code-editor",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/core-analytics-browser"
   ]
 }
