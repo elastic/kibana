@@ -14,8 +14,26 @@ import {
   TITLE_LINK_ICON_TEST_ID,
 } from './test_ids';
 
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+
+  return {
+    ...actual,
+    EuiIcon: ({
+      type,
+      color,
+      'data-test-subj': dataTestSubj,
+    }: {
+      type: string;
+      color?: string;
+      'data-test-subj'?: string;
+    }) => <span data-test-subj={dataTestSubj} data-icon-type={type} data-icon-color={color} />,
+  };
+});
+
 const title = 'test title';
 const TEST_ID = 'test';
+const DEFAULT_TEST_ID = 'flyoutTitle';
 
 describe('<FlyoutTitle />', () => {
   it('should render title and icon', () => {
@@ -42,7 +60,53 @@ describe('<FlyoutTitle />', () => {
     const { getByTestId } = render(<FlyoutTitle title={title} isLink data-test-subj={TEST_ID} />);
 
     expect(getByTestId(TITLE_HEADER_TEXT_TEST_ID(TEST_ID))).toHaveTextContent(title);
-    expect(getByTestId(TITLE_LINK_ICON_TEST_ID(TEST_ID))).toBeInTheDocument();
-    expect(getByTestId(TITLE_LINK_ICON_TEST_ID(TEST_ID))).toBeInTheDocument();
+    expect(getByTestId(TITLE_LINK_ICON_TEST_ID(TEST_ID))).toHaveAttribute(
+      'data-icon-type',
+      'popout'
+    );
+  });
+
+  it('should render both the title icon and popout icon when the title is a link with an icon', () => {
+    const { getByTestId } = render(
+      <FlyoutTitle title={title} iconType={'warning'} isLink data-test-subj={TEST_ID} />
+    );
+
+    expect(getByTestId(TITLE_HEADER_ICON_TEST_ID(TEST_ID))).toHaveAttribute(
+      'data-icon-type',
+      'warning'
+    );
+    expect(getByTestId(TITLE_LINK_ICON_TEST_ID(TEST_ID))).toHaveAttribute(
+      'data-icon-type',
+      'popout'
+    );
+  });
+
+  it('should use the default test subject when one is not provided', () => {
+    const { getByTestId, queryByTestId } = render(
+      <FlyoutTitle title={title} iconType={'warning'} />
+    );
+
+    expect(getByTestId(TITLE_HEADER_TEXT_TEST_ID(DEFAULT_TEST_ID))).toHaveTextContent(title);
+    expect(getByTestId(TITLE_HEADER_ICON_TEST_ID(DEFAULT_TEST_ID))).toHaveAttribute(
+      'data-icon-type',
+      'warning'
+    );
+    expect(queryByTestId(TITLE_LINK_ICON_TEST_ID(DEFAULT_TEST_ID))).not.toBeInTheDocument();
+  });
+
+  it('should pass iconColor to the title icon', () => {
+    const { getByTestId } = render(
+      <FlyoutTitle
+        title={title}
+        iconType={'warning'}
+        iconColor={'primary'}
+        data-test-subj={TEST_ID}
+      />
+    );
+
+    expect(getByTestId(TITLE_HEADER_ICON_TEST_ID(TEST_ID))).toHaveAttribute(
+      'data-icon-color',
+      'primary'
+    );
   });
 });

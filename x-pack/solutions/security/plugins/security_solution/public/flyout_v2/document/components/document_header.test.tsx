@@ -10,8 +10,17 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentHeader } from './document_header';
-import { HEADER_TITLE_TEST_ID } from './test_ids';
-import { TITLE_HEADER_TEXT_TEST_ID } from '../../shared/components/test_ids';
+
+jest.mock('./header_title', () => ({
+  HeaderTitle: ({ hit, titleHref }: { hit: DataTableRecord; titleHref?: string }) => (
+    <div
+      data-test-subj="mockHeaderTitle"
+      data-hit-id={hit.id}
+      data-event-kind={String(hit.flattened['event.kind'] ?? '')}
+      data-title-href={titleHref ?? ''}
+    />
+  ),
+}));
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -34,12 +43,11 @@ const renderDocumentHeader = (props: Parameters<typeof DocumentHeader>[0]) =>
   );
 
 describe('<DocumentHeader />', () => {
-  it('should render the header title', () => {
+  it('should pass the hit to the header title', () => {
     const { getByTestId } = renderDocumentHeader({ hit: alertHit });
 
-    expect(getByTestId(TITLE_HEADER_TEXT_TEST_ID(HEADER_TITLE_TEST_ID))).toHaveTextContent(
-      'Test Rule'
-    );
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-hit-id', '1');
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-event-kind', 'signal');
   });
 
   it('should pass titleHref to the header title', () => {
@@ -48,6 +56,9 @@ describe('<DocumentHeader />', () => {
       titleHref: 'https://example.com/rule/123',
     });
 
-    expect(getByTestId(`${HEADER_TITLE_TEST_ID}LinkIcon`)).toBeInTheDocument();
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute(
+      'data-title-href',
+      'https://example.com/rule/123'
+    );
   });
 });
