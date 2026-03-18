@@ -130,6 +130,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
           backed: false,
           id: 'rule-1',
         },
+        stream_name: 'logs.test',
       },
     ]);
   });
