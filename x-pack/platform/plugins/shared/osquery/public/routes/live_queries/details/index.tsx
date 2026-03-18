@@ -11,6 +11,7 @@ import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useGoBack } from '../../../common/use_go_back';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
@@ -18,7 +19,7 @@ import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
 const tableWrapperCss = {
-  paddingLeft: '10px',
+  paddingLeft: 0,
 };
 
 const LiveQueryDetailsPageComponent = () => {
@@ -28,7 +29,8 @@ const LiveQueryDetailsPageComponent = () => {
     liveQueryId: actionId,
   });
   const backNavigationTarget = isHistoryEnabled ? 'history' : 'live_queries';
-  const liveQueryListProps = useRouterNavigate(backNavigationTarget);
+  const handleGoBack = useGoBack(backNavigationTarget);
+  const liveQueryListProps = useRouterNavigate(backNavigationTarget, handleGoBack);
   const [isLive, setIsLive] = useState(false);
   const { data } = useLiveQueryDetails({ actionId, isLive });
 

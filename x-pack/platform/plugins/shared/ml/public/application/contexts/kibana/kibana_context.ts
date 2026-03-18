@@ -36,7 +36,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
-import type { CPSPluginStart } from '@kbn/cps/public';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
