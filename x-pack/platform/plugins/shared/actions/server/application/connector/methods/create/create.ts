@@ -16,11 +16,8 @@ import { validateConfig, validateConnector, validateSecrets } from '../../../../
 import { isConnectorDeprecated } from '../../lib';
 import type { HookServices, ActionResult } from '../../../../types';
 import { tryCatch } from '../../../../lib';
-<<<<<<< HEAD
-import { inferAuthMode } from '../../../../lib/infer_auth_mode';
-=======
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
->>>>>>> 33fc4152d101caeefb8dd124496986f94ded3b97
+import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 
 export async function create({
   context,
