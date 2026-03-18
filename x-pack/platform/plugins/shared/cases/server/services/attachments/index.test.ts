@@ -662,6 +662,35 @@ describe('AttachmentService', () => {
   });
 
   describe('find', () => {
+    it('uses a single paginated find call when feature flag is enabled', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
+      );
+
+      await serviceWithFlagOn.find({
+        mode: 'legacy',
+        options: {
+          page: 1,
+          perPage: 10,
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 1,
+          perPage: 10,
+          type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
+        })
+      );
+    });
+
     it('queries only legacy SO type when feature flag is disabled', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValue(
         createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
@@ -712,6 +741,7 @@ describe('AttachmentService', () => {
             attributes: {
               type: 'comment',
               data: { content: 'from unified' },
+              owner: SECURITY_SOLUTION_OWNER,
               metadata: { owner: SECURITY_SOLUTION_OWNER },
               created_at: '2024-01-01T00:00:00.000Z',
               created_by: { username: 'u', full_name: null, email: null },

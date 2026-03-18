@@ -8,6 +8,7 @@
 import { unset } from 'lodash';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createPersistableStateAttachmentTypeRegistryMock } from '../../../attachment_framework/mocks';
@@ -160,6 +161,45 @@ describe('AttachmentService getter', () => {
   });
 
   describe('get', () => {
+    it('falls back to legacy SO when unified SO returns 404', async () => {
+      const attachmentGetterWithFlagOn = createAttachmentGetter(true);
+      unsecuredSavedObjectsClient.get
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(CASE_ATTACHMENT_SAVED_OBJECT, '1')
+        )
+        .mockResolvedValueOnce(createUserAttachment());
+
+      const res = await attachmentGetterWithFlagOn.get({ attachmentId: '1', mode });
+
+      expect(res).toStrictEqual(createUserAttachment());
+      expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(2);
+      expect(unsecuredSavedObjectsClient.get).toHaveBeenNthCalledWith(
+        1,
+        CASE_ATTACHMENT_SAVED_OBJECT,
+        '1'
+      );
+      expect(unsecuredSavedObjectsClient.get).toHaveBeenNthCalledWith(
+        2,
+        CASE_COMMENT_SAVED_OBJECT,
+        '1'
+      );
+    });
+
+    it('does not fall back to legacy SO when unified SO returns non-404 error', async () => {
+      const attachmentGetterWithFlagOn = createAttachmentGetter(true);
+      unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('ES timeout'));
+
+      await expect(
+        attachmentGetterWithFlagOn.get({ attachmentId: '1', mode })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES timeout"`);
+
+      expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(
+        CASE_ATTACHMENT_SAVED_OBJECT,
+        '1'
+      );
+    });
+
     describe('Decoding', () => {
       it('does not throw when the response has the required fields', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue(createUserAttachment());
@@ -366,6 +406,33 @@ describe('AttachmentService getter', () => {
       });
       expect(unsecuredSavedObjectsClient.find.mock.calls[1][0]).toEqual(
         expect.objectContaining({ type: CASE_ATTACHMENT_SAVED_OBJECT })
+      );
+    });
+  });
+
+  describe('getAttachmentIdsForCases', () => {
+    it('queries both SO types when feature flag is disabled', async () => {
+      mockFinder(createSOFindResponse([{ ...createUserAttachment(), score: 0 }]));
+
+      await attachmentGetter.getAttachmentIdsForCases({ caseIds: ['case-1'] });
+
+      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
+        })
+      );
+    });
+
+    it('queries both SO types when feature flag is enabled', async () => {
+      const attachmentGetterWithFlagOn = createAttachmentGetter(true);
+      mockFinder(createSOFindResponse([{ ...createUserAttachment(), score: 0 }]));
+
+      await attachmentGetterWithFlagOn.getAttachmentIdsForCases({ caseIds: ['case-1'] });
+
+      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
+        })
       );
     });
   });

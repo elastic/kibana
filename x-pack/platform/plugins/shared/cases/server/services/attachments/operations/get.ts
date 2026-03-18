@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { isSOError } from '../../../common/error';
@@ -179,13 +180,10 @@ export class AttachmentGetter {
         `Attempting to retrieve attachments associated with cases: [${caseIds}]`
       );
 
-      const isCasesAttachmentsEnabled = this.context.config.attachments?.enabled;
       // We are intentionally not adding the type here because we only want to interact with the id and this function
       // should not use the attributes
       const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<unknown>({
-        type: isCasesAttachmentsEnabled
-          ? [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT]
-          : CASE_COMMENT_SAVED_OBJECT,
+        type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
         hasReference: caseIds.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
         sortField: 'created_at',
         sortOrder: 'asc',
@@ -366,6 +364,12 @@ export class AttachmentGetter {
             attachmentId
           );
         } catch (error) {
+          if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+            throw error;
+          }
+          this.context.log.debug(
+            `Attachment ${attachmentId} not found in ${CASE_ATTACHMENT_SAVED_OBJECT}, falling back to ${CASE_COMMENT_SAVED_OBJECT}`
+          );
           res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
             CASE_COMMENT_SAVED_OBJECT,
             attachmentId
