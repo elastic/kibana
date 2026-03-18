@@ -46,6 +46,7 @@ export const GoogleCalendar: ConnectorSpec = {
       defaultMessage: 'Search and access events and calendars in Google Calendar',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows'],
   },
   auth: {

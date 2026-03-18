@@ -72,8 +72,8 @@ export class SearchInferenceEndpointsPlugin
       id: PLUGIN_ID,
       minimumLicense: 'enterprise',
       name: PLUGIN_NAME,
-      order: 2,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      order: 4000,
+      category: DEFAULT_APP_CATEGORIES.management,
       app: [],
       catalogue: [],
       management: {
