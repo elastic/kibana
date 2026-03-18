@@ -250,11 +250,6 @@ function TraceWaterfallComponent() {
   );
 }
 
-const SCROLL_CONTAINER =
-  typeof document !== 'undefined'
-    ? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined
-    : undefined;
-
 function TraceTree() {
   const {
     traceWaterfallMap,
@@ -319,19 +314,25 @@ function TraceTree() {
 
   if (scrollStrategy === 'window') {
     return (
-      <WindowScroller scrollElement={SCROLL_CONTAINER}>
-        {({ height, registerChild, isScrolling, onChildScroll, scrollTop }) => (
+      <WindowScroller
+        scrollElement={document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined}
+      >
+        {({ height, onChildScroll, scrollTop, registerChild }) => (
           <AutoSizer disableHeight>
             {({ width }) => (
-              <div ref={registerChild} data-test-subj="waterfall">
+              <div data-test-subj="waterfall" ref={registerChild}>
                 <List
-                  {...listProps}
+                  ref={listRef}
                   autoHeight
                   height={height}
-                  width={width}
-                  isScrolling={isScrolling}
                   onScroll={onChildScroll}
                   scrollTop={scrollTop}
+                  width={width}
+                  rowCount={visibleList.length}
+                  deferredMeasurementCache={rowHeightCache.current}
+                  rowHeight={rowHeightCache.current.rowHeight}
+                  rowRenderer={rowRenderer}
+                  containerRole="rowgroup"
                 />
               </div>
             )}
