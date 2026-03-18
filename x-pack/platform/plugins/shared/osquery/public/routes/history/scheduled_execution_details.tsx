@@ -5,65 +5,184 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButtonEmpty,
+  EuiBadge,
+  EuiSpacer,
+  EuiSkeletonText,
+  EuiLink,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment-timezone';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { pagePathGetters } from '../../common/page_paths';
+import { useGoBack } from '../../common/use_go_back';
+import { WithHeaderLayout } from '../../components/layouts';
+import {
+  useScheduledExecutionDetails,
+  mapScheduledDetailsToQueryData,
+} from '../../actions/use_scheduled_execution_details';
+import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
+
+const tableWrapperCss = {
+  paddingLeft: '10px',
+};
 
 const ScheduledExecutionDetailsPageComponent = () => {
-  const { scheduleId, executionCount } = useParams<{
+  const { scheduleId, executionCount: executionCountStr } = useParams<{
     scheduleId: string;
     executionCount: string;
   }>();
 
-  const isValid = !!scheduleId && !!executionCount;
+  const executionCount = parseInt(executionCountStr, 10);
+  const isValid = !!scheduleId && !isNaN(executionCount);
 
   useBreadcrumbs('history_scheduled_details', {
     scheduleId: scheduleId ?? '',
-    executionCount: executionCount ?? '',
+    executionCount: executionCountStr ?? '',
   });
 
   const historyPath = pagePathGetters.history();
-  const historyNavProps = useRouterNavigate(historyPath);
+  const handleGoBack = useGoBack(historyPath);
+  const historyNavProps = useRouterNavigate(historyPath, handleGoBack);
+
+  const { data, isLoading, isError } = useScheduledExecutionDetails({
+    scheduleId,
+    executionCount,
+    skip: !isValid,
+  });
+
+  const packPath = data?.packId ? pagePathGetters.pack_details({ packId: data.packId }) : '';
+  const packNavProps = useRouterNavigate(packPath);
+
+  const formattedTimestamp = useMemo(
+    () => (data?.timestamp ? moment(data.timestamp).format('lll') : ''),
+    [data?.timestamp]
+  );
+
+  const queryData = useMemo(
+    () => (data ? mapScheduledDetailsToQueryData(data, scheduleId) : undefined),
+    [data, scheduleId]
+  );
+
+  const LeftColumn = useMemo(
+    () => (
+      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
+        <EuiFlexItem>
+          <EuiButtonEmpty iconType="arrowLeft" {...historyNavProps} flush="left" size="xs">
+            <FormattedMessage
+              id="xpack.osquery.scheduledExecutionDetails.viewHistoryTitle"
+              defaultMessage="View history"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <h1>
+              <FormattedMessage
+                id="xpack.osquery.scheduledExecutionDetails.pageTitle"
+                defaultMessage="Scheduled execution details"
+              />
+            </h1>
+          </EuiText>
+        </EuiFlexItem>
+        {data && (
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              {data.packName ? (
+                <EuiFlexItem grow={false}>
+                  <EuiLink {...packNavProps}>
+                    <EuiBadge iconType="package">{data.packName}</EuiBadge>
+                  </EuiLink>
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{formattedTimestamp}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.osquery.scheduledExecutionDetails.executionLabel"
+                    defaultMessage="Execution #{executionCount}"
+                    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                    values={{ executionCount }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ),
+    [historyNavProps, data, formattedTimestamp, packNavProps, executionCount]
+  );
 
   if (!isValid) {
     return <Redirect to={historyPath} />;
   }
 
+  if (isLoading) {
+    return (
+      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+        <EuiSpacer size="l" />
+        <EuiSkeletonText lines={5} />
+      </WithHeaderLayout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+        <EuiSpacer size="l" />
+        <EuiEmptyPrompt
+          iconType="warning"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.osquery.scheduledExecutionDetails.errorTitle"
+                defaultMessage="Unable to load execution details"
+              />
+            </h2>
+          }
+          body={
+            <FormattedMessage
+              id="xpack.osquery.scheduledExecutionDetails.errorBody"
+              defaultMessage="There was an error loading the details for this scheduled execution. Please try again."
+            />
+          }
+          actions={
+            <EuiButtonEmpty {...historyNavProps} iconType="arrowLeft">
+              <FormattedMessage
+                id="xpack.osquery.scheduledExecutionDetails.backToHistory"
+                defaultMessage="Back to History"
+              />
+            </EuiButtonEmpty>
+          }
+        />
+      </WithHeaderLayout>
+    );
+  }
+
   return (
-    <>
-      <EuiSpacer size="l" />
-      <EuiEmptyPrompt
-        iconType="clock"
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.osquery.scheduledExecutionDetails.title"
-              defaultMessage="Scheduled Execution Details"
-            />
-          </h2>
-        }
-        body={
-          <FormattedMessage
-            id="xpack.osquery.scheduledExecutionDetails.placeholder"
-            defaultMessage="Detail view for schedule {scheduleId}, execution #{executionCount}."
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            values={{ scheduleId, executionCount }}
-          />
-        }
-        actions={
-          <EuiButtonEmpty {...historyNavProps} iconType="arrowLeft">
-            <FormattedMessage
-              id="xpack.osquery.scheduledExecutionDetails.backToHistory"
-              defaultMessage="Back to History"
-            />
-          </EuiButtonEmpty>
-        }
-      />
-    </>
+    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+      <EuiFlexItem css={tableWrapperCss}>
+        <PackQueriesStatusTable
+          actionId={scheduleId}
+          data={queryData}
+          startDate={data?.timestamp}
+          showResultsHeader
+          scheduleId={scheduleId}
+          executionCount={executionCount}
+        />
+      </EuiFlexItem>
+    </WithHeaderLayout>
   );
 };
 
