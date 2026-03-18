@@ -76,6 +76,8 @@ echo "--- Build Elasticsearch"
   :distribution:archives:linux-aarch64-tar:assemble \
   :distribution:archives:linux-tar:assemble \
   :distribution:archives:windows-zip:assemble \
+  -x :distribution:tools:server-launcher:nativeImageLinuxX64 \
+  -x :distribution:tools:server-launcher:nativeImageLinuxAarch64 \
   --parallel
 
 echo "--- Create distribution archives"
