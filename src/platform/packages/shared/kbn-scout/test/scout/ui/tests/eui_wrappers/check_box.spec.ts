@@ -11,8 +11,7 @@
 
 // TODO: 'toBeChecked' is not available in playwright version we are using. Remove after Playwright upgrade
 
-import { expect } from '@kbn/scout/ui';
-import { test, tags } from '../../../../../src/playwright';
+import { test, expect, tags } from '../../../../../src/playwright';
 import { EuiCheckBoxWrapper } from '../../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../../fixtures/eui_helpers';
 

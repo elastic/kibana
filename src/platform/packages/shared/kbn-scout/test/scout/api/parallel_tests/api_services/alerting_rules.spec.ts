@@ -8,9 +8,9 @@
  */
 
 import { randomUUID } from 'crypto';
-import { expect } from '@kbn/scout/api';
 import { apiTest, tags } from '../../../../../src/playwright';
 import { createAlertRuleParams } from '../../../fixtures/constants';
+import { expect } from '../../../../../api';
 
 apiTest.describe(
   `Alerting Rules helpers`,

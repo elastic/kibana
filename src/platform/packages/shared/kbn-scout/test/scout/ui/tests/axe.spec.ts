@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect } from '@kbn/scout/ui';
-import { test, tags } from '../../../../src/playwright';
+import { test, expect, tags } from '../../../../src/playwright';
 
 test.describe(
   'runA11yScan',
