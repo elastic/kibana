@@ -15,12 +15,17 @@ import {
   EuiBadge,
   EuiText,
   EuiIcon,
+  EuiLoadingSpinner,
+  EuiLink,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { noop, get } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
+import { encode } from '@kbn/rison';
+import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { Direction } from '../../../../common/search_strategy/common';
@@ -28,8 +33,7 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import type { Criteria, Columns } from '../../../explore/components/paginated_table';
 import { PaginatedTable } from '../../../explore/components/paginated_table';
-import type { EntityType } from '../../../../common/entity_analytics/types';
-import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+import { EntityType, EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
@@ -55,6 +59,23 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../flyout/entity_details/shared/constants';
+import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
+import type { AlertsByStatusAgg } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import {
+  getAlertsByStatusQuery,
+  parseAlertsData,
+} from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
+import { URL_PARAM_KEY } from '../../../common/hooks/constants';
+import {
+  OPEN_IN_ALERTS_TITLE_STATUS,
+  OPEN_IN_ALERTS_TITLE_USERNAME,
+  OPEN_IN_ALERTS_TITLE_HOSTNAME,
+} from '../../../overview/components/detection_response/translations';
+import { FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../../../common/types';
+import { getFormattedAlertStats } from '../../../flyout/document_details/shared/components/alert_count_insight';
 
 const THREAT_HUNTING_TABLE_ID = 'threat-hunting-table';
 
@@ -117,11 +138,102 @@ const getRiskScoreColors = (
   }
 };
 
+const EntityAlertDistribution: React.FC<{ entityType: EntityType; entityName: string }> = ({
+  entityType,
+  entityName,
+}) => {
+  const { signalIndexName } = useSignalIndex();
+  const { from, to } = useGlobalTime();
+  const { euiTheme } = useEuiTheme();
+
+  const fieldName = EntityTypeToIdentifierField[entityType] || 'entity.id';
+
+  const { data, setQuery: setAlertsQuery } = useQueryAlerts<{}, AlertsByStatusAgg>({
+    query: getAlertsByStatusQuery({
+      from,
+      to,
+      entityFilter: { field: fieldName, value: entityName },
+    }),
+    indexName: signalIndexName,
+    queryName: ALERTS_QUERY_NAMES.BY_STATUS,
+  });
+
+  useEffect(() => {
+    setAlertsQuery(
+      getAlertsByStatusQuery({
+        from,
+        to,
+        entityFilter: { field: fieldName, value: entityName },
+      })
+    );
+  }, [setAlertsQuery, from, to, fieldName, entityName]);
+
+  const { navigateTo } = useNavigation();
+
+  if (!data) return <EuiLoadingSpinner size="m" />;
+
+  const alertsData = parseAlertsData(data);
+  const alertStats = getFormattedAlertStats(alertsData, euiTheme);
+
+  const alertCount = (alertsData?.open?.total ?? 0) + (alertsData?.acknowledged?.total ?? 0);
+
+  const timerange = encode({
+    global: {
+      [URL_PARAM_KEY.timerange]: {
+        kind: 'absolute',
+        from,
+        to,
+      },
+    },
+  });
+
+  const titleForEntity =
+    entityType === EntityType.host ? OPEN_IN_ALERTS_TITLE_HOSTNAME : OPEN_IN_ALERTS_TITLE_USERNAME;
+
+  const filters = [
+    {
+      title: titleForEntity,
+      selected_options: [entityName],
+      field_name: fieldName,
+    },
+    {
+      title: OPEN_IN_ALERTS_TITLE_STATUS,
+      selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+      field_name: 'kibana.alert.workflow_status',
+    },
+  ];
+
+  const urlFilterParams = encode(formatPageFilterSearchParam(filters));
+  const timerangePath = timerange ? `&timerange=${timerange}` : '';
+
+  const openAlertsPage = () => {
+    navigateTo({
+      deepLinkId: SecurityPageName.alerts,
+      path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}${timerangePath}`,
+      openInNewTab: true,
+    });
+  };
+
+  return (
+    <EuiFlexGroup direction="row">
+      <EuiFlexItem>
+        <DistributionBar
+          stats={alertStats}
+          hideLastTooltip
+          data-test-subj="threat-hunting-alerts-distribution-bar"
+        />
+      </EuiFlexItem>
+      <EuiBadge color="hollow">{<EuiLink onClick={openAlertsPage}>{alertCount}</EuiLink>}</EuiBadge>
+    </EuiFlexGroup>
+  );
+};
+
 export type ThreatHuntingEntitiesColumns = [
   Columns<Entity>,
   Columns<string, Entity>,
   Columns<string | undefined, Entity>,
   Columns<CriticalityLevels, Entity>,
+  Columns<Entity>,
   Columns<Entity>,
   Columns<Entity>,
   Columns<string, Entity>
@@ -255,40 +367,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
           </span>
         );
       },
-      width: '25%',
-    },
-    {
-      field: 'entity.source',
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.threatHunting.sourceColumn.title"
-          defaultMessage="Source"
-        />
-      ),
-      width: '25%',
-      truncateText: { lines: 2 },
-      render: (source: string | undefined) => {
-        if (source != null) {
-          return sourceFieldToText(source);
-        }
-        return getEmptyTagValue();
-      },
-    },
-    {
-      field: 'asset.criticality',
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.threatHunting.criticalityColumn.title"
-          defaultMessage="Criticality"
-        />
-      ),
-      width: '10%',
-      render: (criticality: CriticalityLevels) => {
-        if (criticality != null) {
-          return <span>{CRITICALITY_LEVEL_TITLE[criticality]}</span>;
-        }
-        return getEmptyTagValue();
-      },
+      width: '20%',
     },
     {
       name: (
@@ -363,16 +442,63 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
       },
     },
     {
+      field: 'asset.criticality',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.threatHunting.criticalityColumn.title"
+          defaultMessage="Asset Criticality"
+        />
+      ),
+      width: '10%',
+      render: (criticality: CriticalityLevels) => {
+        if (criticality != null) {
+          return <span>{CRITICALITY_LEVEL_TITLE[criticality]}</span>;
+        }
+        return getEmptyTagValue();
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.threatHunting.alertsColumn.title"
+          defaultMessage="Alerts"
+        />
+      ),
+      render: (entity: Entity) => {
+        const entityType = getEntityType(entity);
+        const entityName = entity.entity.name;
+        if (!entityName) return getEmptyTagValue();
+        return <EntityAlertDistribution entityType={entityType} entityName={entityName} />;
+      },
+    },
+    {
+      field: 'entity.source',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.threatHunting.sourceColumn.title"
+          defaultMessage="Source"
+        />
+      ),
+      width: '15%',
+      truncateText: { lines: 2 },
+      render: (source: string | undefined) => {
+        if (source != null) {
+          return sourceFieldToText(source);
+        }
+        return getEmptyTagValue();
+      },
+    },
+    {
       field: '@timestamp',
       name: (
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.threatHunting.lastUpdateColumn.title"
-          defaultMessage="Last Update"
+          defaultMessage="Last Seen"
         />
       ),
       sortable: true,
-      render: (lastUpdate: string) => {
-        return <FormattedRelativePreferenceDate value={lastUpdate} />;
+      render: (lastSeen: string) => {
+        return <FormattedRelativePreferenceDate value={lastSeen} />;
       },
       width: '15%',
     },

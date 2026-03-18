@@ -45,6 +45,7 @@ import type {
 import type { TlsColumns } from '../../network/components/tls_table/columns';
 import type { UncommonProcessTableColumns } from '../../hosts/components/uncommon_process_table/columns';
 import type { HostRiskScoreColumns } from '../../../entity_analytics/components/host_risk_score_table';
+import type { ThreatHuntingEntitiesColumns } from '../../../entity_analytics/components/threat_hunting/threat_hunting_entities_table';
 
 import type { UsersColumns } from '../../network/components/users_table/columns';
 import { HeaderSection } from '../../../common/components/header_section';
@@ -98,7 +99,8 @@ declare type BasicTableColumns =
   | UncommonProcessTableColumns
   | UsersColumns
   | UsersTableColumns
-  | EntitiesListColumns;
+  | EntitiesListColumns
+  | ThreatHuntingEntitiesColumns;
 
 export declare type SiemTables = BasicTableProps<BasicTableColumns>;
 

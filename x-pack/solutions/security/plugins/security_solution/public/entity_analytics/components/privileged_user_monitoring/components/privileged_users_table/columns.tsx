@@ -353,7 +353,7 @@ export const buildPrivilegedUsersTableColumns = (
   getPrivilegedUserColumn(),
   getRiskScoreColumn(euiTheme),
   getAssetCriticalityColumn(),
+  getAlertDistributionColumn(),
   getLabelColumn(),
   getDataSourceColumn(),
-  getAlertDistributionColumn(),
 ];
