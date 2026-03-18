@@ -65,7 +65,6 @@ describe('view in discover, link to the app that created the rule', () => {
     expect(button).not.toBeDisabled();
     expect(button).toHaveTextContent('View in Discover');
     expect(button).toHaveAttribute('href', '/rule');
-    expect(button).toHaveAttribute('target', '_blank');
   });
 });
 

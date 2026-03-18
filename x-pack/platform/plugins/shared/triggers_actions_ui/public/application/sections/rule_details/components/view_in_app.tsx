@@ -56,7 +56,6 @@ export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ rule }) => 
     <EuiButtonEmpty
       data-test-subj="ruleDetails-viewInDiscover"
       href={basePath.prepend(ruleNavigation)}
-      target="_blank"
       iconType="discoverApp"
     >
       {i18n.translate(
