@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -22,6 +22,8 @@ import { TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
 import { TemplateFormHeader } from './template_form_header';
 import { TemplateResetModal } from './template_reset_modal';
 import { TemplateEditorLayout } from './template_editor_layout';
+import { updateYamlFieldDefault } from '../utils/update_yaml_field_default';
+import { FieldType } from '../field_types/constants';
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
@@ -77,6 +79,21 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   );
 
   const hasChanges = yamlValue !== savedValue;
+
+  const yamlValueRef = useRef(yamlValue);
+  yamlValueRef.current = yamlValue;
+
+  const handleFieldDefaultChange = useCallback(
+    (fieldName: string, value: string, control: string) => {
+      const isNumericControl = control === FieldType.INPUT_NUMBER;
+      const parsedValue = isNumericControl && value !== '' ? Number(value) : value;
+      const updatedYaml = updateYamlFieldDefault(yamlValueRef.current, fieldName, parsedValue);
+      if (updatedYaml !== yamlValueRef.current) {
+        onYamlChange(updatedYaml);
+      }
+    },
+    [onYamlChange]
+  );
 
   const handleResetClick = useCallback(() => {
     setIsResetModalVisible(true);
@@ -134,6 +151,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             isLoading={isLoading}
             yamlValue={yamlValue}
             onYamlChange={onYamlChange}
+            onFieldDefaultChange={handleFieldDefaultChange}
             isYamlSaving={isYamlSaving}
             isYamlSaved={isYamlSaved}
             previewWidth={previewWidth}
