@@ -64,7 +64,7 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
     );
   });
 
-  apiTest('should return 200 if the markdown panel is deleted', async ({ apiClient }) => {
+  apiTest('should return 204 if the markdown panel is deleted', async ({ apiClient }) => {
     const response = await apiClient.delete(`${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -73,11 +73,11 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(204);
   });
 
   apiTest(
-    'should return 200 if the markdown panel is deleted in a specific space',
+    'should return 204 if the markdown panel is deleted in a specific space',
     async ({ apiClient }) => {
       const response = await apiClient.delete(
         `s/${spaceId}/${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID_IN_SPACE}`,
@@ -90,7 +90,7 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
         }
       );
 
-      expect(response).toHaveStatusCode(200);
+      expect(response).toHaveStatusCode(204);
     }
   );
 });
