@@ -49,19 +49,15 @@ test.describe(
         await expect(lensFailure).toBeVisible({ timeout: 20_000 });
       });
 
-      await test.step('fix the error and verify failure panel disappears', async () => {
-        // Popover and embeddable updates can race in CI. Retry the full "fix" flow
-        // until Lens settles and the failure panel is gone.
-        await expect(async () => {
-          await customEquation.click();
-          await expect(customEquationField).toBeVisible({ timeout: 20_000 });
-          await customEquationField.fill('A');
-          await expect(customEquationField).toHaveValue('A');
-          await customEquationPopoverCloseButton.click();
-
-          await expect(customEquation).toContainText('A');
-          await expect(lensFailure).toBeHidden({ timeout: 20_000 });
-        }).toPass({ timeout: 60_000, intervals: [500, 1000, 2000] });
+      await test.step('fix the error and verify chart renders', async () => {
+        await customEquation.click();
+        await expect(customEquationField).toBeVisible({ timeout: 20_000 });
+        await customEquationField.fill('A');
+        await expect(customEquationField).toHaveValue('A');
+        await customEquationPopoverCloseButton.click();
+        await expect(customEquation).toContainText('A');
+        const previewChart = page.testSubj.locator(previewChartDataTestSubj);
+        await expect(previewChart.locator('.echChart')).toBeVisible({ timeout: 60_000 });
       });
     });
   }
