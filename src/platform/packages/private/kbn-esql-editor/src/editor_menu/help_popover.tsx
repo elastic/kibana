@@ -96,14 +96,10 @@ export const HelpPopover: React.FC<{
 
     const getDataViewForQuery = async () => {
       const currentQuery = currentQueryRef.current;
-      if (!currentQuery) {
-        resetDataviewDerived();
-        return;
-      }
       try {
         const dataView = await getESQLAdHocDataview({
           dataViewsService: data.dataViews,
-          query: currentQuery,
+          query: currentQuery || '',
           http,
         });
         if (!isMounted) return;
@@ -142,7 +138,7 @@ export const HelpPopover: React.FC<{
   useEffect(() => {
     let cancelled = false;
     const getESQLExtensions = async () => {
-      if (!activeSolutionId) {
+      if (!activeSolutionId || !queryForRecommendedQueries) {
         return;
       }
 
