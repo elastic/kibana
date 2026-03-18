@@ -12,7 +12,7 @@ Solution-agnostic: use it from any plugin or module that needs audit-style histo
 
 **Single shared data stream, one client per (module, dataset)**:
 
-- All clients write to one data stream: `.kibana-change-history`. Each client is bound to a `module` and `dataset`, which are analogs of the "business domain" and "feature".
+- All clients write to one data stream: `.kibana-change-history`. Each client is bound to a `module` and `dataset`, analogs of the "business domain" and "feature".
 
 **Log changes** with `log(change, opts)` / `logBulk(changes, opts)`:
 
@@ -28,7 +28,7 @@ Each `change` has the following (see [Usage examples](#usage-examples) below):
 
 There is also an `opts` object that contains the `action` that took place, and relevant `username` and other contextual information.
 
-When `change.before` is provided, a diff is computed (using the optional custom `diffDocCalculation` or a default).
+When `change.before` is provided, a diff is computed using a default calculation.
 
 **Query history** with `getHistory(spaceId, objectType, objectId, opts?)`:
 
@@ -45,7 +45,6 @@ All persisted documents follow the same schema (see below).
 - **`new ChangeHistoryClient({ module, dataset, logger, kibanaVersion })`**
   Constructs a client for the given `module`, `dataset`, and `kibanaVersion`. All clients write to the shared data stream `.kibana-change-history`; each client’s writes are scoped by `module` and `dataset`.
 
-- **`startDate`** (read-only) — The date when change tracking started for this client’s module and dataset. This is stored in the index template metadata and is useful when change tracking is introduced mid-lifecycle and change history stops suddenly without explanation.
 
 - **`isInitialized()`** — Returns `true` if the client has been initialized (e.g. after `initialize()` has been called).
 
@@ -67,22 +66,19 @@ All persisted documents follow the same schema (see below).
     - change `data` overrides (partial `event`, `tags`, and `metadata` to merge into the document),
     - `ignoreFields` a nested key/value map of fields to ignore in the diff calculation,
     - `maskFields` a nested key/value map of “sensitive” fields to mask instead of storing data in plain form,
-    - `diffDocCalculation` a diff function `(opts) => ChangeTrackingDiff`; when omitted, a default diff is used.
-    - `refresh` an optional indicator to force ES shard refresh after changes (affects performance)
+    - `refresh` an optional indicator to force ES shard refresh after changes (affects performance).
 
 - **`getHistory(spaceId, objectType, objectId, opts?)`**
-  - Returns a promise with `{ startDate?, total, items }`.
+  - Returns a promise with `{ total, items }`.
   - `spaceId` — The Kibana space ID where the object exists (used to scope the search).
   - Results are scoped by `spaceId`, the client’s `module` and `dataset`, and filtered by `object.type` and `object.id`.
-  - Optional `opts: GetChangeHistoryOptions` with `additionalFilters` (array of ES query clauses), pagination options `sort`, `from`, `size` (default 100), `transportOpts`.
+  - Optional `opts: GetChangeHistoryOptions` with `additionalFilters` (array of ES query clauses), pagination options `sort`, `from`, `size` (default 100).
   - Results are sorted by `object.sequence` (if available), then `@timestamp`, and `event.id` as the tie-breaker.
 
 
-### Special functionality: Diffing behavior.
+### Special functionality: Diffing behavior
 
-When logging change history items, you may pass an additional payload `before` (pre-change snapshot). 
-
-This will automatically trigger a diff calculation between `before` and `after` using a default function, which can be customized using `diffDocCalculation` parameter:
+When logging change history items, you may pass an additional payload `before` (pre-change snapshot). This triggers a diff calculation between `before` and `after` objects that is stored under `object.diff` in the mapping schema:
 
 ```ts
 // After an object update (diff is computed from before → after):
@@ -91,21 +87,15 @@ const change: ObjectChange = {
   objectId: ruleId,
   before: previousSnapshot, // <-- optional; if set, diff is computed
   after: ruleSnapshot,
-  diffDocCalculation: myDiffDocCalculation // <-- you may also pass your own function here
 };
 await client.log(change, {
   action: 'rule-update',
   username,
   spaceId,
 });
-
-function myDiffDocCalculation(opts: ChangeTrackingDiffOptions): ChangeTrackingDiff {
-  // .. custom logic
-}
-
 ```
 
-⚠️ IMPORTANT: if the provided calculation throws an error. The `document.fields.changed` and `document.oldvalues` **will be missing**.
+⚠️ **Important:** If the diff calculation throws an error, `object.diff` **will also be missing** from the stored document.
 
 ### Elasticsearch mapping schema
 
@@ -126,27 +116,30 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | `event.action`          | `keyword`   | Action that triggered the change (e.g. `rule_create`, `rule_update`, `rule_delete`). See additional [examples](https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging).  |
 | `event.type`            | `keyword`   | ECS categorization: `creation`, `change`, `deletion`.                         |
 | `event.reason`          | `text`      | User-specified reason for the change. (Optional)                            |
-| `event.created`         | `date`      | ISO8601 timestamp of the event creation time. Generated by library.                   |
-| `event.group`           | `object`    | Group for bulk operations. (Optional)                                       |
-| `event.group.id`        | `keyword`   | ID shared between events in a group. (Optional)                             |
+| `event.created`         | `date`      | ISO8601 timestamp of the event creation time. Generated by library.        |
+| `group`                 | `object`    | Grouping for bulk operations. (Optional)                                       |
+| `group.id`              | `keyword`   | ID shared between events in a group. (Optional)                              |
 | `object`                | `object`    | The tracked object.                                                         |
-| `object.id`             | `keyword`   | Unique id of the target object in Kibana.                                  |
-| `object.type`           | `keyword`   | Type of the target object (e.g. `alert`). Allows tracking multiple types in the same change history stream                                 |
-| `object.index`         | `keyword`   | ES backing index where this object was stored. (Optional)                   |
-| `object.hash`           | `keyword`   | SHA256 of the object snapshot to identify the payload.                         |
-| `object.sequence`       | `integer`   | Version/sequence number for ordering. (Optional)                        |
-| `object.fields`         | `object`    | Lists of fields affected by the change. (Optional)                              |
-| `object.fields.changed` | `keyword`   | List of field names that changed. (Optional)                                |
-| `object.fields.masked`  | `keyword`   | List of sensitive field that were masked. (Optional)                            |
-| `object.oldvalues`      | (unmapped) | Previous values for changed fields. (Optional)                              |
-| `object.snapshot`       | (unmapped) | Full snapshot after the change.                                             |
-| `tags`                  | `keyword`   | Optional list of tags for the event.                                        |
-| `metadata`              | `flattened` | Optional structured metadata; does not form part of the diff or ECS schema.            |
+| `object.id`             | `keyword`   | Unique id of the target object in Kibana.                                   |
+| `object.type`           | `keyword`   | Type of the target object (e.g. `alert`). Allows tracking multiple types in the same change history stream. |
+| `object.index`          | `keyword`   | ES backing index where this object was stored. (Optional)                   |
+| `object.hash`           | `keyword`   | SHA256 of the object snapshot to identify the payload.                     |
+| `object.sequence`       | `integer`   | Version/sequence number for ordering. (Optional)                            |
+| `object.diff`           | `object`    | Diff metadata when `before` is provided. (Optional)                       |
+| `object.diff.type`      | `keyword`   | Diff calculation type (e.g. `default`).                                    |
+| `object.diff.fields`    | `keyword`   | List of field names that changed (full paths). (Optional)                  |
+| `object.diff.before`    | (unmapped)  | Previous values for changed fields. (Optional)                              |
+| `object.maskedfields`   | `keyword`   | List of sensitive fields that were masked. (Optional)                       |
+| `object.snapshot`       | (unmapped)  | Full snapshot after the change.                                             |
+| `tags`                  | `keyword`   | Optional list of tags for the event.                                       |
+| `metadata`              | `flattened` | Optional structured metadata; does not form part of the diff or ECS schema. |
 | `kibana`                | `object`    | Kibana context.                                                             |
-| `kibana.space_id`       | `keyword`   | ID of the space that the event belongs to.                                  |
-| `kibana.version`        | `keyword`   | Version of Kibana.                                                          |
+| `kibana.space_ids`       | `keyword`   | ID of the space that the event belongs to.                                   |
+| `service`               | `object`    | Service context.                                                            |
+| `service.type`          | `keyword`   | Service type (e.g. `kibana`).                                               |
+| `service.version`       | `keyword`   | Version of Kibana.                                                           |
 
-Variable-shape fields `object.oldvalues` and `object.snapshot` are stored but unmapped; `metadata` uses the `flattened` type so arbitrary keys can be stored and indexed without dynamic mapping.
+Variable-shape fields `object.snapshot` and `object.diff.before` are stored but unmapped; `metadata` uses the `flattened` type so arbitrary keys can be stored and indexed without dynamic mapping.
 
 ### Dependencies
 
@@ -187,9 +180,9 @@ await client.log(change, {
 });
 
 // When reading history for an object
-const { startDate, total, items } = await client.getHistory('spaceId', 'alerting-rule', ruleId);
+const { total, items } = await client.getHistory('spaceId', 'alerting-rule', ruleId);
 console.log(
-  `Change tracking started on ${startDate}, we have ${total} items, latest change at: \n${JSON.stringify(items[0]?.['@timestamp'])}`
+  `We have ${total} items, latest change at: \n${JSON.stringify(items[0]?.['@timestamp'])}`
 );
 ```
 
@@ -210,10 +203,10 @@ await client.log(change, {
 });
 
 // Read history for an object
-const { startDate, total, items } = await client.getHistory(spaceId, 'alerting-rule', ruleId);
-const { object } = items.shift();
+const { total, items } = await client.getHistory(spaceId, 'alerting-rule', ruleId);
+const { object } = items[0] ?? {};
 console.log(
-  `We have just updated the following fields: \n${object.fields?.changed}`
+  `We have just updated the following fields: \n${object.diff?.fields}`
 );
 ```
 
@@ -298,7 +291,7 @@ await client.log(change, {
 ### Querying with filters and pagination
 
 ```ts
-const { startDate, total, items } = await client.getHistory(spaceId, 'alerting-rule', ruleId, {
+const { total, items } = await client.getHistory(spaceId, 'alerting-rule', ruleId, {
   additionalFilters: [{ range: { '@timestamp': { lt: '2026-01-01' } } }],
   size: 50,
   from: 0,
@@ -325,3 +318,15 @@ yarn test:jest --config=x-pack/platform/packages/shared/kbn-change-history/jest.
 ```bash
 yarn test:jest_integration --config=x-pack/platform/packages/shared/kbn-change-history/jest.integration.config.js
 ```
+
+## Unsupported functionality
+
+### Kibana objects that use a dot `.` in their JSON structure.
+
+```json
+{
+  "user.details": { "name": "bob"}
+}
+```
+
+The change history package does not currently support JSON structures that use a dot `.` for property names, as it relies on "flattening" JSON into dot notation for JSON paths.

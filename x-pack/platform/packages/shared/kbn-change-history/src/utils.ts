@@ -6,14 +6,11 @@
  */
 
 import crypto from 'node:crypto';
-import {
-  flattenObjectWithEscapedDots as flatten,
-  unflattenObjectWithEscapedDots as unflatten,
-} from '@kbn/object-utils';
+import { flattenObject as flatten, unflattenObject as unflatten } from '@kbn/object-utils';
 import type {
-  ChangeTrackingDataMaskingFields,
-  ChangeTrackingDiff,
-  ChangeTrackingDiffOptions,
+  ChangeHistoryDataMaskingFields,
+  ChangeHistoryDiff,
+  ChangeHistoryDiffOptions,
 } from './types';
 
 export const sha256 = (text: string) => crypto.createHash('sha256').update(text).digest('hex');
@@ -31,27 +28,28 @@ export const sha256 = (text: string) => crypto.createHash('sha256').update(text)
  *   const a = { user: { email: 'bob@example.com' }, status: 'active' };
  *   const b = { user: { email: 'bobby@example.com' }, status: 'inactive' };
  *   const ignoreFields = { status: true };
- *   const result = standardDiffDocCalculation({ a, b, ignoreFields });
+ *   const result = defaultDiffCalculation({ a, b, ignoreFields });
  *   // {
  *   //  stats: { total: 1, additions: 0, deletions: 0, updates: 1 },
  *   //  ignored: ['status'],
- *   //  fieldChanges: ['user.email'],
- *   //  oldvalues: { user: { email: 'bob@example.com' } },
- *   //  newvalues: { user: { email: 'bobby@example.com' } }
+ *   //  changes: ['user.email'],
+ *   //  before: { user: { email: 'bob@example.com' } },
+ *   //  after: { user: { email: 'bobby@example.com' } }
  *   // }
  */
-export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): ChangeTrackingDiff {
-  const result: ChangeTrackingDiff = {
+export function defaultDiffCalculation(opts: ChangeHistoryDiffOptions): ChangeHistoryDiff {
+  const result: ChangeHistoryDiff = {
     stats: {
       total: 0,
       additions: 0,
       deletions: 0,
       updates: 0,
     },
+    type: 'default',
+    fields: [],
     ignored: [],
-    fieldChanges: [],
-    oldvalues: {},
-    newvalues: {},
+    before: {},
+    after: {},
   };
 
   // Flatten both objects and work out diff
@@ -96,8 +94,8 @@ export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): Cha
         if (!arrayDeepEquals(valA, valB)) {
           if (valA === undefined) stats.additions++;
           else stats.updates++;
-          result.oldvalues[key] = valA;
-          result.newvalues[key] = valB;
+          result.before[key] = valA;
+          result.after[key] = valB;
         } else {
           // Array has not changed
           // So we're good.
@@ -108,15 +106,15 @@ export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): Cha
         if (valA === undefined) stats.additions++;
         else if (valB === undefined) stats.deletions++;
         else stats.updates++;
-        result.oldvalues[key] = valA;
-        result.newvalues[key] = valB;
+        result.before[key] = valA;
+        result.after[key] = valB;
       }
     }
   }
 
   // Gather stats, list of changed fields and return.
   result.stats.total = stats.additions + stats.deletions + stats.updates;
-  result.fieldChanges = Object.keys(result.newvalues);
+  result.fields = Object.keys(result.after); // <-- We do not need both. Keys are available for `undefined` items.
   return result;
 }
 
@@ -136,10 +134,10 @@ export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): Cha
  */
 export function maskSensitiveFields(
   snapshot: Record<string, any>,
-  maskFields?: ChangeTrackingDataMaskingFields
+  maskFields?: ChangeHistoryDataMaskingFields
 ): { fields: Array<string>; snapshot: Record<string, any> } {
   const fields: string[] = [];
-  if (!maskFields) {
+  if (!maskFields || Object.keys(maskFields).length === 0) {
     return { fields, snapshot };
   }
   const flatSnapshot = flatten(snapshot);

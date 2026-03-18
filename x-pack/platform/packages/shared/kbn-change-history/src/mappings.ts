@@ -40,11 +40,12 @@ export const changeHistoryMappings = {
           type: mappings.keyword(),
           reason: mappings.text(),
           created: mappings.date(),
-          group: mappings.object({
-            properties: {
-              id: mappings.keyword(),
-            },
-          }),
+        },
+      }),
+
+      group: mappings.object({
+        properties: {
+          id: mappings.keyword(),
         },
       }),
 
@@ -55,14 +56,15 @@ export const changeHistoryMappings = {
           index: mappings.keyword(),
           hash: mappings.keyword(),
           sequence: mappings.integer(),
-          fields: mappings.object({
+          diff: mappings.object({
             properties: {
-              changed: mappings.keyword(),
-              masked: mappings.keyword(),
+              type: mappings.keyword(),
+              fields: mappings.keyword(),
+              // before: mappings.object(), // <- unmapped field, please keep me commented out.
             },
           }),
-          // oldvalues: mappings.object(), // unmapped field, please keep me commented out.
-          // snapshot: mappings.object(), // unmapped field, please keep me commented out.
+          maskedfields: mappings.keyword(),
+          // snapshot: mappings.object(), // <- unmapped field, please keep me commented out.
         },
       }),
 
@@ -72,7 +74,13 @@ export const changeHistoryMappings = {
 
       kibana: mappings.object({
         properties: {
-          space_id: mappings.keyword(),
+          // space_ids: mappings.keyword(),  // <- managed upstream by `@kbn/data-streams`, please keep me commented out.
+        },
+      }),
+
+      service: mappings.object({
+        properties: {
+          type: mappings.keyword(),
           version: mappings.keyword(),
         },
       }),

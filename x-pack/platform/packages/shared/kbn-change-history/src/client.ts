@@ -16,6 +16,13 @@ import { type DataStreamDefinition, DataStreamClient } from '@kbn/data-streams';
 import type { ClientCreateRequest } from '@kbn/data-streams/src/types/es_api';
 import type { Logger } from '@kbn/logging';
 import { changeHistoryMappings } from './mappings';
+import {
+  FEATURE_ENABLED,
+  DATA_STREAM_NAME,
+  SEPARATOR_CHAR,
+  ECS_VERSION,
+  DEFAULT_RESULT_SIZE,
+} from './constants';
 import type {
   ChangeHistoryDocument,
   GetHistoryResult,
@@ -23,15 +30,11 @@ import type {
   GetChangeHistoryOptions,
   ObjectChange,
 } from './types';
-import { sha256, standardDiffDocCalculation, maskSensitiveFields } from './utils';
+import { sha256, defaultDiffCalculation, maskSensitiveFields } from './utils';
+
+export { DATA_STREAM_NAME } from './constants';
 
 const ulid = monotonicFactory();
-
-export const DATA_STREAM_NAME = '.kibana-change-history';
-const START_DATE_META_PROP = 'startDates';
-const SEPARATOR_CHAR = '|';
-const ECS_VERSION = '9.3.0';
-const DEFAULT_RESULT_SIZE = 100;
 
 type ChangeHistoryDataStreamClient = DataStreamClient<
   typeof changeHistoryMappings.v1,
@@ -52,23 +55,11 @@ export interface IChangeHistoryClient {
 }
 
 export class ChangeHistoryClient implements IChangeHistoryClient {
-  static startDates = {} as Record<string, Date>;
-  static initializationQueue = [] as string[];
-
   private module: string;
   private dataset: string;
   private kibanaVersion: string;
   private logger: Logger;
   private client?: ChangeHistoryDataStreamClient;
-
-  /**
-   * The date when change tracking started for this module and dataset.
-   * Useful when change tracking is introduced halfway through feature lifecycle where objects
-   * will have change histories that suddenly stop at a particular date without explanation.
-   */
-  public get startDate() {
-    return ChangeHistoryClient.startDates[`${this.module}${SEPARATOR_CHAR}${this.dataset}`];
-  }
 
   constructor({
     module,
@@ -93,7 +84,6 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     this.dataset = dataset;
     this.kibanaVersion = kibanaVersion;
     this.logger = logger;
-    ChangeHistoryClient.initializationQueue.push(`${module}${SEPARATOR_CHAR}${dataset}`);
   }
 
   /**
@@ -111,6 +101,11 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @throws An error if the data stream is not initialized properly.
    */
   async initialize(elasticsearchClient: ElasticsearchClient) {
+    if (!FEATURE_ENABLED) {
+      const error = new Error(`Change history is disabled. Skipping initialization.`);
+      this.logger.error(error);
+      throw error;
+    }
     // Step 1: Create data stream definition
     // TODO: What about ILM policy (defaults to none = keep forever)
     const definition: DataStreamDefinition<typeof changeHistoryMappings.v1> = {
@@ -139,83 +134,6 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       this.logger.error(err);
       throw err;
     }
-
-    // Step 3: Initialize the "start date" when change tracking began for this feature.
-    const queue = ChangeHistoryClient.initializationQueue.splice(0);
-    // If there are no features left to initialize.
-    // This has been done somewhere else so skip next step.
-    if (!queue.length) return;
-    ChangeHistoryClient.startDates = await this.initializeStartDates(queue, elasticsearchClient);
-  }
-
-  /**
-   * Gets a list of change tracking dates from the ES index template, sets any to today if not initialized.
-   * @param features A list of features to get change tracking start dates for
-   * @param elasticsearchClient The ES client. To make queries to elasticsearch.
-   * @returns A map of dates for each feature stored in the data steam index template.
-   */
-  private async initializeStartDates(
-    features: string[],
-    elasticsearchClient: ElasticsearchClient
-  ): Promise<Record<string, Date>> {
-    const result = {} as Record<string, Date>;
-    try {
-      const now = new Date();
-      const {
-        data_streams: [{ template: templateName }],
-      } = await elasticsearchClient.indices.getDataStream(
-        { name: DATA_STREAM_NAME },
-        { maxRetries: 3 }
-      );
-      if (templateName) {
-        // Check existing start dates stored on index template for this data stream
-        const {
-          index_templates: [{ index_template: template }],
-        } = await elasticsearchClient.indices.getIndexTemplate(
-          { name: templateName },
-          { maxRetries: 3 }
-        );
-        if (template) {
-          const meta = template._meta ?? {};
-          const originalStartDates = (meta[START_DATE_META_PROP] =
-            meta[START_DATE_META_PROP] || {});
-          for (const feature of features) {
-            const startDate = new Date(originalStartDates[feature]);
-            result[feature] = startDate.getTime() ? startDate : now;
-          }
-          // Any changes? If so update the index template.
-          // So the metadata reflects actual start dates for all the features
-          // stored in the data stream.
-          const serialize = JSON.stringify;
-          if (serialize(result) !== serialize(originalStartDates)) {
-            const _meta = {
-              ...template._meta,
-              [START_DATE_META_PROP]: result,
-            };
-            // Clean up
-            delete template.created_date;
-            delete template.created_date_millis;
-            delete template.modified_date;
-            delete template.modified_date_millis;
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            const ignore_missing_component_templates =
-              template.ignore_missing_component_templates as string[] | undefined;
-            await elasticsearchClient.indices.putIndexTemplate(
-              {
-                name: templateName,
-                ...template,
-                ignore_missing_component_templates,
-                _meta,
-              },
-              { maxRetries: 3 }
-            );
-          }
-        }
-      }
-    } catch (err) {
-      this.logger.error(`Unable to initialize change history start dates. ${err}`);
-    }
-    return result;
   }
 
   /**
@@ -257,9 +175,10 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       this.logger.error(err);
       throw err;
     }
-    const { username, userProfileId, spaceId, correlationId, refresh } = opts;
+    const { username, userProfileId, spaceId: space, correlationId, refresh } = opts;
     const request: ClientCreateRequest<ChangeHistoryDocument> = {
       refresh,
+      space,
       documents: [],
     };
 
@@ -268,7 +187,6 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       const { id, objectType, objectId, index, timestamp, sequence } = change;
       const hash = sha256(JSON.stringify(change.after));
       const masked = maskSensitiveFields(change.after, opts.maskFields);
-      const fields = { masked: masked.fields, changed: undefined as string[] | undefined };
       const { event, metadata, tags } = opts.data ?? {};
       const created = new Date().toISOString();
       // `eventId` should be scoped by module and dataset so two features do not clash on the same `event.id`
@@ -293,31 +211,37 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
           index,
           hash,
           sequence,
-          fields,
+          maskedfields: masked.fields,
           snapshot: masked.snapshot,
         },
         tags,
         metadata,
-        kibana: { space_id: spaceId, version: kibanaVersion },
+        service: { type: 'kibana', version: kibanaVersion },
       };
-      if (correlationId && !document.event.group) document.event.group = { id: correlationId };
+      if (correlationId) document.group = { id: correlationId };
       // Do we have "before" state?
-      // Perform diff using diffDocCalculation(), defaulted to standard if not passed in.
+      // Perform diff using registered calculation, defaulting to defaultDiffCalculation().
       if (change.before) {
-        const diffCalc = opts.diffDocCalculation ?? standardDiffDocCalculation;
+        const diffCalc = defaultDiffCalculation;
         try {
           const maskedBefore = maskSensitiveFields(change.before, opts.maskFields);
-          const { fieldChanges, oldvalues } = diffCalc({
+          const { type, fields, before } = diffCalc({
             a: maskedBefore.snapshot,
             b: masked.snapshot,
             ignoreFields: opts.ignoreFields,
           });
-          fields.masked = Array.from(new Set([...maskedBefore.fields, ...masked.fields]));
-          fields.changed = fieldChanges;
-          document.object = { ...document.object, oldvalues };
+          document.object.diff = { type, fields, before };
+          document.object.maskedfields = Array.from(
+            new Set([...maskedBefore.fields, ...masked.fields])
+          );
         } catch (err) {
           // Uncalculated diff should not be fatal, just log and continue
-          this.logger.error(new Error('Unable to calculate change history diff', { cause: err }));
+          this.logger.error(
+            new Error(
+              `Unable to calculate change history diff for module ${module} and dataset ${dataset}`,
+              { cause: err }
+            )
+          );
         }
       }
       // Queue operations
@@ -362,7 +286,6 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       throw err;
     }
     const filter: QueryDslQueryContainer[] = [
-      { term: { 'kibana.space_id': spaceId } },
       { term: { 'event.module': this.module } },
       { term: { 'event.dataset': this.dataset } },
       { term: { 'object.type': objectType } },
@@ -384,7 +307,6 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       from: opts?.from,
     });
     return {
-      startDate: this.startDate,
       total: Number((history.hits.total as SearchTotalHits)?.value) || 0,
       items: history.hits.hits.map((h) => h._source).filter((i) => !!i),
     };

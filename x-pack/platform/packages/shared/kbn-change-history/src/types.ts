@@ -45,8 +45,11 @@ export interface ChangeHistoryDocument {
     reason?: string;
     /** ISO8601 timestamp of the event creation time. */
     created?: string;
+  };
+
+  group?: {
     /** ID shared between events that take place as a group. */
-    group?: { id: string };
+    id: string;
   };
 
   object: {
@@ -60,14 +63,17 @@ export interface ChangeHistoryDocument {
     hash: string;
     /** Version identifier used for ordering. Increases with each version. */
     sequence?: number;
-    fields: {
-      /** List of field names that changed. */
-      changed?: string[];
-      /** List of "sensitive data" fields masked in snapshot */
-      masked?: string[];
+    /** The diff (if available) */
+    diff?: {
+      /** Calculation used to produce this diff (ie `default`, `rfc6092`) */
+      type: ChangeHistoryDiff['type'];
+      /** List of field names that changed. With full paths. */
+      fields: string[];
+      /** Previous state for changed fields. */
+      before: Record<string, unknown>;
     };
-    /** Previous values for changed fields. */
-    oldvalues?: Record<string, unknown>;
+    /** List of "sensitive data" fields masked in snapshot */
+    maskedfields?: string[];
     /** Full snapshot after the change. */
     snapshot: Record<string, unknown>;
   };
@@ -78,9 +84,13 @@ export interface ChangeHistoryDocument {
   /** Optional metadata about the event. Information that does not form part of the diff or ECS schema. */
   metadata?: Record<string, unknown>;
 
-  kibana: {
-    /** Kibana space ID that the change event belongs to. (ie `default` etc) */
-    space_id: string;
+  kibana?: {
+    // /** Kibana space ID that the change event belongs to. (ie `default` etc) */
+    space_ids: string;
+  };
+
+  service: {
+    type: 'kibana';
     /** Version of kibana that the event belongs to. */
     version: string;
   };
@@ -119,11 +129,9 @@ export interface LogChangeHistoryOptions {
   /** Direct overrides for the change document */
   data?: Partial<Pick<ChangeHistoryDocument, 'event' | 'tags' | 'metadata'>>;
   /** List of fields to ignore in change calculation */
-  ignoreFields?: ChangeTrackingIgnoreFields;
+  ignoreFields?: ChangeHistoryIgnoreFields;
   /** List of sensitive fields to mask in the saved change history (secret keys, PII etc) */
-  maskFields?: ChangeTrackingDataMaskingFields;
-  /** Optional diff to be used instead of standard diff calculation */
-  diffDocCalculation?: (opts: ChangeTrackingDiffOptions) => ChangeTrackingDiff;
+  maskFields?: ChangeHistoryDataMaskingFields;
   /** Optional indicator to force an ES refresh after changes (affects perfomance) */
   refresh?: Refresh;
 }
@@ -139,7 +147,6 @@ export interface GetChangeHistoryOptions {
  * Result from a history query.
  */
 export interface GetHistoryResult {
-  startDate?: Date;
   total: number;
   items: ChangeHistoryDocument[];
 }
@@ -147,38 +154,44 @@ export interface GetHistoryResult {
 /**
  * Fields excluded from diff calculation
  */
-export interface ChangeTrackingIgnoreFields {
-  [Key: string]: boolean | ChangeTrackingIgnoreFields;
+export interface ChangeHistoryIgnoreFields {
+  [Key: string]: boolean | ChangeHistoryIgnoreFields;
 }
 
 /**
  * Fields hashed due to sensitive nature (PII, Secret keys, etc)
  */
-export interface ChangeTrackingDataMaskingFields {
-  [Key: string]: boolean | ChangeTrackingDataMaskingFields;
+export interface ChangeHistoryDataMaskingFields {
+  [Key: string]: boolean | ChangeHistoryDataMaskingFields;
 }
 
 /**
  * Input for the diff calculation
  */
-export interface ChangeTrackingDiffOptions {
+export interface ChangeHistoryDiffOptions {
   a?: Record<string, any>;
   b?: Record<string, any>;
-  ignoreFields?: ChangeTrackingIgnoreFields;
+  ignoreFields?: ChangeHistoryIgnoreFields;
 }
 
 /**
  * Output of the diff calculation
  */
-export interface ChangeTrackingDiff {
+export interface ChangeHistoryDiff {
   stats: {
     total: number;
     additions: number;
     deletions: number;
     updates: number;
   };
-  fieldChanges: Array<string>;
+  /** The type of diff calculation (ie `default`, `rfc6902` etc) */
+  type: 'default';
+  /** The list of fields that changed, using full paths */
+  fields: Array<string>;
+  /** The list of fields that were ignored, using full paths */
   ignored: Array<string>;
-  oldvalues: Record<string, any>;
-  newvalues: Record<string, any>;
+  /** A partial copy of the original object, including only fields that changed */
+  before: Record<string, any>;
+  /** A partial copy of the modified object, including only fields that changed */
+  after: Record<string, any>;
 }

@@ -40,36 +40,6 @@ export function flattenObject<TObj extends Record<PropertyKey, any>>(
 }
 
 /**
- * Returns a flattened version of the input object, accounting for nested properties and escaping dots in the key names.
- * @param obj - The input object.
- * @param parentKey - The initial key used for recursive flattening.
- * @returns An object containing all the flattened properties.
- */
-export function flattenObjectWithEscapedDots<TObj extends Record<PropertyKey, any>>(
-  obj: TObj,
-  parentKey: string = ''
-) {
-  const result: Record<PropertyKey, GetValuesTypes<TObj>> = {};
-
-  for (const key in obj) {
-    if (Object.hasOwn(obj, key)) {
-      const value = obj[key];
-      let escapedKey: string = key;
-      if (key.includes('.')) {
-        escapedKey = key.replace(/\./g, '\\.');
-      }
-      const newKey = parentKey ? `${parentKey}.${escapedKey}` : escapedKey;
-      if (isPlainObject(value)) {
-        Object.assign(result, flattenObjectWithEscapedDots(value, newKey));
-      } else {
-        result[newKey] = value;
-      }
-    }
-  }
-  return result;
-}
-
-/**
  * Returns a flattened version of the input object, giving higher priority to nested fields and flattening them after the other properties.
  * @param obj - The input object.
  * @returns An object containing all the flattened properties.

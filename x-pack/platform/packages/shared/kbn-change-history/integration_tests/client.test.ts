@@ -76,7 +76,7 @@ describe('ChangeHistoryClient', () => {
       }
     };
 
-    it('should set isInitialized to true after initialize and getHistory does not throw', async () => {
+    it('should initialize the data stream', async () => {
       const client = new ChangeHistoryClient(defaultCostructorOpts);
       expect(client.isInitialized()).toBe(false);
 
@@ -164,10 +164,13 @@ describe('ChangeHistoryClient', () => {
           id: 'id-1',
           hash,
           sequence: 1,
-          fields: { masked: [] },
+          maskedfields: [],
           snapshot: { name: 'Rule 1', enabled: true },
         },
-        kibana: { space_id: 'default', version: '1.0.0' },
+        service: {
+          type: 'kibana',
+          version: expect.any(String),
+        },
       });
     });
   });
@@ -232,7 +235,7 @@ describe('ChangeHistoryClient', () => {
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'rule-id');
       expect(result.total).toBe(2);
-      const snapshots = result.items.map((i) => i.object.snapshot as ChangeHistoryDocument);
+      const snapshots = result.items.map((i) => i.object.snapshot);
       expect(snapshots[0]).toEqual({ name: 'Last Rule' });
       expect(snapshots[1]).toEqual({ name: 'First Rule' });
     });
@@ -252,19 +255,24 @@ describe('ChangeHistoryClient', () => {
       const change: ObjectChange = {
         objectType: 'rule',
         objectId: 'diff-id',
-        before: { name: 'Old name', enabled: true },
-        after: { name: 'New name', enabled: true },
+        before: { name: 'Old name', enabled: true, status: 'draft' },
+        after: { name: 'New name', enabled: true, status: 'published' },
       };
-      await client.log(change, { ...defaultLogOpts, spaceId: 'default' });
+      await client.log(change, {
+        ...defaultLogOpts,
+        spaceId: 'default',
+        ignoreFields: { status: true },
+      });
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'diff-id');
       expect(result.total).toBe(1);
       const doc = result.items[0] as ChangeHistoryDocument;
-      expect(doc.object.fields.changed).toBeDefined();
-      expect(doc.object.fields.changed).toContain('name');
-      expect(doc.object.oldvalues).toBeDefined();
-      expect(doc.object.oldvalues).toHaveProperty('name', 'Old name');
-      expect(doc.object.snapshot).toHaveProperty('name', 'New name');
+      expect(doc.object.diff).toEqual({
+        type: 'default',
+        fields: ['name'],
+        before: { name: 'Old name' },
+      });
+      expect(doc.object.snapshot).toEqual(change.after);
     });
   });
 
@@ -305,9 +313,7 @@ describe('ChangeHistoryClient', () => {
       expect(doc.object.hash).toEqual(hash);
 
       // Check masked fields
-      expect(doc.object.fields).toEqual({
-        masked: ['user.email', 'apiKey'],
-      });
+      expect(doc.object.maskedfields).toEqual(['user.email', 'apiKey']);
       const snapshot = doc.object.snapshot as Record<string, unknown>;
       const maskedApiKey = `****************${sha256('sk-secret-key-12345').slice(-12)}`;
       const maskedEmail = `****************${sha256('secret@example.com').slice(-12)}`;
