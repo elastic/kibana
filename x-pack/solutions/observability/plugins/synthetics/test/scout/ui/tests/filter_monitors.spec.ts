@@ -12,7 +12,8 @@ import { test } from '../fixtures';
 const FIRST_TAG = 'a';
 const SECOND_TAG = 'b';
 
-test.describe('FilterMonitors', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/257334
+test.describe.skip('FilterMonitors', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
   });

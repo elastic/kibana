@@ -303,6 +303,50 @@ describe('Authenticator', () => {
             )
           ).toBe('/mock-server-basepath/security/logged_out?msg=SESSION_EXPIRED');
         });
+
+        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_IDLE_TIMEOUT', () => {
+          const authenticationProviderMock =
+            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+          authenticationProviderMock.mockClear();
+          new Authenticator(
+            getMockOptions({
+              selector: { enabled: false },
+              providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+              customLogoutURL: 'https://some-logout-origin/logout',
+            })
+          );
+          const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+          expect(
+            getLoggedOutURL(
+              httpServerMock.createKibanaRequest({
+                query: { msg: LogoutReason.SESSION_IDLE_TIMEOUT },
+              })
+            )
+          ).toBe('/mock-server-basepath/security/logged_out?msg=SESSION_IDLE_TIMEOUT');
+        });
+
+        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_LIFESPAN_TIMEOUT', () => {
+          const authenticationProviderMock =
+            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+          authenticationProviderMock.mockClear();
+          new Authenticator(
+            getMockOptions({
+              selector: { enabled: false },
+              providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+              customLogoutURL: 'https://some-logout-origin/logout',
+            })
+          );
+          const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+          expect(
+            getLoggedOutURL(
+              httpServerMock.createKibanaRequest({
+                query: { msg: LogoutReason.SESSION_LIFESPAN_TIMEOUT },
+              })
+            )
+          ).toBe('/mock-server-basepath/security/logged_out?msg=SESSION_LIFESPAN_TIMEOUT');
+        });
       });
     });
 
@@ -1509,7 +1553,7 @@ describe('Authenticator', () => {
         it('expected message is attached to the URL when authentication provider redirects to login page', async () => {
           const request = httpServerMock.createKibanaRequest();
           const redirectUrl = '/mock-server-basepath/login?foo=bar';
-          const failureReason = new FailureClass();
+          const failureReason: SessionError = new FailureClass();
 
           mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
 

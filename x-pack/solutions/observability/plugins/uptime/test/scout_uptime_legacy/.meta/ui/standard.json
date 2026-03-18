@@ -1,0 +1,148 @@
+{
+  "sha1": "5312f901f8d7fb8f0d6f3901a86bb8b1dba7ff15",
+  "tests": [
+    {
+      "id": "b84b07d0bf27e66-b0ce2da86af09e0",
+      "title": "Ingest Uptime test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "3a61502f9b08310-f0b91c39b7de2bb",
+      "title": "DataViewPermissions renders exploratory view for viewer user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/data_view_permissions.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "0308a3e7e937b45-3138489b9623fcf",
+      "title": "DefaultEmailSettings configures email connector and validates settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/default_email_settings.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "71cc3e0d7c45e05-7abb22683fda4d3",
+      "title": "MonitorAlerts creates and manages anomaly detection alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/monitor_alerts.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "6bb8a5a56f4bbf7-6aa6870c3a32521",
+      "title": "MonitorDetails navigates to monitor details and displays ping data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/monitor_details.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "3c193e12d1083b3-fa50727de54f145",
+      "title": "Observer location displays the overall availability for no location monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/observer_location.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "3c193e12d1083b3-52d8e8ed8fd690b",
+      "title": "Observer location displays less monitor availability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/observer_location.spec.ts",
+        "line": 49,
+        "column": 7
+      }
+    },
+    {
+      "id": "fd6172046372db0-23918f7e6195d2b",
+      "title": "MonitorPingRedirects displays redirect info in detail panel and ping list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/ping_redirects.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "e4b6a68489745d8-5219667d912e580",
+      "title": "StepsDuration navigates to monitor details and verifies step duration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/step_duration.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "5b30221a451ce18-d69694c36c6d60c",
+      "title": "TlsFlyoutInAlertingApp opens TLS alert flyout and verifies setting values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/tls_alert_flyout.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "8e76624b22e8ba4-2ce95cce31088e9",
+      "title": "UptimeOverview navigates to overview and clicks monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/uptime_overview.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    }
+  ]
+}
