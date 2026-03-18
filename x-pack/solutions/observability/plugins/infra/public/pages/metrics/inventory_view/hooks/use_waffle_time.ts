@@ -11,21 +11,27 @@ import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
+import { parse, stringify } from 'query-string';
+import { decode as decodeRison } from '@kbn/rison';
+import { useHistory } from 'react-router-dom';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryView } from '../../../../../common/inventory_views';
-import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
+import {
+  useKibanaTimefilterTime,
+  useSyncKibanaTimeFilterTime,
+} from '../../../../hooks/use_kibana_timefilter_time';
 import { useInventoryViewsContext } from './use_inventory_views';
 
 const DEFAULT_FROM = 'now-15m';
 const DEFAULT_TO = 'now';
 
+const INITIAL_DATE_RANGE: TimeRange = { from: DEFAULT_FROM, to: DEFAULT_TO };
+
 export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
   from: DEFAULT_FROM,
   to: DEFAULT_TO,
 };
-
-const DEFAULT_DATE_RANGE: TimeRange = { from: DEFAULT_FROM, to: DEFAULT_TO };
 
 function mapInventoryViewToState(savedView: InventoryView): WaffleTimeState {
   const { time, dateRange } = savedView.attributes;
@@ -44,31 +50,85 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleTimeState {
   return DEFAULT_WAFFLE_TIME_STATE;
 }
 
+function parseLegacyWaffleTime(raw: string | undefined): WaffleTimeState | undefined {
+  if (!raw) return undefined;
+  try {
+    const decoded = decodeRison(raw);
+    const asNew = pipe(WaffleTimeStateRT.decode(decoded), fold(constant(undefined), identity));
+    if (asNew) return asNew;
+
+    const asLegacy = pipe(
+      legacyWaffleTimeStateRT.decode(decoded),
+      fold(constant(undefined), identity)
+    );
+    if (asLegacy) {
+      return {
+        from: new Date(asLegacy.currentTime - 15 * 60 * 1000).toISOString(),
+        to: new Date(asLegacy.currentTime).toISOString(),
+      };
+    }
+  } catch {
+    // ignore rison parse errors
+  }
+  return undefined;
+}
+
 export const useWaffleTime = () => {
   const { currentView } = useInventoryViewsContext();
-  const [urlState, setUrlState] = useUrlState<WaffleTimeState>({
-    defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_TIME_STATE,
-    decodeUrlState,
-    encodeUrlState,
-    urlStateKey: 'waffleTime',
+  const [getTime] = useKibanaTimefilterTime(INITIAL_DATE_RANGE);
+  const history = useHistory();
+
+  // Resolve initial default: saved view > legacy waffleTime URL > timefilter > defaults
+  const resolvedDefault = (() => {
+    if (history?.location) {
+      const urlParams = parse(history.location.search, { sort: false });
+      const legacy = parseLegacyWaffleTime(urlParams.waffleTime as string | undefined);
+      if (legacy) return legacy;
+    }
+    if (currentView) return mapInventoryViewToState(currentView);
+    return getTime();
+  })();
+
+  const [urlState, setUrlState] = useUrlState<AppState>({
+    defaultState: { dateRange: resolvedDefault },
+    decodeUrlState: decodeAppState,
+    encodeUrlState: encodeAppState,
+    urlStateKey: '_a',
     writeDefaultState: true,
   });
 
-  const dateRange: TimeRange = { from: urlState.from, to: urlState.to };
+  const dateRange: TimeRange = urlState.dateRange;
 
   const setDateRange = useCallback(
     (range: TimeRange) => {
-      setUrlState({ from: range.from, to: range.to });
+      setUrlState({ dateRange: { from: range.from, to: range.to } });
     },
     [setUrlState]
   );
 
-  useSyncKibanaTimeFilterTime(DEFAULT_DATE_RANGE, dateRange, setDateRange);
+  // Bidirectional sync between _a.dateRange and the Kibana timefilter (same as Hosts)
+  useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, dateRange, (timeRange) => {
+    setUrlState({ dateRange: { from: timeRange.from, to: timeRange.to } });
+  });
 
+  // Strip legacy waffleTime from URL on mount
+  useEffect(() => {
+    if (history?.location) {
+      const params = parse(history.location.search, { sort: false });
+      if (params.waffleTime) {
+        delete params.waffleTime;
+        history.replace({ ...history.location, search: stringify(params, { sort: false }) });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Saved view change
   const previousViewId = useRef<string | undefined>(currentView?.id);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
-      setUrlState(mapInventoryViewToState(currentView));
+      const viewState = mapInventoryViewToState(currentView);
+      setUrlState({ dateRange: viewState });
       previousViewId.current = currentView.id;
     }
   }, [currentView, setUrlState]);
@@ -76,9 +136,11 @@ export const useWaffleTime = () => {
   return {
     dateRange,
     setDateRange,
-    setWaffleTimeState: setUrlState,
+    setWaffleTimeState: setDateRange,
   };
 };
+
+// -- io-ts types --
 
 export const WaffleTimeStateRT = rt.type({
   from: rt.string,
@@ -91,21 +153,16 @@ const legacyWaffleTimeStateRT = rt.type({
 });
 
 export type WaffleTimeState = rt.TypeOf<typeof WaffleTimeStateRT>;
-const encodeUrlState = WaffleTimeStateRT.encode;
-const decodeUrlState = (value: unknown): WaffleTimeState | undefined => {
-  const decoded = pipe(WaffleTimeStateRT.decode(value), fold(constant(undefined), identity));
-  if (decoded) {
-    return decoded;
-  }
-  const legacy = pipe(legacyWaffleTimeStateRT.decode(value), fold(constant(undefined), identity));
-  if (legacy) {
-    return {
-      from: new Date(legacy.currentTime - 15 * 60 * 1000).toISOString(),
-      to: new Date(legacy.currentTime).toISOString(),
-    };
-  }
-  return undefined;
-};
+
+const AppStateRT = rt.type({
+  dateRange: WaffleTimeStateRT,
+});
+
+type AppState = rt.TypeOf<typeof AppStateRT>;
+
+const encodeAppState = AppStateRT.encode;
+const decodeAppState = (value: unknown): AppState | undefined =>
+  pipe(AppStateRT.decode(value), fold(constant(undefined), identity));
 
 export const WaffleTime = createContainer(useWaffleTime);
 export const [WaffleTimeProvider, useWaffleTimeContext] = WaffleTime;

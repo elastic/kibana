@@ -18,6 +18,7 @@ export interface InventoryLocatorParams extends SerializableRecord {
     expression: string;
     kind: string;
   };
+  /** @deprecated Use `dateRange` instead. Kept for backward compatibility with existing alert links. */
   waffleTime?:
     | {
         from: string;
@@ -27,6 +28,10 @@ export interface InventoryLocatorParams extends SerializableRecord {
         currentTime: number;
         isAutoReloading: boolean;
       };
+  dateRange?: {
+    from: string;
+    to: string;
+  };
   waffleOptions?: {
     accountId: string;
     autoBounds: boolean;
@@ -59,18 +64,30 @@ export interface InventoryLocatorParams extends SerializableRecord {
 
 export const INVENTORY_LOCATOR_ID = 'INVENTORY_LOCATOR';
 
+function resolveTimeRange(params: InventoryLocatorParams): { from: string; to: string } {
+  if (params.dateRange) {
+    return params.dateRange;
+  }
+  if (params.waffleTime) {
+    if ('from' in params.waffleTime) {
+      return params.waffleTime;
+    }
+    return {
+      from: new Date(params.waffleTime.currentTime - 15 * 60 * 1000).toISOString(),
+      to: new Date(params.waffleTime.currentTime).toISOString(),
+    };
+  }
+  return { from: 'now-15m', to: 'now' };
+}
+
 export class InventoryLocatorDefinition implements LocatorDefinition<InventoryLocatorParams> {
   public readonly id = INVENTORY_LOCATOR_ID;
 
   public readonly getLocation = async (params: InventoryLocatorParams) => {
+    const timeRange = resolveTimeRange(params);
+
     const paramsWithDefaults = {
       waffleFilter: rison.encodeUnknown(params.waffleFilter ?? { kind: 'kuery', expression: '' }),
-      waffleTime: rison.encodeUnknown(
-        params.waffleTime ?? {
-          from: 'now-15m',
-          to: 'now',
-        }
-      ),
       waffleOptions: rison.encodeUnknown(
         params.waffleOptions ?? {
           accountId: '',
@@ -91,6 +108,7 @@ export class InventoryLocatorDefinition implements LocatorDefinition<InventoryLo
       sort: rison.encodeUnknown(params.sort ?? { by: 'name', direction: 'desc' }),
       timelineOpen: rison.encodeUnknown(params.timelineOpen ?? false),
       view: rison.encodeUnknown(params.view ?? 'map'),
+      _a: rison.encodeUnknown({ dateRange: timeRange }),
     };
 
     const queryStringParams = querystring.stringify(paramsWithDefaults);

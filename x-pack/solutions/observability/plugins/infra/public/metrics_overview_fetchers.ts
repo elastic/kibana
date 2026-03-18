@@ -52,9 +52,9 @@ export const createMetricsFetchData =
         body: JSON.stringify(overviewRequest),
       });
       return {
-        appLink: `/app/metrics/inventory?waffleTime=(from:'${new Date(
+        appLink: `/app/metrics/inventory?_a=(dateRange:(from:'${new Date(
           start
-        ).toISOString()}',to:'${new Date(end).toISOString()}')`,
+        ).toISOString()}',to:'${new Date(end).toISOString()}'))`,
         series: results.series,
         sort: async (by: string, direction: string) =>
           makeRequest({ sort: by, sortDirection: direction }),

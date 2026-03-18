@@ -19,8 +19,8 @@ import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { RouteState } from '../../types';
 
 interface QueryParams {
-  from?: number;
-  to?: number;
+  from?: number | string;
+  to?: number | string;
   name?: string;
 }
 
@@ -49,22 +49,21 @@ export const useAssetDetailsRedirect = () => {
       preferredSchema?: DataSchemaFormat;
     }): RouterLinkProps => {
       const { to, from, ...rest } = search;
+      const fromStr = typeof from === 'number' ? new Date(from).toISOString() : from;
+      const toStr = typeof to === 'number' ? new Date(to).toISOString() : to;
       const queryParams = {
         assetDetails:
           Object.keys(rest).length > 0
             ? {
                 ...rest,
-                dateRange: {
-                  from: from ? new Date(from).toISOString() : undefined,
-                  to: to ? new Date(to).toISOString() : undefined,
-                },
+                ...(fromStr && toStr ? { dateRange: { from: fromStr, to: toStr } } : undefined),
                 preferredSchema: preferredSchema ?? 'semconv',
               }
             : {},
         _a: {
           time: {
-            ...(from ? { from: new Date(from).toISOString() } : undefined),
-            ...(to ? { to: new Date(to).toISOString() } : undefined),
+            ...(fromStr ? { from: fromStr } : undefined),
+            ...(toStr ? { to: toStr } : undefined),
             interval: '>=1m',
           },
         },

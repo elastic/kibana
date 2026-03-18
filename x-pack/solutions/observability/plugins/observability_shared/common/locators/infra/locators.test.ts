@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
+import rison, { decode as decodeRison } from '@kbn/rison';
 import { AssetDetailsLocatorDefinition } from './asset_details_locator';
 import { AssetDetailsFlyoutLocatorDefinition } from './asset_details_flyout_locator';
 import type { HostsLocatorParams } from './hosts_locator';
 import { HostsLocatorDefinition } from './hosts_locator';
 import { InventoryLocatorDefinition } from './inventory_locator';
-import querystring from 'querystring';
 
 const setupAssetDetailsLocator = async () => {
   const assetDetailsLocator = new AssetDetailsLocatorDefinition();
@@ -204,9 +203,9 @@ describe('Infra Locators', () => {
   describe('Inventory Locator', () => {
     const params = {
       waffleFilter: { kind: 'kuery', expression: '' },
-      waffleTime: {
-        currentTime: 1715688477985,
-        isAutoReloading: false,
+      dateRange: {
+        from: '2024-05-14T13:07:57.985Z',
+        to: '2024-05-14T13:22:57.985Z',
       },
       waffleOptions: {
         accountId: '',
@@ -226,34 +225,55 @@ describe('Infra Locators', () => {
       view: 'map' as const,
     };
 
-    const expected = Object.keys(params).reduce((acc: Record<string, string | undefined>, key) => {
-      acc[key] =
-        key === 'metric' || key === 'customOptions' || key === 'customMetrics'
-          ? params[key]
-          : rison.encodeUnknown(params[key as keyof typeof params]);
-      return acc;
-    }, {});
+    function parseAppState(path: string): Record<string, unknown> {
+      const qs = path.split('?')[1] ?? '';
+      const parsed = new URLSearchParams(qs);
+      return decodeRison(parsed.get('_a')!) as Record<string, unknown>;
+    }
 
-    const queryStringParams = querystring.stringify(expected);
-
-    it('should create a link to Inventory with no state', async () => {
+    it('should create a link to Inventory with _a containing dateRange', async () => {
       const { inventoryLocator } = await setupInventoryLocator();
       const { app, path, state } = await inventoryLocator.getLocation(params);
 
       expect(app).toBe('metrics');
-      expect(path).toBe(`/inventory?${queryStringParams}`);
+      expect(path).toContain('/inventory?');
+      expect(path).not.toContain('waffleTime');
+      expect(parseAppState(path)).toEqual({ dateRange: params.dateRange });
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });
 
-    it('should return correct structured url', async () => {
+    it('should handle legacy waffleTime params', async () => {
+      const legacyParams = {
+        ...params,
+        dateRange: undefined,
+        waffleTime: {
+          currentTime: 1715688477985,
+          isAutoReloading: false,
+        },
+      };
       const { inventoryLocator } = await setupInventoryLocator();
-      const { app, path, state } = await inventoryLocator.getLocation(params);
+      const { app, path } = await inventoryLocator.getLocation(legacyParams);
 
       expect(app).toBe('metrics');
-      expect(path).toBe(`/inventory?${queryStringParams}`);
-      expect(state).toBeDefined();
-      expect(Object.keys(state)).toHaveLength(0);
+      expect(path).toContain('/inventory?');
+      expect(path).not.toContain('waffleTime');
+      const appState = parseAppState(path);
+      expect(appState.dateRange).toHaveProperty('from');
+      expect(appState.dateRange).toHaveProperty('to');
+    });
+
+    it('should default to now-15m when no time params provided', async () => {
+      const noTimeParams = {
+        ...params,
+        dateRange: undefined,
+      };
+      const { inventoryLocator } = await setupInventoryLocator();
+      const { path } = await inventoryLocator.getLocation(noTimeParams);
+
+      expect(parseAppState(path)).toEqual({
+        dateRange: { from: 'now-15m', to: 'now' },
+      });
     });
   });
 });

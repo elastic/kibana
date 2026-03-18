@@ -8,7 +8,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { parse } from '@kbn/datemath';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 
@@ -33,8 +32,8 @@ export const LinkToNodeDetails = ({ entityId, entityName, entityType }: LinkToNo
     search: {
       ...assetDetails,
       name: entityName,
-      from: parse(dateRange?.from ?? '')?.valueOf(),
-      to: parse(dateRange?.to ?? '')?.valueOf(),
+      from: dateRange?.from,
+      to: dateRange?.to,
     },
     preferredSchema: preferredSchema ?? 'semconv',
   });

@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
 import { esql, type ComposerQuery } from '@elastic/esql';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
@@ -92,8 +91,8 @@ export const MetricsNodeDetailsLink = ({
       entityId: id,
       search: {
         name: label,
-        from: parse(timerange.from)?.valueOf(),
-        to: parse(timerange.to)?.valueOf(),
+        from: timerange.from,
+        to: timerange.to,
       },
       preferredSchema: isOtel ? 'semconv' : 'ecs',
     });

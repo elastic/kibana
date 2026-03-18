@@ -27,7 +27,7 @@ export const RedirectToInventory: React.FC<RouteComponentProps> = ({ location })
 
     baseLocator?.navigate({
       ...parsedQueryString,
-      waffleTime: { from, to },
+      dateRange: { from, to },
       state: location.state as SerializableRecord,
     });
   }, [baseLocator, location.search, location.state]);
