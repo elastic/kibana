@@ -173,16 +173,9 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({
     const path = conversationId
       ? appPaths.chat.conversation({ conversationId })
       : appPaths.chat.new;
-    const params =
-      !conversationId && agentId ? { [searchParamNames.agentId]: agentId } : undefined;
-    navigateToAgentBuilderUrl(path, params, { shouldStickToBottom: false });
-  }, [
-    application,
-    agentId,
-    conversationId,
-    navigateToAgentBuilderUrl,
-    onCloseSidebar,
-  ]);
+    const params = !conversationId && agentId ? { [searchParamNames.agentId]: agentId } : undefined;
+    navigateToAgentBuilderUrl(path, params);
+  }, [application, agentId, conversationId, navigateToAgentBuilderUrl, onCloseSidebar]);
 
   const menuItems = [
     ...(isEmbeddedContext && application
@@ -265,7 +258,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({
     />,
     <EuiContextMenuItem
       key="agents"
-      icon={<EuiIcon type="productAgent" />}
+      icon={<EuiIcon type="productAgent" aria-hidden={true} />}
       onClick={closePopover}
       href={createAgentBuilderUrl(appPaths.agents.list)}
       data-test-subj="agentBuilderActionsAgents"
