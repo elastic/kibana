@@ -61,7 +61,7 @@ describe('generateInputsSnippet', () => {
 
   it('generates snippet with inputs header and tab-stop placeholders', () => {
     const result = generateInputsSnippet(testSchema);
-    expect(result).toBe(`\ninputs:\n  name: \${1:${INPUT_STRING_PLACEHOLDER}}\n  count: \${2:0}`);
+    expect(result).toBe(`\ninputs:\n  name: \${1:"${INPUT_STRING_PLACEHOLDER}"}\n  count: \${2:0}`);
   });
 });
 

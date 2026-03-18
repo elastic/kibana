@@ -29,8 +29,7 @@ import {
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
-
-export const STRING_PLACEHOLDER = '<your_input>';
+import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
 
 export interface ContextOverrideData {
   stepContext: Partial<StepContext>;
@@ -138,7 +137,7 @@ export function buildContextOverride(
         current[part] =
           current[part] ||
           readPropertyRecursive(pathParts.slice(0, i + 1), staticDataWithInputs) ||
-          STRING_PLACEHOLDER;
+          INPUT_STRING_PLACEHOLDER;
       } else {
         // Create nested object if it doesn't exist
         if (!current[part]) {
@@ -150,7 +149,6 @@ export function buildContextOverride(
   });
 
   const schema = buildStepContextSchemaFromObject(contextOverride);
-
   return {
     stepContext: contextOverride,
     schema,
@@ -341,7 +339,7 @@ export function buildContextOverrideFromExecution(
 
       if (isLastPart) {
         const value = readPropertyRecursive(pathParts.slice(0, i + 1), lookupData);
-        current[part] = current[part] ?? value ?? STRING_PLACEHOLDER;
+        current[part] = current[part] ?? value ?? INPUT_STRING_PLACEHOLDER;
       } else {
         if (!current[part]) {
           current[part] = {};
