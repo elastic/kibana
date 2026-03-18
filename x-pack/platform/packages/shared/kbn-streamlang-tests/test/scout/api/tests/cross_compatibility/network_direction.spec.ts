@@ -31,7 +31,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           {
@@ -69,7 +69,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ source_ip: '128.232.110.120', destination_ip: '192.168.1.1' }];
         await testBed.ingest('ingest-e2e-test-network-direction-target-field', docs, processors);
@@ -105,7 +105,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           {
@@ -153,7 +153,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           { source_ip: '128.232.110.120', destination_ip: '192.168.1.1' },
@@ -199,7 +199,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           { source_ip: '128.232.110.120', destination_ip: '192.168.1.1', event: { kind: 'test' } },

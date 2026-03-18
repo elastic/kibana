@@ -29,7 +29,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest('ingest-date-single-format', docs, processors);
@@ -62,7 +62,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [
         { event: { created: '01/01/2025:12:34:56' } },
@@ -101,7 +101,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest('ingest-date-output-format', docs, processors);
@@ -148,7 +148,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed'
         );
-        expect(() => transpileEsql(streamlangDSL)).toThrow(
+        await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed'
         );
       }
@@ -172,7 +172,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       // Test documents with different formats that should match different patterns in the list
       const docs = [
@@ -219,7 +219,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { time: '01-01-2025' } }];
       const { errors } = await testBed.ingest('ingest-date-fail', docs, processors);
@@ -254,7 +254,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { date: '08 avril 1999' } }];
       await testBed.ingest('ingest-date-timezone-locale-format', docs, processors);

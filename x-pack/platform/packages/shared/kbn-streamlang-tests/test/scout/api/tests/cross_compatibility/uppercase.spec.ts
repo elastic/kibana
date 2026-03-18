@@ -28,7 +28,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           {
@@ -67,7 +67,7 @@ apiTest.describe(
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'test message 1' }, { message: 'test message 2' }];
       await testBed.ingest('ingest-e2e-test-uppercase-basic', docs, processors);
@@ -100,7 +100,7 @@ apiTest.describe(
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [
         { message: 'test message 1', should_uppercase: 'yes' },

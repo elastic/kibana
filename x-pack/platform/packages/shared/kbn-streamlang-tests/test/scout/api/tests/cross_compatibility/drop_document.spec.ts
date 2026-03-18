@@ -31,7 +31,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           {
@@ -81,7 +81,7 @@ apiTest.describe(
       expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
         'where clause is required in drop_document.'
       );
-      expect(() => transpileEsql(streamlangDSL)).toThrow(
+      await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
         'where clause is required in drop_document.'
       );
     });

@@ -31,7 +31,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'An error occurred' }];
         await testBed.ingest('ingest-replace', docs, processors);
@@ -61,7 +61,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'An error occurred' }];
         await testBed.ingest('ingest-replace-target', docs, processors);
@@ -91,7 +91,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Error code 404 found' }];
         await testBed.ingest('ingest-replace-regex', docs, processors);
@@ -120,7 +120,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'User alice has 3 new messages' }];
         await testBed.ingest('ingest-replace-capture', docs, processors);
@@ -153,7 +153,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           { message: 'An error occurred', event: { kind: 'test' } },
@@ -204,7 +204,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         // Source field is numeric (non-string)
         const docs = [{ status_code: 404, message: 'test' }];
@@ -243,7 +243,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         // Target field exists as numeric, source field is string
         const docs = [{ message: 'An error occurred', status_code: 404 }];
@@ -292,7 +292,7 @@ apiTest.describe(
           expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
         }
@@ -326,7 +326,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: ['An error occurred 01', 'An error occurred 02'] }];
         await testBed.ingest('ingest-replace-single', docs, processors);

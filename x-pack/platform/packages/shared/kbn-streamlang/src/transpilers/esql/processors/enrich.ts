@@ -7,28 +7,38 @@
 
 import { Builder } from '@elastic/esql';
 import type { ESQLAstCommand } from '@elastic/esql/types';
+import type { EnrichPolicyResolver } from '../../../../types/resolvers';
 import type { EnrichProcessor } from '../../../../types/processors';
 import { buildIgnoreMissingFilter } from './common';
 
 /**
- * Converts a Streamlang EnrichProcessor into a list of ES|QL AST commands.
- * @param processor - The EnrichProcessor to convert
- * @returns A list of ES|QL AST commands
- * @example
- * Input:
- * { action: 'enrich', policy_name: 'ip_location', field: 'ip', to: 'location' }
- *
- * Output (basic, without enrich_fields):
- * | ENRICH ip_location ON ip
- *
- * Output (with enrich_fields: ['city', 'country']):
- * | ENRICH ip_location ON ip WITH location.city = city, location.country = country
+ * TODO - rewrite this once enrich policy resolver is implemented
+ * TODO - add support for the "override" option
  */
-export const convertEnrichProcessorToESQL = (processor: EnrichProcessor): ESQLAstCommand[] => {
-  const { policy_name, field, ignore_missing = false } = processor;
+export const convertEnrichProcessorToESQL = async (
+  processor: EnrichProcessor,
+  resolver: EnrichPolicyResolver
+): Promise<ESQLAstCommand[]> => {
+  const { policy_name, to, ignore_missing = false } = processor;
   const commands: ESQLAstCommand[] = [];
 
-  const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, field);
+  const policyMetadata = await resolver(policy_name);
+
+  if (!policyMetadata) {
+    throw new Error(`Enrich policy ${policy_name} not found`);
+  }
+
+  if (!policyMetadata.matchField || policyMetadata.enrichFields.length === 0) {
+    throw new Error(`Enrich policy ${policy_name} is invalid`);
+  }
+
+  if (!policyMetadata.enrichFields || policyMetadata.enrichFields.length === 0) {
+    throw new Error(`Enrich policy ${policy_name} has no enrich fields`);
+  }
+
+  const { matchField, enrichFields } = policyMetadata;
+
+  const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, matchField);
   if (missingFieldFilter) {
     commands.push(missingFieldFilter);
   }
@@ -41,15 +51,26 @@ export const convertEnrichProcessorToESQL = (processor: EnrichProcessor): ESQLAs
 
   const onOption = Builder.option({
     name: 'on',
-    args: [Builder.expression.column(field)],
+    args: [Builder.expression.column(matchField)],
+  });
+
+  const withAssignments = enrichFields.map((field) =>
+    Builder.expression.func.binary('=', [
+      Builder.expression.column(`${to}.${field}`),
+      Builder.expression.column(field),
+    ])
+  );
+
+  const withOption = Builder.option({
+    name: 'with',
+    args: withAssignments,
   });
 
   const enrichCmd = Builder.command({
     name: 'enrich',
-    args: [policySource, onOption],
+    args: [policySource, onOption, withOption],
   });
 
-  // TODO: Add support for "to" and "override" options
   commands.push(enrichCmd);
   return commands;
 };

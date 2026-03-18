@@ -30,7 +30,7 @@ apiTest.describe(
           ],
         };
         const { processors } = transpileIngestPipeline(dsl);
-        const { query } = transpileEsql(dsl);
+        const { query } = await transpileEsql(dsl);
 
         const docs = [{ attributes: { flag: true } }, { attributes: { flag: 'true' } }];
         const mappingDoc = {
@@ -73,7 +73,7 @@ apiTest.describe(
           ],
         };
         const { processors } = transpileIngestPipeline(dsl);
-        const { query } = transpileEsql(dsl);
+        const { query } = await transpileEsql(dsl);
 
         const docs = [{ attributes: { val: '450' } }, { attributes: { val: '404' } }];
         const mappingDoc = {
@@ -117,7 +117,7 @@ apiTest.describe(
           ],
         };
         const { processors } = transpileIngestPipeline(dsl);
-        const { query } = transpileEsql(dsl);
+        const { query } = await transpileEsql(dsl);
 
         const docs = [{ attributes: { val: 450 } }, { attributes: { val: 404 } }];
         const mappingDoc = {
@@ -154,7 +154,7 @@ apiTest.describe(
         ],
       };
       const { processors } = transpileIngestPipeline(dsl);
-      const { query } = transpileEsql(dsl);
+      const { query } = await transpileEsql(dsl);
 
       const docs = [
         { attributes: { val: '450-abc' } },
@@ -192,7 +192,7 @@ apiTest.describe(
           ],
         };
         const { processors } = transpileIngestPipeline(dsl);
-        const { query } = transpileEsql(dsl);
+        const { query } = await transpileEsql(dsl);
 
         const docs = [
           { attributes: { val: 8500 } },
@@ -231,7 +231,7 @@ apiTest.describe(
           ],
         };
         const { processors } = transpileIngestPipeline(dsl);
-        const { query } = transpileEsql(dsl);
+        const { query } = await transpileEsql(dsl);
 
         const docs = [
           { attributes: { val: 8500 } },

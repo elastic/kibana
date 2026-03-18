@@ -9,12 +9,19 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EnrichProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/esql';
+import type { EnrichPolicyResolver } from '@kbn/streamlang/types/resolvers';
 import { streamlangApiTest as apiTest } from '../..';
 import {
   ENRICH_POLICY_NAME,
   setupEnrichIndexWithPolicy,
   teardownEnrichIndexWithPolicy,
 } from '../../utils/enrich_helpers';
+
+const mockEnrichPolicyResolver: EnrichPolicyResolver = () =>
+  Promise.resolve({
+    matchField: 'ip',
+    enrichFields: ['city', 'country'],
+  });
 
 apiTest.describe(
   'Streamlang to ES|QL - Enrich Processor',
@@ -44,17 +51,19 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL, undefined, {
+          enrich: mockEnrichPolicyResolver,
+        });
 
         const docs = [{ ip: '10.0.0.1' }, { ip: '10.0.0.2' }];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0].city).toBe('New York');
-        expect(esqlResult.documents[0].country).toBe('US');
-        expect(esqlResult.documents[1].city).toBe('London');
-        expect(esqlResult.documents[1].country).toBe('GB');
+        expect(esqlResult.documents[0]['location.city']).toBe('New York');
+        expect(esqlResult.documents[0]['location.country']).toBe('US');
+        expect(esqlResult.documents[1]['location.city']).toBe('London');
+        expect(esqlResult.documents[1]['location.country']).toBe('GB');
       }
     );
 
@@ -75,7 +84,9 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL, undefined, {
+          enrich: mockEnrichPolicyResolver,
+        });
         const docs = [
           { ip: '10.0.0.1', message: 'some message' },
           { message: 'some other message' },
@@ -84,10 +95,10 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0].city).toBe('New York');
-        expect(esqlResult.documents[0].country).toBe('US');
-        expect(esqlResult.documents[1].city).toBeNull();
-        expect(esqlResult.documents[1].country).toBeNull();
+        expect(esqlResult.documents[0]['location.city']).toBe('New York');
+        expect(esqlResult.documents[0]['location.country']).toBe('US');
+        expect(esqlResult.documents[1]['location.city']).toBeNull();
+        expect(esqlResult.documents[1]['location.country']).toBeNull();
       }
     );
 
@@ -108,14 +119,16 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL, undefined, {
+          enrich: mockEnrichPolicyResolver,
+        });
         const docs = [{ ip: '10.0.0.1', message: 'has ip' }, { message: 'no ip here' }];
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         // Only the doc with ip survives the WHERE filter
         expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documents[0].city).toBe('New York');
+        expect(esqlResult.documents[0]['location.city']).toBe('New York');
       }
     );
   }

@@ -29,7 +29,7 @@ apiTest.describe(
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
       await testBed.ingest('ingest-rename-override', docs, processors);
@@ -62,7 +62,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
 
@@ -109,7 +109,7 @@ apiTest.describe(
           expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
         }
@@ -131,7 +131,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'some_value' }];
 

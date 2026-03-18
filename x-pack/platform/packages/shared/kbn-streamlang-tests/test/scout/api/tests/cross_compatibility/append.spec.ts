@@ -28,7 +28,7 @@ apiTest.describe(
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ tags: ['existing_tag'] }];
       await testBed.ingest('ingest-append', docs, processors);
@@ -53,7 +53,7 @@ apiTest.describe(
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'a' }];
       await testBed.ingest('ingest-append-non-existent', docs, processors);
@@ -97,7 +97,7 @@ apiTest.describe(
           expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
         }
@@ -121,7 +121,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'a' }];
         await testBed.ingest('ingest-append-scalar', docs, processors);
@@ -151,7 +151,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ tags: ['existing_tag'] }];
         await testBed.ingest('ingest-append-dedupe', docs, processors);

@@ -29,7 +29,7 @@ apiTest.describe(
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ attributes: { size: 4096 } }];
       await testBed.ingest('ingest-set-value', docs, processors);
@@ -56,7 +56,7 @@ apiTest.describe(
       };
 
       const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'should-be-copied' }];
       await testBed.ingest('ingest-set-copy', docs, processors);
@@ -86,7 +86,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ attributes: { status: 'active' } }];
         await testBed.ingest('ingest-set-override', docs, processors);
@@ -117,7 +117,7 @@ apiTest.describe(
         };
 
         const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ attributes: { status: 'active' } }];
         await testBed.ingest('ingest-set-no-override', docs, processors);
@@ -163,7 +163,7 @@ apiTest.describe(
           expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
         }
