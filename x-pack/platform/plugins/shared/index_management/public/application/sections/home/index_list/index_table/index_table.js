@@ -18,6 +18,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLiveAnnouncer,
   EuiPageSection,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -205,6 +206,7 @@ export class IndexTable extends Component {
     this.docCountApi = docCountApi(props.http);
     this.state = {
       selectedIndicesMap: {},
+      selectionAnnouncement: '',
     };
   }
 
@@ -234,6 +236,35 @@ export class IndexTable extends Component {
     for (const toggleParam of toggleParams) {
       if (toggles.includes(toggleParam)) {
         toggleChanged(toggleParam, rest[toggleParam] === 'true');
+      }
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const hadSelectedItems = Object.keys(prevState.selectedIndicesMap).length > 0;
+    const hasSelectedItems = Object.keys(this.state.selectedIndicesMap).length > 0;
+
+    if (!hadSelectedItems && hasSelectedItems) {
+      const selectionAnnouncement = i18n.translate(
+        'xpack.idxMgmt.indexTable.bulkActionsAnnouncementVisible',
+        {
+          defaultMessage: 'Bulk actions menu is now available.',
+        }
+      );
+
+      if (this.state.selectionAnnouncement !== selectionAnnouncement) {
+        this.setState({ selectionAnnouncement });
+      }
+    } else if (hadSelectedItems && !hasSelectedItems) {
+      const selectionAnnouncement = i18n.translate(
+        'xpack.idxMgmt.indexTable.bulkActionsAnnouncementHidden',
+        {
+          defaultMessage: 'Bulk actions menu is now hidden.',
+        }
+      );
+
+      if (this.state.selectionAnnouncement !== selectionAnnouncement) {
+        this.setState({ selectionAnnouncement });
       }
     }
   }
@@ -601,7 +632,7 @@ export class IndexTable extends Component {
       }
     }
 
-    const { selectedIndicesMap } = this.state;
+    const { selectedIndicesMap, selectionAnnouncement } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
 
     return (
@@ -741,6 +772,8 @@ export class IndexTable extends Component {
               {this.renderEnrichmentErrors()}
 
               <EuiSpacer size="m" />
+
+              <EuiLiveAnnouncer>{selectionAnnouncement}</EuiLiveAnnouncer>
 
               <div style={{ maxWidth: '100%', overflow: 'auto' }}>
                 <EuiTable data-test-subj="indexTable">

@@ -1878,6 +1878,8 @@
       "@kbn/response-ops-alerts-table/*": ["x-pack/platform/packages/shared/response-ops/alerts-table/*"],
       "@kbn/response-ops-form-generator": ["x-pack/platform/packages/shared/response-ops/form-generator"],
       "@kbn/response-ops-form-generator/*": ["x-pack/platform/packages/shared/response-ops/form-generator/*"],
+      "@kbn/response-ops-oauth-hooks": ["x-pack/platform/packages/shared/response-ops/oauth-hooks"],
+      "@kbn/response-ops-oauth-hooks/*": ["x-pack/platform/packages/shared/response-ops/oauth-hooks/*"],
       "@kbn/response-ops-recurring-schedule-form": ["x-pack/platform/packages/shared/response-ops/recurring-schedule-form"],
       "@kbn/response-ops-recurring-schedule-form/*": ["x-pack/platform/packages/shared/response-ops/recurring-schedule-form/*"],
       "@kbn/response-ops-retry-service": ["x-pack/platform/packages/shared/response-ops/retry-service"],
