@@ -45,9 +45,8 @@ const securityRuleV3 = schema.object(
     tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_RULE })),
     severity: schema.maybe(schema.string()),
     risk_score: schema.maybe(schema.number()),
-    // New fields for deprecated detection-rule objects
+    // New field for deprecated detection-rule objects
     deprecated: schema.maybe(schema.boolean()),
-    deprecated_reason: schema.maybe(schema.string()),
   },
   { unknowns: 'allow' }
 );
@@ -81,9 +80,6 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
     },
     deprecated: {
       type: 'boolean',
-    },
-    deprecated_reason: {
-      type: 'keyword',
     },
   },
 };
@@ -144,9 +140,6 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
           addedMappings: {
             deprecated: {
               type: 'boolean',
-            },
-            deprecated_reason: {
-              type: 'keyword',
             },
           },
         },
