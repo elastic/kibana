@@ -7,14 +7,57 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
 import { createConversationStorage } from '../lib/conversation_storage';
 import { isElasticConsoleEnabled } from './is_enabled';
 
+/**
+ * Agent_builder stores tool_call step results as JSON strings (via serializeStepResults).
+ * The CLI sends them as objects/arrays. Serialize them so agent_builder can deserialize
+ * with JSON.parse when reading conversations back.
+ */
+const serializeConversationRounds = (
+  rounds: Array<Record<string, unknown>>
+): Array<Record<string, unknown>> => {
+  return rounds.map((round) => {
+    const steps = round.steps as Array<Record<string, unknown>> | undefined;
+    if (!steps) {
+      return round;
+    }
+    return {
+      ...round,
+      steps: steps.map((step) => {
+        if (
+          step.type === 'tool_call' &&
+          step.results !== undefined &&
+          typeof step.results !== 'string'
+        ) {
+          return { ...step, results: JSON.stringify(step.results) };
+        }
+        return step;
+      }),
+    };
+  });
+};
+
 const getSpace = (basePath: string): string => {
   const spaceMatch = basePath.match(/^\/s\/([^/]+)/);
   return spaceMatch ? spaceMatch[1] : 'default';
+};
+
+const getCurrentUser = async (
+  coreStart: CoreStart,
+  request: KibanaRequest
+): Promise<{ userId?: string; username: string }> => {
+  const authUser = coreStart.security.authc.getCurrentUser(request);
+  if (authUser) {
+    return { userId: authUser.profile_uid, username: authUser.username };
+  }
+  // Fallback for API key requests: call ES _security/_authenticate
+  const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+  const authResponse = await esClient.security.authenticate();
+  return { username: authResponse.username };
 };
 
 export const registerConversationRoutes = ({
@@ -56,8 +99,12 @@ export const registerConversationRoutes = ({
 
         const basePath = coreStart.http.basePath.get(request);
         const space = getSpace(basePath);
+        const user = await getCurrentUser(coreStart, request);
 
-        const filter: Array<Record<string, unknown>> = [{ term: { space } }];
+        const filter: Array<Record<string, unknown>> = [
+          { term: { space } },
+          { term: { user_name: user.username } },
+        ];
         if (request.query.agent_id) {
           filter.push({ term: { agent_id: request.query.agent_id } });
         }
@@ -160,7 +207,6 @@ export const registerConversationRoutes = ({
           conversation_rounds: schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
             defaultValue: [],
           }),
-          user_name: schema.maybe(schema.string()),
         }),
       },
     },
@@ -177,6 +223,7 @@ export const registerConversationRoutes = ({
 
         const basePath = coreStart.http.basePath.get(request);
         const space = getSpace(basePath);
+        const user = await getCurrentUser(coreStart, request);
 
         const id = uuidv4();
         const now = new Date().toISOString();
@@ -186,8 +233,9 @@ export const registerConversationRoutes = ({
           document: {
             agent_id: request.body.agent_id,
             title: request.body.title,
-            conversation_rounds: request.body.conversation_rounds,
-            user_name: request.body.user_name,
+            conversation_rounds: serializeConversationRounds(request.body.conversation_rounds),
+            user_id: user.userId,
+            user_name: user.username,
             space,
             created_at: now,
             updated_at: now,
@@ -251,7 +299,7 @@ export const registerConversationRoutes = ({
           ...existing._source,
           ...(request.body.title !== undefined && { title: request.body.title }),
           ...(request.body.conversation_rounds !== undefined && {
-            conversation_rounds: request.body.conversation_rounds,
+            conversation_rounds: serializeConversationRounds(request.body.conversation_rounds),
           }),
           updated_at: new Date().toISOString(),
         };
