@@ -32,7 +32,7 @@ const queryDocumentsSchema = z.object({
       - "top 5 values of host.name"
       - "count documents by log.level"
       - "errors from the last hour"
-      - "average response_time where status >= 500"`)
+      - "average event.duration where http.response.status_code >= 500"`)
   ),
 });
 
@@ -58,10 +58,12 @@ export const createQueryDocumentsTool = ({
   `),
   tags: ['streams'],
   schema: queryDocumentsSchema,
-  handler: async ({ name, query: nlQuery }, { logger, request, modelProvider }) => {
+  handler: async ({ name, query: nlQuery }, { request, modelProvider }) => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
       const esClient = scopedClusterClient.asCurrentUser;
+
+      await streamsClient.getStream(name); // Throws if stream not found
 
       const [fieldCapsResponse, sampleDocs, model] = await Promise.all([
         esClient.fieldCaps({ index: name, fields: ['*'], ignore_unavailable: true }),
@@ -143,11 +145,11 @@ export const createQueryDocumentsTool = ({
         inferenceClient: model.inferenceClient,
         availableFields,
       });
-      logger.debug(`nlQuery: ${nlQuery}`);
-      logger.debug(`translated query: ${JSON.stringify(translated)}`);
-
       const requestedSize = translated.size ?? DEFAULT_SIZE;
-      const cappedSize = translated.aggs ? requestedSize : Math.min(requestedSize, MAX_DOCUMENTS);
+      const cappedSize =
+        translated.aggs && translated.size === undefined
+          ? 0
+          : Math.min(requestedSize, MAX_DOCUMENTS);
 
       const searchParams: SearchRequest = {
         index: name,

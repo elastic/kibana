@@ -31,12 +31,16 @@ const getDataQualitySchema = z.object({
     .string()
     .optional()
     .default('now-24h')
-    .describe('Start of time range for failed doc counts (ES date math). Default: "now-24h"'),
+    .describe(
+      'Start of time range for failed doc counts (ES date math). Total and degraded counts are always computed over the full index lifecycle. Default: "now-24h"'
+    ),
   end: z
     .string()
     .optional()
     .default('now')
-    .describe('End of time range for failed doc counts (ES date math). Default: "now"'),
+    .describe(
+      'End of time range for failed doc counts (ES date math). Total and degraded counts are always computed over the full index lifecycle. Default: "now"'
+    ),
 });
 
 export const createGetDataQualityTool = ({
@@ -92,7 +96,8 @@ export const createGetDataQualityTool = ({
       const failedCount = failedResults.find((s) => s.stream === name)?.count ?? 0;
 
       const degradedPct = totalCount > 0 ? (degradedCount / totalCount) * 100 : 0;
-      const failedPct = totalCount > 0 ? (failedCount / totalCount) * 100 : 0;
+      const allAttempted = totalCount + failedCount;
+      const failedPct = allAttempted > 0 ? (failedCount / allAttempted) * 100 : 0;
       const qualityScore = Math.max(0, Math.round(100 - degradedPct - failedPct));
 
       let failureStoreStatus = 'not_applicable';
@@ -120,7 +125,8 @@ export const createGetDataQualityTool = ({
               failed_pct: Math.round(failedPct * 100) / 100,
               quality_score: qualityScore,
               failure_store_status: failureStoreStatus,
-              time_range: { start, end },
+              failed_docs_time_range: { start, end },
+              note: 'total_docs and degraded_docs are computed over the full index lifecycle. failed_docs is scoped to failed_docs_time_range.',
             },
           },
         ],
