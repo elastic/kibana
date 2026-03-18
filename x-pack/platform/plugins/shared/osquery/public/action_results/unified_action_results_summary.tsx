@@ -6,7 +6,6 @@
  */
 
 import { EuiProgress, EuiTablePagination, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
@@ -230,9 +229,9 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               columnsMeta={STATUS_COLUMNS_META}
               showColumnTokens={false}
               settings={COLUMN_DISPLAY_SETTINGS}
+              onSetColumns={() => {}}
               controlColumnIds={[]}
               gridStyleOverride={gridStyleOverride}
-              toolbarVisibility={false}
               dataGridDensityState={DataGridDensity.EXPANDED}
             />
           </CellActionsProvider>

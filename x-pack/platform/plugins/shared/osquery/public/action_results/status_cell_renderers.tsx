@@ -35,7 +35,7 @@ export const getStatusCellRenderers = ({
   'action_response.osquery.count': (props: DataGridCellValueElementProps) => {
     const count = props.row.flattened['action_response.osquery.count'];
 
-    return <>{count ?? '-'}</>;
+    return <>{count != null ? String(count) : '-'}</>;
   },
   error: (props: DataGridCellValueElementProps) => {
     const errorValue = props.row.flattened.error as string;
