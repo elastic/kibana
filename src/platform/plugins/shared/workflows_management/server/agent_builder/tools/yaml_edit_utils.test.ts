@@ -485,6 +485,62 @@ steps:
     });
   });
 
+  describe('modifyStepProperty preserves quoting of unchanged scalars', () => {
+    it('keeps double quotes on values that did not change', () => {
+      const yamlWithQuotes = `version: "1"
+name: Test
+steps:
+  - name: search_new_parks
+    type: elasticsearch.search
+    with:
+      index: parks
+      query:
+        range:
+          "@timestamp":
+            gte: "now-5m"
+      size: 100
+      sort:
+        - "@timestamp":
+            order: desc
+`;
+      const result = modifyStepProperty(yamlWithQuotes, 'search_new_parks', 'with', {
+        index: 'parks',
+        query: { range: { '@timestamp': { gte: 'now-5m' } } },
+        size: 100,
+        sort: ['@timestamp:desc'],
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.yaml).toContain('gte: "now-5m"');
+      expect(result.yaml).not.toContain('gte: now-5m');
+    });
+
+    it('only diffs the actually changed property when rest stays the same', () => {
+      const yamlWithQuotes = `version: "1"
+name: Test
+steps:
+  - name: search_step
+    type: elasticsearch.search
+    with:
+      index: "my-index"
+      query:
+        match_all: {}
+      size: 50
+`;
+      const result = modifyStepProperty(yamlWithQuotes, 'search_step', 'with', {
+        index: 'my-index',
+        query: { match_all: {} },
+        size: 100,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.yaml).toContain('index: "my-index"');
+      const changed = getChangedLines(yamlWithQuotes, result.yaml);
+      expect(changed.some((l) => l.includes('size'))).toBe(true);
+      expect(changed.every((l) => !l.includes('index'))).toBe(true);
+    });
+  });
+
   describe('modifyStepProperty with multi-line nested values', () => {
     it('correctly indents nested object values at step indentation depth', () => {
       const yamlWithStep = `version: "1"
@@ -513,6 +569,28 @@ steps:
       const parsed = doc.toJSON();
       expect(parsed.steps[0].with.method).toBe('POST');
       expect(parsed.steps[0].with.headers.Authorization).toBe('Bearer token');
+    });
+  });
+
+  describe('modifyWorkflowProperty preserves quoting of unchanged scalars', () => {
+    it('keeps double quotes on trigger values that did not change', () => {
+      const yamlWithQuotes = `version: "1"
+name: "My Workflow"
+triggers:
+  - type: scheduled
+    with:
+      every: "5m"
+steps:
+  - name: step1
+    type: console
+`;
+      const result = modifyWorkflowProperty(yamlWithQuotes, 'triggers', [
+        { type: 'scheduled', with: { every: '5m' } },
+      ]);
+
+      expect(result.success).toBe(true);
+      expect(result.yaml).toContain('every: "5m"');
+      expect(result.yaml).not.toContain('every: 5m\n');
     });
   });
 

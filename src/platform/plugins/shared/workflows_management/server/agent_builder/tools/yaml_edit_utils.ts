@@ -13,6 +13,7 @@ import {
   isPair,
   isScalar,
   isSeq,
+  type Node,
   parseDocument,
   stringify,
   type YAMLMap,
@@ -79,6 +80,84 @@ const detectIndent = (yaml: string): number => {
  */
 const stringifyValue = (value: unknown, indentUnit: number, depth: number): string => {
   const raw = stringify(value, { indent: indentUnit, lineWidth: 0 });
+  if (depth === 0) return raw;
+
+  const pad = ' '.repeat(indentUnit * depth);
+  return raw
+    .split('\n')
+    .map((line, i) => (i === 0 || line === '' ? line : `${pad}${line}`))
+    .join('\n');
+};
+
+/**
+ * For a single map pair in `fresh`, find its counterpart in `existing` by key
+ * and transfer quoting types for both the key and value subtrees.
+ */
+const mergeMapPairFormat = (existing: YAMLMap, freshPair: unknown): void => {
+  if (!isPair(freshPair) || !isScalar(freshPair.key)) return;
+
+  const freshKey = freshPair.key;
+  const existingPair = existing.items.find(
+    (p) => isPair(p) && isScalar(p.key) && p.key.value === freshKey.value
+  );
+  if (!existingPair || !isPair(existingPair)) return;
+
+  if (
+    isScalar(existingPair.key) &&
+    existingPair.key.value === freshKey.value &&
+    existingPair.key.type
+  ) {
+    freshKey.type = existingPair.key.type;
+  }
+  mergePreservingFormat(existingPair.value as Node, freshPair.value as Node);
+};
+
+/**
+ * Walk an existing AST node and a freshly-created node in parallel.
+ * For scalar values that are identical, copy the quoting `type` from the
+ * existing node so that `stringify` reproduces the original formatting
+ * (e.g. `"now-5m"` stays double-quoted instead of becoming plain `now-5m`).
+ */
+const mergePreservingFormat = (existing: Node | null, fresh: Node | null): void => {
+  if (!existing || !fresh) return;
+
+  if (isScalar(existing) && isScalar(fresh)) {
+    if (existing.value === fresh.value && existing.type) {
+      fresh.type = existing.type;
+    }
+    return;
+  }
+
+  if (isMap(existing) && isMap(fresh)) {
+    for (const freshPair of fresh.items) {
+      mergeMapPairFormat(existing, freshPair);
+    }
+    return;
+  }
+
+  if (isSeq(existing) && isSeq(fresh)) {
+    const len = Math.min(existing.items.length, fresh.items.length);
+    for (let i = 0; i < len; i++) {
+      mergePreservingFormat(existing.items[i] as Node, fresh.items[i] as Node);
+    }
+  }
+};
+
+/**
+ * Like `stringifyValue` but preserves the quoting style of unchanged scalars
+ * by comparing against the original AST node.
+ */
+const stringifyValuePreservingFormat = (
+  value: unknown,
+  indentUnit: number,
+  depth: number,
+  originalNode: Node
+): string => {
+  const tempDoc = parseDocument('null');
+  const freshNode = tempDoc.createNode(value);
+  mergePreservingFormat(originalNode, freshNode);
+
+  const raw = stringify(tempDoc.createNode(freshNode), { indent: indentUnit, lineWidth: 0 });
   if (depth === 0) return raw;
 
   const pad = ' '.repeat(indentUnit * depth);
@@ -287,7 +366,12 @@ export const modifyStep = (
   const currentIndent = lastNewline >= 0 ? range[0] - lastNewline - 1 : range[0];
   const depth = Math.floor(currentIndent / indentUnit);
 
-  const stepYaml = stringifyValue(updatedStep, indentUnit, depth);
+  const stepYaml = stringifyValuePreservingFormat(
+    updatedStep,
+    indentUnit,
+    depth,
+    found.node as Node
+  );
   const replacement = `${stepYaml.trimEnd()}\n`;
 
   return checkedResult(yaml, spliceYaml(yaml, range[0], range[1], replacement), {
@@ -319,7 +403,12 @@ export const modifyStepProperty = (
       const precedingNewline = yaml.lastIndexOf('\n', valRange[0] - 1);
       const valueIndent = precedingNewline >= 0 ? valRange[0] - precedingNewline - 1 : valRange[0];
       const depth = Math.floor(valueIndent / indentUnit);
-      const valStr = stringifyValue(value, indentUnit, depth).trimEnd();
+      const valStr = stringifyValuePreservingFormat(
+        value,
+        indentUnit,
+        depth,
+        pair.value as Node
+      ).trimEnd();
       return checkedResult(yaml, spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`), scope);
     }
   }
@@ -411,7 +500,12 @@ export const modifyWorkflowProperty = (
       const nl = leadingWs.lastIndexOf('\n');
       const valueIndent = nl >= 0 ? leadingWs.length - nl - 1 : 0;
       const depth = Math.floor(valueIndent / indentUnit);
-      const valStr = stringifyValue(value, indentUnit, depth).trimEnd();
+      const valStr = stringifyValuePreservingFormat(
+        value,
+        indentUnit,
+        depth,
+        pair.value as Node
+      ).trimEnd();
       return checkedResult(yaml, spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`), scope);
     }
   }
