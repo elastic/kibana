@@ -29,5 +29,3 @@ export {
   isKqlQueryValid,
   buildEsqlFilter,
 } from './query_helpers';
-
-export { streamMatchesIndexPatterns } from '@kbn/streams-schema';
