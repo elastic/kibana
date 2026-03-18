@@ -482,7 +482,7 @@ export const getWhileStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 };
 
 export const SwitchCaseSchema = z.object({
-  value: z.union([z.string(), z.number(), z.boolean()]),
+  match: z.union([z.string(), z.number(), z.boolean()]),
   steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when this case matches'),
 });
 export type SwitchCase = z.infer<typeof SwitchCaseSchema>;
@@ -491,23 +491,20 @@ export const SwitchStepConfigSchema = z.object({
   expression: z
     .string()
     .describe(
-      'Liquid expression that evaluates to a value matched against case values, e.g. "{{ steps.check.output.status }}"'
+      'Liquid expression evaluated and compared to each case match, e.g. "{{ steps.check.output.status }}"'
     ),
   cases: z
     .array(SwitchCaseSchema)
     .min(1)
-    .describe('Ordered list of value-to-steps mappings. First matching case is executed'),
-  default: z
-    .array(BaseStepSchema)
-    .optional()
-    .describe('Steps to execute when no case value matches'),
+    .describe('Ordered list of match-to-steps mappings. First matching case is executed'),
+  default: z.array(BaseStepSchema).optional().describe('Steps to execute when no case matches'),
 });
 
 export const SwitchStepSchema = BaseStepSchema.extend({
   type: z
     .literal('switch')
     .describe(
-      'Multi-way branching. Evaluates expression and runs the steps of the first case whose value matches'
+      'Multi-way branching. Evaluates expression and runs the steps of the first case whose match equals the expression'
     ),
   ...SwitchStepConfigSchema.shape,
   ...StepWithIfConditionSchema.shape,

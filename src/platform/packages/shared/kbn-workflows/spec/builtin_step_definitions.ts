@@ -124,7 +124,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     id: 'switch',
     label: 'Switch',
     description:
-      'Multi-way branching. Evaluates an expression and runs the steps of the first case whose value matches',
+      'Multi-way branching. Evaluates an expression and runs the steps of the first case whose match equals the expression',
     category: StepCategory.FlowControl,
     inputSchema: EmptyObjectSchema,
     outputSchema: EmptyObjectSchema,
@@ -135,13 +135,13 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
   type: switch
   expression: "{{ steps.check.output.status }}"
   cases:
-    - value: success
+    - match: success
       steps:
         - name: on_success
           type: console
           with:
             message: "Operation succeeded"
-    - value: error
+    - match: error
       steps:
         - name: on_error
           type: console

@@ -72,7 +72,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
-          value: 'success',
+          match: 'success',
           index: 0,
           stepId: 'testStep',
           stepType: 'switch',
@@ -80,7 +80,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_1',
           type: 'enter-case-branch',
-          value: 'failure',
+          match: 'failure',
           index: 1,
           stepId: 'testStep',
           stepType: 'switch',
@@ -131,7 +131,7 @@ describe('EnterSwitchNodeImpl', () => {
     it('should log debug message for matched case', async () => {
       await impl.run();
       expect(workflowContextLoggerMock.logDebug).toHaveBeenCalledWith(
-        expect.stringContaining('Matched case value')
+        expect.stringContaining('Matched case')
       );
     });
   });
@@ -142,7 +142,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
-          value: 'success',
+          match: 'success',
           index: 0,
           stepId: 'testStep',
           stepType: 'switch',
@@ -150,7 +150,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_1',
           type: 'enter-case-branch',
-          value: 'failure',
+          match: 'failure',
           index: 1,
           stepId: 'testStep',
           stepType: 'switch',
@@ -191,7 +191,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
-          value: 'success',
+          match: 'success',
           index: 0,
           stepId: 'testStep',
           stepType: 'switch',
@@ -245,7 +245,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
-          value: 'success',
+          match: 'success',
           index: 0,
           stepId: 'testStep',
           stepType: 'switch',
@@ -285,7 +285,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
-          value: 200,
+          match: 200,
           index: 0,
           stepId: 'testStep',
           stepType: 'switch',
@@ -293,7 +293,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_1',
           type: 'enter-case-branch',
-          value: 404,
+          match: 404,
           index: 1,
           stepId: 'testStep',
           stepType: 'switch',
@@ -346,7 +346,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
-          value: '{{ consts.expected_status }}',
+          match: '{{ consts.expected_status }}',
           index: 0,
           stepId: 'testStep',
           stepType: 'switch',
@@ -354,7 +354,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_1',
           type: 'enter-case-branch',
-          value: 'static_value',
+          match: 'static_value',
           index: 1,
           stepId: 'testStep',
           stepType: 'switch',
@@ -395,7 +395,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
-          value: 42,
+          match: 42,
           index: 0,
           stepId: 'testStep',
           stepType: 'switch',
@@ -435,7 +435,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_1',
           type: 'enter-case-branch',
-          value: 'b',
+          match: 'b',
           index: 1,
           stepId: 'testStep',
           stepType: 'switch',
@@ -443,7 +443,7 @@ describe('EnterSwitchNodeImpl', () => {
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
-          value: 'a',
+          match: 'a',
           index: 0,
           stepId: 'testStep',
           stepType: 'switch',

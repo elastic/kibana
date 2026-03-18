@@ -484,7 +484,7 @@ function createSwitchGraph(
     const enterCaseNode: EnterCaseBranchNode = {
       id: enterCaseId,
       type: 'enter-case-branch',
-      value: caseItem.value,
+      match: caseItem.match,
       index: i,
       stepId,
       stepType: switchStep.type,

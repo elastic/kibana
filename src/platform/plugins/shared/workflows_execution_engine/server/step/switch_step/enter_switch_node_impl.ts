@@ -55,25 +55,25 @@ export class EnterSwitchNodeImpl implements NodeImplementation {
       ) as EnterCaseBranchNode[];
 
     const matchingCase = caseBranches.find((c) => {
-      const renderedValue =
-        typeof c.value === 'string'
-          ? this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(c.value)
-          : c.value;
-      return String(renderedValue) === String(renderedExpression);
+      const renderedMatch =
+        typeof c.match === 'string'
+          ? this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(c.match)
+          : c.match;
+      return String(renderedMatch) === String(renderedExpression);
     });
 
     if (matchingCase) {
       const renderedMatchedValue =
-        typeof matchingCase.value === 'string'
+        typeof matchingCase.match === 'string'
           ? this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-              matchingCase.value
+              matchingCase.match
             )
-          : matchingCase.value;
+          : matchingCase.match;
       this.workflowContextLogger.logDebug(
-        `Switch expression "${expression}" evaluated to "${renderedExpression}" for step ${this.node.stepId}. Matched case value "${renderedMatchedValue}" (raw: "${matchingCase.value}").`
+        `Switch expression "${expression}" evaluated to "${renderedExpression}" for step ${this.node.stepId}. Matched case "${renderedMatchedValue}" (raw: "${matchingCase.match}").`
       );
       this.stepExecutionRuntime.setCurrentStepState({
-        matchedValue: matchingCase.value,
+        matchedValue: matchingCase.match,
         matchedIndex: matchingCase.index,
       });
       this.wfExecutionRuntimeManager.navigateToNode(matchingCase.id);

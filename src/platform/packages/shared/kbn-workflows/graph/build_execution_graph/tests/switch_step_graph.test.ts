@@ -29,7 +29,7 @@ describe('convertToWorkflowGraph - switch step', () => {
           expression: '{{ steps.check.output.status }}',
           cases: [
             {
-              value: 'success',
+              match: 'success',
               steps: [
                 {
                   name: 'successStep',
@@ -40,7 +40,7 @@ describe('convertToWorkflowGraph - switch step', () => {
               ],
             },
             {
-              value: 'failure',
+              match: 'failure',
               steps: [
                 {
                   name: 'failureStep',
@@ -126,7 +126,7 @@ describe('convertToWorkflowGraph - switch step', () => {
       expect(case0).toEqual({
         id: 'enterCase_testSwitchStep_0',
         type: 'enter-case-branch',
-        value: 'success',
+        match: 'success',
         index: 0,
         stepId: 'testSwitchStep',
         stepType: 'switch',
@@ -136,7 +136,7 @@ describe('convertToWorkflowGraph - switch step', () => {
       expect(case1).toEqual({
         id: 'enterCase_testSwitchStep_1',
         type: 'enter-case-branch',
-        value: 'failure',
+        match: 'failure',
         index: 1,
         stepId: 'testSwitchStep',
         stepType: 'switch',
@@ -201,7 +201,7 @@ describe('convertToWorkflowGraph - switch step', () => {
           expression: '{{ steps.check.output.status }}',
           cases: [
             {
-              value: 'active',
+              match: 'active',
               steps: [
                 {
                   name: 'activeStep',
@@ -245,7 +245,7 @@ describe('convertToWorkflowGraph - switch step', () => {
           expression: '{{ steps.check.output.priority }}',
           cases: [
             {
-              value: 'high',
+              match: 'high',
               steps: [
                 {
                   name: 'firstHighStep',
@@ -307,7 +307,7 @@ describe('convertToWorkflowGraph - switch step', () => {
           expression: '{{ steps.beforeStep.output.result }}',
           cases: [
             {
-              value: 'yes',
+              match: 'yes',
               steps: [
                 {
                   name: 'yesStep',
@@ -349,7 +349,7 @@ describe('convertToWorkflowGraph - switch step', () => {
           expression: '{{ steps.check.output.code }}',
           cases: [
             {
-              value: 200,
+              match: 200,
               steps: [
                 {
                   name: 'okStep',
@@ -360,7 +360,7 @@ describe('convertToWorkflowGraph - switch step', () => {
               ],
             },
             {
-              value: 404,
+              match: 404,
               steps: [
                 {
                   name: 'notFoundStep',
@@ -380,12 +380,12 @@ describe('convertToWorkflowGraph - switch step', () => {
       const case0 = executionGraph.node(
         'enterCase_numericSwitch_0'
       ) as unknown as EnterCaseBranchNode;
-      expect(case0.value).toBe(200);
+      expect(case0.match).toBe(200);
 
       const case1 = executionGraph.node(
         'enterCase_numericSwitch_1'
       ) as unknown as EnterCaseBranchNode;
-      expect(case1.value).toBe(404);
+      expect(case1.match).toBe(404);
     });
   });
 });

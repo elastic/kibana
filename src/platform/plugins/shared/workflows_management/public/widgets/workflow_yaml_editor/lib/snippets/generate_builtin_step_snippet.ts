@@ -62,11 +62,11 @@ export function generateBuiltInStepSnippet(
         expression: '{{ steps.step_1.output.value }}',
         cases: [
           {
-            value: 'value_1',
+            match: 'value_1',
             steps: [{ name: 'case-1-step', type: '# Add step type here' }],
           },
           {
-            value: 'value_2',
+            match: 'value_2',
             steps: [{ name: 'case-2-step', type: '# Add step type here' }],
           },
         ],

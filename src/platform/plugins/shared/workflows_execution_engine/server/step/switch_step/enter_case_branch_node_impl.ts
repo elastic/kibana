@@ -18,7 +18,7 @@ export class EnterCaseBranchNodeImpl implements NodeImplementation {
   ) {}
 
   public run(): void {
-    this.wfExecutionRuntimeManager.enterScope(`case_${this.node.value}`);
+    this.wfExecutionRuntimeManager.enterScope(`case_${this.node.match}`);
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

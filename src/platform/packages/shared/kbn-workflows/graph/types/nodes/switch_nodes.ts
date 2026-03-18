@@ -28,7 +28,7 @@ export type EnterSwitchNode = z.infer<typeof EnterSwitchNodeSchema>;
 export const EnterCaseBranchNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-case-branch'),
-  value: z.union([z.string(), z.number(), z.boolean()]),
+  match: z.union([z.string(), z.number(), z.boolean()]),
   index: z.number().int().nonnegative(),
 });
 export type EnterCaseBranchNode = z.infer<typeof EnterCaseBranchNodeSchema>;
