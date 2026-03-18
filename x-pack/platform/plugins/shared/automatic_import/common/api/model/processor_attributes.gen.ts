@@ -14,7 +14,6 @@
  *   version: not applicable
  */
 
-import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
 
 /**
@@ -66,11 +65,7 @@ export interface ESProcessorOptionsInput {
   tag?: string;
   [key: string]: unknown;
 }
-export const ESProcessorOptions: z.ZodType<
-  ESProcessorOptions,
-  ZodTypeDef,
-  ESProcessorOptionsInput
-> = z
+export const ESProcessorOptions: z.ZodType<ESProcessorOptions, ESProcessorOptionsInput> = z
   .object({
     /**
      * An array of items to execute if the processor fails.
@@ -107,6 +102,6 @@ export interface ESProcessorItem {
 export interface ESProcessorItemInput {
   [key: string]: ESProcessorOptionsInput;
 }
-export const ESProcessorItem: z.ZodType<ESProcessorItem, ZodTypeDef, ESProcessorItemInput> = z
+export const ESProcessorItem: z.ZodType<ESProcessorItem, ESProcessorItemInput> = z
   .object({})
   .catchall(z.lazy(() => ESProcessorOptions));

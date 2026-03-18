@@ -99,13 +99,7 @@ export function registerRelatedRoutes(router: IRouter<AutomaticImportRouteHandle
           const results = await graph
             .withConfig({ runName: 'Related' })
             .invoke(parameters, options);
-          const parsedRelatedResult = RelatedResponse.safeParse(results);
-          if (!parsedRelatedResult.success) {
-            logger.warn(
-              `Related response validation warning: ${parsedRelatedResult.error.message}`
-            );
-          }
-          return res.ok({ body: parsedRelatedResult.success ? parsedRelatedResult.data : results });
+          return res.ok({ body: RelatedResponse.parse(results) });
         } catch (err) {
           try {
             handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);

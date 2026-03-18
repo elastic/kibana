@@ -101,13 +101,7 @@ export function registerEcsRoutes(router: IRouter<AutomaticImportRouteHandlerCon
               .withConfig({ runName: 'ECS Mapping' })
               .invoke(parameters, options);
 
-            const parsedEcsResult = EcsMappingResponse.safeParse(results);
-            if (!parsedEcsResult.success) {
-              logger.warn(
-                `ECS mapping response validation warning: ${parsedEcsResult.error.message}`
-              );
-            }
-            return res.ok({ body: parsedEcsResult.success ? parsedEcsResult.data : results });
+            return res.ok({ body: EcsMappingResponse.parse(results) });
           } catch (err) {
             try {
               handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);

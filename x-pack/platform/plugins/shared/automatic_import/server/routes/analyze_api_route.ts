@@ -88,15 +88,7 @@ export function registerApiAnalysisRoutes(router: IRouter<AutomaticImportRouteHa
               .withConfig({ runName: 'API analysis' })
               .invoke(parameters, options);
 
-            const parsedAnalyzeApiResult = AnalyzeApiResponse.safeParse(results);
-            if (!parsedAnalyzeApiResult.success) {
-              logger.warn(
-                `Analyze API response validation warning: ${parsedAnalyzeApiResult.error.message}`
-              );
-            }
-            return res.ok({
-              body: parsedAnalyzeApiResult.success ? parsedAnalyzeApiResult.data : results,
-            });
+            return res.ok({ body: AnalyzeApiResponse.parse(results) });
           } catch (e) {
             if (isErrorThatHandlesItsOwnResponse(e)) {
               return e.sendResponse(res);

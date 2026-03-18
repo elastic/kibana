@@ -91,13 +91,7 @@ export function registerCelInputRoutes(router: IRouter<AutomaticImportRouteHandl
             const graph = await getCelGraph({ model });
             const results = await graph.withConfig({ runName: 'CEL' }).invoke(parameters, options);
 
-            const parsedCelResult = CelInputResponse.safeParse(results);
-            if (!parsedCelResult.success) {
-              logger.warn(
-                `CEL input response validation warning: ${parsedCelResult.error.message}`
-              );
-            }
-            return res.ok({ body: parsedCelResult.success ? parsedCelResult.data : results });
+            return res.ok({ body: CelInputResponse.parse(results) });
           } catch (e) {
             if (isErrorThatHandlesItsOwnResponse(e)) {
               return e.sendResponse(res);

@@ -106,15 +106,7 @@ export function registerCategorizationRoutes(router: IRouter<AutomaticImportRout
               .withConfig({ runName: 'Categorization' })
               .invoke(parameters, options);
 
-            const parsedCategorizationResult = CategorizationResponse.safeParse(results);
-            if (!parsedCategorizationResult.success) {
-              logger.warn(
-                `Categorization response validation warning: ${parsedCategorizationResult.error.message}`
-              );
-            }
-            return res.ok({
-              body: parsedCategorizationResult.success ? parsedCategorizationResult.data : results,
-            });
+            return res.ok({ body: CategorizationResponse.parse(results) });
           } catch (err) {
             try {
               handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);

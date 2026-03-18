@@ -122,15 +122,7 @@ export function registerAnalyzeLogsRoutes(router: IRouter<AutomaticImportRouteHa
                 });
             }
 
-            const parsedAnalyzeLogsResult = AnalyzeLogsResponse.safeParse(graphResults);
-            if (!parsedAnalyzeLogsResult.success) {
-              logger.warn(
-                `Analyze logs response validation warning: ${parsedAnalyzeLogsResult.error.message}`
-              );
-            }
-            return res.ok({
-              body: parsedAnalyzeLogsResult.success ? parsedAnalyzeLogsResult.data : graphResults,
-            });
+            return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });
           } catch (err) {
             try {
               handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT_ANALYZE_LOGS);
