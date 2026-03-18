@@ -7,13 +7,13 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { BaseFeature } from '@kbn/streams-schema';
-import { createKIExtractionEvaluators } from './ki_extraction_evaluators';
+import { createKIFeatureExtractionEvaluators } from './ki_feature_extraction_evaluators';
 
-const evidenceGroundingEvaluator = createKIExtractionEvaluators().find(
+const evidenceGroundingEvaluator = createKIFeatureExtractionEvaluators().find(
   (evaluator) => evaluator.name === 'evidence_grounding'
 );
-const kiCountEvaluator = createKIExtractionEvaluators().find(
-  (evaluator) => evaluator.name === 'ki_count'
+const kiFeatureCountEvaluator = createKIFeatureExtractionEvaluators().find(
+  (evaluator) => evaluator.name === 'ki_feature_count'
 );
 
 const createSearchHit = (source: Record<string, unknown>): SearchHit<Record<string, unknown>> => ({
@@ -131,9 +131,9 @@ describe('evidence grounding evaluator', () => {
   });
 });
 
-describe('ki count evaluator', () => {
+describe('ki_feature_count evaluator', () => {
   it('returns full credit when the KI count is within bounds', async () => {
-    const result = await kiCountEvaluator!.evaluate({
+    const result = await kiFeatureCountEvaluator!.evaluate({
       input: {
         sample_documents: [],
       },
@@ -153,7 +153,7 @@ describe('ki count evaluator', () => {
   });
 
   it('penalizes counts proportionally when below the minimum', async () => {
-    const result = await kiCountEvaluator!.evaluate({
+    const result = await kiFeatureCountEvaluator!.evaluate({
       input: {
         sample_documents: [],
       },
@@ -173,7 +173,7 @@ describe('ki count evaluator', () => {
   });
 
   it('penalizes counts proportionally when above the maximum', async () => {
-    const result = await kiCountEvaluator!.evaluate({
+    const result = await kiFeatureCountEvaluator!.evaluate({
       input: {
         sample_documents: [],
       },
