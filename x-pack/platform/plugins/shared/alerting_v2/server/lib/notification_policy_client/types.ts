@@ -39,9 +39,9 @@ export interface BulkActionNotificationPoliciesResponse {
 export type FindNotificationPoliciesSortField =
   | 'name'
   | 'createdAt'
-  | 'createdBy'
   | 'updatedAt'
-  | 'updatedBy';
+  | 'createdByUsername'
+  | 'updatedByUsername';
 
 export interface FindNotificationPoliciesParams {
   page?: number;

@@ -35,7 +35,9 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
     createdByUser: schema.boolean(),
   }),
   createdBy: schema.nullable(schema.string()),
+  createdByUsername: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
+  updatedByUsername: schema.nullable(schema.string()),
   createdAt: schema.string(),
   updatedAt: schema.string(),
 });

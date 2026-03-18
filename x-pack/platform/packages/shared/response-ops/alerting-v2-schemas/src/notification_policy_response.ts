@@ -23,7 +23,9 @@ export interface NotificationPolicyResponse {
     createdByUser: boolean;
   };
   createdBy: string | null;
+  createdByUsername: string | null;
   createdAt: string;
   updatedBy: string | null;
+  updatedByUsername: string | null;
   updatedAt: string;
 }

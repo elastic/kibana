@@ -49,15 +49,19 @@ export const buildCreateNotificationPolicyAttributes = ({
   data,
   auth,
   createdBy,
+  createdByUsername,
   createdAt,
   updatedBy,
+  updatedByUsername,
   updatedAt,
 }: {
   data: CreateNotificationPolicyData;
   auth: NotificationPolicySavedObjectAttributes['auth'];
   createdBy: string | null;
+  createdByUsername: string | null;
   createdAt: string;
   updatedBy: string | null;
+  updatedByUsername: string | null;
   updatedAt: string;
 }): NotificationPolicySavedObjectAttributes => {
   return {
@@ -71,8 +75,10 @@ export const buildCreateNotificationPolicyAttributes = ({
     snoozedUntil: null,
     auth,
     createdBy,
+    createdByUsername,
     createdAt,
     updatedBy,
+    updatedByUsername,
     updatedAt,
   };
 };
@@ -82,12 +88,14 @@ export const buildUpdateNotificationPolicyAttributes = ({
   update,
   auth,
   updatedBy,
+  updatedByUsername,
   updatedAt,
 }: {
   existing: NotificationPolicySavedObjectAttributes;
   update: UpdateNotificationPolicyData;
   auth: NotificationPolicySavedObjectAttributes['auth'];
   updatedBy: string | null;
+  updatedByUsername: string | null;
   updatedAt: string;
 }): NotificationPolicySavedObjectAttributes => {
   return {
@@ -101,7 +109,9 @@ export const buildUpdateNotificationPolicyAttributes = ({
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
     auth,
     createdBy: existing.createdBy,
+    createdByUsername: existing.createdByUsername,
     updatedBy,
+    updatedByUsername,
     createdAt: existing.createdAt,
     updatedAt,
   };
@@ -129,8 +139,10 @@ export const transformNotificationPolicySoAttributesToApiResponse = ({
     snoozedUntil: normalizeNullableField(attributes.snoozedUntil),
     auth: toAuthResponse(attributes.auth),
     createdBy: attributes.createdBy,
+    createdByUsername: attributes.createdByUsername,
     createdAt: attributes.createdAt,
     updatedBy: attributes.updatedBy,
+    updatedByUsername: attributes.updatedByUsername,
     updatedAt: attributes.updatedAt,
   };
 };

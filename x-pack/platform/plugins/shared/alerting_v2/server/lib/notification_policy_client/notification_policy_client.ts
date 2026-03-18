@@ -89,7 +89,7 @@ export class NotificationPolicyClient {
       );
     }
 
-    const userProfileUid = await this.getUserProfileUid();
+    const userProfile = await this.getUserProfile();
     const now = new Date().toISOString();
 
     const apiKeyAttrs = await this.apiKeyService.create(`Notification Policy: ${params.data.name}`);
@@ -97,9 +97,11 @@ export class NotificationPolicyClient {
     const attributes = buildCreateNotificationPolicyAttributes({
       data: parsed.data,
       auth: apiKeyAttrs,
-      createdBy: userProfileUid,
+      createdBy: userProfile.uid,
+      createdByUsername: userProfile.username,
       createdAt: now,
-      updatedBy: userProfileUid,
+      updatedBy: userProfile.uid,
+      updatedByUsername: userProfile.username,
       updatedAt: now,
     });
 
@@ -176,7 +178,7 @@ export class NotificationPolicyClient {
       );
     }
 
-    const userProfileUid = await this.getUserProfileUid();
+    const userProfile = await this.getUserProfile();
     const now = new Date().toISOString();
 
     let existingPolicy: NotificationPolicySavedObjectAttributes;
@@ -199,7 +201,8 @@ export class NotificationPolicyClient {
       existing: existingPolicy,
       update: parsed.data,
       auth: apiKeyAttrs,
-      updatedBy: userProfileUid,
+      updatedBy: userProfile.uid,
+      updatedByUsername: userProfile.username,
       updatedAt: now,
     });
 
@@ -296,14 +299,15 @@ export class NotificationPolicyClient {
   public async bulkActionNotificationPolicies({
     actions,
   }: BulkActionNotificationPoliciesParams): Promise<BulkActionNotificationPoliciesResponse> {
-    const userProfileUid = await this.getUserProfileUid();
+    const userProfile = await this.getUserProfile();
     const now = new Date().toISOString();
 
     const objects = actions.map((action) => ({
       id: action.id,
       attrs: {
         ...resolveActionAttrs(action),
-        updatedBy: userProfileUid,
+        updatedBy: userProfile.uid,
+        updatedByUsername: userProfile.username,
         updatedAt: now,
       },
     }));
@@ -355,9 +359,9 @@ export class NotificationPolicyClient {
     const sortFieldMap: Record<string, string> = {
       name: 'name.keyword',
       createdAt: 'createdAt',
-      createdBy: 'createdBy',
+      createdByUsername: 'createdByUsername',
       updatedAt: 'updatedAt',
-      updatedBy: 'updatedBy',
+      updatedByUsername: 'updatedByUsername',
     };
 
     return sortFieldMap[sortField];
@@ -409,18 +413,23 @@ export class NotificationPolicyClient {
       validateDateString(stateUpdate.snoozedUntil);
     }
 
-    const userProfileUid = await this.getUserProfileUid();
+    const userProfile = await this.getUserProfile();
     const now = new Date().toISOString();
 
     await this.notificationPolicySavedObjectService.update({
       id,
-      attrs: { ...stateUpdate, updatedBy: userProfileUid, updatedAt: now },
+      attrs: {
+        ...stateUpdate,
+        updatedBy: userProfile.uid,
+        updatedByUsername: userProfile.username,
+        updatedAt: now,
+      },
     });
 
     return this.getNotificationPolicy({ id });
   }
 
-  private async getUserProfileUid(): Promise<string | null> {
-    return this.userService.getCurrentUserProfileUid();
+  private async getUserProfile() {
+    return this.userService.getCurrentUserProfile();
   }
 }

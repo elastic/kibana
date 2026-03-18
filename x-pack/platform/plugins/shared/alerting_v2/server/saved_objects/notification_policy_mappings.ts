@@ -34,8 +34,10 @@ export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
       },
     },
     createdBy: { type: 'keyword' },
+    createdByUsername: { type: 'keyword' },
     createdAt: { type: 'date' },
     updatedBy: { type: 'keyword' },
+    updatedByUsername: { type: 'keyword' },
     updatedAt: { type: 'date' },
   },
 };

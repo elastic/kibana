@@ -47,7 +47,7 @@ export const ListNotificationPoliciesPage = () => {
   const [search, setSearch] = useState('');
   const [destinationType, setDestinationType] = useState('');
   const [enabled, setEnabled] = useState('');
-  const [sortField, setSortField] = useState<'name' | 'updatedAt'>('name');
+  const [sortField, setSortField] = useState<'name' | 'updatedAt' | 'updatedByUsername'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [policyToDelete, setPolicyToDelete] = useState<NotificationPolicyResponse | null>(null);
 
@@ -133,7 +133,7 @@ export const ListNotificationPoliciesPage = () => {
     setPage(tablePage.index);
     setPerPage(tablePage.size);
     if (sort) {
-      setSortField(sort.field as 'name' | 'updatedAt');
+      setSortField(sort.field as 'name' | 'updatedAt' | 'updatedByUsername');
       setSortDirection(sort.direction);
     }
   };
@@ -239,6 +239,16 @@ export const ListNotificationPoliciesPage = () => {
           hour: 'numeric',
           minute: '2-digit',
         }),
+    },
+    {
+      field: 'updatedByUsername',
+      sortable: true,
+      name: (
+        <FormattedMessage
+          id="xpack.alertingV2.notificationPoliciesList.column.updatedByUsername"
+          defaultMessage="Updated by"
+        />
+      ),
     },
     {
       name: i18n.translate('xpack.alertingV2.notificationPoliciesList.column.actions', {
