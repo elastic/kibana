@@ -87,3 +87,15 @@ export const bulkCreateAlertActionBodySchema = z
     'Request body for bulk create alert actions. Array of 1 to 100 actions, each with group_hash and action payload.'
   );
 export type BulkCreateAlertActionBody = z.infer<typeof bulkCreateAlertActionBodySchema>;
+
+export const bulkGetAlertActionsBodySchema = z
+  .object({
+    episode_ids: z
+      .array(z.string())
+      .min(1, 'At least one episode ID must be provided')
+      .max(100, 'Cannot query more than 100 episode IDs in a single request')
+      .describe('List of episode identifiers to fetch alert actions for.'),
+  })
+  .describe('Request body for bulk getting alert actions by episode IDs.');
+
+export type BulkGetAlertActionsBody = z.infer<typeof bulkGetAlertActionsBodySchema>;

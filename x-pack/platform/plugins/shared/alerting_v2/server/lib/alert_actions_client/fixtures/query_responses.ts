@@ -38,6 +38,36 @@ export function getEmptyESQLResponse(): EsqlQueryResponse {
   };
 }
 
+export function getBulkGetAlertActionsESQLResponse(
+  records: Array<{
+    episode_id?: string;
+    rule_id?: string;
+    group_hash?: string;
+    last_ack_action?: string | null;
+    last_deactivate_action?: string | null;
+    last_snooze_action?: string | null;
+  }>
+): EsqlQueryResponse {
+  return {
+    columns: [
+      { name: 'episode_id', type: 'keyword' },
+      { name: 'rule_id', type: 'keyword' },
+      { name: 'group_hash', type: 'keyword' },
+      { name: 'last_ack_action', type: 'keyword' },
+      { name: 'last_deactivate_action', type: 'keyword' },
+      { name: 'last_snooze_action', type: 'keyword' },
+    ],
+    values: records.map((record) => [
+      record.episode_id ?? 'episode-1',
+      record.rule_id ?? 'test-rule-id',
+      record.group_hash ?? 'test-group-hash',
+      record.last_ack_action ?? null,
+      record.last_deactivate_action ?? null,
+      record.last_snooze_action ?? null,
+    ]),
+  };
+}
+
 export function getBulkAlertEventsESQLResponse(
   records: Array<{
     '@timestamp'?: string;

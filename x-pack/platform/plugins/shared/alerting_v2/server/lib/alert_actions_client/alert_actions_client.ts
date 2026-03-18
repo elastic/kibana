@@ -22,6 +22,7 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import { getBulkGetAlertActionsQuery } from './queries';
 
 @injectable()
 export class AlertActionsClient {
@@ -53,6 +54,14 @@ export class AlertActionsClient {
         }),
       ],
     });
+  }
+
+  public async bulkGet(episodeIds: string[]): Promise<BulkGetAlertActionsRecord[]> {
+    const query = getBulkGetAlertActionsQuery(episodeIds);
+
+    return queryResponseToRecords<BulkGetAlertActionsRecord>(
+      await this.queryService.executeQuery({ query: query.query })
+    );
   }
 
   public async createBulkActions(
@@ -178,4 +187,13 @@ interface AlertEventRecord {
   group_hash: string;
   episode_id: string;
   rule_id: string;
+}
+
+export interface BulkGetAlertActionsRecord {
+  episode_id: string;
+  rule_id: string;
+  group_hash: string;
+  last_ack_action: string | null;
+  last_deactivate_action: string | null;
+  last_snooze_action: string | null;
 }

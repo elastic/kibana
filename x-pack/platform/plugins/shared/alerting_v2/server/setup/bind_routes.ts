@@ -14,6 +14,7 @@ import { GetRuleRoute } from '../routes/rules/get_rule_route';
 import { DeleteRuleRoute } from '../routes/rules/delete_rule_route';
 import { CreateAlertActionRoute } from '../routes/alert_actions/create_alert_action_route';
 import { BulkCreateAlertActionRoute } from '../routes/alert_actions/bulk_create_alert_action_route';
+import { BulkGetAlertActionsRoute } from '../routes/alert_actions/bulk_get_alert_actions_route';
 import { BulkActionNotificationPoliciesRoute } from '../routes/notification_policies/bulk_action_notification_policies_route';
 import { CreateNotificationPolicyRoute } from '../routes/notification_policies/create_notification_policy_route';
 import { DisableNotificationPolicyRoute } from '../routes/notification_policies/disable_notification_policy_route';
@@ -32,6 +33,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(DeleteRuleRoute);
   bind(Route).toConstantValue(CreateAlertActionRoute);
   bind(Route).toConstantValue(BulkCreateAlertActionRoute);
+  bind(Route).toConstantValue(BulkGetAlertActionsRoute);
   bind(Route).toConstantValue(CreateNotificationPolicyRoute);
   bind(Route).toConstantValue(GetNotificationPolicyRoute);
   bind(Route).toConstantValue(UpdateNotificationPolicyRoute);
