@@ -33,7 +33,6 @@ import { SavedQueryRowActions } from './saved_query_row_actions';
 import type { SavedQuerySO } from '.';
 
 const EMPTY_ARRAY: SavedQuerySO[] = [];
-const EMPTY_PROFILES_MAP = new Map();
 
 const SEARCH_PLACEHOLDER = i18n.translate('xpack.osquery.savedQueryList.searchPlaceholder', {
   defaultMessage: 'Search by query ID or description',
@@ -390,7 +389,7 @@ const SavedQueriesTableComponent = () => {
         creators={creators}
         selectedCreators={selectedCreators}
         onSelectedCreatorsChange={handleSelectedCreatorsChange}
-        profilesMap={profilesMap ?? EMPTY_PROFILES_MAP}
+        profilesMap={profilesMap}
         columnConfigs={COLUMN_CONFIGS}
         visibleColumns={visibleColumns}
         onVisibleColumnsChange={setVisibleColumns}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useKibana } from './lib/kibana';
@@ -19,13 +19,24 @@ import { useKibana } from './lib/kibana';
 export const useGenericBulkGetUserProfiles = (uids: string[]) => {
   const { userProfile } = useKibana().services;
 
-  const sortedUids = useMemo(() => [...new Set(uids)].sort(), [uids]);
+  const prevKeyRef = useRef('');
+  const stableUids = useMemo(() => {
+    const deduped = [...new Set(uids)].sort();
+    const key = deduped.join(',');
+    if (key === prevKeyRef.current) {
+      return prevKeyRef.current.split(',').filter(Boolean);
+    }
+
+    prevKeyRef.current = key;
+
+    return deduped;
+  }, [uids]);
 
   const { data: userProfiles, isLoading } = useQuery<UserProfileWithAvatar[]>(
-    ['useGenericBulkGetUserProfiles', ...sortedUids],
-    () => userProfile.bulkGet({ uids: new Set(sortedUids), dataPath: 'avatar' }),
+    ['useGenericBulkGetUserProfiles', ...stableUids],
+    () => userProfile.bulkGet({ uids: new Set(stableUids), dataPath: 'avatar' }),
     {
-      enabled: sortedUids.length > 0,
+      enabled: stableUids.length > 0,
       staleTime: Infinity,
       retry: false,
       keepPreviousData: true,
@@ -38,5 +49,5 @@ export const useGenericBulkGetUserProfiles = (uids: string[]) => {
     return new Map(userProfiles.map((profile) => [profile.uid, profile]));
   }, [userProfiles]);
 
-  return { profilesMap, isLoading: isLoading && sortedUids.length > 0 };
+  return { profilesMap, isLoading: isLoading && stableUids.length > 0 };
 };

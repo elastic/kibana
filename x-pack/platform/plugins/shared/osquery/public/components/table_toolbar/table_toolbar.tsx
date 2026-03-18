@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFieldSearch, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldSearch, EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CreatedByFilterPopover } from './created_by_filter_popover';
 import { EnabledFilterButtons } from './enabled_filter_buttons';
@@ -131,6 +131,7 @@ const TableToolbarComponent: React.FC<TableToolbarProps> = ({
         )}
         {actionButton && <EuiFlexItem grow={false}>{actionButton}</EuiFlexItem>}
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <ColumnPickerPopover

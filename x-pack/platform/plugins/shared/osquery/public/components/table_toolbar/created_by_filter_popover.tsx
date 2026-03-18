@@ -44,9 +44,9 @@ interface CreatedByFilterPopoverProps {
 const toSelectableOption = (
   username: string,
   isSelected: boolean,
-  profilesMap: Map<string, UserProfileWithAvatar>
+  usernameToProfile: Map<string, UserProfileWithAvatar>
 ): EuiSelectableOption => {
-  const profile = Array.from(profilesMap.values()).find((p) => p.user.username === username);
+  const profile = usernameToProfile.get(username);
   const user = profile?.user ?? { username };
   const displayName = profile?.user.full_name || username;
 
@@ -67,14 +67,23 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const usernameToProfile = useMemo(() => {
+    const map = new Map<string, UserProfileWithAvatar>();
+    for (const p of profilesMap.values()) {
+      map.set(p.user.username, p);
+    }
+
+    return map;
+  }, [profilesMap]);
+
   const selectableOptions = useMemo(() => {
     const selectedSet = new Set(selectedCreators);
     const allCreators = Array.from(new Set([...creators, ...selectedCreators]));
 
     return allCreators
       .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-      .map((username) => toSelectableOption(username, selectedSet.has(username), profilesMap));
-  }, [creators, selectedCreators, profilesMap]);
+      .map((username) => toSelectableOption(username, selectedSet.has(username), usernameToProfile));
+  }, [creators, selectedCreators, usernameToProfile]);
 
   const handleChange = useCallback(
     (_: EuiSelectableOption[], __: unknown, changedOption: EuiSelectableOption) => {

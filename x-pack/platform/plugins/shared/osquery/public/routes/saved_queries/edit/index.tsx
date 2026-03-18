@@ -41,6 +41,8 @@ const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
   flex: 1,
   minWidth: 0,
   maxWidth: 1200,
+  margin: '0 auto',
+  width: '100%',
 });
 
 const EditSavedQueryPageComponent = () => {

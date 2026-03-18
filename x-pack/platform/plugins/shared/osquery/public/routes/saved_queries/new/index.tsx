@@ -17,11 +17,13 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_fe
 import { NewSavedQueryForm } from './form';
 import { useCreateSavedQuery } from '../../../saved_queries/use_create_saved_query';
 
-const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
+const contentCss = ({ euiTheme }: UseEuiTheme) => ({
   padding: `0 ${euiTheme.size.l}`,
   flex: 1,
   minWidth: 0,
   maxWidth: 1200,
+  margin: '0 auto',
+  width: '100%',
 });
 
 const NewSavedQueryPageComponent = () => {
@@ -52,7 +54,7 @@ const NewSavedQueryPageComponent = () => {
 
   if (isHistoryEnabled) {
     return (
-      <div css={fullWidthContentCss}>
+      <div css={contentCss}>
         <EuiSpacer size="l" />
         {backLink}
         <EuiSpacer size="m" />

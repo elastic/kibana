@@ -39,6 +39,7 @@ export const useSavedQueries = ({
 }) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
+  const sanitizedSearch = sanitizeSearch(search);
 
   return useQuery<
     {
@@ -58,7 +59,7 @@ export const useSavedQueries = ({
           pageSize,
           sort: sortField,
           sortOrder,
-          ...(sanitizeSearch(search) && { search: sanitizeSearch(search) }),
+          ...(sanitizedSearch && { search: sanitizedSearch }),
           ...(createdBy && { createdBy }),
         },
       }),
