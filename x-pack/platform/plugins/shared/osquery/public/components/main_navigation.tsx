@@ -18,10 +18,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
-import { useLocation } from 'react-router-dom';
+import { matchPath, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { navCss } from './layouts/default';
 import { useRouterNavigate } from '../common/lib/kibana';
+import { PAGE_ROUTING_PATHS } from '../common/page_paths';
 import { ManageIntegrationLink } from './manage_integration_link';
 import { useKibana } from '../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
@@ -51,12 +52,13 @@ export const MainNavigation = () => {
     return isHistoryEnabled && firstSegment === 'new' ? Section.History : firstSegment;
   }, [location.pathname, isHistoryEnabled]);
 
-  const isListView = useMemo(() => {
-    const segments = location.pathname.split('/').filter(Boolean);
-    const lastSegment = segments[segments.length - 1];
-
-    return lastSegment === 'history' || lastSegment === 'packs' || lastSegment === 'saved_queries';
-  }, [location.pathname]);
+  const isListView = useMemo(
+    () =>
+      [PAGE_ROUTING_PATHS.history, PAGE_ROUTING_PATHS.packs, PAGE_ROUTING_PATHS.saved_queries].some(
+        (path) => matchPath(location.pathname, { path, exact: true })
+      ),
+    [location.pathname]
+  );
   const feedbackButtonLabel = i18n.translate('xpack.osquery.appNavigation.giveFeedbackButton', {
     defaultMessage: 'Give feedback',
   });
