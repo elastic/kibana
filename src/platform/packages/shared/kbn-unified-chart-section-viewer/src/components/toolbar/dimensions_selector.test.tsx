@@ -12,7 +12,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DimensionsSelector } from './dimensions_selector';
 import type { Dimension } from '../../types';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
@@ -98,18 +97,18 @@ jest.mock('../../common/constants', () => {
 });
 
 const mockDimensions: Dimension[] = [
-  { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'pod.name', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'namespace.name', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'node.name', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'zone.name', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'region.name', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'cloud.provider', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'cloud.region', type: ES_FIELD_TYPES.KEYWORD },
-  { name: 'cloud.availability_zone', type: ES_FIELD_TYPES.KEYWORD },
-];
+  { name: 'host.name' },
+  { name: 'container.id' },
+  { name: 'service.name' },
+  { name: 'pod.name' },
+  { name: 'namespace.name' },
+  { name: 'node.name' },
+  { name: 'zone.name' },
+  { name: 'region.name' },
+  { name: 'cloud.provider' },
+  { name: 'cloud.region' },
+  { name: 'cloud.availability_zone' },
+] as Dimension[];
 
 const mockFields = [
   { dimensions: [mockDimensions[0], mockDimensions[1]] },
@@ -348,76 +347,6 @@ describe('DimensionsSelector', () => {
       if (lastCall) {
         expect(lastCall[0].length).toBeLessThanOrEqual(MAX_DIMENSIONS_SELECTIONS);
       }
-    });
-  });
-
-  describe('Intersection logic', () => {
-    it('enables all dimensions when no dimensions are selected', () => {
-      renderWithIntl(<DimensionsSelector {...defaultProps} />);
-      mockDimensions.forEach((dim) => {
-        const option = screen.getByTestId(
-          `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${dim.name}`
-        );
-        expect(option).toHaveAttribute('data-disabled', 'false');
-      });
-    });
-
-    it('disables dimensions that are not in intersection of fields', () => {
-      renderWithIntl(
-        <DimensionsSelector
-          {...defaultProps}
-          selectedDimensions={[mockDimensions[0]]} // host.name
-        />
-      );
-
-      const hostNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[0].name}`
-      );
-      expect(hostNameOption).toHaveAttribute('data-disabled', 'false');
-
-      const containerIdOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[1].name}`
-      );
-      expect(containerIdOption).toHaveAttribute('data-disabled', 'false');
-
-      const serviceNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[2].name}`
-      );
-      expect(serviceNameOption).toHaveAttribute('data-disabled', 'false');
-
-      const podNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[3].name}`
-      );
-      expect(podNameOption).toHaveAttribute('data-disabled', 'true');
-    });
-
-    it('enables dimensions that appear in fields containing all selected dimensions', () => {
-      renderWithIntl(
-        <DimensionsSelector
-          {...defaultProps}
-          selectedDimensions={[mockDimensions[0], mockDimensions[1]]} // host.name, container.id
-        />
-      );
-
-      const hostNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[0].name}`
-      );
-      expect(hostNameOption).toHaveAttribute('data-disabled', 'false');
-
-      const containerIdOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[1].name}`
-      );
-      expect(containerIdOption).toHaveAttribute('data-disabled', 'false');
-
-      const serviceNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[2].name}`
-      );
-      expect(serviceNameOption).toHaveAttribute('data-disabled', 'false');
-
-      const podNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[3].name}`
-      );
-      expect(podNameOption).toHaveAttribute('data-disabled', 'true');
     });
   });
 

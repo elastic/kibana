@@ -51,8 +51,12 @@ const euiFlexItemCss = {
 // TODO fix types
 const euiBasicTableCss = {
   '.euiTableRow.euiTableRow-isExpandedRow > td > div': {
-    padding: '0',
     border: '1px solid #d3dae6',
+  },
+
+  '.euiTableRow.euiTableRow-isExpandedRow .euiTableCellContent': {
+    paddingLeft: 0,
+    paddingRight: 0,
   },
 
   'div.euiDataGrid__virtualized::-webkit-scrollbar': {
@@ -142,6 +146,8 @@ interface PackQueriesStatusTableProps {
   expirationDate?: string;
   showResultsHeader?: boolean;
   addToTimeline?: AddToTimelineHandler;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
@@ -153,6 +159,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   expirationDate,
   showResultsHeader,
   addToTimeline,
+  scheduleId,
+  executionCount,
 }) => {
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
@@ -217,13 +225,27 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, []);
 
   const renderDiscoverResultsAction = useCallback(
-    (item: any) => <PackViewInDiscoverAction item={item} />,
-    []
+    (item: any) => (
+      <PackViewInDiscoverAction
+        item={item}
+        scheduleId={scheduleId}
+        executionCount={executionCount}
+        timestamp={scheduleId ? startDate : undefined}
+      />
+    ),
+    [scheduleId, executionCount, startDate]
   );
 
   const renderLensResultsAction = useCallback(
-    (item: any) => <PackViewInLensAction item={item} />,
-    []
+    (item: any) => (
+      <PackViewInLensAction
+        item={item}
+        scheduleId={scheduleId}
+        executionCount={executionCount}
+        timestamp={scheduleId ? startDate : undefined}
+      />
+    ),
+    [scheduleId, executionCount, startDate]
   );
 
   const getHandleErrorsToggle = useCallback(
@@ -246,6 +268,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   failedAgentsCount={item?.failed ?? 0}
                   error={item.error}
                   addToTimeline={addToTimeline}
+                  scheduleId={scheduleId}
+                  executionCount={executionCount}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -255,7 +279,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [actionId, startDate, expirationDate, agentIds, addToTimeline]
+    [actionId, startDate, expirationDate, agentIds, addToTimeline, scheduleId, executionCount]
   );
 
   const renderToggleResultsAction = useCallback(
@@ -306,6 +330,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                 queryId={item.action_id}
                 isIcon={true}
                 isDisabled={!item.action_id}
+                scheduleId={scheduleId}
+                executionCount={executionCount}
               />
             ),
         },
@@ -328,9 +354,11 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       actionId,
       addToTimeline,
       agentIds,
+      executionCount,
       handleQueryFlyoutOpen,
       renderDiscoverResultsAction,
       renderLensResultsAction,
+      scheduleId,
     ]
   );
   const columns = useMemo(
@@ -413,15 +441,16 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, [queryId, actionId]);
 
   useEffect(() => {
-    if (
+    const shouldAutoExpand =
       data?.length === 1 &&
-      agentIds?.length &&
+      (agentIds?.length || scheduleId) &&
       data?.[0].id &&
-      !itemIdToExpandedRowMap[data?.[0].id]
-    ) {
+      !itemIdToExpandedRowMap[data?.[0].id];
+
+    if (shouldAutoExpand) {
       getHandleErrorsToggle(data?.[0])();
     }
-  }, [agentIds?.length, data, getHandleErrorsToggle, itemIdToExpandedRowMap]);
+  }, [agentIds?.length, data, getHandleErrorsToggle, itemIdToExpandedRowMap, scheduleId]);
 
   const queryIds = useMemo(() => map(data, (query) => query.action_id), [data]);
 
@@ -433,6 +462,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           actionId={actionId}
           agentIds={agentIds}
           addToTimeline={addToTimeline}
+          isScheduled={!!scheduleId}
         />
       )}
       <EuiBasicTable

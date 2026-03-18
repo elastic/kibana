@@ -11,4 +11,10 @@ import { apiTest as baseApiTest, sloDataFixture } from '@kbn/scout-oblt';
 /** API test with SLO data fixture for tests that need generated SLO data */
 export const apiTest = mergeTests(baseApiTest, sloDataFixture);
 
-export { COMMON_HEADERS, DASHBOARD_API_PATH } from './constants';
+export {
+  COMMON_HEADERS,
+  DASHBOARD_API_PATH,
+  SLO_BURN_RATE_EMBEDDABLE_ID,
+  SLO_ERROR_BUDGET_ID,
+  SLO_OVERVIEW_EMBEDDABLE_ID,
+} from './constants';

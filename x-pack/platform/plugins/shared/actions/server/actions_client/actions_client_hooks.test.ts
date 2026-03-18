@@ -33,6 +33,8 @@ import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
+import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
 
 jest.mock('uuid', () => ({
   v4: () => ConnectorSavedObject.id,
@@ -61,6 +63,7 @@ let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
+let authTypeRegistry: AuthTypeRegistry;
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
@@ -135,9 +138,11 @@ beforeEach(() => {
   };
 
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+  authTypeRegistry = authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
   actionsClient = new ActionsClient({
     logger,
     actionTypeRegistry,
+    authTypeRegistry,
     unsecuredSavedObjectsClient,
     scopedClusterClient,
     kibanaIndices,
