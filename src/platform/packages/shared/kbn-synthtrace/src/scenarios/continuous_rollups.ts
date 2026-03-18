@@ -37,7 +37,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
           const next = {
             settings: {
               index: {
-                number_of_shards: 8 as number,
+                number_of_shards: 8,
               },
             },
           };
