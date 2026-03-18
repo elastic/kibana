@@ -6,7 +6,6 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { pairwise, startWith } from 'rxjs';
 import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -38,36 +37,26 @@ export const createAttachmentMountHandler = ({
 
       if (!api) return;
 
-      const attachmentOrigin = getAttachment().origin;
-      const currentDashboardId = api.savedObjectId$.value;
+      let previousSavedObjectId = api.savedObjectId$.value;
 
-      // only subscribe if:
-      // the attachment has no origin yet and we are a new dashboard
-      // OR we are on the same dashboard as the attachment
-      const shouldSubscribe =
-        (!currentDashboardId && !attachmentOrigin) ||
-        (currentDashboardId && currentDashboardId === attachmentOrigin);
+      savedObjectIdSubscription = api.savedObjectId$.subscribe(async (currentSavedObjectId) => {
+        const currentAttachment = getAttachment();
+        // Only update origin if:
+        // there is an id to update to (currentId is not undefined)
+        // the id is different from the current origin (currentId !== currentAttachment.origin)
+        // 1. The attachment has no origin yet (unsaved), OR
+        // 2. The previous savedObjectId matches the attachment origin (we're on the same dashboard)
+        // This prevents linking to unrelated dashboards when navigating
 
-      if (shouldSubscribe) {
-        savedObjectIdSubscription = api.savedObjectId$
-          .pipe(startWith<string | undefined>(attachmentOrigin), pairwise())
-          .subscribe(([previousId, currentId]) => {
-            const currentAttachment = getAttachment();
-            // Only update origin if:
-            // there is an id to update to (currentId is not undefined)
-            // the id is different from the current origin (currentId !== currentAttachment.origin)
-            // 1. The attachment has no origin yet (unsaved), OR
-            // 2. The previous savedObjectId matches the attachment origin (we're on the same dashboard)
-            // This prevents linking to unrelated dashboards when navigating
-            const shouldUpdate =
-              currentId &&
-              currentId !== currentAttachment.origin &&
-              (!currentAttachment.origin || previousId === currentAttachment.origin);
-            if (shouldUpdate) {
-              updateOrigin(currentId);
-            }
-          });
-      }
+        const shouldUpdate =
+          currentSavedObjectId &&
+          currentSavedObjectId !== currentAttachment.origin &&
+          (!currentAttachment.origin || previousSavedObjectId === currentAttachment.origin);
+        if (shouldUpdate) {
+          await updateOrigin(currentSavedObjectId);
+        }
+        previousSavedObjectId = currentSavedObjectId;
+      });
     });
 
     return () => {

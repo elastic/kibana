@@ -64,9 +64,14 @@ export const useRegisterActionButtons = ({
         }),
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          const existingAttachmentOrigin =
+          const dashboardHasBeenDeleted =
             attachmentOriginRef.current &&
-            (await checkSavedDashboardExist(attachmentOriginRef.current))
+            (await checkSavedDashboardExist(attachmentOriginRef.current)) === false;
+          if (dashboardHasBeenDeleted) {
+            await updateOrigin('');
+          }
+          const existingAttachmentOrigin =
+            attachmentOriginRef.current && !dashboardHasBeenDeleted
               ? attachmentOriginRef.current
               : undefined;
           await locator.navigate({
@@ -89,12 +94,16 @@ export const useRegisterActionButtons = ({
       icon: 'save',
       type: ActionButtonType.PRIMARY,
       handler: async () => {
-        const existingAttachmentOrigin =
+        const dashboardHasBeenDeleted =
           attachmentOriginRef.current &&
-          (await checkSavedDashboardExist(attachmentOriginRef.current))
+          (await checkSavedDashboardExist(attachmentOriginRef.current)) === false;
+        if (dashboardHasBeenDeleted) {
+          await updateOrigin('');
+        }
+        const existingAttachmentOrigin =
+          attachmentOriginRef.current && !dashboardHasBeenDeleted
             ? attachmentOriginRef.current
             : undefined;
-
         if (existingAttachmentOrigin) {
           await dashboardApi.runQuickSave();
           return;

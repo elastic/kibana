@@ -64,7 +64,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         checkSavedDashboardExist={checkSavedDashboardExist}
       />
     ),
-    getActionButtons: ({ attachment, openCanvas, isCanvas }) => {
+    getActionButtons: ({ attachment, openCanvas, isCanvas, updateOrigin }) => {
       if (isCanvas) {
         return [];
       }
@@ -85,6 +85,7 @@ export const registerDashboardAttachmentUiDefinition = ({
               attachment,
               dashboardApi,
               checkSavedDashboardExist,
+              updateOrigin,
             });
           },
         },

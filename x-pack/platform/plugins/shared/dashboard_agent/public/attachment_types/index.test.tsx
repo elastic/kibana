@@ -211,20 +211,6 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         cleanup?.();
       });
 
-      it('does NOT subscribe when attachment has no origin but dashboard has an ID (navigated to existing dashboard)', () => {
-        const { getAttachment } = createMockAttachment('attachment-1'); // no origin
-        const mockApi = createMockDashboardApi('existing-dashboard-id');
-
-        const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
-        deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-
-        // Even if the dashboard saves with a new ID, we should not update origin
-        mockApi.setSavedObjectId('newly-saved-id');
-
-        expect(updateOrigin).not.toHaveBeenCalled();
-        cleanup?.();
-      });
-
       it('subscribes when attachment has origin matching dashboard ID', () => {
         const { getAttachment } = createMockAttachment('attachment-1', 'same-dashboard-id');
         const mockApi = createMockDashboardApi('same-dashboard-id');
