@@ -38,6 +38,12 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
           200: {
             body: () => updateResponseBodySchema,
           },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the markdown panel with the given ID was not found.',
+          },
         },
       },
     },

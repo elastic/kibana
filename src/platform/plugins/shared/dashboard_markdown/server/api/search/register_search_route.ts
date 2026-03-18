@@ -32,6 +32,9 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
           200: {
             body: () => searchResponseBodySchema,
           },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
         },
       },
     },

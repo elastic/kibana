@@ -38,6 +38,12 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
           201: {
             body: () => createResponseBodySchema,
           },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          409: {
+            description: 'Indicates that a markdown panel with the given ID already exists.',
+          },
         },
       },
     },
@@ -46,6 +52,14 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
         const result = await create(ctx, req.body, req.params);
         return res.created({ body: result });
       } catch (e) {
+        if (e.isBoom && e.output.statusCode === 409) {
+          return res.conflict({
+            body: {
+              message: `A markdown panel with ID ${req?.params?.id} already exists.`,
+            },
+          });
+        }
+
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }

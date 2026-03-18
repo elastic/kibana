@@ -39,6 +39,12 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
           200: {
             body: () => readResponseBodySchema,
           },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the markdown panel with the given ID was not found.',
+          },
         },
       },
     },

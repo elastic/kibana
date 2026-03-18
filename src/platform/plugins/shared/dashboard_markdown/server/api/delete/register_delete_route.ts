@@ -34,6 +34,17 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
             }),
           }),
         },
+        response: {
+          204: {
+            description: 'Indicates a successful delete operation.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the markdown panel with the given ID was not found.',
+          },
+        },
       },
     },
     async (ctx, req, res) => {
