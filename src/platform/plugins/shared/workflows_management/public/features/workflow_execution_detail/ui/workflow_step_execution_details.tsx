@@ -78,9 +78,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
     const isTriggerPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
-    const isWorkflowExecuteStep =
-      stepExecution?.stepType === 'workflow.execute' ||
-      stepExecution?.stepType === 'workflow.executeAsync';
+    const isWorkflowExecuteStep = stepExecution?.stepType === 'workflow.execute';
 
     const handleWorkflowLinkClick = useCallback(
       (e: React.MouseEvent) => {
