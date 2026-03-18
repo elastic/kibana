@@ -51,7 +51,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
   apiTest('can create a markdown panel with a specific id', async ({ apiClient }) => {
     const content = `Test content ${Date.now()}`;
     const title = `Test title ${Date.now()}`;
-    const id = `test-markdown-${Date.now()}-${Math.random()}`;
+    const id = `test-markdown-with-specific-id`;
 
     const response = await apiClient.post(`${MARKDOWN_API_PATH}/${id}`, {
       headers: {
@@ -197,6 +197,19 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.message).toBe(
       '[request body.title]: expected value of type [string] but got [undefined]'
     );
+  });
+
+  apiTest('validiation - returns error when id already exists', async ({ apiClient }) => {
+    const id = `test-markdown-with-specific-id`;
+    const response = await apiClient.post(MARKDOWN_API_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+    });
+
+    expect(response).toHaveStatusCode(409);
+    expect(response.body.message).toBe(`A markdown panel with ID ${id} already exists.`);
   });
 
   apiTest(
