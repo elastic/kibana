@@ -12,7 +12,6 @@ import { useContainer } from './state_container';
 import { useTimefilterService } from '../../../hooks/use_timefilter_service';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { PublicAlertStatus } from '@kbn/rule-data-utils';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 const MOCK_DEFAULT_STATE = {
   rangeFrom: 'now-30m',
@@ -162,9 +161,7 @@ describe('useAlertSearchBarStateContainer', () => {
       wrapper: MemoryRouter,
     });
 
-    const newControlConfigs = [
-      { ...DEFAULT_DSL_OPTIONS_LIST_STATE, data_view_id: 'test-view', field_name: 'host.name' },
-    ];
+    const newControlConfigs = [{ data_view_id: 'test-view', field_name: 'host.name' }];
     act(() => {
       result.current.onControlConfigsChange(newControlConfigs);
     });
