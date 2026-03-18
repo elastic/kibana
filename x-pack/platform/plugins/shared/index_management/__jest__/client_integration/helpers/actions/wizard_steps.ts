@@ -154,7 +154,7 @@ export const wizardSteps = {
       const index = componentsFound.indexOf(componentName);
       if (index >= 0) {
         // Find all add buttons within the list
-        const addButtons = within(listContainer).getAllByTestId('action-plusInCircle');
+        const addButtons = within(listContainer).getAllByTestId('action-plusCircle');
         fireEvent.click(addButtons[index]);
       }
     }
