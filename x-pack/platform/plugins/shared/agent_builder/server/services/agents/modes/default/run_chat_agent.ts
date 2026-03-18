@@ -106,9 +106,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
 
-  const pluginSkillIds = await context.plugins.resolveSkillIds(
-    agentConfiguration.plugin_ids ?? []
-  );
+  const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
   const filteredSkills = await selectSkills({
     skills,
     skillsStore,
