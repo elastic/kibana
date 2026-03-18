@@ -71,3 +71,13 @@ ${additionalContext ?? ''}`,
     ['human', 'Generate the visualization configuration.'],
   ];
 };
+
+export const esqlAdditionalInstructions = `
+    ## Time-based XY charts (auto buckets)
+
+    When creating XY charts with time on an axis, use **auto buckets** in ES|QL so the time range is driven by the visualization's "?_tstart" and ""?_tend" parameters. Use the "BUCKET" function with 75 buckets over the parameterized range. Example:
+
+    STATS count = COUNT() BY bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+
+    When generating or passing "esql" for time-based XY charts, prefer this pattern (adjust the aggregation and timestamp field as needed) so the chart responds correctly to the dashboard or lens time range.
+`;
