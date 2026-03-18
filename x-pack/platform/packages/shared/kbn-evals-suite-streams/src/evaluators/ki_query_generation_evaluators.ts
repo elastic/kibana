@@ -28,7 +28,7 @@ const ALLOWED_CATEGORIES = [
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 ];
 
-interface RuleGenerationEvaluationExample {
+interface KIQueryGenerationEvaluationExample {
   input: { sample_logs: string[] } & Record<string, unknown>;
   output: {
     expected_categories?: string[];
@@ -45,14 +45,14 @@ interface Query {
   evidence?: string[];
 }
 
-interface RuleGenerationTaskOutput {
+interface KIQueryGenerationTaskOutput {
   queries: Query[];
   traceId?: string | null;
 }
 
-type RuleGenerationOutput = Query[] | RuleGenerationTaskOutput;
+type KIQueryGenerationOutput = Query[] | KIQueryGenerationTaskOutput;
 
-const getQueriesFromOutput = (output: RuleGenerationOutput): Query[] => {
+const getQueriesFromOutput = (output: KIQueryGenerationOutput): Query[] => {
   return Array.isArray(output) ? output : output.queries;
 };
 
@@ -185,9 +185,9 @@ const computeEsqlSubstringCoverage = (expectedSubstrings: string[], queries: Que
 };
 
 /**
- * Formats human-readable validation failures for the rule-generation CODE evaluator.
+ * Formats human-readable validation failures for the KI query generation CODE evaluator.
  */
-const buildRuleGenerationValidationIssues = ({
+const buildKIQueryGenerationValidationIssues = ({
   queriesCount,
   validSyntaxCount,
   executionHitCount,
@@ -235,7 +235,7 @@ const buildRuleGenerationValidationIssues = ({
   return issues;
 };
 
-const evaluateRuleGenerationCode = async ({
+const evaluateKIQueryGenerationCode = async ({
   queries,
   sampleLogs,
   expectedCategories,
@@ -302,7 +302,7 @@ const evaluateRuleGenerationCode = async ({
   const missingEvidence = validationDetails.flatMap(
     (detail) => detail.evidenceValidation.missingEvidence
   );
-  const issues = buildRuleGenerationValidationIssues({
+  const issues = buildKIQueryGenerationValidationIssues({
     queriesCount: queries.length,
     validSyntaxCount,
     executionHitCount,
@@ -318,7 +318,7 @@ const evaluateRuleGenerationCode = async ({
     explanation:
       issues.length > 0
         ? `${issues.join('; ')} (score=${score.toFixed(2)})`
-        : `All ${queries.length} generated rules passed code validation`,
+        : `All ${queries.length} generated queries passed code validation`,
     details: {
       syntaxValidityRate,
       executionHitRate,
@@ -336,11 +336,11 @@ const evaluateRuleGenerationCode = async ({
   };
 };
 
-const createRuleGenerationCodeEvaluator = (
+const createKIQueryGenerationCodeEvaluator = (
   esClient: ElasticsearchClient,
   logger?: Logger
-): Evaluator<RuleGenerationEvaluationExample, RuleGenerationOutput> => ({
-  name: 'rule_generation_code_evaluator',
+): Evaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput> => ({
+  name: 'ki_query_generation_code_evaluator',
   kind: 'CODE' as const,
   evaluate: async ({ output, input, expected }) => {
     const queries = getQueriesFromOutput(output ?? []);
@@ -350,7 +350,7 @@ const createRuleGenerationCodeEvaluator = (
     );
     const expectedEsqlSubstrings = expected.esql_substrings ?? [];
 
-    return evaluateRuleGenerationCode({
+    return evaluateKIQueryGenerationCode({
       queries,
       sampleLogs,
       expectedCategories,
@@ -361,7 +361,7 @@ const createRuleGenerationCodeEvaluator = (
   },
 });
 
-export const createRuleGenerationEvaluators = (
+export const createKIQueryGenerationEvaluators = (
   esClient: ElasticsearchClient,
   scenarioCriteria?: {
     criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
@@ -369,7 +369,7 @@ export const createRuleGenerationEvaluators = (
   },
   logger?: Logger
 ) => {
-  const base = selectEvaluators([createRuleGenerationCodeEvaluator(esClient, logger)]);
+  const base = selectEvaluators([createKIQueryGenerationCodeEvaluator(esClient, logger)]);
 
   if (!scenarioCriteria) {
     return base;
@@ -378,11 +378,13 @@ export const createRuleGenerationEvaluators = (
   const { criteriaFn, criteria } = scenarioCriteria;
   return [
     ...base,
-    createScenarioCriteriaLlmEvaluator<RuleGenerationEvaluationExample, RuleGenerationOutput>({
-      criteriaFn: (c) =>
-        criteriaFn(c) as Evaluator<RuleGenerationEvaluationExample, RuleGenerationOutput>,
-      criteria,
-      transformOutput: (output) => getQueriesFromOutput(output),
-    }),
+    createScenarioCriteriaLlmEvaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput>(
+      {
+        criteriaFn: (c) =>
+          criteriaFn(c) as Evaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput>,
+        criteria,
+        transformOutput: (output) => getQueriesFromOutput(output),
+      }
+    ),
   ];
 };
