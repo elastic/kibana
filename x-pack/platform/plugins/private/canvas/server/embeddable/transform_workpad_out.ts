@@ -9,13 +9,14 @@ import type { Ast } from '@kbn/interpreter';
 import { fromExpression, toExpression } from '@kbn/interpreter';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { TimeRange } from '@kbn/es-query';
+import { transformType } from '@kbn/embeddable-plugin/server';
 import { EmbeddableTypes } from '../../canvas_plugin_src/expression_types';
 import { DEFAULT_TIME_RANGE } from '../../common/lib';
 import { encode, decode } from '../../common/lib/embeddable_dataurl';
 import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
 import { embeddableService, logger } from '../kibana_services';
-import { transformPanelReferencesOut } from './transform_references_out';
 import { getReferencesForElement } from './get_references_for_element';
+import { ensureLibraryReference } from './ensure_library_reference';
 
 const embeddableFunctions = ['embeddable', 'savedLens', 'savedVisualization', 'savedMap'];
 
@@ -121,18 +122,22 @@ export function transformWorkpadOut(
         }
 
         const embeddableConfig = decode(fn.arguments.config[0] as string);
-        const embeddableType = fn.arguments.type[0] as string;
+        const storedEmbeddableType = fn.arguments.type[0] as string;
+        const embeddableType = transformType(storedEmbeddableType);
+        fn.arguments.type[0] = embeddableType;
         // Temporary escape hatch for lens as code
         // TODO remove when lens as code transforms are ready for production
-        const transformType = embeddableType === 'lens' ? 'lens-dashboard-app' : embeddableType;
-        const transforms = embeddableService.getTransforms(transformType);
+        const transforms = embeddableService.getTransforms(
+          embeddableType === 'lens' ? 'lens-dashboard-app' : embeddableType
+        );
 
         try {
-          // / BWC: Legacy Canvas embeddables have a savedObjectId and incorrect reference names,
+          // BWC: Legacy Canvas embeddables have a savedObjectId and incorrect reference names,
           // so we need to transform the references to use the correct reference name 'savedObjectRef'
           if (embeddableConfig.savedObjectId) {
-            referencesForElement = transformPanelReferencesOut(
+            referencesForElement = ensureLibraryReference(
               referencesForElement,
+              storedEmbeddableType,
               embeddableConfig.savedObjectId
             );
           }
