@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useFilterBarContext } from '../filter_bar_context';
 
@@ -40,6 +40,16 @@ export const FilterBarToggleButton: React.FC<{}> = () => {
     useFilterBarContext();
   const themeContext = useEuiTheme();
   const styles = toggleStyles(themeContext);
+
+  const expandTooltipRef = useRef<EuiToolTip>(null);
+  const onClickToggleButton = useCallback(() => {
+    // Clicking the toggle button will bring it into focus if it's not already. EuiToolTip is designed
+    // to stay visible permanently on focused elements, but this is not a desirable behavior when the user
+    // has just toggled the button. They already know what this button does. So, hide the tooltip manually.
+    expandTooltipRef.current?.hideToolTip();
+    onToggleCollapse();
+  }, [onToggleCollapse]);
+
   if (numFilters === 0) return null;
   return (
     <EuiToolTip content={isCollapsed ? expandLabel : collapseLabel} disableScreenReaderOutput>
@@ -48,7 +58,7 @@ export const FilterBarToggleButton: React.FC<{}> = () => {
         aria-label={isCollapsed ? expandLabel : collapseLabel}
         aria-expanded={!isCollapsed}
         aria-controls={expandablePillsId}
-        onClick={onToggleCollapse}
+        onClick={onClickToggleButton}
         css={styles.filterButtonStyle}
         size="s"
       >
