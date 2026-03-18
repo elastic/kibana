@@ -37,7 +37,7 @@ export const RepositoryEmptyPrompt: React.FunctionComponent = () => {
             <EuiButton
               {...reactRouterNavigate(history, linkToAddRepository())}
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               data-test-subj="registerRepositoryButton"
             >
               <FormattedMessage
