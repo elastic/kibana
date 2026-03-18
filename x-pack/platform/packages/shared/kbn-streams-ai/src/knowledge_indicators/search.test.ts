@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Feature, StreamQuery } from '@kbn/streams-schema';
+import type { Feature, QueryLink, StreamQuery } from '@kbn/streams-schema';
 import { searchKnowledgeIndicators } from './search';
-import type { QueryLink } from './types';
 
 function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
@@ -40,12 +39,15 @@ describe('searchKnowledgeIndicators', () => {
       params: {},
       getStreamNames: async () => ['logs.test'],
       getFeatures: async () => [makeFeature({ id: 'f1', confidence: 80 })],
-      getQueries: async (): Promise<QueryLink[]> => [
+      getQueries: async () => [
         {
           query: makeStreamQuery({ id: 'q1', severity_score: 50 }),
           rule_backed: true,
           rule_id: 'rule-1',
           stream_name: 'logs.test',
+          'asset.uuid': 'asset-uuid',
+          'asset.type': 'query',
+          'asset.id': 'asset-id',
         },
       ],
     });
@@ -64,6 +66,9 @@ describe('searchKnowledgeIndicators', () => {
           rule_backed: false,
           rule_id: 'rule-1',
           stream_name: 'logs.test',
+          'asset.uuid': 'asset-uuid',
+          'asset.type': 'query',
+          'asset.id': 'asset-id',
         },
       ]
     );
@@ -96,12 +101,12 @@ describe('searchKnowledgeIndicators', () => {
     expect(res.knowledge_indicators[0].kind).toBe('feature');
   });
 
-  it('filters requested streamNames against accessible streams', async () => {
+  it('filters requested stream_names against accessible streams', async () => {
     const getFeatures = jest.fn(async () => []);
     const getQueries = jest.fn(async () => []);
 
     await searchKnowledgeIndicators({
-      params: { streamNames: ['logs.allowed', 'logs.denied'] },
+      params: { stream_names: ['logs.allowed', 'logs.denied'] },
       getStreamNames: async () => ['logs.allowed'],
       getFeatures,
       getQueries,

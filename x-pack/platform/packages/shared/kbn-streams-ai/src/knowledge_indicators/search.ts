@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
+import type { Feature, QueryLink } from '@kbn/streams-schema';
 import type {
   KnowledgeIndicator,
-  QueryLink,
   SearchKnowledgeIndicatorsInput,
   SearchKnowledgeIndicatorsOutput,
 } from './types';
@@ -63,8 +62,8 @@ export async function searchKnowledgeIndicators({
   const accessibleStreamNameSet = new Set(accessibleStreamNames);
 
   const requestedStreamNames =
-    Array.isArray(params.streamNames) && params.streamNames.length > 0
-      ? [...new Set(params.streamNames)].filter((name) => accessibleStreamNameSet.has(name))
+    Array.isArray(params.stream_names) && params.stream_names.length > 0
+      ? [...new Set(params.stream_names)].filter((name) => accessibleStreamNameSet.has(name))
       : accessibleStreamNames;
 
   const streamNames = requestedStreamNames.filter(

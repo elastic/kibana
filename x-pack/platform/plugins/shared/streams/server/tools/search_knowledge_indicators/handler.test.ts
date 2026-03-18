@@ -166,7 +166,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       featureClient,
       queryClient,
       logger,
-      params: { kind: ['knowledge_indicator'], min_confidence: 42, limit: 7 },
+      params: { kind: ['feature'], min_confidence: 42, limit: 7 },
     });
 
     expect(featureClient.getFeatures).toHaveBeenCalledWith('logs.test', {
@@ -188,7 +188,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       featureClient,
       queryClient,
       logger,
-      params: { streamNames: ['logs.allowed', 'logs.not_allowed'] },
+      params: { stream_names: ['logs.allowed', 'logs.not_allowed'] },
     });
 
     expect(featureClient.getFeatures).toHaveBeenCalledTimes(1);
@@ -218,7 +218,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       featureClient,
       queryClient,
       logger,
-      params: { kind: ['knowledge_indicator'] },
+      params: { kind: ['feature'] },
     });
 
     expect(logger.debug).toHaveBeenCalled();

@@ -26,7 +26,7 @@ export {
 } from './src/knowledge_indicators/search';
 export {
   featureToKnowledgeIndicatorFeature,
-  streamQueryToKnowledgeIndicatorQuery as queryWithRuleLinkageToKnowledgeIndicatorQuery,
+  queryLinkToKnowledgeIndicatorQuery,
 } from './src/knowledge_indicators/mappers';
 export type {
   SearchKnowledgeIndicatorsInput,
@@ -35,5 +35,4 @@ export type {
   KnowledgeIndicator,
   KnowledgeIndicatorFeature,
   KnowledgeIndicatorQuery,
-  QueryWithRuleLinkage,
 } from './src/knowledge_indicators/types';

@@ -13,7 +13,7 @@ export interface SearchKnowledgeIndicatorsInput {
   /**
    * Optional: if omitted, search across all accessible streams.
    */
-  streamNames?: string[];
+  stream_names?: string[];
 
   /**
    * Optional: free-text search (best-effort across stored fields).
@@ -56,12 +56,5 @@ export interface KnowledgeIndicatorQuery {
     backed: boolean;
     id: string;
   };
-  stream_name: string;
-}
-
-export interface QueryLink {
-  query: StreamQuery;
-  rule_backed: boolean;
-  rule_id: string;
   stream_name: string;
 }

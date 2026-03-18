@@ -39,7 +39,7 @@ const searchKnowledgeIndicatorsSchema = z.object({
     .describe(
       dedent`What to return.
       - ['query']: queries-only KIs
-      - ['knowledge_indicator']: feature-based KIs only
+      - ['feature']: feature-based KIs only
       - default (empty array or omitted): both features and queries`
     ),
   limit: z
