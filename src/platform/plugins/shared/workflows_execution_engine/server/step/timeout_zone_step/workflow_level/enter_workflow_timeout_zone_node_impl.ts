@@ -8,6 +8,7 @@
  */
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import { parseDuration } from '../../../utils';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
@@ -34,7 +35,10 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
     const currentStepDuration = currentTimeMs - whenStepStartedTime;
 
     if (currentStepDuration > timeoutMs) {
-      const timeoutError = new Error('Failed due to workflow timeout');
+      const timeoutError = new ExecutionError({
+        type: 'TimeoutError',
+        message: 'Failed due to workflow timeout',
+      });
       monitoredStepExecutionRuntime.abortController.abort();
       monitoredStepExecutionRuntime.failStep(timeoutError);
 
