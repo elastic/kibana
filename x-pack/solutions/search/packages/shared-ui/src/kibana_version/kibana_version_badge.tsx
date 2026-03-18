@@ -8,7 +8,6 @@
 import { EuiFlexItem, EuiFlexGroup, EuiLink, EuiCopy, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 interface SearchHomepageVersionBadgeProps {
   kibanaVersion: string;
@@ -27,13 +26,7 @@ export const SearchHomepageVersionBadge: React.FC<SearchHomepageVersionBadgeProp
           target="_blank"
           href={docLink}
         >
-          <FormattedMessage
-            id="xpack.searchHomepage.versionTextLabel"
-            defaultMessage="{version}"
-            values={{
-              version: kibanaVersion,
-            }}
-          />
+          {kibanaVersion}
         </EuiLink>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
