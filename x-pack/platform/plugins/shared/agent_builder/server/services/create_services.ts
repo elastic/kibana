@@ -137,6 +137,13 @@ export class ServiceManager {
 
     const hooks = this.services.hooks.start();
 
+    const plugins = this.services.plugins.start({
+      logger: logger.get('plugins'),
+      elasticsearch,
+      spaces,
+      config: this.config,
+    });
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
@@ -150,6 +157,7 @@ export class ServiceManager {
       agentsService: agents,
       attachmentsService: attachments,
       skillServiceStart: skillsServiceStart,
+      pluginsServiceStart: plugins,
       trackingService,
       analyticsService,
       hooks,
@@ -198,13 +206,6 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
-    });
-
-    const plugins = this.services.plugins.start({
-      logger: logger.get('plugins'),
-      elasticsearch,
-      spaces,
-      config: this.config,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
