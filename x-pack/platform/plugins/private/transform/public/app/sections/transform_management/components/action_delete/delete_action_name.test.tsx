@@ -105,7 +105,7 @@ describe('Transform: Transform List Actions <DeleteAction />', () => {
       forceDisable: false,
     });
     expect(message).toBe(
-      'This transform is deletion protected and cannot be deleted directly. To remove it, delete the Kibana resource (e.g SLO) that created this transform.'
+      'This transform is deletion protected and cannot be deleted directly. To remove it, delete the Kibana resource (e.g. SLO) that created this transform.'
     );
   });
 
@@ -116,7 +116,7 @@ describe('Transform: Transform List Actions <DeleteAction />', () => {
       forceDisable: false,
     });
     expect(message).toBe(
-      'One or more selected transforms are deletion protected and cannot be deleted directly. To remove them, delete the Kibana resources (e.g SLO) that created those transforms.'
+      'One or more selected transforms are deletion protected and cannot be deleted directly. To remove them, delete the Kibana resources (e.g. SLO) that created those transforms.'
     );
   });
 
@@ -143,7 +143,7 @@ describe('Transform: Transform List Actions <DeleteAction />', () => {
       forceDisable: false,
     });
     expect(message).toBe(
-      'This transform is deletion protected and cannot be deleted directly. To remove it, delete the Kibana resource (e.g SLO) that created this transform.'
+      'This transform is deletion protected and cannot be deleted directly. To remove it, delete the Kibana resource (e.g. SLO) that created this transform.'
     );
   });
 });
