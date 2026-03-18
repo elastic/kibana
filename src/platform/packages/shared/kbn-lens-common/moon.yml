@@ -66,6 +66,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/kql'
   - '@kbn/control-group-renderer'
+  - '@kbn/palettes'
 tags:
   - shared-common
   - package
