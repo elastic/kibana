@@ -10,6 +10,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { ToolType, platformCoreTools } from '@kbn/agent-builder-common';
 import type { WorkflowToolConfig } from '@kbn/agent-builder-common/tools';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import type { RunContextStackEntry } from '@kbn/agent-builder-server';
 import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/agent-builder-common/tools/types/workflow';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
@@ -18,6 +19,10 @@ import { executeWorkflow } from '../../../workflow';
 import { generateSchema } from './generate_schema';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateWorkflowId } from './validation';
+
+const getAgentIdFromStack = (stack: RunContextStackEntry[]): string | undefined => {
+  return [...stack].reverse().find((entry) => entry.type === 'agent')?.agentId;
+};
 
 export const getWorkflowToolType = ({
   workflowsManagement,
@@ -37,9 +42,10 @@ export const getWorkflowToolType = ({
     getDynamicProps: (config, { spaceId }) => {
       return {
         getHandler: () => {
-          return async (params, { request }) => {
+          return async (params, { request, runContext }) => {
             const { management: workflowApi } = workflowsManagement;
             const workflowId = config.workflow_id;
+            const agentId = getAgentIdFromStack(runContext.stack);
 
             try {
               const result = await executeWorkflow({
@@ -49,6 +55,7 @@ export const getWorkflowToolType = ({
                 workflowId,
                 workflowParams: params,
                 waitForCompletion: config.wait_for_completion,
+                metadata: agentId ? { agent_id: agentId } : undefined,
               });
 
               const toolResults = result.success

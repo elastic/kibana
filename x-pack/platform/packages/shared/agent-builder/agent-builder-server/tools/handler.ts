@@ -21,6 +21,7 @@ import type {
   ToolPromptManager,
   ToolStateManager,
   ToolManager,
+  RunContext,
 } from '../runner';
 import type { IToolFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
@@ -145,4 +146,8 @@ export interface ToolHandlerContext {
    * Tool manager to manage active tools for the agent.
    */
   toolManager: ToolManager;
+  /**
+   * The current execution context, including the agent/tool call stack.
+   */
+  runContext: RunContext;
 }

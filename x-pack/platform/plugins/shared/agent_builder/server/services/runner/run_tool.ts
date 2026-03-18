@@ -272,6 +272,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     toolManager,
     filestore,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    runContext: manager.context,
   };
 };
 
