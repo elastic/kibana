@@ -418,6 +418,96 @@ steps:
       expect(unchanged).toContain('  - name: test_values');
       expect(unchanged).toContain('  - name: esql_coalesce_test');
     });
+
+    it('inserts after a top-level step in the middle of the list', () => {
+      const result = insertStep(
+        SAMPLE_WORKFLOW,
+        { name: 'middle_step', type: 'console', with: { message: 'inserted' } },
+        'log_greeting'
+      );
+
+      expect(result.success).toBe(true);
+
+      const parsed = parseDocument(result.yaml).toJSON();
+      expect(parsed.steps).toHaveLength(3);
+      expect(parsed.steps[0].name).toBe('log_greeting');
+      expect(parsed.steps[1].name).toBe('middle_step');
+      expect(parsed.steps[2].name).toBe('search_data');
+
+      expect(result.yaml).toContain('  - name: middle_step');
+      expect(result.yaml).toContain('    type: console');
+    });
+
+    it('inserts after the last top-level step', () => {
+      const result = insertStep(
+        SAMPLE_WORKFLOW,
+        { name: 'last_step', type: 'console' },
+        'search_data'
+      );
+
+      expect(result.success).toBe(true);
+
+      const parsed = parseDocument(result.yaml).toJSON();
+      expect(parsed.steps).toHaveLength(3);
+      expect(parsed.steps[2].name).toBe('last_step');
+    });
+
+    it('inserts after a nested step inside a foreach block', () => {
+      const yamlWithForeach = `version: "1"
+name: Test
+steps:
+  - name: setup
+    type: console
+    with:
+      message: init
+  - name: loop
+    type: foreach
+    foreach: "{{ inputs.items }}"
+    steps:
+      - name: nested_first
+        type: console
+        with:
+          message: "{{ foreach.item }}"
+      - name: nested_second
+        type: http
+        with:
+          url: https://example.com
+  - name: cleanup
+    type: console
+    with:
+      message: done
+`;
+
+      const result = insertStep(
+        yamlWithForeach,
+        { name: 'nested_inserted', type: 'console', with: { message: 'middle' } },
+        'nested_first'
+      );
+
+      expect(result.success).toBe(true);
+
+      const parsed = parseDocument(result.yaml).toJSON();
+      const foreachSteps = parsed.steps[1].steps;
+      expect(foreachSteps).toHaveLength(3);
+      expect(foreachSteps[0].name).toBe('nested_first');
+      expect(foreachSteps[1].name).toBe('nested_inserted');
+      expect(foreachSteps[2].name).toBe('nested_second');
+
+      expect(parsed.steps[0].name).toBe('setup');
+      expect(parsed.steps[2].name).toBe('cleanup');
+    });
+
+    it('returns error when insertAfterStep names a non-existent step', () => {
+      const result = insertStep(
+        SAMPLE_WORKFLOW,
+        { name: 'orphan', type: 'console' },
+        'no_such_step'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('no_such_step');
+      expect(result.error).toContain('not found');
+    });
   });
 
   describe('deleteStep', () => {

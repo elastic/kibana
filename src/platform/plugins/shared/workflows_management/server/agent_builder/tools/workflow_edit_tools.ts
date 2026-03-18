@@ -228,18 +228,27 @@ export function registerWorkflowEditTools(
     id: workflowTools.insertStep,
     type: ToolType.builtin,
     description:
-      'Insert a new step at the end of the workflow steps list. Provide the step as a structured object. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
+      'Insert a new step into the workflow. By default appends to the end of the root steps list. Use insertAfterStep to place the new step immediately after a named step at any nesting depth. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
     schema: z.object({
       ...baseWorkflowEditSchema.shape,
       step: stepDefinitionSchema as z.ZodType<StepDefinition>,
+      insertAfterStep: z
+        .string()
+        .optional()
+        .describe(
+          'Name of an existing step to insert after. The new step is placed immediately after it in the same parent sequence. If omitted, appends to the end of the root steps list.'
+        ),
     }),
     tags: ['workflows', 'yaml', 'edit'],
     availability: workflowEditAvailability,
-    handler: async ({ attachmentId: targetAttachmentId, step, description }, context) => {
+    handler: async (
+      { attachmentId: targetAttachmentId, step, insertAfterStep: afterStep, description },
+      context
+    ) => {
       const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       if (!attachment) return noAttachmentError();
 
-      const result = insertStep(attachment.yaml, step);
+      const result = insertStep(attachment.yaml, step, afterStep);
       return handleEditResult(
         result,
         context,

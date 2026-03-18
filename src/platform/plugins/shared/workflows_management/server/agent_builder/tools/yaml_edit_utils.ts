@@ -174,7 +174,7 @@ const spliceYaml = (yaml: string, start: number, end: number, replacement: strin
 type EditScope =
   | { type: 'property'; key: string }
   | { type: 'step'; stepName: string }
-  | { type: 'insertStep' }
+  | { type: 'insertStep'; parentStepName?: string }
   | { type: 'deleteStep'; stepName: string };
 
 interface StepJson {
@@ -256,8 +256,12 @@ const verifyEditIntegrity = (
   }
 
   if (stepsNeedPerItemCheck && editScope.type !== 'property') {
-    const excludeName =
-      editScope.type === 'step' || editScope.type === 'deleteStep' ? editScope.stepName : undefined;
+    let excludeName: string | undefined;
+    if (editScope.type === 'step' || editScope.type === 'deleteStep') {
+      excludeName = editScope.stepName;
+    } else if (editScope.type === 'insertStep') {
+      excludeName = editScope.parentStepName;
+    }
     const corruptedStep = findCorruptedStep(
       (beforeJson.steps ?? []) as StepJson[],
       (afterJson.steps ?? []) as StepJson[],
@@ -282,7 +286,49 @@ const checkedResult = (beforeYaml: string, afterYaml: string, editScope: EditSco
   return { success: true, yaml: afterYaml };
 };
 
-export const insertStep = (yaml: string, step: StepDefinition): EditResult => {
+const findRootAncestorStepName = (
+  doc: Document,
+  targetRange: [number, number],
+  targetStepName: string
+): string | undefined => {
+  const rootSteps = doc.getIn(['steps']) as YAMLSeq | undefined;
+  if (!isSeq(rootSteps)) return undefined;
+
+  for (const item of rootSteps.items) {
+    if (isMap(item) && item.range) {
+      const [rStart, , rEnd] = item.range;
+      if (targetRange[0] >= rStart && targetRange[1] <= rEnd) {
+        const name = item.get('name');
+        return typeof name === 'string' && name !== targetStepName ? name : undefined;
+      }
+    }
+  }
+  return undefined;
+};
+
+const formatStepYaml = (
+  step: StepDefinition,
+  indentUnit: number,
+  seqItemIndent: number
+): string => {
+  const raw = stringify([step], { indent: indentUnit, lineWidth: 0 }).trimEnd();
+  const pad = ' '.repeat(Math.max(0, seqItemIndent));
+  return raw
+    .split('\n')
+    .map((line) => (line.length > 0 ? `${pad}${line}` : line))
+    .join('\n');
+};
+
+const buildInsertion = (yaml: string, offset: number, stepLines: string): string => {
+  const needsNewline = offset > 0 && yaml[offset - 1] !== '\n';
+  return `${needsNewline ? '\n' : ''}${stepLines}\n`;
+};
+
+export const insertStep = (
+  yaml: string,
+  step: StepDefinition,
+  insertAfterStep?: string
+): EditResult => {
   const { doc, error } = parseForEditing(yaml);
   if (error) return { success: false, yaml, error };
 
@@ -291,22 +337,40 @@ export const insertStep = (yaml: string, step: StepDefinition): EditResult => {
   }
 
   const indentUnit = detectIndent(yaml);
-  const rawStepYaml = stringify([step], { indent: indentUnit, lineWidth: 0 }).trimEnd();
-  const stepLines = rawStepYaml
-    .split('\n')
-    .map((line) => (line.length > 0 ? ' '.repeat(indentUnit) + line : line))
-    .join('\n');
+
+  if (insertAfterStep) {
+    const targetNode = getStepNode(doc, insertAfterStep);
+    if (!targetNode) {
+      return { success: false, yaml, error: `Step "${insertAfterStep}" not found` };
+    }
+    const targetRange = nodeRange(targetNode);
+    if (!targetRange) {
+      return { success: false, yaml, error: 'Cannot determine target step range' };
+    }
+
+    const lastNewline = yaml.lastIndexOf('\n', targetRange[0] - 1);
+    const currentIndent = lastNewline >= 0 ? targetRange[0] - lastNewline - 1 : targetRange[0];
+    const stepLines = formatStepYaml(step, indentUnit, currentIndent - indentUnit);
+    const insertion = buildInsertion(yaml, targetRange[1], stepLines);
+    const parentStepName = findRootAncestorStepName(doc, targetRange, insertAfterStep);
+
+    return checkedResult(yaml, spliceYaml(yaml, targetRange[1], targetRange[1], insertion), {
+      type: 'insertStep',
+      parentStepName,
+    });
+  }
 
   const stepsNode = doc.getIn(['steps']) as YAMLSeq | undefined;
   if (!isSeq(stepsNode) || !stepsNode.range) {
+    const stepLines = formatStepYaml(step, indentUnit, indentUnit);
     const newBlock = `steps:\n${stepLines}\n`;
     const trimmed = yaml.trimEnd();
     return checkedResult(yaml, `${trimmed}\n${newBlock}`, { type: 'insertStep' });
   }
 
   const endOffset = stepsNode.range[2];
-  const needsNewline = endOffset > 0 && yaml[endOffset - 1] !== '\n';
-  const insertion = `${needsNewline ? '\n' : ''}${stepLines}\n`;
+  const stepLines = formatStepYaml(step, indentUnit, indentUnit);
+  const insertion = buildInsertion(yaml, endOffset, stepLines);
   return checkedResult(yaml, spliceYaml(yaml, endOffset, endOffset, insertion), {
     type: 'insertStep',
   });
