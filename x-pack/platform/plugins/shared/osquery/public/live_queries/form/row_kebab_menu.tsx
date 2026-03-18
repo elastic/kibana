@@ -6,12 +6,7 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
@@ -19,7 +14,7 @@ import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import type { AddToTimelineHandler } from '../../types';
 
 interface RowKebabMenuProps {
-  row: { action_id: string; id?: string };
+  row: { action_id?: string; id?: string };
   actionId: string | undefined;
   agentIds?: string[];
   addToTimeline?: AddToTimelineHandler;

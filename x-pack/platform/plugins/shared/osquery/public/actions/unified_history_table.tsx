@@ -21,6 +21,7 @@ import {
   EuiToolTip,
   formatDate,
 } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
@@ -50,6 +51,9 @@ const EMPTY_TAGS: string[] = [];
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
 const PACKS_CONFIG = { isLive: false } as const;
+
+const separatorCss = ({ euiTheme }: UseEuiTheme) => ({ color: euiTheme.colors.lightShade });
+const badgePaddingCss = { padding: '0 6px' };
 
 const isLiveRow = (row: UnifiedHistoryRow): row is LiveHistoryRow => row.sourceType === 'live';
 
@@ -212,7 +216,7 @@ const UnifiedHistoryTableComponent = () => {
 
   const { data: packsData } = usePacks(PACKS_CONFIG);
 
-  // No deps needed — callback only reads from the row argument, not from component state
+  // Empty deps: callback derives output solely from the row argument and module-level helpers
   const renderQueryColumn = useCallback((_: unknown, row: UnifiedHistoryRow) => {
     // Scheduled rows: show query name only (pack name appears on details page only)
     if (isScheduledRow(row) && (row.queryName || row.packName)) {
@@ -265,28 +269,25 @@ const UnifiedHistoryTableComponent = () => {
     const errors = row.errorCount ?? 0;
     const pending = Math.max(0, row.agentCount - success - errors);
 
-    const badges = [
-      ...(success > 0
-        ? [<EuiBadge color="success">{`  ${success}  `}</EuiBadge>]
-        : []),
-      ...(errors > 0
-        ? [<EuiBadge color="danger">{`  ${errors}  `}</EuiBadge>]
-        : []),
-      ...(pending > 0
-        ? [<EuiBadge color="hollow">{`  ${pending}  `}</EuiBadge>]
-        : []),
-    ];
+    const badges: Array<{ key: string; color: string; count: number }> = [];
+    if (success > 0) badges.push({ key: 'success', color: 'success', count: success });
+    if (errors > 0) badges.push({ key: 'errors', color: 'danger', count: errors });
+    if (pending > 0) badges.push({ key: 'pending', color: 'hollow', count: pending });
 
     return (
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-        {badges.map((badge, idx) => (
-          <React.Fragment key={idx}>
+        {badges.map(({ key, color, count }, idx) => (
+          <React.Fragment key={key}>
             {idx > 0 && (
               <EuiFlexItem grow={false}>
-                <span css={{ color: '#D3DAE6' }}>/</span>
+                <span css={separatorCss}>/</span>
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>{badge}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={color} css={badgePaddingCss}>
+                {count}
+              </EuiBadge>
+            </EuiFlexItem>
           </React.Fragment>
         ))}
       </EuiFlexGroup>

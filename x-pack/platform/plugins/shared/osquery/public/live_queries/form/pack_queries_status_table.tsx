@@ -31,6 +31,7 @@ import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
 import { PackViewInLensAction } from '../../lens/pack_view_in_lens';
 import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
+import { AddToCaseWrapper } from '../../cases/add_to_cases';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { TagsColumn } from '../../actions/components/tags_column';
 import { RowKebabMenu } from './row_kebab_menu';
@@ -360,7 +361,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const getItemId = useCallback((item: PackItem) => get(item, 'id'), []) as unknown as string;
 
   const renderResultActions = useCallback(
-    (row: { action_id: string; id?: string }) => {
+    (row: PackQueryStatusItem) => {
       if (isHistoryEnabled) {
         return (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -386,7 +387,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         { render: renderDiscoverResultsAction },
         { render: renderLensResultsAction },
         {
-          render: (item: { action_id: string }) =>
+          render: (item: PackQueryStatusItem) =>
             item.action_id && (
               <AddToTimelineButton
                 field="action_id"
@@ -397,7 +398,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
             ),
         },
         {
-          render: (item: { action_id: string }) =>
+          render: (item: PackQueryStatusItem) =>
             actionId && (
               <AddToCaseWrapper
                 actionId={actionId}
@@ -411,7 +412,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
             ),
         },
         {
-          render: (item: { action_id: string }) => (
+          render: (item: PackQueryStatusItem) => (
             <EuiButtonIcon
               iconType={'expand'}
               onClick={handleQueryFlyoutOpen(item)}
@@ -444,9 +445,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         {data && data.length > 1 && (
           <EuiFlexItem grow={false}>{renderToggleResultsAction(row)}</EuiFlexItem>
         )}
-        <EuiFlexItem grow={false}>
-          {renderResultActions(row as { action_id: string; id?: string })}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{renderResultActions(row)}</EuiFlexItem>
       </EuiFlexGroup>
     ),
     [data, renderResultActions, renderToggleResultsAction]

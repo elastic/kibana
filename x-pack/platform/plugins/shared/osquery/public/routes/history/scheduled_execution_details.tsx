@@ -179,17 +179,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      <EuiFlexItem css={tableWrapperCss}>
-        <PackQueriesStatusTable
-          actionId={scheduleId}
-          data={queryData}
-          startDate={data?.timestamp}
-          showResultsHeader
-          scheduleId={scheduleId}
-          executionCount={executionCount}
-          packName={data?.packName}
-        />
-      </EuiFlexItem>
+      {tableBlock}
     </WithHeaderLayout>
   );
 };

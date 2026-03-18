@@ -137,7 +137,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
             <EuiText>
               <h2>
                 <FormattedMessage
-                  id="xpack.osquery.liveQueryActionResults.resultsLegacy"
+                  id="xpack.osquery.liveQueryActionResults.resultsHeading"
                   defaultMessage="Results"
                 />
               </h2>
