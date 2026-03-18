@@ -22,6 +22,7 @@ import {
   inferenceChunkToOpenAi,
   createFinalChunk,
   inferenceResponseToOpenAi,
+  createErrorResponse,
 } from '../lib/openai_format';
 import { resolveConnector } from '../lib/resolve_connector';
 import { isElasticConsoleEnabled } from './is_enabled';
@@ -182,18 +183,11 @@ export const registerChatCompletionsRoute = ({
         });
       } catch (error) {
         logger.error(`Chat completions error: ${error.message}`);
-        return response.customError({
-          statusCode: error.statusCode || 500,
-          body: {
-            message: error.message,
-            attributes: {
-              error: {
-                message: error.message,
-                type: 'api_error',
-                code: error.statusCode?.toString() || '500',
-              },
-            },
-          },
+        // Return an OpenAI-compatible error response so AI SDKs can parse it
+        const errorBody = createErrorResponse(error.message, request.body.model || 'default');
+        return response.ok({
+          headers: { 'Content-Type': 'application/json' },
+          body: errorBody,
         });
       }
     }
@@ -279,13 +273,23 @@ const handleStreamingRequest = async ({
     },
     error: (error: Error) => {
       routeLogger.error(`Streaming error: ${error.message}`);
-      const errorChunk = {
-        error: {
-          message: error.message,
-          type: 'api_error',
-        },
+      // Emit a valid OpenAI delta chunk with error content so AI SDKs can parse it
+      const errorContentChunk = {
+        id: completionId,
+        object: 'chat.completion.chunk',
+        created: Math.floor(Date.now() / 1000),
+        model,
+        choices: [
+          {
+            index: 0,
+            delta: { content: `Error: ${error.message}` },
+            finish_reason: null,
+          },
+        ],
       };
-      passThrough.write(`data: ${JSON.stringify(errorChunk)}\n\n`);
+      passThrough.write(`data: ${JSON.stringify(errorContentChunk)}\n\n`);
+      const finalChunk = createFinalChunk(model, completionId, false, undefined);
+      passThrough.write(`data: ${JSON.stringify(finalChunk)}\n\n`);
       passThrough.write('data: [DONE]\n\n');
       passThrough.end();
     },
@@ -334,22 +338,30 @@ const handleNonStreamingRequest = async ({
   response: any;
   logger: Logger;
 }) => {
-  const result = await client.chatComplete({
-    connectorId,
-    system,
-    messages,
-    temperature,
-    tools,
-    toolChoice,
-    stream: false,
-  });
+  try {
+    const result = await client.chatComplete({
+      connectorId,
+      system,
+      messages,
+      temperature,
+      tools,
+      toolChoice,
+      stream: false,
+    });
 
-  const openAiResponse = inferenceResponseToOpenAi(result, model);
+    const openAiResponse = inferenceResponseToOpenAi(result, model);
 
-  return response.ok({
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: openAiResponse,
-  });
+    return response.ok({
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: openAiResponse,
+    });
+  } catch (error) {
+    routeLogger.error(`Non-streaming completion error: ${error.message}`);
+    return response.ok({
+      headers: { 'Content-Type': 'application/json' },
+      body: createErrorResponse(error.message, model),
+    });
+  }
 };

@@ -289,7 +289,7 @@ export const inferenceResponseToOpenAi = (
 ): object => {
   const message: Record<string, unknown> = {
     role: 'assistant',
-    content: response.content || null,
+    content: response.content ?? '',
   };
 
   if (response.toolCalls && response.toolCalls.length > 0) {
@@ -324,5 +324,33 @@ export const inferenceResponseToOpenAi = (
           total_tokens: response.tokens.total,
         }
       : undefined,
+  };
+};
+
+/**
+ * Create an OpenAI-compatible error response that AI SDKs can parse.
+ * Always includes choices[0].message so the SDK doesn't crash on missing content.
+ */
+export const createErrorResponse = (errorMessage: string, model: string): object => {
+  return {
+    id: `chatcmpl-${uuidv4()}`,
+    object: 'chat.completion',
+    created: Math.floor(Date.now() / 1000),
+    model,
+    choices: [
+      {
+        index: 0,
+        message: {
+          role: 'assistant',
+          content: `Error: ${errorMessage}`,
+        },
+        finish_reason: 'stop',
+      },
+    ],
+    usage: {
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0,
+    },
   };
 };
