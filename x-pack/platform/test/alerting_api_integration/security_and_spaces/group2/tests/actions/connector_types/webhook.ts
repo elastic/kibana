@@ -160,6 +160,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           url: webhookSimulatorURL,
         },
         is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
     });
 
@@ -204,7 +205,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           .get(`/api/actions/connector/${createdAction.id}`)
           .expect(200);
 
-        expect(fetchedAction).to.eql(expectedResult);
+        expect(fetchedAction).to.eql({ ...expectedResult, auth_mode: 'shared' });
       });
     }
 
@@ -284,6 +285,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           },
         },
         is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
     });
 
