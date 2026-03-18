@@ -16,7 +16,7 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { getPersistedTabMock } from '../redux/__mocks__/internal_state.mocks';
 import { createUrlSyncObservables } from './create_url_sync_observables';
 import { selectTab } from '../redux/selectors';
-import { selectTabRuntimeState } from '../redux';
+import { getCurrentProfileId } from '../redux/actions/tab_state';
 import type { DiscoverAppState } from '../redux/types';
 
 describe('createUrlSyncObservables', () => {
@@ -92,12 +92,9 @@ describe('createUrlSyncObservables', () => {
     expect(currentAppState).toBeDefined();
     expect(currentAppState.query).toBeDefined();
 
-    const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
-      .scopedProfilesManager$.getValue()
-      .getContexts().dataSourceContext.profileId;
-    const snapshotsByProfileId = structuredClone(
-      selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
-    );
+    const profileId = getCurrentProfileId(runtimeStateManager, tabId);
+    const snapshotsByProfileId = selectTab(internalState.getState(), tabId).defaultProfileState
+      .snapshotsByProfileId;
 
     let state = internalState.getState();
     let tab = selectTab(state, tabId);
@@ -113,7 +110,7 @@ describe('createUrlSyncObservables', () => {
     state = internalState.getState();
     tab = selectTab(state, tabId);
     expect(tab.appState.hideChart).toBe(true);
-    expect(tab.defaultProfileState.snapshotsByProfileId).toEqual(snapshotsByProfileId);
+    expect(tab.defaultProfileState.snapshotsByProfileId).toBe(snapshotsByProfileId);
     expect(tab.defaultProfileState.snapshotsByProfileId[profileId]).toBe(
       snapshotsByProfileId[profileId]
     );
@@ -159,7 +156,7 @@ describe('createUrlSyncObservables', () => {
     appStateContainer.set(null);
 
     const currentAppState = appStateContainer.get();
-    expect(currentAppState).toEqual(originalAppState);
+    expect(currentAppState).toBe(originalAppState);
   });
 
   it('should not set app state when nothing is passed to urlAppStateContainer', async () => {
@@ -170,7 +167,7 @@ describe('createUrlSyncObservables', () => {
     urlAppStateContainer.set(null);
 
     const currentAppState = urlAppStateContainer.get();
-    expect(currentAppState).toEqual(originalAppState);
+    expect(currentAppState).toBe(originalAppState);
   });
 
   it('should not set global state when nothing is passed', async () => {
