@@ -160,6 +160,7 @@ describe('initialize edit api', () => {
     };
 
     let mockedNavigate: jest.Mock;
+    let getLocationMock: jest.Mock;
 
     beforeEach(() => {
       mockedNavigate = jest.fn();
@@ -169,9 +170,11 @@ describe('initialize edit api', () => {
       mockedApi.dataViews$.next([dataViewMock]);
       mockedApi.savedObjectId$.next('test-id');
 
-      (discoverServiceMock.locator.getLocation as jest.Mock).mockReset().mockResolvedValue({
+      getLocationMock = jest.mocked(discoverServiceMock.locator.getLocation);
+
+      getLocationMock.mockReset().mockResolvedValue({
         app: 'discover',
-        path: '/mock-url',
+        path: '/mock-url-for-onedit',
         state: {},
       });
     });
@@ -184,13 +187,14 @@ describe('initialize edit api', () => {
         isEditable: () => true,
         discoverServices: discoverServiceMock,
         getTitle: () => 'test-title',
+        getSelectedTabId: () => undefined,
       });
 
       await editApi?.onEdit();
 
       expect(mockedNavigate).toHaveBeenCalledTimes(1);
       expect(mockedNavigate).toHaveBeenCalledWith('discover', {
-        path: '/mock-url',
+        path: '/mock-url-for-onedit',
         state: expect.objectContaining({
           embeddableId: 'test',
           originatingApp: 'dashboard',
@@ -233,25 +237,7 @@ describe('initialize edit api', () => {
 
       await editApi?.onEdit();
 
-      const locatorCallArgs = (discoverServiceMock.locator.getLocation as jest.Mock).mock
-        .calls[0][0];
-      expect(locatorCallArgs).not.toHaveProperty('tab');
-    });
-
-    it('should not pass a tab param when getSelectedTabId is not provided', async () => {
-      const editApi = initializeEditApi({
-        uuid: 'test',
-        parentApi: mockedParentApi,
-        partialApi: mockedApi,
-        isEditable: () => true,
-        discoverServices: discoverServiceMock,
-        getTitle: () => 'test-title',
-      });
-
-      await editApi?.onEdit();
-
-      const locatorCallArgs = (discoverServiceMock.locator.getLocation as jest.Mock).mock
-        .calls[0][0];
+      const locatorCallArgs = getLocationMock.mock.calls[0][0];
       expect(locatorCallArgs).not.toHaveProperty('tab');
     });
 

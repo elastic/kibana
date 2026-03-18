@@ -67,4 +67,18 @@ describe('view saved search action', () => {
       getDiscoverLocatorParams(compatibleEmbeddableApi)
     );
   });
+
+  it('execute passes selected tab id to the locator when available', async () => {
+    const embeddableWithTab = {
+      ...compatibleEmbeddableApi,
+      selectedTabId$: new BehaviorSubject<string | undefined>('tab-1'),
+    } as unknown as SearchEmbeddableApi;
+
+    const action = new ViewSavedSearchAction(applicationMock, services.locator);
+    await action.execute({ embeddable: embeddableWithTab });
+
+    expect(discoverServiceMock.locator.navigate).toHaveBeenCalledWith(
+      getDiscoverLocatorParams(embeddableWithTab, { selectedTabId: 'tab-1' })
+    );
+  });
 });

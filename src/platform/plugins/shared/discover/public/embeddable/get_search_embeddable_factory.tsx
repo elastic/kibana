@@ -239,6 +239,7 @@ export const getSearchEmbeddableFactory = ({
         dataLoading$,
         blockingError$,
         savedObjectId$,
+        selectedTabId$,
         defaultTitle$,
         defaultDescription$,
         hasTimeRange: () => {

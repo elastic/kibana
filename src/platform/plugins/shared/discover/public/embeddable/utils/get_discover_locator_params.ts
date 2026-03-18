@@ -23,7 +23,8 @@ import { type PublishesSavedSearch } from '../types';
 
 export const getDiscoverLocatorParams = (
   api: PublishesSavedSearch &
-    Partial<PublishesSavedObjectId & PublishesUnifiedSearch & HasParentApi>
+    Partial<PublishesSavedObjectId & PublishesUnifiedSearch & HasParentApi>,
+  options?: { selectedTabId?: string }
 ) => {
   const savedSearch = api.savedSearch$.getValue();
   const query = savedSearch?.searchSource.getField('query');
@@ -35,7 +36,10 @@ export const getDiscoverLocatorParams = (
     : undefined;
 
   const locatorParams: DiscoverAppLocatorParams = savedObjectId
-    ? { savedSearchId: savedObjectId }
+    ? {
+        savedSearchId: savedObjectId,
+        ...(options?.selectedTabId ? { tab: { id: options.selectedTabId } } : {}),
+      }
     : {
         dataViewId: dataView?.id,
         dataViewSpec: dataView?.toMinimalSpec(),

@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { DiscoverAppLocator } from '../../../common';
+import { apiPublishesSelectedTabId } from '../types';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 import { compatibilityCheck } from './view_saved_search_compatibility_check';
 import { ACTION_VIEW_SAVED_SEARCH } from '../constants';
@@ -31,7 +32,10 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
       return;
     }
 
-    const locatorParams = getDiscoverLocatorParams(embeddable);
+    const selectedTabId = apiPublishesSelectedTabId(embeddable)
+      ? embeddable.selectedTabId$.getValue()
+      : undefined;
+    const locatorParams = getDiscoverLocatorParams(embeddable, { selectedTabId });
     await this.locator.navigate(locatorParams);
   }
 
