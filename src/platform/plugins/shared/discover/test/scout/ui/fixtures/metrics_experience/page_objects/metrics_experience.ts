@@ -124,9 +124,7 @@ export class MetricsExperiencePage {
    * approach used by `DiscoverApp.waitForDocTableRendered`.
    */
   public async waitForCardRenderComplete(index: number): Promise<void> {
-    const panel = this.getCardByIndex(index).locator(
-      '[data-test-subj="embeddablePanel"]'
-    );
+    const panel = this.getCardByIndex(index).locator('[data-test-subj="embeddablePanel"]');
     await expect(panel).toBeVisible();
 
     const minDurationMs = 2_000;
