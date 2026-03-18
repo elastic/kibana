@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { SolutionViewSwitchModal } from './solution_view_switch_modal';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+export const SolutionViewSwitchModal = dynamic(() =>
+  import('./solution_view_switch_modal').then((mod) => ({ default: mod.SolutionViewSwitchModal }))
+);
