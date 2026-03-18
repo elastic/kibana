@@ -36,27 +36,21 @@ export const selectSkills = async ({
     return [];
   }
 
-  const [selectedSkillsMap, builtinSkills, pluginSkillsMap] = await Promise.all([
-    skillIds.length > 0
-      ? skills.bulkGet(skillIds)
+  const allExplicitIds = [...skillIds, ...pluginSkillIds];
+
+  const [explicitSkillsMap, builtinSkills] = await Promise.all([
+    allExplicitIds.length > 0
+      ? skills.bulkGet(allExplicitIds)
       : Promise.resolve(new Map<string, InternalSkillDefinition>()),
     enableElasticCapabilities
       ? skills.list({ type: 'built-in' })
       : Promise.resolve([] as InternalSkillDefinition[]),
-    pluginSkillIds.length > 0
-      ? skills.bulkGet(pluginSkillIds)
-      : Promise.resolve(new Map<string, InternalSkillDefinition>()),
   ]);
 
-  const merged = new Map(selectedSkillsMap);
+  const merged = new Map(explicitSkillsMap);
   for (const skill of builtinSkills) {
     if (!merged.has(skill.id)) {
       merged.set(skill.id, skill);
-    }
-  }
-  for (const [id, skill] of pluginSkillsMap) {
-    if (!merged.has(id)) {
-      merged.set(id, skill);
     }
   }
 
