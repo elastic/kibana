@@ -53,7 +53,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ snoozed_until: futureDate });
+        .send({ snoozedUntil: futureDate });
 
       expect(response.status).to.be(200);
       expect(response.body.snoozedUntil).to.be(futureDate);
@@ -75,7 +75,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ snoozed_until: futureDate });
+        .send({ snoozedUntil: futureDate });
 
       expect(response.status).to.be(200);
       expect(response.body.snoozedUntil).to.be(futureDate);
@@ -91,13 +91,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ snoozed_until: firstDate });
+        .send({ snoozedUntil: firstDate });
 
       const response = await supertestWithoutAuth
         .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ snoozed_until: secondDate });
+        .send({ snoozedUntil: secondDate });
 
       expect(response.status).to.be(200);
       expect(response.body.snoozedUntil).to.be(secondDate);
@@ -110,7 +110,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ snoozed_until: 'not-a-date' });
+        .send({ snoozedUntil: 'not-a-date' });
 
       expect(response.status).to.be(400);
     });
@@ -122,7 +122,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/non-existent-id/_snooze`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ snoozed_until: futureDate });
+        .send({ snoozedUntil: futureDate });
 
       expect(response.status).to.be(404);
     });

@@ -70,7 +70,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ snoozed_until: snoozedUntil });
+        .send({ snoozedUntil });
 
       expect(response.status).to.be(200);
       return response.body;
@@ -130,8 +130,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const futureDate = new Date(Date.now() + 86_400_000).toISOString();
 
       const response = await bulkAction([
-        { id: p1.id, action: 'snooze', snoozed_until: futureDate },
-        { id: p2.id, action: 'snooze', snoozed_until: futureDate },
+        { id: p1.id, action: 'snooze', snoozedUntil: futureDate },
+        { id: p2.id, action: 'snooze', snoozedUntil: futureDate },
       ]);
 
       expect(response.status).to.be(200);
@@ -177,7 +177,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await bulkAction([
         { id: pEnable.id, action: 'enable' },
         { id: pDisable.id, action: 'disable' },
-        { id: pSnooze.id, action: 'snooze', snoozed_until: futureDate },
+        { id: pSnooze.id, action: 'snooze', snoozedUntil: futureDate },
         { id: pUnsnooze.id, action: 'unsnooze' },
       ]);
 

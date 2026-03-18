@@ -50,7 +50,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ snoozed_until: snoozedUntil });
+        .send({ snoozedUntil });
 
       expect(response.status).to.be(200);
       return response.body;

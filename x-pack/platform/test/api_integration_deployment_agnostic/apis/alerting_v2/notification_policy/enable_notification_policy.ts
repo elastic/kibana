@@ -85,7 +85,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ snoozed_until: futureDate });
+        .send({ snoozedUntil: futureDate });
 
       // Disable then enable
       await supertestWithoutAuth
