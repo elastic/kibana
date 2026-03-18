@@ -9,9 +9,8 @@ import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import userEvent from '@testing-library/user-event';
 import type { Rule } from '../../../../types';
-import { ViewInApp } from './view_in_app';
+import { ViewInDiscover } from './view_in_discover';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 const mockGetNavigation = jest.fn();
@@ -45,20 +44,18 @@ describe('view in discover, link to the app that created the rule', () => {
     const rule = mockRule();
     mockGetNavigation.mockResolvedValueOnce(undefined);
 
-    const { container } = renderWithIntl(<ViewInApp rule={rule} />);
+    const { container } = renderWithIntl(<ViewInDiscover rule={rule} />);
 
     await waitFor(() => expect(mockGetNavigation).toBeCalledWith(rule.id));
     expect(container).toBeEmptyDOMElement();
   });
 
   it('renders link when there is navigation', async () => {
-    const user = userEvent.setup();
-
     const rule = mockRule({ id: 'rule-with-nav', consumer: 'discover' });
 
     mockGetNavigation.mockResolvedValueOnce('/rule');
 
-    renderWithIntl(<ViewInApp rule={rule} />);
+    renderWithIntl(<ViewInDiscover rule={rule} />);
 
     const button = await screen.findByRole('link', { name: /view in discover/i });
 

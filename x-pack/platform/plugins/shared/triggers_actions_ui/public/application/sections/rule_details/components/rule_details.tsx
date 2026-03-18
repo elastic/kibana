@@ -73,7 +73,7 @@ import {
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import type { RefreshToken } from './types';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
-import { ViewInApp } from './view_in_app';
+import { ViewInDiscover } from './view_in_discover';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -447,7 +447,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               isInternallyManaged={ruleType.isInternallyManaged}
             />
           ),
-          <ViewInApp rule={rule} />,
+          <ViewInDiscover rule={rule} />,
           <ViewLinkedObject rule={rule} />,
         ]}
       />

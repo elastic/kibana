@@ -14,7 +14,7 @@ import { pipe } from 'fp-ts/pipeable';
 import type { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
-export interface ViewInAppProps {
+export interface ViewInDiscoverProps {
   rule: Rule;
 }
 
@@ -22,7 +22,7 @@ const NO_NAVIGATION = false;
 
 type RuleNavigationLoadingState = string | false | null;
 
-export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ rule }) => {
+export const ViewInDiscover: React.FunctionComponent<ViewInDiscoverProps> = ({ rule }) => {
   const {
     http: { basePath },
     alerting: maybeAlerting,
