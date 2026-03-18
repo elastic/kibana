@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExecutionError } from '@kbn/workflows/server';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitTryBlockNodeImpl } from '../exit_try_block_node_impl';
@@ -64,6 +65,23 @@ describe('ExitTryBlockNodeImpl', () => {
       it('should not go to next step when there is an error', async () => {
         await underTest.run();
         expect(mockWorkflowRuntime.navigateToNextNode).not.toHaveBeenCalled();
+      });
+
+      it('should preserve error type by wrapping in ExecutionError (e.g., TimeoutError)', async () => {
+        const serializedTimeoutError = {
+          type: 'TimeoutError',
+          message: 'Step execution exceeded timeout',
+        };
+        mockStepExecutionRuntime.getCurrentStepState = jest.fn().mockReturnValue({
+          error: serializedTimeoutError,
+        });
+
+        await underTest.run();
+
+        expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(expect.any(ExecutionError));
+        const failedError = (mockStepExecutionRuntime.failStep as jest.Mock).mock.calls[0][0];
+        expect(failedError).toBeInstanceOf(ExecutionError);
+        expect(failedError.toSerializableObject()).toEqual(serializedTimeoutError);
       });
     });
 
