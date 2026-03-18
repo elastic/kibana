@@ -25,7 +25,6 @@ describe('formatPageFilterSearchParam', () => {
 
   it('it sets default values when they are undefined', () => {
     const filter: FilterControlConfig = {
-      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       field_name: 'user.name',
     };
 

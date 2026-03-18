@@ -10,7 +10,6 @@
 import { isEmpty, isEqual, pick } from 'lodash';
 import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import type { FilterControlConfig } from './types';
 
@@ -25,7 +24,6 @@ export const getFilterItemObjListFromControlState = (controlState: ControlGroupR
     const { field_name, selected_options, title, exists_selected, exclude, display_settings } =
       panel as OptionsListDSLControlState;
     return {
-      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       field_name,
       selected_options,
       title,

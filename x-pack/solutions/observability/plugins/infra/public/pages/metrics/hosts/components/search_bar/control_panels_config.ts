@@ -14,7 +14,6 @@ import {
   type DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
 import type { ControlPanels } from '@kbn/observability-shared-plugin/public';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 type ReplaceableControl = Record<
   string,
@@ -22,7 +21,6 @@ type ReplaceableControl = Record<
 >;
 const commonControlPanelConfig: ControlPanels = {
   [CLOUD_PROVIDER]: {
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     order: 1,
     width: 'medium',
     grow: false,
@@ -31,7 +29,6 @@ const commonControlPanelConfig: ControlPanels = {
     title: 'Cloud Provider',
   },
   [SERVICE_NAME]: {
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     order: 2,
     width: 'medium',
     grow: false,
@@ -44,7 +41,6 @@ const commonControlPanelConfig: ControlPanels = {
 const controlPanelConfig: Record<DataSchemaFormat, ControlPanels> = {
   ecs: {
     [HOST_OS_NAME]: {
-      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       order: 0,
       width: 'medium',
       grow: false,
@@ -55,7 +51,6 @@ const controlPanelConfig: Record<DataSchemaFormat, ControlPanels> = {
   },
   semconv: {
     [OS_NAME]: {
-      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       order: 0,
       width: 'medium',
       grow: false,

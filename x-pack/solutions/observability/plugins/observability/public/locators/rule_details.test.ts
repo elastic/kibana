@@ -6,7 +6,6 @@
  */
 
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import {
   RULE_DETAILS_EXECUTION_TAB,
   RULE_DETAILS_ALERTS_TAB,
@@ -60,7 +59,6 @@ describe('RuleDetailsLocator', () => {
   it('should return correct url when controlConfigs is provided', async () => {
     const mockedControlConfigs = [
       {
-        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         title: 'Status',
         field_name: ALERT_STATUS,
         selected_options: ['untracked'],
@@ -71,15 +69,14 @@ describe('RuleDetailsLocator', () => {
         persist: true,
       },
       {
-        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         title: 'Rule',
         field_name: ALERT_RULE_NAME,
         display_settings: {
           hide_exists: true,
         },
       },
-      { ...DEFAULT_DSL_OPTIONS_LIST_STATE, title: 'Group', field_name: 'kibana.alert.group.value' },
-      { ...DEFAULT_DSL_OPTIONS_LIST_STATE, title: 'Tags', field_name: 'tags' },
+      { title: 'Group', field_name: 'kibana.alert.group.value' },
+      { title: 'Tags', field_name: 'tags' },
     ];
     const location = await locator.getLocation({
       ruleId: mockedRuleId,

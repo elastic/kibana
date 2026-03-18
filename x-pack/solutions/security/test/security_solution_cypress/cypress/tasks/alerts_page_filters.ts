@@ -6,7 +6,6 @@
  */
 
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import {
   CONTROL_FRAMES,
   OPTION_LIST_LABELS,
@@ -15,7 +14,6 @@ import {
 
 const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
   {
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: 'Status',
     field_name: 'kibana.alert.workflow_status',
     selected_options: ['open'],
@@ -26,7 +24,6 @@ const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
     persist: true,
   },
   {
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: 'Severity',
     field_name: 'kibana.alert.severity',
     display_settings: {
@@ -35,12 +32,10 @@ const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
     },
   },
   {
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: 'User',
     field_name: 'user.name',
   },
   {
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: 'Host',
     field_name: 'host.name',
   },

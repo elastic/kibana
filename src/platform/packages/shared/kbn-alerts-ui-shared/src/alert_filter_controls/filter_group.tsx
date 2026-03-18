@@ -20,7 +20,7 @@ import type { DataControlState } from '@kbn/controls-schemas';
 import { controlGroupStateBuilder } from '@kbn/control-group-renderer/src/control_group_state_builder';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { debounce, isEqual, isEqualWith } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -269,7 +269,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     overridingControls = overridingControls.map((item) => {
       return {
         // give default value to params which are coming from the URL
-        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         field_name: item.field_name,
         title: item.title,
         selected_options: item.selected_options ?? [],

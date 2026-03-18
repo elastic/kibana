@@ -20,7 +20,6 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { ALERT_SEVERITY, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
@@ -155,7 +154,6 @@ export const AlertsByStatus = ({
     (status: Status, level?: string) =>
       navigateToAlerts([
         {
-          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           title: OPEN_IN_ALERTS_TITLE_STATUS,
           selected_options: [status],
           field_name: ALERT_WORKFLOW_STATUS,
@@ -163,7 +161,6 @@ export const AlertsByStatus = ({
         ...(level
           ? [
               {
-                ...DEFAULT_DSL_OPTIONS_LIST_STATE,
                 title: OPEN_IN_ALERTS_TITLE_SEVERITY,
                 selected_options: [level],
                 field_name: ALERT_SEVERITY,
@@ -173,7 +170,6 @@ export const AlertsByStatus = ({
         ...(entityFilter
           ? [
               {
-                ...DEFAULT_DSL_OPTIONS_LIST_STATE,
                 selected_options: [entityFilter.value],
                 field_name: entityFilter.field,
               },

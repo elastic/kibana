@@ -8,7 +8,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
@@ -67,7 +66,6 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
       telemetry.reportEvent(EntityEventTypes.EntityAlertsClicked, { entity: riskEntity });
       openAlertsPageWithFilters([
         {
-          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           title: getRiskEntityTranslation(riskEntity),
           selected_options: [entityName],
           field_name: entityNameField,

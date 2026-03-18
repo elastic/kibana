@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { SecurityPageName } from '../../app/types';
 import { useNavigateToAlertsPageWithFilters } from './use_navigate_to_alerts_page_with_filters';
 
@@ -18,7 +17,6 @@ jest.mock('../lib/kibana', () => ({
 describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page with single filter', () => {
     const filter = {
-      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       title: 'test filter',
       selected_options: ['test value'],
       field_name: 'test field',
@@ -40,13 +38,11 @@ describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page with multiple filter', () => {
     const filters = [
       {
-        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         title: 'test filter 1',
         selected_options: ['test value 1'],
         field_name: 'test field 1',
       },
       {
-        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         title: 'test filter 2',
         selected_options: ['test value 2'],
         field_name: 'test field 2',
@@ -83,7 +79,6 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
   it('navigates to alerts page in new tab', () => {
     const filter = {
-      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       title: 'test filter',
       selected_options: ['test value'],
       field_name: 'test field',
@@ -105,7 +100,6 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
   it('navigates to alerts page with timerange', () => {
     const filter = {
-      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       title: 'test filter',
       selected_options: ['test value'],
       field_name: 'test field',

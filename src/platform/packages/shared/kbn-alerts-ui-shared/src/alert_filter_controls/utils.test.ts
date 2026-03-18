@@ -16,22 +16,14 @@ import {
 import { initialInputData } from './mocks/data';
 import type { FilterControlConfig } from './types';
 import { isEqualWith } from 'lodash';
-import {
-  DEFAULT_DSL_OPTIONS_LIST_STATE,
-  DEFAULT_PINNED_CONTROL_STATE,
-} from '@kbn/controls-constants';
 
 const defaultControls: FilterControlConfig[] = [
   {
-    ...DEFAULT_PINNED_CONTROL_STATE,
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'first',
     display_settings: { hide_action_bar: true },
     selected_options: ['val1', 'val2'],
   },
   {
-    ...DEFAULT_PINNED_CONTROL_STATE,
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'second',
     display_settings: { hide_action_bar: true },
     selected_options: ['val1', 'val2'],
@@ -41,8 +33,6 @@ const defaultControls: FilterControlConfig[] = [
 
 const firstControlsSet: FilterControlConfig[] = [
   {
-    ...DEFAULT_PINNED_CONTROL_STATE,
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'first',
     selected_options: ['firstVal'],
   },
@@ -50,15 +40,11 @@ const firstControlsSet: FilterControlConfig[] = [
 
 const secondControlsSet: FilterControlConfig[] = [
   {
-    ...DEFAULT_PINNED_CONTROL_STATE,
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'first',
     selected_options: ['secondVal1', 'secondVal2'],
     exists_selected: true,
   },
   {
-    ...DEFAULT_PINNED_CONTROL_STATE,
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'second',
     display_settings: { hide_action_bar: false },
     exclude: true,
@@ -67,8 +53,6 @@ const secondControlsSet: FilterControlConfig[] = [
 
 const thirdControlsSet: FilterControlConfig[] = [
   {
-    ...DEFAULT_PINNED_CONTROL_STATE,
-    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'new',
     selected_options: [],
   },
