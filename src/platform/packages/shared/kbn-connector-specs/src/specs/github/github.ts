@@ -21,6 +21,26 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient } from '../../lib/mcp';
+import {
+  GetMeInputSchema,
+  SearchCodeInputSchema,
+  SearchRepositoriesInputSchema,
+  SearchIssuesInputSchema,
+  SearchPullRequestsInputSchema,
+  SearchUsersInputSchema,
+  ListIssuesInputSchema,
+  ListPullRequestsInputSchema,
+  ListCommitsInputSchema,
+  ListBranchesInputSchema,
+  ListReleasesInputSchema,
+  ListTagsInputSchema,
+  GetCommitInputSchema,
+  GetLatestReleaseInputSchema,
+  PullRequestReadInputSchema,
+  GetFileContentsInputSchema,
+  GetIssueInputSchema,
+  GetIssueCommentsInputSchema,
+} from './types';
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
 
@@ -67,7 +87,7 @@ export const GithubConnector: ConnectorSpec = {
       description: i18n.translate('connectorSpecs.github.actions.getMe.description', {
         defaultMessage: 'Get the authenticated GitHub user profile.',
       }),
-      input: z.object({}),
+      input: GetMeInputSchema,
       handler: async (ctx) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({ name: 'get_me' });
@@ -81,11 +101,7 @@ export const GithubConnector: ConnectorSpec = {
       description: i18n.translate('connectorSpecs.github.actions.searchCode.description', {
         defaultMessage: 'Search for code across GitHub repositories.',
       }),
-      input: z.object({
-        query: z.string().min(1).describe('GitHub code search query'),
-        page: z.number().optional().default(1),
-        perPage: z.number().optional().default(10),
-      }),
+      input: SearchCodeInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -103,11 +119,7 @@ export const GithubConnector: ConnectorSpec = {
         'connectorSpecs.github.actions.searchRepositories.description',
         { defaultMessage: 'Search for GitHub repositories.' }
       ),
-      input: z.object({
-        query: z.string().min(1).describe('GitHub repository search query'),
-        page: z.number().optional().default(1),
-        perPage: z.number().optional().default(10),
-      }),
+      input: SearchRepositoriesInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -124,13 +136,7 @@ export const GithubConnector: ConnectorSpec = {
       description: i18n.translate('connectorSpecs.github.actions.searchIssues.description', {
         defaultMessage: 'Search for issues across GitHub repositories.',
       }),
-      input: z.object({
-        query: z.string().min(1).describe('GitHub issue search query'),
-        order: z.enum(['asc', 'desc']).optional().default('desc'),
-        sort: z.string().optional().default('created'),
-        page: z.number().optional().default(1),
-        perPage: z.number().optional().default(10),
-      }),
+      input: SearchIssuesInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -154,13 +160,7 @@ export const GithubConnector: ConnectorSpec = {
         'connectorSpecs.github.actions.searchPullRequests.description',
         { defaultMessage: 'Search for pull requests across GitHub repositories.' }
       ),
-      input: z.object({
-        query: z.string().min(1).describe('GitHub pull request search query'),
-        order: z.enum(['asc', 'desc']).optional().default('desc'),
-        sort: z.string().optional().default('created'),
-        page: z.number().optional().default(1),
-        perPage: z.number().optional().default(10),
-      }),
+      input: SearchPullRequestsInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -183,11 +183,7 @@ export const GithubConnector: ConnectorSpec = {
       description: i18n.translate('connectorSpecs.github.actions.searchUsers.description', {
         defaultMessage: 'Search for GitHub users.',
       }),
-      input: z.object({
-        query: z.string().min(1).describe('GitHub user search query'),
-        page: z.number().optional().default(1),
-        perPage: z.number().optional().default(10),
-      }),
+      input: SearchUsersInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -204,16 +200,7 @@ export const GithubConnector: ConnectorSpec = {
       description: i18n.translate('connectorSpecs.github.actions.listIssues.description', {
         defaultMessage: 'List issues in a GitHub repository. Uses cursor-based pagination.',
       }),
-      input: z.object({
-        owner: z.string().min(1).describe('Repository owner (user or org)'),
-        repo: z.string().min(1).describe('Repository name'),
-        state: z.enum(['open', 'closed', 'all']).optional().default('open'),
-        first: z.number().optional().default(10).describe('Number of results to return'),
-        after: z
-          .string()
-          .optional()
-          .describe('Cursor for pagination (endCursor from previous response)'),
-      }),
+      input: ListIssuesInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -240,16 +227,7 @@ export const GithubConnector: ConnectorSpec = {
             'List pull requests in a GitHub repository. Uses cursor-based pagination.',
         }
       ),
-      input: z.object({
-        owner: z.string().min(1).describe('Repository owner (user or org)'),
-        repo: z.string().min(1).describe('Repository name'),
-        state: z.enum(['open', 'closed', 'all']).optional().default('open'),
-        first: z.number().optional().default(10).describe('Number of results to return'),
-        after: z
-          .string()
-          .optional()
-          .describe('Cursor for pagination (endCursor from previous response)'),
-      }),
+      input: ListPullRequestsInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -272,16 +250,7 @@ export const GithubConnector: ConnectorSpec = {
       description: i18n.translate('connectorSpecs.github.actions.listCommits.description', {
         defaultMessage: 'List commits in a GitHub repository. Uses cursor-based pagination.',
       }),
-      input: z.object({
-        owner: z.string().min(1).describe('Repository owner (user or org)'),
-        repo: z.string().min(1).describe('Repository name'),
-        sha: z.string().optional().describe('Branch name or commit SHA to start listing from'),
-        first: z.number().optional().default(10).describe('Number of results to return'),
-        after: z
-          .string()
-          .optional()
-          .describe('Cursor for pagination (endCursor from previous response)'),
-      }),
+      input: ListCommitsInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -304,15 +273,7 @@ export const GithubConnector: ConnectorSpec = {
       description: i18n.translate('connectorSpecs.github.actions.listBranches.description', {
         defaultMessage: 'List branches in a GitHub repository. Uses cursor-based pagination.',
       }),
-      input: z.object({
-        owner: z.string().min(1).describe('Repository owner (user or org)'),
-        repo: z.string().min(1).describe('Repository name'),
-        first: z.number().optional().default(10).describe('Number of results to return'),
-        after: z
-          .string()
-          .optional()
-          .describe('Cursor for pagination (endCursor from previous response)'),
-      }),
+      input: ListBranchesInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -334,15 +295,7 @@ export const GithubConnector: ConnectorSpec = {
       description: i18n.translate('connectorSpecs.github.actions.listReleases.description', {
         defaultMessage: 'List releases in a GitHub repository. Uses cursor-based pagination.',
       }),
-      input: z.object({
-        owner: z.string().min(1).describe('Repository owner (user or org)'),
-        repo: z.string().min(1).describe('Repository name'),
-        first: z.number().optional().default(10).describe('Number of results to return'),
-        after: z
-          .string()
-          .optional()
-          .describe('Cursor for pagination (endCursor from previous response)'),
-      }),
+      input: ListReleasesInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -364,15 +317,7 @@ export const GithubConnector: ConnectorSpec = {
       description: i18n.translate('connectorSpecs.github.actions.listTags.description', {
         defaultMessage: 'List tags in a GitHub repository. Uses cursor-based pagination.',
       }),
-      input: z.object({
-        owner: z.string().min(1).describe('Repository owner (user or org)'),
-        repo: z.string().min(1).describe('Repository name'),
-        first: z.number().optional().default(10).describe('Number of results to return'),
-        after: z
-          .string()
-          .optional()
-          .describe('Cursor for pagination (endCursor from previous response)'),
-      }),
+      input: ListTagsInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -394,11 +339,7 @@ export const GithubConnector: ConnectorSpec = {
       description: i18n.translate('connectorSpecs.github.actions.getCommit.description', {
         defaultMessage: 'Get details of a specific commit.',
       }),
-      input: z.object({
-        owner: z.string().min(1).describe('Repository owner (user or org)'),
-        repo: z.string().min(1).describe('Repository name'),
-        sha: z.string().min(1).describe('Commit SHA'),
-      }),
+      input: GetCommitInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -416,10 +357,7 @@ export const GithubConnector: ConnectorSpec = {
         'connectorSpecs.github.actions.getLatestRelease.description',
         { defaultMessage: 'Get the latest release of a GitHub repository.' }
       ),
-      input: z.object({
-        owner: z.string().min(1).describe('Repository owner (user or org)'),
-        repo: z.string().min(1).describe('Repository name'),
-      }),
+      input: GetLatestReleaseInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
@@ -436,16 +374,68 @@ export const GithubConnector: ConnectorSpec = {
       description: i18n.translate('connectorSpecs.github.actions.pullRequestRead.description', {
         defaultMessage: 'Read the full details of a specific pull request.',
       }),
-      input: z.object({
-        owner: z.string().min(1).describe('Repository owner (user or org)'),
-        repo: z.string().min(1).describe('Repository name'),
-        pullNumber: z.number().describe('Pull request number'),
-      }),
+      input: PullRequestReadInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
           const result = await mcp.callTool({
             name: 'pull_request_read',
-            arguments: { owner: input.owner, repo: input.repo, pullNumber: input.pullNumber },
+            arguments: {
+              owner: input.owner,
+              repo: input.repo,
+              pullNumber: input.pullNumber,
+              method: input.method,
+            },
+          });
+          return result.content;
+        });
+      },
+    },
+
+    getFileContents: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.getFileContents.description', {
+        defaultMessage: 'Get the contents of a file or directory from a GitHub repository.',
+      }),
+      input: GetFileContentsInputSchema,
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'get_file_contents',
+            arguments: { owner: input.owner, repo: input.repo, path: input.path, ref: input.ref },
+          });
+          return result.content;
+        });
+      },
+    },
+
+    getIssue: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.getIssue.description', {
+        defaultMessage: 'Get details of a specific issue in a GitHub repository.',
+      }),
+      input: GetIssueInputSchema,
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'get_issue',
+            arguments: { owner: input.owner, repo: input.repo, issueNumber: input.issueNumber },
+          });
+          return result.content;
+        });
+      },
+    },
+
+    getIssueComments: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.getIssueComments.description', {
+        defaultMessage: 'Get comments for a specific issue in a GitHub repository.',
+      }),
+      input: GetIssueCommentsInputSchema,
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'get_issue_comments',
+            arguments: { owner: input.owner, repo: input.repo, issueNumber: input.issueNumber },
           });
           return result.content;
         });

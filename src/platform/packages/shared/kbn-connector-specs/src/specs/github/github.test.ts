@@ -280,16 +280,105 @@ describe('GithubConnector', () => {
   });
 
   describe('pullRequestRead action', () => {
-    it('calls pull_request_read', async () => {
+    it('defaults method to get', async () => {
+      const input = parse('pullRequestRead', { owner: 'elastic', repo: 'kibana', pullNumber: 42 });
+      await GithubConnector.actions.pullRequestRead.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'pull_request_read',
+        arguments: { owner: 'elastic', repo: 'kibana', pullNumber: 42, method: 'get' },
+      });
+    });
+
+    it('passes get_diff method', async () => {
       await GithubConnector.actions.pullRequestRead.handler(mockContext, {
         owner: 'elastic',
         repo: 'kibana',
         pullNumber: 42,
+        method: 'get_diff',
       });
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'pull_request_read',
-        arguments: { owner: 'elastic', repo: 'kibana', pullNumber: 42 },
+        arguments: { owner: 'elastic', repo: 'kibana', pullNumber: 42, method: 'get_diff' },
+      });
+    });
+
+    it('passes get_review_comments method', async () => {
+      await GithubConnector.actions.pullRequestRead.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        pullNumber: 42,
+        method: 'get_review_comments',
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'pull_request_read',
+        arguments: {
+          owner: 'elastic',
+          repo: 'kibana',
+          pullNumber: 42,
+          method: 'get_review_comments',
+        },
+      });
+    });
+  });
+
+  describe('getFileContents action', () => {
+    it('calls get_file_contents with required args', async () => {
+      await GithubConnector.actions.getFileContents.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        path: 'README.md',
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_file_contents',
+        arguments: { owner: 'elastic', repo: 'kibana', path: 'README.md', ref: undefined },
+      });
+    });
+
+    it('passes optional ref', async () => {
+      await GithubConnector.actions.getFileContents.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        path: 'src/index.ts',
+        ref: 'main',
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_file_contents',
+        arguments: { owner: 'elastic', repo: 'kibana', path: 'src/index.ts', ref: 'main' },
+      });
+    });
+  });
+
+  describe('getIssue action', () => {
+    it('calls get_issue with required args', async () => {
+      await GithubConnector.actions.getIssue.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        issueNumber: 123,
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_issue',
+        arguments: { owner: 'elastic', repo: 'kibana', issueNumber: 123 },
+      });
+    });
+  });
+
+  describe('getIssueComments action', () => {
+    it('calls get_issue_comments with required args', async () => {
+      await GithubConnector.actions.getIssueComments.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        issueNumber: 123,
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_issue_comments',
+        arguments: { owner: 'elastic', repo: 'kibana', issueNumber: 123 },
       });
     });
   });
