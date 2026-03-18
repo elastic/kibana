@@ -54,11 +54,13 @@ jest.mock('../../../../../common', () => ({
 }));
 
 const mockReportEditDataStreamFlyoutOpened = jest.fn();
+const mockReportDataStreamDeleteConfirmed = jest.fn();
+const mockReportDataStreamRefreshConfirmed = jest.fn();
 jest.mock('../../../../telemetry_context', () => ({
   useTelemetry: () => ({
     reportEditDataStreamFlyoutOpened: mockReportEditDataStreamFlyoutOpened,
-    reportDataStreamDeleteConfirmed: jest.fn(),
-    reportDataStreamRefreshConfirmed: jest.fn(),
+    reportDataStreamDeleteConfirmed: mockReportDataStreamDeleteConfirmed,
+    reportDataStreamRefreshConfirmed: mockReportDataStreamRefreshConfirmed,
   }),
 }));
 
@@ -454,6 +456,44 @@ describe('DataStreamsTable', () => {
       renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       expect(screen.getByText('Actions')).toBeInTheDocument();
+    });
+  });
+
+  describe('telemetry', () => {
+    it('should call reportDataStreamDeleteConfirmed when delete is confirmed', async () => {
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('deleteDataStreamButton'));
+      await userEvent.click(screen.getByRole('button', { name: /delete/i }));
+
+      expect(mockReportDataStreamDeleteConfirmed).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call reportDataStreamDeleteConfirmed when delete is cancelled', async () => {
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('deleteDataStreamButton'));
+      await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+
+      expect(mockReportDataStreamDeleteConfirmed).not.toHaveBeenCalled();
+    });
+
+    it('should call reportDataStreamRefreshConfirmed when re-analyze is confirmed', async () => {
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('refreshDataStreamButton'));
+      await userEvent.click(screen.getByRole('button', { name: /re-analyze/i }));
+
+      expect(mockReportDataStreamRefreshConfirmed).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call reportDataStreamRefreshConfirmed when re-analyze is cancelled', async () => {
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('refreshDataStreamButton'));
+      await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+
+      expect(mockReportDataStreamRefreshConfirmed).not.toHaveBeenCalled();
     });
   });
 });

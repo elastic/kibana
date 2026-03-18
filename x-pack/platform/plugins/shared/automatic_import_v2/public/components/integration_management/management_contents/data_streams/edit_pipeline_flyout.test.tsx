@@ -75,13 +75,14 @@ jest.mock('../../contexts', () => ({
 
 const mockReportCodeEditorCopyClicked = jest.fn();
 const mockReportPipelineEdited = jest.fn();
+const mockReportEditPipelineTabOpened = jest.fn();
 jest.mock('../../../telemetry_context', () => ({
   useTelemetry: () => ({
     sessionId: 'test-session-id',
     reportDataStreamFlyoutOpened: jest.fn(),
     reportEditDataStreamFlyoutOpened: jest.fn(),
     reportAnalyzeLogsTriggered: jest.fn(),
-    reportEditPipelineTabOpened: jest.fn(),
+    reportEditPipelineTabOpened: mockReportEditPipelineTabOpened,
     reportCodeEditorCopyClicked: mockReportCodeEditorCopyClicked,
     reportPipelineEdited: mockReportPipelineEdited,
   }),
@@ -334,6 +335,22 @@ describe('EditPipelineFlyout', () => {
       await userEvent.click(pipelineTab);
 
       expect(mockSelectPipelineTab).toHaveBeenCalledWith('pipeline');
+    });
+
+    it('calls reportEditPipelineTabOpened when pipeline tab is clicked', async () => {
+      mockUIState.selectedPipelineTab = 'table';
+
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      const pipelineTab = screen.getByRole('tab', { name: 'Ingest pipeline' });
+      await userEvent.click(pipelineTab);
+
+      expect(mockReportEditPipelineTabOpened).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        integrationName: 'Test Integration',
+        dataStreamId: 'ds-1',
+        dataStreamName: 'Test Data Stream',
+      });
     });
 
     it('should render save button and submit updated pipeline', async () => {
