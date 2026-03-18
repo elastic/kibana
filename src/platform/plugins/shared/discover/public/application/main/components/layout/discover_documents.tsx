@@ -341,6 +341,7 @@ function DiscoverDocumentsComponent({
   const setDocViewerUiState = useCurrentTabAction(internalStateActions.setDocViewerUiState);
 
   const latestDocViewerUiState = useLatest(docViewerUiState);
+  const latestInitialDocViewerTabId = useLatest(initialDocViewerTabId);
 
   const onInitialDocViewerStateChange = useCallback(
     (newDocViewerUiState: Partial<DocViewerRestorableState>) => {
@@ -377,7 +378,7 @@ function DiscoverDocumentsComponent({
         columnsMeta={customColumnsMeta}
         savedSearchId={persistedDiscoverSession?.id!}
         query={query}
-        initialTabId={initialDocViewerTabId}
+        initialTabId={latestInitialDocViewerTabId.current}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumnWithTracking}
         onAddColumn={onAddColumnWithTracking}
@@ -394,7 +395,7 @@ function DiscoverDocumentsComponent({
       dataView,
       persistedDiscoverSession?.id,
       query,
-      initialDocViewerTabId,
+      latestInitialDocViewerTabId,
       onAddFilter,
       onRemoveColumnWithTracking,
       onAddColumnWithTracking,
