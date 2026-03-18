@@ -6,22 +6,22 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { SearchHit } from '../../../../../common/search_strategy';
-import { buildThreatDescription } from '../../../../detection_engine/rule_creation_ui/components/description_step/helpers';
-import { useDocumentDetailsContext } from '../../shared/context';
+import { buildThreatDescription } from '../../../detection_engine/rule_creation_ui/components/description_step/helpers';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 
 /**
- * Retrieves mitre attack information from the alert information
+ * Retrieves mitre attack information from the alert document.
  */
-const getMitreComponentParts = (searchHit?: SearchHit) => {
-  const ruleParameters = searchHit?.fields
-    ? searchHit?.fields['kibana.alert.rule.parameters']
-    : null;
-  const threat: Threat = ruleParameters ? ruleParameters[0]?.threat : null;
+const getMitreComponentParts = (hit: DataTableRecord) => {
+  const raw = getFieldValue(hit, ALERT_RULE_PARAMETERS);
+  const ruleParameters = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  const firstParam = Array.isArray(ruleParameters) ? ruleParameters[0] : ruleParameters;
+  const threat = firstParam?.threat ?? null;
   if (!threat) {
     return null;
   }
@@ -33,12 +33,21 @@ const getMitreComponentParts = (searchHit?: SearchHit) => {
   });
 };
 
-export const MitreAttack: FC = () => {
-  const { searchHit } = useDocumentDetailsContext();
-  const threatDetails = useMemo(() => getMitreComponentParts(searchHit), [searchHit]);
+export interface MitreAttackProps {
+  /**
+   * Alert/event document
+   */
+  hit: DataTableRecord;
+}
+
+/**
+ * Displays MITRE ATT&CK tactics and techniques extracted from the alert rule parameters.
+ * Returns null when no threat data is available.
+ */
+export const MitreAttack: FC<MitreAttackProps> = ({ hit }) => {
+  const threatDetails = useMemo(() => getMitreComponentParts(hit), [hit]);
 
   if (!threatDetails || !threatDetails[0]) {
-    // Do not render empty message on MITRE attack because other frameworks could be used
     return null;
   }
 
