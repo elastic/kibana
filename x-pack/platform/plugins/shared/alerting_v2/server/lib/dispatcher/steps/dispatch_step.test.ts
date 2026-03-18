@@ -18,7 +18,7 @@ import { DispatchStep } from './dispatch_step';
 const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
   ({
     getWorkflow: jest.fn(),
-    runWorkflow: jest.fn(),
+    scheduleWorkflow: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
 
 const createWorkflowDetailDto = (
@@ -52,7 +52,7 @@ describe('DispatchStep', () => {
     const step = new DispatchStep(loggerService, mockWfm);
 
     mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
-    mockWfm.runWorkflow.mockResolvedValue('exec-1');
+    mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
 
     const group = createNotificationGroup({
       id: 'g1',
@@ -73,7 +73,7 @@ describe('DispatchStep', () => {
 
     expect(result.type).toBe('continue');
     expect(mockWfm.getWorkflow).toHaveBeenCalledWith('workflow-1', 'default');
-    expect(mockWfm.runWorkflow).toHaveBeenCalledWith(
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'workflow-1', name: 'Test Workflow' }),
       'default',
       expect.objectContaining({
@@ -87,7 +87,8 @@ describe('DispatchStep', () => {
         headers: expect.objectContaining({
           authorization: 'ApiKey dGVzdC1pZDp0ZXN0LWtleQ==',
         }),
-      })
+      }),
+      'notification_policy'
     );
   });
 
@@ -108,7 +109,7 @@ describe('DispatchStep', () => {
     expect(result.type).toBe('continue');
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
     expect(mockWfm.getWorkflow).not.toHaveBeenCalled();
-    expect(mockWfm.runWorkflow).not.toHaveBeenCalled();
+    expect(mockWfm.scheduleWorkflow).not.toHaveBeenCalled();
   });
 
   it('skips dispatch when workflow is not found', async () => {
@@ -136,7 +137,7 @@ describe('DispatchStep', () => {
 
     expect(result.type).toBe('continue');
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
-    expect(mockWfm.runWorkflow).not.toHaveBeenCalled();
+    expect(mockWfm.scheduleWorkflow).not.toHaveBeenCalled();
   });
 
   it('dispatches to multiple workflow destinations', async () => {
@@ -144,7 +145,7 @@ describe('DispatchStep', () => {
     const step = new DispatchStep(loggerService, mockWfm);
 
     mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
-    mockWfm.runWorkflow.mockResolvedValue('exec-1');
+    mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
 
     const group = createNotificationGroup({
       id: 'g1',
@@ -167,7 +168,7 @@ describe('DispatchStep', () => {
     await step.execute(state);
 
     expect(mockWfm.getWorkflow).toHaveBeenCalledTimes(2);
-    expect(mockWfm.runWorkflow).toHaveBeenCalledTimes(2);
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledTimes(2);
   });
 
   it('continues with no-op when dispatch is empty', async () => {

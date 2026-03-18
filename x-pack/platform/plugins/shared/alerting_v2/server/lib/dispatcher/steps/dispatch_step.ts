@@ -20,9 +20,12 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   NotificationGroup,
+  NotificationPolicyWorkflowPayload,
 } from '../types';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
+
 const DEFAULT_SPACE_ID = 'default';
+const NOTIFICATION_POLICY_TRIGGER = 'notification_policy';
 
 @injectable()
 export class DispatchStep implements DispatcherStep {
@@ -106,7 +109,7 @@ export class DispatchStep implements DispatcherStep {
       yaml: workflow.yaml,
     };
 
-    const payload = {
+    const payload: NotificationPolicyWorkflowPayload = {
       id: group.id,
       ruleId: group.ruleId,
       policyId: group.policyId,
@@ -119,16 +122,17 @@ export class DispatchStep implements DispatcherStep {
         `Dispatching notification group ${group.id} to workflow ${workflowId} for policy ${group.policyId}`,
     });
 
-    const executionId = await this.workflowsManagement.runWorkflow(
+    const executionId = await this.workflowsManagement.scheduleWorkflow(
       model,
       DEFAULT_SPACE_ID,
       payload,
-      request
+      request,
+      NOTIFICATION_POLICY_TRIGGER
     );
 
     this.logger.debug({
       message: () =>
-        `Workflow ${workflowId} execution started with id ${executionId} for group ${group.id}`,
+        `Workflow ${workflowId} execution scheduled with id ${executionId} for group ${group.id}`,
     });
   }
 }
