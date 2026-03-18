@@ -246,7 +246,8 @@ export function SettingsTab() {
               helpText={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.discoveryHelp',
                 {
-                  defaultMessage: 'Model used during Discovery phase and Significant Event generation',
+                  defaultMessage:
+                    'Model used during Discovery phase and Significant Event generation',
                 }
               )}
             >
