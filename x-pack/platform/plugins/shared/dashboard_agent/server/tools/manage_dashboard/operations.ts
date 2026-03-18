@@ -14,7 +14,9 @@ import type {
 } from '@kbn/dashboard-agent-common';
 import { panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
-import { upsertMarkdownPanel, type VisualizationFailure } from './utils';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
+import type { GenericAttachmentPanel } from '@kbn/dashboard-agent-common';
+import type { VisualizationFailure } from './utils';
 
 export const setMetadataOperationSchema = z.object({
   operation: z.literal('set_metadata'),
@@ -22,9 +24,18 @@ export const setMetadataOperationSchema = z.object({
   description: z.string().optional(),
 });
 
-export const upsertMarkdownOperationSchema = z.object({
-  operation: z.literal('upsert_markdown'),
-  markdownContent: z.string().describe('Markdown content for the dashboard summary panel.'),
+export const addMarkdownOperationSchema = z.object({
+  operation: z.literal('add_markdown'),
+  markdownContent: z.string().describe('Markdown content for the panel.'),
+  grid: panelGridSchema.describe(
+    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row.'
+  ),
+  sectionId: z
+    .string()
+    .optional()
+    .describe(
+      'Optional section ID to add this panel into. If omitted, panel is added at the top level.'
+    ),
 });
 
 const attachmentWithGridSchema = z.object({
@@ -79,7 +90,7 @@ export const removePanelsOperationSchema = z.object({
 
 export const dashboardOperationSchema = z.discriminatedUnion('operation', [
   setMetadataOperationSchema,
-  upsertMarkdownOperationSchema,
+  addMarkdownOperationSchema,
   addPanelsFromAttachmentsOperationSchema,
   addSectionOperationSchema,
   removeSectionOperationSchema,
@@ -189,19 +200,39 @@ export const executeDashboardOperations = async ({
         break;
       }
 
-      case 'upsert_markdown': {
-        const markdownResult = upsertMarkdownPanel(
-          nextDashboardData.panels,
-          operation.markdownContent
-        );
-        nextDashboardData = {
-          ...nextDashboardData,
-          panels: markdownResult.panels,
+      case 'add_markdown': {
+        const markdownPanel: GenericAttachmentPanel = {
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          panelId: uuidv4(),
+          rawConfig: { content: operation.markdownContent },
+          grid: operation.grid,
         };
 
-        if (markdownResult.changedPanel) {
-          onPanelsAdded([markdownResult.changedPanel]);
+        if (operation.sectionId) {
+          const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
+            ({ sectionId }) => sectionId === operation.sectionId
+          );
+          if (sectionIndex === -1) {
+            throw new Error(`Section "${operation.sectionId}" not found.`);
+          }
+
+          const sections = [...(nextDashboardData.sections ?? [])];
+          sections[sectionIndex] = {
+            ...sections[sectionIndex],
+            panels: [...sections[sectionIndex].panels, markdownPanel],
+          };
+          nextDashboardData = {
+            ...nextDashboardData,
+            sections: asOptionalSections(sections),
+          };
+        } else {
+          nextDashboardData = {
+            ...nextDashboardData,
+            panels: [...nextDashboardData.panels, markdownPanel],
+          };
         }
+
+        onPanelsAdded([markdownPanel]);
         break;
       }
 
