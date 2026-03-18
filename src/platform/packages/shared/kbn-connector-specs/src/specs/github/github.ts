@@ -1,520 +1,509 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+/**
+ * GitHub MCP Connector (v2)
+ *
+ * An MCP-native v2 connector that connects to the GitHub Copilot MCP server.
+ * Uses Mike's Axios-based approach: the framework's ctx.client (Axios) is
+ * wrapped as a fetch adapter and passed to McpClient, so auth/SSL/proxy
+ * come from Axios for free. No client registry needed.
+ *
+ * Auth: Bearer token (PAT or OAuth token)
+ * Transport: Axios → createFetchFromAxios → StreamableHTTPClientTransport
+ */
+
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import { createMcpClientFromAxios } from '../../lib/mcp/create_mcp_client_from_axios';
+
+const MCP_CLIENT_VERSION = '1.0.0';
+
+/**
+ * Lifecycle helper: creates an MCP client from the connector's Axios instance,
+ * connects, runs the callback, and disconnects. Every action call gets a fresh
+ * MCP session (connect-per-action pattern).
+ */
+const withMcpClient = async <T>(
+  ctx: ActionContext,
+  fn: (mcp: ReturnType<typeof createMcpClientFromAxios>) => Promise<T>
+): Promise<T> => {
+  const serverUrl = (ctx.config?.serverUrl as string) ?? '';
+  if (!serverUrl) {
+    throw new Error('config.serverUrl is required');
+  }
+  const mcpClient = createMcpClientFromAxios({
+    logger: ctx.log,
+    axiosInstance: ctx.client,
+    url: serverUrl,
+    name: `kibana-github-mcp-${serverUrl}`,
+    version: MCP_CLIENT_VERSION,
+  });
+  try {
+    await mcpClient.connect();
+    return await fn(mcpClient);
+  } finally {
+    await mcpClient.disconnect();
+  }
+};
 
 export const GithubConnector: ConnectorSpec = {
   metadata: {
     id: '.github',
-    displayName: 'Github',
-    description: i18n.translate('core.kibanaConnectorSpecs.github.metadata.description', {
-      defaultMessage: 'Search through repositories and issues in Github',
+    displayName: 'GitHub',
+    description: i18n.translate('core.kibanaConnectorSpecs.githubMcp.metadata.description', {
+      defaultMessage:
+        'Connect to GitHub via the Copilot MCP server to search and read repositories, issues, pull requests, and more.',
     }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
+
   auth: {
     types: ['bearer'],
-    headers: {
-      Accept: 'application/vnd.github+json',
-    },
+  },
+
+  schema: z.object({
+    serverUrl: z
+      .string()
+      .url()
+      .default('https://api.githubcopilot.com/mcp/')
+      .meta({
+        label: i18n.translate('core.kibanaConnectorSpecs.githubMcp.config.serverUrl.label', {
+          defaultMessage: 'MCP Server URL',
+        }),
+        helpText: i18n.translate('core.kibanaConnectorSpecs.githubMcp.config.serverUrl.helpText', {
+          defaultMessage: 'The URL of the GitHub Copilot MCP server.',
+        }),
+      }),
+  }),
+
+  validateUrls: {
+    fields: ['serverUrl'],
   },
 
   actions: {
-    listRepos: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-        };
-        const response = await ctx.client.get(
-          `https://api.github.com/users/${typedInput.owner}/repos`
-        );
-        return response.data.map((repo: { name: string }) => repo.name);
+
+    getMe: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.getMe.description',
+        { defaultMessage: 'Get the authenticated GitHub user profile.' }
+      ),
+      input: z.object({}),
+      handler: async (ctx) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({ name: 'get_me' });
+          return result.content;
+        });
       },
     },
+
+    searchCode: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.searchCode.description',
+        { defaultMessage: 'Search for code across GitHub repositories.' }
+      ),
+      input: z.object({
+        query: z.string().min(1).describe('GitHub code search query'),
+        page: z.number().default(1).optional(),
+        perPage: z.number().default(10).optional(),
+      }),
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'search_code',
+            arguments: { query: input.query, page: input.page, perPage: input.perPage },
+          });
+          return result.content;
+        });
+      },
+    },
+
+    searchRepositories: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.searchRepositories.description',
+        { defaultMessage: 'Search for GitHub repositories.' }
+      ),
+      input: z.object({
+        query: z.string().min(1).describe('GitHub repository search query'),
+        page: z.number().default(1).optional(),
+        perPage: z.number().default(10).optional(),
+      }),
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'search_repositories',
+            arguments: { query: input.query, page: input.page, perPage: input.perPage },
+          });
+          return result.content;
+        });
+      },
+    },
+
     searchIssues: {
-      isTool: false,
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.searchIssues.description',
+        { defaultMessage: 'Search for issues across GitHub repositories.' }
+      ),
       input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        type: z.enum(['issue', 'pr']),
-        query: z.string().optional(),
-        size: z.number().default(10),
+        query: z.string().min(1).describe('GitHub issue search query'),
+        order: z.enum(['asc', 'desc']).default('desc').optional(),
+        sort: z.string().default('created').optional(),
+        page: z.number().default(1).optional(),
+        perPage: z.number().default(10).optional(),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          type: 'issue' | 'pr';
-          query?: string;
-          size?: number;
-        };
-
-        const query =
-          `repo:${typedInput.owner}/${typedInput.repo} is:${typedInput.type} is:open` +
-          (typedInput.query ? ` ${typedInput.query}` : '');
-
-        const response = await ctx.client.get('https://api.github.com/search/issues', {
-          params: {
-            q: query,
-            per_page: typedInput.size || 10,
-          },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'search_issues',
+            arguments: {
+              query: input.query,
+              order: input.order,
+              sort: input.sort,
+              page: input.page,
+              perPage: input.perPage,
+            },
+          });
+          return result.content;
         });
-
-        return response.data;
       },
     },
-    searchRepoContents: {
-      isTool: false,
+
+    searchPullRequests: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.searchPullRequests.description',
+        { defaultMessage: 'Search for pull requests across GitHub repositories.' }
+      ),
       input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        query: z.string().optional(),
+        query: z.string().min(1).describe('GitHub pull request search query'),
+        order: z.enum(['asc', 'desc']).default('desc').optional(),
+        sort: z.string().default('created').optional(),
+        page: z.number().default(1).optional(),
+        perPage: z.number().default(10).optional(),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          query?: string;
-        };
-        let searchQuery = `repo:${typedInput.owner}/${typedInput.repo}`;
-        if (typedInput.query) {
-          searchQuery += ` ${typedInput.query}`;
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'search_pull_requests',
+            arguments: {
+              query: input.query,
+              order: input.order,
+              sort: input.sort,
+              page: input.page,
+              perPage: input.perPage,
+            },
+          });
+          return result.content;
+        });
+      },
+    },
+
+    searchUsers: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.searchUsers.description',
+        { defaultMessage: 'Search for GitHub users.' }
+      ),
+      input: z.object({
+        query: z.string().min(1).describe('GitHub user search query'),
+        page: z.number().default(1).optional(),
+        perPage: z.number().default(10).optional(),
+      }),
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'search_users',
+            arguments: { query: input.query, page: input.page, perPage: input.perPage },
+          });
+          return result.content;
+        });
+      },
+    },
+
+    listIssues: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.listIssues.description',
+        { defaultMessage: 'List issues in a GitHub repository. Uses cursor-based pagination.' }
+      ),
+      input: z.object({
+        owner: z.string().min(1).describe('Repository owner (user or org)'),
+        repo: z.string().min(1).describe('Repository name'),
+        state: z.enum(['open', 'closed', 'all']).default('open').optional(),
+        first: z.number().default(10).optional().describe('Number of results to return'),
+        after: z
+          .string()
+          .optional()
+          .describe('Cursor for pagination (endCursor from previous response)'),
+      }),
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'list_issues',
+            arguments: {
+              owner: input.owner,
+              repo: input.repo,
+              state: input.state,
+              first: input.first,
+              after: input.after,
+            },
+          });
+          return result.content;
+        });
+      },
+    },
+
+    listPullRequests: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.listPullRequests.description',
+        {
+          defaultMessage:
+            'List pull requests in a GitHub repository. Uses cursor-based pagination.',
         }
-
-        const response = await ctx.client.get('https://api.github.com/search/code', {
-          params: {
-            q: searchQuery,
-          },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        });
-
-        const searchRepoContentsResponseSchema = z.object({
-          total_count: z.number(),
-          items: z.array(
-            z.object({
-              name: z.string(),
-              path: z.string(),
-              html_url: z.string(),
-              repository: z.object({ full_name: z.string() }),
-              score: z.number(),
-            })
-          ),
-        });
-
-        return searchRepoContentsResponseSchema.parse(response.data);
-      },
-    },
-    getDocs: {
-      isTool: false,
+      ),
       input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        ref: z.string().optional(),
+        owner: z.string().min(1).describe('Repository owner (user or org)'),
+        repo: z.string().min(1).describe('Repository name'),
+        state: z.enum(['open', 'closed', 'all']).default('open').optional(),
+        first: z.number().default(10).optional().describe('Number of results to return'),
+        after: z
+          .string()
+          .optional()
+          .describe('Cursor for pagination (endCursor from previous response)'),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          ref?: string;
-        };
-
-        const ref = typedInput.ref || 'main';
-
-        // Get the commit SHA for the ref
-        const commitResponse = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/commits/${ref}`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'list_pull_requests',
+            arguments: {
+              owner: input.owner,
+              repo: input.repo,
+              state: input.state,
+              first: input.first,
+              after: input.after,
             },
-          }
-        );
-        const commitSha = commitResponse.data.sha;
-
-        // Get the tree from the commit
-        const treeResponse = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/git/trees/${commitSha}`,
-          {
-            params: { recursive: '1' },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-
-        // Filter the tree for markdown files
-        const markdownFiles = treeResponse.data.tree.filter(
-          (file: { type: string; path: string }) =>
-            file.type === 'blob' && file.path.toLowerCase().endsWith('.md')
-        );
-
-        if (markdownFiles.length === 0) {
-          throw new Error(
-            `No .md files found in repository ${typedInput.owner}/${typedInput.repo}`
-          );
-        }
-
-        // Get the content of the markdown files
-        const markdownFilesWithContent = await Promise.all(
-          markdownFiles.map(async (file: { path: string }) => {
-            const response = await ctx.client.get(
-              `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${file.path}`,
-              {
-                params: { ref },
-                headers: {
-                  Accept: 'application/vnd.github.v3+json',
-                },
-              }
-            );
-
-            return {
-              name: response.data.name,
-              path: response.data.path,
-              content: response.data.content,
-              html_url: response.data.html_url,
-            };
-          })
-        );
-
-        const getDocsResponseSchema = z.array(
-          z.object({
-            name: z.string(),
-            path: z.string(),
-            content: z.string(),
-            html_url: z.string(),
-          })
-        );
-
-        // Only return the name, path, content, and html_url of markdown files
-        return getDocsResponseSchema.parse(markdownFilesWithContent);
-      },
-    },
-    getDoc: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        path: z.string(),
-        ref: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          path: string;
-          ref?: string;
-        };
-
-        const ref = typedInput.ref || 'main';
-
-        // Get the content of the specified file
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${typedInput.path}`,
-          {
-            params: { ref },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-
-        const getDocResponseSchema = z.object({
-          name: z.string(),
-          path: z.string(),
-          content: z.string(),
-          html_url: z.string(),
-        });
-
-        // Return the name, path, content, and html_url of the file
-        // Note: GitHub API returns content as base64-encoded string
-        return getDocResponseSchema.parse({
-          name: response.data.name,
-          path: response.data.path,
-          content: response.data.content,
-          html_url: response.data.html_url,
+          });
+          return result.content;
         });
       },
     },
-    getFileContents: {
-      isTool: false,
+
+    listCommits: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.listCommits.description',
+        { defaultMessage: 'List commits in a GitHub repository. Uses cursor-based pagination.' }
+      ),
       input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        path: z.string(),
-        ref: z.string().optional(),
+        owner: z.string().min(1).describe('Repository owner (user or org)'),
+        repo: z.string().min(1).describe('Repository name'),
+        sha: z.string().optional().describe('Branch name or commit SHA to start listing from'),
+        first: z.number().default(10).optional().describe('Number of results to return'),
+        after: z
+          .string()
+          .optional()
+          .describe('Cursor for pagination (endCursor from previous response)'),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          path: string;
-          ref?: string;
-        };
-
-        const ref = typedInput.ref || 'main';
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${typedInput.path}`,
-          {
-            params: { ref },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'list_commits',
+            arguments: {
+              owner: input.owner,
+              repo: input.repo,
+              sha: input.sha,
+              first: input.first,
+              after: input.after,
             },
-          }
-        );
-
-        // Return raw response data to support both file and directory responses
-        // Files: object with name, path, content (base64), html_url, etc.
-        // Directories: array of objects with type, name, path, size, url, etc.
-        return response.data;
+          });
+          return result.content;
+        });
       },
     },
-    getIssue: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        issueNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          issueNumber: number;
-        };
 
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues/${typedInput.issueNumber}`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
-    getIssueComments: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        issueNumber: z.number(),
-        page: z.number().optional(),
-        perPage: z.number().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          issueNumber: number;
-          page?: number;
-          perPage?: number;
-        };
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues/${typedInput.issueNumber}/comments`,
-          {
-            params: {
-              ...(typedInput.page && { page: typedInput.page }),
-              ...(typedInput.perPage && { per_page: typedInput.perPage }),
-            },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
-    getPullRequest: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        pullNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          pullNumber: number;
-        };
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
-    getPullRequestComments: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        pullNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          pullNumber: number;
-        };
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}/comments`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
-    getPullRequestDiff: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        pullNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          pullNumber: number;
-        };
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3.diff',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
-    getPullRequestFiles: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        pullNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          pullNumber: number;
-        };
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}/files`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
-    getPullRequestReviews: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        pullNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          pullNumber: number;
-        };
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}/reviews`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
     listBranches: {
-      isTool: false,
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.listBranches.description',
+        { defaultMessage: 'List branches in a GitHub repository. Uses cursor-based pagination.' }
+      ),
       input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        page: z.number().optional(),
-        perPage: z.number().optional(),
+        owner: z.string().min(1).describe('Repository owner (user or org)'),
+        repo: z.string().min(1).describe('Repository name'),
+        first: z.number().default(10).optional().describe('Number of results to return'),
+        after: z
+          .string()
+          .optional()
+          .describe('Cursor for pagination (endCursor from previous response)'),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          page?: number;
-          perPage?: number;
-        };
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'list_branches',
+            arguments: {
+              owner: input.owner,
+              repo: input.repo,
+              first: input.first,
+              after: input.after,
+            },
+          });
+          return result.content;
+        });
+      },
+    },
 
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/branches`,
-          {
-            params: {
-              ...(typedInput.page && { page: typedInput.page }),
-              ...(typedInput.perPage && { per_page: typedInput.perPage }),
+    listReleases: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.listReleases.description',
+        { defaultMessage: 'List releases in a GitHub repository. Uses cursor-based pagination.' }
+      ),
+      input: z.object({
+        owner: z.string().min(1).describe('Repository owner (user or org)'),
+        repo: z.string().min(1).describe('Repository name'),
+        first: z.number().default(10).optional().describe('Number of results to return'),
+        after: z
+          .string()
+          .optional()
+          .describe('Cursor for pagination (endCursor from previous response)'),
+      }),
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'list_releases',
+            arguments: {
+              owner: input.owner,
+              repo: input.repo,
+              first: input.first,
+              after: input.after,
             },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
+          });
+          return result.content;
+        });
+      },
+    },
+
+    listTags: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.listTags.description',
+        { defaultMessage: 'List tags in a GitHub repository. Uses cursor-based pagination.' }
+      ),
+      input: z.object({
+        owner: z.string().min(1).describe('Repository owner (user or org)'),
+        repo: z.string().min(1).describe('Repository name'),
+        first: z.number().default(10).optional().describe('Number of results to return'),
+        after: z
+          .string()
+          .optional()
+          .describe('Cursor for pagination (endCursor from previous response)'),
+      }),
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'list_tags',
+            arguments: {
+              owner: input.owner,
+              repo: input.repo,
+              first: input.first,
+              after: input.after,
             },
-          }
-        );
-        return response.data;
+          });
+          return result.content;
+        });
+      },
+    },
+
+    getCommit: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.getCommit.description',
+        { defaultMessage: 'Get details of a specific commit.' }
+      ),
+      input: z.object({
+        owner: z.string().min(1).describe('Repository owner (user or org)'),
+        repo: z.string().min(1).describe('Repository name'),
+        sha: z.string().min(1).describe('Commit SHA'),
+      }),
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'get_commit',
+            arguments: { owner: input.owner, repo: input.repo, sha: input.sha },
+          });
+          return result.content;
+        });
+      },
+    },
+
+    getLatestRelease: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.getLatestRelease.description',
+        { defaultMessage: 'Get the latest release of a GitHub repository.' }
+      ),
+      input: z.object({
+        owner: z.string().min(1).describe('Repository owner (user or org)'),
+        repo: z.string().min(1).describe('Repository name'),
+      }),
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'get_latest_release',
+            arguments: { owner: input.owner, repo: input.repo },
+          });
+          return result.content;
+        });
+      },
+    },
+
+    pullRequestRead: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.githubMcp.actions.pullRequestRead.description',
+        { defaultMessage: 'Read the full details of a specific pull request.' }
+      ),
+      input: z.object({
+        owner: z.string().min(1).describe('Repository owner (user or org)'),
+        repo: z.string().min(1).describe('Repository name'),
+        pullNumber: z.number().describe('Pull request number'),
+      }),
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: 'pull_request_read',
+            arguments: { owner: input.owner, repo: input.repo, pullNumber: input.pullNumber },
+          });
+          return result.content;
+        });
       },
     },
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.github.test.description', {
-      defaultMessage: 'Verifies Github connection by fetching metadata about given data source',
+    description: i18n.translate('core.kibanaConnectorSpecs.githubMcp.test.description', {
+      defaultMessage:
+        'Verifies connection to the GitHub Copilot MCP server by listing available tools.',
     }),
     handler: async (ctx) => {
-      ctx.log.debug('Github test handler');
-      const response = await ctx.client.get('https://api.github.com/user');
-
-      if (response.status !== 200) {
-        return { ok: false, message: 'Failed to connect to Github API' };
-      } else {
-        return { ok: true, message: 'Successfully connected to Github API' };
-      }
+      return withMcpClient(ctx, async (mcp) => {
+        const { tools } = await mcp.listTools();
+        return {
+          ok: true,
+          message: `Connected to GitHub MCP server. ${tools.length} tools available.`,
+        };
+      });
     },
   },
 };

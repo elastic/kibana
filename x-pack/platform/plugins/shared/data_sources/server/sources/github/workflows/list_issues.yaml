@@ -1,6 +1,6 @@
 version: '1'
-name: 'sources.github_mcp.list_pull_requests'
-description: 'List pull requests in a GitHub repository, with optional filtering by state. Uses cursor-based pagination.'
+name: 'sources.github.list_issues'
+description: 'List issues in a GitHub repository, with optional filtering by state. Uses cursor-based pagination.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -29,9 +29,9 @@ inputs:
     required: false
     description: "Cursor for pagination (endCursor from previous response)"
 steps:
-  - name: list-pull-requests
-    type: github_mcp.listPullRequests
-    connector-id: <%= github_mcp-stack-connector-id %>
+  - name: list-issues
+    type: github.listIssues
+    connector-id: <%= github-stack-connector-id %>
     with:
       owner: "${{inputs.owner}}"
       repo: "${{inputs.repo}}"

@@ -21,7 +21,6 @@ import { pagerdutyDataSource } from './pagerduty';
 import { servicenowDataSource } from './servicenow';
 import { amazonS3DataSource } from './amazon_s3';
 import { tavilyDataSource } from './tavily';
-import { githubMcpDataSource } from './github_mcp';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(figmaDataSource);
@@ -40,5 +39,4 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(pagerdutyDataSource);
   dataCatalog.register(amazonS3DataSource);
   dataCatalog.register(tavilyDataSource);
-  dataCatalog.register(githubMcpDataSource);
 }

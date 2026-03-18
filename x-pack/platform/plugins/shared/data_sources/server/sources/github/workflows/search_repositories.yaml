@@ -1,6 +1,6 @@
 version: '1'
-name: 'sources.github_mcp.search_code'
-description: 'Search for code across GitHub repositories using GitHub query syntax.'
+name: 'sources.github.search_repositories'
+description: 'Search for GitHub repositories using GitHub query syntax.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -9,7 +9,7 @@ inputs:
   - name: query
     type: string
     required: true
-    description: "The code search query. Use GitHub query syntax."
+    description: "The repository search query. Use GitHub query syntax."
   - name: page
     type: number
     default: 1
@@ -21,9 +21,9 @@ inputs:
     required: false
     description: "The number of results per page"
 steps:
-  - name: search-code
-    type: github_mcp.searchCode
-    connector-id: <%= github_mcp-stack-connector-id %>
+  - name: search-repositories
+    type: github.searchRepositories
+    connector-id: <%= github-stack-connector-id %>
     with:
       query: "${{inputs.query}}"
       page: ${{inputs.page}}

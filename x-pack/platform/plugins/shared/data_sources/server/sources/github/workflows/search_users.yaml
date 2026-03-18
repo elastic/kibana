@@ -1,5 +1,5 @@
 version: '1'
-name: 'sources.github_mcp.search_users'
+name: 'sources.github.search_users'
 description: 'Search for GitHub users.'
 tags: ['agent-builder-tool']
 enabled: true
@@ -22,8 +22,8 @@ inputs:
     description: "The number of results per page"
 steps:
   - name: search-users
-    type: github_mcp.searchUsers
-    connector-id: <%= github_mcp-stack-connector-id %>
+    type: github.searchUsers
+    connector-id: <%= github-stack-connector-id %>
     with:
       query: "${{inputs.query}}"
       page: ${{inputs.page}}

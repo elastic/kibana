@@ -1,6 +1,6 @@
 version: '1'
-name: 'sources.github_mcp.search_issues'
-description: 'Search for issues across GitHub repositories using GitHub query syntax.'
+name: 'sources.github.search_pull_requests'
+description: 'Search for pull requests across GitHub repositories using GitHub query syntax.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -9,7 +9,7 @@ inputs:
   - name: query
     type: string
     required: true
-    description: "The issue search query. Use GitHub query syntax."
+    description: "The pull request search query. Use GitHub query syntax."
   - name: order
     type: string
     default: "desc"
@@ -31,9 +31,9 @@ inputs:
     required: false
     description: "The number of results per page"
 steps:
-  - name: search-issues
-    type: github_mcp.searchIssues
-    connector-id: <%= github_mcp-stack-connector-id %>
+  - name: search-pull-requests
+    type: github.searchPullRequests
+    connector-id: <%= github-stack-connector-id %>
     with:
       query: "${{inputs.query}}"
       order: "${{inputs.order}}"
