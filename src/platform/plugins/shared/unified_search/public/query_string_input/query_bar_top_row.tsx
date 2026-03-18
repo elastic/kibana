@@ -611,7 +611,6 @@ export const QueryBarTopRow = React.memo(
           disabled={props.isDisabled}
           width="full"
           compressed
-          collapsed={shouldShowDatePickerAsBadge()}
           showTimeWindowButtons
           presets={commonlyUsedRanges}
           recent={recentlyUsedRanges}
