@@ -16,9 +16,39 @@ import { SECURITY_ALERTS_TOOL_ID } from '../../tools/alerts_tool';
 import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID } from '../../tools/create_detection_rule_tool';
 import { SECURITY_LABS_SEARCH_TOOL_ID } from '../../tools/security_labs_search_tool';
 import { getDetectionEngineeringSkill } from '.';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import type { Logger } from '@kbn/core/server';
+
+jest.mock('../../tools/find_rules_tool', () => ({
+  findRulesTool: jest.fn(() => ({ id: 'security.find_rules', type: 'tool' })),
+  SECURITY_FIND_RULES_TOOL_ID: 'security.find_rules',
+}));
+jest.mock('../../tools/manage_rules_tool', () => ({
+  manageRulesTool: jest.fn(() => ({ id: 'security.manage_rules', type: 'tool' })),
+  SECURITY_MANAGE_RULES_TOOL_ID: 'security.manage_rules',
+}));
+jest.mock('../../tools/preview_rule_tool', () => ({
+  previewRuleTool: jest.fn(() => ({ id: 'security.preview_rule', type: 'tool' })),
+  SECURITY_PREVIEW_RULE_TOOL_ID: 'security.preview_rule',
+}));
+jest.mock('../../tools/manage_exceptions_tool', () => ({
+  manageExceptionsTool: jest.fn(() => ({ id: 'security.manage_exceptions', type: 'tool' })),
+  SECURITY_MANAGE_EXCEPTIONS_TOOL_ID: 'security.manage_exceptions',
+}));
+jest.mock('../../tools/coverage_overview_tool', () => ({
+  coverageOverviewTool: jest.fn(() => ({ id: 'security.coverage_overview', type: 'tool' })),
+  SECURITY_COVERAGE_OVERVIEW_TOOL_ID: 'security.coverage_overview',
+}));
+jest.mock('../../tools/rule_monitoring_tool', () => ({
+  ruleMonitoringTool: jest.fn(() => ({ id: 'security.rule_monitoring', type: 'tool' })),
+  SECURITY_RULE_MONITORING_TOOL_ID: 'security.rule_monitoring',
+}));
 
 describe('getDetectionEngineeringSkill', () => {
-  const skill = getDetectionEngineeringSkill();
+  const mockCore = {} as SecuritySolutionPluginCoreSetupDependencies;
+  const mockLogger = { debug: jest.fn(), error: jest.fn() } as unknown as Logger;
+
+  const skill = getDetectionEngineeringSkill({ core: mockCore, logger: mockLogger });
 
   describe('skill definition', () => {
     it('returns a valid skill definition', () => {
@@ -91,38 +121,54 @@ describe('getDetectionEngineeringSkill', () => {
   });
 
   describe('getRegistryTools', () => {
-    it('returns all detection engineering tools', () => {
+    it('returns only pre-existing security and platform tools (not inline tools)', () => {
       const tools = skill.getRegistryTools?.();
 
       expect(tools).toBeDefined();
-      expect(tools).toContain(SECURITY_FIND_RULES_TOOL_ID);
-      expect(tools).toContain(SECURITY_MANAGE_RULES_TOOL_ID);
-      expect(tools).toContain(SECURITY_PREVIEW_RULE_TOOL_ID);
-      expect(tools).toContain(SECURITY_MANAGE_EXCEPTIONS_TOOL_ID);
-      expect(tools).toContain(SECURITY_COVERAGE_OVERVIEW_TOOL_ID);
-      expect(tools).toContain(SECURITY_RULE_MONITORING_TOOL_ID);
-    });
-
-    it('returns existing security tools', () => {
-      const tools = skill.getRegistryTools?.();
-
       expect(tools).toContain(SECURITY_ALERTS_TOOL_ID);
       expect(tools).toContain(SECURITY_CREATE_DETECTION_RULE_TOOL_ID);
       expect(tools).toContain(SECURITY_LABS_SEARCH_TOOL_ID);
-    });
-
-    it('returns platform core tools', () => {
-      const tools = skill.getRegistryTools?.();
-
       expect(tools).toContain(platformCoreTools.cases);
       expect(tools).toContain(platformCoreTools.executeEsql);
       expect(tools).toContain(platformCoreTools.generateEsql);
     });
 
-    it('returns correct total number of tools', () => {
+    it('does not include inline tool IDs', () => {
       const tools = skill.getRegistryTools?.();
 
-      expect(tools).toHaveLength(12);
+      expect(tools).not.toContain(SECURITY_FIND_RULES_TOOL_ID);
+      expect(tools).not.toContain(SECURITY_MANAGE_RULES_TOOL_ID);
+      expect(tools).not.toContain(SECURITY_PREVIEW_RULE_TOOL_ID);
+      expect(tools).not.toContain(SECURITY_MANAGE_EXCEPTIONS_TOOL_ID);
+      expect(tools).not.toContain(SECURITY_COVERAGE_OVERVIEW_TOOL_ID);
+      expect(tools).not.toContain(SECURITY_RULE_MONITORING_TOOL_ID);
+    });
+
+    it('returns correct total number of registry tools', () => {
+      const tools = skill.getRegistryTools?.();
+
+      expect(tools).toHaveLength(6);
+    });
+  });
+
+  describe('getInlineTools', () => {
+    it('returns all 6 detection engineering inline tools', async () => {
+      const inlineTools = await skill.getInlineTools?.();
+
+      expect(inlineTools).toBeDefined();
+      expect(inlineTools).toHaveLength(6);
+    });
+
+    it('returns tools with correct IDs', async () => {
+      const inlineTools = await skill.getInlineTools?.();
+      const toolIds = inlineTools?.map((t: { id: string }) => t.id);
+
+      expect(toolIds).toContain(SECURITY_FIND_RULES_TOOL_ID);
+      expect(toolIds).toContain(SECURITY_MANAGE_RULES_TOOL_ID);
+      expect(toolIds).toContain(SECURITY_PREVIEW_RULE_TOOL_ID);
+      expect(toolIds).toContain(SECURITY_MANAGE_EXCEPTIONS_TOOL_ID);
+      expect(toolIds).toContain(SECURITY_COVERAGE_OVERVIEW_TOOL_ID);
+      expect(toolIds).toContain(SECURITY_RULE_MONITORING_TOOL_ID);
     });
   });
 });

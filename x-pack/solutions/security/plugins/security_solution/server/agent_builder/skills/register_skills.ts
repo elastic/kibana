@@ -14,9 +14,11 @@ import { getEntityAnalyticsSkill } from './entity_analytics';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { getSecurityMlJobsSkill } from './security_ml_jobs';
 import { getDetectionEngineeringSkill } from './detection_engineering';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
+  core: SecuritySolutionPluginCoreSetupDependencies;
   experimentalFeatures: ExperimentalFeatures;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
@@ -32,6 +34,7 @@ interface RegisterSkillsOpts {
  */
 export const registerSkills = async ({
   agentBuilder,
+  core,
   experimentalFeatures,
   getStartServices,
   kibanaVersion,
@@ -52,6 +55,6 @@ export const registerSkills = async ({
   await agentBuilder.skills.register(getSecurityMlJobsSkill({ getStartServices, logger, ml }));
 
   if (experimentalFeatures.aiRuleCreationEnabled) {
-    await agentBuilder.skills.register(getDetectionEngineeringSkill());
+    await agentBuilder.skills.register(getDetectionEngineeringSkill({ core, logger }));
   }
 };

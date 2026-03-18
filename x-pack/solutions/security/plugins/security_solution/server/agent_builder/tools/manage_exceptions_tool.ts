@@ -7,9 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/logging';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { securityTool } from './constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import type { ExperimentalFeatures } from '../../../common';
@@ -58,27 +57,14 @@ const manageExceptionsSchema = z.object({
 export const manageExceptionsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
-): BuiltinToolDefinition<typeof manageExceptionsSchema> => {
+  experimentalFeatures?: ExperimentalFeatures
+): BuiltinSkillBoundedTool<typeof manageExceptionsSchema> => {
   return {
     id: SECURITY_MANAGE_EXCEPTIONS_TOOL_ID,
     type: ToolType.builtin,
     description:
       'Manage rule exceptions: find existing exceptions on a rule, identify overlapping exception conditions, or prepare new exception payloads for false positive suppression. Essential for rule tuning.',
     schema: manageExceptionsSchema,
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ request }) => {
-        if (!experimentalFeatures?.aiRuleCreationEnabled) {
-          return {
-            status: 'unavailable',
-            reason:
-              'AI rule creation is not enabled. Enable it via experimental feature flag "aiRuleCreationEnabled".',
-          };
-        }
-        return getAgentBuilderResourceAvailability({ core, request, logger });
-      },
-    },
     handler: async (
       {
         operation,
@@ -278,6 +264,5 @@ export const manageExceptionsTool = (
         };
       }
     },
-    tags: ['security', 'detection', 'exceptions', 'tuning'],
   };
 };

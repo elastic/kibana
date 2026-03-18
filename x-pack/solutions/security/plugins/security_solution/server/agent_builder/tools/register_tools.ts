@@ -13,12 +13,6 @@ import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { entityRiskScoreTool, getEntityTool, searchEntitiesTool } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
-import { findRulesTool } from './find_rules_tool';
-import { manageRulesTool } from './manage_rules_tool';
-import { previewRuleTool } from './preview_rule_tool';
-import { manageExceptionsTool } from './manage_exceptions_tool';
-import { coverageOverviewTool } from './coverage_overview_tool';
-import { ruleMonitoringTool } from './rule_monitoring_tool';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -37,10 +31,4 @@ export const registerTools = async (
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(findRulesTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(manageRulesTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(previewRuleTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(manageExceptionsTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(coverageOverviewTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(ruleMonitoringTool(core, logger, experimentalFeatures));
 };

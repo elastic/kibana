@@ -7,9 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/logging';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { securityTool } from './constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import type { ExperimentalFeatures } from '../../../common';
@@ -37,27 +36,14 @@ const manageRulesSchema = z.object({
 export const manageRulesTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
-): BuiltinToolDefinition<typeof manageRulesSchema> => {
+  experimentalFeatures?: ExperimentalFeatures
+): BuiltinSkillBoundedTool<typeof manageRulesSchema> => {
   return {
     id: SECURITY_MANAGE_RULES_TOOL_ID,
     type: ToolType.builtin,
     description:
       'Manage security detection rules: enable, disable, duplicate existing rules, or install prebuilt Elastic rules. Operates on rules by ID or KQL query.',
     schema: manageRulesSchema,
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ request }) => {
-        if (!experimentalFeatures?.aiRuleCreationEnabled) {
-          return {
-            status: 'unavailable',
-            reason:
-              'AI rule creation is not enabled. Enable it via experimental feature flag "aiRuleCreationEnabled".',
-          };
-        }
-        return getAgentBuilderResourceAvailability({ core, request, logger });
-      },
-    },
     handler: async ({ operation, rule_ids: ruleIds, query }, { request }) => {
       logger.debug(
         `${SECURITY_MANAGE_RULES_TOOL_ID} tool called with operation: ${operation}, rule_ids: ${JSON.stringify(
@@ -204,6 +190,5 @@ export const manageRulesTool = (
         };
       }
     },
-    tags: ['security', 'detection', 'rules', 'management'],
   };
 };

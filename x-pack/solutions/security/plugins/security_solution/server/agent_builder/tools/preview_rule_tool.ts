@@ -7,9 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/logging';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { securityTool } from './constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import type { ExperimentalFeatures } from '../../../common';
@@ -55,27 +54,14 @@ const previewRuleSchema = z.object({
 export const previewRuleTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
-): BuiltinToolDefinition<typeof previewRuleSchema> => {
+  experimentalFeatures?: ExperimentalFeatures
+): BuiltinSkillBoundedTool<typeof previewRuleSchema> => {
   return {
     id: SECURITY_PREVIEW_RULE_TOOL_ID,
     type: ToolType.builtin,
     description:
       'Preview/test a detection rule query without creating it. Shows how many alerts the rule would generate and sample matches. Use this to validate rule queries before deployment.',
     schema: previewRuleSchema,
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ request }) => {
-        if (!experimentalFeatures?.aiRuleCreationEnabled) {
-          return {
-            status: 'unavailable',
-            reason:
-              'AI rule creation is not enabled. Enable it via experimental feature flag "aiRuleCreationEnabled".',
-          };
-        }
-        return getAgentBuilderResourceAvailability({ core, request, logger });
-      },
-    },
     handler: async (
       {
         rule_type: ruleType,
@@ -242,6 +228,5 @@ export const previewRuleTool = (
         };
       }
     },
-    tags: ['security', 'detection', 'rules', 'preview', 'testing'],
   };
 };

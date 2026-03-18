@@ -7,9 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/logging';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { securityTool } from './constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import type { ExperimentalFeatures } from '../../../common';
@@ -34,27 +33,14 @@ const coverageOverviewSchema = z.object({
 export const coverageOverviewTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
-): BuiltinToolDefinition<typeof coverageOverviewSchema> => {
+  experimentalFeatures?: ExperimentalFeatures
+): BuiltinSkillBoundedTool<typeof coverageOverviewSchema> => {
   return {
     id: SECURITY_COVERAGE_OVERVIEW_TOOL_ID,
     type: ToolType.builtin,
     description:
       'Analyze MITRE ATT&CK coverage of installed detection rules. Shows which tactics and techniques are covered, identifies gaps, and reports unmapped rules. Use to assess detection posture.',
     schema: coverageOverviewSchema,
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ request }) => {
-        if (!experimentalFeatures?.aiRuleCreationEnabled) {
-          return {
-            status: 'unavailable',
-            reason:
-              'AI rule creation is not enabled. Enable it via experimental feature flag "aiRuleCreationEnabled".',
-          };
-        }
-        return getAgentBuilderResourceAvailability({ core, request, logger });
-      },
-    },
     handler: async ({ search_term: searchTerm, activity, source }, { request }) => {
       logger.debug(
         `${SECURITY_COVERAGE_OVERVIEW_TOOL_ID} tool called with search_term: ${
@@ -200,6 +186,5 @@ export const coverageOverviewTool = (
         };
       }
     },
-    tags: ['security', 'detection', 'coverage', 'mitre'],
   };
 };

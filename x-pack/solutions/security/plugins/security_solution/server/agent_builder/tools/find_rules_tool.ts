@@ -7,9 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/logging';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { securityTool } from './constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import type { ExperimentalFeatures } from '../../../common';
@@ -54,27 +53,14 @@ const findRulesSchema = z.object({
 export const findRulesTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
-): BuiltinToolDefinition<typeof findRulesSchema> => {
+  experimentalFeatures?: ExperimentalFeatures
+): BuiltinSkillBoundedTool<typeof findRulesSchema> => {
   return {
     id: SECURITY_FIND_RULES_TOOL_ID,
     type: ToolType.builtin,
     description:
       'Search and list security detection rules with filtering by type, status, tags, and prebuilt/custom classification. Returns paginated results with rule metadata including severity, risk score, and index patterns.',
     schema: findRulesSchema,
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ request }) => {
-        if (!experimentalFeatures?.aiRuleCreationEnabled) {
-          return {
-            status: 'unavailable',
-            reason:
-              'AI rule creation is not enabled. Enable it via experimental feature flag "aiRuleCreationEnabled".',
-          };
-        }
-        return getAgentBuilderResourceAvailability({ core, request, logger });
-      },
-    },
     handler: async (
       {
         search_term: searchTerm,
@@ -172,6 +158,5 @@ export const findRulesTool = (
         };
       }
     },
-    tags: ['security', 'detection', 'rules', 'search'],
   };
 };

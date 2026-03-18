@@ -7,25 +7,15 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { coreMock } from '@kbn/core/server/mocks';
-import type { ExperimentalFeatures } from '../../../common';
 import {
-  createToolAvailabilityContext,
   createToolHandlerContext,
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../__mocks__/test_helpers';
 import { findRulesTool, SECURITY_FIND_RULES_TOOL_ID } from './find_rules_tool';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-
-jest.mock('../utils/get_agent_builder_resource_availability', () => ({
-  getAgentBuilderResourceAvailability: jest.fn(),
-}));
-
-const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
 
 describe('findRulesTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const mockExperimentalFeatures = { aiRuleCreationEnabled: true } as ExperimentalFeatures;
 
   const mockRulesClient = {
     find: jest.fn(),
@@ -35,12 +25,11 @@ describe('findRulesTool', () => {
     create: jest.fn(),
   };
 
-  const tool = findRulesTool(mockCore, mockLogger, mockExperimentalFeatures);
+  const tool = findRulesTool(mockCore, mockLogger);
 
   beforeEach(() => {
     jest.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
-    mockGetAgentBuilderResourceAvailability.mockResolvedValue({ status: 'available' });
 
     const coreStart = coreMock.createStart();
     mockCore.getStartServices.mockResolvedValue([
@@ -102,36 +91,6 @@ describe('findRulesTool', () => {
   describe('tool properties', () => {
     it('returns correct tool id', () => {
       expect(tool.id).toBe(SECURITY_FIND_RULES_TOOL_ID);
-    });
-
-    it('has correct tags', () => {
-      expect(tool.tags).toEqual(['security', 'detection', 'rules', 'search']);
-    });
-  });
-
-  describe('availability', () => {
-    it('returns unavailable when experimental feature is disabled', async () => {
-      const toolWithFeatureDisabled = findRulesTool(mockCore, mockLogger, {
-        aiRuleCreationEnabled: false,
-      } as ExperimentalFeatures);
-
-      const availability = await toolWithFeatureDisabled.availability?.handler(
-        createToolAvailabilityContext(mockRequest, 'default')
-      );
-
-      expect(availability).toEqual({
-        status: 'unavailable',
-        reason:
-          'AI rule creation is not enabled. Enable it via experimental feature flag "aiRuleCreationEnabled".',
-      });
-    });
-
-    it('returns available status when experimental feature is enabled', async () => {
-      const availability = await tool.availability?.handler(
-        createToolAvailabilityContext(mockRequest, 'default')
-      );
-
-      expect(availability).toEqual({ status: 'available' });
     });
   });
 
