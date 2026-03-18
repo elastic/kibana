@@ -17,6 +17,7 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   visualization = 'visualization',
+  graph = 'graph',
 }
 
 interface AttachmentDataMap {
@@ -24,6 +25,7 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.visualization]: VisualizationAttachmentData;
+  [AttachmentType.graph]: GraphAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -128,5 +130,36 @@ export interface VisualizationAttachmentData {
   /** Optional time range for the visualization (e.g., { from: 'now-24h', to: 'now' }) */
   time_range?: { from: string; to: string };
 }
+
+const graphNodeSchema = z.looseObject({
+  id: z.string().min(1),
+  position: z.object({
+    x: z.number(),
+    y: z.number(),
+  }),
+  data: z.looseObject({
+    label: z.string(),
+  }),
+});
+
+const graphEdgeSchema = z.looseObject({
+  id: z.string().min(1),
+  source: z.string().min(1),
+  target: z.string().min(1),
+  type: z.string().min(1),
+  label: z.string().optional(),
+  markerEnd: z.enum(['arrow']).optional(),
+});
+
+export const graphAttachmentDataSchema = z.looseObject({
+  nodes: z.array(graphNodeSchema),
+  edges: z.array(graphEdgeSchema),
+  title: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export type GraphNode = z.infer<typeof graphNodeSchema>;
+export type GraphEdge = z.infer<typeof graphEdgeSchema>;
+export type GraphAttachmentData = z.infer<typeof graphAttachmentDataSchema>;
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
