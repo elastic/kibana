@@ -67,9 +67,6 @@ else
     .buildkite/pipeline-utils/affected-packages/list_affected \
       --strategy git --deep --merge-base "$GITHUB_PR_MERGE_BASE" --json \
       --ignore '**/test/scout/.meta/**' \
-      --ignore '.buildkite/**' \
-      --ignore '.moon/**' \
-      --ignore 'src/platform/packages/shared/kbn-scout/**' \
       > "$AFFECTED_MODULES_FILE"
     # Temporarily ignore kbn-scout (and kbn-scout-release-testing) in the affected list so that
     # pipeline only runs scout configs for other affected modules (e.g. SLO plugin and dependents).
@@ -81,12 +78,6 @@ else
       const filtered = list.filter(id => typeof id === 'string' && !id.startsWith('@kbn/scout'));
       require('fs').writeFileSync(f, JSON.stringify(filtered));
     "
-    echo "Affected modules (after filtering):"
-    node -e "
-      const modules = JSON.parse(require('fs').readFileSync('$AFFECTED_MODULES_FILE', 'utf8'));
-      modules.forEach(m => console.log('  - ' + m));
-      console.log('Total: ' + modules.length + ' modules');
-    "
     AFFECTED_MODULES_FLAG="--affected-modules $AFFECTED_MODULES_FILE"
   fi
 
@@ -95,12 +86,6 @@ else
     --target "$SCOUT_DISCOVERY_TARGET" \
     $AFFECTED_MODULES_FLAG \
     --save
-  echo "Discovered Scout Playwright configs:"
-  node -e "
-    const configs = JSON.parse(require('fs').readFileSync('.scout/test_configs/scout_playwright_configs.json', 'utf8'));
-    configs.forEach(c => console.log('  - ' + (typeof c === 'string' ? c : c.configPath || JSON.stringify(c))));
-    console.log('Total: ' + configs.length + ' configs');
-  "
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
   buildkite-agent artifact upload "scout_playwright_configs.json"
 fi
