@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,10 +13,13 @@ import {
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
+import type { Location } from 'history';
+import { useHistory } from 'react-router-dom';
 import * as i18n from '../../../common/translations';
 import { docLinks } from '../../../common/doc_links';
 import { FeatureSection } from './feature_section';
 import { ResetDefaultsModal } from './reset_defaults_modal';
+import { UnsavedChangesModal } from './unsaved_changes_modal';
 import { useModelSettingsForm } from './use_model_settings_form';
 
 export const ModelSettings: React.FC = () => {
@@ -31,7 +34,37 @@ export const ModelSettings: React.FC = () => {
     resetSection,
   } = useModelSettingsForm();
 
+  const history = useHistory();
+  const unblockRef = useRef<(() => void) | null>(null);
+  const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
   const [resetParentKey, setResetParentKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isDirty) {
+      unblockRef.current?.();
+      unblockRef.current = null;
+      return;
+    }
+
+    unblockRef.current = history.block((location) => {
+      setPendingLocation(location);
+      return false;
+    });
+
+    return () => {
+      unblockRef.current?.();
+      unblockRef.current = null;
+    };
+  }, [isDirty, history]);
+
+  const handleDiscardAndLeave = useCallback(() => {
+    unblockRef.current?.();
+    unblockRef.current = null;
+    if (pendingLocation) {
+      history.push(pendingLocation);
+    }
+    setPendingLocation(null);
+  }, [history, pendingLocation]);
 
   const handleResetConfirm = useCallback(() => {
     if (!resetParentKey) return;
@@ -95,6 +128,13 @@ export const ModelSettings: React.FC = () => {
         <ResetDefaultsModal
           onConfirm={handleResetConfirm}
           onCancel={() => setResetParentKey(null)}
+        />
+      )}
+
+      {pendingLocation && (
+        <UnsavedChangesModal
+          onConfirm={handleDiscardAndLeave}
+          onCancel={() => setPendingLocation(null)}
         />
       )}
     </>

@@ -36,7 +36,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
         !existingSet.has(endpoint.inference_id) && (!taskType || endpoint.task_type === taskType)
     );
 
-    const modelToCount = available.reduce<Map<string, number>>((acc, ep) => {
+    const modelToCount = inferenceEndpoints.reduce<Map<string, number>>((acc, ep) => {
       const modelId = getModelId(ep) ?? ep.inference_id;
       acc.set(modelId, (acc.get(modelId) ?? 0) + 1);
       return acc;
