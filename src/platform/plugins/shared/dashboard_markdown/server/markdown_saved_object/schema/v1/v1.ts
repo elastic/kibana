@@ -18,7 +18,7 @@ export const markdownAttributesSchema = schema.object(
       schema.string({ meta: { description: 'A short description of the markdown panel.' } })
     ),
     content: schema.string({
-      meta: { description: 'markdown enriched text content' },
+      meta: { description: 'Markdown enriched text content' },
     }),
   },
   { unknowns: 'forbid' }
