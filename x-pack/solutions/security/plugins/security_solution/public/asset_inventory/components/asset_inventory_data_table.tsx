@@ -246,7 +246,6 @@ export const AssetInventoryDataTable = ({
     toastNotifications: notifications.toasts,
     storage,
     data,
-    uiActions,
   };
 
   const styles = useStyles();

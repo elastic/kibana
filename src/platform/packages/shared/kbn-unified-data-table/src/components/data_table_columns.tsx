@@ -136,7 +136,7 @@ function buildEuiGridColumn({
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
-  uiActions: UiActionsStart;
+  uiActions?: UiActionsStart;
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
@@ -378,7 +378,7 @@ export function getEuiGridColumns({
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
-    uiActions: UiActionsStart;
+    uiActions?: UiActionsStart;
   };
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;

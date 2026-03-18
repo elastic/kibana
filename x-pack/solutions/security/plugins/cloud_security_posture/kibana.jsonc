@@ -30,8 +30,7 @@
       "share",
       "kibanaUtils",
       "alerting",
-      "spaces",
-      "uiActions",
+      "spaces"
     ],
     "optionalPlugins": [
       "usageCollection"

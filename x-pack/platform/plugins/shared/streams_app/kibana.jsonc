@@ -28,7 +28,6 @@
       "unifiedSearch",
       "unifiedDocViewer",
       "dashboard",
-      "uiActions",
     ],
     "optionalPlugins": ["cloud", "spaces", "indexLifecycleManagement"],
     "requiredBundles": [
