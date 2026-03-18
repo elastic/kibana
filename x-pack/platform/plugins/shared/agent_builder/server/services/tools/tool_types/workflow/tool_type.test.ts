@@ -11,6 +11,7 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ToolType } from '@kbn/agent-builder-common';
 import { getWorkflowToolType } from './tool_type';
+import { isEnabledDefinition, isDisabledDefinition } from '../definitions';
 import { executeWorkflow } from '../../../workflow';
 
 jest.mock('../../../workflow', () => ({
@@ -26,12 +27,12 @@ describe('workflow tool type', () => {
 
   it('returns disabled when workflowsManagement is not provided', () => {
     const toolType = getWorkflowToolType({ workflowsManagement: undefined });
-    expect(toolType.disabled).toBe(true);
+    expect(isDisabledDefinition(toolType)).toBe(true);
   });
 
   it('returns enabled when workflowsManagement is provided', () => {
     const toolType = getWorkflowToolType({ workflowsManagement: mockWorkflowsManagement });
-    expect(toolType.disabled).toBeUndefined();
+    expect(isEnabledDefinition(toolType)).toBe(true);
     expect(toolType.toolType).toBe(ToolType.workflow);
   });
 
@@ -50,13 +51,13 @@ describe('workflow tool type', () => {
 
     it('passes metadata with agent_id when agent is in the run context stack', async () => {
       const toolType = getWorkflowToolType({ workflowsManagement: mockWorkflowsManagement });
-      if (toolType.disabled) throw new Error('Expected enabled');
+      if (!isEnabledDefinition(toolType)) throw new Error('Expected enabled');
 
-      const dynamicProps = toolType.getDynamicProps(config, {
+      const dynamicProps = await toolType.getDynamicProps(config, {
         spaceId: 'default',
         request,
       });
-      const handler = dynamicProps.getHandler();
+      const handler = await dynamicProps.getHandler();
 
       const runContext: RunContext = {
         runId: 'run-1',
@@ -74,13 +75,13 @@ describe('workflow tool type', () => {
 
     it('passes undefined metadata when no agent is in the run context stack', async () => {
       const toolType = getWorkflowToolType({ workflowsManagement: mockWorkflowsManagement });
-      if (toolType.disabled) throw new Error('Expected enabled');
+      if (!isEnabledDefinition(toolType)) throw new Error('Expected enabled');
 
-      const dynamicProps = toolType.getDynamicProps(config, {
+      const dynamicProps = await toolType.getDynamicProps(config, {
         spaceId: 'default',
         request,
       });
-      const handler = dynamicProps.getHandler();
+      const handler = await dynamicProps.getHandler();
 
       const runContext: RunContext = {
         runId: 'run-1',
@@ -98,13 +99,13 @@ describe('workflow tool type', () => {
 
     it('picks the most recent agent from a nested stack', async () => {
       const toolType = getWorkflowToolType({ workflowsManagement: mockWorkflowsManagement });
-      if (toolType.disabled) throw new Error('Expected enabled');
+      if (!isEnabledDefinition(toolType)) throw new Error('Expected enabled');
 
-      const dynamicProps = toolType.getDynamicProps(config, {
+      const dynamicProps = await toolType.getDynamicProps(config, {
         spaceId: 'default',
         request,
       });
-      const handler = dynamicProps.getHandler();
+      const handler = await dynamicProps.getHandler();
 
       const runContext: RunContext = {
         runId: 'run-1',

@@ -36,7 +36,10 @@ describe('executeWorkflow', () => {
     lastUpdatedAt: '2025-01-01T00:00:00.000Z',
     lastUpdatedBy: 'user',
     definition: {
+      version: '1' as const,
       name: 'Test Workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
       steps: [],
     },
   };
