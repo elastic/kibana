@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 
 import { i18n } from '@kbn/i18n';
 
@@ -26,9 +27,19 @@ export const SolutionViewSwitchCalloutInternal = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { value: asyncParams } = useAsync(async () => {
+    const [{ application, notifications }] = await getStartServices();
+    return {
+      notifications,
+      manageSpacesUrl: application.getUrlForApp('management', { path: 'kibana/spaces' }),
+    };
+  }, [getStartServices]);
+
   const handleSwitch = async (selectedSolution: SupportedSolutionView) => {
+    if (!asyncParams) return;
+    const { notifications } = asyncParams;
+
     setIsLoading(true);
-    const [{ notifications }] = await getStartServices();
 
     try {
       const activeSpace = await spacesManager.getActiveSpace();
@@ -64,15 +75,16 @@ export const SolutionViewSwitchCalloutInternal = ({
           <EuiText size="s">
             <strong>
               {i18n.translate('xpack.spaces.solutionViewSwitch.callout.title', {
-                defaultMessage: '{solutionViewName} space',
-                values: { solutionViewName: SOLUTION_VIEW_CONFIG[currentSolution].name },
+                defaultMessage: 'New navigation available',
               })}
             </strong>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiText size="s">
             {i18n.translate('xpack.spaces.solutionViewSwitch.callout.description', {
-              defaultMessage: 'Use dedicated space to benefit from all new features.',
+              defaultMessage:
+                'A simplified left nav built for {solutionName} with easier access to analytics and management.',
+              values: { solutionName: SOLUTION_VIEW_CONFIG[currentSolution].name },
             })}
           </EuiText>
         </EuiFlexItem>
@@ -85,11 +97,12 @@ export const SolutionViewSwitchCalloutInternal = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isModalOpen && (
+      {isModalOpen && asyncParams && (
         <SolutionViewSwitchModal
           currentSolution={currentSolution}
           onClose={() => setIsModalOpen(false)}
           onSwitch={handleSwitch}
+          manageSpacesUrl={asyncParams.manageSpacesUrl}
           isLoading={isLoading}
         />
       )}

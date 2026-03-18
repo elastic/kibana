@@ -41,6 +41,23 @@ jest.mock('./modal', () => ({
 }));
 
 describe('SolutionViewSwitchCalloutInternal', () => {
+  const originalLocation = window.location;
+
+  beforeEach(() => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { ...originalLocation, reload: jest.fn() },
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: originalLocation,
+    });
+    jest.restoreAllMocks();
+  });
+
   const setup = ({ updateSpaceRejects }: { updateSpaceRejects?: Error } = {}) => {
     const user = userEvent.setup();
 
@@ -76,10 +93,6 @@ describe('SolutionViewSwitchCalloutInternal', () => {
 
     return { user, coreStart, spacesManager, setItemSpy };
   };
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
 
   test('switches solution and sets the per-space localStorage flag', async () => {
     const { user, spacesManager, setItemSpy } = setup();

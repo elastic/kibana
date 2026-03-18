@@ -27,4 +27,5 @@ export interface SolutionViewSwitchModalProps {
   onSwitch: (solution: SupportedSolutionView) => void;
   currentSolution: SupportedSolutionView;
   isLoading: boolean;
+  manageSpacesUrl: string;
 }
