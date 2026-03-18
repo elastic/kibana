@@ -8,7 +8,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 
 import type { PartialTheme } from '@elastic/charts';
@@ -23,32 +23,31 @@ interface SparklineChartProps {
   values?: number[];
   rowHeight: number;
 }
+const miniHistogramChartTheme: PartialTheme = {
+  chartMargins: {
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  chartPaddings: {
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  scales: {
+    barsPadding: 0.1,
+  },
+  background: {
+    color: 'transparent',
+  },
+};
 
 export const SparklineChart: FC<SparklineChartProps> = ({ values, services, rowHeight }) => {
   const { charts } = services;
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
   const barColors = useLogRateAnalysisBarColors();
-
-  const miniHistogramChartTheme: PartialTheme = {
-    chartMargins: {
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0,
-    },
-    chartPaddings: {
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0,
-    },
-    scales: {
-      barsPadding: 0.1,
-    },
-    background: {
-      color: 'transparent',
-    },
-  };
 
   const cssChartSize = css({
     width: '100%',
@@ -56,11 +55,14 @@ export const SparklineChart: FC<SparklineChartProps> = ({ values, services, rowH
     margin: '0px',
   });
 
-  if (!values || values.length === 0 || Array.isArray(values) === false) {
+  const chartData = useMemo(
+    () => values?.map((value, index) => ({ key: index, value })) ?? [],
+    [values]
+  );
+
+  if (Array.isArray(values) === false || values.length === 0) {
     return values;
   }
-
-  const chartData = values.map((value, index) => ({ key: index, value }));
 
   return (
     <div css={cssChartSize}>
@@ -74,7 +76,6 @@ export const SparklineChart: FC<SparklineChartProps> = ({ values, services, rowH
         />
         <BarSeries
           id="doc_count_overall"
-          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'key'}
