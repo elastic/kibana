@@ -30,10 +30,29 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
   cancel?: () => Promise<void>,
   { pollInterval, abortSignal }: IAsyncSearchOptions = {}
 ): Observable<Response> => {
+  const getPollInterval = (elapsedTime: number): number => {
+    if (typeof pollInterval === 'number') return pollInterval;
+    else {
+      // if static pollInterval is not provided, then use default back-off logic
+      switch (true) {
+        case elapsedTime < 1500:
+          return 300;
+        case elapsedTime < 5000:
+          return 1000;
+        case elapsedTime < 20000:
+          return 2500;
+        default:
+          return 5000;
+      }
+    }
+  };
+
   return defer(() => {
     if (abortSignal?.aborted) {
       throw new AbortError();
     }
+
+    const startTime = Date.now();
 
     const safeCancel = () =>
       cancel?.().catch((e) => {
@@ -50,8 +69,9 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
 
     return from(search()).pipe(
       expand((response) => {
+        const elapsedTime = Date.now() - startTime;
         return isRunningResponse(response)
-          ? timer(pollInterval ?? 0).pipe(switchMap(() => search()))
+          ? timer(getPollInterval(elapsedTime)).pipe(switchMap(() => search()))
           : EMPTY;
       }),
       tap((response) => {

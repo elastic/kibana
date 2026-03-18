@@ -118,6 +118,8 @@ export class SearchInterceptor {
     MAX_CACHE_ITEMS,
     MAX_CACHE_SIZE_MB
   );
+  private protocolSupportsMultiplexing: boolean = false;
+  private performanceObserver?: PerformanceObserver;
 
   /**
    * Observable that emits when the number of pending requests changes.
@@ -163,11 +165,37 @@ export class SearchInterceptor {
         this.searchTimeout = timeout;
       })
     );
+
+    // Increase performance buffer size to capture more entries
+    try {
+      performance.setResourceTimingBufferSize(500);
+    } catch (e) {
+      // Silently fail - not critical
+    }
+
+    // Set up PerformanceObserver to capture search requests as they happen
+    try {
+      this.performanceObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries() as PerformanceResourceTiming[];
+        entries.forEach((entry) => {
+          if (entry.name.includes('/internal/search/')) {
+            this.protocolSupportsMultiplexing = ['h2', 'h3'].includes(entry.nextHopProtocol);
+            this.performanceObserver?.disconnect(); // We only need to detect this once, so we can disconnect the observer after the first match
+          }
+        });
+      });
+      this.performanceObserver.observe({ entryTypes: ['resource'] });
+    } catch (e) {
+      // Silently fail - protocol detection is not critical
+    }
   }
 
   public stop() {
     this.responseCache.clear();
     this.uiSettingsSubs.forEach((s) => s.unsubscribe());
+    if (this.performanceObserver) {
+      this.performanceObserver.disconnect();
+    }
   }
 
   /*
@@ -398,7 +426,9 @@ export class SearchInterceptor {
     let firstRequestParams: SanitizedConnectionRequestParams;
 
     return pollSearch(search, cancel, {
-      pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
+      pollInterval:
+        this.deps.searchConfig.asyncSearch.pollInterval ??
+        (this.protocolSupportsMultiplexing ? 0 : undefined),
       ...options,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
@@ -492,7 +522,12 @@ export class SearchInterceptor {
     // FIXME: the dropNullColumns param shouldn't be needed during polling
     // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
     // at that point, exclude all params when request.id is defined (polling phase)
-    const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
+    const paramsToUse = request.id
+      ? {
+          dropNullColumns: params?.dropNullColumns,
+          wait_for_completion_timeout: this.protocolSupportsMultiplexing ? '30s' : undefined,
+        }
+      : params || {};
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
         `/internal/search/${strategyToString(strategy)}${request.id ? `/${request.id}` : ''}`,

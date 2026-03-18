@@ -76,7 +76,7 @@ export const searchConfigSchema = schema.object({
     /**
      * How long to wait for results before initiating a new poll request. If not provided, defaults to 30s.
      */
-    pollLength: schema.duration({ defaultValue: '30s' }),
+    pollLength: schema.duration({ defaultValue: '0s' }),
   }),
   aggs: schema.object({
     shardDelay: schema.object({
