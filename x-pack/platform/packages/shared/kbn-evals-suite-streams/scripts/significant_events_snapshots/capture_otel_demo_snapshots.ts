@@ -15,6 +15,7 @@ import {
   listAvailableDemos,
   deployDemo,
   teardownDemo,
+  ensureMinikubeRunning,
 } from '@kbn/otel-demo';
 import type { DemoType, FailureScenario } from '@kbn/otel-demo';
 import { GCS_BUCKET, BASELINE_WAIT_MS, FAILURE_WAIT_MS } from './lib/constants';
@@ -31,7 +32,6 @@ import {
   triggerSigEventsFeatureExtraction,
   waitForSigEventsFeatureExtraction,
 } from './lib/significant_events_workflow';
-import { ensureMinikube } from './lib/otel_demo';
 
 run(
   async ({ log, flags }) => {
@@ -110,7 +110,7 @@ run(
 
     log.info('');
     log.info('Checking minikube...');
-    await ensureMinikube(log);
+    await ensureMinikubeRunning(log);
 
     log.info('');
     log.info('Registering GCS snapshot repository...');

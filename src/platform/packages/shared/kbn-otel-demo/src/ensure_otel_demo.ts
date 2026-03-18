@@ -269,7 +269,7 @@ export async function deployDemo({
 
   const waitAndReport = async () => {
     try {
-      await waitForPodsReady(namespace, 600);
+      await waitForPodsReady(namespace, { timeoutSeconds: 600, log });
 
       const minikubeIp = await getMinikubeIp();
 

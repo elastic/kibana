@@ -50,6 +50,18 @@ export {
 export { getScenariosByCategory as getDemoScenariosByCategory } from './src/demo_registry';
 export { listScenarioIds as listDemoScenarioIds } from './src/demo_registry';
 
+// Minikube utilities
+export { ensureMinikubeRunning, waitForPodsReady } from './src/util/assert_minikube_available';
+
+// Configuration utilities
+export { readKibanaConfig } from './src/read_kibana_config';
+export type {
+  KibanaConfig,
+  ElasticsearchConfig,
+  KibanaServerConfig,
+} from './src/read_kibana_config';
+export { resolveKibanaUrl } from './src/util/resolve_kibana_url';
+
 // Backward compatibility exports for OTel Demo (default demo)
 import { OTEL_DEMO_SCENARIOS } from './src/demos/otel_demo/scenarios';
 
