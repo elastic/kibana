@@ -506,27 +506,7 @@
     "name": "rules_read_enable_disable_all",
     "elasticsearch": {
       "cluster": [],
-      "indices": [
-        {
-          "names": [
-            "apm-*-transaction*",
-            "traces-apm*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "winlogbeat-*",
-            ".lists*",
-            ".items*"
-          ],
-          "privileges": ["read"]
-        },
-        {
-          "names": [".alerts-security*", ".siem-signals-*"],
-          "privileges": ["read"]
-        }
-      ],
+      "indices": [],
       "run_as": []
     },
     "kibana": [
@@ -545,34 +525,7 @@
     "name": "rules_all_rules_management_settings_none",
     "elasticsearch": {
       "cluster": [],
-      "indices": [
-        {
-          "names": [
-            "apm-*-transaction*",
-            "traces-apm*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "winlogbeat-*",
-            ".lists*",
-            ".items*"
-          ],
-          "privileges": ["read"]
-        },
-        {
-          "names": [
-            ".alerts-security*",
-            ".preview.alerts-security*",
-            ".internal.preview.alerts-security*",
-            ".adhoc.alerts-security*",
-            ".internal.adhoc.alerts-security*",
-            ".siem-signals-*"
-          ],
-          "privileges": ["read", "write", "manage"]
-        }
-      ],
+      "indices": [],
       "run_as": []
     },
     "kibana": [
@@ -598,27 +551,7 @@
     "name": "rules_read_manual_run_all",
     "elasticsearch": {
       "cluster": [],
-      "indices": [
-        {
-          "names": [
-            "apm-*-transaction*",
-            "traces-apm*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "winlogbeat-*",
-            ".lists*",
-            ".items*"
-          ],
-          "privileges": ["read"]
-        },
-        {
-          "names": [".alerts-security*", ".siem-signals-*"],
-          "privileges": ["read"]
-        }
-      ],
+      "indices": [],
       "run_as": []
     },
     "kibana": [
@@ -637,27 +570,7 @@
     "name": "rules_read_rules_management_settings_all",
     "elasticsearch": {
       "cluster": [],
-      "indices": [
-        {
-          "names": [
-            "apm-*-transaction*",
-            "traces-apm*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "winlogbeat-*",
-            ".lists*",
-            ".items*"
-          ],
-          "privileges": ["read"]
-        },
-        {
-          "names": [".alerts-security*", ".siem-signals-*"],
-          "privileges": ["read"]
-        }
-      ],
+      "indices": [],
       "run_as": []
     },
     "kibana": [
@@ -676,34 +589,7 @@
     "name": "rules_all_enable_disable_none",
     "elasticsearch": {
       "cluster": [],
-      "indices": [
-        {
-          "names": [
-            "apm-*-transaction*",
-            "traces-apm*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "winlogbeat-*",
-            ".lists*",
-            ".items*"
-          ],
-          "privileges": ["read"]
-        },
-        {
-          "names": [
-            ".alerts-security*",
-            ".preview.alerts-security*",
-            ".internal.preview.alerts-security*",
-            ".adhoc.alerts-security*",
-            ".internal.adhoc.alerts-security*",
-            ".siem-signals-*"
-          ],
-          "privileges": ["read", "write", "manage"]
-        }
-      ],
+      "indices": [],
       "run_as": []
     },
     "kibana": [
@@ -729,34 +615,7 @@
     "name": "rules_all_manual_run_none",
     "elasticsearch": {
       "cluster": [],
-      "indices": [
-        {
-          "names": [
-            "apm-*-transaction*",
-            "traces-apm*",
-            "auditbeat-*",
-            "endgame-*",
-            "filebeat-*",
-            "logs-*",
-            "packetbeat-*",
-            "winlogbeat-*",
-            ".lists*",
-            ".items*"
-          ],
-          "privileges": ["read"]
-        },
-        {
-          "names": [
-            ".alerts-security*",
-            ".preview.alerts-security*",
-            ".internal.preview.alerts-security*",
-            ".adhoc.alerts-security*",
-            ".internal.adhoc.alerts-security*",
-            ".siem-signals-*"
-          ],
-          "privileges": ["read", "write", "manage"]
-        }
-      ],
+      "indices": [],
       "run_as": []
     },
     "kibana": [
@@ -813,7 +672,9 @@
             "read",
             "security_solution_investigation_guide_edit",
             "security_solution_custom_highlighted_fields_edit",
-            "security_solution_enable_disable_rules"
+            "security_solution_enable_disable_rules",
+            "security_solution_manual_run_rules",
+            "security_solution_rules_management_settings"
           ],
           "builtInAlerts": ["read"]
         },
