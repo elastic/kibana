@@ -57,7 +57,7 @@ export const MysqlConnector: ConnectorSpec = {
         helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.helpText', {
           defaultMessage:
             'The URL of the MySQL HTTP proxy, including protocol ' +
-            '(e.g. https://proxy.example.com). Use http:// for local development only.',
+            '(for example, https://proxy.example.com). Use http:// for local development only.',
         }),
       }),
     port: z.coerce
