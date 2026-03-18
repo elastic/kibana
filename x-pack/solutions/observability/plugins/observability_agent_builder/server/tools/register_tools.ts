@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { platformCoreTools } from '@kbn/agent-builder-common';
+import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common';
 import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import type {
   ObservabilityAgentBuilderCoreSetup,
@@ -60,6 +60,7 @@ const PLATFORM_TOOL_IDS = [
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
   platformCoreTools.productDocumentation,
+  platformStreamsSigEventsTools.searchKnowledgeIndicators,
 ];
 
 const OBSERVABILITY_TOOL_IDS = [

@@ -19,3 +19,21 @@ export {
 export { sumTokens } from './src/helpers/sum_tokens';
 export { identifyFeatures, type IdentifyFeaturesOptions } from './src/features/identify_features';
 export { generateAllComputedFeatures } from './src/features/computed';
+
+export {
+  searchKnowledgeIndicators,
+  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT,
+} from './src/knowledge_indicators/search';
+export {
+  featureToKnowledgeIndicatorFeature,
+  streamQueryToKnowledgeIndicatorQuery as queryWithRuleLinkageToKnowledgeIndicatorQuery,
+} from './src/knowledge_indicators/mappers';
+export type {
+  SearchKnowledgeIndicatorsInput,
+  SearchKnowledgeIndicatorsKind,
+  SearchKnowledgeIndicatorsOutput,
+  KnowledgeIndicator,
+  KnowledgeIndicatorFeature,
+  KnowledgeIndicatorQuery,
+  QueryWithRuleLinkage,
+} from './src/knowledge_indicators/types';

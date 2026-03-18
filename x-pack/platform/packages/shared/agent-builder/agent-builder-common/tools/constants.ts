@@ -32,6 +32,10 @@ export const platformCoreTools = {
   integrationKnowledge: platformCoreTool('integration_knowledge'),
 } as const;
 
+export const platformStreamsSigEventsTools = {
+  searchKnowledgeIndicators: `${internalNamespaces.platformStreamsSigEvents}.search_knowledge_indicators`,
+} as const;
+
 export const attachmentTools = {
   read: `${internalNamespaces.attachments}.read`,
   update: `${internalNamespaces.attachments}.update`,

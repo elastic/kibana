@@ -55,6 +55,7 @@ import { TaskService } from './lib/tasks/task_service';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
+import { registerAgentBuilderTools } from './tools/register_tools';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -193,6 +194,13 @@ export class StreamsPlugin
         modelSettingsClient,
       };
     };
+
+    registerAgentBuilderTools({
+      plugins,
+      getScopedClients,
+      server: this.server,
+      logger: this.logger,
+    });
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
