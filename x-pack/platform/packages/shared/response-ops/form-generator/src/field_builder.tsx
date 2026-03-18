@@ -63,6 +63,15 @@ export const getFieldFromSchema = ({
     validate: (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
       const [{ value, path: formPath }] = args;
 
+      // Skip validation for optional fields when the value is empty.
+      // extractSchemaCore unwraps ZodOptional to get the inner schema, so the
+      // optional wrapper is no longer present during parse(). Without this
+      // check, empty values (e.g. "") would fail validation against the inner
+      // schema (e.g. ZodEnum) even though the field is not required.
+      if (isOptional && (value === undefined || value === null || value === '')) {
+        return undefined;
+      }
+
       try {
         schema.parse(value);
         return undefined;
