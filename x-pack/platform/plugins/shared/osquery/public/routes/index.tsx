@@ -18,6 +18,7 @@ import { SavedQueries } from './saved_queries';
 import { Packs } from './packs';
 import { NewLiveQueryPage } from './live_queries/new';
 import { MissingPrivileges, NotFoundPage } from './components';
+import { ComplianceRoutes } from '../compliance';
 
 const LiveQueriesToHistoryRedirect = () => {
   const location = useLocation();
@@ -42,10 +43,16 @@ const NewQueryRoute = () => {
 const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
+  const isComplianceEnabled = useIsExperimentalFeatureEnabled('endpointComplianceMonitoring');
 
   if (isHistoryEnabled) {
     return (
       <Routes>
+        {isComplianceEnabled && (
+          <Route path="/compliance">
+            <ComplianceRoutes />
+          </Route>
+        )}
         <Route path={`/packs`}>
           <Packs />
         </Route>
@@ -73,6 +80,11 @@ const OsqueryAppRoutesComponent = () => {
 
   return (
     <Routes>
+      {isComplianceEnabled && (
+        <Route path="/compliance">
+          <ComplianceRoutes />
+        </Route>
+      )}
       <Route path={`/packs`}>
         <Packs />
       </Route>

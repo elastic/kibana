@@ -20,6 +20,9 @@ export const allowedExperimentalValues = Object.freeze({
    *   - Introduces scheduled responses support
    */
   queryHistoryRework: false,
+
+  /** Gates all endpoint compliance monitoring functionality (findings, scores, benchmarks, dashboard). */
+  endpointComplianceMonitoring: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

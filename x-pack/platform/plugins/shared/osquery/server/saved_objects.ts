@@ -13,10 +13,19 @@ import {
   packAssetType,
   usageMetricType,
 } from './lib/saved_query/saved_object_mappings';
+import { complianceRuleType, complianceBenchmarkStateType } from './compliance/saved_objects';
 
-export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
+export const initSavedObjects = (
+  savedObjects: CoreSetup['savedObjects'],
+  options: { complianceEnabled?: boolean } = {}
+) => {
   savedObjects.registerType(usageMetricType);
   savedObjects.registerType(savedQueryType);
   savedObjects.registerType(packType);
   savedObjects.registerType(packAssetType);
+
+  if (options.complianceEnabled) {
+    savedObjects.registerType(complianceRuleType);
+    savedObjects.registerType(complianceBenchmarkStateType);
+  }
 };

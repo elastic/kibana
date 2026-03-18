@@ -18,6 +18,7 @@ import { initAssetRoutes } from './asset';
 import { initActionResultsRoutes } from './action_results';
 import { initUnifiedHistoryRoutes } from './unified_history';
 import { initScheduledResultsRoutes } from './scheduled_results';
+import { initComplianceRoutes } from '../compliance/routes';
 
 export const defineRoutes = (
   router: IRouter<DataRequestHandlerContext>,
@@ -33,4 +34,8 @@ export const defineRoutes = (
   initActionResultsRoutes(router, context);
   initUnifiedHistoryRoutes(router, context);
   initScheduledResultsRoutes(router, context);
+
+  if (context.experimentalFeatures.endpointComplianceMonitoring) {
+    initComplianceRoutes(router);
+  }
 };

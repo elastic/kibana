@@ -49,6 +49,11 @@ import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
 import { backfillScheduleIds } from './lib/backfill_schedule_ids';
+import { initializeComplianceIndices } from './compliance/create_indices';
+import { installPrebuiltRules } from './compliance/services/install_prebuilt_rules';
+import { computeAndWriteScores } from './compliance/services/compliance_scoring_service';
+import { getMutedRulesState } from './compliance/services/compliance_rules_service';
+import { COMPLIANCE_SCORE_AGGREGATION_TASK_TYPE } from '../common/compliance';
 
 const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
 
@@ -61,6 +66,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private coreStart: CoreStart | null = null;
   private licenseSubscription: Subscription | null = null;
   private createActionService: ReturnType<typeof createActionService> | null = null;
+  private config: ConfigType | null = null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
@@ -72,6 +78,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
     this.logger.debug('osquery: Setup');
     const config = createConfig(this.initializerContext);
+    this.config = config;
     const experimentalFeatures = config.experimentalFeatures;
 
     registerFeatures(plugins.features);
@@ -89,7 +96,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       licensing: plugins.licensing,
     };
 
-    initSavedObjects(core.savedObjects);
+    initSavedObjects(core.savedObjects, {
+      complianceEnabled: experimentalFeatures.endpointComplianceMonitoring,
+    });
 
     // TODO: We do not pass so client here.
     this.createActionService = createActionService(osqueryContext);
@@ -143,6 +152,27 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
 
+    if (experimentalFeatures.endpointComplianceMonitoring && plugins.taskManager) {
+      plugins.taskManager.registerTaskDefinitions({
+        [COMPLIANCE_SCORE_AGGREGATION_TASK_TYPE]: {
+          title: 'Endpoint compliance score aggregation',
+          timeout: '5m',
+          maxAttempts: 3,
+          createTaskRunner: () => ({
+            run: async () => {
+              if (!this.coreStart) throw new Error('Core not started');
+              const esClient = this.coreStart.elasticsearch.client.asInternalUser;
+              const soClient = await getInternalSavedObjectsClient(this.coreStart);
+              const mutedRules = await getMutedRulesState(soClient);
+              await computeAndWriteScores(esClient, mutedRules, 'default', this.logger);
+
+              return { state: {} };
+            },
+          }),
+        },
+      });
+    }
+
     return {
       createActionService: this.createActionService,
     };
@@ -185,6 +215,24 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         // If package is installed we want to make sure all needed assets are installed
         if (packageInfo) {
           await this.initialize(core, dataViewsService);
+        }
+
+        if (this.config?.experimentalFeatures.endpointComplianceMonitoring) {
+          await initializeComplianceIndices(esClient, this.logger);
+          await installPrebuiltRules(client, this.logger);
+
+          plugins.taskManager
+            ?.ensureScheduled({
+              id: COMPLIANCE_SCORE_AGGREGATION_TASK_TYPE,
+              taskType: COMPLIANCE_SCORE_AGGREGATION_TASK_TYPE,
+              scope: ['osquery'],
+              schedule: { interval: '5m' },
+              params: {},
+              state: {},
+            })
+            .catch((err) => {
+              this.logger.warn(`Failed to schedule compliance score task: ${err.message}`);
+            });
         }
 
         // Upgrade integration into 1.6.0 and rollover if found 'generic' dataset - we do not want to wait for it
