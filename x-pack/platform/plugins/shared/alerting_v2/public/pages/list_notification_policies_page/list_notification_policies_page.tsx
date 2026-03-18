@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { DeleteNotificationPolicyConfirmModal } from '../../components/notification_policy/delete_confirmation_modal';
-import { NotificationPolicyDestinationBadge } from '../../components/notification_policy/notification_policy_destination_badge';
+import { NotificationPolicyDestinationsSummary } from '../../components/notification_policy/notification_policy_destinations_summary';
 import { NotificationPolicySnoozePopover } from '../../components/notification_policy/notification_policy_snooze_popover';
 import { NotificationPolicyStateBadge } from '../../components/notification_policy/notification_policy_state_badge';
 import { paths } from '../../constants';
@@ -161,14 +161,7 @@ export const ListNotificationPoliciesPage = () => {
         />
       ),
       render: (destinations: NotificationPolicyResponse['destinations']) => (
-        <EuiFlexGroup responsive={false} gutterSize="s" wrap>
-          {destinations?.map((destination) => (
-            <EuiFlexItem key={destination.id} grow={false}>
-              <NotificationPolicyDestinationBadge destination={destination} />
-            </EuiFlexItem>
-          ))}
-          {destinations?.length === 0 ? '-' : null}
-        </EuiFlexGroup>
+        <NotificationPolicyDestinationsSummary destinations={destinations} />
       ),
     },
     {

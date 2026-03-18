@@ -14,7 +14,7 @@ import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ListNotificationPoliciesPage } from './list_notification_policies_page';
 
 const mockNavigateToUrl = jest.fn();
-const mockRefetch = jest.fn();
+const mockGetUrlForApp = jest.fn();
 const mockUseFetchNotificationPolicies = jest.fn();
 const mockCreateNotificationPolicy = jest.fn();
 const mockDeleteNotificationPolicy = jest.fn();
@@ -23,11 +23,12 @@ const mockDisableNotificationPolicy = jest.fn();
 const mockSnoozeNotificationPolicy = jest.fn();
 const mockUnsnoozeNotificationPolicy = jest.fn();
 const mockSettingsClientGet = jest.fn();
+const mockUseFetchWorkflow = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl };
+      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
     }
     if (token === 'http') {
       return { basePath: { prepend: (path: string) => path } };
@@ -92,16 +93,12 @@ jest.mock('../../hooks/use_unsnooze_notification_policy', () => ({
   }),
 }));
 
-jest.mock('../../components/notification_policy/delete_confirmation_modal', () => ({
-  DeleteNotificationPolicyConfirmModal: () => null,
+jest.mock('../../hooks/use_fetch_workflow', () => ({
+  useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
 }));
 
-jest.mock('../../components/notification_policy/notification_policy_destination_badge', () => ({
-  NotificationPolicyDestinationBadge: ({
-    destination,
-  }: {
-    destination: NotificationPolicyResponse['destinations'][number];
-  }) => <span>{destination.id}</span>,
+jest.mock('../../components/notification_policy/delete_confirmation_modal', () => ({
+  DeleteNotificationPolicyConfirmModal: () => null,
 }));
 
 jest.mock('../../components/notification_policy/notification_policy_snooze_popover', () => ({
@@ -163,6 +160,15 @@ describe('ListNotificationPoliciesPage', () => {
     jest.clearAllMocks();
 
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
+    mockGetUrlForApp.mockImplementation((_appId: string, { path }: { path: string }) => {
+      return `/app/workflows${path}`;
+    });
+    mockUseFetchWorkflow.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
     mockUseFetchNotificationPolicies.mockReturnValue({
       data: {
         items: [createPolicy()],
@@ -173,7 +179,6 @@ describe('ListNotificationPoliciesPage', () => {
       isLoading: false,
       isError: false,
       error: null,
-      refetch: mockRefetch,
     });
   });
 
@@ -181,16 +186,22 @@ describe('ListNotificationPoliciesPage', () => {
     renderPage();
 
     expect(mockSettingsClientGet).toHaveBeenCalledWith('dateFormat');
-    expect(screen.getByText('mock formatted date')).toBeInTheDocument();
+    expect(screen.getByText('mock formatted date')).not.toBeNull();
   });
 
   it('does not render destination or refresh controls and fetches without destinationType', () => {
     renderPage();
 
-    expect(screen.queryByLabelText('Filter by destination type')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Refresh' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Filter by destination type')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Refresh' })).toBeNull();
 
     expect(mockUseFetchNotificationPolicies).toHaveBeenCalled();
     expect(mockUseFetchNotificationPolicies.mock.calls[0][0]).not.toHaveProperty('destinationType');
+  });
+
+  it('renders a workflow count summary in the destinations column', () => {
+    renderPage();
+
+    expect(screen.getByText('1 workflow')).not.toBeNull();
   });
 });
