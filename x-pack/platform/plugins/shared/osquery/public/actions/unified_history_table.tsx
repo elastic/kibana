@@ -266,15 +266,9 @@ const UnifiedHistoryTableComponent = () => {
     const pending = Math.max(0, row.agentCount - success - errors);
 
     const badges = [
-      ...(success > 0
-        ? [<EuiBadge color="success">{`  ${success}  `}</EuiBadge>]
-        : []),
-      ...(errors > 0
-        ? [<EuiBadge color="danger">{`  ${errors}  `}</EuiBadge>]
-        : []),
-      ...(pending > 0
-        ? [<EuiBadge color="hollow">{`  ${pending}  `}</EuiBadge>]
-        : []),
+      ...(success > 0 ? [<EuiBadge color="success">{`  ${success}  `}</EuiBadge>] : []),
+      ...(errors > 0 ? [<EuiBadge color="danger">{`  ${errors}  `}</EuiBadge>] : []),
+      ...(pending > 0 ? [<EuiBadge color="hollow">{`  ${pending}  `}</EuiBadge>] : []),
     ];
 
     return (
