@@ -19,6 +19,7 @@ import {
   EuiSplitPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
@@ -163,9 +164,15 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow>
-                        <EuiText size="s">
-                          {endpointDisplayMap.get(endpointId)?.label ?? endpointId}
-                        </EuiText>
+                        <EuiToolTip
+                          title={endpointDisplayMap.get(endpointId)?.label ?? endpointId}
+                          content={endpointId}
+                          position="top"
+                        >
+                          <EuiText size="s">
+                            {endpointDisplayMap.get(endpointId)?.label ?? endpointId}
+                          </EuiText>
+                        </EuiToolTip>
                       </EuiFlexItem>
                       {index === 0 && (
                         <EuiFlexItem grow={false}>
