@@ -201,11 +201,16 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest('validiation - returns error when id already exists', async ({ apiClient }) => {
     const id = `test-markdown-with-specific-id`;
-    const response = await apiClient.post(MARKDOWN_API_PATH, {
+    const response = await apiClient.post(`${MARKDOWN_API_PATH}/${id}`, {
       headers: {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
+      body: {
+        content: '# Test',
+        title: 'Test title',
+      },
+      responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(409);

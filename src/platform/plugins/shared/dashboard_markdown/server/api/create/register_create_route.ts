@@ -56,6 +56,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
         const result = await create(ctx, req.body, req.params);
         return res.created({ body: result });
       } catch (e) {
+        console.log('====================\n', e.output, '\n====================');
         if (e.isBoom && e.output.statusCode === 409) {
           return res.conflict({
             body: {
