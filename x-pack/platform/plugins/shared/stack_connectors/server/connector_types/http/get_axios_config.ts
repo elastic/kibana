@@ -90,7 +90,12 @@ const getOAuth2AxiosConfig = async ({
     Authorization: accessToken,
   };
 
-  return { axiosInstance, headers: headersWithAuth, sslOverrides: {} };
+  return {
+    axiosInstance,
+    headers: headersWithAuth,
+    sslOverrides: {},
+    secretQueryParams: secrets.secretQueryParams ?? null,
+  };
 };
 
 interface GetDefaultAxiosConfig {
@@ -116,13 +121,19 @@ const getDefaultAxiosConfig = async ({ config, secrets }: GetDefaultAxiosConfig)
     headers: mergedHeaders,
   });
 
-  return { axiosInstance, headers: headersWithAuth, sslOverrides };
+  return {
+    axiosInstance,
+    headers: headersWithAuth,
+    sslOverrides,
+    secretQueryParams: secrets.secretQueryParams ?? null,
+  };
 };
 
 export interface GetAxiosConfigResponse {
   axiosInstance: AxiosInstance;
   headers: Record<string, AxiosHeaderValue> | undefined;
   sslOverrides: SSLSettings;
+  secretQueryParams: Record<string, string> | null;
 }
 
 export interface GetAxiosConfigParams {

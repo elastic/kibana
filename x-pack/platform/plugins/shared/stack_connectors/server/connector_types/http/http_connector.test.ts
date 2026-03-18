@@ -100,6 +100,7 @@ const emptySecrets: ConnectorTypeSecretsType = {
   pfx: null,
   clientSecret: null,
   secretHeaders: null,
+  secretQueryParams: null,
   proxyUsername: null,
   proxyPassword: null,
 };
@@ -1084,6 +1085,62 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0].url).toContain('https://abc.def/api/v1/endpoint?');
     expect(requestMock.mock.calls[0][0].url).toContain('key1=value1');
     expect(requestMock.mock.calls[0][0].url).toContain('key2=value2');
+  });
+
+  test('execute injects secretQueryParams from connector secrets into URL', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://maps.googleapis.com/maps/api/geocode/json',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        ...emptySecrets,
+        secretQueryParams: { key: 'secret-api-key' },
+      },
+      params: {
+        method: 'GET',
+        query: { address: 'Beijing' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toContain('key=secret-api-key');
+    expect(requestMock.mock.calls[0][0].url).toContain('address=Beijing');
+  });
+
+  test('execute params.query takes precedence over secretQueryParams', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://example.com/api',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        ...emptySecrets,
+        secretQueryParams: { version: 'v1', apiKey: 'secret' },
+      },
+      params: {
+        method: 'GET',
+        query: { version: 'v2' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    expect(resultUrl).toContain('version=v2');
+    expect(resultUrl).not.toContain('version=v1');
+    expect(resultUrl).toContain('apiKey=secret');
   });
 
   test('execute uses params.url when config.url is not provided', async () => {

@@ -11,15 +11,15 @@ import {
   type ConnectorsPluginsStart,
 } from './lib/get_decrypted_secret_keys';
 
-export const getWebhookSecretHeadersKeyRoute = (
+export const getHttpSecretQueryParamsKeyRoute = (
   router: IRouter,
   getStartServices: StartServicesAccessor<ConnectorsPluginsStart, unknown>
 ) => {
   registerSecretKeysRoute({
     router,
     getStartServices,
-    path: 'secret_headers',
-    allowedConnectorTypes: ['.webhook', '.cases-webhook', '.mcp', '.http'],
-    secretField: 'secretHeaders',
+    path: 'secret_query_params',
+    allowedConnectorTypes: ['.http'],
+    secretField: 'secretQueryParams',
   });
 };

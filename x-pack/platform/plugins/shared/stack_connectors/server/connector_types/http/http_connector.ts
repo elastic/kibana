@@ -173,15 +173,16 @@ function combineUrl(basePath: string, path?: string): string {
   return `${basePathNormalized}${pathNormalized}`;
 }
 
-function buildQueryString(query?: Record<string, string>): string {
+function appendQueryString(baseUrl: string, query?: Record<string, string>): string {
   if (!query || Object.keys(query).length === 0) {
-    return '';
+    return baseUrl;
   }
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     params.append(key, value);
   }
-  return `?${params.toString()}`;
+  const separator = baseUrl.includes('?') ? '&' : '?';
+  return `${baseUrl}${separator}${params.toString()}`;
 }
 
 function serializeHttpRequestBody(body: unknown): string {
@@ -225,9 +226,6 @@ export async function executor(
     return errorResultInvalid(actionId, 'URL is required');
   }
 
-  // Combine base url and path
-  const url = combineUrl(baseUrl, path) + buildQueryString(query);
-
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
     services,
@@ -249,7 +247,15 @@ export async function executor(
     );
   }
 
-  const { axiosInstance, headers: configHeaders, sslOverrides: baseSslOverrides } = axiosConfig;
+  const {
+    axiosInstance,
+    headers: configHeaders,
+    sslOverrides: baseSslOverrides,
+    secretQueryParams,
+  } = axiosConfig;
+
+  const mergedQuery = { ...(secretQueryParams ?? {}), ...(query ?? {}) };
+  const url = appendQueryString(combineUrl(baseUrl, path), mergedQuery);
 
   // Merge headers: params headers take precedence over config headers
   const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
