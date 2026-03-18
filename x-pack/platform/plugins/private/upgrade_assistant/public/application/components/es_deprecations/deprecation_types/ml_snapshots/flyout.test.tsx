@@ -129,6 +129,26 @@ describe('FixSnapshotsFlyout', () => {
     expect(screen.getByTestId('upgradeSnapshotButton')).toHaveTextContent('Retry upgrade');
   });
 
+  it('shows error callout and changes action labels on delete failure', () => {
+    const error: ResponseError = {
+      statusCode: 500,
+      message: 'Delete snapshot error',
+    };
+    const snapshotState: SnapshotState = {
+      jobId: MOCK_JOB_ID,
+      snapshotId: MOCK_SNAPSHOT_ID,
+      status: 'error',
+      action: 'delete',
+      error,
+    };
+
+    renderFlyout({ snapshotState, mlUpgradeModeEnabled: false });
+
+    expect(screen.getByTestId('resolveSnapshotError')).toHaveTextContent('Error deleting snapshot');
+    expect(screen.getByTestId('resolveSnapshotError')).toHaveTextContent('Delete snapshot error');
+    expect(screen.getByTestId('deleteSnapshotButton')).toHaveTextContent('Retry delete');
+  });
+
   it('calls upgradeSnapshot and closes flyout', () => {
     const snapshotState: SnapshotState = {
       jobId: MOCK_JOB_ID,

@@ -69,6 +69,20 @@ describe('ReindexResolutionCell', () => {
     mockUseIndexContext.mockReset();
   });
 
+  it('recommends reindexing by default', () => {
+    mockUseIndexContext.mockReturnValue(
+      createIndexContext({
+        deprecation: reindexDeprecation,
+        reindexState: createReindexState(),
+        updateIndexState: createUpdateIndexState(),
+      })
+    );
+
+    renderWithI18n(<ReindexResolutionCell deprecation={reindexDeprecation} />);
+
+    expect(screen.getByText('Recommended: reindex')).toBeInTheDocument();
+  });
+
   it('recommends unfreeze for frozen indices', () => {
     mockUseIndexContext.mockReturnValue(
       createIndexContext({

@@ -43,6 +43,9 @@ describe('MigrationProgress', () => {
     renderWithI18n(<MigrationProgress migrationState={migrationState} dataStreamName="logs-foo" />);
 
     expect(screen.getByTestId('reindexChecklistTitle')).toHaveTextContent('logs-foo');
+    expect(screen.getByTestId('reindexChecklistTitle')).toHaveTextContent(
+      'Reindexing logs-foo in progress…'
+    );
     expect(screen.getByText('1 Index failed to get reindexed.')).toBeInTheDocument();
     expect(screen.getByText('2 Indices successfully reindexed.')).toBeInTheDocument();
     expect(screen.getByText('3 Indices currently getting reindexed.')).toBeInTheDocument();
@@ -70,6 +73,9 @@ describe('MigrationProgress', () => {
 
     renderWithI18n(<MigrationProgress migrationState={migrationState} dataStreamName="logs-bar" />);
 
+    expect(screen.getByTestId('reindexChecklistTitle')).toHaveTextContent(
+      'Setting to read-only logs-bar in progress…'
+    );
     expect(screen.getByText('1 Index successfully set to read-only.')).toBeInTheDocument();
     expect(screen.getByText('0 Indices currently getting set to read-only.')).toBeInTheDocument();
     expect(screen.getByText('1 Index waiting to start.')).toBeInTheDocument();

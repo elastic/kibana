@@ -112,6 +112,7 @@ describe('ChecklistFlyoutStep (data streams)', () => {
       cancelAction,
     });
 
+    expect(screen.getByTestId('startDataStreamMigrationButton')).toBeDisabled();
     fireEvent.click(screen.getByTestId('cancelDataStreamMigrationButton'));
     expect(cancelAction).toHaveBeenCalledTimes(1);
   });
