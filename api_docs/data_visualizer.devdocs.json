@@ -42,7 +42,7 @@
         "label": "IndexDataVisualizerViewProps",
         "description": [],
         "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-        "lineNumber": 101,
+        "lineNumber": 102,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -64,7 +64,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-            "lineNumber": 102,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -87,7 +87,7 @@
               " | null"
             ],
             "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-            "lineNumber": 103,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -103,7 +103,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-            "lineNumber": 104,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -120,7 +120,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-            "lineNumber": 105,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

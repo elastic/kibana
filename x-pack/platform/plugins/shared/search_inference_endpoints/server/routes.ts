@@ -10,11 +10,13 @@ import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
+import { defineInferenceSettingsRoutes } from './routes/inference_settings';
 import { APIRoutes } from './types';
 import { errorHandler } from './utils/error_handler';
 import { deleteInferenceEndpoint } from './lib/delete_inference_endpoint';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
+  defineInferenceSettingsRoutes({ logger, router });
   router.get(
     {
       path: APIRoutes.GET_INFERENCE_ENDPOINTS,

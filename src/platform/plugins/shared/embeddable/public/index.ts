@@ -12,7 +12,7 @@ import { EmbeddablePublicPlugin } from './plugin';
 
 export type { DrilldownDefinition, DrilldownEditorProps } from './drilldowns/types';
 
-export { useAddFromLibraryTypes } from './add_from_library/registry';
+export { getAddFromLibraryType, useAddFromLibraryTypes } from './add_from_library/registry';
 export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
 export { EmbeddableStateTransfer } from './state_transfer';
 export {
@@ -38,6 +38,11 @@ export {
 } from './react_embeddable_system';
 
 export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
+
+export async function transformType(type: string) {
+  const { transformType: transformTypeFn } = await import('./async_module');
+  return transformTypeFn(type);
+}
 
 export type { SerializedDrilldowns } from '../server';
 

@@ -1,5 +1,5 @@
 {
-  "sha1": "80ccbb6602dda037ed6e72036df9630944789429",
+  "sha1": "f9f1314f0f67b572c2fd6cbc04d115a623534a3d",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -10,6 +10,130 @@
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 14,
         "column": 16
+      }
+    },
+    {
+      "id": "61762fc85e5e046-883e55fae4bd272",
+      "title": "Flyout system Emotion cache stability opening a flyout after a cascade close does not corrupt the Emotion style cache",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/flyout_stability/flyout_emotion_cache.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "236c161ee847af9-88da4c36b9f9cd5",
+      "title": "Metrics in Discover - Add to Case should show Add to case action in chart context menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/add_to_case_privileged.spec.ts",
+        "line": 36,
+        "column": 14
+      }
+    },
+    {
+      "id": "4758a5d0dc16621-dbeac393b8a72d5",
+      "title": "Metrics in Discover - Fullscreen Mode should toggle fullscreen mode via button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
+        "line": 43,
+        "column": 14
+      }
+    },
+    {
+      "id": "4758a5d0dc16621-8f591993a7ea7f1",
+      "title": "Metrics in Discover - Fullscreen Mode should exit fullscreen mode with Escape key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "4758a5d0dc16621-12768da295d325e",
+      "title": "Metrics in Discover - Fullscreen Mode should interact with metrics in fullscreen mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
+        "line": 84,
+        "column": 14
+      }
+    },
+    {
+      "id": "4758a5d0dc16621-ed73a308e43416f",
+      "title": "Metrics in Discover - Fullscreen Mode should persist fullscreen state during interactions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
+        "line": 117,
+        "column": 14
       }
     },
     {
@@ -321,6 +445,28 @@
       }
     },
     {
+      "id": "2d96124987672f0-546bf85ae11def5",
+      "title": "Metrics in Discover - Inspect should open inspector and navigate through views and tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/inspect.spec.ts",
+        "line": 35,
+        "column": 14
+      }
+    },
+    {
       "id": "e5122822a21b3b2-d64cae306a0fa14",
       "title": "Traces in Discover - Custom columns should display trace-specific columns in data view mode",
       "expectedStatus": "passed",
@@ -360,7 +506,337 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/custom_columns.spec.ts",
-        "line": 53,
+        "line": 50,
+        "column": 14
+      }
+    },
+    {
+      "id": "df7f704800ddfee-4b0b2b2673fd7c0",
+      "title": "Traces in Discover - Explore from APM Service Inventory - \"Open in Discover\" links open correct experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "df7f704800ddfee-d789c1f6bb98188",
+      "title": "Traces in Discover - Explore from APM Service Overview - \"Open in Discover\" links open traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
+        "line": 83,
+        "column": 14
+      }
+    },
+    {
+      "id": "df7f704800ddfee-860ac3d004ab3cb",
+      "title": "Traces in Discover - Explore from APM Transactions page - \"Open in Discover\" links open traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
+        "line": 124,
+        "column": 14
+      }
+    },
+    {
+      "id": "df7f704800ddfee-8d357b33752c84d",
+      "title": "Traces in Discover - Explore from APM Transaction Detail - \"Open in Discover\" links open traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
+        "line": 163,
+        "column": 14
+      }
+    },
+    {
+      "id": "df7f704800ddfee-aa4bde9e3597a61",
+      "title": "Traces in Discover - Explore from APM Errors page - \"Open in Discover\" links open traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
+        "line": 230,
+        "column": 14
+      }
+    },
+    {
+      "id": "df7f704800ddfee-e8ad6dbd660a203",
+      "title": "Traces in Discover - Explore from APM Transaction Detail - Waterfall size warning \"view in Discover\" link opens traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
+        "line": 256,
+        "column": 14
+      }
+    },
+    {
+      "id": "df7f704800ddfee-e62a77a252b54b5",
+      "title": "Traces in Discover - Explore from APM Dependencies - \"Open in Discover\" from operation detail opens traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
+        "line": 301,
+        "column": 14
+      }
+    },
+    {
+      "id": "7d9a57b0659b738-1f25e9798fd3adc",
+      "title": "Traces in Discover - Overview tab content and actions About section - service name link navigates to APM service overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
+        "line": 59,
+        "column": 14
+      }
+    },
+    {
+      "id": "7d9a57b0659b738-7273d4ba0bb83c6",
+      "title": "Traces in Discover - Overview tab content and actions About section - transaction name link navigates to APM transactions page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
+        "line": 80,
+        "column": 14
+      }
+    },
+    {
+      "id": "7d9a57b0659b738-581846eae6f640a",
+      "title": "Traces in Discover - Overview tab content and actions About section - dependency name link navigates to APM dependency overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
+        "line": 104,
+        "column": 14
+      }
+    },
+    {
+      "id": "7d9a57b0659b738-42a29eb0744bd0a",
+      "title": "Traces in Discover - Overview tab content and actions Similar Spans section - renders chart and Open in Discover returns similar spans",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
+        "line": 126,
+        "column": 14
+      }
+    },
+    {
+      "id": "7d9a57b0659b738-d6beeaace0aca26",
+      "title": "Traces in Discover - Overview tab content and actions Trace Summary section - waterfall actions and Open in Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
+        "line": 155,
+        "column": 14
+      }
+    },
+    {
+      "id": "7d9a57b0659b738-e4a0cc5ccc67dad",
+      "title": "Traces in Discover - Overview tab content and actions Errors section - error link and Open in Discover return expected results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
+        "line": 197,
+        "column": 14
+      }
+    },
+    {
+      "id": "7d9a57b0659b738-1cf2b0ced65bf5a",
+      "title": "Traces in Discover - Overview tab content and actions Logs section - Open in Discover returns correlated logs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
+        "line": 247,
+        "column": 14
+      }
+    },
+    {
+      "id": "7d9a57b0659b738-9fd8f0490f431f3",
+      "title": "Traces in Discover - Overview tab content and actions Span Links section - links and Open in Discover return expected results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab_usage.spec.ts",
+        "line": 290,
         "column": 14
       }
     },
@@ -717,6 +1193,50 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/red_metrics_charts.spec.ts",
         "line": 88,
+        "column": 14
+      }
+    },
+    {
+      "id": "53f97d0c42b6e9b-126381863b66a98",
+      "title": "Traces in Discover - Waterfall flyout usage child flyout loads the correct document data for each waterfall item",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
+        "line": 56,
+        "column": 14
+      }
+    },
+    {
+      "id": "53f97d0c42b6e9b-287bab24f344d0f",
+      "title": "Traces in Discover - Waterfall flyout usage Open in Discover from child flyout sections navigates to the correct data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
+        "line": 190,
         "column": 14
       }
     }

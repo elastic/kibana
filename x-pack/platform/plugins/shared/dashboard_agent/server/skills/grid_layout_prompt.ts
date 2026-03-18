@@ -38,6 +38,15 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below. Choose \`w\` and \`h\` to fit the available space.
 6. **Markdown panels** are auto-sized by \`upsert_markdown\` to \`w: 48, h: 4–9\` (based on content length). Account for this height when positioning the first row of visualization panels below the markdown.
 
+### Section grid rules
+
+- When using \`add_section\`, each section has its own coordinate space.
+- Panel coordinates inside a section are section-relative: each section starts at \`y: 0\`. The same 48-column grid and sizing guidance apply within each section.
+- A section occupies exactly one row (\`h: 1\`) in the outer dashboard grid. When placing widgets after a section, compute the next outer \`y\` as \`section.grid.y + 1\` (not by summing internal panel heights).
+- Internal section panel heights affect layout inside the section only; they do not increase the section's outer-grid height.
+- When mixing top-level panels and sections, compute outer \`y\` sequentially: top-level panels advance by \`y + h\`, sections advance by \`y + 1\`.
+- Use \`add_panels_from_attachments.items[].sectionId\` to place new panels inside an existing section.
+
 ### Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
 
 \`\`\`

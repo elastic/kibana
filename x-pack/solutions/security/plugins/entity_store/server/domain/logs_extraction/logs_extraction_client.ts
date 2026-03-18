@@ -15,12 +15,14 @@ import type {
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
-import type { PaginationParams } from './logs_extraction_query_builder';
+import {
+  type PaginationParams,
+  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+} from './query_builder_commons';
 import {
   buildLogsExtractionEsqlQuery,
   buildRemainingLogsCountQuery,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  extractPaginationParams,
+  extractMainPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
 import { getLatestEntitiesIndexName } from '../asset_manager/latest_index';
@@ -31,7 +33,10 @@ import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
 } from '../asset_manager/external_indices_contants';
-import type { LogExtractionConfig } from '../saved_objects';
+import {
+  type LogExtractionConfig,
+  LogExtractionConfig as LogExtractionConfigSchema,
+} from '../saved_objects';
 import {
   type EngineDescriptorClient,
   type EngineLogExtractionState,
@@ -41,6 +46,7 @@ import { ENGINE_STATUS } from '../constants';
 import { parseDurationToMs } from '../../infra/time';
 import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
 import { EntityStoreNotRunningError } from '../errors';
+import type { LogExtractionUpdateParams } from '../../routes/constants';
 
 interface LogsExtractionOptions {
   specificWindow?: {
@@ -160,6 +166,16 @@ export class LogsExtractionClient {
     } catch (error) {
       return await this.handleError(error, type);
     }
+  }
+
+  public async updateConfig(params: LogExtractionUpdateParams): Promise<LogExtractionConfig> {
+    const globalState = await this.globalStateClient.findOrThrow();
+    const mergedConfig = LogExtractionConfigSchema.parse({
+      ...globalState.logsExtraction,
+      ...params,
+    });
+    await this.globalStateClient.update({ logsExtraction: mergedConfig });
+    return mergedConfig;
   }
 
   public async getRemainingLogsCount(type: EntityType): Promise<number> {
@@ -325,7 +341,7 @@ export class LogsExtractionClient {
       });
 
       totalCount += esqlResponse.values.length;
-      pagination = extractPaginationParams(esqlResponse, docsLimit);
+      pagination = extractMainPaginationParams(esqlResponse, docsLimit);
       if (esqlResponse.values.length > 0) {
         pages++;
       }
