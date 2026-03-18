@@ -9,6 +9,7 @@ import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   CATEGORIZATION_GRAPH_PATH,
   CategorizationRequestBody,
@@ -17,7 +18,6 @@ import {
 import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { AutomaticImportRouteHandlerContext } from '../plugin';
-import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
@@ -106,7 +106,15 @@ export function registerCategorizationRoutes(router: IRouter<AutomaticImportRout
               .withConfig({ runName: 'Categorization' })
               .invoke(parameters, options);
 
-            return res.ok({ body: CategorizationResponse.parse(results) });
+            const parsedCategorizationResult = CategorizationResponse.safeParse(results);
+            if (!parsedCategorizationResult.success) {
+              logger.warn(
+                `Categorization response validation warning: ${parsedCategorizationResult.error.message}`
+              );
+            }
+            return res.ok({
+              body: parsedCategorizationResult.success ? parsedCategorizationResult.data : results,
+            });
           } catch (err) {
             try {
               handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);

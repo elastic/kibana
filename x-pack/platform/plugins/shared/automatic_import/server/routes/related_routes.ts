@@ -9,11 +9,11 @@ import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RELATED_GRAPH_PATH, RelatedRequestBody, RelatedResponse } from '../../common';
 import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getRelatedGraph } from '../graphs/related';
 import type { AutomaticImportRouteHandlerContext } from '../plugin';
-import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
@@ -99,7 +99,13 @@ export function registerRelatedRoutes(router: IRouter<AutomaticImportRouteHandle
           const results = await graph
             .withConfig({ runName: 'Related' })
             .invoke(parameters, options);
-          return res.ok({ body: RelatedResponse.parse(results) });
+          const parsedRelatedResult = RelatedResponse.safeParse(results);
+          if (!parsedRelatedResult.success) {
+            logger.warn(
+              `Related response validation warning: ${parsedRelatedResult.error.message}`
+            );
+          }
+          return res.ok({ body: parsedRelatedResult.success ? parsedRelatedResult.data : results });
         } catch (err) {
           try {
             handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);

@@ -9,11 +9,11 @@ import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ANALYZE_LOGS_PATH, AnalyzeLogsRequestBody, AnalyzeLogsResponse } from '../../common';
 import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getLogFormatDetectionGraph } from '../graphs/log_type_detection/graph';
 import type { AutomaticImportRouteHandlerContext } from '../plugin';
-import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse, UnsupportedLogFormatError } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
@@ -122,7 +122,15 @@ export function registerAnalyzeLogsRoutes(router: IRouter<AutomaticImportRouteHa
                 });
             }
 
-            return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });
+            const parsedAnalyzeLogsResult = AnalyzeLogsResponse.safeParse(graphResults);
+            if (!parsedAnalyzeLogsResult.success) {
+              logger.warn(
+                `Analyze logs response validation warning: ${parsedAnalyzeLogsResult.error.message}`
+              );
+            }
+            return res.ok({
+              body: parsedAnalyzeLogsResult.success ? parsedAnalyzeLogsResult.data : graphResults,
+            });
           } catch (err) {
             try {
               handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT_ANALYZE_LOGS);

@@ -9,11 +9,11 @@ import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { CEL_INPUT_GRAPH_PATH, CelInputRequestBody, CelInputResponse } from '../../common';
 import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCelGraph } from '../graphs/cel';
 import type { AutomaticImportRouteHandlerContext } from '../plugin';
-import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 
@@ -91,7 +91,13 @@ export function registerCelInputRoutes(router: IRouter<AutomaticImportRouteHandl
             const graph = await getCelGraph({ model });
             const results = await graph.withConfig({ runName: 'CEL' }).invoke(parameters, options);
 
-            return res.ok({ body: CelInputResponse.parse(results) });
+            const parsedCelResult = CelInputResponse.safeParse(results);
+            if (!parsedCelResult.success) {
+              logger.warn(
+                `CEL input response validation warning: ${parsedCelResult.error.message}`
+              );
+            }
+            return res.ok({ body: parsedCelResult.success ? parsedCelResult.data : results });
           } catch (e) {
             if (isErrorThatHandlesItsOwnResponse(e)) {
               return e.sendResponse(res);

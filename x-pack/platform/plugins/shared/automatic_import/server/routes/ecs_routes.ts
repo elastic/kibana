@@ -9,11 +9,11 @@ import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ECS_GRAPH_PATH, EcsMappingRequestBody, EcsMappingResponse } from '../../common';
 import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
 import type { AutomaticImportRouteHandlerContext } from '../plugin';
-import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
@@ -101,7 +101,13 @@ export function registerEcsRoutes(router: IRouter<AutomaticImportRouteHandlerCon
               .withConfig({ runName: 'ECS Mapping' })
               .invoke(parameters, options);
 
-            return res.ok({ body: EcsMappingResponse.parse(results) });
+            const parsedEcsResult = EcsMappingResponse.safeParse(results);
+            if (!parsedEcsResult.success) {
+              logger.warn(
+                `ECS mapping response validation warning: ${parsedEcsResult.error.message}`
+              );
+            }
+            return res.ok({ body: parsedEcsResult.success ? parsedEcsResult.data : results });
           } catch (err) {
             try {
               handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
