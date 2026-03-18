@@ -43,6 +43,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
   const [panelCount, setPanelCount] = useState<number>(
     Object.keys(gridLayoutStateManager.gridLayout$.getValue()[sectionId]?.panels ?? {}).length
   );
+  const hasDraggedHeaderRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -50,6 +51,31 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       delete gridLayoutStateManager.headerRefs.current[sectionId];
     };
   }, [sectionId, gridLayoutStateManager]);
+
+  /**
+   * Callback for collapsing and/or expanding the section when the title button is clicked
+   */
+  const toggleIsCollapsed = useCallback(() => {
+    // console.log('toggleIsCollapsed fires');
+    const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+    const section = newLayout[sectionId];
+    if (section.isMainSection) return;
+
+    section.isCollapsed = !section.isCollapsed;
+    gridLayoutStateManager.gridLayout$.next(newLayout);
+
+    const buttonRef = collapseButtonRef.current;
+    if (!buttonRef) return;
+    buttonRef.setAttribute('aria-expanded', `${!section.isCollapsed}`);
+  }, [gridLayoutStateManager, sectionId]);
+
+  const collapseSectionOnDrag = useCallback(() => {
+    const section = gridLayoutStateManager.gridLayout$.getValue()[sectionId];
+    if (section && !section.isMainSection && !section.isCollapsed) {
+      console.log('close section');
+      toggleIsCollapsed();
+    }
+  }, [gridLayoutStateManager, sectionId, toggleIsCollapsed]);
 
   useEffect(() => {
     /**
@@ -96,16 +122,27 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         if (!headerRef || activeSectionEvent?.id !== sectionId) return;
 
         if (type === 'init') {
-          setIsActive(true);
-          const width = headerRef.getBoundingClientRect().width;
-          headerRef.style.position = 'fixed';
-          headerRef.style.width = `${width}px`;
-          headerRef.style.top = `${activeSectionEvent.startingPosition.top}px`;
-          headerRef.style.left = `${activeSectionEvent.startingPosition.left}px`;
+          hasDraggedHeaderRef.current = false; // reset the flag for new drag event
         } else if (type === 'update') {
+          if (hasDraggedHeaderRef.current === false) {
+            collapseSectionOnDrag();
+            setIsActive(true);
+            hasDraggedHeaderRef.current = true;
+            const width = headerRef.getBoundingClientRect().width;
+            headerRef.style.width = `${width}px`;
+            headerRef.style.position = 'fixed';
+            headerRef.style.top = `${activeSectionEvent.startingPosition.top}px`;
+            headerRef.style.left = `${activeSectionEvent.startingPosition.left}px`;
+          }
+
           headerRef.style.transform = `translate(${activeSectionEvent.translate.left}px, ${activeSectionEvent.translate.top}px)`;
-        } else {
+        } else if (type === 'finish') {
+          console.log(hasDraggedHeaderRef.current, 'hasDraggedHeaderRef.current');
+          if (hasDraggedHeaderRef.current === false) {
+            toggleIsCollapsed(); // no drag, only click => toggle
+          }
           setIsActive(false);
+          hasDraggedHeaderRef.current = false;
           headerRef.style.position = ``;
           headerRef.style.width = ``;
           headerRef.style.top = ``;
@@ -141,7 +178,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       dragRowStyleSubscription.unsubscribe();
       collapsedStateSubscription.unsubscribe();
     };
-  }, [gridLayoutStateManager, sectionId]);
+  }, [gridLayoutStateManager, sectionId, toggleIsCollapsed]);
 
   const confirmDeleteSection = useCallback(() => {
     /**
@@ -159,32 +196,18 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     }
   }, [gridLayoutStateManager, sectionId]);
 
-  /**
-   * Callback for collapsing and/or expanding the section when the title button is clicked
-   */
-  const toggleIsCollapsed = useCallback(() => {
-    const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-    const section = newLayout[sectionId];
-    if (section.isMainSection) return;
-
-    section.isCollapsed = !section.isCollapsed;
-    gridLayoutStateManager.gridLayout$.next(newLayout);
-
-    const buttonRef = collapseButtonRef.current;
-    if (!buttonRef) return;
-    buttonRef.setAttribute('aria-expanded', `${!section.isCollapsed}`);
-  }, [gridLayoutStateManager, sectionId]);
+  const shouldIgnoreHeaderClick = (target: EventTarget | null) => {
+    if (!(target instanceof Element)) return false;
+    // console.log(Boolean(target.closest('[data-no-drag]')));
+    return Boolean(target.closest('[data-no-drag]'));
+  };
 
   const handleSectionDragStart = useCallback(
     (e: UserInteractionEvent) => {
-      const section = gridLayoutStateManager.gridLayout$.getValue()[sectionId];
-
-      if (section && !section.isMainSection && !section.isCollapsed) {
-        toggleIsCollapsed();
-      }
+      if (shouldIgnoreHeaderClick((e as unknown as React.MouseEvent).target)) return;
       startDrag(e);
     },
-    [gridLayoutStateManager, sectionId, toggleIsCollapsed, startDrag]
+    [startDrag]
   );
 
   return (
@@ -193,7 +216,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         gutterSize="xs"
         responsive={false}
         alignItems="center"
-        css={(theme) => styles.headerStyles(theme, sectionId)}
+        css={(theme) => styles.headerStyles(theme, sectionId, readOnly)}
         className={classNames('kbnGridSectionHeader', {
           'kbnGridSectionHeader--active': isActive,
           // sets the collapsed state on mount
@@ -207,11 +230,13 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         ref={(element: HTMLDivElement | null) => {
           gridLayoutStateManager.headerRefs.current[sectionId] = element;
         }}
+        onMouseDown={handleSectionDragStart}
+        onTouchStart={handleSectionDragStart}
+        onKeyDown={handleSectionDragStart}
       >
         <GridSectionTitle
           sectionId={sectionId}
           readOnly={readOnly || isActive}
-          toggleIsCollapsed={toggleIsCollapsed}
           editTitleOpen={editTitleOpen}
           setEditTitleOpen={setEditTitleOpen}
           collapseButtonRef={collapseButtonRef}
@@ -244,6 +269,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                   {!isActive && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
+                        data-no-drag
                         iconType="trash"
                         color="danger"
                         className="kbnGridLayout--deleteSectionIcon"
@@ -262,9 +288,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
                         defaultMessage: 'Move section',
                       })}
-                      onMouseDown={handleSectionDragStart}
-                      onTouchStart={handleSectionDragStart}
-                      onKeyDown={handleSectionDragStart}
                       data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
                     />
                   </EuiFlexItem>
@@ -294,13 +317,22 @@ const styles = {
   floatToRight: css({
     marginLeft: 'auto',
   }),
-  headerStyles: ({ euiTheme }: UseEuiTheme, sectionId: string) =>
+  headerStyles: ({ euiTheme }: UseEuiTheme, sectionId: string, readOnly: boolean) =>
     css({
       gridColumnStart: 1,
       gridColumnEnd: -1,
       gridRowStart: `span 1`,
       gridRowEnd: `start-${sectionId}`,
       height: `${euiTheme.size.xl}`,
+      ...(readOnly
+        ? {}
+        : {
+            touchAction: 'none',
+            '&:hover': {
+              cursor: 'move',
+              backgroundColor: euiTheme.colors.lightestShade,
+            },
+          }),
       '.kbnGridLayout--deleteSectionIcon': {
         marginLeft: euiTheme.size.xs,
       },
@@ -339,6 +371,9 @@ const styles = {
           opacity: 1,
           pointerEvents: 'auto',
         },
+      },
+      '&.kbnGridSectionHeader--active button, &.kbnGridSectionHeader--active a': {
+        pointerEvents: 'none',
       },
     }),
 };
