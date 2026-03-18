@@ -23,6 +23,7 @@ const defaultControls: FilterControlConfig[] = [
     display_settings: { hide_action_bar: true },
     selected_options: ['val1', 'val2'],
   },
+
   {
     field_name: 'second',
     display_settings: { hide_action_bar: true },
@@ -146,7 +147,7 @@ describe('utils', () => {
         },
         {
           field_name: 'second',
-          selected_options: [],
+          selected_options: ['val1', 'val2'],
           display_settings: { hide_action_bar: false },
           exclude: true,
           persist: true,
@@ -177,10 +178,10 @@ describe('utils', () => {
 
   describe('reorderControls', () => {
     it('should add persist controls in order if they are not available in the given controls', () => {
-      const newControlsSet = [
+      const newControlsSet: FilterControlConfig[] = [
         {
           field_name: 'new',
-        } as FilterControlConfig,
+        },
       ];
 
       const result = reorderControlsWithDefaultControls({
@@ -203,7 +204,7 @@ describe('utils', () => {
       expect(result).toMatchObject(expectedResult);
     });
     it('should change controls order if they are available in the given controls', () => {
-      const newControlsSet = [
+      const newControlsSet: FilterControlConfig[] = [
         {
           field_name: 'new',
         },
@@ -216,7 +217,7 @@ describe('utils', () => {
           field_name: 'first',
           selected_options: [],
         },
-      ] as FilterControlConfig[];
+      ];
 
       const expectedResult = [
         {
