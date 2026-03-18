@@ -126,15 +126,37 @@ export class MetricsExperiencePage {
   }
 
   /**
-   * Clicks at the center of the chart canvas in a metric card to trigger
-   * Lens's click-to-filter action (appends a WHERE clause to the query).
-   * Requires a breakdown dimension to be active so the click targets a
-   * specific series data point.
+   * Filters by the first visible legend series in a metric card chart.
+   *
+   * When a breakdown dimension is active, each series gets a legend entry.
+   * Elastic-charts renders legend action buttons with stable `data-test-subj`
+   * attributes: `legend-{seriesLabel}` opens the action popover and
+   * `legend-{seriesLabel}-filterIn` applies the "Filter for" action.
+   * This triggers the same `onFilter` callback path as clicking a data point
+   * directly, but is far more reliable because the legend is DOM-rendered
+   * rather than canvas-rendered (no hit-detection radius concerns).
+   *
+   * NOTE: This requires `onFilter` to be wired up for ES|QL mode in
+   * `use_discover_histogram.ts`. Without that product fix the filter action
+   * is a no-op and the WHERE clause will not be appended to the query.
    */
-  public async clickChartDataPoint(index: number): Promise<void> {
-    const canvas = this.getChartCanvasForCard(index);
-    await canvas.waitFor({ state: 'visible' });
-    await canvas.click();
+  public async filterByFirstLegendSeries(cardIndex: number): Promise<void> {
+    const card = this.getCardByIndex(cardIndex);
+    // Read the data-test-subj of the first legend trigger in the card's DOM so
+    // we can build a fully specific selector, avoiding positional Playwright APIs.
+    // Legend triggers have data-test-subj="legend-{seriesValue}"; child action
+    // buttons share the same prefix so they are excluded from the query.
+    const triggerTestSubj = await card
+      .locator('[data-test-subj^="legend-"]:not([data-test-subj*="-filter"])')
+      .evaluateAll((els) => els[0]?.getAttribute('data-test-subj') ?? null);
+
+    if (!triggerTestSubj) {
+      throw new Error(`No legend items found in card ${cardIndex}`);
+    }
+
+    await card.locator(`[data-test-subj="${triggerTestSubj}"]`).click();
+    // The filter-in button renders in a portal; scope to the page not the card.
+    await this.page.locator(`[data-test-subj="${triggerTestSubj}-filterIn"]`).click();
   }
 
   /**
