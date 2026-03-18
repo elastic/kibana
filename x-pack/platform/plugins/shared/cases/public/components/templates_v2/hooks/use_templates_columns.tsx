@@ -51,7 +51,6 @@ interface ActionColumnProps {
   template: Template;
   onEdit: (template: Template) => void;
   onClone: (template: Template) => void;
-  onSetAsDefault: (template: Template) => void;
   onExport: (template: Template) => void;
   onDelete: (template: Template) => void;
   disableActions?: boolean;
@@ -61,7 +60,6 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
   template,
   onEdit,
   onClone,
-  onSetAsDefault,
   onExport,
   onDelete,
   disableActions = false,
@@ -78,11 +76,6 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
     closePopover();
     onClone(template);
   }, [closePopover, onClone, template]);
-
-  const handleSetAsDefault = useCallback(() => {
-    closePopover();
-    onSetAsDefault(template);
-  }, [closePopover, onSetAsDefault, template]);
 
   const handleExport = useCallback(() => {
     closePopover();
@@ -113,12 +106,6 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
             'data-test-subj': `template-action-clone-${template.templateId}`,
           },
           {
-            name: i18n.SET_AS_DEFAULT_TEMPLATE,
-            icon: 'check',
-            onClick: handleSetAsDefault,
-            'data-test-subj': `template-action-set-default-${template.templateId}`,
-          },
-          {
             name: i18n.EXPORT_TEMPLATE,
             icon: 'exportAction',
             onClick: handleExport,
@@ -136,7 +123,7 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
         ],
       },
     ],
-    [handleEdit, handleClone, handleSetAsDefault, handleExport, handleDelete, template.templateId]
+    [handleEdit, handleClone, handleExport, handleDelete, template.templateId]
   );
 
   return (
@@ -173,7 +160,6 @@ const ActionColumn = React.memo(ActionColumnComponent);
 export interface UseTemplatesColumnsProps {
   onEdit: (template: Template) => void;
   onClone: (template: Template) => void;
-  onSetAsDefault: (template: Template) => void;
   onExport: (template: Template) => void;
   onDelete: (template: Template) => void;
   disableActions?: boolean;
@@ -182,7 +168,6 @@ export interface UseTemplatesColumnsProps {
 export const useTemplatesColumns = ({
   onEdit,
   onClone,
-  onSetAsDefault,
   onExport,
   onDelete,
   disableActions = false,
@@ -196,25 +181,9 @@ export const useTemplatesColumns = ({
         sortable: true,
         render: (name: string, template: Template) =>
           name ? (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiLink onClick={() => onEdit(template)} data-test-subj="template-column-name">
-                  {name}
-                </EuiLink>
-              </EuiFlexItem>
-              {template.isDefault && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge
-                    css={css`
-                      border-radius: ${euiTheme.border.radius.small};
-                    `}
-                    data-test-subj="template-column-default-badge"
-                  >
-                    {i18n.DEFAULT}
-                  </EuiBadge>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <EuiLink onClick={() => onEdit(template)} data-test-subj="template-column-name">
+              {name}
+            </EuiLink>
           ) : (
             getEmptyCellValue()
           ),
@@ -392,7 +361,6 @@ export const useTemplatesColumns = ({
             template={template}
             onEdit={onEdit}
             onClone={onClone}
-            onSetAsDefault={onSetAsDefault}
             onExport={onExport}
             onDelete={onDelete}
             disableActions={disableActions}
@@ -406,7 +374,6 @@ export const useTemplatesColumns = ({
       euiTheme.size.xs,
       euiTheme.border.radius.small,
       onClone,
-      onSetAsDefault,
       onExport,
       onDelete,
       disableActions,
