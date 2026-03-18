@@ -50,10 +50,6 @@ export const appPaths = {
 
   // Backward compatibility aliases pointing to new routes
   // TODO: Migrate consumers to use appPaths.agent.* or appPaths.manage.* directly and remove these aliases
-  chat: {
-    new: '/agents/elastic-default',
-    newWithAgent: ({ agentId }: { agentId: string }) => `/agents/${agentId}`,
-  },
   agents: {
     list: '/manage/agents',
     new: '/manage/agents/new',
