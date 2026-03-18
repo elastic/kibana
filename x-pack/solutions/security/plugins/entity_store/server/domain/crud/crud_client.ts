@@ -143,6 +143,59 @@ export class CRUDClient {
   // 6. Update Scout tests to test new logic, make sure they pass
   // 7. Remove updates index and methods that install/test it.
 
+  // updateEntity takes a single entity patch and applies it to an existing
+  // entity in LATEST index. The patch has to contain either:
+  // 1. a valid ID and non-identifying data: provided ID will be used
+  // 2. a valid ID and matching identifying data: provided ID will be validated
+  // and used if correct
+  // 3. no ID and identifying data: ID will be generated
+  public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
+    const id = getEuidFromObject(entityType, doc);
+
+    if (!doc.entity?.id && id === undefined) {
+      throw new BadCRUDRequestError(`Could not derive EUID from document or find it in entity.id`);
+    }
+
+    if (doc.entity?.id && id !== undefined && doc.entity?.id !== id) {
+      throw new BadCRUDRequestError(
+        `Supplied ID ${doc.entity?.id} does not match generated EUID ${id}`
+      );
+    }
+
+    if (!doc.entity?.id && id) {
+      doc.entity.id = id as string;
+    }
+
+    const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, force);
+    const { result } = await this.esClient.update({
+      index: getLatestEntitiesIndexName(this.namespace),
+      id: hashEuid(doc.entity.id),
+      doc: readyDoc,
+      retry_on_conflict: RETRY_ON_CONFLICT,
+      refresh: 'wait_for',
+    });
+
+    switch (result as Result) {
+      case 'updated':
+        this.logger.debug(`Updated entity ID ${id}`);
+        break;
+      case 'noop':
+        this.logger.debug(`Updated entity ID ${id} (no change)`);
+        break;
+    }
+    return;
+  }
+
+  /*
+    // Check if document has identifying data
+    const { identitySourceFields } = getEuidSourceFields(entityType);
+    const flat = getFlattenedObject(doc);
+    const presentIdentifyingFields = Object.keys(flat).find((k) =>
+      identitySourceFields.includes(k)
+    );
+    const hasIdentifyingFields = presentIdentifyingFields !== undefined && presentIdentifyingFields.length > 0;
+  */
+
   // upsertEntity takes a single entity and tries to either create or update
   // (if an entity with the same EUID already exists) it directly in the LATEST
   // index. This is considered a single synchronous upsert.
