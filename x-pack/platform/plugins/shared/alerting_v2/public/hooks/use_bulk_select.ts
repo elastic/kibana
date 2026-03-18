@@ -19,14 +19,14 @@ interface BulkSelectState {
 
 enum ActionType {
   TOGGLE_ROW = 'TOGGLE_ROW',
-  TOGGLE_SELECT_ALL = 'TOGGLE_SELECT_ALL',
+  SELECT_ALL = 'SELECT_ALL',
   SET_PAGE_SELECTION = 'SET_PAGE_SELECTION',
   CLEAR_SELECTION = 'CLEAR_SELECTION',
 }
 
 type Action =
   | { type: ActionType.TOGGLE_ROW; payload: string }
-  | { type: ActionType.TOGGLE_SELECT_ALL }
+  | { type: ActionType.SELECT_ALL }
   | { type: ActionType.SET_PAGE_SELECTION; payload: string[] }
   | { type: ActionType.CLEAR_SELECTION };
 
@@ -37,9 +37,9 @@ const initialState: BulkSelectState = {
 
 const reducer = (state: BulkSelectState, action: Action): BulkSelectState => {
   switch (action.type) {
-    case ActionType.TOGGLE_SELECT_ALL:
+    case ActionType.SELECT_ALL:
       return {
-        isAllSelected: !state.isAllSelected,
+        isAllSelected: true,
         selectedIds: new Set<string>(),
       };
 
@@ -122,7 +122,7 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
   }, []);
 
   const onSelectAll = useCallback(() => {
-    dispatch({ type: ActionType.TOGGLE_SELECT_ALL });
+    dispatch({ type: ActionType.SELECT_ALL });
   }, []);
 
   const onSelectPage = useCallback(() => {

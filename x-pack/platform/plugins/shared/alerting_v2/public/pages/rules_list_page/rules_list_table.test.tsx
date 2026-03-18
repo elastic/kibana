@@ -184,15 +184,15 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('selectAllRulesButton')).toHaveTextContent('Select all 5 rules');
     });
 
-    it('shows "Deselect all" when all selected', () => {
+    it('hides "Select all" button when all selected', () => {
       renderTable({ selectedCount: 5, isAllSelected: true, totalItemCount: 5 });
 
-      expect(screen.getByTestId('selectAllRulesButton')).toHaveTextContent('Deselect all');
+      expect(screen.queryByTestId('selectAllRulesButton')).not.toBeInTheDocument();
     });
 
     it('calls onSelectAll when select all button is clicked', () => {
       const onSelectAll = jest.fn();
-      renderTable({ selectedCount: 1, onSelectAll });
+      renderTable({ selectedCount: 1, isAllSelected: false, onSelectAll });
 
       fireEvent.click(screen.getByTestId('selectAllRulesButton'));
 

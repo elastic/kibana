@@ -24,10 +24,20 @@ import {
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
+
+const descriptionTextStyle = css`
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+`;
 
 interface RuleActionsMenuProps {
   rule: RuleApiResponse;
@@ -118,6 +128,9 @@ const RuleActionsMenu = ({
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downRight"
+      aria-label={i18n.translate('xpack.alertingV2.rulesList.action.actionsMenu', {
+        defaultMessage: 'Rule actions',
+      })}
     >
       <EuiContextMenuPanel size="s" items={menuItems} />
     </EuiPopover>
@@ -237,8 +250,16 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
         ),
         truncateText: true,
-        render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) =>
-          metadata?.name ?? rule.id,
+        render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
+          <div>
+            {metadata?.name ?? rule.id}
+            {metadata?.description && (
+              <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
+                {metadata.description}
+              </EuiText>
+            )}
+          </div>
+        ),
       },
       {
         field: 'evaluation',
@@ -411,6 +432,9 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                 closePopover={() => setIsBulkActionsOpen(false)}
                 panelPaddingSize="none"
                 anchorPosition="downLeft"
+                aria-label={i18n.translate('xpack.alertingV2.rulesList.bulkAction.menu', {
+                  defaultMessage: 'Bulk actions',
+                })}
               >
                 <EuiContextMenuPanel
                   size="s"
@@ -449,27 +473,22 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                 />
               </EuiPopover>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                iconType={isAllSelected ? 'cross' : 'pagesSelect'}
-                onClick={onSelectAll}
-                data-test-subj="selectAllRulesButton"
-              >
-                {isAllSelected ? (
-                  <FormattedMessage
-                    id="xpack.alertingV2.rulesList.deselectAll"
-                    defaultMessage="Deselect all"
-                  />
-                ) : (
+            {!isAllSelected ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="pagesSelect"
+                  onClick={onSelectAll}
+                  data-test-subj="selectAllRulesButton"
+                >
                   <FormattedMessage
                     id="xpack.alertingV2.rulesList.selectAll"
                     defaultMessage="Select all {total} {total, plural, one {rule} other {rules}}"
                     values={{ total: totalItemCount }}
                   />
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"

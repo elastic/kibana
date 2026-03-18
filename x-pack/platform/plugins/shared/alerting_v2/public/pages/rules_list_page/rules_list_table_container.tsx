@@ -14,7 +14,7 @@ import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
 import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
-import { DeleteConfirmationModal } from '../../components/rule/delete_confirmation_modal';
+import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
 import { paths } from '../../constants';
 import { RulesListTable } from './rules_list_table';
 

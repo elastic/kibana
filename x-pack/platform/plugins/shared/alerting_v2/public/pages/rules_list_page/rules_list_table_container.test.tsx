@@ -339,7 +339,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('selectAllRulesButton'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('selectAllRulesButton')).toHaveTextContent('Deselect all');
+        expect(screen.queryByTestId('selectAllRulesButton')).not.toBeInTheDocument();
       });
 
       // Open bulk actions menu
