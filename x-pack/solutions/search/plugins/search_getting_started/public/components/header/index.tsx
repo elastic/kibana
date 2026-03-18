@@ -89,7 +89,13 @@ export const SearchGettingStartedHeader: React.FC = () => {
                       ? docLinks.hostedCloudReleaseNotes
                       : docLinks.serverlessReleaseNotes
                   }
-                  kibanaVersion={!cloud?.isServerlessEnabled ? `v${kibanaVersion}` : 'Changelog'}
+                  kibanaVersion={
+                    !cloud?.isServerlessEnabled
+                      ? `v${kibanaVersion}`
+                      : i18n.translate('xpack.search.gettingStarted.changelog', {
+                          defaultMessage: 'Changelog',
+                        })
+                  }
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
