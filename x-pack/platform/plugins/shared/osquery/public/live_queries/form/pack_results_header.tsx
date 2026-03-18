@@ -6,7 +6,14 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
@@ -21,6 +28,11 @@ const ADD_TAGS_LABEL = i18n.translate('xpack.osquery.packResultsHeader.addTagsLa
   defaultMessage: 'Add tags',
 });
 
+const SCHEDULED_TAGS_DISABLED_LABEL = i18n.translate(
+  'xpack.osquery.packResultsHeader.scheduledTagsDisabledLabel',
+  { defaultMessage: 'Tags are not supported for scheduled queries' }
+);
+
 const EMPTY_TAGS: string[] = [];
 
 interface PackResultsHeadersProps {
@@ -28,6 +40,7 @@ interface PackResultsHeadersProps {
   queryIds: string[];
   agentIds?: string[];
   addToTimeline?: AddToTimelineHandler;
+  isScheduled?: boolean;
 }
 
 const resultsHeadingCss = ({ euiTheme }: UseEuiTheme) => ({
@@ -42,7 +55,7 @@ const iconsListCss = {
 };
 
 export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
-  ({ actionId, agentIds, queryIds, addToTimeline }) => {
+  ({ actionId, agentIds, queryIds, addToTimeline, isScheduled }) => {
     const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' } as const), []);
     const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
     const permissions = useKibana().services.application.capabilities.osquery;
@@ -51,7 +64,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
 
     const { data: liveQueryDetails } = useLiveQueryDetails({
       actionId,
-      skip: !showAddTags,
+      skip: !showAddTags || !!isScheduled,
     });
 
     const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -95,15 +108,20 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                   </EuiFlexItem>
                   {showAddTags && (
                     <EuiFlexItem>
-                      <EuiButtonIcon
-                        iconType="tag"
-                        color="text"
-                        iconSize="l"
-                        size="xs"
-                        aria-label={ADD_TAGS_LABEL}
-                        onClick={handleOpenFlyout}
-                        data-test-subj="add-tags-button"
-                      />
+                      <EuiToolTip
+                        content={isScheduled ? SCHEDULED_TAGS_DISABLED_LABEL : ADD_TAGS_LABEL}
+                      >
+                        <EuiButtonIcon
+                          iconType="tag"
+                          color="text"
+                          iconSize="l"
+                          size="xs"
+                          aria-label={ADD_TAGS_LABEL}
+                          onClick={handleOpenFlyout}
+                          isDisabled={isScheduled}
+                          data-test-subj="add-tags-button"
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
