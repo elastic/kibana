@@ -221,10 +221,6 @@ export function useModelActions({
         isPrimary: true,
         color: 'success',
         enabled: (item) => {
-          if (isRerankModelItem(item)) {
-            return false;
-          }
-
           const isModelBeingDeployed = scheduledDeployments.some(
             (deployment) => deployment.modelId === item.model_id
           );
@@ -239,9 +235,7 @@ export function useModelActions({
           return canStartStopTrainedModels && !isModelBeingDeployed;
         },
         available: (item) => {
-          if (isRerankModelItem(item)) {
-            return false;
-          }
+          if (isRerankModelItem(item)) return false;
 
           return (
             isNLPModelItem(item) ||
