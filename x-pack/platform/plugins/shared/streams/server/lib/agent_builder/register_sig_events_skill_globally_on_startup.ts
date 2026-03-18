@@ -10,11 +10,11 @@ import type { Logger } from '@kbn/logging';
 import type { StreamsServer } from '../../types';
 import { createSigEventsSkill } from './skills/sig_events_skill';
 import { registerSigEventsTools } from './register_tools';
-import { isSigEventsSkillEnabledInAnySpace } from './sig_events_skill_space_state';
+import { isSigEventsSkillEnabledInDefaultSpace } from './sig_events_skill_space_state';
 
 /**
  * On Kibana startup, registers the SigEvents skill and tools in the global Agent Builder
- * registry when at least one space has sigEventsSkillEnabled in significant-events settings.
+ * registry when the Default space has sigEventsSkillEnabled in significant-events settings.
  */
 export async function registerSigEventsSkillGloballyOnStartup({
   core,
@@ -31,7 +31,7 @@ export async function registerSigEventsSkillGloballyOnStartup({
 
   const logPrefix = 'registerSigEventsSkillGloballyOnStartup';
 
-  const anyEnabled = await isSigEventsSkillEnabledInAnySpace(core, logger, logPrefix);
+  const anyEnabled = await isSigEventsSkillEnabledInDefaultSpace(core, logger, logPrefix);
   if (!anyEnabled) {
     return;
   }

@@ -13,8 +13,8 @@ import {
 import type { SigEventsSettingsAttributes } from './sig_events_settings_config';
 
 /**
- * SigEvents settings as stored or returned by the API.
- * Each property is undefined when no saved object exists or the value was never set.
+ * SigEvents settings for the current space (saved object is namespaced per space).
+ * sigEventsSkillEnabled is only written from the Default space (skill routes enforce that).
  */
 export interface SigEventsSettings {
   connectorIdKnowledgeIndicatorExtraction?: string;
@@ -34,14 +34,13 @@ export class SigEventsSettingsClientImpl implements SigEventsSettingsClient {
     private readonly logger: Logger
   ) {}
 
-  async getSettings(): Promise<SigEventsSettings> {
-    let attributes: SigEventsSettingsAttributes | null = null;
+  private async getScopedAttributes(): Promise<SigEventsSettingsAttributes> {
     try {
       const data = await this.soClient.get<SigEventsSettingsAttributes>(
         STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SO_TYPE,
         STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SINGLETON_ID
       );
-      attributes = data.attributes;
+      return data.attributes ?? {};
     } catch (err) {
       if (
         (err as { output?: { statusCode?: number } })?.output?.statusCode === 404 ||
@@ -50,41 +49,49 @@ export class SigEventsSettingsClientImpl implements SigEventsSettingsClient {
         this.logger.debug(
           `No saved settings found for ${STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SINGLETON_ID}`
         );
-      } else {
-        throw err;
+        return {};
       }
+      throw err;
     }
+  }
 
-    if (!attributes) {
-      return {
-        connectorIdKnowledgeIndicatorExtraction: undefined,
-        connectorIdRuleGeneration: undefined,
-        connectorIdDiscovery: undefined,
-        sigEventsSkillEnabled: undefined,
-      };
-    }
-
+  async getSettings(): Promise<SigEventsSettings> {
+    const attrs = await this.getScopedAttributes();
     const toOptional = (v: string | undefined) => (v != null && v.trim() !== '' ? v : undefined);
 
     return {
       connectorIdKnowledgeIndicatorExtraction: toOptional(
-        attributes.connectorIdKnowledgeIndicatorExtraction
+        attrs.connectorIdKnowledgeIndicatorExtraction
       ),
-      connectorIdRuleGeneration: toOptional(attributes.connectorIdRuleGeneration),
-      connectorIdDiscovery: toOptional(attributes.connectorIdDiscovery),
-      sigEventsSkillEnabled: attributes.sigEventsSkillEnabled,
+      connectorIdRuleGeneration: toOptional(attrs.connectorIdRuleGeneration),
+      connectorIdDiscovery: toOptional(attrs.connectorIdDiscovery),
+      sigEventsSkillEnabled: attrs.sigEventsSkillEnabled,
     };
   }
 
   async updateSettings(settings: Partial<SigEventsSettingsAttributes>): Promise<void> {
-    const current = await this.getSettings();
+    const scoped = await this.getScopedAttributes();
     const updates = Object.fromEntries(
       Object.entries(settings).filter(([, v]) => v !== undefined)
     ) as Partial<SigEventsSettingsAttributes>;
 
-    const merged: SigEventsSettings = {
-      ...current,
-      ...updates,
+    const merged: SigEventsSettingsAttributes = {
+      connectorIdKnowledgeIndicatorExtraction:
+        updates.connectorIdKnowledgeIndicatorExtraction !== undefined
+          ? updates.connectorIdKnowledgeIndicatorExtraction
+          : scoped.connectorIdKnowledgeIndicatorExtraction,
+      connectorIdRuleGeneration:
+        updates.connectorIdRuleGeneration !== undefined
+          ? updates.connectorIdRuleGeneration
+          : scoped.connectorIdRuleGeneration,
+      connectorIdDiscovery:
+        updates.connectorIdDiscovery !== undefined
+          ? updates.connectorIdDiscovery
+          : scoped.connectorIdDiscovery,
+      sigEventsSkillEnabled:
+        updates.sigEventsSkillEnabled !== undefined
+          ? updates.sigEventsSkillEnabled
+          : scoped.sigEventsSkillEnabled,
     };
 
     const toWrite = Object.fromEntries(
@@ -93,7 +100,7 @@ export class SigEventsSettingsClientImpl implements SigEventsSettingsClient {
         connectorIdRuleGeneration: merged.connectorIdRuleGeneration,
         connectorIdDiscovery: merged.connectorIdDiscovery,
         sigEventsSkillEnabled: merged.sigEventsSkillEnabled,
-      }).filter(([, v]) => v !== undefined)
+      }).filter(([, v]) => v !== undefined && (typeof v === 'boolean' || String(v).trim() !== ''))
     ) as SigEventsSettingsAttributes;
 
     await this.soClient.create<SigEventsSettingsAttributes>(

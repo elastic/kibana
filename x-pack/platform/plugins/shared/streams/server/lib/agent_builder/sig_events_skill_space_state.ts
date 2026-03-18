@@ -7,6 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SO_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SINGLETON_ID,
@@ -14,47 +15,29 @@ import {
 } from '../saved_objects/significant_events/sig_events_settings_config';
 
 /**
- * Returns true if any space has Sig Events skill enabled in significant-events settings.
+ * Reads whether the Sig Events skill is enabled from the Default space's significant-events settings.
  */
-export async function isSigEventsSkillEnabledInAnySpace(
+export async function isSigEventsSkillEnabledInDefaultSpace(
   core: CoreStart,
   logger: Logger,
   logPrefix: string
 ): Promise<boolean> {
-  let spaceIds: string[];
+  const internalRepo = core.savedObjects.createInternalRepository();
   try {
-    const spaceRepo = core.savedObjects.createInternalRepository(['space']);
-    const { saved_objects: spaceObjects } = await spaceRepo.find({
-      type: 'space',
-      perPage: 1000,
-    });
-    spaceIds = spaceObjects.map((so) => so.id);
+    const so = await internalRepo.get<SigEventsSettingsAttributes>(
+      STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SO_TYPE,
+      STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SINGLETON_ID,
+      { namespace: DEFAULT_SPACE_ID }
+    );
+    return so.attributes?.sigEventsSkillEnabled === true;
   } catch (err) {
-    logger.warn(`${logPrefix}: could not list spaces: ${(err as Error).message}`);
+    const statusCode =
+      (err as { output?: { statusCode?: number }; statusCode?: number })?.output?.statusCode ??
+      (err as { statusCode?: number })?.statusCode;
+    if (statusCode === 404) {
+      return false;
+    }
+    logger.warn(`${logPrefix}: failed to read default space settings: ${(err as Error).message}`);
     return false;
   }
-
-  const internalRepo = core.savedObjects.createInternalRepository();
-  for (const spaceId of spaceIds) {
-    try {
-      const so = await internalRepo.get<SigEventsSettingsAttributes>(
-        STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SO_TYPE,
-        STREAMS_SIGNIFICANT_EVENTS_SETTINGS_SINGLETON_ID,
-        { namespace: spaceId }
-      );
-      if (so.attributes?.sigEventsSkillEnabled === true) {
-        return true;
-      }
-    } catch (err) {
-      const statusCode =
-        (err as { output?: { statusCode?: number }; statusCode?: number })?.output?.statusCode ??
-        (err as { statusCode?: number })?.statusCode;
-      if (statusCode !== 404) {
-        logger.warn(
-          `${logPrefix}: failed to read settings for space ${spaceId}: ${(err as Error).message}`
-        );
-      }
-    }
-  }
-  return false;
 }

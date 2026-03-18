@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { badRequest } from '@hapi/boom';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { createServerRoute } from '../../../create_server_route';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
@@ -17,13 +18,19 @@ import {
 import { registerSigEventsTools } from '../../../../lib/agent_builder/register_tools';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
+const SIG_EVENTS_SKILL_DEFAULT_SPACE_ONLY_MESSAGE =
+  'The Sig Events Agent Builder skill can only be turned on or off from the Default space. Switch to the Default space in Kibana and try again.';
+
+const SIG_EVENTS_SKILL_SPACE_UNRESOLVED_MESSAGE =
+  'Could not determine the active Kibana space. Enable the Spaces plugin to turn the Sig Events skill on or off.';
+
 const enableRoute = createServerRoute({
   endpoint: 'POST /internal/streams/_sig_events_skill/enable',
   options: {
     access: 'internal',
     summary: 'Enable SigEvents skill in Agent Builder',
     description:
-      'Registers Sig Events tools and the SigEvents skill in the global Agent Builder registry. Does not modify the default agent. In any space, agents with enable_elastic_capabilities (or skill_ids that include sig-events) can use this skill and its tools.',
+      'Available only in the Default space. Registers Sig Events tools and the skill globally. The enabled state is stored on the Default space significant-events settings. Agents with enable_elastic_capabilities (or skill_ids including sig-events) can use this skill in any space.',
   },
   security: {
     authz: {
@@ -31,6 +38,16 @@ const enableRoute = createServerRoute({
     },
   },
   handler: async ({ request, server, getScopedClients }): Promise<EnableSigEventsSkillResult> => {
+    if (!server.getActiveSpaceId) {
+      throw badRequest(new Error('Sig Events skill routes are not available yet.'));
+    }
+    const activeSpaceId = server.getActiveSpaceId(request);
+    if (activeSpaceId === undefined) {
+      throw badRequest(new Error(SIG_EVENTS_SKILL_SPACE_UNRESOLVED_MESSAGE));
+    }
+    if (activeSpaceId !== DEFAULT_SPACE_ID) {
+      throw badRequest(new Error(SIG_EVENTS_SKILL_DEFAULT_SPACE_ONLY_MESSAGE));
+    }
     const { licensing, uiSettingsClient, sigEventsSettingsClient } = await getScopedClients({
       request,
     });
@@ -61,7 +78,7 @@ const disableRoute = createServerRoute({
     access: 'internal',
     summary: 'Disable SigEvents skill in Agent Builder',
     description:
-      'Turns off Sig Events skill for this space in settings. Unregisters the global skill only if no other space still has it enabled.',
+      'Available only in the Default space. Turns off the skill in settings and unregisters it globally.',
   },
   security: {
     authz: {
@@ -74,6 +91,16 @@ const disableRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<DisableSigEventsSkillResult> => {
+    if (!server.getActiveSpaceId) {
+      throw badRequest(new Error('Sig Events skill routes are not available yet.'));
+    }
+    const activeSpaceId = server.getActiveSpaceId(request);
+    if (activeSpaceId === undefined) {
+      throw badRequest(new Error(SIG_EVENTS_SKILL_SPACE_UNRESOLVED_MESSAGE));
+    }
+    if (activeSpaceId !== DEFAULT_SPACE_ID) {
+      throw badRequest(new Error(SIG_EVENTS_SKILL_DEFAULT_SPACE_ONLY_MESSAGE));
+    }
     const { licensing, uiSettingsClient, sigEventsSettingsClient } = await getScopedClients({
       request,
     });
@@ -83,7 +110,7 @@ const disableRoute = createServerRoute({
       throw new Error('Agent Builder is not available. Ensure the agentBuilder plugin is enabled.');
     }
     await sigEventsSettingsClient.updateSettings({ sigEventsSkillEnabled: false });
-    return disableSigEventsSkill(server.agentBuilderStart, server.core, logger);
+    return disableSigEventsSkill(server.agentBuilderStart, logger);
   },
 });
 

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 import { createSigEventsSkill, SIG_EVENTS_SKILL_ID } from './skills/sig_events_skill';
-import { isSigEventsSkillEnabledInAnySpace } from './sig_events_skill_space_state';
 
 export interface EnableSigEventsSkillResult {
   skillRegistered: boolean;
@@ -47,31 +46,18 @@ export async function enableSigEventsSkill(
   }
 }
 
-const disableLogPrefix = 'disableSigEventsSkill';
-
 /**
- * Unregisters the SigEvents skill only if no space still has sigEventsSkillEnabled true.
- * Call after persisting false for the current space.
+ * Unregisters the SigEvents skill globally. Call only after persisting disabled in Default space settings.
  */
 export async function disableSigEventsSkill(
   agentBuilder: AgentBuilderPluginStart,
-  core: CoreStart,
   logger: Logger
 ): Promise<DisableSigEventsSkillResult> {
-  const anySpaceEnabled = await isSigEventsSkillEnabledInAnySpace(core, logger, disableLogPrefix);
-  if (anySpaceEnabled) {
-    return {
-      skillUnregistered: false,
-      message:
-        'SigEvents skill remains registered because another space still has it enabled. Disable it in each space to fully unregister.',
-    };
-  }
-
   try {
     await agentBuilder.skills.unregister(SIG_EVENTS_SKILL_ID);
     return {
       skillUnregistered: true,
-      message: 'SigEvents skill unregistered (no space has it enabled).',
+      message: 'SigEvents skill unregistered.',
     };
   } catch (err) {
     logger.warn('Failed to unregister SigEvents skill', {

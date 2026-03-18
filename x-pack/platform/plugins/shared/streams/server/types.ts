@@ -7,6 +7,7 @@
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
@@ -49,6 +50,8 @@ export interface StreamsServer {
   agentBuilderSetup?: AgentBuilderPluginSetup;
   sigEventsSettingsService?: SigEventsSettingsService;
   getScopedClients?: GetScopedClients;
+  /** Active Kibana space for a request; undefined if Spaces is unavailable or space cannot be resolved. */
+  getActiveSpaceId?: (request: KibanaRequest) => string | undefined;
 }
 
 export interface ElasticsearchAccessorOptions {

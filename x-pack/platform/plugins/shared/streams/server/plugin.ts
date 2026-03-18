@@ -366,6 +366,8 @@ export class StreamsPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.taskManager = plugins.taskManager;
       this.server.agentBuilderStart = plugins.agentBuilder;
+      this.server.getActiveSpaceId = (request) =>
+        plugins.spaces ? plugins.spaces.spacesService.getSpaceId(request) : undefined;
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
