@@ -66,20 +66,19 @@ export const getGridAttrs = async (
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
-    return adHoc.name === indexPattern;
+    return adHoc.title === indexPattern;
   });
 
+  // Fall back to getESQLAdHocDataview when the spec has no timeFieldName,
+  // which detects the time field via HTTP (with a promise cache to avoid
+  // redundant requests).
   const dataView =
     dataViewSpec && dataViewSpec.timeFieldName
       ? await data.dataViews.create(dataViewSpec)
       : await getESQLAdHocDataview({
           dataViewsService: data.dataViews,
           query: query.esql,
-          // The ad-hoc DataView spec in the document may lack a timeFieldName
-          // (e.g. when built via config builder API transforms).
-          // Force a fresh instance so the time field is resolved via HTTP.
-          // This is a workaround to avoid the issue described in https://github.com/elastic/kibana/issues/255311
-          options: { skipFetchFields: true, createNewInstanceEvenIfCachedOneAvailable: true },
+          options: { skipFetchFields: true, id: dataViewSpec?.id },
           http,
         });
 

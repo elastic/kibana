@@ -14,13 +14,15 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import { keyBy } from 'lodash';
-import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import type {
   IndexPattern,
   IndexPatternField,
   IndexPatternMap,
   IndexPatternRef,
+  TextBasedPersistedState,
 } from '@kbn/lens-common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { documentField } from '../datasources/form_based/document_field';
 import { sortDataViewRefs } from '../utils';
 
@@ -160,6 +162,68 @@ function onRestrictionMapping(agg: string): string {
   return agg in renameOperationsMapping ? renameOperationsMapping[agg] : agg;
 }
 
+/**
+ * Ensures ESQL ad-hoc DataView specs have a valid `timeFieldName` if any.
+ *
+ * Persisted specs may be missing time field info. For each text-based layer with
+ * an ES|QL query, this function checks whether the corresponding ad-hoc DataView
+ * spec already has a `timeFieldName`. If it does, the spec is kept as-is. If not,
+ * `getESQLAdHocDataview` is called to detect the time field via the TIMEFIELD_ROUTE.
+ *
+ * After calling this function the DataViewService instance cache is also populated
+ * with the correct DataView, so downstream `dataViews.create(spec)` calls
+ * (in `loadIndexPatterns`, `getUsedDataViews`, etc.) will return the cached instance
+ * with the right time field — even if they receive a stale spec.
+ */
+export async function ensureESQLTimeFieldOnAdHocDataViews({
+  adHocDataViews,
+  textBasedState,
+  dataViewsService,
+  http,
+}: {
+  adHocDataViews: Record<string, DataViewSpec>;
+  textBasedState: TextBasedPersistedState | undefined;
+  dataViewsService: DataViewsContract;
+  http?: HttpStart;
+}): Promise<Record<string, DataViewSpec>> {
+  if (!textBasedState?.layers) {
+    return adHocDataViews;
+  }
+
+  const result = { ...adHocDataViews };
+
+  for (const layer of Object.values(textBasedState.layers)) {
+    if (!layer.query || !isOfAggregateQueryType(layer.query)) {
+      continue;
+    }
+
+    const existingSpec = layer.index ? result[layer.index] : undefined;
+
+    // Skip regeneration when the persisted spec already has a timeFieldName
+    if (existingSpec?.timeFieldName) {
+      continue;
+    }
+
+    const freshDataView = await getESQLAdHocDataview({
+      dataViewsService,
+      query: layer.query.esql,
+      options: {
+        skipFetchFields: true,
+        id: layer.index,
+        createNewInstanceEvenIfCachedOneAvailable: true,
+      },
+      http,
+    });
+    const spec = freshDataView.toSpec(false);
+
+    if (freshDataView.id) {
+      result[freshDataView.id] = spec;
+    }
+  }
+
+  return result;
+}
+
 export async function loadIndexPatterns({
   dataViews,
   patterns,
@@ -167,8 +231,6 @@ export async function loadIndexPatterns({
   cache,
   adHocDataViews,
   onIndexPatternRefresh,
-  http,
-  esqlQueryMap,
 }: {
   dataViews: MinimalDataViewsContract;
   patterns: string[];
@@ -176,8 +238,6 @@ export async function loadIndexPatterns({
   cache: Record<string, IndexPattern>;
   adHocDataViews?: Record<string, DataViewSpec>;
   onIndexPatternRefresh?: () => void;
-  http?: HttpStart;
-  esqlQueryMap?: Record<string, string>;
 }) {
   const missingIds = patterns.filter((id) => !cache[id] && !adHocDataViews?.[id]);
   const hasAdHocDataViews = Object.values(adHocDataViews || {}).length > 0;
@@ -209,35 +269,9 @@ export async function loadIndexPatterns({
     }
   }
 
-  const adHocSpecs = Object.values(adHocDataViews || {});
-
-  // Resolve time fields for ESQL data views
-  const shouldResolveTimeFields = (spec: DataViewSpec) =>
-    spec.type === 'esql' && !spec.timeFieldName && spec.id;
-  const esqlSpecsWithoutTimeField = adHocSpecs.filter((spec) => shouldResolveTimeFields(spec));
-  const resolvedEsqlTimeFields: Record<string, string | undefined> =
-    esqlSpecsWithoutTimeField.length && http
-      ? await resolveTimeFieldsForEsqlIndexPatterns(esqlSpecsWithoutTimeField, http, esqlQueryMap)
-      : {};
-
   indexPatterns.push(
     ...(await Promise.all(
-      adHocSpecs.map(async (spec) => {
-        if (!shouldResolveTimeFields(spec)) {
-          return dataViews.create(spec);
-        }
-
-        // Enrich the ESQL spec with the time field
-        const enrichedSpec = { ...spec };
-        const timeField = spec.id ? resolvedEsqlTimeFields[spec.id] : undefined;
-        if (timeField) {
-          enrichedSpec.timeFieldName = timeField;
-          if (enrichedSpec.id) {
-            dataViews.clearInstanceCache(enrichedSpec.id);
-          }
-        }
-        return dataViews.create(enrichedSpec);
-      })
+      Object.values(adHocDataViews || {}).map((spec) => dataViews.create(spec))
     ))
   );
 
@@ -250,53 +284,6 @@ export async function loadIndexPatterns({
   );
 
   return indexPatternsObject;
-}
-
-async function resolveTimeFieldsForEsqlIndexPatterns(
-  adHocDataViewSpecs: DataViewSpec[],
-  http: HttpStart,
-  esqlQueryMap?: Record<string, string>
-): Promise<Record<string, string | undefined>> {
-  if (!adHocDataViewSpecs.length || !esqlQueryMap) {
-    return {};
-  }
-
-  const timeFieldsById: Record<string, string | undefined> = {};
-
-  // Deduplicate requests -> specs with the same query only need one server call
-  const queryToIds = new Map<string, string[]>();
-  for (const { id } of adHocDataViewSpecs) {
-    if (!id) {
-      continue;
-    }
-    const query = esqlQueryMap?.[id];
-    if (!query) {
-      continue;
-    }
-    const existing = queryToIds.get(query);
-    if (existing) {
-      existing.push(id);
-    } else {
-      queryToIds.set(query, [id]);
-    }
-  }
-
-  await Promise.all(
-    Array.from(queryToIds.entries()).map(async ([query, ids]) => {
-      const response = await http
-        .get<{ timeField?: string }>(`${TIMEFIELD_ROUTE}${encodeURIComponent(query)}`)
-        .catch((error) => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to fetch the timefield', error);
-          return undefined;
-        });
-      for (const id of ids) {
-        timeFieldsById[id] = response?.timeField;
-      }
-    })
-  );
-
-  return timeFieldsById;
 }
 
 export async function ensureIndexPattern({

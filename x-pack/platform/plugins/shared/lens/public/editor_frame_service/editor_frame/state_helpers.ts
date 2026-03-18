@@ -19,7 +19,6 @@ import {
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '@kbn/event-annotation-common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   Datasource,
   DatasourceMap,
@@ -42,7 +41,11 @@ import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
 import { buildExpression } from './expression_helpers';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
 import { readFromStorage } from '../../settings_storage';
-import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
+import {
+  loadIndexPatternRefs,
+  loadIndexPatterns,
+  ensureESQLTimeFieldOnAdHocDataViews,
+} from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
 
 // there are 2 ways of coloring, the color mapping where the user can map specific colors to
@@ -113,19 +116,6 @@ const getRefsForAdHocDataViewsFromContext = (
   );
   return adHocDataViewsList.map(({ id, title, name }) => ({ id, title, name }));
 };
-
-function buildEsqlIndexToQueryMap(datasourceStates: DatasourceStates): Record<string, string> {
-  const queryMap: Record<string, string> = {};
-  const textBasedState = datasourceStates.textBased?.state as TextBasedPersistedState | undefined;
-  if (textBasedState?.layers) {
-    for (const layer of Object.values(textBasedState.layers)) {
-      if (layer.index && layer.query && isOfAggregateQueryType(layer.query) && layer.query.esql) {
-        queryMap[layer.index] = layer.query.esql;
-      }
-    }
-  }
-  return queryMap;
-}
 
 export async function initializeDataViews(
   {
@@ -198,16 +188,12 @@ export async function initializeDataViews(
 
   const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedIndexPatternsIds);
 
-  const esqlQueryMap = buildEsqlIndexToQueryMap(datasourceStates);
-
   const indexPatterns = await loadIndexPatterns({
     dataViews,
     patterns: usedIndexPatternsIds,
     notUsedPatterns,
     cache: {},
     adHocDataViews,
-    http,
-    esqlQueryMap,
   });
 
   const adHocDataViewsRefs = getRefsForAdHocDataViewsFromContext(
@@ -278,6 +264,17 @@ export async function initializeSources(
     references
   );
 
+  // Regenerate ESQL ad-hoc DataViews once at editor initialization.
+  // This replaces potentially stale persisted specs with fresh ones derived
+  // from the actual ES|QL queries, including time field detection via http.
+  const textBasedState = datasourceStates.textBased?.state as TextBasedPersistedState | undefined;
+  const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
+    adHocDataViews: adHocDataViews ?? {},
+    textBasedState,
+    dataViewsService: dataViews,
+    http,
+  });
+
   const { indexPatternRefs, indexPatterns } = await initializeDataViews(
     {
       datasourceMap,
@@ -287,7 +284,7 @@ export async function initializeSources(
       storage,
       defaultIndexPatternId,
       references,
-      adHocDataViews,
+      adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
       http,
     },
@@ -430,6 +427,19 @@ export async function persistedStateToExpression(
       { isLoading: false, state },
     ])
   );
+
+  // Ensure ESQL ad-hoc DataViews have the correct time field before
+  // initializing DataViews — same as in initializeSources for the editor path.
+  const textBasedState = datasourceStatesFromSO.textBased?.state as
+    | TextBasedPersistedState
+    | undefined;
+  const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
+    adHocDataViews: adHocDataViews ?? {},
+    textBasedState,
+    dataViewsService: services.dataViews,
+    http: services.http,
+  });
+
   const { indexPatterns, indexPatternRefs } = await initializeDataViews(
     {
       datasourceMap,
@@ -438,7 +448,7 @@ export async function persistedStateToExpression(
       dataViews: services.dataViews,
       storage: services.storage,
       defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
-      adHocDataViews,
+      adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
       http: services.http,
     },
