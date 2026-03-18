@@ -9,6 +9,7 @@ import { Skills } from './menus/skills';
 import type { CommandDefinition } from './types';
 import { CommandId } from './types';
 
+// When adding a new command, also add its data prefetch hook to use_command_menu_prefetch.ts
 const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
   // { id: CommandId.Attachment, sequence: '@', name: 'Attachment', menuComponent: Attachments },
   { id: CommandId.Skill, scheme: 'skill', sequence: '/', name: 'Skill', menuComponent: Skills },

@@ -8,8 +8,7 @@
 import type { RefObject } from 'react';
 import { useRef, useMemo, useState, useCallback } from 'react';
 import type { CommandMatchResult, CommandBadgeData } from './command_menu';
-import { useCommandMenu } from './command_menu';
-import { useCommandMenuPrefetch } from './command_menu/use_command_menu_prefetch';
+import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
 import { createCommandBadgeElement, deserializeCommandBadge } from './command_badge';
 import { serializeEditorContent } from './serialize';
 import { createCommandRange, insertSpaceAfter, placeCursorAfter, placeCursorAtEnd } from './utils';
