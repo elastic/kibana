@@ -60,6 +60,12 @@ export {
   type RoundCompleteEvent,
   type PromptRequestEventData,
   type PromptRequestEvent,
+  type PlanCreatedEvent,
+  type PlanCreatedEventData,
+  type PlanUpdatedEvent,
+  type PlanUpdatedEventData,
+  type ModeSuggestionEvent,
+  type ModeSuggestionEventData,
   isToolCallEvent,
   isBrowserToolCallEvent,
   isToolResultEvent,
@@ -74,5 +80,17 @@ export {
   isConversationUpdatedEvent,
   isConversationIdSetEvent,
   isPromptRequestEvent,
+  isPlanCreatedEvent,
+  isPlanUpdatedEvent,
+  isModeSuggestionEvent,
 } from './events';
+export {
+  type AgentMode,
+  type PlanStatus,
+  type PlanSource,
+  type ActionItemStatus,
+  type PlanActionItem,
+  type Plan,
+  DEFAULT_AGENT_MODE,
+} from './plan';
 export type { RoundState } from './round_state';

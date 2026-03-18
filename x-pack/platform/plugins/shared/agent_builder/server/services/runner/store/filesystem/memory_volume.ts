@@ -90,10 +90,6 @@ export class MemoryVolume implements Volume {
     return this.fileIndex.has(normalizePath(path));
   }
 
-  // ============================================================================
-  // Volume interface implementation (async)
-  // ============================================================================
-
   async get(path: string): Promise<FileEntry | undefined> {
     return this.fileIndex.get(normalizePath(path));
   }
@@ -182,10 +178,6 @@ export class MemoryVolume implements Volume {
   async dispose(): Promise<void> {
     this.clear();
   }
-
-  // ============================================================================
-  // Private helpers
-  // ============================================================================
 
   private createDirNode(): DirNode {
     return {

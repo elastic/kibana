@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChatEvent } from '@kbn/agent-builder-common';
+import type { ChatEvent, Plan } from '@kbn/agent-builder-common';
 import {
   isConversationCreatedEvent,
   isMessageChunkEvent,
@@ -17,6 +17,9 @@ import {
   isToolProgressEvent,
   isToolResultEvent,
   isThinkingCompleteEvent,
+  isPlanCreatedEvent,
+  isPlanUpdatedEvent,
+  isModeSuggestionEvent,
 } from '@kbn/agent-builder-common';
 import {
   createReasoningStep,
@@ -33,11 +36,15 @@ export const useSubscribeToChatEvents = ({
   setIsResponseLoading,
   isAborted,
   browserToolExecutor,
+  onPlanUpdate,
+  onModeSuggestion,
 }: {
   setAgentReasoning: (agentReasoning: string) => void;
   setIsResponseLoading: (isResponseLoading: boolean) => void;
   isAborted: () => boolean;
   browserToolExecutor?: BrowserToolExecutor;
+  onPlanUpdate?: (plan: Plan) => void;
+  onModeSuggestion?: (suggestion: { reason: string }) => void;
 }) => {
   const { conversationActions, browserApiTools } = useConversationContext();
   const unsubscribedRef = useRef(false);
@@ -127,6 +134,12 @@ export const useSubscribeToChatEvents = ({
       });
       // Stop loading when a prompt is requested - the round is now awaiting user input
       setIsResponseLoading(false);
+    } else if (isPlanCreatedEvent(event)) {
+      onPlanUpdate?.(event.data.plan);
+    } else if (isPlanUpdatedEvent(event)) {
+      onPlanUpdate?.(event.data.plan);
+    } else if (isModeSuggestionEvent(event)) {
+      onModeSuggestion?.({ reason: event.data.reason });
     }
   };
 

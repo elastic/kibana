@@ -16,6 +16,7 @@ import type {
 import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { RoundState } from './round_state';
+import type { Plan } from './plan';
 
 /**
  * Represents the input that initiated a conversation round.
@@ -271,6 +272,11 @@ export interface ConversationInternalState {
    * These tools are persisted across rounds so they remain available.
    */
   dynamic_tool_ids?: string[];
+  /**
+   * Current plan associated with this conversation, if any.
+   * Persisted across rounds so planning state survives round boundaries.
+   */
+  plan?: Plan;
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

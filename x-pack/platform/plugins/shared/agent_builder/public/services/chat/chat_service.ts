@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 import { defer } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import type { ChatEvent, AgentCapabilities } from '@kbn/agent-builder-common';
+import type { ChatEvent, AgentCapabilities, AgentMode } from '@kbn/agent-builder-common';
 import {
   getKibanaDefaultAgentCapabilities,
   type PromptResponse,
@@ -29,6 +29,8 @@ interface BaseConverseParams {
   conversationId?: string;
   browserApiTools?: BrowserApiToolMetadata[];
   capabilities?: AgentCapabilities;
+  agentMode?: AgentMode;
+  executionMode?: 'local' | 'task_manager';
 }
 
 export type ChatParams = BaseConverseParams & {
@@ -63,6 +65,8 @@ export class ChatService {
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       attachments: params.attachments,
       browser_api_tools: params.browserApiTools ?? [],
+      agent_mode: params.agentMode,
+      ...(params.executionMode ? { _execution_mode: params.executionMode } : {}),
     });
   }
 

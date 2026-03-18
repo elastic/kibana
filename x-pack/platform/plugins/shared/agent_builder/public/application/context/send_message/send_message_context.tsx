@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import React, { createContext, useContext, useState } from 'react';
+import type { ConversationRoundStep, AgentMode, Plan } from '@kbn/agent-builder-common';
+import { DEFAULT_AGENT_MODE } from '@kbn/agent-builder-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 
 interface SendMessageState {
-  sendMessage: ({ message }: { message: string }) => void;
+  sendMessage: (params: { message: string; agentModeOverride?: AgentMode }) => void;
   isResponseLoading: boolean;
   pendingMessage: string | undefined;
   error: unknown;
@@ -31,12 +32,21 @@ interface SendMessageState {
     selectConnector: (connectorId: string) => void;
     defaultConnectorId?: string;
   };
+  agentMode: AgentMode;
+  setAgentMode: (mode: AgentMode) => void;
+  plan: Plan | undefined;
+  setPlan: (plan: Plan | undefined) => void;
+  modeSuggestion: { reason: string } | undefined;
+  setModeSuggestion: (suggestion: { reason: string } | undefined) => void;
 }
 
 const SendMessageContext = createContext<SendMessageState | null>(null);
 
 export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
   const connectorSelection = useConnectorSelection();
+  const [agentMode, setAgentMode] = useState<AgentMode>(DEFAULT_AGENT_MODE);
+  const [plan, setPlan] = useState<Plan | undefined>(undefined);
+  const [modeSuggestion, setModeSuggestion] = useState<{ reason: string } | undefined>(undefined);
 
   const {
     sendMessage,
@@ -51,7 +61,13 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     cleanConversation,
     regenerate,
     isRegenerating,
-  } = useSendMessageMutation({ connectorId: connectorSelection.selectedConnector });
+  } = useSendMessageMutation({
+    connectorId: connectorSelection.selectedConnector,
+    agentMode,
+    plan,
+    onPlanUpdate: setPlan,
+    onModeSuggestion: setModeSuggestion,
+  });
 
   const {
     resumeRound,
@@ -86,6 +102,12 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
           selectConnector: connectorSelection.selectConnector,
           defaultConnectorId: connectorSelection.defaultConnectorId,
         },
+        agentMode,
+        setAgentMode,
+        plan,
+        setPlan,
+        modeSuggestion,
+        setModeSuggestion,
       }}
     >
       {children}
