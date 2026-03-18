@@ -513,8 +513,8 @@ describe('utils', () => {
       });
 
       expect(foundNoIndices).toBeFalsy();
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
+      expect(ruleExecutionLogger.logExecutionResult).toHaveBeenCalledWith({
+        status: RuleExecutionStatusEnum['partial failure'],
         message:
           'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"]',
       });
@@ -554,8 +554,8 @@ describe('utils', () => {
       });
 
       expect(foundNoIndices).toBeFalsy();
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
+      expect(ruleExecutionLogger.logExecutionResult).toHaveBeenCalledWith({
+        sampleDocSearchResultsNoSortIdNoHitstatus: RuleExecutionStatusEnum['partial failure'],
         message:
           'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]',
       });

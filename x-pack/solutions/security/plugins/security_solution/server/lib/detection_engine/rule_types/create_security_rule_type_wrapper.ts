@@ -485,12 +485,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const hasWarnings = result.warningMessages.length > 0;
             const hasErrors = result.errors.length > 0;
 
-            if (hasErrors || hasWarnings) {
+            if (hasWarnings || wrapperWarnings.length > 0) {
               status = RuleExecutionStatusEnum['partial failure'];
               statusMessage = truncateList(result.warningMessages.concat(wrapperWarnings)).join(
                 '\n\n'
               );
-            } else if (wrapperErrors.length > 0 || result.errors.length > 0) {
+            } else if (hasErrors || wrapperErrors.length > 0) {
               status = RuleExecutionStatusEnum.failed;
               statusMessage = truncateList(result.errors.concat(wrapperErrors)).join(', ');
             }

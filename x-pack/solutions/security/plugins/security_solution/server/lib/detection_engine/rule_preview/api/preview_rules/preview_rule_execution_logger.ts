@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import type {
-  IRuleMonitoringService,
-  RuleExecutionContext,
-  StatusChangeArgs,
-} from '../../../rule_monitoring';
+import type { ExecutionResult, IRuleMonitoringService } from '../../../rule_monitoring';
 
 export interface IPreviewRuleExecutionLogger {
   factory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
+  getExecutionResult: () => ExecutionResult | undefined;
 }
 
-export const createPreviewRuleExecutionLogger = (
-  loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs>
-): IPreviewRuleExecutionLogger => {
+export const createPreviewRuleExecutionLogger = (): IPreviewRuleExecutionLogger => {
+  let executionResult: ExecutionResult | undefined;
+
   return {
     factory: ({ context }) => {
       const spyLogger = {
@@ -28,14 +25,20 @@ export const createPreviewRuleExecutionLogger = (
         info: () => {},
         warn: () => {},
         error: () => {},
-
-        logStatusChange: (args: StatusChangeArgs): Promise<void> => {
-          loggedStatusChanges.push({ ...context, ...args });
-          return Promise.resolve();
+        logMetric: () => {},
+        logMetrics: () => {},
+        logExecutionResult: (result: ExecutionResult): void => {
+          executionResult = result;
         },
+
+        closed: () => false,
+        close: () => Promise.resolve(),
       };
 
       return Promise.resolve(spyLogger);
+    },
+    getExecutionResult: () => {
+      return executionResult;
     },
   };
 };

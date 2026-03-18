@@ -161,9 +161,9 @@ describe('Custom Query Alerts', () => {
 
     expect((await ruleDataClient.getWriter()).bulk).not.toHaveBeenCalled();
     expect(eventsTelemetry.sendAsync).not.toHaveBeenCalled();
-    expect(mockedStatusLogger.logStatusChange).toHaveBeenCalledWith(
+    expect(mockedStatusLogger.logExecutionResult).toHaveBeenCalledWith(
       expect.objectContaining({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
+        status: RuleExecutionStatusEnum['partial failure'],
         message: expect.stringContaining(
           'Unable to find matching indices for rule ALERT_RULE_NAME. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.'
         ),
@@ -254,9 +254,9 @@ describe('Custom Query Alerts', () => {
     expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
     // ensures that the last status written is a warning status
     // and that status contains the error message
-    expect(mockedStatusLogger.logStatusChange).lastCalledWith(
+    expect(mockedStatusLogger.logExecutionResult).lastCalledWith(
       expect.objectContaining({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
+        status: RuleExecutionStatusEnum['partial failure'],
         message:
           'Timestamp fields check failed to execute Error: hastTimestampFields test error\n' +
           '\n' +
