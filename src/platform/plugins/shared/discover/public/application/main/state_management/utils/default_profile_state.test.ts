@@ -11,7 +11,11 @@ import { fieldList } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { DEFAULT_PROFILE_STATE_FIELDS, type DefaultProfileStateField } from '../redux/types';
+import {
+  DEFAULT_PROFILE_STATE_FIELDS,
+  type DefaultProfileStateField,
+  type DefaultProfileStateFields,
+} from '../redux/types';
 import {
   getDefaultProfileState,
   getFieldsToReset,
@@ -29,81 +33,73 @@ const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
 
 scopedProfilesManager.resolveDataSourceProfile({});
 
-const getResetByField = (
-  fieldsToReset: DefaultProfileStateField[]
-): Record<DefaultProfileStateField, boolean> =>
-  Object.fromEntries(
-    DEFAULT_PROFILE_STATE_FIELDS.map((field) => [field, fieldsToReset.includes(field)])
-  ) as Record<DefaultProfileStateField, boolean>;
+const createDefaultProfileState = (fieldsToReset: DefaultProfileStateFields) => ({
+  resetId: 'test',
+  fieldsToReset,
+  snapshotsByProfileId: {},
+});
+
+const getResetByField = (fieldsToReset: DefaultProfileStateField[]) => ({
+  columns: fieldsToReset.includes('columns'),
+  rowHeight: fieldsToReset.includes('rowHeight'),
+  breakdownField: fieldsToReset.includes('breakdownField'),
+  hideChart: fieldsToReset.includes('hideChart'),
+});
 
 describe('getDefaultProfileState', () => {
   describe('getPreFetchState', () => {
     it('should return expected breakdownField', () => {
-      let appState = getDefaultProfileState({
+      const appStateWithBreakdownField = getDefaultProfileState({
         scopedProfilesManager,
-        defaultProfileState: {
-          resetId: 'test',
-          fieldsToReset: ['breakdownField'],
-          snapshotsByProfileId: {},
-        },
+        defaultProfileState: createDefaultProfileState(['breakdownField']),
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
-      expect(appState).toEqual({
+      expect(appStateWithBreakdownField).toEqual({
         breakdownField: 'extension',
       });
-      appState = getDefaultProfileState({
+
+      const appStateWithoutBreakdownField = getDefaultProfileState({
         scopedProfilesManager,
-        defaultProfileState: {
-          resetId: 'test',
-          fieldsToReset: ['breakdownField'],
-          snapshotsByProfileId: {},
-        },
+        defaultProfileState: createDefaultProfileState(['breakdownField']),
         dataView: emptyDataView,
       }).getPreFetchState();
-      expect(appState).toEqual(undefined);
+
+      expect(appStateWithoutBreakdownField).toBeUndefined();
     });
 
     it('should return expected hideChart', () => {
-      let appState = getDefaultProfileState({
+      const appStateWithHideChart = getDefaultProfileState({
         scopedProfilesManager,
-        defaultProfileState: {
-          resetId: 'test',
-          fieldsToReset: ['hideChart'],
-          snapshotsByProfileId: {},
-        },
+        defaultProfileState: createDefaultProfileState(['hideChart']),
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
-      expect(appState).toEqual({
+
+      expect(appStateWithHideChart).toEqual({
         hideChart: true,
       });
-      appState = getDefaultProfileState({
+
+      const appStateWithoutHideChart = getDefaultProfileState({
         scopedProfilesManager,
-        defaultProfileState: {
-          resetId: 'test',
-          fieldsToReset: 'none',
-          snapshotsByProfileId: {},
-        },
+        defaultProfileState: createDefaultProfileState('none'),
         dataView: emptyDataView,
       }).getPreFetchState();
-      expect(appState).toEqual(undefined);
+
+      expect(appStateWithoutHideChart).toBeUndefined();
     });
   });
 
   describe('getPostFetchState', () => {
     it('should return expected columns', () => {
-      let appState = getDefaultProfileState({
+      const appStateFromDataView = getDefaultProfileState({
         scopedProfilesManager,
-        defaultProfileState: {
-          resetId: 'test',
-          fieldsToReset: ['columns'],
-          snapshotsByProfileId: {},
-        },
+        defaultProfileState: createDefaultProfileState(['columns']),
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
         esqlQueryColumns: undefined,
       });
-      expect(appState).toEqual({
+
+      expect(appStateFromDataView).toEqual({
         columns: ['message', 'extension', 'bytes'],
         grid: {
           columns: {
@@ -116,13 +112,10 @@ describe('getDefaultProfileState', () => {
           },
         },
       });
-      appState = getDefaultProfileState({
+
+      const appStateFromEsqlColumns = getDefaultProfileState({
         scopedProfilesManager,
-        defaultProfileState: {
-          resetId: 'test',
-          fieldsToReset: ['columns'],
-          snapshotsByProfileId: {},
-        },
+        defaultProfileState: createDefaultProfileState(['columns']),
         dataView: emptyDataView,
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
@@ -131,7 +124,7 @@ describe('getDefaultProfileState', () => {
           { id: '2', name: 'bar', meta: { type: 'string' } },
         ],
       });
-      expect(appState).toEqual({
+      expect(appStateFromEsqlColumns).toEqual({
         columns: ['foo', 'bar'],
         grid: {
           columns: {
@@ -146,11 +139,7 @@ describe('getDefaultProfileState', () => {
     it('should return expected rowHeight', () => {
       const appState = getDefaultProfileState({
         scopedProfilesManager,
-        defaultProfileState: {
-          resetId: 'test',
-          fieldsToReset: ['rowHeight'],
-          snapshotsByProfileId: {},
-        },
+        defaultProfileState: createDefaultProfileState(['rowHeight']),
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
         defaultColumns: [],
@@ -164,17 +153,13 @@ describe('getDefaultProfileState', () => {
     it('should return undefined', () => {
       const appState = getDefaultProfileState({
         scopedProfilesManager,
-        defaultProfileState: {
-          resetId: 'test',
-          fieldsToReset: 'none',
-          snapshotsByProfileId: {},
-        },
+        defaultProfileState: createDefaultProfileState('none'),
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
         defaultColumns: [],
         esqlQueryColumns: undefined,
       });
-      expect(appState).toEqual(undefined);
+      expect(appState).toBeUndefined();
     });
   });
 });
