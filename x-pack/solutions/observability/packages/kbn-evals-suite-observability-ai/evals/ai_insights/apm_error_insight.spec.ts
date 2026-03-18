@@ -48,13 +48,12 @@ function createScenarioTest(scenario: ApmErrorScenario) {
           query: {
             bool: {
               filter: [
-                { term: { 'error.exception.type': 'Error' } },
+                { term: { 'service.name': scenario.errorQuery.serviceName } },
                 {
-                  term: {
+                  match_phrase: {
                     'error.exception.message': scenario.errorQuery.errorMessage,
                   },
                 },
-                { term: { 'service.name': scenario.errorQuery.serviceName } },
               ],
             },
           },
@@ -76,7 +75,7 @@ function createScenarioTest(scenario: ApmErrorScenario) {
         log.info(`Found APM error with ID: ${errorId}`);
       });
 
-      evaluate('APM error analysis correctness', async ({ aiInsightClient, evaluateDataset }) => {
+      evaluate(`APM error AI insight correctness (${scenario.id})`, async ({ aiInsightClient, evaluateDataset }) => {
         await evaluateDataset<ErrorInsightParams>({
           getInsight: (params) => aiInsightClient.getErrorInsight(params),
           dataset: {
