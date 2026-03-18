@@ -54,15 +54,16 @@ import {
   createGetServiceTopologyTool,
 } from './get_service_topology/tool';
 import { OBSERVABILITY_GET_TRACES_TOOL_ID, createGetTracesTool } from './get_traces/tool';
+import { OBSERVABILITY_GET_LOGS_TOOL_ID, createGetLogsTool } from './get_logs/tool';
 
-const PLATFORM_TOOL_IDS = [
+export const PLATFORM_TOOL_IDS = [
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
   platformCoreTools.productDocumentation,
 ];
 
-const OBSERVABILITY_TOOL_IDS = [
+export const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
@@ -77,9 +78,8 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
   OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
+  OBSERVABILITY_GET_LOGS_TOOL_ID,
 ];
-
-export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
 
 export async function registerTools({
   core,
@@ -107,6 +107,7 @@ export async function registerTools({
     createGetTraceChangePointsTool({ core, plugins, logger }),
     createGetIndexInfoTool({ core, plugins, logger }),
     createGetServiceTopologyTool({ core, plugins, dataRegistry, logger }),
+    createGetLogsTool({ core, logger }),
   ];
 
   for (const tool of observabilityTools) {
