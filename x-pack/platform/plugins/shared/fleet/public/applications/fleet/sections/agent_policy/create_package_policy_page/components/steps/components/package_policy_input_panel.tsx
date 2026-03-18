@@ -50,7 +50,7 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
 
 export const shouldShowStreamsByDefault = (
   packageInput: RegistryInput,
-  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type?: string } }>,
+  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>,
   packagePolicyInput: NewPackagePolicyInput,
   defaultDataStreamId?: string
 ): boolean => {

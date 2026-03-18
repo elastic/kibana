@@ -21,6 +21,7 @@ import type {
   PackageInfo,
   RegistryVarsEntry,
   RegistryDataStream,
+  InputOnlyRegistryDataStream,
   InstallablePackage,
   NewPackagePolicy,
 } from '../types';
@@ -94,11 +95,23 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
   return [input];
 };
 
-export const getNormalizedDataStreams = (
+export function getNormalizedDataStreams(
+  packageInfo: { type: 'input' } & (PackageInfo | InstallablePackage),
+  datasetName?: string,
+  dataStreamType?: string
+): InputOnlyRegistryDataStream[];
+
+export function getNormalizedDataStreams(
   packageInfo: PackageInfo | InstallablePackage,
   datasetName?: string,
   dataStreamType?: string
-): RegistryDataStream[] => {
+): RegistryDataStream[];
+
+export function getNormalizedDataStreams(
+  packageInfo: PackageInfo | InstallablePackage,
+  datasetName?: string,
+  dataStreamType?: string
+): RegistryDataStream[] | InputOnlyRegistryDataStream[] {
   if (packageInfo.type !== 'input') {
     return packageInfo.data_streams || [];
   }
@@ -122,7 +135,7 @@ export const getNormalizedDataStreams = (
       vars = addUseAPMVarIfNotPresent(vars);
     }
 
-    const dataStream: RegistryDataStream = {
+    const dataStream: InputOnlyRegistryDataStream = {
       type: dataStreamType || policyTemplate.type,
       dataset,
       title: policyTemplate.title + ' Dataset',
@@ -142,19 +155,15 @@ export const getNormalizedDataStreams = (
       ],
     };
 
-    if (packageInfo.type === 'input') {
-      dataStream.elasticsearch = {
-        ...dataStream.elasticsearch,
-        ...{
-          dynamic_dataset: true,
-          dynamic_namespace: true,
-        },
-      };
-    }
+    dataStream.elasticsearch = {
+      ...dataStream.elasticsearch,
+      dynamic_dataset: true,
+      dynamic_namespace: true,
+    };
 
     return dataStream;
   });
-};
+}
 
 // Input only packages must provide a dataset name in order to differentiate their data streams
 // here we add the dataset var if it is not defined in the package already.

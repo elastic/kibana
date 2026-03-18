@@ -133,22 +133,22 @@ export function storedPackagePoliciesToAgentPermissions(
       case 'endpoint':
         // - Endpoint doesn't store the `data_stream` metadata in
         // `packagePolicy.inputs`, so we will use _all_ data_streams from the
-        // package. These packages always have typed data streams.
-        dataStreamsForPermissions = dataStreams as unknown as DataStreamMeta[];
+        // package.
+        dataStreamsForPermissions = dataStreams;
         break;
 
       case 'apm':
         // - APM doesn't store the `data_stream` metadata in
         //   `packagePolicy.inputs`, so we will use _all_ data_streams from
-        //   the package. These packages always have typed data streams.
-        dataStreamsForPermissions = dataStreams as unknown as DataStreamMeta[];
+        //   the package.
+        dataStreamsForPermissions = dataStreams;
         break;
 
       case 'osquery_manager':
         // - Osquery manager doesn't store the `data_stream` metadata in
         //   `packagePolicy.inputs`, so we will use _all_ data_streams from
-        //   the package. These packages always have typed data streams.
-        dataStreamsForPermissions = dataStreams as unknown as DataStreamMeta[];
+        //   the package.
+        dataStreamsForPermissions = dataStreams;
         break;
 
       default:

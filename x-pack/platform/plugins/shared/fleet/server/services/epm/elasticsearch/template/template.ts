@@ -828,9 +828,7 @@ function generateRuntimeFieldProps(field: Field): IndexTemplateMapping {
  * Generates the template name out of the given information
  */
 export function generateTemplateName(dataStream: RegistryDataStream): string {
-  return getRegistryDataStreamAssetBaseName(
-    dataStream as { dataset: string; type: string; hidden?: boolean }
-  );
+  return getRegistryDataStreamAssetBaseName(dataStream);
 }
 
 /**
@@ -853,11 +851,10 @@ export function generateTemplateIndexPattern(
 ): string {
   // undefined or explicitly set to false
   // See also https://github.com/elastic/package-spec/pull/102
-  const typedDataStream = dataStream as { dataset: string; type: string; hidden?: boolean };
   if (!dataStream.dataset_is_prefix) {
-    return getRegistryDataStreamAssetBaseName(typedDataStream, isOtelInputType) + '-*';
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '-*';
   } else {
-    return getRegistryDataStreamAssetBaseName(typedDataStream, isOtelInputType) + '.*-*';
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '.*-*';
   }
 }
 

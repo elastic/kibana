@@ -449,7 +449,7 @@ export enum RegistryDataStreamKeys {
 
 export interface RegistryDataStream {
   [key: string]: any;
-  [RegistryDataStreamKeys.type]?: string;
+  [RegistryDataStreamKeys.type]: string;
   [RegistryDataStreamKeys.ilm_policy]?: string;
   [RegistryDataStreamKeys.hidden]?: boolean;
   [RegistryDataStreamKeys.dataset]: string;
@@ -465,6 +465,24 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
   [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
   [RegistryDataStreamKeys.agent]?: RegistryAgent;
+}
+
+export interface InputOnlyRegistryDataStream {
+  type?: string;
+  ilm_policy?: string;
+  hidden?: boolean;
+  dataset: string;
+  title: string;
+  release: RegistryRelease;
+  streams?: RegistryStream[];
+  package: string;
+  path: string;
+  ingest_pipeline?: string;
+  elasticsearch?: RegistryElasticsearch;
+  dataset_is_prefix?: boolean;
+  routing_rules?: RegistryDataStreamRoutingRules[];
+  lifecycle?: RegistryDataStreamLifecycle;
+  agent?: RegistryAgent;
 }
 
 export interface RegistryAgent {

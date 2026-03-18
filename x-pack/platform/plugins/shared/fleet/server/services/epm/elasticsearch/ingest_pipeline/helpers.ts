@@ -34,11 +34,7 @@ export const getPipelineNameForInstallation = ({
     const isPipelineEntry = pipelineName === dataStream.ingest_pipeline;
     const suffix = isPipelineEntry ? '' : `-${pipelineName}`;
     // if this is the pipeline entry, don't add a suffix
-    // dataStream.type is always defined for packages that install ingest pipelines
-    return `${getPipelineNameForDatastream({
-      dataStream: dataStream as { dataset: string; type: string },
-      packageVersion,
-    })}${suffix}`;
+    return `${getPipelineNameForDatastream({ dataStream, packageVersion })}${suffix}`;
   }
   // It's a top-level pipeline
   return `${packageVersion}-${pipelineName}`;

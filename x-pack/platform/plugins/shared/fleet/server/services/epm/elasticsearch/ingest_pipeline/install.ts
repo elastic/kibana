@@ -77,9 +77,8 @@ export const prepareToInstallPipelines = (
           return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
         });
         if (!createdDatastreamPipeline) {
-          // dataStream.type is always defined for packages that install ingest pipelines
           const nameForInstallation = getPipelineNameForDatastream({
-            dataStream: dataStream as { dataset: string; type: string },
+            dataStream,
             packageVersion: pkgVersion,
           });
           acc.push({ id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline });
@@ -206,9 +205,8 @@ export async function installAllPipelines({
   });
 
   if (!datastreamPipelineCreated && dataStream) {
-    // dataStream.type is always defined for packages that install ingest pipelines
     const nameForInstallation = getPipelineNameForDatastream({
-      dataStream: dataStream as { dataset: string; type: string },
+      dataStream,
       packageVersion: packageInstallContext.packageInfo.version,
     });
 

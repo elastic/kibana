@@ -10,6 +10,7 @@ import { getNormalizedDataStreams } from '../../../../../../common/services';
 import { installIndexTemplatesAndPipelines } from '../../install_index_template_pipeline';
 
 import type { InstallContext } from '../_state_machine_package_install';
+import type { RegistryDataStream } from '../../../../../../common/types';
 import { withPackageSpan } from '../../utils';
 import { deletePrerequisiteAssets, splitESAssets, cleanupComponentTemplate } from '../../remove';
 import { INSTALL_STATES } from '../../../../../../common/types';
@@ -66,7 +67,7 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
             savedObjectsClient,
             logger,
             esReferences,
-            onlyForDataStreams: dataStreams,
+            onlyForDataStreams: dataStreams as RegistryDataStream[],
           })
       );
       return { esReferences: templateEsReferences, indexTemplates: installedTemplates };

@@ -145,10 +145,7 @@ export async function prepareDataStreamTemplates(
   const templates = dataStreams.map((dataStream) => {
     const experimentalDataStreamFeature = experimentalDataStreamFeatures.find(
       (datastreamFeature) =>
-        datastreamFeature.data_stream ===
-        getRegistryDataStreamAssetBaseName(
-          dataStream as { dataset: string; type: string; hidden?: boolean }
-        )
+        datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
     );
 
     const { componentTemplates, indexTemplate } = prepareTemplate({
@@ -654,14 +651,10 @@ export function prepareTemplate({
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
   const lifecyle = isILMPolicyDisabled && dataStream.lifecycle ? dataStream.lifecycle : undefined;
 
-  // dataStream.type is always defined for packages that install index templates
-  const pipelineName = getPipelineNameForDatastream({
-    dataStream: dataStream as { dataset: string; type: string },
-    packageVersion,
-  });
+  const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
 
   const defaultSettings = buildDefaultSettings({
-    type: dataStream.type!, // always defined for packages that install index templates
+    type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
     isOtelInputType,
     ilmMigrationStatusMap,
@@ -677,7 +670,7 @@ export function prepareTemplate({
     experimentalDataStreamFeature,
     lifecycle: lifecyle,
     fieldCount: countFields(validFields),
-    type: dataStream.type!, // always defined for packages that install index templates
+    type: dataStream.type,
     isOtelInputType,
   });
 
@@ -689,7 +682,7 @@ export function prepareTemplate({
     hidden: dataStream.hidden,
     registryElasticsearch: dataStream.elasticsearch,
     isIndexModeTimeSeries,
-    type: dataStream.type!, // always defined for packages that install index templates
+    type: dataStream.type,
     isOtelInputType,
   });
 

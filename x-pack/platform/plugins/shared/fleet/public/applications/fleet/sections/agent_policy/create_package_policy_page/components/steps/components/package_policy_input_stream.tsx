@@ -148,12 +148,10 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     const { exists: indexTemplateExists, isLoading: isLoadingIndexTemplate } =
       useIndexTemplateExists(
-        packageInputStream.data_stream.type
-          ? getRegistryDataStreamAssetBaseName({
-              dataset: customDatasetVarValue || packageInputStream.data_stream.dataset,
-              type: packageInputStream.data_stream.type,
-            })
-          : '',
+        getRegistryDataStreamAssetBaseName({
+          dataset: customDatasetVarValue || packageInputStream.data_stream.dataset,
+          type: packageInputStream.data_stream.type,
+        }),
         isPackagePolicyEdit
       );
 
