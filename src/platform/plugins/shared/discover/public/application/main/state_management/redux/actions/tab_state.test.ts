@@ -8,7 +8,7 @@
  */
 
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { internalStateActions, selectTab, selectTabRuntimeState } from '..';
+import { type DiscoverAppState, internalStateActions, selectTab } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
@@ -16,6 +16,7 @@ import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
+import { getCurrentProfileId } from './tab_state';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -52,9 +53,7 @@ describe('tab_state actions', () => {
   describe('setAppState', () => {
     it('should sync snapshotsByProfileId for the current profile', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
-      const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
-        .scopedProfilesManager$.getValue()
-        .getContexts().dataSourceContext.profileId;
+      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
 
       internalState.dispatch(
         internalStateActions.setAppState({
@@ -69,24 +68,22 @@ describe('tab_state actions', () => {
         })
       );
 
-      expect(
-        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
-      ).toEqual(
-        expect.objectContaining({
-          [profileId]: {
-            columns: ['message'],
-            rowHeight: 3,
-            breakdownField: 'extension',
-            hideChart: true,
-          },
-        })
-      );
+      const snapshotsByProfileId = selectTab(internalState.getState(), tabId).defaultProfileState
+        .snapshotsByProfileId;
+
+      expect(snapshotsByProfileId[profileId]).toEqual({
+        columns: ['message'],
+        rowHeight: 3,
+        breakdownField: 'extension',
+        hideChart: true,
+      });
     });
   });
 
   describe('syncProfileStateSnapshot', () => {
     it('should sync snapshotsByProfileId for the current profile when triggered separately', async () => {
-      const { internalState, tabId } = await setup();
+      const { internalState, runtimeStateManager, tabId } = await setup();
+      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
       const snapshotsByProfileId = structuredClone(
         selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
       );
@@ -109,12 +106,13 @@ describe('tab_state actions', () => {
       internalState.dispatch(internalStateActions.syncProfileStateSnapshot({ tabId }));
 
       expect(
-        Object.values(
-          selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
-        )
-      ).toContainEqual({
-        columns: ['message'],
-        hideChart: true,
+        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
+      ).toEqual({
+        ...snapshotsByProfileId,
+        [profileId]: {
+          columns: ['message'],
+          hideChart: true,
+        },
       });
     });
   });
@@ -122,11 +120,7 @@ describe('tab_state actions', () => {
   describe('updateAppStateAndReplaceUrl', () => {
     it('should only sync changed app state fields after replacing the URL for the active tab', async () => {
       const { internalState, runtimeStateManager, stateStorageContainer, tabId } = await setup();
-      const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
-        .scopedProfilesManager$.getValue()
-        .getContexts().dataSourceContext.profileId;
-
-      const setSpy = jest.spyOn(stateStorageContainer, 'set');
+      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
 
       internalState.dispatch(
         internalStateActions.setAppState({
@@ -158,37 +152,21 @@ describe('tab_state actions', () => {
         })
       );
 
-      expect(setSpy).toHaveBeenCalledWith(
-        APP_STATE_URL_KEY,
-        expect.objectContaining({
-          columns: ['message'],
-          rowHeight: 8,
-        }),
-        { replace: true }
-      );
-      expect(selectTab(internalState.getState(), tabId).appState).toEqual(
-        expect.objectContaining({
-          columns: ['message'],
-          rowHeight: 8,
-        })
-      );
-      expect(
-        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
-      ).toEqual(
-        expect.objectContaining({
-          [profileId]: {
-            columns: ['message'],
-            rowHeight: 3,
-          },
-        })
-      );
+      const currentTab = selectTab(internalState.getState(), tabId);
+      const persistedAppState = stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY);
+
+      expect(persistedAppState).toEqual(currentTab.appState);
+      expect(currentTab.appState.columns).toEqual(['message']);
+      expect(currentTab.appState.rowHeight).toBe(8);
+      expect(currentTab.defaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+        columns: ['message'],
+        rowHeight: 3,
+      });
     });
 
     it('should not sync snapshotsByProfileId after replacing the URL for system-triggered updates', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
-      const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
-        .scopedProfilesManager$.getValue()
-        .getContexts().dataSourceContext.profileId;
+      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
 
       internalState.dispatch(
         internalStateActions.setAppState({
@@ -209,36 +187,34 @@ describe('tab_state actions', () => {
         })
       );
 
-      expect(
-        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
-      ).toEqual(
-        expect.objectContaining({
-          [profileId]: expect.objectContaining({
-            columns: ['field1'],
-          }),
-        })
-      );
+      const snapshotsByProfileId = selectTab(internalState.getState(), tabId).defaultProfileState
+        .snapshotsByProfileId;
+
+      expect(snapshotsByProfileId[profileId]).toEqual({
+        breakdownField: undefined,
+        columns: ['field1'],
+        hideChart: undefined,
+        rowHeight: undefined,
+      });
     });
   });
 
   describe('pushCurrentTabStateToUrl', () => {
     it('should write the current app state to the URL even when app state is unchanged', async () => {
       const { internalState, stateStorageContainer, tabId } = await setup();
-      const setSpy = jest.spyOn(stateStorageContainer, 'set');
 
       await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));
 
-      expect(setSpy).toHaveBeenCalledWith(
-        APP_STATE_URL_KEY,
-        selectTab(internalState.getState(), tabId).appState,
-        { replace: true }
+      expect(stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY)).toEqual(
+        selectTab(internalState.getState(), tabId).appState
       );
     });
   });
 
   describe('transitionFromESQLToDataView', () => {
     it('should transition from ES|QL mode to Data View mode', async () => {
-      const { internalState, tabId } = await setup();
+      const { internalState, runtimeStateManager, tabId } = await setup();
+      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
       const dataViewId = 'test-data-view-id';
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
@@ -250,12 +226,15 @@ describe('tab_state actions', () => {
         type: DataSourceType.Esql,
       });
 
-      expect(prevDefaultProfileState).toEqual(
-        expect.objectContaining({
-          resetId: expect.any(String),
-          fieldsToReset: 'none',
-        })
-      );
+      expect(prevDefaultProfileState.fieldsToReset).toBe('none');
+      expect(typeof prevDefaultProfileState.resetId).toBe('string');
+      expect(prevDefaultProfileState.resetId).not.toEqual('');
+      expect(prevDefaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+        breakdownField: '',
+        columns: ['field1', 'field2'],
+        hideChart: false,
+        rowHeight: undefined,
+      });
 
       // Transition to data view mode
       internalState.dispatch(
@@ -280,12 +259,14 @@ describe('tab_state actions', () => {
         dataViewId,
       });
 
-      expect(tab.defaultProfileState).toEqual(
-        expect.objectContaining({
-          resetId: expect.any(String),
-          fieldsToReset: 'all',
-        })
-      );
+      expect(tab.defaultProfileState.fieldsToReset).toBe('all');
+      expect(typeof tab.defaultProfileState.resetId).toBe('string');
+      expect(tab.defaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+        breakdownField: '',
+        columns: [],
+        hideChart: false,
+        rowHeight: undefined,
+      });
       expect(tab.defaultProfileState.resetId).not.toEqual(prevDefaultProfileState.resetId);
       expect(tab.defaultProfileState.resetId).not.toEqual('');
     });
@@ -293,7 +274,8 @@ describe('tab_state actions', () => {
 
   describe('transitionFromDataViewToESQL', () => {
     it('should transition from Data View mode to ES|QL mode', async () => {
-      const { internalState, tabId } = await setup();
+      const { internalState, runtimeStateManager, tabId } = await setup();
+      const profileId = getCurrentProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
 
       const query = { query: "foo: 'bar'", language: 'kuery' };
@@ -337,12 +319,15 @@ describe('tab_state actions', () => {
         dataViewId: 'the-data-view-id',
       });
 
-      expect(prevDefaultProfileState).toEqual(
-        expect.objectContaining({
-          resetId: expect.any(String),
-          fieldsToReset: 'none',
-        })
-      );
+      expect(prevDefaultProfileState.fieldsToReset).toBe('none');
+      expect(typeof prevDefaultProfileState.resetId).toBe('string');
+      expect(prevDefaultProfileState.resetId).not.toEqual('');
+      expect(prevDefaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+        breakdownField: undefined,
+        columns: undefined,
+        hideChart: undefined,
+        rowHeight: undefined,
+      });
 
       // Transition to ES|QL mode
       internalState.dispatch(
@@ -367,12 +352,14 @@ describe('tab_state actions', () => {
         type: DataSourceType.Esql,
       });
 
-      expect(tab.defaultProfileState).toEqual(
-        expect.objectContaining({
-          resetId: expect.any(String),
-          fieldsToReset: 'all',
-        })
-      );
+      expect(tab.defaultProfileState.fieldsToReset).toBe('all');
+      expect(typeof tab.defaultProfileState.resetId).toBe('string');
+      expect(tab.defaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+        breakdownField: undefined,
+        columns: [],
+        hideChart: undefined,
+        rowHeight: undefined,
+      });
       expect(tab.defaultProfileState.resetId).not.toEqual(prevDefaultProfileState.resetId);
       expect(tab.defaultProfileState.resetId).not.toEqual('');
     });

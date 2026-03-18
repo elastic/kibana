@@ -63,7 +63,7 @@ const mergeAppState = (
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
-const getCurrentProfileId = (runtimeStateManager: RuntimeStateManager, tabId: string) => {
+export const getCurrentProfileId = (runtimeStateManager: RuntimeStateManager, tabId: string) => {
   return selectTabRuntimeState(runtimeStateManager, tabId)
     .scopedProfilesManager$.getValue()
     .getContexts().dataSourceContext.profileId;
