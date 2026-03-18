@@ -2733,12 +2733,13 @@ module.exports = {
     },
     // Custom rules for scout tests
     {
-      // Platform & Solutions (plugins and packages)
+      // Platform & Solutions (plugins and packages, excluding Scout framework's own tests)
       files: [
         'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
         'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
         'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
       ],
+      excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
         '@kbn/eslint/scout_max_one_describe': 'error',

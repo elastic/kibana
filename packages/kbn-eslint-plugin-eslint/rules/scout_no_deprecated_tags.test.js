@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const { RuleTester } = require('eslint');
@@ -19,9 +21,6 @@ const ruleTester = new RuleTester({
     },
   },
 });
-
-const ERROR_MSG =
-  'Use the `tags` helper from @kbn/scout (e.g. `tags.stateful.classic`, `tags.serverless.observability.complete`) instead of deprecated string tags like `@ess` or `@svlOblt`.';
 
 ruleTester.run('@kbn/eslint/scout_no_deprecated_tags', rule, {
   valid: [
