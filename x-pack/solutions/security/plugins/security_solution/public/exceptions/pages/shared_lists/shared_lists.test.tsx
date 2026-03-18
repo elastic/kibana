@@ -275,10 +275,7 @@ describe('SharedLists', () => {
   it('returns focus to the create button when the create shared list flyout is closed', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: {
-        rules: { read: true, edit: true },
-        exceptions: { read: true, edit: true },
-      },
+      rulesPrivileges: { read: true, edit: true },
     });
 
     const wrapper = render(
