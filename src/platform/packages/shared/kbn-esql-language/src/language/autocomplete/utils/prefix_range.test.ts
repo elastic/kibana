@@ -71,8 +71,8 @@ describe('computePrefixRange', () => {
       expectPrefix('FROM a | KEEP `my field`.na', '`my field`.na', 'dot-field-combining');
     });
 
-    it('trailing dot after dotted field is treated as delimiter', () => {
-      expectPrefix('FROM a | KEEP event.data.', '', 'token-based');
+    it('trailing dot after dotted field keeps the dotted prefix', () => {
+      expectPrefix('FROM a | KEEP event.data.', 'event.data.', 'dot-field-combining');
     });
   });
 

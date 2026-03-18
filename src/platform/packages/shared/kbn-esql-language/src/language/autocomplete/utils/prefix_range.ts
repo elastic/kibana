@@ -17,7 +17,6 @@ const STARTS_WITH_WORD_CHAR = /^\w/;
 
 interface LexerToken {
   text: string;
-  type: number;
   start: number;
   stop: number;
 }
@@ -73,6 +72,17 @@ export function computePrefixRange(query: string): PrefixResult {
 
   // Structural delimiters like ( ) , . = are not valid prefixes — cursor is in an empty position
   if (!STARTS_WITH_WORD_CHAR.test(lastText[0])) {
+    if (lastText === '.') {
+      const trailingDotPrefix = getTrailingDotFieldPrefix(query, tokens);
+
+      if (trailingDotPrefix) {
+        return {
+          ...trailingDotPrefix,
+          classification: 'dot-field-combining',
+        };
+      }
+    }
+
     return {
       prefix: '',
       range: { start: query.length, end: query.length },
@@ -80,11 +90,8 @@ export function computePrefixRange(query: string): PrefixResult {
     };
   }
 
-  let compoundStart = lastStart;
-  let tokenIdx = tokens.length - 1;
-
   // Walk backwards through adjacent dot-separated tokens (e.g. event.data.field)
-  ({ compoundStart, tokenIdx } = walkBackDotChain(tokens, tokenIdx, compoundStart));
+  const compoundStart = walkBackDotChain(tokens, tokens.length - 1, lastStart);
 
   if (compoundStart < lastStart) {
     return {
@@ -181,7 +188,7 @@ function getVisibleLexerTokens(query: string): LexerToken[] {
       continue;
     }
 
-    tokens.push({ text, type, start, stop });
+    tokens.push({ text, start, stop });
   }
 
   return tokens;
@@ -202,12 +209,33 @@ function getTrailingNonWhitespaceRange(
   };
 }
 
+/** Extends a trailing dot into a dotted field prefix (e.g. event.data.). */
+function getTrailingDotFieldPrefix(query: string, tokens: LexerToken[]) {
+  if (tokens.length < 2) {
+    return;
+  }
+
+  const dotToken = tokens[tokens.length - 1];
+  const previousToken = tokens[tokens.length - 2];
+
+  if (
+    previousToken.stop + 1 !== dotToken.start ||
+    (!STARTS_WITH_WORD_CHAR.test(previousToken.text[0]) && !previousToken.text.startsWith('`'))
+  ) {
+    return;
+  }
+
+  const compoundStart = walkBackDotChain(tokens, tokens.length - 2, previousToken.start);
+  const range = { start: compoundStart, end: dotToken.stop + 1 };
+
+  return {
+    prefix: query.substring(range.start, range.end),
+    range,
+  };
+}
+
 /** Walks backwards through adjacent dot-separated tokens (e.g. event.data.field). */
-function walkBackDotChain(
-  tokens: LexerToken[],
-  startIdx: number,
-  compoundStart: number
-): { compoundStart: number; tokenIdx: number } {
+function walkBackDotChain(tokens: LexerToken[], startIdx: number, compoundStart: number): number {
   let tokenIdx = startIdx;
   let result = compoundStart;
 
@@ -228,5 +256,5 @@ function walkBackDotChain(
     tokenIdx -= 2;
   }
 
-  return { compoundStart: result, tokenIdx };
+  return result;
 }
