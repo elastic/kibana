@@ -367,6 +367,8 @@ export default function ({ getService }: FtrProviderContext) {
         'security_solution_investigation_guide_edit',
         'security_solution_custom_highlighted_fields_edit',
         'security_solution_enable_disable_rules',
+        'security_solution_manual_run_rules',
+        'security_solution_rules_management_settings',
       ],
       securitySolutionAlertsV1: ['all', 'read', 'minimal_all', 'minimal_read'],
       infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
