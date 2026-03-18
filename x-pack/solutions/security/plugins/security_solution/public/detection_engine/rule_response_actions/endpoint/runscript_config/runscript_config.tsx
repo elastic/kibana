@@ -106,6 +106,8 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
 );
 RunscriptConfig.displayName = 'RunscriptConfig';
 
+type RunscriptOsValidationState = Record<SupportedHostOsType, ValidationState>;
+
 interface AutomatedRunScriptConfigurationProps {
   field: FieldHook<AutomatedRunScriptConfig>;
   onChange: (validationState: ValidationState) => void;
@@ -133,7 +135,6 @@ const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProp
     return value.linux && value.macos && value.windows;
   }, [value]);
 
-  type RunscriptOsValidationState = Record<SupportedHostOsType, ValidationState>;
   const [osValidationState, setOsValidationState] = useState<RunscriptOsValidationState>({
     linux: { isValid: true },
     macos: { isValid: true },

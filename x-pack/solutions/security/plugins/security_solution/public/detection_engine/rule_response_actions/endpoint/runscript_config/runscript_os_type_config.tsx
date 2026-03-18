@@ -39,6 +39,11 @@ import { EndpointRunscriptScriptSelector } from '../../../../management/componen
 import { OS_TITLES } from '../../../../management/common/translations';
 import { validateTimeoutValue } from './utils';
 
+interface OsConfigValidationResult extends ValidationState {
+  timeout: ValidationState;
+  arguments: ValidationState;
+}
+
 export interface RunScriptOsTypeConfigProps {
   'data-test-subj'?: string;
   platform: SupportedHostOsType;
@@ -60,10 +65,6 @@ export const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const [scriptSelected, setSelectedScript] = useState<EndpointScript | undefined>(undefined);
 
-    interface OsConfigValidationResult extends ValidationState {
-      timeout: ValidationState;
-      arguments: ValidationState;
-    }
     const validateConfig = useCallback(
       (
         updatedConfig: EndpointRunScriptActionRequestParams,
