@@ -143,6 +143,10 @@ spaceTest.describe(
           await metricsExperience.breakdownSelector.toggleButton.click();
           await metricsExperience.breakdownSelector.selectable.waitFor({ state: 'visible' });
           // EUI selectable list has a known scrollable-region-focusable violation
+          // because .euiSelectableList__list lacks tabIndex and aria-label.
+          // TODO: File an issue at https://github.com/elastic/eui to add
+          // tabIndex and aria-label to EuiSelectableList's scrollable
+          // container, then remove this exclude once fixed upstream.
           const { violations } = await page.checkA11y({
             include: ['[data-test-subj="metricsExperienceBreakdownSelectorSelectable"]'],
             exclude: ['.euiSelectableList__list'],
