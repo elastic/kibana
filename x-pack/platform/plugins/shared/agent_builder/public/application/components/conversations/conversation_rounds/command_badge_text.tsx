@@ -25,7 +25,7 @@ export const CommandBadgeText: React.FC<CommandBadgeTextProps> = ({ text }) => {
 
   const badgeStyle = css`
     color: ${euiTheme.colors.textPrimary};
-    background-color: ${euiTheme.colors.backgroundBasePrimary};
+    background-color: ${euiTheme.colors.backgroundLightPrimary};
     border-radius: ${euiTheme.border.radius.small};
     padding: 0 ${euiTheme.size.xs};
   `;

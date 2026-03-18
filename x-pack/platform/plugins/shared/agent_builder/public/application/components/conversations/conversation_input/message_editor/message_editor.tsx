@@ -128,7 +128,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   const commandBadgeStyles = css`
     [${COMMAND_BADGE_ATTRIBUTE}] {
       color: ${euiTheme.colors.textPrimary};
-      background-color: ${euiTheme.colors.backgroundBasePrimary};
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
       border-radius: ${euiTheme.border.radius.small};
       padding: 0 ${euiTheme.size.xs};
       cursor: default;
