@@ -35,7 +35,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
           body: createRequestBodySchema,
         },
         response: {
-          200: {
+          201: {
             body: () => createResponseBodySchema,
           },
         },
@@ -44,7 +44,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
     async (ctx, req, res) => {
       try {
         const result = await create(ctx, req.body, req.params);
-        return res.ok({ body: result });
+        return res.created({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();

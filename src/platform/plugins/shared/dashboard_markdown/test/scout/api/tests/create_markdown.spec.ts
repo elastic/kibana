@@ -41,7 +41,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(201);
     expect(response.body.data).toMatchObject({
       content,
       title,
@@ -65,7 +65,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(201);
     expect(response.body.id).toBe(id);
   });
 
@@ -83,7 +83,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(201);
     expect(response.body.data).toMatchObject({
       title: 'My Markdown Panel',
       description: 'A description of this panel',
@@ -106,7 +106,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(201);
     expect(response.body.data).toMatchObject({ content, title });
   });
 
@@ -126,7 +126,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(201);
     expect(response.body.id).toBe(id);
   });
 
@@ -149,7 +149,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
         responseType: 'json',
       });
 
-      expect(createResponse).toHaveStatusCode(200);
+      expect(createResponse).toHaveStatusCode(201);
 
       const getResponse = await apiClient.get(`${MARKDOWN_API_PATH}/${id}`, {
         headers: {
