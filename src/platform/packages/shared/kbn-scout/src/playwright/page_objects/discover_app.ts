@@ -373,19 +373,10 @@ export class DiscoverApp {
 
     await menuPopover.waitFor({ state: 'visible' });
 
-    const panelTitleButton = this.page.testSubj.locator('contextMenuPanelTitleButton');
-    if (await panelTitleButton.isVisible()) {
-      return;
-    }
-
-    // Recommended queries are fetched asynchronously when the popover opens
-    // (ad-hoc data view resolution followed by the extensions endpoint with
-    // two resolveIndex calls). In serverless CI this chain regularly exceeds
-    // the default 10 s action timeout.
     const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
     await expect(recommendedQueriesButton).toBeVisible();
     await recommendedQueriesButton.click();
-    await panelTitleButton.waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('contextMenuPanelTitleButton').waitFor({ state: 'visible' });
   }
 
   async runRecommendedEsqlQuery(queryLabel: string) {
