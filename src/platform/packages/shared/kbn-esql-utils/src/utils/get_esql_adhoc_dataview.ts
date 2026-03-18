@@ -9,7 +9,11 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import {
+  type ESQLSourceResult,
+  SOURCES_AUTOCOMPLETE_ROUTE,
+  TIMEFIELD_ROUTE,
+} from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
 
 // Caches the in-flight or resolved TIMEFIELD_ROUTE promise by query.
@@ -52,7 +56,7 @@ async function sha256(str: string) {
  * @param options.skipFetchFields - Whether to skip fetching fields for performance reasons
  * @param options.createNewInstanceEvenIfCachedOneAvailable - Forces creation of a new instance, clearing any cached DataView
  * @param options.id - Explicit DataView ID. When provided, this ID is used as-is instead of generating one via SHA-256. Useful when the caller already knows the ID (e.g. from a persisted ad-hoc DataView spec) and wants the DataViewService cache to be populated under that exact key.
- * @param options.idPrefix - Custom prefix for the DataView ID (defaults to 'esql'). Ignored when `options.id` is provided. Use a different prefix to avoid cache collisions between consumers.
+ * @param options.idPrefix - Custom prefix for the DataView ID (defaults to 'esql'). Use a different prefix to avoid cache collisions between consumers.
  * @param http - Optional HTTP service for fetching time field information. If not provided, no time field detection is performed
  *
  * @returns Promise that resolves to the created DataView with the detected time field (if any)
@@ -78,13 +82,7 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  const indexPattern = getIndexPatternFromESQLQuery(query);
-  const prefix = options?.idPrefix ?? 'esql';
-  const dataViewId = options?.id ?? (await sha256(`${prefix}-${indexPattern}`));
-
   if (options?.createNewInstanceEvenIfCachedOneAvailable) {
-    // overwise it might return a cached data view with a different time field
-    dataViewsService.clearInstanceCache(dataViewId);
     timeFieldCache.delete(query);
   }
 
@@ -105,6 +103,20 @@ export async function getESQLAdHocDataview({
     timeFieldCache.set(query, pendingRequest);
     timeFieldName = await pendingRequest;
   }
+
+  const indexPattern = getIndexPatternFromESQLQuery(query);
+  const prefix = options?.idPrefix ?? 'esql';
+  const dataViewId =
+    options?.id ??
+    (await sha256(
+      timeFieldName ? `${prefix}-${indexPattern}-${timeFieldName}` : `${prefix}-${indexPattern}`
+    ));
+
+  if (options?.createNewInstanceEvenIfCachedOneAvailable) {
+    // overwise it might return a cached data view with a different time field
+    dataViewsService.clearInstanceCache(dataViewId);
+  }
+
   const skipFetchFields = options?.skipFetchFields ?? false;
 
   const dataView = await dataViewsService.create(
@@ -113,7 +125,7 @@ export async function getESQLAdHocDataview({
       type: ESQL_TYPE,
       id: dataViewId,
       allowNoIndex: options?.allowNoIndex,
-      timeFieldName,
+      timeFieldName: timeFieldName || undefined,
     },
     // important to skip if you just need the dataview without the fields for performance reasons
     skipFetchFields
@@ -122,29 +134,31 @@ export async function getESQLAdHocDataview({
 }
 
 /**
- * This can be used to get an initial index for a default ES|QL query.
+ * Gets an initial index for a default ES|QL query by querying both local and remote (CCS) indices.
  * Could be used during onboarding when data views to get a better index are not yet available.
  * Can be used in combination with {@link getESQLAdHocDataview} to create a dataview for the index.
+ *
+ * Prefers a local `logs*` pattern if any local index starts with "logs",
+ * otherwise returns the first available non-hidden index (local or remote).
  */
-export async function getIndexForESQLQuery(deps: {
-  dataViews: { getIndices: DataViewsPublicPluginStart['getIndices'] };
-}): Promise<string | null> {
-  const indices = (
-    await deps.dataViews.getIndices({
-      showAllIndices: false,
-      pattern: '*',
-      isRollupIndex: () => false,
-    })
-  )
-    .filter((index) => !index.name.startsWith('.'))
-    .map((index) => index.name);
+export async function getIndexForESQLQuery(deps: { http: HttpStart }): Promise<string | null> {
+  const fetchIndices = async (scope: 'local' | 'all' | 'remote') => {
+    const response = await deps.http.get(`${SOURCES_AUTOCOMPLETE_ROUTE}${scope}`).catch(() => []);
+    return (response as ESQLSourceResult[]).filter((source) => !source.hidden);
+  };
 
-  let indexName = indices[0];
-  if (indices.length > 0) {
-    if (indices.find((index) => index.startsWith('logs'))) {
-      indexName = 'logs*';
-    }
+  let indices = await fetchIndices('local');
+  // only if no local indices are found, try to fetch remote indices
+  if (indices.length === 0) {
+    indices = await fetchIndices('remote');
   }
 
-  return indexName ?? null;
+  if (indices.length === 0) return null;
+
+  const hasLocalLogs = indices.some(
+    (source) => !source.name.includes(':') && source.name.startsWith('logs')
+  );
+  if (hasLocalLogs) return 'logs*';
+
+  return indices[0].name;
 }
