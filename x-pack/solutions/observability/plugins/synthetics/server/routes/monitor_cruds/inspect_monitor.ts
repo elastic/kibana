@@ -116,6 +116,8 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
         monitorPrivateLocations,
         privateLocations,
         monitorConfigRepository,
+        getPolicyId: (configId, locationId) =>
+          syntheticsMonitorClient.privateLocationAPI.getPolicyId({ id: configId }, locationId),
       });
 
       return response.ok({
@@ -145,6 +147,7 @@ export const buildPackagePolicyLinks = async ({
   monitorPrivateLocations,
   privateLocations,
   monitorConfigRepository,
+  getPolicyId,
 }: {
   monitorId?: string;
   monitorPrivateLocations: Array<{ id: string; label?: string; isServiceManaged?: boolean }>;
@@ -152,6 +155,7 @@ export const buildPackagePolicyLinks = async ({
   monitorConfigRepository: {
     get: (id: string) => Promise<{ references?: SavedObjectReference[] }>;
   };
+  getPolicyId: (configId: string, locationId: string) => string;
 }): Promise<{ packagePolicyLinks: PackagePolicyLink[]; hasMissingReferences: boolean }> => {
   if (!monitorId || monitorPrivateLocations.length === 0) {
     return { packagePolicyLinks: [], hasMissingReferences: false };
@@ -176,7 +180,7 @@ export const buildPackagePolicyLinks = async ({
       continue;
     }
 
-    const expectedPolicyId = `${monitorId}-${loc.id}`;
+    const expectedPolicyId = getPolicyId(monitorId, loc.id);
     const hasReference = referenceIdSet.has(expectedPolicyId);
 
     if (!hasReference) {

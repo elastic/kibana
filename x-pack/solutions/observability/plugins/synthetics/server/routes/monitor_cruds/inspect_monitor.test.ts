@@ -24,6 +24,8 @@ const makeMockRepository = (
   get: jest.fn().mockResolvedValue({ references }),
 });
 
+const mockGetPolicyId = (configId: string, locationId: string) => `${configId}-${locationId}`;
+
 describe('buildPackagePolicyLinks', () => {
   it('returns empty links when monitorId is undefined (new monitor)', async () => {
     const result = await buildPackagePolicyLinks({
@@ -31,6 +33,7 @@ describe('buildPackagePolicyLinks', () => {
       monitorPrivateLocations: [{ id: 'loc-1', label: 'Loc 1' }],
       privateLocations: [makePrivateLocation()],
       monitorConfigRepository: makeMockRepository(),
+      getPolicyId: mockGetPolicyId,
     });
 
     expect(result).toEqual({ packagePolicyLinks: [], hasMissingReferences: false });
@@ -42,6 +45,7 @@ describe('buildPackagePolicyLinks', () => {
       monitorPrivateLocations: [],
       privateLocations: [makePrivateLocation()],
       monitorConfigRepository: makeMockRepository(),
+      getPolicyId: mockGetPolicyId,
     });
 
     expect(result).toEqual({ packagePolicyLinks: [], hasMissingReferences: false });
@@ -55,6 +59,7 @@ describe('buildPackagePolicyLinks', () => {
       monitorConfigRepository: makeMockRepository([
         { id: 'monitor-1-loc-1', name: 'monitor-1-loc-1', type: 'ingest-package-policies' },
       ]),
+      getPolicyId: mockGetPolicyId,
     });
 
     expect(result.hasMissingReferences).toBe(false);
@@ -74,6 +79,7 @@ describe('buildPackagePolicyLinks', () => {
       monitorPrivateLocations: [{ id: 'loc-1', label: 'My Location' }],
       privateLocations: [makePrivateLocation({ id: 'loc-1', agentPolicyId: 'ap-1' })],
       monitorConfigRepository: makeMockRepository([]),
+      getPolicyId: mockGetPolicyId,
     });
 
     expect(result.hasMissingReferences).toBe(true);
@@ -95,6 +101,7 @@ describe('buildPackagePolicyLinks', () => {
       monitorConfigRepository: makeMockRepository([
         { id: 'monitor-1-loc-1', name: 'monitor-1-loc-1', type: 'ingest-package-policies' },
       ]),
+      getPolicyId: mockGetPolicyId,
     });
 
     expect(result.hasMissingReferences).toBe(true);
@@ -126,6 +133,7 @@ describe('buildPackagePolicyLinks', () => {
       monitorConfigRepository: makeMockRepository([
         { id: 'monitor-1-loc-1', name: 'monitor-1-loc-1', type: 'ingest-package-policies' },
       ]),
+      getPolicyId: mockGetPolicyId,
     });
 
     expect(result.packagePolicyLinks).toHaveLength(1);
@@ -140,6 +148,7 @@ describe('buildPackagePolicyLinks', () => {
       monitorConfigRepository: makeMockRepository([
         { id: 'monitor-1-loc-1', name: 'monitor-1-loc-1', type: 'ingest-package-policies' },
       ]),
+      getPolicyId: mockGetPolicyId,
     });
 
     expect(result.packagePolicyLinks[0].locationLabel).toBe('loc-1');
@@ -155,6 +164,7 @@ describe('buildPackagePolicyLinks', () => {
       monitorPrivateLocations: [{ id: 'loc-1', label: 'My Location' }],
       privateLocations: [makePrivateLocation({ id: 'loc-1', agentPolicyId: 'ap-1' })],
       monitorConfigRepository: mockRepo,
+      getPolicyId: mockGetPolicyId,
     });
 
     expect(result.hasMissingReferences).toBe(true);
@@ -172,9 +182,30 @@ describe('buildPackagePolicyLinks', () => {
       monitorPrivateLocations: [{ id: 'loc-1', label: 'My Location' }],
       privateLocations: [makePrivateLocation({ id: 'loc-1', agentPolicyId: 'ap-1' })],
       monitorConfigRepository: mockRepo,
+      getPolicyId: mockGetPolicyId,
     });
 
     expect(result.hasMissingReferences).toBe(true);
     expect(result.packagePolicyLinks).toHaveLength(1);
+  });
+
+  it('uses the provided getPolicyId function', async () => {
+    const customGetPolicyId = jest.fn(
+      (configId: string, locationId: string) => `custom-${configId}--${locationId}`
+    );
+
+    const result = await buildPackagePolicyLinks({
+      monitorId: 'mon-1',
+      monitorPrivateLocations: [{ id: 'loc-1', label: 'Loc' }],
+      privateLocations: [makePrivateLocation({ id: 'loc-1', agentPolicyId: 'ap-1' })],
+      monitorConfigRepository: makeMockRepository([
+        { id: 'custom-mon-1--loc-1', name: 'ref', type: 'ingest-package-policies' },
+      ]),
+      getPolicyId: customGetPolicyId,
+    });
+
+    expect(customGetPolicyId).toHaveBeenCalledWith('mon-1', 'loc-1');
+    expect(result.packagePolicyLinks[0].packagePolicyId).toBe('custom-mon-1--loc-1');
+    expect(result.hasMissingReferences).toBe(false);
   });
 });
