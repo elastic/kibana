@@ -66,5 +66,4 @@ describe('CEL input attributes schema validation', () => {
       expectParseError(OpenApiDetails.safeParse({ ...baseDetails, schemas: 'x'.repeat(500001) }));
     });
   });
-
 });
