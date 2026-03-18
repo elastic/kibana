@@ -186,6 +186,7 @@ export class CRUDClient {
     return;
   }
 
+  // createEntity generates EUID and creates the entity in the LATEST index
   public async createEntity(entityType: EntityType, doc: Entity): Promise<void> {
     const id = getEuidFromObject(entityType, doc);
 
