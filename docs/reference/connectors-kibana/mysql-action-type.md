@@ -1,5 +1,6 @@
 ---
 navigation_title: "MySQL"
+description: "Connect to a MySQL database through an HTTP proxy to search and query data from Workplace AI conversations."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/mysql-action-type.html
 applies_to:
@@ -20,7 +21,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For e
 MySQL connectors have the following configuration properties:
 
 Host
-:   The hostname or URL of the MySQL server (e.g., `https://your-mysql-server.example.com`).
+:   The hostname, IP address, or URL of the MySQL HTTP proxy (e.g., `https://your-mysql-proxy.example.com`, `192.168.1.1`, `localhost`).
 
 Port
 :   The port number for the MySQL server (default: 3306).
@@ -64,10 +65,20 @@ Search Rows
     - **database** (optional): The database name. Uses the configured default if omitted.
 
 
+## Requirements [mysql-requirements]
+
+The MySQL connector communicates with MySQL through an **HTTP proxy or gateway** that exposes a REST API in front of your database. Direct MySQL protocol (port 3306) is not supported.
+
+To use the MySQL connector, you need:
+
+1. An HTTP proxy or gateway that exposes your MySQL server as a REST API (for example, a custom middleware, [mysql2http](https://github.com/example/mysql2http), or a similar tool).
+2. A bearer token that grants read access to the databases you want to query through the proxy.
+3. The proxy must be accessible from your Kibana instance over HTTPS.
+
 ## Get API credentials [mysql-api-credentials]
 
-To use the MySQL connector, you need to:
+To obtain credentials:
 
-1. Have access to a MySQL server that exposes an HTTP API endpoint.
-2. Obtain a bearer token or API token that grants read access to the databases you want to query.
-3. Ensure the MySQL server is accessible from your Kibana instance.
+1. Deploy or identify the HTTP proxy that wraps your MySQL server.
+2. Generate or retrieve a bearer token with read-only access to the target databases.
+3. Note the proxy host (URL, hostname, or IP), port, and the default database name.

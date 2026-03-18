@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.mysql.query'
-description: 'Execute a read-only SQL query against the MySQL database. Use this to retrieve specific data with custom SQL. Inputs: sql (string), maxRows (number, optional).'
+description: 'Execute a read-only SQL SELECT query against the MySQL database. Use when you need to retrieve specific data with a custom SQL query.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -8,9 +8,12 @@ triggers:
 inputs:
   - name: sql
     type: string
+    required: true
+    description: 'Read-only SQL SELECT query to execute (e.g. SELECT id, name FROM users WHERE status = "active" LIMIT 20). Only SELECT statements are permitted.'
   - name: maxRows
     type: number
     required: false
+    description: 'Maximum number of rows to return (default: 100).'
 steps:
   - name: execute-query
     type: mysql.query

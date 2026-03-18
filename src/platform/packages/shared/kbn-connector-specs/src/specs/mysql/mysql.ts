@@ -10,6 +10,17 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import {
+  DescribeTableInputSchema,
+  ListDatabasesInputSchema,
+  ListTablesInputSchema,
+  QueryInputSchema,
+  SearchRowsInputSchema,
+  type DescribeTableInput,
+  type ListTablesInput,
+  type QueryInput,
+  type SearchRowsInput,
+} from './types';
 
 const buildBaseUrl = (ctx: ActionContext) => {
   const host = (ctx.config?.host as string).trim();
@@ -43,10 +54,10 @@ export const MysqlConnector: ConnectorSpec = {
   schema: z.object({
     host: z
       .string()
-      .url()
+      .min(1)
       .describe(
         i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.description', {
-          defaultMessage: 'The MySQL server host URL',
+          defaultMessage: 'The MySQL HTTP proxy host (URL, hostname, or IP address)',
         })
       )
       .meta({
@@ -54,19 +65,20 @@ export const MysqlConnector: ConnectorSpec = {
         label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.label', {
           defaultMessage: 'Host',
         }),
-        placeholder: 'https://your-mysql-server.example.com',
+        placeholder: 'https://your-mysql-proxy.example.com',
         helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.helpText', {
-          defaultMessage: 'The hostname or IP address of your MySQL server',
+          defaultMessage:
+            'The hostname, IP address, or URL of the MySQL HTTP proxy (e.g. https://proxy.example.com, 192.168.1.1, localhost)',
         }),
       }),
     port: z
-      .number()
+      .coerce.number()
       .int()
       .min(1)
       .max(65535)
       .describe(
         i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.description', {
-          defaultMessage: 'The MySQL server port',
+          defaultMessage: 'The MySQL HTTP proxy port',
         })
       )
       .meta({
@@ -76,7 +88,7 @@ export const MysqlConnector: ConnectorSpec = {
         }),
         placeholder: '3306',
         helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.helpText', {
-          defaultMessage: 'The port number for the MySQL server (default: 3306)',
+          defaultMessage: 'The port number for the MySQL HTTP proxy (default: 3306)',
         }),
       }),
     database: z
@@ -103,20 +115,13 @@ export const MysqlConnector: ConnectorSpec = {
     // Execute a read-only SQL query
     query: {
       isTool: false,
-      input: z.object({
-        sql: z.string(),
-        maxRows: z.number().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          sql: string;
-          maxRows?: number;
-        };
+      input: QueryInputSchema,
+      handler: async (ctx, input: QueryInput) => {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.post(`${baseUrl}/query`, {
-          sql: typedInput.sql,
+          sql: input.sql,
           database: ctx.config?.database,
-          maxRows: typedInput.maxRows ?? 100,
+          maxRows: input.maxRows ?? 100,
         });
         return response.data;
       },
@@ -125,7 +130,7 @@ export const MysqlConnector: ConnectorSpec = {
     // List all databases accessible to the user
     listDatabases: {
       isTool: false,
-      input: z.object({}),
+      input: ListDatabasesInputSchema,
       handler: async (ctx) => {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.post(`${baseUrl}/query`, {
@@ -138,14 +143,9 @@ export const MysqlConnector: ConnectorSpec = {
     // List tables in a database
     listTables: {
       isTool: false,
-      input: z.object({
-        database: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          database?: string;
-        };
-        const db = typedInput.database ?? (ctx.config?.database as string);
+      input: ListTablesInputSchema,
+      handler: async (ctx, input: ListTablesInput) => {
+        const db = input.database ?? (ctx.config?.database as string);
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.post(`${baseUrl}/query`, {
           sql: `SHOW TABLES FROM ${escapeIdentifier(db)}`,
@@ -158,55 +158,33 @@ export const MysqlConnector: ConnectorSpec = {
     // Describe a table's schema
     describeTable: {
       isTool: false,
-      input: z.object({
-        table: z.string(),
-        database: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          table: string;
-          database?: string;
-        };
-        const db = typedInput.database ?? (ctx.config?.database as string);
+      input: DescribeTableInputSchema,
+      handler: async (ctx, input: DescribeTableInput) => {
+        const db = input.database ?? (ctx.config?.database as string);
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.post(`${baseUrl}/query`, {
-          sql: `DESCRIBE ${escapeIdentifier(db)}.${escapeIdentifier(typedInput.table)}`,
+          sql: `DESCRIBE ${escapeIdentifier(db)}.${escapeIdentifier(input.table)}`,
           database: db,
         });
         return response.data;
       },
     },
 
-    // Search across tables using full-text search or LIKE patterns
+    // Search across tables using LIKE patterns on specified columns
     searchRows: {
       isTool: false,
-      input: z.object({
-        table: z.string(),
-        searchTerm: z.string(),
-        columns: z.array(z.string()).optional(),
-        maxRows: z.number().optional(),
-        database: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          table: string;
-          searchTerm: string;
-          columns?: string[];
-          maxRows?: number;
-          database?: string;
-        };
-        const db = typedInput.database ?? (ctx.config?.database as string);
+      input: SearchRowsInputSchema,
+      handler: async (ctx, input: SearchRowsInput) => {
+        const db = input.database ?? (ctx.config?.database as string);
         const baseUrl = buildBaseUrl(ctx);
-        const escaped = escapeLikeValue(typedInput.searchTerm);
-        const whereClause = typedInput.columns
-          ? typedInput.columns
-              .map((col: string) => `${escapeIdentifier(col)} LIKE '%${escaped}%'`)
-              .join(' OR ')
-          : `1=0`;
+        const escaped = escapeLikeValue(input.searchTerm);
+        const whereClause = input.columns
+          .map((col: string) => `${escapeIdentifier(col)} LIKE '%${escaped}%'`)
+          .join(' OR ');
         const response = await ctx.client.post(`${baseUrl}/query`, {
           sql: `SELECT * FROM ${escapeIdentifier(db)}.${escapeIdentifier(
-            typedInput.table
-          )} WHERE ${whereClause} LIMIT ${typedInput.maxRows ?? 50}`,
+            input.table
+          )} WHERE ${whereClause} LIMIT ${input.maxRows ?? 50}`,
           database: db,
         });
         return response.data;
