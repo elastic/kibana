@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { useAbortController } from '@kbn/react-hooks';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useGenAIConnectors } from '../../../../hooks/use_genai_connectors';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -75,7 +76,7 @@ export function SettingsTab() {
     setKnowledgeIndicatorExtraction(toFormValue(v.connectorIdKnowledgeIndicatorExtraction));
     setRuleGeneration(toFormValue(v.connectorIdRuleGeneration));
     setDiscovery(toFormValue(v.connectorIdDiscovery));
-    setIndexPatterns(v.indexPatterns || 'logs*');
+    setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
   }, [settingsFetch.value]);
 
   const handleSave = useCallback(async () => {
@@ -281,7 +282,7 @@ export function SettingsTab() {
                 data-test-subj="streams-settings-index-patterns"
                 value={indexPatterns}
                 onChange={(e) => setIndexPatterns(e.target.value)}
-                placeholder="logs*"
+                placeholder={DEFAULT_INDEX_PATTERNS}
                 rows={2}
                 style={{ minWidth: 280 }}
               />

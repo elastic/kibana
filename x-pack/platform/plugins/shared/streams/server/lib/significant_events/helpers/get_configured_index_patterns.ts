@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import type {
   ModelSettingsConfigClient,
   ModelSettings,
 } from '../../saved_objects/significant_events/model_settings_config_client';
-
-const DEFAULT_INDEX_PATTERNS = 'logs*';
 
 /**
  * Resolves index patterns from the given settings string.
