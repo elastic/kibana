@@ -21,39 +21,44 @@ const mockBreadcrumbsSetBreadcrumbs = jest.fn();
 const mockUseLoadEsDeprecations = jest.fn();
 const mockUseLoadRemoteClusters = jest.fn();
 
-jest.mock('../../app_context', () => ({
-  useAppContext: () => ({
-    plugins: {
-      share: {
-        url: {
-          locators: {
-            get: () => ({
-              useUrl: () => '/app/management/data/remote_clusters',
-            }),
-          },
-        },
-      },
-    },
-    services: {
-      api: {
-        useLoadEsDeprecations: () => mockUseLoadEsDeprecations(),
-        useLoadRemoteClusters: () => mockUseLoadRemoteClusters(),
-      },
-      breadcrumbs: {
-        setBreadcrumbs: mockBreadcrumbsSetBreadcrumbs,
-      },
-      core: {
-        docLinks: {
-          links: {
-            upgradeAssistant: {
-              batchReindex: 'https://example.invalid/batch-reindex',
+jest.mock('../../app_context', () => {
+  const actual = jest.requireActual('../../app_context');
+
+  return {
+    ...actual,
+    useAppContext: () => ({
+      plugins: {
+        share: {
+          url: {
+            locators: {
+              get: () => ({
+                useUrl: () => '/app/management/data/remote_clusters',
+              }),
             },
           },
         },
       },
-    },
-  }),
-}));
+      services: {
+        api: {
+          useLoadEsDeprecations: () => mockUseLoadEsDeprecations(),
+          useLoadRemoteClusters: () => mockUseLoadRemoteClusters(),
+        },
+        breadcrumbs: {
+          setBreadcrumbs: mockBreadcrumbsSetBreadcrumbs,
+        },
+        core: {
+          docLinks: {
+            links: {
+              upgradeAssistant: {
+                batchReindex: 'https://example.invalid/batch-reindex',
+              },
+            },
+          },
+        },
+      },
+    }),
+  };
+});
 
 jest.mock('./es_deprecations_table', () => ({
   EsDeprecationsTable: () => <div data-test-subj="esDeprecationsTableStub" />,

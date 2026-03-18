@@ -19,29 +19,38 @@ import {
 import type { SnapshotState } from './use_snapshot_state';
 import { FixSnapshotsFlyout } from './flyout';
 
-jest.mock('../../../../app_context', () => ({
-  useAppContext: () => ({
-    services: {
-      core: {
-        docLinks: {
-          links: {
-            ml: {
-              setUpgradeMode: 'https://example.invalid/ml-upgrade-mode',
+jest.mock('../../../../app_context', () => {
+  const actual = jest.requireActual('../../../../app_context');
+
+  return {
+    ...actual,
+    useAppContext: () => ({
+      services: {
+        core: {
+          docLinks: {
+            links: {
+              ml: {
+                setUpgradeMode: 'https://example.invalid/ml-upgrade-mode',
+              },
             },
           },
         },
       },
-    },
-  }),
-}));
+    }),
+  };
+});
 
-jest.mock('../../../../lib/ui_metric', () => ({
-  uiMetricService: {
-    trackUiMetric: jest.fn(),
-  },
-  UIM_ML_SNAPSHOT_UPGRADE_CLICK: 'UIM_ML_SNAPSHOT_UPGRADE_CLICK',
-  UIM_ML_SNAPSHOT_DELETE_CLICK: 'UIM_ML_SNAPSHOT_DELETE_CLICK',
-}));
+jest.mock('../../../../lib/ui_metric', () => {
+  const actual = jest.requireActual('../../../../lib/ui_metric');
+
+  return {
+    ...actual,
+    uiMetricService: {
+      ...actual.uiMetricService,
+      trackUiMetric: jest.fn(),
+    },
+  };
+});
 
 describe('FixSnapshotsFlyout', () => {
   const closeFlyout = jest.fn();

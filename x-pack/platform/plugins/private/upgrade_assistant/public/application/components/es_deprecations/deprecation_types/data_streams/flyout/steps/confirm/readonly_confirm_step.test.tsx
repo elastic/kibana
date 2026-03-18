@@ -18,24 +18,29 @@ import {
   mockMeta,
 } from './test_utils/confirm_step_test_scaffold';
 
-jest.mock('../../../../../../../app_context', () => ({
-  useAppContext: () => ({
-    services: {
-      api: {
-        useLoadNodeDiskSpace: () => mockLoadNodeDiskSpace(),
-      },
-      core: {
-        docLinks: {
-          links: {
-            upgradeAssistant: {
-              dataStreamReindex: 'https://example.invalid/reindex-docs',
+jest.mock('../../../../../../../app_context', () => {
+  const actual = jest.requireActual('../../../../../../../app_context');
+
+  return {
+    ...actual,
+    useAppContext: () => ({
+      services: {
+        api: {
+          useLoadNodeDiskSpace: () => mockLoadNodeDiskSpace(),
+        },
+        core: {
+          docLinks: {
+            links: {
+              upgradeAssistant: {
+                dataStreamReindex: 'https://example.invalid/reindex-docs',
+              },
             },
           },
         },
       },
-    },
-  }),
-}));
+    }),
+  };
+});
 
 jest.mock('./warnings', () => ({
   IncompatibleDataInDataStreamWarningCheckbox: ({

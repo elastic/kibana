@@ -15,15 +15,20 @@ import { LoadingState } from '../../../../../../types';
 import type { MigrationState } from '../../../use_migration_state';
 import { ChecklistFlyoutStep } from './checklist_reindex_step';
 
-jest.mock('../../../../../../../app_context', () => ({
-  useAppContext: () => ({
-    services: {
-      api: {
-        useLoadNodeDiskSpace: () => ({ data: [] }),
+jest.mock('../../../../../../../app_context', () => {
+  const actual = jest.requireActual('../../../../../../../app_context');
+
+  return {
+    ...actual,
+    useAppContext: () => ({
+      services: {
+        api: {
+          useLoadNodeDiskSpace: () => ({ data: [] }),
+        },
       },
-    },
-  }),
-}));
+    }),
+  };
+});
 
 jest.mock('../../../../../common/nodes_low_disk_space', () => ({
   NodesLowSpaceCallOut: () => <div data-test-subj="nodesLowSpaceCallout" />,

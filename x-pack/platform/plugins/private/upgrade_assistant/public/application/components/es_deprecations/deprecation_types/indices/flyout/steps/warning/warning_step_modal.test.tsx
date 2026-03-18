@@ -16,18 +16,23 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { WarningModalStep } from './warning_step_modal';
 
 // Mocks
-jest.mock('../../../../../../../app_context', () => ({
-  useAppContext: () => ({
-    services: {
-      api: {
-        useLoadNodeDiskSpace: () => ({ data: [] }),
+jest.mock('../../../../../../../app_context', () => {
+  const actual = jest.requireActual('../../../../../../../app_context');
+
+  return {
+    ...actual,
+    useAppContext: () => ({
+      services: {
+        api: {
+          useLoadNodeDiskSpace: () => ({ data: [] }),
+        },
+        core: {
+          docLinks: { links: {} },
+        },
       },
-      core: {
-        docLinks: { links: {} },
-      },
-    },
-  }),
-}));
+    }),
+  };
+});
 
 jest.mock('./warning_step_checkbox', () => ({
   DeprecatedSettingWarningCheckbox: ({

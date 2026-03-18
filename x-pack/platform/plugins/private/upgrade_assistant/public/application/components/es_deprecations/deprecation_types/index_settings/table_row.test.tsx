@@ -39,25 +39,37 @@ const mockAddContent = jest.fn<
 >();
 const mockRemoveContent = jest.fn<void, [id: string]>();
 
-jest.mock('../../../../app_context', () => ({
-  useAppContext: () => ({
-    services: {
-      api: {
-        updateIndexSettings: (...args: Parameters<UpdateIndexSettings>) =>
-          mockUpdateIndexSettings(...args),
-      },
-    },
-  }),
-}));
+jest.mock('../../../../app_context', () => {
+  const actual = jest.requireActual('../../../../app_context');
 
-jest.mock('../../../../../shared_imports', () => ({
-  GlobalFlyout: {
-    useGlobalFlyout: () => ({
-      addContent: (...args: Parameters<typeof mockAddContent>) => mockAddContent(...args),
-      removeContent: (...args: Parameters<typeof mockRemoveContent>) => mockRemoveContent(...args),
+  return {
+    ...actual,
+    useAppContext: () => ({
+      services: {
+        api: {
+          updateIndexSettings: (...args: Parameters<UpdateIndexSettings>) =>
+            mockUpdateIndexSettings(...args),
+        },
+      },
     }),
-  },
-}));
+  };
+});
+
+jest.mock('../../../../../shared_imports', () => {
+  const actual = jest.requireActual('../../../../../shared_imports');
+
+  return {
+    ...actual,
+    GlobalFlyout: {
+      ...actual.GlobalFlyout,
+      useGlobalFlyout: () => ({
+        addContent: (...args: Parameters<typeof mockAddContent>) => mockAddContent(...args),
+        removeContent: (...args: Parameters<typeof mockRemoveContent>) =>
+          mockRemoveContent(...args),
+      }),
+    },
+  };
+});
 
 describe('IndexSettingsTableRow', () => {
   const rowFieldNames: DeprecationTableColumns[] = ['correctiveAction', 'actions'];

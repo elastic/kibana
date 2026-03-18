@@ -14,20 +14,25 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { EnrichedDeprecationInfo } from '../../../../common/types';
 import { createEsDeprecations } from './__fixtures__/es_deprecations';
 
-jest.mock('../../app_context', () => ({
-  useAppContext: () => ({
-    kibanaVersionInfo: {
-      currentMajor: 8,
-      currentMinor: 0,
-      currentPatch: 0,
-    },
-    services: {
-      api: {
-        useLoadMlUpgradeMode: () => ({ data: { mlUpgradeModeEnabled: false } }),
+jest.mock('../../app_context', () => {
+  const actual = jest.requireActual('../../app_context');
+
+  return {
+    ...actual,
+    useAppContext: () => ({
+      kibanaVersionInfo: {
+        currentMajor: 8,
+        currentMinor: 0,
+        currentPatch: 0,
       },
-    },
-  }),
-}));
+      services: {
+        api: {
+          useLoadMlUpgradeMode: () => ({ data: { mlUpgradeModeEnabled: false } }),
+        },
+      },
+    }),
+  };
+});
 
 jest.mock('./deprecation_types', () => {
   const TestRow = ({

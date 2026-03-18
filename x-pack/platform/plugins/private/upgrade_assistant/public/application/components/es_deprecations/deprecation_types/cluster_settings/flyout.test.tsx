@@ -14,12 +14,17 @@ import type { ResponseError } from '../../../../../../common/types';
 import { mockClusterSettingDeprecation } from '../../__fixtures__/es_deprecations';
 import { RemoveClusterSettingsFlyout } from './flyout';
 
-jest.mock('../../../../lib/ui_metric', () => ({
-  uiMetricService: {
-    trackUiMetric: jest.fn(),
-  },
-  UIM_CLUSTER_SETTINGS_DELETE_CLICK: 'UIM_CLUSTER_SETTINGS_DELETE_CLICK',
-}));
+jest.mock('../../../../lib/ui_metric', () => {
+  const actual = jest.requireActual('../../../../lib/ui_metric');
+
+  return {
+    ...actual,
+    uiMetricService: {
+      ...actual.uiMetricService,
+      trackUiMetric: jest.fn(),
+    },
+  };
+});
 
 describe('RemoveClusterSettingsFlyout', () => {
   const closeFlyout = jest.fn();

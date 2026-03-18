@@ -17,14 +17,21 @@ import { DefaultTableRow } from './table_row';
 const mockAddContent = jest.fn<void, [params: { id: string }]>();
 const mockRemoveContent = jest.fn<void, [id: string]>();
 
-jest.mock('../../../../../shared_imports', () => ({
-  GlobalFlyout: {
-    useGlobalFlyout: () => ({
-      addContent: (...args: Parameters<typeof mockAddContent>) => mockAddContent(...args),
-      removeContent: (...args: Parameters<typeof mockRemoveContent>) => mockRemoveContent(...args),
-    }),
-  },
-}));
+jest.mock('../../../../../shared_imports', () => {
+  const actual = jest.requireActual('../../../../../shared_imports');
+
+  return {
+    ...actual,
+    GlobalFlyout: {
+      ...actual.GlobalFlyout,
+      useGlobalFlyout: () => ({
+        addContent: (...args: Parameters<typeof mockAddContent>) => mockAddContent(...args),
+        removeContent: (...args: Parameters<typeof mockRemoveContent>) =>
+          mockRemoveContent(...args),
+      }),
+    },
+  };
+});
 
 describe('DefaultTableRow', () => {
   const rowFieldNames: DeprecationTableColumns[] = ['message', 'actions'];

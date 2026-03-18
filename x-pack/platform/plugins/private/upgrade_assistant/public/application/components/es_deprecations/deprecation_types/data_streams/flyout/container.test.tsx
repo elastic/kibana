@@ -16,18 +16,25 @@ import { LoadingState } from '../../../../types';
 import type { MigrationState } from '../use_migration_state';
 import { DataStreamReindexFlyout } from './container';
 
-jest.mock('../../../../../app_context', () => ({
-  useAppContext: () => ({
-    services: {
-      api: {
-        useLoadNodeDiskSpace: () => ({ data: [] }),
+jest.mock('../../../../../app_context', () => {
+  const actual = jest.requireActual('../../../../../app_context');
+
+  return {
+    ...actual,
+    useAppContext: () => ({
+      services: {
+        api: {
+          useLoadNodeDiskSpace: () => ({ data: [] }),
+        },
+        core: {
+          docLinks: {
+            links: { upgradeAssistant: { dataStreamReindex: 'https://example.invalid' } },
+          },
+        },
       },
-      core: {
-        docLinks: { links: { upgradeAssistant: { dataStreamReindex: 'https://example.invalid' } } },
-      },
-    },
-  }),
-}));
+    }),
+  };
+});
 
 jest.mock('../use_migration_step', () => ({
   useMigrationStep: () => ['confirm', jest.fn()] as const,
