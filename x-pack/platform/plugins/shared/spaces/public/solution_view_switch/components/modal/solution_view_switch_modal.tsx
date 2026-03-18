@@ -29,12 +29,12 @@ import { BenefitRow } from './benefit_row';
 import { SolutionSelector } from './solution_selector';
 import type { SolutionViewSwitchModalProps, SupportedSolutionView } from '../../types';
 
-export const SolutionViewSwitchModal: React.FC<SolutionViewSwitchModalProps> = ({
+export const SolutionViewSwitchModal = ({
   onClose,
   onSwitch,
   currentSolution,
   isLoading,
-}) => {
+}: SolutionViewSwitchModalProps) => {
   const [selectedSolution, setSelectedSolution] = useState<SupportedSolutionView>(currentSolution);
   const modalTitleId = useGeneratedHtmlId();
 

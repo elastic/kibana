@@ -13,7 +13,7 @@ interface BenefitRowProps {
   text: string;
 }
 
-export const BenefitRow: React.FC<BenefitRowProps> = ({ iconType, text }) => {
+export const BenefitRow = ({ iconType, text }: BenefitRowProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexItem grow={false}>

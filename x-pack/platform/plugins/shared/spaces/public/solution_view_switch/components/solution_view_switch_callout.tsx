@@ -14,7 +14,7 @@ import type {
 
 export const getSolutionViewSwitchCalloutComponent = async (
   internalProps: SolutionViewSwitchCalloutInternalProps
-): Promise<React.FC<SolutionViewSwitchCalloutProps>> => {
+): Promise<React.ComponentType<SolutionViewSwitchCalloutProps>> => {
   const { SolutionViewSwitchCalloutInternal } = await import(
     './solution_view_switch_callout_internal'
   );

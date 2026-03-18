@@ -30,10 +30,7 @@ const options: EuiSuperSelectOption<SupportedSolutionView>[] = (
   ),
 }));
 
-export const SolutionSelector: React.FC<SolutionSelectorProps> = ({
-  selectedSolution,
-  onSolutionChange,
-}) => {
+export const SolutionSelector = ({ selectedSolution, onSolutionChange }: SolutionSelectorProps) => {
   return (
     <EuiFormRow
       label={i18n.translate('xpack.spaces.solutionViewSwitch.modal.solutionLabel', {
