@@ -93,6 +93,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Dashboard
   'dashboard-management',
 
+  // Platform – Streams
+  'streams-exploration',
+
   // Security Solution
   'find-security-ml-jobs',
   'automatic_troubleshooting',
