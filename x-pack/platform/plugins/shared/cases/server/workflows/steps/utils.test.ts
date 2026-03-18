@@ -133,7 +133,7 @@ describe('createCasesStepHandler', () => {
 });
 
 describe('safeParseCaseForWorkflowOutput', () => {
-  it('normalizes unsupported comments and null alert rule fields', () => {
+  it('preserves supported comment variants and nullable alert rule fields', () => {
     const eventComment = {
       id: 'event-comment-id',
       type: 'event' as const,
@@ -165,17 +165,30 @@ describe('safeParseCaseForWorkflowOutput', () => {
       version: 'WzQ3LDFc',
     };
 
+    const actionsComment = {
+      id: 'actions-comment-id',
+      type: 'actions' as const,
+      comment: 'Isolated host from response action',
+      actions: {
+        targets: [{ hostname: 'host-1', endpointId: 'endpoint-1' }],
+        type: 'isolate',
+      },
+      owner: createCaseResponseFixture.owner,
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: createCaseResponseFixture.created_by,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+      version: 'WzQ3LDFc',
+    };
+
     const result = safeParseCaseForWorkflowOutput(CaseResponsePropertiesSchema, {
       ...createCaseResponseFixture,
-      comments: [eventComment, alertCommentWithNullRule],
+      comments: [eventComment, actionsComment, alertCommentWithNullRule],
     });
 
-    expect(result.comments).toHaveLength(1);
-    expect(result.comments[0]).toMatchObject({
-      id: alertCommentWithNullRule.id,
-      type: 'alert',
-    });
-    expect(result.comments[0]).not.toHaveProperty('rule');
+    expect(result.comments).toEqual([eventComment, actionsComment, alertCommentWithNullRule]);
   });
 
   it('does not throw when output cannot be parsed', () => {

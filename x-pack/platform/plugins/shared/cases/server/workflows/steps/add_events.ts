@@ -32,7 +32,6 @@ export const addEventsStepDefinition = (
           })),
         });
 
-        // Centralized safe-parse + normalization for case-output schema drift in comments.
         return safeParseCaseForWorkflowOutput(
           addEventsStepCommonDefinition.outputSchema.shape.case,
           updatedCase

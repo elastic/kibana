@@ -36,7 +36,6 @@ export const addAlertsStepDefinition = (
           })),
         });
 
-        // Centralized safe-parse + normalization for case-output schema drift in comments.
         return safeParseCaseForWorkflowOutput(
           addAlertsStepCommonDefinition.outputSchema.shape.case,
           updatedCase
