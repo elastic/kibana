@@ -56,7 +56,8 @@ const resolveEndpointIds = async (
   soClient: ISavedObjectsRepository,
   featureId: string
 ): Promise<ResolvedEndpointIds> => {
-  if (!registry.get(featureId)) {
+  let current = registry.get(featureId);
+  if (!current) {
     throw new Error(
       i18n.translate('xpack.searchInferenceEndpoints.endpoints.featureNotFound', {
         defaultMessage: 'Feature with id "{featureId}" is not registered.',
@@ -64,55 +65,72 @@ const resolveEndpointIds = async (
       })
     );
   }
-
+  let recEntry = current.recommendedEndpoints?.length
+    ? { featureId: current.featureId, recommendedEndpoints: current.recommendedEndpoints }
+    : undefined;
   const soFeatures = await readSettingsFeatures(soClient);
   const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
 
   // Walk the fallback chain for the feature:
   // 1. Check for an admin-configured SO override for the current feature
-  // 2. Fall back to the feature's recommendedEndpoints
-  // 3. If neither exists, follow the parentFeatureId link and repeat
+  // 2. Follow the parentFeatureId link and repeat
+  // 3. Fall back to the feature's recommendedEndpoints
   // The visited set prevents infinite loops from circular parent references.
   const visited = new Set<string>();
   let currentId = featureId;
 
-  while (true) {
-    if (visited.has(currentId)) {
-      return {
-        ids: [],
-        warnings: [
-          i18n.translate('xpack.searchInferenceEndpoints.endpoints.cyclicDependency', {
-            defaultMessage:
-              'Cyclic dependency detected in feature fallback chain: "{featureId}" references back to "{currentId}".',
-            values: { featureId, currentId },
-          }),
-        ],
-      };
-    }
+  const initialSoEntry = soFeaturesMap.get(currentId);
+  if (initialSoEntry && initialSoEntry.endpoints.length > 0) {
+    return { ids: initialSoEntry.endpoints.map((e) => e.id), warnings: [] };
+  }
 
-    visited.add(currentId);
-    const current = registry.get(currentId);
-    if (!current) {
-      break;
-    }
+  visited.add(currentId);
+  if (current.parentFeatureId) {
+    currentId = current?.parentFeatureId;
 
-    const soEntry = soFeaturesMap.get(currentId);
-    if (soEntry && soEntry.endpoints.length > 0) {
-      return { ids: soEntry.endpoints.map((e) => e.id), warnings: [] };
-    }
+    while (true) {
+      if (visited.has(currentId)) {
+        return {
+          ids: [],
+          warnings: [
+            i18n.translate('xpack.searchInferenceEndpoints.endpoints.cyclicDependency', {
+              defaultMessage:
+                'Cyclic dependency detected in feature fallback chain: "{featureId}" references back to "{currentId}".',
+              values: { featureId, currentId },
+            }),
+          ],
+        };
+      }
 
-    if (current.recommendedEndpoints.length > 0) {
-      return { ids: current.recommendedEndpoints, warnings: [] };
-    }
+      visited.add(currentId);
+      current = registry.get(currentId);
+      if (!current) {
+        break;
+      }
+      if (!recEntry && current.recommendedEndpoints.length) {
+        recEntry = {
+          featureId: current.featureId,
+          recommendedEndpoints: current.recommendedEndpoints,
+        };
+      }
 
-    if (current.parentFeatureId) {
-      currentId = current.parentFeatureId;
-    } else {
-      break;
+      const soEntry = soFeaturesMap.get(currentId);
+      if (soEntry && soEntry.endpoints.length > 0) {
+        return { ids: soEntry.endpoints.map((e) => e.id), warnings: [] };
+      }
+
+      if (current.parentFeatureId) {
+        currentId = current.parentFeatureId;
+      } else {
+        break;
+      }
     }
   }
 
-  return { ids: [], warnings: [] };
+  return {
+    ids: recEntry?.recommendedEndpoints ?? [],
+    warnings: [],
+  };
 };
 
 /**

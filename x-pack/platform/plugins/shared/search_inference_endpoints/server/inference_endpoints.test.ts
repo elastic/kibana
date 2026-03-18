@@ -210,4 +210,115 @@ describe('getForFeature', () => {
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings[0]).toContain('Cyclic dependency');
   });
+
+  it('prefers child recommendedEndpoints over parent recommendedEndpoints', async () => {
+    registry.register(
+      createValidFeature({ featureId: 'parent', recommendedEndpoints: ['parent_ep'] })
+    );
+    registry.register(
+      createValidFeature({
+        featureId: 'child',
+        parentFeatureId: 'parent',
+        recommendedEndpoints: ['child_ep'],
+      })
+    );
+    const info = createEndpointInfo('child_ep');
+    await expect(
+      getForFeature(
+        registry,
+        createSoClient(),
+        createEsClient({ child_ep: info, parent_ep: createEndpointInfo('parent_ep') }),
+        'child'
+      )
+    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+  });
+
+  it('uses first recommendedEndpoints found in chain when child has none', async () => {
+    registry.register(
+      createValidFeature({ featureId: 'grandparent', recommendedEndpoints: ['gp_ep'] })
+    );
+    registry.register(
+      createValidFeature({
+        featureId: 'parent',
+        parentFeatureId: 'grandparent',
+        recommendedEndpoints: ['parent_ep'],
+      })
+    );
+    registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
+    const info = createEndpointInfo('parent_ep');
+    await expect(
+      getForFeature(
+        registry,
+        createSoClient(),
+        createEsClient({ parent_ep: info, gp_ep: createEndpointInfo('gp_ep') }),
+        'child'
+      )
+    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+  });
+
+  it('prefers parent SO override over child recommendedEndpoints', async () => {
+    registry.register(createValidFeature({ featureId: 'parent' }));
+    registry.register(
+      createValidFeature({
+        featureId: 'child',
+        parentFeatureId: 'parent',
+        recommendedEndpoints: ['child_ep'],
+      })
+    );
+    const soInfo = createEndpointInfo('so_ep');
+    await expect(
+      getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'parent', endpoints: [{ id: 'so_ep' }] }]),
+        createEsClient({ so_ep: soInfo, child_ep: createEndpointInfo('child_ep') }),
+        'child'
+      )
+    ).resolves.toEqual({ endpoints: [soInfo], warnings: [] });
+  });
+
+  it('uses grandparent recommendedEndpoints when parent has none', async () => {
+    registry.register(
+      createValidFeature({ featureId: 'grandparent', recommendedEndpoints: ['gp_ep'] })
+    );
+    registry.register(createValidFeature({ featureId: 'parent', parentFeatureId: 'grandparent' }));
+    registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
+    const info = createEndpointInfo('gp_ep');
+    await expect(
+      getForFeature(registry, createSoClient(), createEsClient({ gp_ep: info }), 'child')
+    ).resolves.toEqual({ endpoints: [info], warnings: [] });
+  });
+
+  it('prefers grandparent SO override over all recommendedEndpoints', async () => {
+    registry.register(
+      createValidFeature({ featureId: 'grandparent', recommendedEndpoints: ['gp_rec'] })
+    );
+    registry.register(
+      createValidFeature({
+        featureId: 'parent',
+        parentFeatureId: 'grandparent',
+        recommendedEndpoints: ['parent_rec'],
+      })
+    );
+    registry.register(
+      createValidFeature({
+        featureId: 'child',
+        parentFeatureId: 'parent',
+        recommendedEndpoints: ['child_rec'],
+      })
+    );
+    const soInfo = createEndpointInfo('gp_so');
+    await expect(
+      getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'grandparent', endpoints: [{ id: 'gp_so' }] }]),
+        createEsClient({
+          gp_so: soInfo,
+          child_rec: createEndpointInfo('child_rec'),
+          parent_rec: createEndpointInfo('parent_rec'),
+          gp_rec: createEndpointInfo('gp_rec'),
+        }),
+        'child'
+      )
+    ).resolves.toEqual({ endpoints: [soInfo], warnings: [] });
+  });
 });
