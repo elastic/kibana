@@ -89,7 +89,7 @@ const uploadSamplesRoute = (
           if (sourceIndex) {
             const searchResult = await esClient.search({
               index: sourceIndex,
-              size: 1000,
+              size: 100,
               _source: ['event.original'],
               query: {
                 function_score: {
