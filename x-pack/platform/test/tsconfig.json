@@ -180,6 +180,7 @@
     "@kbn/connector-specs",
     "@kbn/ftr-llm-proxy",
     "@kbn/dev-cli-runner",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/search-inference-endpoints-fixture-plugin"
   ]
 }
