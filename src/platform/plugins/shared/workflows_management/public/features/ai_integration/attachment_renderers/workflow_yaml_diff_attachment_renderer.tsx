@@ -7,12 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { diffLines } from 'diff';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
+import {
+  useWorkflowsMonacoTheme,
+  WORKFLOWS_MONACO_EDITOR_THEME,
+} from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 interface WorkflowYamlDiffData {
   beforeYaml: string;
@@ -28,37 +35,98 @@ interface WorkflowYamlDiffAttachment {
   data: WorkflowYamlDiffData;
 }
 
-const DIFF_EDITOR_HEIGHT = 200;
+const COLLAPSED_HEIGHT = 160;
+const LINE_HEIGHT = 18;
+const PADDING = 8;
+const HIDDEN_REGION_WIDGET_HEIGHT = 24;
 
-const findFirstChangedLine = (beforeYaml: string, afterYaml: string): number => {
-  const beforeLines = beforeYaml.split('\n');
-  const afterLines = afterYaml.split('\n');
-  const minLen = Math.min(beforeLines.length, afterLines.length);
+/**
+ * Estimates the pixel height Monaco's inline diff editor will occupy
+ * after hideUnchangedRegions collapses unchanged hunks.
+ *
+ * Uses `diffLines` to identify changed/unchanged regions, then
+ * accounts for edge regions (start/end of file) only getting
+ * one-sided context instead of two-sided.
+ */
+const estimateContentHeight = (
+  beforeYaml: string,
+  afterYaml: string,
+  contextLineCount: number,
+  minimumLineCount: number
+): number => {
+  const parts = diffLines(beforeYaml, afterYaml);
 
-  for (let i = 0; i < minLen; i++) {
-    if (beforeLines[i] !== afterLines[i]) {
-      return i + 1;
+  const lineRanges: Array<{ kind: 'changed' | 'unchanged'; lineCount: number }> = [];
+  for (const part of parts) {
+    const count = part.count ?? part.value.replace(/\n$/, '').split('\n').length;
+    if (part.added || part.removed) {
+      const last = lineRanges[lineRanges.length - 1];
+      if (last?.kind === 'changed') {
+        last.lineCount += count;
+      } else {
+        lineRanges.push({ kind: 'changed', lineCount: count });
+      }
+    } else {
+      lineRanges.push({ kind: 'unchanged', lineCount: count });
     }
   }
 
-  return minLen + 1;
+  let visibleLines = 0;
+  let hiddenRegions = 0;
+
+  for (let i = 0; i < lineRanges.length; i++) {
+    const range = lineRanges[i];
+    if (range.kind === 'changed') {
+      visibleLines += range.lineCount;
+    } else {
+      const isFirst = i === 0;
+      const isLast = i === lineRanges.length - 1;
+      const contextNeeded = isFirst || isLast ? contextLineCount : 2 * contextLineCount;
+      const threshold = minimumLineCount + contextNeeded;
+      if (range.lineCount >= threshold) {
+        hiddenRegions++;
+        visibleLines += contextNeeded;
+      } else {
+        visibleLines += range.lineCount;
+      }
+    }
+  }
+
+  return visibleLines * LINE_HEIGHT + hiddenRegions * HIDDEN_REGION_WIDGET_HEIGHT + PADDING;
 };
 
 const MonacoDiffViewer: React.FC<{
   beforeYaml: string;
   afterYaml: string;
 }> = ({ beforeYaml, afterYaml }) => {
+  const styles = useMemoCss(componentStyles);
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<monaco.editor.IDiffEditor | null>(null);
   const [isActive, setIsActive] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [measuredHeight, setMeasuredHeight] = useState<number | null>(null);
 
-  const handleClick = useCallback(() => {
+  const contextLineCount = 3;
+  const minimumLineCount = 3;
+
+  const estimatedHeight = useMemo(
+    () => estimateContentHeight(beforeYaml, afterYaml, contextLineCount, minimumLineCount),
+    [beforeYaml, afterYaml]
+  );
+
+  const contentHeight = measuredHeight ?? estimatedHeight;
+  const collapsedHeight = Math.min(contentHeight, COLLAPSED_HEIGHT);
+  const needsExpansion = contentHeight > COLLAPSED_HEIGHT;
+
+  const handleFocus = useCallback(() => {
     setIsActive(true);
   }, []);
 
   const handleBlur = useCallback(() => {
     setIsActive(false);
   }, []);
+
+  useWorkflowsMonacoTheme();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -68,6 +136,7 @@ const MonacoDiffViewer: React.FC<{
     const modifiedModel = monaco.editor.createModel(afterYaml, 'yaml');
 
     const diffEditor = monaco.editor.createDiffEditor(container, {
+      theme: WORKFLOWS_MONACO_EDITOR_THEME,
       readOnly: true,
       renderSideBySide: false,
       minimap: { enabled: false },
@@ -84,12 +153,12 @@ const MonacoDiffViewer: React.FC<{
       hideUnchangedRegions: {
         enabled: true,
         revealLineCount: 2,
-        minimumLineCount: 3,
-        contextLineCount: 3,
+        minimumLineCount,
+        contextLineCount,
       },
       renderOverviewRuler: false,
       fontSize: 12,
-      lineHeight: 18,
+      lineHeight: LINE_HEIGHT,
       padding: { top: 4, bottom: 4 },
       contextmenu: false,
       domReadOnly: true,
@@ -104,14 +173,16 @@ const MonacoDiffViewer: React.FC<{
 
     diffEditor.setModel({ original: originalModel, modified: modifiedModel });
 
-    const firstChangedLine = findFirstChangedLine(beforeYaml, afterYaml);
-    const topLine = Math.max(1, firstChangedLine - 2);
+    editorRef.current = diffEditor;
 
     requestAnimationFrame(() => {
-      diffEditor.getModifiedEditor().revealLineNearTop(topLine);
+      const scrollable = container.querySelector(
+        '.modified-in-monaco-diff-editor .monaco-scrollable-element'
+      );
+      if (scrollable && scrollable.clientHeight > 0) {
+        setMeasuredHeight(scrollable.clientHeight);
+      }
     });
-
-    editorRef.current = diffEditor;
 
     return () => {
       diffEditor.dispose();
@@ -119,20 +190,21 @@ const MonacoDiffViewer: React.FC<{
       modifiedModel.dispose();
       editorRef.current = null;
     };
-  }, [beforeYaml, afterYaml]);
+  }, [beforeYaml, afterYaml, minimumLineCount, contextLineCount]);
 
   useEffect(() => {
     const editor = editorRef.current;
     if (!editor) return;
 
+    const enableScroll = isActive && isExpanded;
     editor.updateOptions({
       scrollbar: {
-        vertical: isActive ? 'auto' : 'hidden',
-        horizontal: isActive ? 'auto' : 'hidden',
-        handleMouseWheel: isActive,
+        vertical: enableScroll ? 'auto' : 'hidden',
+        horizontal: enableScroll ? 'auto' : 'hidden',
+        handleMouseWheel: enableScroll,
       },
     });
-  }, [isActive]);
+  }, [isActive, isExpanded]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -140,41 +212,67 @@ const MonacoDiffViewer: React.FC<{
     }
   }, []);
 
+  const handleExpand = useCallback(() => {
+    setIsExpanded(true);
+    requestAnimationFrame(() => {
+      editorRef.current?.getModifiedEditor().layout();
+    });
+  }, []);
+
+  const handleCollapse = useCallback(() => {
+    setIsExpanded(false);
+    requestAnimationFrame(() => {
+      editorRef.current?.getModifiedEditor().layout();
+    });
+  }, []);
+
   return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
-      ref={containerRef}
-      onFocus={handleClick}
-      onBlur={handleBlur}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="region"
-      aria-label="Workflow diff"
-      style={{ height: DIFF_EDITOR_HEIGHT, width: '100%' }}
-    />
+      css={styles.wrapper}
+      style={isExpanded ? undefined : { height: collapsedHeight, overflow: 'hidden' }}
+    >
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+      <div
+        ref={containerRef}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="region"
+        aria-label="Workflow diff"
+        style={{ height: contentHeight, width: '100%' }}
+      />
+      {needsExpansion && !isExpanded && (
+        <div css={styles.expandBar}>
+          <EuiButtonEmpty size="xs" iconType="arrowDown" color="primary" onClick={handleExpand}>
+            {i18n.translate('workflowsManagement.attachmentRenderers.diff.showAll', {
+              defaultMessage: 'Show all',
+            })}
+          </EuiButtonEmpty>
+        </div>
+      )}
+      {needsExpansion && isExpanded && (
+        <div css={styles.collapseBar}>
+          <EuiButtonEmpty size="xs" iconType="arrowUp" color="primary" onClick={handleCollapse}>
+            {i18n.translate('workflowsManagement.attachmentRenderers.diff.collapse', {
+              defaultMessage: 'Collapse',
+            })}
+          </EuiButtonEmpty>
+        </div>
+      )}
+    </div>
   );
 };
 
 const DiffInlineContent: React.FC<{
   attachment: WorkflowYamlDiffAttachment;
 }> = ({ attachment }) => {
-  const { euiTheme } = useEuiTheme();
-  const { beforeYaml, afterYaml } = attachment.data;
-
-  const headerStyles = css`
-    padding: ${euiTheme.size.s};
-    border-bottom: ${euiTheme.border.thin};
-  `;
+  const styles = useMemoCss(componentStyles);
+  const { beforeYaml, afterYaml, name } = attachment.data;
 
   if (beforeYaml === afterYaml) {
     return (
-      <EuiText
-        size="s"
-        color="subdued"
-        css={css`
-          padding: ${euiTheme.size.s};
-        `}
-      >
+      <EuiText size="s" color="subdued" css={styles.noChanges}>
         {i18n.translate('workflowsManagement.attachmentRenderers.diff.noChanges', {
           defaultMessage: 'No changes detected',
         })}
@@ -188,19 +286,93 @@ const DiffInlineContent: React.FC<{
         alignItems="center"
         justifyContent="spaceBetween"
         responsive={false}
-        css={headerStyles}
+        css={styles.header}
       >
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('workflowsManagement.attachmentRenderers.diff.proposedChanges', {
-              defaultMessage: 'Proposed changes',
-            })}
-          </EuiText>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {name && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">
+                  <strong>{name}</strong>
+                </EuiText>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('workflowsManagement.attachmentRenderers.diff.proposedChanges', {
+                  defaultMessage: 'Proposed changes',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <MonacoDiffViewer beforeYaml={beforeYaml} afterYaml={afterYaml} />
     </div>
   );
+};
+
+const componentStyles = {
+  wrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'relative',
+      '.diff-hidden-lines .center': {
+        gap: euiTheme.size.s,
+      },
+    }),
+  expandBar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      transition: 'opacity 0.15s ease-out',
+      opacity: 0.7,
+      '&:hover': {
+        opacity: 1,
+      },
+      '.euiButtonEmpty': {
+        width: '100%',
+        height: '100%',
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+      },
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 48,
+      background: `linear-gradient(
+        to bottom,
+        ${transparentize(euiTheme.colors.backgroundBasePlain, 0)} 0%,
+        ${transparentize(euiTheme.colors.backgroundBasePlain, 0.6)} 40%,
+        ${euiTheme.colors.backgroundBasePlain} 100%
+      )`,
+    }),
+  collapseBar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      transition: 'opacity 0.15s ease-out',
+      opacity: 0.7,
+      '&:hover': {
+        opacity: 1,
+      },
+      '.euiButtonEmpty': {
+        width: '100%',
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+      },
+      background: `linear-gradient(
+        to top,
+        ${transparentize(euiTheme.colors.backgroundBasePlain, 0)} 0%,
+        ${transparentize(euiTheme.colors.backgroundBasePlain, 0.6)} 40%,
+        ${euiTheme.colors.backgroundBasePlain} 100%
+      )`,
+    }),
+  header: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.s,
+      borderBottom: euiTheme.border.thin,
+    }),
+  noChanges: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.s,
+    }),
 };
 
 export const workflowYamlDiffAttachmentUiDefinition: AttachmentUIDefinition<WorkflowYamlDiffAttachment> =
