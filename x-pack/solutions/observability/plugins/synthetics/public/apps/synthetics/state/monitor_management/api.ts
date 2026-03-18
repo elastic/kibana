@@ -60,6 +60,12 @@ export const inspectMonitorAPI = async ({
   });
 };
 
+export const fetchMonitorAPI = async ({ id }: { id: string }): Promise<SyntheticsMonitor> => {
+  return await apiService.get(
+    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id)
+  );
+};
+
 export const updateMonitorAPI = async ({
   monitor,
   id,

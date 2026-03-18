@@ -39,7 +39,11 @@ import type {
   MonitorInspectResponse,
   PackagePolicyLink,
 } from '../../../state/monitor_management/api';
-import { inspectMonitorAPI, updateMonitorAPI } from '../../../state/monitor_management/api';
+import {
+  fetchMonitorAPI,
+  inspectMonitorAPI,
+  updateMonitorAPI,
+} from '../../../state/monitor_management/api';
 import { kibanaService } from '../../../../../utils/kibana_service';
 
 interface InspectorProps {
@@ -190,7 +194,8 @@ const PackagePolicyLinksTable = ({
     if (!monitorId) return;
     setIsMigrating(true);
     try {
-      await updateMonitorAPI({ monitor: monitorFields, id: monitorId });
+      const savedMonitor = await fetchMonitorAPI({ id: monitorId });
+      await updateMonitorAPI({ monitor: savedMonitor, id: monitorId });
       kibanaService.toasts.addSuccess({
         title: MIGRATE_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
@@ -384,7 +389,7 @@ const MISSING_REFERENCES_DESCRIPTION = i18n.translate(
   'xpack.synthetics.monitorInspect.missingReferencesDescription',
   {
     defaultMessage:
-      'This monitor has private locations but no saved references to package policies. Save the monitor to populate the references.',
+      'This monitor has package policies that use a legacy ID format. Click Migrate now to update them.',
   }
 );
 
