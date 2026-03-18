@@ -434,7 +434,7 @@
             "\nUpdates the origin of an attachment in a conversation.\nUse this after saving a by-value attachment to link it to its persistent store.\n"
           ],
           "signature": [
-            "(conversationId: string, attachmentId: string, origin: unknown) => Promise<",
+            "(conversationId: string, attachmentId: string, origin: string) => Promise<",
             {
               "pluginId": "@kbn/agent-builder-common",
               "scope": "common",
@@ -491,14 +491,14 @@
             {
               "parentPluginId": "agentBuilder",
               "id": "def-public.AgentBuilderPluginStart.updateAttachmentOrigin.$3",
-              "type": "Unknown",
+              "type": "string",
               "tags": [],
               "label": "origin",
               "description": [
                 "- The origin reference object (shape depends on attachment type)"
               ],
               "signature": [
-                "unknown"
+                "string"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
               "lineNumber": 151,

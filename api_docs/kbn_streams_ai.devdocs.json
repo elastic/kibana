@@ -159,9 +159,21 @@
                 "label": "stream",
                 "description": [],
                 "signature": [
-                  "IngestStream",
+                  {
+                    "pluginId": "@kbn/streams-schema",
+                    "scope": "common",
+                    "docId": "kibKbnStreamsSchemaPluginApi",
+                    "section": "def-common.IngestStream",
+                    "text": "IngestStream"
+                  },
                   ".all.Definition | ",
-                  "QueryStream",
+                  {
+                    "pluginId": "@kbn/streams-schema",
+                    "scope": "common",
+                    "docId": "kibKbnStreamsSchemaPluginApi",
+                    "section": "def-common.QueryStream",
+                    "text": "QueryStream"
+                  },
                   ".Definition"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
@@ -1434,9 +1446,21 @@
                 "label": "stream",
                 "description": [],
                 "signature": [
-                  "IngestStream",
+                  {
+                    "pluginId": "@kbn/streams-schema",
+                    "scope": "common",
+                    "docId": "kibKbnStreamsSchemaPluginApi",
+                    "section": "def-common.IngestStream",
+                    "text": "IngestStream"
+                  },
                   ".all.Definition | ",
-                  "QueryStream",
+                  {
+                    "pluginId": "@kbn/streams-schema",
+                    "scope": "common",
+                    "docId": "kibKbnStreamsSchemaPluginApi",
+                    "section": "def-common.QueryStream",
+                    "text": "QueryStream"
+                  },
                   ".Definition"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/description/generate_description.ts",
@@ -2622,7 +2646,13 @@
         "description": [],
         "signature": [
           "({\n  definition,\n  inferenceClient,\n  esClient,\n  logger,\n  start,\n  end,\n  maxSteps,\n  signal,\n  getFeatures,\n}: { definition: ",
-          "WiredStream",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.WiredStream",
+            "text": "WiredStream"
+          },
           ".Definition; inferenceClient: ",
           {
             "pluginId": "@kbn/inference-common",
@@ -2672,7 +2702,13 @@
                 "label": "definition",
                 "description": [],
                 "signature": [
-                  "WiredStream",
+                  {
+                    "pluginId": "@kbn/streams-schema",
+                    "scope": "common",
+                    "docId": "kibKbnStreamsSchemaPluginApi",
+                    "section": "def-common.WiredStream",
+                    "text": "WiredStream"
+                  },
                   ".Definition"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
@@ -3884,7 +3920,13 @@
         "description": [],
         "signature": [
           "({\n  definition,\n  inferenceClient,\n  parsingProcessor,\n  maxSteps,\n  signal,\n  simulatePipeline,\n  documents,\n  fieldsMetadataClient,\n  esClient,\n}: { definition: ",
-          "IngestStream",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStream",
+            "text": "IngestStream"
+          },
           ".all.Definition; inferenceClient: ",
           {
             "pluginId": "@kbn/inference-common",
@@ -3974,9 +4016,21 @@
                 "label": "definition",
                 "description": [],
                 "signature": [
-                  "WiredStream",
+                  {
+                    "pluginId": "@kbn/streams-schema",
+                    "scope": "common",
+                    "docId": "kibKbnStreamsSchemaPluginApi",
+                    "section": "def-common.WiredStream",
+                    "text": "WiredStream"
+                  },
                   ".Definition | ",
-                  "ClassicStream",
+                  {
+                    "pluginId": "@kbn/streams-schema",
+                    "scope": "common",
+                    "docId": "kibKbnStreamsSchemaPluginApi",
+                    "section": "def-common.ClassicStream",
+                    "text": "ClassicStream"
+                  },
                   ".Definition"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
