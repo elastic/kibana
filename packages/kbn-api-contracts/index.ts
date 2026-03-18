@@ -8,15 +8,9 @@
  */
 
 export { loadOas } from './src/input/load_oas';
-export { runBumpDiff } from './src/diff/run_bump_diff';
-export { BumpServiceError } from './src/diff/errors';
-export { parseBumpDiff } from './src/diff/parse_bump_diff';
-export { applyAllowlist } from './src/diff/breaking_rules';
+export { runOasdiff, parseOasdiff, applyAllowlist } from './src/diff';
+export type { OasdiffEntry, BreakingChange, FilterResult } from './src/diff';
 export { formatFailure } from './src/report/format_failure';
 export { ESCALATION_LINK } from './src/report/links';
 export { loadAllowlist } from './src/allowlist/load_allowlist';
 export { checkTerraformImpact } from './src/terraform/check_terraform_impact';
-
-export type { OpenAPISpec } from './src/input/load_oas';
-export type { BumpDiffEntry } from './src/diff/parse_bump_diff';
-export type { BreakingChange, FilterResult } from './src/diff/breaking_rules';

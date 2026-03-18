@@ -9,6 +9,7 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import { KbnPalette } from '@kbn/palettes';
 import type { ColorMapping } from '../config';
 import {
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
@@ -29,7 +30,7 @@ export interface RootState {
 const initialState: RootState['colorMapping'] = {
   assignments: [],
   specialAssignments: [],
-  paletteId: 'eui',
+  paletteId: KbnPalette.Default,
   colorMode: { type: 'categorical' },
 };
 
