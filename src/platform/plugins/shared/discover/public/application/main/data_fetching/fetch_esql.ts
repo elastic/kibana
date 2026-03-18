@@ -11,6 +11,7 @@ import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { Query, AggregateQuery, Filter, TimeRange, ProjectRouting } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -20,6 +21,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { injectMetadataFields } from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -66,8 +68,19 @@ export function fetchEsql({
   projectRouting,
   inspectorConfig,
 }: FetchEsqlParams): Promise<RecordsFetchResponse> {
+  let queryWithMetadata = query;
+  if (isOfAggregateQueryType(query)) {
+    try {
+      const injected = injectMetadataFields(query.esql, ['_id', '_index']);
+      queryWithMetadata = { ...query, esql: injected };
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('[Discover] Failed to inject METADATA _id, _index into ES|QL query:', error);
+    }
+  }
+
   const props = getTextBasedQueryStateToAstProps({
-    query,
+    query: queryWithMetadata,
     inputQuery,
     filters,
     timeRange,
