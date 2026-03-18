@@ -217,7 +217,7 @@ describe('useTelemetry', () => {
 
     expect(mockReportEvent).toHaveBeenCalledWith(
       AIV2TelemetryEventType.DataStreamDeleteConfirmed,
-      {}
+      expect.objectContaining({ sessionId: expect.any(String) })
     );
   });
 
@@ -230,7 +230,7 @@ describe('useTelemetry', () => {
 
     expect(mockReportEvent).toHaveBeenCalledWith(
       AIV2TelemetryEventType.DataStreamRefreshConfirmed,
-      {}
+      expect.objectContaining({ sessionId: expect.any(String) })
     );
   });
 

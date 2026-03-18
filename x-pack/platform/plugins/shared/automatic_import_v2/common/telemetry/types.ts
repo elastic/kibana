@@ -119,8 +119,13 @@ export type IntegrationDownloadZipClickedPayload = Record<string, never>;
 export type ApproveModalCancelClickedPayload = Record<string, never>;
 export type ApproveModalApproveClickedPayload = Record<string, never>;
 export type IntegrationDeleteConfirmedPayload = Record<string, never>;
-export type DataStreamDeleteConfirmedPayload = Record<string, never>;
-export type DataStreamRefreshConfirmedPayload = Record<string, never>;
+export interface DataStreamDeleteConfirmedPayload {
+  sessionId: string;
+}
+
+export interface DataStreamRefreshConfirmedPayload {
+  sessionId: string;
+}
 
 export interface PipelineEditedPayload {
   integrationId: string;

@@ -188,8 +188,24 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
   [AIV2TelemetryEventType.ApproveModalCancelClicked]: {},
   [AIV2TelemetryEventType.ApproveModalApproveClicked]: {},
   [AIV2TelemetryEventType.IntegrationDeleteConfirmed]: {},
-  [AIV2TelemetryEventType.DataStreamDeleteConfirmed]: {},
-  [AIV2TelemetryEventType.DataStreamRefreshConfirmed]: {},
+  [AIV2TelemetryEventType.DataStreamDeleteConfirmed]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
+      },
+    },
+  },
+  [AIV2TelemetryEventType.DataStreamRefreshConfirmed]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
+      },
+    },
+  },
   [AIV2TelemetryEventType.PipelineEdited]: {
     integrationId: {
       type: 'keyword',

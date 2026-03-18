@@ -191,11 +191,15 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
   }, [telemetry]);
 
   const reportDataStreamDeleteConfirmed = useCallback<ReportDataStreamDeleteConfirmed>(() => {
-    telemetry?.reportEvent(AIV2TelemetryEventType.DataStreamDeleteConfirmed, {});
+    telemetry?.reportEvent(AIV2TelemetryEventType.DataStreamDeleteConfirmed, {
+      sessionId: sessionData.current.sessionId,
+    });
   }, [telemetry]);
 
   const reportDataStreamRefreshConfirmed = useCallback<ReportDataStreamRefreshConfirmed>(() => {
-    telemetry?.reportEvent(AIV2TelemetryEventType.DataStreamRefreshConfirmed, {});
+    telemetry?.reportEvent(AIV2TelemetryEventType.DataStreamRefreshConfirmed, {
+      sessionId: sessionData.current.sessionId,
+    });
   }, [telemetry]);
 
   const reportPipelineEdited = useCallback<ReportPipelineEdited>(
