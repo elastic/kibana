@@ -41,8 +41,8 @@ You can test connectors as you're creating or editing the connector in {{kib}}.
 The MySQL connector has the following actions:
 
 Query
-:   Execute a read-only SQL query against the MySQL database.
-    - **sql** (required): The SQL query to execute.
+:   Run a read-only SQL query against the MySQL database.
+    - **sql** (required): The SQL query to run.
     - **maxRows** (optional): Maximum number of rows to return (default: 100).
 
 List Databases
