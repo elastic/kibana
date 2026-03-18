@@ -235,7 +235,7 @@ describe('getFieldEvaluationsEsql', () => {
     );
   });
 
-  it('returns EVAL fragment for user entity.namespace and entity.confidence', () => {
+  it('returns EVAL fragment for user entity.namespace', () => {
     const result = getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('user', 'default'));
     const base = '_src_entity_namespace';
     const v0 = `${base}0`;
@@ -250,8 +250,8 @@ describe('getFieldEvaluationsEsql', () => {
     expect(result?.replace(/\s+/g, ' ').trim()).toContain(
       namespacePart.replace(/\s+/g, ' ').trim()
     );
-    expect(result).toContain('entity.confidence');
-    expect(result).toContain('_src_entity_confidence');
+    expect(result).not.toContain('entity.confidence');
+    expect(result).not.toContain('_src_entity_confidence');
   });
 });
 
@@ -308,7 +308,7 @@ describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
   });
 
   describe('evaluated fields and source clauses', () => {
-    it('does not add filter on evaluated fields (entity.namespace, entity.confidence) since they are not stored', () => {
+    it('does not add filter on evaluated fields (entity.namespace) since they are not stored', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
         event: { module: 'okta' },
@@ -319,7 +319,7 @@ describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
       expect(result).not.toMatch(/entity\.confidence\s*==/);
     });
 
-    it('skips source clause for evaluations whose source is an evaluated field (entity.confidence sources from entity.namespace)', () => {
+    it('includes source clause for entity.namespace evaluation (event.module, data_stream.dataset)', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { name: 'jane', domain: 'corp.com' },
         event: { module: 'entityanalytics_ad' },

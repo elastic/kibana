@@ -97,16 +97,11 @@ export function applyFieldEvaluations(
       value = evaluation.fallbackValue;
     } else {
       value = sourceValue;
-      let clauseMatched = false;
       for (const clause of evaluation.whenClauses) {
         if (clause.sourceMatchesAny.includes(value)) {
           value = clause.then;
-          clauseMatched = true;
           break;
         }
-      }
-      if (!clauseMatched && evaluation.useFallbackWhenNoClauseMatch) {
-        value = evaluation.fallbackValue;
       }
     }
     result[evaluation.destination] = value;

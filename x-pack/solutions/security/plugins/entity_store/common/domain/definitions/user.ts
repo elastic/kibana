@@ -136,13 +136,6 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
           { sourceMatchesAny: ['entityanalytics_ad'], then: 'active_directory' },
         ],
       },
-      {
-        destination: 'entity.confidence',
-        sources: [{ field: 'entity.namespace' }],
-        fallbackValue: 'high',
-        whenClauses: [{ sourceMatchesAny: ['local'], then: 'medium' }],
-        useFallbackWhenNoClauseMatch: true,
-      },
     ],
     euidRanking: {
       branches: [
@@ -194,14 +187,31 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   indexPatterns: [],
   /** Post-aggregation filter (after LOOKUP JOIN): keep row when entity.id exists (shared) OR IDP OR non-IDP. */
   postAggFilter: { or: [entityIdExistsAfterLookup, idpPostAggFilter, nonIdpPostAggFilter] },
-  /** Pre-agg: set entity.namespace to "local" only when non-IDP and not IDP event type (on source). */
-  whenConditionTrueSetFieldsPreAgg: {
-    condition: { and: [{ not: idpEventTypeCondition }, nonIdpDocumentFilter] },
-    fields: { 'entity.namespace': 'local' },
-  },
+  /** Pre-agg: set entity.namespace, entity.confidence, and entity.name based on conditions (EVAL after field evals, before STATS). */
+  whenConditionTrueSetFieldsPreAgg: [
+    {
+      condition: { and: [{ not: idpEventTypeCondition }, nonIdpDocumentFilter] },
+      fields: {
+        'entity.namespace': 'local',
+        'entity.confidence': 'medium',
+      },
+    },
+    {
+      condition: { field: 'entity.namespace', eq: 'local' },
+      fields: {
+        'entity.name': { composition: { fields: ['user.name', 'host.name'], sep: '@' } },
+      },
+    },
+    {
+      condition: { field: 'entity.namespace', neq: 'local' },
+      fields: {
+        'entity.name': { source: 'user.name' },
+        'entity.confidence': 'high',
+      },
+    },
+  ],
   fields: [
-    newestValue({ destination: 'entity.name', source: 'user.name' }),
-
+    newestValue({ source: 'entity.name' }),
     // Having multiple values in event.module or data_stream.dataset is a good feature
     // but causes complexity for CCS extraction.
     // That's why event.module and data_stream.dataset always use MV_FIRST on its usage

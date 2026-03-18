@@ -10,6 +10,7 @@ import type {
   CalculatedEntityIdentity,
   EuidAttribute,
   FieldEvaluationSource,
+  FieldValueSchema,
 } from '../definitions/entity_schema';
 
 interface FieldValue {
@@ -97,6 +98,44 @@ export function evaluateStreamlangCondition(doc: any, condition: unknown): boole
     }
   }
   return false;
+}
+
+/**
+ * Resolves a FieldValue (literal, source, or composition) to a string for in-memory doc.
+ */
+export function resolveFieldValueSchema(doc: any, value: FieldValueSchema): string | undefined {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if ('source' in value) {
+    return getFieldValue(doc, value.source);
+  }
+  const { fields, sep } = value.composition;
+  const values = fields.map((f) => getFieldValue(doc, f));
+  if (values.some((v) => v === undefined)) {
+    return undefined;
+  }
+  return values.join(sep);
+}
+
+/**
+ * Applies whenConditionTrueSetFieldsPreAgg entries to doc. Iterates in order; for each entry
+ * whose condition matches, sets the fields on doc (resolving source/composition values).
+ */
+export function applyWhenConditionTrueSetFieldsPreAgg(
+  doc: any,
+  entries: Array<{ condition: unknown; fields: Record<string, FieldValueSchema> }>
+): void {
+  for (const entry of entries) {
+    if (evaluateStreamlangCondition(doc, entry.condition)) {
+      for (const [field, value] of Object.entries(entry.fields)) {
+        const resolved = resolveFieldValueSchema(doc, value);
+        if (resolved !== undefined) {
+          doc[field] = resolved;
+        }
+      }
+    }
+  }
 }
 
 /**

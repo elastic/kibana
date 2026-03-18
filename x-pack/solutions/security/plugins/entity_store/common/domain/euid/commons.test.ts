@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { evaluateStreamlangCondition, getDocument, getFieldValue } from './commons';
+import {
+  applyWhenConditionTrueSetFieldsPreAgg,
+  evaluateStreamlangCondition,
+  getDocument,
+  getFieldValue,
+  resolveFieldValueSchema,
+} from './commons';
 
 describe('getDocument', () => {
   it('returns _source when doc is an Elasticsearch hit', () => {
@@ -74,7 +80,9 @@ describe('evaluateStreamlangCondition', () => {
   describe('field predicates', () => {
     it('eq: returns true when field value equals expected', () => {
       expect(evaluateStreamlangCondition({ a: 'x' }, { field: 'a', eq: 'x' })).toBe(true);
-      expect(evaluateStreamlangCondition({ 'user.name': 'alice' }, { field: 'user.name', eq: 'alice' })).toBe(true);
+      expect(
+        evaluateStreamlangCondition({ 'user.name': 'alice' }, { field: 'user.name', eq: 'alice' })
+      ).toBe(true);
     });
 
     it('eq: returns false when field value does not equal expected', () => {
@@ -108,12 +116,18 @@ describe('evaluateStreamlangCondition', () => {
     });
 
     it('includes: returns true when field value includes substring', () => {
-      expect(evaluateStreamlangCondition({ a: 'hello world' }, { field: 'a', includes: 'world' })).toBe(true);
-      expect(evaluateStreamlangCondition({ a: 'okta' }, { field: 'a', includes: 'okta' })).toBe(true);
+      expect(
+        evaluateStreamlangCondition({ a: 'hello world' }, { field: 'a', includes: 'world' })
+      ).toBe(true);
+      expect(evaluateStreamlangCondition({ a: 'okta' }, { field: 'a', includes: 'okta' })).toBe(
+        true
+      );
     });
 
     it('includes: returns false when field does not include substring', () => {
-      expect(evaluateStreamlangCondition({ a: 'hello' }, { field: 'a', includes: 'world' })).toBe(false);
+      expect(evaluateStreamlangCondition({ a: 'hello' }, { field: 'a', includes: 'world' })).toBe(
+        false
+      );
     });
 
     it('includes: returns false when field is missing', () => {
@@ -197,8 +211,18 @@ describe('evaluateStreamlangCondition', () => {
       const doc = { a: 'x', b: 'y' };
       const condition = {
         and: [
-          { or: [{ field: 'a', eq: 'x' }, { field: 'a', eq: 'z' }] },
-          { or: [{ field: 'b', eq: 'y' }, { field: 'b', eq: 'w' }] },
+          {
+            or: [
+              { field: 'a', eq: 'x' },
+              { field: 'a', eq: 'z' },
+            ],
+          },
+          {
+            or: [
+              { field: 'b', eq: 'y' },
+              { field: 'b', eq: 'w' },
+            ],
+          },
         ],
       };
       expect(evaluateStreamlangCondition(doc, condition)).toBe(true);
@@ -216,5 +240,107 @@ describe('evaluateStreamlangCondition', () => {
       };
       expect(evaluateStreamlangCondition(doc, condition)).toBe(true);
     });
+  });
+});
+
+describe('resolveFieldValueSchema', () => {
+  it('returns literal string as-is', () => {
+    expect(resolveFieldValueSchema({}, 'local')).toBe('local');
+    expect(resolveFieldValueSchema({ a: 'x' }, 'literal')).toBe('literal');
+  });
+
+  it('returns field value for source reference', () => {
+    expect(resolveFieldValueSchema({ 'user.name': 'alice' }, { source: 'user.name' })).toBe(
+      'alice'
+    );
+    expect(resolveFieldValueSchema({ user: { name: 'bob' } }, { source: 'user.name' })).toBe('bob');
+  });
+
+  it('returns undefined for source when field is missing', () => {
+    expect(resolveFieldValueSchema({}, { source: 'user.name' })).toBeUndefined();
+  });
+
+  it('returns concatenated values for composition', () => {
+    const doc = { 'user.name': 'alice', 'host.name': 'server1' };
+    expect(
+      resolveFieldValueSchema(doc, {
+        composition: { fields: ['user.name', 'host.name'], sep: '@' },
+      })
+    ).toBe('alice@server1');
+  });
+
+  it('returns undefined for composition when any field is missing', () => {
+    expect(
+      resolveFieldValueSchema(
+        { 'user.name': 'alice' },
+        {
+          composition: { fields: ['user.name', 'host.name'], sep: '@' },
+        }
+      )
+    ).toBeUndefined();
+  });
+
+  it('uses custom separator for composition', () => {
+    const doc = { a: 'x', b: 'y', c: 'z' };
+    expect(
+      resolveFieldValueSchema(doc, { composition: { fields: ['a', 'b', 'c'], sep: '.' } })
+    ).toBe('x.y.z');
+  });
+});
+
+describe('applyWhenConditionTrueSetFieldsPreAgg', () => {
+  it('sets literal field when condition matches', () => {
+    const doc: Record<string, unknown> = { a: 'x' };
+    applyWhenConditionTrueSetFieldsPreAgg(doc, [
+      { condition: { field: 'a', eq: 'x' }, fields: { 'entity.namespace': 'local' } },
+    ]);
+    expect(doc['entity.namespace']).toBe('local');
+  });
+
+  it('does not set fields when condition does not match', () => {
+    const doc: Record<string, unknown> = { a: 'x' };
+    applyWhenConditionTrueSetFieldsPreAgg(doc, [
+      { condition: { field: 'a', eq: 'y' }, fields: { 'entity.namespace': 'local' } },
+    ]);
+    expect(doc['entity.namespace']).toBeUndefined();
+  });
+
+  it('applies entries in order; later entries can depend on earlier', () => {
+    const doc: Record<string, unknown> = { 'user.name': 'alice', 'host.name': 'server1' };
+    applyWhenConditionTrueSetFieldsPreAgg(doc, [
+      { condition: { always: true }, fields: { 'entity.namespace': 'local' } },
+      {
+        condition: { field: 'entity.namespace', eq: 'local' },
+        fields: {
+          'entity.name': { composition: { fields: ['user.name', 'host.name'], sep: '@' } },
+        },
+      },
+    ]);
+    expect(doc['entity.namespace']).toBe('local');
+    expect(doc['entity.name']).toBe('alice@server1');
+  });
+
+  it('sets source-based field when condition matches', () => {
+    const doc: Record<string, unknown> = { 'entity.namespace': 'okta', 'user.name': 'bob' };
+    applyWhenConditionTrueSetFieldsPreAgg(doc, [
+      {
+        condition: { field: 'entity.namespace', neq: 'local' },
+        fields: { 'entity.name': { source: 'user.name' } },
+      },
+    ]);
+    expect(doc['entity.name']).toBe('bob');
+  });
+
+  it('skips entry when resolved value is undefined', () => {
+    const doc: Record<string, unknown> = { 'entity.namespace': 'local' };
+    applyWhenConditionTrueSetFieldsPreAgg(doc, [
+      {
+        condition: { field: 'entity.namespace', eq: 'local' },
+        fields: {
+          'entity.name': { composition: { fields: ['user.name', 'host.name'], sep: '@' } },
+        },
+      },
+    ]);
+    expect(doc['entity.name']).toBeUndefined();
   });
 });

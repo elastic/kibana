@@ -12,7 +12,7 @@ import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isNotEmptyCondition } from '../definitions/common_fields';
 import {
-  evaluateStreamlangCondition,
+  applyWhenConditionTrueSetFieldsPreAgg,
   getDocument,
   getEffectiveEuidRanking,
   getFieldValue,
@@ -112,12 +112,8 @@ export function getEuidDslFilterBasedOnDocument(
     const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.condition) {
-    if (
-      evaluateStreamlangCondition(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg.condition)
-    ) {
-      doc = { ...doc, ...entityDefinition.whenConditionTrueSetFieldsPreAgg.fields };
-    }
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    applyWhenConditionTrueSetFieldsPreAgg(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
   }
   const effectiveRanking = getEffectiveEuidRanking(doc, identityField);
   const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, effectiveRanking);

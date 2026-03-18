@@ -104,10 +104,10 @@ export function buildLogsExtractionEsqlQuery({
     parts.push(buildFieldEvaluations(entityDefinition));
   }
 
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg) {
-    parts.push(
-      buildSetFieldsByCondition(entityDefinition.whenConditionTrueSetFieldsPreAgg)
-    );
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+      parts.push(buildSetFieldsByCondition(entry));
+    }
   }
 
   // Evaluation of the id without type so we can fallback to name

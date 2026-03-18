@@ -76,10 +76,10 @@ export function buildCcsLogsExtractionEsqlQuery({
     parts.push(buildFieldEvaluations(entityDefinition));
   }
 
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg) {
-    parts.push(
-      buildSetFieldsByCondition(entityDefinition.whenConditionTrueSetFieldsPreAgg)
-    );
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+      parts.push(buildSetFieldsByCondition(entry));
+    }
   }
 
   // Builds the id

@@ -10,6 +10,7 @@ import { conditionToESQL } from '@kbn/streamlang';
 import { recentData } from '../../../common/domain/definitions/esql';
 import type {
   EntityDefinition,
+  FieldValueSchema,
   SetFieldsByCondition,
 } from '../../../common/domain/definitions/entity_schema';
 import { escapeEsqlStringLiteral } from '../../../common/esql/strings';
@@ -169,6 +170,21 @@ export function buildFieldEvaluations(entityDefinition: EntityDefinition): strin
   return `| EVAL ${fieldEvaluationsEsql}`;
 }
 
+function fieldValueToEsqlExpression(value: FieldValueSchema): string {
+  if (typeof value === 'string') {
+    return `"${escapeEsqlStringLiteral(value)}"`;
+  }
+  if ('source' in value) {
+    return `TO_STRING(${value.source})`;
+  }
+  const { fields, sep } = value.composition;
+  const escapedSep = escapeEsqlStringLiteral(sep);
+  const parts = fields.flatMap((f, i) =>
+    i === 0 ? [`TO_STRING(${f})`] : [`"${escapedSep}"`, `TO_STRING(${f})`]
+  );
+  return `CONCAT(${parts.join(', ')})`;
+}
+
 /**
  * Builds the ESQL EVAL fragment for "when condition true set fields" (e.g. pre-aggregation overrides).
  * When condition is true, each field is set to the given value; otherwise the field is unchanged.
@@ -177,8 +193,8 @@ export function buildSetFieldsByCondition(setFieldsByCondition: SetFieldsByCondi
   const { condition, fields: overrideFields } = setFieldsByCondition;
   const conditionEsql = conditionToESQL(condition);
   const evals = Object.entries(overrideFields).map(([field, value]) => {
-    const escapedValue = escapeEsqlStringLiteral(value);
-    return `${field} = CASE((${conditionEsql}), "${escapedValue}", ${field})`;
+    const valueExpr = fieldValueToEsqlExpression(value);
+    return `${field} = CASE((${conditionEsql}), ${valueExpr}, ${field})`;
   });
   return `| EVAL ${evals.join(',\n    ')}`;
 }

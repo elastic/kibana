@@ -125,6 +125,13 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     // it's deterministic because of the MD5 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedUserEntities);
+    // All user entities must have entity.namespace (from fieldEvaluations) and entity.confidence (from whenConditionTrueSetFieldsPreAgg)
+    for (const hit of entities.hits.hits) {
+      const source = hit._source as Record<string, unknown>;
+      expect(source.entity).toBeDefined();
+      expect((source.entity as Record<string, unknown>).namespace).toBeDefined();
+      expect((source.entity as Record<string, unknown>).confidence).toBeDefined();
+    }
   });
 
   apiTest('Should extract properly extract service', async ({ apiClient, esClient }) => {
@@ -230,6 +237,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         id: 'user:latest-test@okta',
         type: 'Identity',
         name: 'latest-test-name',
+        namespace: 'okta',
+        confidence: 'high',
       },
     });
 
@@ -266,6 +275,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         type: 'Identity',
         name: 'latest-test-name',
         sub_type: 'Sub Type 1',
+        namespace: 'okta',
+        confidence: 'high',
       },
       user: { hash: ['hash-1', 'hash-2'] },
     });
@@ -338,6 +349,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         type: 'Identity',
         name: 'latest-test-name',
         sub_type: 'Sub Type 3',
+        namespace: 'okta',
+        confidence: 'high',
       },
       user: { hash: ['hash-1', 'hash-3', 'hash-4', 'hash-5', 'hash-2'] },
     });
@@ -373,6 +386,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         type: 'Identity',
         name: 'latest-test-name',
         sub_type: 'Sub Type 3',
+        namespace: 'okta',
+        confidence: 'high',
       },
       user: {
         hash: [
@@ -416,6 +431,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           id: 'user:postagg-idp-nolatest@okta',
           type: 'Identity',
           name: 'IDP NoLatest',
+          namespace: 'okta',
+          confidence: 'high',
         },
       });
 
@@ -446,6 +463,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           id: 'user:postagg-idp-inlatest@okta',
           type: 'Identity',
           name: 'IDP InLatest Updated',
+          namespace: 'okta',
+          confidence: 'high',
         },
       });
 
@@ -481,6 +500,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           id: 'user:postagg-nonidp-inlatest@active_directory',
           type: 'Identity',
           name: 'NonIDP InLatest',
+          namespace: 'active_directory',
+          confidence: 'high',
         },
       });
 
@@ -502,8 +523,359 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           id: 'user:postagg-nonidp-inlatest@active_directory',
           type: 'Identity',
           name: 'NonIDP InLatest Updated',
+          namespace: 'active_directory',
+          confidence: 'high',
         },
       });
+    }
+  );
+
+  apiTest(
+    'Should only enrich (update) existing entities when entity already exists for both IDP and non-IDP, no new entity creation',
+    async ({ apiClient, esClient }) => {
+      const from = '2026-03-02T10:00:00Z';
+      const to = '2026-03-02T12:00:00Z';
+
+      // 1. Create IDP entity
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-02T10:01:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        user: { id: 'enrich-idp-user', name: 'Enrich IDP' },
+      });
+      const ext1 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext1.statusCode).toBe(200);
+      expect(ext1.body).toMatchObject({ count: 1 });
+
+      // 2. Create non-IDP (local) entity
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-02T10:02:00Z',
+        event: { kind: 'event', category: 'network', outcome: 'success' },
+        user: { name: 'enrich-local-user' },
+        host: { id: 'enrich-host-1', name: 'enrich-ws' },
+      });
+      const ext2 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext2.statusCode).toBe(200);
+      expect(ext2.body).toMatchObject({ count: 2 });
+
+      // 3. Ingest enrichment docs only (entity already exists - same entity, new data)
+      // IDP enrichment: same user, updated name
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-02T10:03:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        user: {
+          id: 'enrich-idp-user',
+          name: 'Enrich IDP Updated',
+          domain: 'enrichment.com',
+        },
+      });
+      // Non-IDP enrichment: same user+host, updated name
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-02T10:04:00Z',
+        event: { kind: 'event', category: 'network', outcome: 'success' },
+        user: { name: 'enrich-local-user' },
+        host: { id: 'enrich-host-1', name: 'enrich-ws-updated' },
+      });
+
+      // 4. Run extraction - should only enrich (update) existing entities, no new creation
+      const ext3 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext3.statusCode).toBe(200);
+      expect(ext3.body).toMatchObject({ count: 2 });
+
+      // 5. Verify: no new entities, only enrichment (updates) to existing
+      const idpHit = await searchDocById(esClient, 'user:enrich-idp-user@okta');
+      expect(idpHit.hits.hits).toHaveLength(1);
+      expect(idpHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:enrich-idp-user@okta',
+          type: 'Identity',
+          name: 'Enrich IDP Updated',
+          namespace: 'okta',
+          confidence: 'high',
+        },
+        user: { domain: 'enrichment.com' },
+      });
+
+      const localHit = await searchDocById(esClient, 'user:enrich-local-user@enrich-host-1@local');
+      expect(localHit.hits.hits).toHaveLength(1);
+      expect(localHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:enrich-local-user@enrich-host-1@local',
+          type: 'Identity',
+          name: 'enrich-local-user@enrich-ws-updated',
+          namespace: 'local',
+          confidence: 'medium',
+        },
+      });
+    }
+  );
+
+  apiTest(
+    'Should set entity.namespace to local and entity.name to user.name@host.name for non-IDP documents',
+    async ({ apiClient, esClient }) => {
+      // Non-IDP: user.name + host.id present, user.name not in excluded list.
+      // Event must NOT be asset/iam so whenConditionTrueSetFieldsPreAgg sets entity.namespace = 'local'.
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T10:00:00Z',
+        event: { kind: 'event', category: 'network', outcome: 'success' },
+        user: { name: 'local-user' },
+        host: { id: 'local-host-1', name: 'workstation-42' },
+      });
+
+      const extractionResponse = await forceLogExtraction(
+        apiClient,
+        defaultHeaders,
+        'user',
+        '2026-03-18T09:59:00Z',
+        '2026-03-18T10:01:00Z'
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({ count: 1 });
+
+      const hit = await searchDocById(esClient, 'user:local-user@local-host-1@local');
+      expect(hit.hits.hits).toHaveLength(1);
+      expect(hit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:local-user@local-host-1@local',
+          type: 'Identity',
+          name: 'local-user@workstation-42',
+          namespace: 'local',
+          confidence: 'medium',
+        },
+      });
+    }
+  );
+
+  apiTest(
+    'Should process extraction successfully when ingesting IDP, non-IDP, and invalid user documents',
+    async ({ apiClient, esClient }) => {
+      const from = '2026-03-18T14:00:00Z';
+      const to = '2026-03-18T15:00:00Z';
+
+      // IDP document (asset kind) → extracted
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T14:01:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        user: { id: 'mixed-idp-user', name: 'IDP User' },
+      });
+
+      // Non-IDP document (local: user.name + host.id, event.kind=event) → extracted
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T14:02:00Z',
+        event: { kind: 'event', category: 'network', outcome: 'success' },
+        user: { name: 'mixed-local-user' },
+        host: { id: 'mixed-host-1', name: 'workstation-99' },
+      });
+
+      // Invalid documents (omitted but should not cause extraction to fail)
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T14:03:00Z',
+        event: { kind: 'asset', module: 'okta', outcome: 'failure' },
+        user: { id: 'mixed-invalid-failure', name: 'Failure' },
+      });
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T14:04:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        host: { id: 'mixed-no-user-host', name: 'server' },
+      });
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T14:05:00Z',
+        event: { kind: 'event', category: 'network', outcome: 'success' },
+        user: { name: 'root' },
+        host: { id: 'mixed-root-host', name: 'server' },
+      });
+
+      const extractionResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: { fromDateISO: from, toDateISO: to },
+        }
+      );
+
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({ success: true });
+      expect(typeof extractionResponse.body.count).toBe('number');
+      expect(typeof extractionResponse.body.pages).toBe('number');
+
+      // IDP and non-IDP documents were extracted
+      const idpHit = await searchDocById(esClient, 'user:mixed-idp-user@okta');
+      expect(idpHit.hits.hits).toHaveLength(1);
+      expect(idpHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:mixed-idp-user@okta',
+          type: 'Identity',
+          name: 'IDP User',
+          namespace: 'okta',
+          confidence: 'high',
+        },
+      });
+
+      const localHit = await searchDocById(esClient, 'user:mixed-local-user@mixed-host-1@local');
+      expect(localHit.hits.hits).toHaveLength(1);
+      expect(localHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:mixed-local-user@mixed-host-1@local',
+          type: 'Identity',
+          name: 'mixed-local-user@workstation-99',
+          namespace: 'local',
+          confidence: 'medium',
+        },
+      });
+
+      // Invalid documents were omitted
+      expect((await searchDocById(esClient, 'user:mixed-invalid-failure@okta')).hits.hits).toHaveLength(0);
+      expect((await searchDocById(esClient, 'user:root@mixed-root-host@local')).hits.hits).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'Should process extraction successfully for all entity types with mixed valid and invalid documents',
+    async ({ apiClient, esClient }) => {
+      const from = '2026-03-18T16:00:00Z';
+      const to = '2026-03-18T17:00:00Z';
+
+      // Host: valid
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T16:01:00Z',
+        host: { id: 'mixed-host-valid', name: 'mixed-server-01' },
+      });
+      // Host: invalid (no host.id, host.name, host.hostname)
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T16:02:00Z',
+        event: { module: 'system' },
+      });
+
+      // User: IDP + non-IDP + invalid (already covered above, use unique IDs)
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T16:03:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        user: { id: 'mixed-all-idp', name: 'AllTypes IDP' },
+      });
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T16:04:00Z',
+        event: { kind: 'event', category: 'network', outcome: 'success' },
+        user: { name: 'mixed-all-local' },
+        host: { id: 'mixed-all-host', name: 'ws-01' },
+      });
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T16:05:00Z',
+        event: { kind: 'asset', module: 'okta', outcome: 'failure' },
+        user: { id: 'mixed-all-invalid', name: 'Invalid' },
+      });
+
+      // Service: valid
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T16:06:00Z',
+        service: { name: 'mixed-service-valid' },
+      });
+
+      // Generic: valid
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T16:07:00Z',
+        entity: { id: 'mixed-generic-valid', name: 'Mixed Generic' },
+      });
+
+      for (const entityType of ['host', 'user', 'service', 'generic'] as const) {
+        const extractionResponse = await apiClient.post(
+          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION(entityType),
+          {
+            headers: defaultHeaders,
+            responseType: 'json',
+            body: { fromDateISO: from, toDateISO: to },
+          }
+        );
+        expect(extractionResponse.statusCode).toBe(200);
+        expect(extractionResponse.body).toMatchObject({ success: true });
+      }
+
+      // Verify extracted entities
+      const hostHit = await searchDocById(esClient, 'host:mixed-host-valid');
+      expect(hostHit.hits.hits).toHaveLength(1);
+
+      const userIdpHit = await searchDocById(esClient, 'user:mixed-all-idp@okta');
+      expect(userIdpHit.hits.hits).toHaveLength(1);
+      expect(userIdpHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:mixed-all-idp@okta',
+          namespace: 'okta',
+          confidence: 'high',
+        },
+      });
+
+      const userLocalHit = await searchDocById(esClient, 'user:mixed-all-local@mixed-all-host@local');
+      expect(userLocalHit.hits.hits).toHaveLength(1);
+      expect(userLocalHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:mixed-all-local@mixed-all-host@local',
+          namespace: 'local',
+          confidence: 'medium',
+        },
+      });
+
+      expect((await searchDocById(esClient, 'user:mixed-all-invalid@okta')).hits.hits).toHaveLength(0);
+
+      const serviceHit = await searchDocById(esClient, 'service:mixed-service-valid');
+      expect(serviceHit.hits.hits).toHaveLength(1);
+
+      const genericHit = await searchDocById(esClient, 'mixed-generic-valid');
+      expect(genericHit.hits.hits).toHaveLength(1);
+    }
+  );
+
+  apiTest(
+    'Should omit documents at logs extraction when they do not match documentsFilter or postAggFilter',
+    async ({ apiClient, esClient }) => {
+      const from = '2026-03-18T11:00:00Z';
+      const to = '2026-03-18T12:00:00Z';
+
+      // 1. event.outcome = 'failure' → documentsFilter omits (pre-agg)
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T11:01:00Z',
+        event: { kind: 'asset', module: 'okta', outcome: 'failure' },
+        user: { id: 'omitted-failure', name: 'FailureUser' },
+      });
+
+      // 2. No user identity (no user.email, user.id, user.name) → documentsFilter omits
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T11:02:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        host: { id: 'host-omitted', name: 'server' },
+      });
+
+      // 3. user.name in excluded list (e.g. 'root') with host.id, event.kind='event' → postAggFilter omits
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T11:03:00Z',
+        event: { kind: 'event', category: 'network', outcome: 'success' },
+        user: { name: 'root' },
+        host: { id: 'omitted-root-host', name: 'server-01' },
+      });
+
+      // 4. user.name without host.id, event.kind='event' → postAggFilter omits (non-IDP needs host.id; IDP needs asset/iam)
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T11:04:00Z',
+        event: { kind: 'event', category: 'network', outcome: 'success' },
+        user: { name: 'no-host-user' },
+      });
+
+      const extractionResponse = await forceLogExtraction(
+        apiClient,
+        defaultHeaders,
+        'user',
+        from,
+        to
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({ count: 0 });
+
+      // Verify none of the omitted documents produced entities
+      expect((await searchDocById(esClient, 'user:omitted-failure@okta')).hits.hits).toHaveLength(0);
+      expect(
+        (await searchDocById(esClient, 'user:root@omitted-root-host@local')).hits.hits
+      ).toHaveLength(0);
+      expect((await searchDocById(esClient, 'user:no-host-user@unknown')).hits.hits).toHaveLength(
+        0
+      );
     }
   );
 

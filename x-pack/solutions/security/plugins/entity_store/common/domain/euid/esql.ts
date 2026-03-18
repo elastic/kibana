@@ -16,7 +16,7 @@ import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
 import {
-  evaluateStreamlangCondition,
+  applyWhenConditionTrueSetFieldsPreAgg,
   getDocument,
   getEffectiveEuidRanking,
   getFieldValue,
@@ -76,11 +76,8 @@ export function getEuidEsqlFilterBasedOnDocument(
     const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  const whenConditionTrueSetFieldsPreAgg = entityDefinition.whenConditionTrueSetFieldsPreAgg;
-  if (whenConditionTrueSetFieldsPreAgg?.condition) {
-    if (evaluateStreamlangCondition(doc, whenConditionTrueSetFieldsPreAgg.condition)) {
-      doc = { ...doc, ...whenConditionTrueSetFieldsPreAgg.fields };
-    }
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    applyWhenConditionTrueSetFieldsPreAgg(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
   }
   const effectiveEuidRanking = getEffectiveEuidRanking(doc, identityField);
   const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, effectiveEuidRanking);
@@ -134,13 +131,12 @@ function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): str
  *
  * - Source values: each source is read with MV_FIRST so multi-value fields are supported; firstChunkOfField sources use SPLIT then MV_FIRST.
  * - Multiple sources: each is assigned to a variable (_src_<dest>0, _src_<dest>1, ...), then an effective source is the first non-null, non-empty variable (CASE).
- * - Destination: effective source is then mapped with CASE: if null/empty → fallbackValue; else if it matches a whenClause → clause's then; else → effective source as-is (or fallbackValue when useFallbackWhenNoClauseMatch is true).
+ * - Destination: effective source is then mapped with CASE: if null/empty → fallbackValue; else if it matches a whenClause → clause's then; else → effective source as-is.
  *
  * Returns a comma-separated list of EVAL assignments (one or more lines).
  */
 function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
-  const { destination, sources, fallbackValue, whenClauses, useFallbackWhenNoClauseMatch } =
-    evaluation;
+  const { destination, sources, fallbackValue, whenClauses } = evaluation;
   const sourceExpressions = sources.map(sourceToEsqlExpression);
   const sourceVariablesBaseName = `_src_${destination.replace(/\./g, '_')}`;
   const effectiveSourceName = sourceVariablesBaseName;
@@ -155,9 +151,7 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
       .join(' OR ');
     destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
   }
-  destinationCaseParts.push(
-    useFallbackWhenNoClauseMatch ? `"${escapeEsqlString(fallbackValue)}"` : effectiveSourceName
-  );
+  destinationCaseParts.push(effectiveSourceName);
 
   const assignments: string[] = [];
 
