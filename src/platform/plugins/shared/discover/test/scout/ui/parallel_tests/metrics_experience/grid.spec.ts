@@ -50,6 +50,7 @@ spaceTest.describe(
         // aria-required-children and aria-required-parent violations because
         // there is no role="row" wrapper between them. Exclude the grid
         // subtree and scan the surrounding metrics experience chrome instead.
+        // Tracked in https://github.com/elastic/kibana/issues/258447
         const { violations } = await page.checkA11y({
           include: ['[data-test-subj="metricsExperienceRendered"]'],
           exclude: ['[data-test-subj="unifiedMetricsExperienceGrid"]'],
