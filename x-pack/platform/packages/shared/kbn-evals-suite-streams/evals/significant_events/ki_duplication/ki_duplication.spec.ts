@@ -21,7 +21,7 @@ import {
   kiDuplicationEvaluator,
   createSemanticUniquenessEvaluator,
   createIdConsistencyEvaluator,
-} from '../../../src/evaluators/feature_duplication_evaluators';
+} from '../../../src/evaluators/ki_duplication_evaluators';
 
 evaluate.describe('KI duplication (harness)', () => {
   const from = kbnDatemath.parse('now-10m')!;
