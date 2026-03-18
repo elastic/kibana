@@ -114,6 +114,7 @@ export function FilterListButton({ onChange, filters }: Props) {
         closePopover={closePopover}
         panelPaddingSize="none"
         data-test-subj="filterList"
+        aria-label="Filter component templates"
       >
         <EuiSelectable
           allowExclusions
