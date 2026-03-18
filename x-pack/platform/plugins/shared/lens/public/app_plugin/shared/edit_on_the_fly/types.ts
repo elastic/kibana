@@ -44,9 +44,7 @@ export interface EditConfigPanelProps {
   updatePanelState: (
     datasourceState: unknown,
     visualizationState: unknown,
-    visualizationId?: string,
-    /** When restoring state (e.g. on cancel), pass the datasource the state belongs to. */
-    datasourceId?: LensDatasourceId
+    visualizationId?: string
   ) => void;
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */

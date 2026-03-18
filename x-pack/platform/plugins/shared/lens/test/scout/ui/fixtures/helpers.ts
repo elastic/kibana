@@ -14,30 +14,19 @@ export async function openDimensionEditorAndWaitForFlyout(
   { lens }: DashboardAndLens,
   page: ScoutPage,
   dimensionPanel: Locator
-): Promise<void> {
+) {
   const dimensionButton = dimensionPanel.getByRole('button', { name: /Edit .* configuration/ });
+  await dimensionButton.click();
 
-  await expect(dimensionButton).toBeVisible({ timeout: 10000 });
-  await dimensionButton.click({ timeout: 15000 });
-
-  await expect
-    .poll(
-      async () => {
-        const backVisible = await lens.getSecondaryFlyoutBackButton().isVisible();
-        const contentVisible = await page
-          .getByTestId('text-based-languages-field-selection-row')
-          .isVisible();
-        return backVisible && contentVisible;
-      },
-      { timeout: 15000 }
-    )
-    .toBe(true);
+  // Confirm that the secondary flyout is opened
+  await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
+  await expect(page.getByTestId('text-based-languages-field-selection-row')).toBeVisible();
 }
 
 export async function openInlineEditorAndWaitVisible(
   { dashboard, lens }: DashboardAndLens,
   panelId: string
-): Promise<void> {
+) {
   await dashboard.openInlineEditor(panelId);
   await expect(lens.getInlineEditor()).toBeVisible();
 }
@@ -48,7 +37,7 @@ export async function convertToEsqlViaModal({
 }: {
   pageObjects: DashboardAndLens;
   page: ScoutPage;
-}): Promise<void> {
+}) {
   const { lens } = pageObjects;
 
   // Click on the "Conver to ES|QL" button in the in-line editor
@@ -59,7 +48,7 @@ export async function convertToEsqlViaModal({
   await lens.getConvertToEsqModalConfirmButton().click();
   await expect(modal).toBeHidden();
 
-  // Confir that the in-line editor has been updated
+  // Confirm that the in-line editor has been updated
   await expect(lens.getConvertToEsqlButton()).toBeHidden();
   await expect(page.getByTestId('ESQLEditor')).toBeVisible();
   await expect(page.getByText('ES|QL Query Results')).toBeVisible();

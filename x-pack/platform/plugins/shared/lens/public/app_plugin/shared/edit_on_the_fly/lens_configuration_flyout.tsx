@@ -193,6 +193,9 @@ export function LensEditConfigurationFlyout({
       // This is important when canceling after a datasource conversion (e.g., formBased -> textBased)
       const previousDatasourceId = getActiveDatasourceIdFromDoc(previousAttrs) as LensDatasourceId;
       const currentDatasourceId = getActiveDatasourceIdFromDoc(attributes) as LensDatasourceId;
+      // When canceling after a datasource conversion (formBased -> textBased), the structure changed;
+      // use updateSuggestion to restore full previous attributes.
+      // When the datasource type is unchanged, use updatePanelState to restore state.
       const isDatasourceConversionRevert = previousDatasourceId !== currentDatasourceId;
 
       if (
@@ -208,12 +211,7 @@ export function LensEditConfigurationFlyout({
               previousAttrs.references
             )
           : prevDsStates[previousDatasourceId];
-        updatePanelState?.(
-          currentDatasourceState,
-          previousAttrs.state.visualization,
-          undefined,
-          previousDatasourceId
-        );
+        updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization, undefined);
       } else {
         updateSuggestion?.(previousAttrs);
       }
