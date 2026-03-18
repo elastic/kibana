@@ -10,13 +10,19 @@ import {
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
+import { tags } from '@kbn/scout';
 import { spaceTest } from '../fixtures';
 import { AIAssistantType } from '../fixtures/constants';
-import { tags } from '@kbn/scout';
 
 spaceTest.describe(
   'GenAI Settings - AI Assistant Visibility without AI Assistants Privileges',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete, ...tags.serverless.security.complete] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.security.complete,
+    ],
+  },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
       // Set AI Assistant, because the AI Assistant nav button will be visible for default value

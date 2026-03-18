@@ -8,8 +8,8 @@
 import { expect } from '@kbn/scout/api';
 import type { SplitProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { streamlangApiTest as apiTest } from '../..';
 import { tags } from '@kbn/scout';
+import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Split Processor',

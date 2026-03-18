@@ -6,9 +6,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
-import { tags } from '@kbn/scout';
 
 const CLASSIC_STREAM = 'logs-classic-license-test';
 const WIRED_STREAM = 'logs.otel';

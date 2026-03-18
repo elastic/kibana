@@ -8,8 +8,8 @@
 import { expect } from '@kbn/scout/ui';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { spaceTest } from '../fixtures';
 import { tags } from '@kbn/scout';
+import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Change Chat Experience to Classic in Search Space',

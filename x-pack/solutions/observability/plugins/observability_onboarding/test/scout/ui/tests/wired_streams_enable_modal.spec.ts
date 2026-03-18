@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
-import { test } from '../fixtures';
 import { tags } from '@kbn/scout-oblt';
+import { test } from '../fixtures';
 
 test.describe(
   'Wired Streams - Enable Modal Confirmation Flow',

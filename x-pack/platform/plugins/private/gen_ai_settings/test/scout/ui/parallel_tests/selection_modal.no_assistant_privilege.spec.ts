@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
 import { tags } from '@kbn/scout';
+import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Selection Modal without AI Assistants Privileges',
