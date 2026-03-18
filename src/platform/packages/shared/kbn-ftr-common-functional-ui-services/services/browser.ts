@@ -17,13 +17,14 @@ import { Protocol } from 'devtools-protocol';
 
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import sharp from 'sharp';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import { WebElementWrapper } from './web_element_wrapper';
+import { Browsers } from './remote/browsers';
 import {
-  WebElementWrapper,
-  Browsers,
   NETWORK_PROFILES,
   type NetworkOptions,
   type NetworkProfile,
-} from '..';
+} from './remote/network_profiles';
 import { FtrService, type FtrProviderContext } from './ftr_provider_context';
 
 export type Browser = BrowserService;
