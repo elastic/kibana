@@ -26,13 +26,11 @@ describe('getDiscoverLocatorParams', () => {
 
   it('should include tab param for by-reference input when selectedTabId is provided', () => {
     expect(
-      getDiscoverLocatorParams(
-        {
-          savedObjectId$: new BehaviorSubject<string | undefined>('savedObjectId'),
-          savedSearch$: new BehaviorSubject<SavedSearch>(savedSearchMock),
-        },
-        { selectedTabId: 'tab-1' }
-      )
+      getDiscoverLocatorParams({
+        savedObjectId$: new BehaviorSubject<string | undefined>('savedObjectId'),
+        savedSearch$: new BehaviorSubject<SavedSearch>(savedSearchMock),
+        getSelectedTabId: () => 'tab-1',
+      })
     ).toEqual({
       savedSearchId: 'savedObjectId',
       tab: { id: 'tab-1' },
@@ -40,12 +38,10 @@ describe('getDiscoverLocatorParams', () => {
   });
 
   it('should not include tab param for by-value input even when selectedTabId is provided', () => {
-    const result = getDiscoverLocatorParams(
-      {
-        savedSearch$: new BehaviorSubject<SavedSearch>(savedSearchMock),
-      },
-      { selectedTabId: 'tab-1' }
-    );
+    const result = getDiscoverLocatorParams({
+      savedSearch$: new BehaviorSubject<SavedSearch>(savedSearchMock),
+      getSelectedTabId: () => 'tab-1',
+    });
     expect(result).not.toHaveProperty('tab');
   });
 

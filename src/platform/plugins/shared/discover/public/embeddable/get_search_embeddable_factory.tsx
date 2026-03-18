@@ -204,15 +204,16 @@ export const getSearchEmbeddableFactory = ({
         },
       });
 
+      const getSelectedTabId = () =>
+        inlineEditingApi.draftSelectedTabId$.getValue() ?? selectedTabId$.getValue();
+
       const editApi = initializeEditApi({
         uuid,
         parentApi,
-        partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
+        partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$, getSelectedTabId },
         discoverServices,
         isEditable: startServices.isEditable,
         getTitle: () => titleManager.api.title$.getValue(),
-        getSelectedTabId: () =>
-          inlineEditingApi.draftSelectedTabId$.getValue() ?? selectedTabId$.getValue(),
       });
 
       const api: SearchEmbeddableApi = finalizeApi({
@@ -239,7 +240,7 @@ export const getSearchEmbeddableFactory = ({
         dataLoading$,
         blockingError$,
         savedObjectId$,
-        selectedTabId$,
+        getSelectedTabId,
         defaultTitle$,
         defaultDescription$,
         hasTimeRange: () => {

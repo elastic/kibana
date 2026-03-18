@@ -118,14 +118,8 @@ export const apiPublishesSavedSearch = (
 };
 
 export interface PublishesSelectedTabId {
-  selectedTabId$: PublishingSubject<string | undefined>;
+  getSelectedTabId: () => string | undefined;
 }
-
-export const apiPublishesSelectedTabId = (
-  api: EmbeddableApiContext['embeddable']
-): api is PublishesSelectedTabId => {
-  return Boolean((api as PublishesSelectedTabId)?.selectedTabId$);
-};
 
 export interface HasTimeRange {
   hasTimeRange(): boolean;

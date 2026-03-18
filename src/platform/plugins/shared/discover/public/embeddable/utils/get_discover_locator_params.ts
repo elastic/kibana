@@ -19,12 +19,11 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { getEsqlControls } from '@kbn/esql-utils';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverAppLocatorParams } from '../../../common';
-import { type PublishesSavedSearch } from '../types';
+import type { PublishesSavedSearch, PublishesSelectedTabId } from '../types';
 
 export const getDiscoverLocatorParams = (
   api: PublishesSavedSearch &
-    Partial<PublishesSavedObjectId & PublishesUnifiedSearch & HasParentApi>,
-  options?: { selectedTabId?: string }
+    Partial<PublishesSavedObjectId & PublishesSelectedTabId & PublishesUnifiedSearch & HasParentApi>
 ) => {
   const savedSearch = api.savedSearch$.getValue();
   const query = savedSearch?.searchSource.getField('query');
@@ -35,10 +34,11 @@ export const getDiscoverLocatorParams = (
     ? api.parentApi
     : undefined;
 
+  const selectedTabId = api.getSelectedTabId?.();
   const locatorParams: DiscoverAppLocatorParams = savedObjectId
     ? {
         savedSearchId: savedObjectId,
-        ...(options?.selectedTabId ? { tab: { id: options.selectedTabId } } : {}),
+        ...(selectedTabId ? { tab: { id: selectedTabId } } : {}),
       }
     : {
         dataViewId: dataView?.id,

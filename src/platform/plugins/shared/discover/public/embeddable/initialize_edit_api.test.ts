@@ -183,11 +183,10 @@ describe('initialize edit api', () => {
       const editApi = initializeEditApi({
         uuid: 'test',
         parentApi: mockedParentApi,
-        partialApi: mockedApi,
+        partialApi: { ...mockedApi, getSelectedTabId: () => undefined },
         isEditable: () => true,
         discoverServices: discoverServiceMock,
         getTitle: () => 'test-title',
-        getSelectedTabId: () => undefined,
       });
 
       await editApi?.onEdit();
@@ -207,11 +206,10 @@ describe('initialize edit api', () => {
       const editApi = initializeEditApi({
         uuid: 'test',
         parentApi: mockedParentApi,
-        partialApi: mockedApi,
+        partialApi: { ...mockedApi, getSelectedTabId: () => 'tab-1' },
         isEditable: () => true,
         discoverServices: discoverServiceMock,
         getTitle: () => 'test-title',
-        getSelectedTabId: () => 'tab-1',
       });
 
       await editApi?.onEdit();
@@ -228,11 +226,10 @@ describe('initialize edit api', () => {
       const editApi = initializeEditApi({
         uuid: 'test',
         parentApi: mockedParentApi,
-        partialApi: mockedApi,
+        partialApi: { ...mockedApi, getSelectedTabId: () => undefined },
         isEditable: () => true,
         discoverServices: discoverServiceMock,
         getTitle: () => 'test-title',
-        getSelectedTabId: () => undefined,
       });
 
       await editApi?.onEdit();
@@ -247,11 +244,10 @@ describe('initialize edit api', () => {
       const editApi = initializeEditApi({
         uuid: 'test',
         parentApi: mockedParentApi,
-        partialApi: mockedApi,
+        partialApi: { ...mockedApi, getSelectedTabId: () => 'tab-2' },
         isEditable: () => true,
         discoverServices: discoverServiceMock,
         getTitle: () => 'test-title',
-        getSelectedTabId: () => 'tab-2',
       });
 
       await editApi?.onEdit();
