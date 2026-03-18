@@ -39,6 +39,9 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
             body: () => updateResponseBodySchema,
             description: 'Indicates that the markdown panel was updated successfully.',
           },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
           403: {
             description: 'Indicates that this call is forbidden.',
           },
