@@ -14,7 +14,7 @@ steps:
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 3
+        parallelism: 2
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:detection_alerts
         label: 'Cypress MKI - Detection Alerts'
@@ -42,7 +42,7 @@ steps:
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 4
+        parallelism: 3
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:overview
         label: 'Cypress MKI - Overview'
@@ -308,6 +308,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
+        parallelism: 2
         retry:
           automatic:
             - exit_status: '1'
@@ -350,6 +351,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
+        parallelism: 2
         retry:
           automatic:
             - exit_status: '1'

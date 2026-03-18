@@ -89,7 +89,7 @@ export const SearchSelection: FC<SearchSelectionProps> = ({
           {canEditDataView ? (
             <EuiButton
               onClick={createNewDataView}
-              iconType="plusInCircle"
+              iconType="plusCircle"
               data-test-subj="newDataViewButton"
               disabled={!canEditDataView}
             >
