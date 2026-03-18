@@ -1107,6 +1107,7 @@
     "provider"
   ],
   "security-rule": [
+    "deprecated",
     "name",
     "risk_score",
     "rule_id",

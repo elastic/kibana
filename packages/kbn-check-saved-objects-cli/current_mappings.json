@@ -3649,6 +3649,9 @@
   "security-rule": {
     "dynamic": false,
     "properties": {
+      "deprecated": {
+        "type": "boolean"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -4556,11 +4559,11 @@
       "entityType": {
         "type": "keyword"
       },
-      "status": {
-        "type": "keyword"
-      },
       "message": {
         "type": "text"
+      },
+      "status": {
+        "type": "keyword"
       }
     }
   },
