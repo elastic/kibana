@@ -93,8 +93,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should disable link if dashboard does not exist', async () => {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
-        expect(await testSubjects.exists('dashboardLink--link004--error')).to.be(true);
-        expect(await testSubjects.isEnabled('dashboardLink--link004--error')).to.be(false);
+        expect(await testSubjects.exists('dashboardLink--Error fetching dashboard--error')).to.be(
+          true
+        );
+        expect(
+          await testSubjects.isEnabled('dashboardLink--Error fetching dashboard--error')
+        ).to.be(false);
       });
 
       it('useFilters should pass filter pills and query', async () => {
@@ -106,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          */
         await dashboard.loadSavedDashboard('links 002');
         await dashboard.waitForRenderComplete();
-        await testSubjects.clickWhenNotDisabled('dashboardLink--link001');
+        await testSubjects.clickWhenNotDisabled('dashboardLink--links 001');
         await header.waitUntilLoadingHasFinished();
         expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
           '0930f310-5bc2-11ee-9a85-7b86504227bc'
@@ -140,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          */
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
-        await testSubjects.clickWhenNotDisabled('dashboardLink--link002');
+        await testSubjects.clickWhenNotDisabled('dashboardLink--links 002');
         await header.waitUntilLoadingHasFinished();
         expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
           '24751520-5bc2-11ee-9a85-7b86504227bc'
@@ -174,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          */
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
-        await testSubjects.clickWhenNotDisabled('dashboardLink--link003');
+        await testSubjects.clickWhenNotDisabled('dashboardLink--links 003');
         await header.waitUntilLoadingHasFinished();
 
         // Should have opened another tab
@@ -211,13 +215,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should disable link if forbidden by external url policy', async () => {
-        const button = await testSubjects.find('externalLink--link777--error');
+        const button = await testSubjects.find('externalLink--external link violation--error');
         const isDisabled = await button.getAttribute('disabled');
         expect(isDisabled).to.be('true');
       });
 
       it('should create an external link when openInNewTab is enabled', async () => {
-        await testSubjects.clickWhenNotDisabled('externalLink--link999');
+        await testSubjects.clickWhenNotDisabled('externalLink--opens in new tab');
 
         // Should have opened another tab
         const windowHandlers = await browser.getAllWindowHandles();
@@ -228,7 +232,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should open in same tab when openInNewTab is disabled', async () => {
-        await testSubjects.clickWhenNotDisabled('externalLink--link888');
+        await testSubjects.clickWhenNotDisabled('externalLink--opens in same tab');
 
         // Should have opened in the same tab
         const windowHandlers = await browser.getAllWindowHandles();
