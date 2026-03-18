@@ -14,6 +14,7 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
 import { DOCKER_IMG, DOCKER_REPO, DOCKER_TAG, DEFAULT_PORT } from '../utils';
+import { parseTimeoutToMs } from '../utils';
 import type { Command } from './types';
 
 export const docker: Command = {
@@ -35,11 +36,26 @@ export const docker: Command = {
       -D                  Override Docker command
       -F                  Absolute paths for files to mount into container
 
+      Snapshot mode (--snapshot):
+
+      --snapshot          Activate snapshot-equivalent behavior: security enabled, detached mode,
+                          readiness check, native realm setup, and extra default ES args.
+                          Without this flag, 'es docker' behaves exactly as before.
+      --license           Run with a 'basic' or 'trial' license [default: basic] (snapshot mode)
+      --version           Version of ES to run [default: <from package.json>] (snapshot mode)
+      --background        Start detached and return after ES is ready (snapshot mode)
+      --name              Container name for parallel runs [default: es01] (snapshot mode)
+      --transport-port    Host-side transport port [default: port + 100] (snapshot mode)
+      --skip-ready-check  Disable the readiness check (snapshot mode)
+      --ready-timeout     Customize the ready check timeout, in seconds or "Xm" format [default: 1m]
+
     Examples:
 
       es docker --tag master-SNAPSHOT-amd64
       es docker --image docker.elastic.co/repo:tag
-      es docker -D 'start es01' 
+      es docker -D 'start es01'
+      es docker --snapshot --license=trial -E path.data=../my-data
+      es docker --snapshot --background --name es-test-1
     `;
   },
   run: async (defaults = {}) => {
@@ -56,10 +72,13 @@ export const docker: Command = {
         esArgs: 'E',
         dockerCmd: 'D',
         files: 'F',
+        skipReadyCheck: 'skip-ready-check',
+        readyTimeout: 'ready-timeout',
+        transportPort: 'transport-port',
       },
 
-      string: ['tag', 'image', 'D'],
-      boolean: ['ssl', 'kill'],
+      string: ['tag', 'image', 'D', 'version', 'license', 'name', 'ready-timeout'],
+      boolean: ['ssl', 'kill', 'snapshot', 'background', 'skip-ready-check'],
 
       default: defaults,
     });
@@ -69,6 +88,9 @@ export const docker: Command = {
       reportTime,
       startTime: runStartTime,
       ...options,
+      readyTimeout: parseTimeoutToMs(options.readyTimeout),
+      transportPort: options.transportPort ? Number(options.transportPort) : undefined,
+      port: options.port ? Number(options.port) : undefined,
     });
   },
 };
