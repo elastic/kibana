@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { closeCaseStepCommonDefinition } from '../../common/workflows/steps/close_case';
 
 export const closeCaseStepDefinition = createPublicStepDefinition({
   ...closeCaseStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
 });

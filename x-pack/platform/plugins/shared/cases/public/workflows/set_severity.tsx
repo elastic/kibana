@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { setSeverityStepCommonDefinition } from '../../common/workflows/steps/set_severity';
 
 export const setSeverityStepDefinition = createPublicStepDefinition({
   ...setSeverityStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
 });

@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { setTitleStepCommonDefinition } from '../../common/workflows/steps/set_title';
 
 export const setTitleStepDefinition = createPublicStepDefinition({
   ...setTitleStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
 });

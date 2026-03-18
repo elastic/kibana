@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { findSimilarCasesStepCommonDefinition } from '../../common/workflows/steps/find_similar_cases';
 
 export const findSimilarCasesStepDefinition = createPublicStepDefinition({
   ...findSimilarCasesStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/magnify').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
 });

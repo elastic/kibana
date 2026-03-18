@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import type { SelectionOption } from '@kbn/workflows/types/latest';
 import { getCaseConfigure } from '../containers/configure/api';
@@ -24,11 +23,6 @@ const getTemplatesForWorkflowOwner = async () => {
 export const createCreateCaseFromTemplateStepDefinition = () =>
   createPublicStepDefinition({
     ...createCaseFromTemplateStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
     editorHandlers: {
       input: {
         case_template_id: {

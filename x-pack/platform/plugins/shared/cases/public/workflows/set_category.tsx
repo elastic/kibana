@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { setCategoryStepCommonDefinition } from '../../common/workflows/steps/set_category';
 
 export const setCategoryStepDefinition = createPublicStepDefinition({
   ...setCategoryStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
 });

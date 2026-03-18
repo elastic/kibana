@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { addObservablesStepCommonDefinition } from '../../common/workflows/steps/add_observables';
 
 export const addObservablesStepDefinition = createPublicStepDefinition({
   ...addObservablesStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
 });

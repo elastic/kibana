@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import type { SelectionOption } from '@kbn/workflows/types/latest';
 import { getCaseConfigure } from '../containers/configure/api';
@@ -33,11 +32,6 @@ const getCustomFieldsForWorkflowOwner = async () => {
 
 export const setCustomFieldStepDefinition = createPublicStepDefinition({
   ...setCustomFieldStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
   editorHandlers: {
     input: {
       field_name: {

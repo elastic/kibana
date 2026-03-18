@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { deleteCasesStepCommonDefinition } from '../../common/workflows/steps/delete_cases';
 
 export const deleteCasesStepDefinition = createPublicStepDefinition({
   ...deleteCasesStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
 });
