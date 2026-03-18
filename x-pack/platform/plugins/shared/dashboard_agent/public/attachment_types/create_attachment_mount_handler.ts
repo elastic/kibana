@@ -10,14 +10,11 @@ import { pairwise, startWith } from 'rxjs';
 import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 
 interface CreateAttachmentMountHandlerParams {
   dashboardPlugin: DashboardStart;
-  updateAttachmentOrigin: (
-    conversationId: string,
-    attachmentId: string,
-    origin: string
-  ) => Promise<void>;
+  updateAttachmentOrigin: AgentBuilderPluginStart['updateAttachmentOrigin'];
 }
 
 /**
@@ -32,7 +29,7 @@ export const createAttachmentMountHandler = ({
   updateAttachmentOrigin,
 }: CreateAttachmentMountHandlerParams) => {
   return ({
-    attachment,
+    getAttachment,
     conversationId,
   }: AttachmentLifecycleParams<DashboardAttachment>): (() => void) => {
     let savedObjectIdSubscription: Subscription | undefined;
@@ -45,16 +42,17 @@ export const createAttachmentMountHandler = ({
       if (!api) return;
 
       savedObjectIdSubscription = api.savedObjectId$
-        .pipe(startWith<string | undefined>(attachment.origin), pairwise())
+        .pipe(startWith<string | undefined>(getAttachment().origin), pairwise())
         .subscribe(([previousId, currentId]) => {
+          const currentAttachment = getAttachment();
           // Only update origin if:
           // 1. The attachment has no origin (unsaved), OR
           // 2. The previous savedObjectId matches the attachment origin (we're on the same dashboard)
           // This prevents linking to unrelated dashboards when navigating
-          const shouldUpdateOrigin = !attachment.origin || previousId === attachment.origin;
+          const shouldUpdate = !currentAttachment.origin || previousId === currentAttachment.origin;
 
-          if (currentId && currentId !== attachment.origin && shouldUpdateOrigin) {
-            updateAttachmentOrigin(conversationId, attachment.id, currentId);
+          if (currentId && currentId !== currentAttachment.origin && shouldUpdate) {
+            updateAttachmentOrigin(conversationId, currentAttachment.id, currentId);
           }
         });
     });

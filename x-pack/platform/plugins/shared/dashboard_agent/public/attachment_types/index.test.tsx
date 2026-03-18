@@ -9,14 +9,14 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import { registerDashboardAttachmentUiDefinition } from '.';
 
 describe('registerDashboardAttachmentUiDefinition', () => {
   let deps: ReturnType<typeof createMockDeps>;
-  let uiDefinition: ReturnType<typeof deps.addAttachmentType.mock.calls>[0][1];
+  let uiDefinition: AttachmentUIDefinition<DashboardAttachment>;
   let unregister: () => void;
 
   const createMockDashboardApi = (savedObjectId?: string) => {
@@ -60,16 +60,26 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     };
   };
 
-  const createMockAttachment = (
-    id: string,
-    origin?: string
-  ): AttachmentLifecycleParams<DashboardAttachment>['attachment'] => ({
-    id,
-    type: DASHBOARD_ATTACHMENT_TYPE,
-    data: { title: 'Test Dashboard', panels: [] },
-    origin,
-    hidden: false,
-  });
+  const createMockAttachment = (id: string, origin?: string) => {
+    let currentOrigin = origin;
+    const attachment: DashboardAttachment = {
+      id,
+      type: DASHBOARD_ATTACHMENT_TYPE,
+      data: { title: 'Test Dashboard', description: '', panels: [] },
+      origin: currentOrigin,
+      hidden: false,
+    };
+    return {
+      attachment,
+      getAttachment: (): DashboardAttachment => ({
+        ...attachment,
+        origin: currentOrigin,
+      }),
+      setOrigin: (newOrigin: string | undefined) => {
+        currentOrigin = newOrigin;
+      },
+    };
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -97,10 +107,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
   describe('onAttachmentMount', () => {
     it('updates origin when dashboard is saved for the first time', () => {
-      const attachment = createMockAttachment('attachment-1');
+      const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount({ attachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId('new-dashboard-id');
 
@@ -113,10 +123,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     });
 
     it('updates origin when the same dashboard is saved again', () => {
-      const attachment = createMockAttachment('attachment-1', 'existing-dashboard-id');
+      const { getAttachment } = createMockAttachment('attachment-1', 'existing-dashboard-id');
       const mockApi = createMockDashboardApi('existing-dashboard-id');
 
-      const cleanup = uiDefinition.onAttachmentMount({ attachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId('new-saved-as-id');
 
@@ -129,10 +139,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     });
 
     it('does NOT update origin when navigating to an unrelated dashboard', () => {
-      const attachment = createMockAttachment('attachment-1', 'original-dashboard-id');
+      const { getAttachment } = createMockAttachment('attachment-1', 'original-dashboard-id');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount({ attachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId('unrelated-dashboard-id');
 
@@ -140,11 +150,37 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       cleanup?.();
     });
 
-    it('does NOT update origin when savedObjectId is undefined', () => {
-      const attachment = createMockAttachment('attachment-1');
+    it('does NOT update origin when navigating after origin was already set', () => {
+      const { getAttachment, setOrigin } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount({ attachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
+      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+
+      // First save - should update origin
+      mockApi.setSavedObjectId('first-dashboard-id');
+      expect(deps.updateAttachmentOrigin).toHaveBeenCalledWith(
+        'conv-1',
+        'attachment-1',
+        'first-dashboard-id'
+      );
+
+      // Simulate the origin being updated (as would happen after updateAttachmentOrigin succeeds)
+      setOrigin('first-dashboard-id');
+      deps.updateAttachmentOrigin.mockClear();
+
+      // Navigate to a different dashboard - should NOT update origin
+      mockApi.setSavedObjectId('second-dashboard-id');
+      expect(deps.updateAttachmentOrigin).not.toHaveBeenCalled();
+
+      cleanup?.();
+    });
+
+    it('does NOT update origin when savedObjectId is undefined', () => {
+      const { getAttachment } = createMockAttachment('attachment-1');
+      const mockApi = createMockDashboardApi();
+
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId(undefined);
 
@@ -153,10 +189,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     });
 
     it('does NOT update origin when savedObjectId equals attachment origin', () => {
-      const attachment = createMockAttachment('attachment-1', 'same-dashboard-id');
+      const { getAttachment } = createMockAttachment('attachment-1', 'same-dashboard-id');
       const mockApi = createMockDashboardApi('same-dashboard-id');
 
-      const cleanup = uiDefinition.onAttachmentMount({ attachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId('same-dashboard-id');
 
@@ -165,10 +201,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     });
 
     it('cleans up subscriptions when cleanup is called', () => {
-      const attachment = createMockAttachment('attachment-1');
+      const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount({ attachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       cleanup?.();
 
@@ -178,10 +214,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     });
 
     it('cleans up savedObjectId subscription when dashboard API becomes unavailable', () => {
-      const attachment = createMockAttachment('attachment-1');
+      const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount({ attachment, conversationId: 'conv-1' });
+      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, conversationId: 'conv-1' });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       mockApi.setSavedObjectId('first-dashboard-id');
@@ -202,35 +238,47 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
   describe('getLabel', () => {
     it('returns attachment title when available', () => {
-      expect(uiDefinition.getLabel({ data: { title: 'My Custom Dashboard' } })).toBe(
-        'My Custom Dashboard'
-      );
+      expect(
+        uiDefinition.getLabel({
+          data: { title: 'My Custom Dashboard', description: '', panels: [] },
+        } as unknown as DashboardAttachment)
+      ).toBe('My Custom Dashboard');
     });
 
     it('returns default label when title is not available', () => {
-      expect(uiDefinition.getLabel({ data: {} })).toBe('New Dashboard');
+      expect(
+        uiDefinition.getLabel({
+          data: { description: '', panels: [] },
+        } as unknown as DashboardAttachment)
+      ).toBe('New Dashboard');
     });
   });
 
   describe('getIcon', () => {
     it('returns productDashboard icon', () => {
-      expect(uiDefinition.getIcon()).toBe('productDashboard');
+      expect(uiDefinition.getIcon!()).toBe('productDashboard');
     });
   });
 
   describe('getActionButtons', () => {
     it('returns empty array when in canvas mode', () => {
-      const buttons = uiDefinition.getActionButtons({
-        attachment: createMockAttachment('1'),
+      const { attachment } = createMockAttachment('1');
+      const buttons = uiDefinition.getActionButtons!({
+        attachment,
+        isSidebar: false,
         isCanvas: true,
+        updateOrigin: jest.fn(),
       });
       expect(buttons).toEqual([]);
     });
 
     it('returns preview button when not in canvas mode', () => {
-      const buttons = uiDefinition.getActionButtons({
-        attachment: createMockAttachment('1'),
+      const { attachment } = createMockAttachment('1');
+      const buttons = uiDefinition.getActionButtons!({
+        attachment,
+        isSidebar: false,
         isCanvas: false,
+        updateOrigin: jest.fn(),
       });
       expect(buttons).toHaveLength(1);
       expect(buttons[0]).toMatchObject({ label: 'Preview', icon: 'eye' });

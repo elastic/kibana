@@ -32,10 +32,10 @@ describe('useAttachmentLifecycle', () => {
     jest.clearAllMocks();
   });
 
-  it('calls onAttachmentAdd for each new attachment', () => {
-    const onAttachmentAdd = jest.fn();
+  it('calls onAttachmentMount for each new attachment', () => {
+    const onAttachmentMount = jest.fn();
     const attachmentsService = createMockAttachmentsService({
-      test_type: { onAttachmentAdd },
+      test_type: { onAttachmentMount },
     });
 
     renderHook(() =>
@@ -46,13 +46,13 @@ describe('useAttachmentLifecycle', () => {
       })
     );
 
-    expect(onAttachmentAdd).toHaveBeenCalledTimes(2);
+    expect(onAttachmentMount).toHaveBeenCalledTimes(2);
   });
 
-  it('does not call onAttachmentAdd for existing attachments on rerender', () => {
-    const onAttachmentAdd = jest.fn();
+  it('does not call onAttachmentMount for existing attachments on rerender', () => {
+    const onAttachmentMount = jest.fn();
     const attachmentsService = createMockAttachmentsService({
-      test_type: { onAttachmentAdd },
+      test_type: { onAttachmentMount },
     });
 
     const { rerender } = renderHook(
@@ -67,18 +67,18 @@ describe('useAttachmentLifecycle', () => {
       }
     );
 
-    expect(onAttachmentAdd).toHaveBeenCalledTimes(1);
+    expect(onAttachmentMount).toHaveBeenCalledTimes(1);
 
     // Rerender with the same attachment
     rerender({ attachments: [createMockAttachment('1')] });
 
-    expect(onAttachmentAdd).toHaveBeenCalledTimes(1);
+    expect(onAttachmentMount).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onAttachmentAdd only for newly added attachments', () => {
-    const onAttachmentAdd = jest.fn();
+  it('calls onAttachmentMount only for newly added attachments', () => {
+    const onAttachmentMount = jest.fn();
     const attachmentsService = createMockAttachmentsService({
-      test_type: { onAttachmentAdd },
+      test_type: { onAttachmentMount },
     });
 
     const { rerender } = renderHook(
@@ -93,17 +93,17 @@ describe('useAttachmentLifecycle', () => {
       }
     );
 
-    expect(onAttachmentAdd).toHaveBeenCalledTimes(1);
+    expect(onAttachmentMount).toHaveBeenCalledTimes(1);
 
     // Add a new attachment
     rerender({
       attachments: [createMockAttachment('1'), createMockAttachment('2')],
     });
 
-    expect(onAttachmentAdd).toHaveBeenCalledTimes(2);
-    expect(onAttachmentAdd).toHaveBeenLastCalledWith(
+    expect(onAttachmentMount).toHaveBeenCalledTimes(2);
+    expect(onAttachmentMount).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        attachment: expect.objectContaining({ id: '2' }),
+        getAttachment: expect.any(Function),
       })
     );
   });
@@ -111,9 +111,9 @@ describe('useAttachmentLifecycle', () => {
   it('calls cleanup for the correct attachment when one is removed', () => {
     const cleanup1 = jest.fn();
     const cleanup2 = jest.fn();
-    const onAttachmentAdd = jest.fn().mockReturnValueOnce(cleanup1).mockReturnValueOnce(cleanup2);
+    const onAttachmentMount = jest.fn().mockReturnValueOnce(cleanup1).mockReturnValueOnce(cleanup2);
     const attachmentsService = createMockAttachmentsService({
-      test_type: { onAttachmentAdd },
+      test_type: { onAttachmentMount },
     });
 
     const { rerender } = renderHook(
@@ -140,9 +140,9 @@ describe('useAttachmentLifecycle', () => {
   it('calls all cleanup functions on unmount', () => {
     const cleanup1 = jest.fn();
     const cleanup2 = jest.fn();
-    const onAttachmentAdd = jest.fn().mockReturnValueOnce(cleanup1).mockReturnValueOnce(cleanup2);
+    const onAttachmentMount = jest.fn().mockReturnValueOnce(cleanup1).mockReturnValueOnce(cleanup2);
     const attachmentsService = createMockAttachmentsService({
-      test_type: { onAttachmentAdd },
+      test_type: { onAttachmentMount },
     });
 
     const { unmount } = renderHook(() =>
@@ -192,10 +192,10 @@ describe('useAttachmentLifecycle', () => {
     ).not.toThrow();
   });
 
-  it('handles onAttachmentAdd returning undefined', () => {
-    const onAttachmentAdd = jest.fn().mockReturnValue(undefined);
+  it('handles onAttachmentMount returning undefined', () => {
+    const onAttachmentMount = jest.fn().mockReturnValue(undefined);
     const attachmentsService = createMockAttachmentsService({
-      test_type: { onAttachmentAdd },
+      test_type: { onAttachmentMount },
     });
 
     const { rerender, unmount } = renderHook(
@@ -217,10 +217,10 @@ describe('useAttachmentLifecycle', () => {
     expect(() => unmount()).not.toThrow();
   });
 
-  it('extracts data from current version', () => {
-    const onAttachmentAdd = jest.fn();
+  it('getAttachment returns current attachment state', () => {
+    const onAttachmentMount = jest.fn();
     const attachmentsService = createMockAttachmentsService({
-      test_type: { onAttachmentAdd },
+      test_type: { onAttachmentMount },
     });
 
     const attachment: VersionedAttachment = {
@@ -243,15 +243,18 @@ describe('useAttachmentLifecycle', () => {
       })
     );
 
-    expect(onAttachmentAdd).toHaveBeenCalledWith({
-      attachment: {
-        id: '1',
-        type: 'test_type',
-        data: { content: 'current' },
-        origin: 'some-origin',
-        hidden: true,
-      },
+    expect(onAttachmentMount).toHaveBeenCalledWith({
+      getAttachment: expect.any(Function),
       conversationId: 'conv-1',
+    });
+
+    const { getAttachment } = onAttachmentMount.mock.calls[0][0];
+    expect(getAttachment()).toEqual({
+      id: '1',
+      type: 'test_type',
+      data: { content: 'current' },
+      origin: 'some-origin',
+      hidden: true,
     });
   });
 });

@@ -95,8 +95,8 @@ export interface ActionButton {
 export interface AttachmentLifecycleParams<
   TAttachment extends UnknownAttachment = UnknownAttachment
 > {
-  /** The attachment instance */
-  attachment: TAttachment;
+  /** Returns the current attachment state */
+  getAttachment: () => TAttachment;
   /** The conversation ID containing this attachment */
   conversationId: string;
 }

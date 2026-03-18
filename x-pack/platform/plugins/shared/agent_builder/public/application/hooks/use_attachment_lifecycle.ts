@@ -42,13 +42,20 @@ export const useAttachmentLifecycle = ({
         const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
         if (uiDefinition?.onAttachmentMount) {
+          const attachmentId = attachment.id;
           const cleanup = uiDefinition.onAttachmentMount({
-            attachment: {
-              id: attachment.id,
-              type: attachment.type,
-              data: attachment.versions[attachment.current_version - 1]?.data,
-              origin: attachment.origin,
-              hidden: attachment.hidden,
+            getAttachment: () => {
+              const current = attachments?.find((a) => a.id === attachmentId);
+              if (!current) {
+                throw new Error(`Attachment ${attachmentId} not found`);
+              }
+              return {
+                id: current.id,
+                type: current.type,
+                data: current.versions[current.current_version - 1]?.data,
+                origin: current.origin,
+                hidden: current.hidden,
+              };
             },
             conversationId,
           });
