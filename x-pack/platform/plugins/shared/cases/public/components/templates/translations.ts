@@ -364,12 +364,6 @@ export const SUCCESS_UPDATING_TEMPLATE = i18n.translate(
   }
 );
 
-export const SUCCESS_SET_AS_DEFAULT_TEMPLATE = (templateName: string) =>
-  i18n.translate('xpack.cases.templates.successSetAsDefaultTemplate', {
-    defaultMessage: 'Template {templateName} was set as default',
-    values: { templateName },
-  });
-
 export const SUCCESS_CLONING_TEMPLATE = (templateName: string) =>
   i18n.translate('xpack.cases.templates.successCloningTemplate', {
     defaultMessage: '{templateName} was cloned successfully',
@@ -497,13 +491,6 @@ export const EDIT_TEMPLATE = i18n.translate('xpack.cases.templates.editTemplate'
 export const CLONE_TEMPLATE = i18n.translate('xpack.cases.templates.cloneTemplate', {
   defaultMessage: 'Clone',
 });
-
-export const SET_AS_DEFAULT_TEMPLATE = i18n.translate(
-  'xpack.cases.templates.setAsDefaultTemplate',
-  {
-    defaultMessage: 'Set as default',
-  }
-);
 
 export const EXPORT_TEMPLATE = i18n.translate('xpack.cases.templates.exportTemplate', {
   defaultMessage: 'Export',

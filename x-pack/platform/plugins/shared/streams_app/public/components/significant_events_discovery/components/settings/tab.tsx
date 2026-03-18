@@ -199,7 +199,7 @@ export function SettingsTab() {
             <EuiFormRow
               label={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.knowledgeIndicatorExtractionLabel',
-                { defaultMessage: 'Knowledge indicator extraction' }
+                { defaultMessage: 'Knowledge Indicator Feature extraction' }
               )}
               helpText={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.knowledgeIndicatorExtractionHelp',
@@ -220,12 +220,12 @@ export function SettingsTab() {
             <EuiFormRow
               label={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.ruleGenerationLabel',
-                { defaultMessage: 'Rule generation' }
+                { defaultMessage: 'Knowledge Indicator Query generation' }
               )}
               helpText={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.ruleGenerationHelp',
                 {
-                  defaultMessage: 'Model used to generate rules.',
+                  defaultMessage: 'Model used for Knowledge Indicator Query generation.',
                 }
               )}
             >
@@ -241,12 +241,13 @@ export function SettingsTab() {
             <EuiFormRow
               label={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.discoveryLabel',
-                { defaultMessage: 'Discovery' }
+                { defaultMessage: 'Discovery & Significant Event generation' }
               )}
               helpText={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.discoveryHelp',
                 {
-                  defaultMessage: 'Model used during Discovery.',
+                  defaultMessage:
+                    'Model used during Discovery phase and Significant Event generation',
                 }
               )}
             >
