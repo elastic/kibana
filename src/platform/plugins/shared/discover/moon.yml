@@ -135,7 +135,6 @@ dependsOn:
   - '@kbn/synthtrace-client'
   - '@kbn/alerting-v2-rule-form'
   - '@kbn/cps-utils'
-  - '@kbn/es-types'
 tags:
   - plugin
   - prod

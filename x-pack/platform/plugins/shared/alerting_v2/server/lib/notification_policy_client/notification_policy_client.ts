@@ -15,8 +15,10 @@ import {
   updateNotificationPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { stringifyZodError } from '@kbn/zod-helpers';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 import { omit } from 'lodash';
 import {
@@ -30,6 +32,7 @@ import type { NotificationPolicySavedObjectServiceContract } from '../services/n
 import { NotificationPolicySavedObjectServiceScopedToken } from '../services/notification_policy_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import { NotificationPolicyNamespaceToken } from './tokens';
 import type {
   BulkActionNotificationPoliciesParams,
   BulkActionNotificationPoliciesResponse,
@@ -39,7 +42,6 @@ import type {
   SnoozeNotificationPolicyParams,
   UpdateNotificationPolicyParams,
 } from './types';
-import { NotificationPolicyNamespaceToken } from './tokens';
 import { validateDateString } from './utils';
 
 const resolveActionAttrs = (
@@ -47,11 +49,13 @@ const resolveActionAttrs = (
 ): Partial<NotificationPolicySavedObjectAttributes> => {
   switch (action.action) {
     case 'enable':
-      return { enabled: true, snoozedUntil: undefined };
+      return { enabled: true };
     case 'disable':
-      return { enabled: false, snoozedUntil: undefined };
+      return { enabled: false };
     case 'snooze':
       return { snoozedUntil: action.snoozed_until };
+    case 'unsnooze':
+      return { snoozedUntil: null };
   }
 };
 
@@ -61,6 +65,9 @@ const toAuthResponse = (
   const { apiKey: _, ...rest } = auth;
   return rest;
 };
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_PER_PAGE = 20;
 
 @injectable()
 export class NotificationPolicyClient {
@@ -222,16 +229,27 @@ export class NotificationPolicyClient {
   public async findNotificationPolicies(
     params: FindNotificationPoliciesParams = {}
   ): Promise<FindNotificationPoliciesResponse> {
-    const page = params.page ?? 1;
-    const perPage = params.perPage ?? 20;
+    const page = params.page ?? DEFAULT_PAGE;
+    const perPage = params.perPage ?? DEFAULT_PER_PAGE;
 
-    const res = await this.notificationPolicySavedObjectService.find({ page, perPage });
+    const filter = this.buildFindFilter(params);
+    const sortField = this.mapSortField(params.sortField);
+
+    const res = await this.notificationPolicySavedObjectService.find({
+      page,
+      perPage,
+      search: params.search,
+      filter,
+      sortField,
+      sortOrder: params.sortOrder,
+    });
 
     return {
       items: res.saved_objects.map((so) => ({
         id: so.id,
         version: so.version,
-        ...so.attributes,
+        ...omit(so.attributes, ['auth']),
+        auth: toAuthResponse(so.attributes.auth),
       })),
       total: res.total,
       page,
@@ -244,7 +262,7 @@ export class NotificationPolicyClient {
   }: {
     id: string;
   }): Promise<NotificationPolicyResponse> {
-    return this.updatePolicyState(id, { enabled: true, snoozedUntil: undefined });
+    return this.updatePolicyState(id, { enabled: true });
   }
 
   public async disableNotificationPolicy({
@@ -252,7 +270,7 @@ export class NotificationPolicyClient {
   }: {
     id: string;
   }): Promise<NotificationPolicyResponse> {
-    return this.updatePolicyState(id, { enabled: false, snoozedUntil: undefined });
+    return this.updatePolicyState(id, { enabled: false });
   }
 
   public async snoozeNotificationPolicy({
@@ -260,6 +278,14 @@ export class NotificationPolicyClient {
     snoozedUntil,
   }: SnoozeNotificationPolicyParams): Promise<NotificationPolicyResponse> {
     return this.updatePolicyState(id, { snoozedUntil });
+  }
+
+  public async unsnoozeNotificationPolicy({
+    id,
+  }: {
+    id: string;
+  }): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { snoozedUntil: null });
   }
 
   public async bulkActionNotificationPolicies({
@@ -291,6 +317,44 @@ export class NotificationPolicyClient {
     }
 
     return { processed, total: actions.length, errors };
+  }
+
+  private buildFindFilter(params: FindNotificationPoliciesParams): KueryNode | undefined {
+    const conditions: KueryNode[] = [];
+    const attrPrefix = `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
+
+    if (params.destinationType) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.destinations.type`, params.destinationType));
+    }
+
+    if (params.createdBy) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.createdBy`, params.createdBy));
+    }
+
+    if (params.enabled !== undefined) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false'));
+    }
+
+    if (conditions.length === 0) {
+      return undefined;
+    }
+
+    return conditions.length === 1 ? conditions[0] : nodeBuilder.and(conditions);
+  }
+
+  private mapSortField(sortField?: string): string | undefined {
+    if (!sortField) {
+      return undefined;
+    }
+
+    const sortFieldMap: Record<string, string> = {
+      name: 'name.keyword',
+      createdAt: 'createdAt',
+      createdBy: 'createdBy',
+      updatedAt: 'updatedAt',
+    };
+
+    return sortFieldMap[sortField];
   }
 
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {
@@ -332,7 +396,7 @@ export class NotificationPolicyClient {
 
   private async updatePolicyState(
     id: string,
-    stateUpdate: { enabled?: boolean; snoozedUntil?: string | undefined }
+    stateUpdate: { enabled?: boolean; snoozedUntil?: string | null }
   ): Promise<NotificationPolicyResponse> {
     if (stateUpdate.snoozedUntil) {
       validateDateString(stateUpdate.snoozedUntil);

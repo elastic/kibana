@@ -490,6 +490,213 @@ describe('NotificationPolicyClient', () => {
     });
   });
 
+  describe('findNotificationPolicies', () => {
+    const makeFindResponse = (
+      items: Array<{
+        id: string;
+        attributes: NotificationPolicySavedObjectAttributes;
+        version?: string;
+      }>,
+      total?: number
+    ) => ({
+      saved_objects: items.map((item) => ({
+        id: item.id,
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: item.attributes,
+        references: [],
+        score: 0,
+        version: item.version ?? 'WzEsMV0=',
+      })),
+      total: total ?? items.length,
+      page: 1,
+      per_page: 20,
+      pit_id: undefined,
+    });
+
+    const policyAttributes: NotificationPolicySavedObjectAttributes = {
+      name: 'find-policy',
+      description: 'find-policy description',
+      enabled: true,
+      destinations: [{ type: 'workflow', id: 'find-workflow' }],
+      auth: {
+        apiKey: 'secret-find-key',
+        owner: 'find-user',
+        createdByUser: false,
+      },
+      createdBy: 'elastic_profile_uid',
+      createdAt: '2025-01-01T00:00:00.000Z',
+      updatedBy: 'elastic_profile_uid',
+      updatedAt: '2025-01-01T00:00:00.000Z',
+    };
+
+    it('returns items with auth.apiKey stripped', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(
+        makeFindResponse([{ id: 'policy-find-1', attributes: policyAttributes }])
+      );
+
+      const res = await client.findNotificationPolicies();
+
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0].auth).toEqual({ owner: 'find-user', createdByUser: false });
+      expect(res.items[0].auth).not.toHaveProperty('apiKey');
+    });
+
+    it('uses default pagination when no params provided', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      const res = await client.findNotificationPolicies();
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          page: 1,
+          perPage: 20,
+        })
+      );
+      expect(res.page).toBe(1);
+      expect(res.perPage).toBe(20);
+      expect(res.total).toBe(0);
+      expect(res.items).toEqual([]);
+    });
+
+    it('passes custom pagination params', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ page: 3, perPage: 5 });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 3,
+          perPage: 5,
+        })
+      );
+    });
+
+    it('forwards search parameter with search fields', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ search: 'my-search' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'my-search',
+          searchFields: ['name', 'description', 'destinations.id'],
+        })
+      );
+    });
+
+    it('builds KQL filter for destinationType', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ destinationType: 'workflow' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.objectContaining({ type: 'function' }),
+        })
+      );
+    });
+
+    it('builds KQL filter for createdBy', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ createdBy: 'user-123' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.objectContaining({ type: 'function' }),
+        })
+      );
+    });
+
+    it('builds KQL filter for enabled=true', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ enabled: true });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.objectContaining({ type: 'function' }),
+        })
+      );
+    });
+
+    it('builds KQL filter for enabled=false', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ enabled: false });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.objectContaining({ type: 'function' }),
+        })
+      );
+    });
+
+    it('maps sort field name to name.keyword', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ sortField: 'name', sortOrder: 'asc' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'name.keyword',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('maps sort field createdAt without transformation', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ sortField: 'createdAt', sortOrder: 'desc' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'createdAt',
+          sortOrder: 'desc',
+        })
+      );
+    });
+
+    it('returns multiple items with correct structure', async () => {
+      const secondAttributes: NotificationPolicySavedObjectAttributes = {
+        ...policyAttributes,
+        name: 'find-policy-2',
+        auth: {
+          apiKey: 'another-secret-key',
+          owner: 'another-user',
+          createdByUser: true,
+        },
+      };
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce(
+        makeFindResponse(
+          [
+            { id: 'policy-find-1', attributes: policyAttributes },
+            { id: 'policy-find-2', attributes: secondAttributes, version: 'WzIsMV0=' },
+          ],
+          2
+        )
+      );
+
+      const res = await client.findNotificationPolicies();
+
+      expect(res.items).toHaveLength(2);
+      expect(res.total).toBe(2);
+
+      expect(res.items[0].id).toBe('policy-find-1');
+      expect(res.items[0].name).toBe('find-policy');
+      expect(res.items[0].auth).toEqual({ owner: 'find-user', createdByUser: false });
+      expect(res.items[0].auth).not.toHaveProperty('apiKey');
+
+      expect(res.items[1].id).toBe('policy-find-2');
+      expect(res.items[1].name).toBe('find-policy-2');
+      expect(res.items[1].auth).toEqual({ owner: 'another-user', createdByUser: true });
+      expect(res.items[1].auth).not.toHaveProperty('apiKey');
+    });
+  });
+
   describe('updateNotificationPolicy', () => {
     it('updates a notification policy and rotates the API key', async () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
@@ -836,7 +1043,6 @@ describe('NotificationPolicyClient', () => {
         'policy-id-enable',
         {
           enabled: true,
-          snoozedUntil: undefined,
           updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
@@ -908,7 +1114,6 @@ describe('NotificationPolicyClient', () => {
         'policy-id-disable',
         {
           enabled: false,
-          snoozedUntil: undefined,
           updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
@@ -1011,6 +1216,13 @@ describe('NotificationPolicyClient', () => {
             references: [],
             version: 'WzUsMV0=',
           },
+          {
+            id: 'policy-4',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzYsMV0=',
+          },
         ],
       });
 
@@ -1019,6 +1231,7 @@ describe('NotificationPolicyClient', () => {
           { id: 'policy-1', action: 'enable' },
           { id: 'policy-2', action: 'disable' },
           { id: 'policy-3', action: 'snooze', snoozed_until: '2025-06-01T12:00:00.000Z' },
+          { id: 'policy-4', action: 'unsnooze' },
         ],
       });
 
@@ -1029,7 +1242,6 @@ describe('NotificationPolicyClient', () => {
           id: 'policy-1',
           attributes: {
             enabled: true,
-            snoozedUntil: undefined,
             updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
@@ -1039,7 +1251,6 @@ describe('NotificationPolicyClient', () => {
           id: 'policy-2',
           attributes: {
             enabled: false,
-            snoozedUntil: undefined,
             updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
@@ -1053,12 +1264,21 @@ describe('NotificationPolicyClient', () => {
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
         },
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-4',
+          attributes: {
+            snoozedUntil: null,
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
       ]);
 
       expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
       expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
 
-      expect(res).toEqual({ processed: 3, total: 3, errors: [] });
+      expect(res).toEqual({ processed: 4, total: 4, errors: [] });
     });
 
     it('collects errors from bulkUpdate response', async () => {
