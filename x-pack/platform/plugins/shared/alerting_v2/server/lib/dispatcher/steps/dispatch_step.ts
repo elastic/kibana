@@ -22,7 +22,6 @@ import type {
   NotificationGroup,
 } from '../types';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
-
 const DEFAULT_SPACE_ID = 'default';
 
 @injectable()
@@ -87,6 +86,14 @@ export class DispatchStep implements DispatcherStep {
     if (!workflow) {
       this.logger.warn({
         message: () => `Workflow ${workflowId} not found, skipping dispatch for group ${group.id}`,
+      });
+      return;
+    }
+
+    if (!workflow.enabled) {
+      this.logger.warn({
+        message: () =>
+          `Workflow ${workflowId} is disabled, enable it to dispatch for group ${group.id}`,
       });
       return;
     }
