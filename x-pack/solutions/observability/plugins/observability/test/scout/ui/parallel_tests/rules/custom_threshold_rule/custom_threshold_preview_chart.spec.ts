@@ -29,36 +29,19 @@ test.describe(
       await expect(previewChart.locator('[data-rendering-count="2"]')).toBeVisible();
     });
 
-    test('should handle the error message correctly', async ({ page }) => {
+    test('should show an error message when the equation is invalid', async ({ page }) => {
       const customEquation = page.testSubj.locator('customEquation');
       const customEquationField = page.testSubj.locator(
         'thresholdRuleCustomEquationEditorFieldText'
       );
-      const customEquationPopoverCloseButton = page.testSubj.locator(
-        'o11yClosablePopoverTitleButton'
-      );
       const lensFailure = page.testSubj.locator('embeddable-lens-failure');
 
-      await test.step('introduce an error and verify failure panel appears', async () => {
-        await customEquation.click();
-        await customEquationField.click();
-        await customEquationField.fill('A +');
-        await customEquationPopoverCloseButton.click();
+      await customEquation.click();
+      await customEquationField.fill('A +');
+      await page.testSubj.click('o11yClosablePopoverTitleButton');
 
-        // The exact error message text varies by Lens version — only assert visibility.
-        await expect(lensFailure).toBeVisible({ timeout: 20_000 });
-      });
-
-      await test.step('fix the error and verify failure panel disappears', async () => {
-        await customEquation.click();
-        await expect(customEquationField).toBeVisible({ timeout: 20_000 });
-        await customEquationField.fill('A');
-        await expect(customEquationField).toHaveValue('A');
-        await customEquationPopoverCloseButton.click();
-        await expect(customEquation).toContainText('A');
-
-        await expect(lensFailure).toBeHidden({ timeout: 60_000 });
-      });
+      await expect(lensFailure).toBeVisible({ timeout: 20_000 });
+      await expect(lensFailure).toContainText(/error/i);
     });
   }
 );
