@@ -57,34 +57,8 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   const { isCollapsed, isCollapsible, expandablePillsId } = useFilterBarContext();
 
-  const filterPills = (
-    <EuiFlexGroup
-      css={styles.filterPillGroup}
-      ref={groupRef}
-      wrap={true}
-      responsive={false}
-      gutterSize="none" // We use `gap` in the styles instead for better truncation of badges
-      alignItems="center"
-      tabIndex={-1}
-      data-test-subj="filter-items-group"
-      className={`filter-items-group ${props.className ?? ''}`}
-    >
-      {props.prepend}
-      <FilterItems
-        filters={props.filters!}
-        onFiltersUpdated={props.onFiltersUpdated}
-        indexPatterns={props.indexPatterns!}
-        timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-        filtersForSuggestions={props.filtersForSuggestions}
-        hiddenPanelOptions={props.hiddenPanelOptions}
-        readOnly={props.isDisabled}
-        suggestionsAbstraction={props.suggestionsAbstraction}
-      />
-    </EuiFlexGroup>
-  );
-
   if (!isCollapsible) {
-    return filterPills;
+    return null;
   }
 
   return (
@@ -100,7 +74,29 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         grow={true}
         css={[styles.pillsScrollContainer, isCollapsed ? styles.filterBarContentCollapsed : null]}
       >
-        {filterPills}
+        <EuiFlexGroup
+          css={styles.filterPillGroup}
+          ref={groupRef}
+          wrap={true}
+          responsive={false}
+          gutterSize="none" // We use `gap` in the styles instead for better truncation of badges
+          alignItems="center"
+          tabIndex={-1}
+          data-test-subj="filter-items-group"
+          className={`filter-items-group ${props.className ?? ''}`}
+        >
+          {props.prepend}
+          <FilterItems
+            filters={props.filters!}
+            onFiltersUpdated={props.onFiltersUpdated}
+            indexPatterns={props.indexPatterns!}
+            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+            filtersForSuggestions={props.filtersForSuggestions}
+            hiddenPanelOptions={props.hiddenPanelOptions}
+            readOnly={props.isDisabled}
+            suggestionsAbstraction={props.suggestionsAbstraction}
+          />
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

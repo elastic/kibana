@@ -14,8 +14,6 @@ export const filterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boole
   return {
     filterPillGroup: css`
       gap: ${euiTheme.size.xs};
-      max-height: calc(${euiTheme.size.base} * 10);
-      overflow-y: auto;
 
       &:not(:empty) {
         margin-top: ${afterQueryBar ? euiTheme.size.s : 0};
@@ -23,7 +21,7 @@ export const filterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boole
     `,
     /** Scrollable container for filter pills when expanded */
     pillsScrollContainer: css`
-      max-height: 150px;
+      max-height: calc(${euiTheme.size.base} * 10);
       overflow-y: auto;
       transition: max-height 200ms ease;
     `,
