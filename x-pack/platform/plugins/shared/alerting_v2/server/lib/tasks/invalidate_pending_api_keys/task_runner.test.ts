@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import type { PluginConfig } from '../../../config';
@@ -19,38 +21,28 @@ jest.mock('@kbn/task-manager-plugin/server', () => ({
 
 const { runInvalidate } = jest.requireMock('@kbn/task-manager-plugin/server');
 
-const securityCore: jest.Mocked<SecurityServiceStart> = {
-  authc: {
-    apiKeys: {
-      uiam: {
-        invalidate: jest.fn(),
-      },
-    },
-  },
-} as unknown as jest.Mocked<SecurityServiceStart>;
-
-const security: jest.Mocked<SecurityPluginStart> = {
-  authc: {
-    apiKeys: {
-      invalidateAsInternalUser: jest.fn(),
-    },
-  },
-} as unknown as jest.Mocked<SecurityPluginStart>;
-
 const config = {
   get: jest.fn().mockReturnValue({ invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' } }),
 } as unknown as PluginInitializerContext<PluginConfig>['config'];
 
 describe('ApiKeyInvalidationTaskRunner', () => {
   const logger = loggingSystemMock.createLogger();
-  const savedObjects = savedObjectsServiceMock.createStartContract();
+  const savedObjectsClient = savedObjectsClientMock.create();
+  const securityStart = securityMock.createStart();
+  const securityCore = securityServiceMock.createStart();
 
   let runner: ApiKeyInvalidationTaskRunner;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    runner = new ApiKeyInvalidationTaskRunner(logger, savedObjects, securityCore, security, config);
+    runner = new ApiKeyInvalidationTaskRunner(
+      logger,
+      savedObjectsClient,
+      securityCore,
+      securityStart,
+      config
+    );
   });
 
   it('calls runInvalidate with correct parameters and no encryptedSavedObjectsClient', async () => {
@@ -59,16 +51,14 @@ describe('ApiKeyInvalidationTaskRunner', () => {
       abortController: new AbortController(),
     });
 
-    expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([
-      API_KEY_PENDING_INVALIDATION_TYPE,
-    ]);
     expect(runInvalidate).toHaveBeenCalledWith(
       expect.objectContaining({
+        savedObjectsClient,
         savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,
         savedObjectTypesToQuery: [],
         removalDelay: '1h',
         logger,
-        invalidateApiKeyFn: security.authc.apiKeys.invalidateAsInternalUser,
+        invalidateApiKeyFn: securityStart.authc.apiKeys.invalidateAsInternalUser,
         invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
       })
     );
@@ -106,8 +96,9 @@ describe('ApiKeyInvalidationTaskRunner', () => {
       abortController: new AbortController(),
     });
 
-    expect(logger.warn).toHaveBeenCalledWith(
-      'Error executing notification policy apiKey invalidation task: invalidation failed'
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error executing notification policy apiKey invalidation task: invalidation failed',
+      expect.any(Object)
     );
     expect(result).toEqual({
       state: { runs: 2, total_invalidated: 0 },
