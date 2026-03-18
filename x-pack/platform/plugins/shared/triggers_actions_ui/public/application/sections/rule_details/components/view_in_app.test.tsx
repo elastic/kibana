@@ -40,36 +40,32 @@ const renderWithIntl = (ui: React.ReactElement) => {
   );
 };
 
-describe('view in app, link to the app that created the rule', () => {
-  it('is disabled when there is no navigation', async () => {
+describe('view in discover, link to the app that created the rule', () => {
+  it('renders nothing when there is no navigation', async () => {
     const rule = mockRule();
     mockGetNavigation.mockResolvedValueOnce(undefined);
 
-    renderWithIntl(<ViewInApp rule={rule} />);
-    const button = await screen.findByRole('button', { name: /view in app/i });
-
-    expect(button).toBeDisabled();
-    expect(button).toHaveTextContent('View in app');
+    const { container } = renderWithIntl(<ViewInApp rule={rule} />);
 
     await waitFor(() => expect(mockGetNavigation).toBeCalledWith(rule.id));
+    expect(container).toBeEmptyDOMElement();
   });
 
-  it('enabled when there is navigation', async () => {
+  it('renders link when there is navigation', async () => {
     const user = userEvent.setup();
 
-    const rule = mockRule({ id: 'rule-with-nav', consumer: 'siem' });
+    const rule = mockRule({ id: 'rule-with-nav', consumer: 'discover' });
 
     mockGetNavigation.mockResolvedValueOnce('/rule');
 
     renderWithIntl(<ViewInApp rule={rule} />);
-    const button = screen.getByRole('button', { name: /view in app/i });
 
-    await waitFor(() => {
-      expect(button).not.toBeDisabled();
-    });
+    const button = await screen.findByRole('link', { name: /view in discover/i });
 
-    await user.click(button);
-    expect(mockNavigateToUrl).toBeCalledWith('/rule');
+    expect(button).not.toBeDisabled();
+    expect(button).toHaveTextContent('View in Discover');
+    expect(button).toHaveAttribute('href', '/rule');
+    expect(button).toHaveAttribute('target', '_blank');
   });
 });
 

@@ -7,8 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { fromNullable, fold } from 'fp-ts/Option';
 import { pipe } from 'fp-ts/pipeable';
 
@@ -25,7 +24,6 @@ type RuleNavigationLoadingState = string | false | null;
 
 export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ rule }) => {
   const {
-    application: { navigateToUrl },
     http: { basePath },
     alerting: maybeAlerting,
   } = useKibana().services;
@@ -36,12 +34,12 @@ export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ rule }) => 
       fromNullable(maybeAlerting),
       fold(
         /**
-         * If the ruleing plugin is disabled,
+         * If the alerting plugin is disabled,
          * navigation isn't supported
          */
         () => setRuleNavigation(NO_NAVIGATION),
-        (ruleing) => {
-          return ruleing
+        (alerting) => {
+          return alerting
             .getNavigation(rule.id)
             .then((nav) => (nav ? setRuleNavigation(nav) : setRuleNavigation(NO_NAVIGATION)))
             .catch(() => {
@@ -52,37 +50,19 @@ export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ rule }) => 
     );
   }, [rule.id, maybeAlerting]);
 
+  if (!ruleNavigation) return null;
+
   return (
     <EuiButtonEmpty
-      data-test-subj="ruleDetails-viewInApp"
-      isLoading={ruleNavigation === null}
-      disabled={!hasNavigation(ruleNavigation)}
-      iconType="popout"
-      {...getNavigationHandler(ruleNavigation, rule, navigateToUrl, basePath)}
+      data-test-subj="ruleDetails-viewInDiscover"
+      href={basePath.prepend(ruleNavigation)}
+      target="_blank"
+      iconType="discoverApp"
     >
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.ruleDetails.viewRuleInAppButtonLabel"
-        defaultMessage="View in app"
-      />
+      {i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleDetails.viewRuleInDiscoverButtonLabel',
+        { defaultMessage: 'View in Discover' }
+      )}
     </EuiButtonEmpty>
   );
 };
-
-function hasNavigation(ruleNavigation: RuleNavigationLoadingState): ruleNavigation is string {
-  return typeof ruleNavigation === 'string';
-}
-
-function getNavigationHandler(
-  ruleNavigation: RuleNavigationLoadingState,
-  rule: Rule,
-  navigateToUrl: CoreStart['application']['navigateToUrl'],
-  basePath: CoreStart['http']['basePath']
-): object {
-  return hasNavigation(ruleNavigation)
-    ? {
-        onClick: () => {
-          navigateToUrl(basePath.prepend(ruleNavigation));
-        },
-      }
-    : {};
-}
