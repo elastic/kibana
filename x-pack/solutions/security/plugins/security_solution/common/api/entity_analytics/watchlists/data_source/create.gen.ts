@@ -36,6 +36,9 @@ export const CreateWatchlistEntitySourceRequestBody = z
     type: EntitySourceType,
     name: z.string(),
     indexPattern: z.string().optional(),
+    /**
+     * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+     */
     integrationName: z.string().optional(),
     enabled: z.boolean().optional(),
     matchers: z.array(Matcher).optional(),
