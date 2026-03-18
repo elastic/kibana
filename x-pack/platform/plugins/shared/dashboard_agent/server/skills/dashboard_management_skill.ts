@@ -57,7 +57,7 @@ Use this contract:
   "operations": [
     { "operation": "set_metadata", "title": "optional", "description": "optional" },
     { "operation": "add_markdown", "markdownContent": "...", "grid": { "x": 0, "y": 0, "w": 36, "h": 5 }, "sectionId": "optional-section-id" },
-    { "operation": "add_panels_from_attachments", "items": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 }, "sectionId": "optional-section-id" }] },
+    { "operation": "add_panels_from_attachments", "items": [{ "attachmentId": "id", "grid": { "x": 0, "y": 5, "w": 24, "h": 9 }, "sectionId": "optional-section-id" }] },
     { "operation": "add_section", "title": "Section title", "grid": { "y": 16 }, "panels": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 } }] },
     { "operation": "remove_section", "sectionId": "existing-section-id", "panelAction": "promote" },
     { "operation": "remove_panels", "panelIds": ["panel-id"] }
@@ -216,7 +216,7 @@ See \`./examples/manage-dashboard-payloads\` for complete payload examples cover
     { "operation": "remove_panels", "panelIds": ["panel-xyz"] },
     {
       "operation": "add_panels_from_attachments",
-      "items": [{ "attachmentId": "viz-attachment-789", "grid": { "x": 0, "y": 0, "w": 24, "h": 8 } }]
+      "items": [{ "attachmentId": "viz-attachment-789", "grid": { "x": 0, "y": 5, "w": 24, "h": 8 } }]
     },
     {
       "operation": "add_markdown",
