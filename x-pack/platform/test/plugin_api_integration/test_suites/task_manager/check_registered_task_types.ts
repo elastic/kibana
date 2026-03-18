@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
     'sampleLongRunningRecurringTask',
+    'sampleRecurringTaskTimingOutWithError',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -161,8 +162,6 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:xpack.uptime.alerts.tlsCertificate',
         'alerting_health_check',
         'alerting_telemetry',
-        'alerting_v2:dispatcher',
-        'alerting_v2:rule_executor',
         'alerts_invalidate_api_keys',
         'apm-source-map-migration-task',
         'apm-telemetry-task',
@@ -186,6 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_store:v2:extract_entity_task:host',
         'entity_store:v2:extract_entity_task:service',
         'entity_store:v2:extract_entity_task:user',
+        'entity_store:v2:history_snapshot_task',
         'fleet:agent-status-change-task',
         'fleet:agentless-deployment-sync-task',
         'fleet:auto-install-content-packages-task',
@@ -214,6 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:version-specific-policy-assignment-task',
         'gap-auto-fill-scheduler-task',
         'maintenance-window:generate-events',
+        'osquery:backfillScheduleIds',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',
@@ -246,7 +247,6 @@ export default function ({ getService }: FtrProviderContext) {
         'streams_insights_discovery',
         'streams_onboarding',
         'streams_significant_events_queries_generation',
-        'streams_systems_identification',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:invalidate_api_keys',
         'task_manager:mark_removed_tasks_as_unrecognized',

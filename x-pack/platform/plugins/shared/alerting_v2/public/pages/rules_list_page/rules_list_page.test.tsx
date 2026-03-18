@@ -38,12 +38,18 @@ jest.mock('../../hooks/use_delete_rule', () => ({
   useDeleteRule: () => mockUseDeleteRule(),
 }));
 
+const mockToggleEnabledMutate = jest.fn();
+const mockUseToggleRuleEnabled = jest.fn();
+jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
+  useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
+}));
+
 const mockRules = [
   {
     id: 'rule-1',
     kind: 'alert',
     enabled: true,
-    metadata: { name: 'Rule One', labels: ['prod'] },
+    metadata: { name: 'Rule One', description: 'Monitors log errors', labels: ['prod'] },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
@@ -81,6 +87,10 @@ describe('RulesListPage', () => {
       mutate: mockDeleteMutate,
       isLoading: false,
     });
+    mockUseToggleRuleEnabled.mockReturnValue({
+      mutate: mockToggleEnabledMutate,
+      isLoading: false,
+    });
   });
 
   it('renders loading state', () => {
@@ -108,6 +118,34 @@ describe('RulesListPage', () => {
 
     expect(screen.getByText('Rule One')).toBeInTheDocument();
     expect(screen.getByText('Rule Two')).toBeInTheDocument();
+  });
+
+  it('renders description under the rule name when present', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByText('Monitors log errors')).toBeInTheDocument();
+  });
+
+  it('does not render description when not present', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    // Rule Two has no description — should only show the name
+    const ruleTwoName = screen.getByText('Rule Two');
+    expect(ruleTwoName.closest('div')?.querySelectorAll('.euiText--extraSmall')).toHaveLength(0);
   });
 
   it('renders the Source column with extracted data source', () => {
@@ -233,6 +271,92 @@ describe('RulesListPage', () => {
       expect.objectContaining({
         onSettled: expect.any(Function),
       })
+    );
+  });
+
+  it('renders the Status column with Enabled and Disabled badges', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByText('Enabled')).toBeInTheDocument();
+    expect(screen.getByText('Disabled')).toBeInTheDocument();
+  });
+
+  it('shows "Disable" action for enabled rules and "Enable" for disabled rules', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    // Open the context menu for the enabled rule (rule-1)
+    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('toggleEnabledRule-rule-1')).toHaveTextContent('Disable');
+    });
+  });
+
+  it('calls toggleEnabledMutation when toggle action is clicked', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    // Open the context menu for the enabled rule (rule-1)
+    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+    // Click the toggle action — should disable the enabled rule
+    fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+
+    expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
+  });
+
+  it('shows "Clone" action in the context menu', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone');
+    });
+  });
+
+  it('navigates to the create page with cloneFrom query param when clone is clicked', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+    fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
+
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+      '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
     );
   });
 });

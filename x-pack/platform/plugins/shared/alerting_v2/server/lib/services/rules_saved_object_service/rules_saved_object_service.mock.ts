@@ -15,13 +15,9 @@ export function createRulesSavedObjectService(): {
   mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 } {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
-  const mockSavedObjectsClientFactory = jest.fn().mockReturnValue(mockSavedObjectsClient);
   const mockSpaces = spacesMock.createStart();
 
-  const rulesSavedObjectService = new RulesSavedObjectService(
-    mockSavedObjectsClientFactory,
-    mockSpaces
-  );
+  const rulesSavedObjectService = new RulesSavedObjectService(mockSavedObjectsClient, mockSpaces);
 
   return { rulesSavedObjectService, mockSavedObjectsClient };
 }

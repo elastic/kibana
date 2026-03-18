@@ -57,7 +57,19 @@ export interface UserActivityEvent {
   action: UserActivityActionId;
   /** Event type {@link UserActivityEventType}. */
   type: UserActivityEventType;
+  /** ISO8601 timestamp of the event start time. */
+  start?: string;
+  /** ISO8601 timestamp of the event end time. */
+  end?: string;
+  /** Duration (in ns) between the event start and end timestamps. */
+  duration?: number;
 }
+
+/**
+ * Additional bucket of non-standard metadata specific to the user activity log.
+ * @public
+ */
+export type UserActivityMetadata = Record<string, unknown>;
 
 /** @public */
 export interface TrackUserActionParams {
@@ -67,6 +79,8 @@ export interface TrackUserActionParams {
   event: UserActivityEvent;
   /** Object attributes written to the log entry. */
   object: UserActivityObject;
+  /** Additional bucket of non-standard metadata. */
+  metadata?: UserActivityMetadata;
 }
 
 /**

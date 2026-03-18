@@ -7,6 +7,7 @@
 
 import type {
   CreateNotificationPolicyData,
+  NotificationPolicyBulkAction,
   NotificationPolicyResponse,
   UpdateNotificationPolicyData,
 } from '@kbn/alerting-v2-schemas';
@@ -21,9 +22,31 @@ export interface CreateNotificationPolicyParams {
   options?: { id?: string };
 }
 
+export interface SnoozeNotificationPolicyParams {
+  id: string;
+  snoozedUntil: string;
+}
+
+export interface BulkActionNotificationPoliciesParams {
+  actions: NotificationPolicyBulkAction[];
+}
+
+export interface BulkActionNotificationPoliciesResponse {
+  processed: number;
+  total: number;
+  errors: Array<{ id: string; message: string }>;
+}
+export type FindNotificationPoliciesSortField = 'name' | 'createdAt' | 'createdBy' | 'updatedAt';
+
 export interface FindNotificationPoliciesParams {
   page?: number;
   perPage?: number;
+  search?: string;
+  destinationType?: string;
+  createdBy?: string;
+  enabled?: boolean;
+  sortField?: FindNotificationPoliciesSortField;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface FindNotificationPoliciesResponse {

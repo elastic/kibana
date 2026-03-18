@@ -26,6 +26,7 @@ import { readKibanaConfig } from './read_kibana_config';
 import { enableStreams } from './util/enable_streams';
 import { createDataView } from './util/create_data_view';
 import { resolveKibanaUrl } from './util/resolve_kibana_url';
+import { buildCustomImages } from './util/build_custom_images';
 import type { DemoType, FailureScenario } from './types';
 import {
   getDemoConfig,
@@ -42,12 +43,11 @@ const DATA_DIR = Path.join(REPO_ROOT, 'data', 'demo_environments');
 async function down(log: ToolingLog, namespace: string, demoName: string) {
   log.info(`Stopping ${demoName}...`);
   await deleteNamespace(namespace);
-  // Also delete the ClusterRole and ClusterRoleBinding
   await execa
-    .command('kubectl delete clusterrole otel-collector --ignore-not-found')
+    .command(`kubectl delete clusterrole otel-collector-${namespace} --ignore-not-found`)
     .catch(() => {});
   await execa
-    .command('kubectl delete clusterrolebinding otel-collector --ignore-not-found')
+    .command(`kubectl delete clusterrolebinding otel-collector-${namespace} --ignore-not-found`)
     .catch(() => {});
 }
 
@@ -102,6 +102,7 @@ export async function ensureOtelDemo({
   version,
   teardown = false,
   scenarioIds = [],
+  forceRebuildImages = false,
 }: {
   log: ToolingLog;
   signal: AbortSignal;
@@ -111,6 +112,7 @@ export async function ensureOtelDemo({
   version?: string;
   teardown?: boolean;
   scenarioIds?: string[];
+  forceRebuildImages?: boolean;
 }) {
   await assertKubectlAvailable();
   await assertMinikubeAvailable();
@@ -129,6 +131,39 @@ export async function ensureOtelDemo({
 
   log.info(`Starting ${demoConfig.displayName} on Kubernetes (minikube)...`);
   log.info(`  Version: ${demoVersion}`);
+
+  if (demoConfig.requiresCustomImages) {
+    if (demoConfig.imageBuildConfig) {
+      log.write('');
+      log.info(
+        `${chalk.bold(
+          'Building custom images:'
+        )} This demo requires images to be built from source.`
+      );
+      if (demoConfig.customImageInstructions) {
+        log.write(chalk.dim(`  ${demoConfig.customImageInstructions.split('\n')[0]}`));
+      }
+      log.write('');
+      await buildCustomImages(log, demoConfig.id, demoConfig.imageBuildConfig, forceRebuildImages);
+      log.write('');
+    } else {
+      log.write('');
+      log.warning(
+        `${chalk.bold(
+          'WARNING:'
+        )} This demo requires custom-built container images that are NOT available in public registries.`
+      );
+      log.warning('Pods will fail to start with ImagePullBackOff errors until images are built.');
+      if (demoConfig.customImageInstructions) {
+        log.write('');
+        log.write(chalk.dim('Build instructions:'));
+        for (const line of demoConfig.customImageInstructions.split('\n')) {
+          log.write(chalk.dim(`  ${line}`));
+        }
+      }
+      log.write('');
+    }
+  }
 
   // Ensure minikube is running
   log.info('Ensuring minikube is running...');
@@ -247,7 +282,7 @@ export async function ensureOtelDemo({
 
   const waitAndReport = async () => {
     try {
-      await waitForPodsReady(namespace, 300);
+      await waitForPodsReady(namespace, 600);
 
       const minikubeIp = await getMinikubeIp();
 
@@ -323,7 +358,7 @@ export async function ensureOtelDemo({
  *
  * @param log - Tooling logger for output
  * @param demoType - Type of demo to patch (default: 'otel-demo')
- * @param scenarioIds - List of scenario IDs to apply (empty = no changes unless reset)
+ * @param scenarioIds - List of failure scenario IDs to apply (empty = no changes unless reset)
  * @param reset - If true, resets all services to defaults
  */
 export async function patchScenarios({
@@ -355,7 +390,6 @@ export async function patchScenarios({
   if (reset) {
     log.info(`Resetting all scenarios to defaults for ${demoConfig.displayName}...`);
 
-    // Reset all services to their default values
     for (const [service, defaults] of Object.entries(serviceDefaults)) {
       const envArgs = Object.entries(defaults)
         .map(([key, value]) => `${key}=${value}`)
@@ -403,7 +437,7 @@ export async function patchScenarios({
     }
   }
 
-  // Apply changes using kubectl set env
+  // Apply env changes using kubectl set env
   for (const [service, envs] of Object.entries(envChanges)) {
     const envArgs = Object.entries(envs)
       .map(([key, value]) => `${key}=${value}`)
@@ -421,7 +455,7 @@ export async function patchScenarios({
   }
 
   log.write('');
-  log.success(`Applied ${scenarioIds.length} scenario(s). Pods will restart with new config.`);
+  log.success(`Applied ${scenarioIds.length} scenario(s).`);
   log.write('');
   log.write(chalk.dim('  To watch pod restarts:'));
   log.write(chalk.dim(`    kubectl get pods -n ${namespace} -w`));

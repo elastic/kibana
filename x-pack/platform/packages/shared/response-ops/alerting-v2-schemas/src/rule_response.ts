@@ -18,6 +18,7 @@ export interface RuleResponse {
   kind: RuleKind;
   metadata: {
     name: string;
+    description?: string;
     owner?: string;
     labels?: string[];
   };
@@ -54,7 +55,6 @@ export interface RuleResponse {
     behavior?: 'no_data' | 'last_status' | 'recover';
     timeframe?: string;
   };
-  notification_policies?: Array<{ ref: string }>;
   enabled: boolean;
   createdBy: string | null;
   createdAt: string;

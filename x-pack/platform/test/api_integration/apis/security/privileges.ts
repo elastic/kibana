@@ -84,7 +84,15 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_assign',
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
-      agentBuilder: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_agents', 'manage_tools'],
+      agentBuilder: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'manage_agents',
+        'manage_tools',
+        'manage_skills',
+      ],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -118,6 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
       actions: ['all', 'read', 'minimal_all', 'minimal_read', 'endpoint_security_execute'],
+      anonymization: ['all', 'read', 'minimal_all', 'minimal_read'],
       stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
       ml: ['all', 'read', 'minimal_all', 'minimal_read'],
       siem: [
@@ -347,8 +356,6 @@ export default function ({ getService }: FtrProviderContext) {
       dataQuality: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_rules', 'manage_alerts'],
       manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
       apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
-      alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
-      alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
       discover: [
         'all',
         'read',

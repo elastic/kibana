@@ -15,7 +15,6 @@ import {
   getDurationUnitValue,
   getDurationNumberInItsUnit,
   INVALID_NUMBER_KEYS,
-  parsePositiveIntegerInput,
 } from './utils';
 
 describe('utils', () => {
@@ -221,20 +220,7 @@ describe('utils', () => {
 
   describe('numeric input helpers', () => {
     it('exposes invalid number keys for EuiFieldNumber guards', () => {
-      expect(INVALID_NUMBER_KEYS).toEqual(['-', '+', '.', 'e', 'E']);
-    });
-
-    it('parses positive integer input values', () => {
-      expect(parsePositiveIntegerInput('1')).toBe(1);
-      expect(parsePositiveIntegerInput(' 42 ')).toBe(42);
-    });
-
-    it('returns undefined for invalid integer input values', () => {
-      expect(parsePositiveIntegerInput('')).toBeUndefined();
-      expect(parsePositiveIntegerInput('0')).toBeUndefined();
-      expect(parsePositiveIntegerInput('-1')).toBeUndefined();
-      expect(parsePositiveIntegerInput('1.5')).toBeUndefined();
-      expect(parsePositiveIntegerInput('abc')).toBeUndefined();
+      expect(INVALID_NUMBER_KEYS).toEqual(['-', '+', ',', '.', 'e', 'E']);
     });
   });
 });

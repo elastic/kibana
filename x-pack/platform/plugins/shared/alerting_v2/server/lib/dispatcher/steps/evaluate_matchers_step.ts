@@ -38,21 +38,22 @@ export function evaluateMatchers(
   policies: ReadonlyMap<NotificationPolicyId, NotificationPolicy>
 ): MatchedPair[] {
   const matched: MatchedPair[] = [];
+  const allPolicies = Array.from(policies.values());
 
   for (const episode of dispatchable) {
     const rule = rules.get(episode.rule_id);
     if (!rule) continue;
 
-    for (const policyId of rule.notificationPolicyIds) {
-      const policy = policies.get(policyId);
-      if (!policy) continue;
+    for (const policy of allPolicies) {
+      if (!policy.enabled) continue;
+      if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
 
       if (!policy.matcher) {
         matched.push({ episode, policy });
         continue;
       }
 
-      const isMatch = evaluateKql(policy.matcher, episode);
+      const isMatch = evaluateKql(policy.matcher, { ...episode, rule });
       if (isMatch) {
         matched.push({ episode, policy });
       }

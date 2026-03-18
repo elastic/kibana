@@ -17,10 +17,11 @@ import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
-import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
+import type { DiscoverInternalState } from '../../../state_management/redux';
+import { selectTab } from '../../../state_management/redux/selectors';
 
 export const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -39,9 +40,10 @@ const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 export const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
+  tabId: string;
+  getState: () => DiscoverInternalState;
   onFinishAction: () => void;
-  stateContainer: DiscoverStateContainer;
-}> = ({ stateContainer, discoverParams, services, onFinishAction = () => {} }) => {
+}> = ({ discoverParams, services, tabId, getState, onFinishAction = () => {} }) => {
   const {
     dataView,
     isEsqlMode,
@@ -51,8 +53,10 @@ export const CreateAlertFlyout: React.FC<{
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
+
+  // Get fresh tab state when the component renders
+  const currentTab = selectTab(getState(), tabId);
   const timeField = getTimeField(dataView);
-  const currentTab = stateContainer.getCurrentTab();
   const { query, savedQuery: savedQueryId } = currentTab.appState;
 
   /**
@@ -120,11 +124,13 @@ export const CreateAlertFlyout: React.FC<{
 export const getAlertsAppMenuItem = ({
   discoverParams,
   services,
-  stateContainer,
+  tabId,
+  getState,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  stateContainer: DiscoverStateContainer;
+  tabId: string;
+  getState: () => DiscoverInternalState;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
@@ -165,7 +171,8 @@ export const getAlertsAppMenuItem = ({
               onFinishAction={onFinishAction}
               discoverParams={discoverParams}
               services={services}
-              stateContainer={stateContainer}
+              tabId={tabId}
+              getState={getState}
             />
           );
         },

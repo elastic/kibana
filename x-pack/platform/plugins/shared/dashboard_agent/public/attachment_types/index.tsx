@@ -7,27 +7,41 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import type {
+  DashboardApi,
+  DashboardRendererProps,
+  DashboardStart,
+} from '@kbn/dashboard-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
-
-// TODO: Remove this once we have a real action for the canvas - required to show the canvas header
-const canvasNoopAction = {
-  label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasNoopActionLabel', {
-    defaultMessage: 'Placeholder',
-  }),
-  icon: 'eye',
-  type: ActionButtonType.PRIMARY,
-  handler: () => undefined,
-} as const;
+import { getStateFromAttachment } from './attachment_to_dashboard_state';
 
 export const registerDashboardAttachmentUiDefinition = ({
-  attachments,
+  agentBuilder: { attachments },
+  dashboardLocator,
+  unifiedSearch,
+  dashboardPlugin,
 }: {
-  attachments: AttachmentServiceStartContract;
+  agentBuilder: AgentBuilderPluginStart;
+  dashboardLocator?: DashboardRendererProps['locator'];
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  dashboardPlugin: DashboardStart;
 }): (() => void) => {
+  let dashboardApi: DashboardApi | undefined;
+  const dashboardAppApiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
+    dashboardApi = api;
+  });
+
+  const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
+  const checkSavedDashboardExist = async (dashboardId: string) => {
+    const findDashboardsService = await findDashboardsServicePromise;
+    const result = await findDashboardsService.findById(dashboardId);
+    return result.status === 'success';
+  };
   attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
     getLabel: (attachment) => {
       return (
@@ -38,16 +52,20 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    renderCanvasContent: (props) => <DashboardCanvasContent {...props} />,
-    getActionButtons: ({ isCanvas, openCanvas }) => {
+    renderCanvasContent: (props, callbacks) => (
+      <DashboardCanvasContent
+        {...props}
+        registerActionButtons={callbacks.registerActionButtons}
+        updateOrigin={callbacks.updateOrigin}
+        dashboardLocator={dashboardLocator}
+        searchBarComponent={unifiedSearch.ui.SearchBar}
+        checkSavedDashboardExist={checkSavedDashboardExist}
+      />
+    ),
+    getActionButtons: ({ attachment, openCanvas, isCanvas }) => {
       if (isCanvas) {
-        return [canvasNoopAction];
-      }
-
-      if (!openCanvas) {
         return [];
       }
-
       return [
         {
           label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.previewActionLabel', {
@@ -55,11 +73,22 @@ export const registerDashboardAttachmentUiDefinition = ({
           }),
           icon: 'eye',
           type: ActionButtonType.SECONDARY,
-          handler: openCanvas,
+          handler: () => {
+            if (!dashboardApi) {
+              openCanvas?.();
+              return;
+            }
+
+            dashboardApi.setViewMode('edit');
+            dashboardApi.setState(getStateFromAttachment(attachment));
+          },
         },
       ];
     },
   });
 
-  return () => {};
+  return () => {
+    dashboardAppApiSubscription.unsubscribe();
+    dashboardApi = undefined;
+  };
 };

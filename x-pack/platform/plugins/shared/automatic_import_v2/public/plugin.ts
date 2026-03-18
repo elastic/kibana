@@ -19,9 +19,11 @@ import type {
   AutomaticImportV2PluginStart,
   AutomaticImportPluginStartDependencies,
 } from './types';
-import { useGetAllIntegrations, useGetIntegrationById } from './common';
+import { useGetAllIntegrations } from './common/hooks/use_get_all_integrations';
+import { useGetIntegrationById } from './common/hooks/use_get_integration_by_id';
 import { getCreateIntegrationLazy } from './components/create_integration';
 import { getCreateIntegrationSideCardButtonLazy } from './components/create_integration_card_button';
+import { getDataStreamResultsFlyoutComponent } from './components/data_stream_results_flyout';
 
 export class AutomaticImportV2Plugin
   implements Plugin<AutomaticImportV2PluginSetup, AutomaticImportV2PluginStart>
@@ -62,6 +64,7 @@ export class AutomaticImportV2Plugin
       components: {
         CreateIntegration: getCreateIntegrationLazy(services),
         CreateIntegrationSideCardButton: getCreateIntegrationSideCardButtonLazy(),
+        DataStreamResultsFlyout: getDataStreamResultsFlyoutComponent(),
       },
     };
   }

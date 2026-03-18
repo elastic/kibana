@@ -240,6 +240,7 @@ const xySharedSettings = {
           {
             ...sharedLegendSchema,
             inside: schema.maybe(schema.literal(false)),
+            layout: schema.maybe(schema.literal('list')),
             position: schema.maybe(
               schema.oneOf([
                 schema.literal('top'),
@@ -756,7 +757,28 @@ export const xyStateSchema = schema.object(
   { meta: { id: 'xyChart', title: 'XY Chart', description: 'Complete XY chart configuration' } }
 );
 
+// TODO: temporary ESQL schema for XY chart to not feed agent with heavy schema for DSL that is not used in agent
+export const xyStateSchemaESQL = schema.object(
+  {
+    type: schema.literal('xy'),
+    ...sharedPanelInfoSchema,
+    ...xySharedSettings,
+    layers: schema.arrayOf(xyDataLayerSchemaESQL, {
+      minSize: 1,
+      maxSize: 1,
+      meta: { description: 'Only single layer ESQL charts are supported ' },
+    }),
+  },
+  {
+    meta: {
+      id: 'xyChartESQL',
+      title: 'XY Chart (ES|QL)',
+    },
+  }
+);
+
 export type XYState = TypeOf<typeof xyStateSchema>;
+export type XYStateESQL = TypeOf<typeof xyStateSchemaESQL>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;
 export type DataLayerTypeNoESQL = TypeOf<typeof xyDataLayerSchemaNoESQL>;
 export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;

@@ -6,7 +6,7 @@
  */
 
 import { PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreStart, Request } from '@kbn/core-di-server';
+import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
@@ -17,12 +17,14 @@ import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
 import { NotificationPolicyClient } from '../lib/notification_policy_client';
+import { NotificationPolicyNamespaceToken } from '../lib/notification_policy_client/tokens';
 import { RulesClient } from '../lib/rules_client';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import {
+  NotificationPolicySavedObjectsClientToken,
   NotificationPolicySavedObjectServiceInternalToken,
   NotificationPolicySavedObjectServiceScopedToken,
 } from '../lib/services/notification_policy_saved_object_service/tokens';
@@ -36,6 +38,7 @@ import { AlertingRetryService } from '../lib/services/retry_service';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
 import {
+  RuleSavedObjectsClientToken,
   RulesSavedObjectServiceInternalToken,
   RulesSavedObjectServiceScopedToken,
 } from '../lib/services/rules_saved_object_service/tokens';
@@ -49,17 +52,40 @@ import {
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
+import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
+import {
+  API_KEY_PENDING_INVALIDATION_TYPE,
+  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+} from '../saved_objects';
 import {
   EncryptedSavedObjectsClientToken,
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
-import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
-  bind(NotificationPolicyClient).toSelf().inRequestScope();
+  bind(NotificationPolicyNamespaceToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+      const spaceId = spaces.spacesService.getSpaceId(request);
+      return spaces.spacesService.spaceIdToNamespace(spaceId);
+    })
+    .inRequestScope();
+  bind(NotificationPolicyClient)
+    .toDynamicValue(({ get }) => {
+      return new NotificationPolicyClient(
+        get(NotificationPolicySavedObjectServiceScopedToken),
+        get(UserService),
+        get(ApiKeyService),
+        get(EncryptedSavedObjectsClientToken),
+        get(NotificationPolicyNamespaceToken)
+      );
+    })
+    .inRequestScope();
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
@@ -90,6 +116,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
   );
 
+  bind(RuleSavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({ includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE] }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
   bind(RulesSavedObjectService).toSelf().inRequestScope();
   bind(RulesSavedObjectServiceScopedToken).toService(RulesSavedObjectService);
   bind(RulesSavedObjectServiceInternalToken)
@@ -97,7 +131,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const savedObjects = get(CoreStart('savedObjects'));
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
       const internalClient = savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
-      return new RulesSavedObjectService(() => internalClient, spaces);
+      return new RulesSavedObjectService(internalClient, spaces);
     })
     .inSingletonScope();
 
@@ -112,6 +146,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
+  bind(NotificationPolicySavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({
+          includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
+        }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
   bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
   bind(NotificationPolicySavedObjectServiceScopedToken).toService(
     NotificationPolicySavedObjectService
@@ -124,7 +168,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       ]);
       const esoClient = get(EncryptedSavedObjectsClientToken);
-      return new NotificationPolicySavedObjectService(() => internalClient, spaces, esoClient);
+      return new NotificationPolicySavedObjectService(internalClient, spaces, esoClient);
+    })
+    .inSingletonScope();
+
+  bind(ApiKeyServiceSavedObjectsClientToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      return savedObjects.createInternalRepository([API_KEY_PENDING_INVALIDATION_TYPE]);
     })
     .inSingletonScope();
 

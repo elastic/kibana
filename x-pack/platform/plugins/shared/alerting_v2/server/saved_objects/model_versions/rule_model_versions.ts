@@ -18,6 +18,7 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
           metadata: {
             properties: {
               name: { type: 'text' },
+              description: { type: 'text' },
               owner: { type: 'keyword' },
               labels: { type: 'keyword' },
             },
@@ -47,7 +48,6 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
             },
           },
           no_data: { type: 'object', enabled: false },
-          notification_policies: { type: 'object', enabled: false },
           enabled: { type: 'boolean' },
           createdBy: { type: 'keyword' },
           createdAt: { type: 'date' },

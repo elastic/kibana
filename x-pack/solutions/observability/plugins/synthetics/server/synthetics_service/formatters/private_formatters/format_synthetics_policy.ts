@@ -58,6 +58,17 @@ export const formatSyntheticsPolicy = (
     // enable only the input type and data stream that matches the monitor type.
     currentInput.enabled = true;
     dataStream.enabled = true;
+
+    if (monitorType === 'browser') {
+      currentInput.streams.forEach((stream) => {
+        if (
+          stream.data_stream.dataset === 'browser.network' ||
+          stream.data_stream.dataset === 'browser.screenshot'
+        ) {
+          stream.enabled = true;
+        }
+      });
+    }
   }
 
   configKeys.forEach((key) => {

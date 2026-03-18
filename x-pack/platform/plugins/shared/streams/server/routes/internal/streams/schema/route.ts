@@ -5,14 +5,19 @@
  * 2.0.
  */
 import { getFlattenedObject } from '@kbn/std';
-import type { SampleDocument } from '@kbn/streams-schema';
+import type {
+  FieldDefinitionType,
+  NamedFieldDefinitionConfig,
+  SampleDocument,
+} from '@kbn/streams-schema';
 import {
-  fieldDefinitionConfigSchema,
+  FIELD_DEFINITION_TYPES,
+  namedFieldDefinitionConfigSchema,
   isDescendantOf,
   Streams,
   LOGS_ROOT_STREAM_NAME,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
@@ -34,6 +39,21 @@ import {
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 const FIELD_SIMULATION_TIMEOUT = '1s';
+
+const isFieldDefinitionType = (value: unknown): value is FieldDefinitionType =>
+  typeof value === 'string' && (FIELD_DEFINITION_TYPES as readonly string[]).includes(value);
+
+const isSimulatableFieldDefinition = (
+  field: NamedFieldDefinitionConfig
+): field is NamedFieldDefinitionConfig & { type: FieldDefinitionType } =>
+  isFieldDefinitionType(field.type);
+
+const getSimulatableFieldDefinitions = (fields: NamedFieldDefinitionConfig[]) =>
+  fields.filter(isSimulatableFieldDefinition);
+
+export const __test__ = {
+  getSimulatableFieldDefinitions,
+};
 
 interface SimulateIngestDoc {
   _source: SampleDocument;
@@ -155,9 +175,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     body: z.object({
-      field_definitions: z.array(
-        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
-      ),
+      field_definitions: z.array(namedFieldDefinitionConfigSchema),
     }),
   }),
   handler: async ({
@@ -171,7 +189,10 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -179,13 +200,16 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     const streamDefinition = await streamsClient.getStream(params.path.name);
 
-    const userFieldDefinitions = params.body.field_definitions.flatMap((field) => {
-      // filter out potential system fields since we can't simulate them anyway
-      if (field.type === 'system') {
-        return [];
-      }
-      return [field];
-    });
+    // Only simulate mapping-affecting definitions; ignore doc-only overrides (`{ description }`)
+    // and system fields.
+    const userFieldDefinitions = getSimulatableFieldDefinitions(params.body.field_definitions);
+    if (userFieldDefinitions.length === 0) {
+      return {
+        status: 'success',
+        simulationError: null,
+        documentsWithRuntimeFieldsApplied: null,
+      };
+    }
 
     const propertiesForSample: Record<string, { type: 'keyword' }> = {};
     userFieldDefinitions.forEach((field) => {
@@ -235,8 +259,8 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       };
     }
 
-    const propertiesForSimulation = Object.fromEntries(
-      userFieldDefinitions.map(({ name, ...field }) => [name, field])
+    const propertiesForSimulation: StreamsMappingProperties = Object.fromEntries(
+      userFieldDefinitions.map(({ name, description: _description, ...field }) => [name, field])
     );
 
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
@@ -324,15 +348,16 @@ export const schemaFieldsConflictsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     body: z.object({
-      field_definitions: z.array(
-        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
-      ),
+      field_definitions: z.array(namedFieldDefinitionConfigSchema),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -346,8 +371,10 @@ export const schemaFieldsConflictsRoute = createServerRoute({
       return { conflicts: [] };
     }
 
+    // Only check conflicts for fields that affect ES mappings
+    // Skip system fields and doc-only overrides (no type)
     const userFieldDefinitions = params.body.field_definitions.filter(
-      (field) => field.type !== 'system'
+      (field): field is typeof field & { type: string } => !!field.type && field.type !== 'system'
     );
 
     if (userFieldDefinitions.length === 0) {
@@ -372,8 +399,8 @@ export const schemaFieldsConflictsRoute = createServerRoute({
       const fields = stream.ingest.wired.fields;
 
       for (const [fieldName, config] of Object.entries(fields)) {
-        // Skip system fields
-        if (config.type === 'system') {
+        // Skip system fields and doc-only overrides (no type)
+        if (!config.type || config.type === 'system') {
           continue;
         }
 

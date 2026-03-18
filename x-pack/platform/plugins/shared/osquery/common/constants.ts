@@ -17,7 +17,11 @@ export const OSQUERY_ACTIONS_INDEX = `${ACTIONS_INDEX}-*`;
 export const ACTION_RESPONSES_INDEX = `.logs-${OSQUERY_INTEGRATION_NAME}.action.responses`;
 export const ACTION_RESPONSES_DATA_STREAM_INDEX = `logs-${OSQUERY_INTEGRATION_NAME}.action.responses`;
 
+export const RESULTS_DATA_STREAM_INDEX = `logs-${OSQUERY_INTEGRATION_NAME}.results`;
+
 export const DEFAULT_PLATFORM = 'linux,windows,darwin';
+
+export const OSQUERY_SCHEDULED_INPUT_TYPE = 'osquery_scheduled';
 
 export const CASE_ATTACHMENT_TYPE_ID = 'osquery';
 
@@ -32,5 +36,8 @@ export const API_VERSIONS = {
 
 export enum QUERY_TIMEOUT {
   DEFAULT = 60, // 60 seconds
-  MAX = 60 * 60 * 24, // 24 hours
+  MAX = 900, // 15 minutes (matches backend inRangeRt(60, 60 * 15))
 }
+
+export const MAX_TAGS_PER_ACTION = 20;
+export const MAX_TAG_LENGTH = 256;
