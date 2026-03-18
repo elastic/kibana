@@ -10,6 +10,9 @@ import {
   EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -20,6 +23,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
@@ -95,6 +99,24 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     [endpointIds, featureId, onEndpointsChange]
   );
 
+  const handleDragEnd = useCallback(
+    ({
+      source,
+      destination,
+    }: {
+      source: { index: number };
+      destination?: { index: number } | null;
+    }) => {
+      if (destination && source.index !== destination.index) {
+        onEndpointsChange(
+          featureId,
+          euiDragDropReorder(endpointIds, source.index, destination.index)
+        );
+      }
+    },
+    [endpointIds, featureId, onEndpointsChange]
+  );
+
   const handleCopyApply = useCallback(
     (selectedFeatureIds: string[]) => {
       for (const targetId of selectedFeatureIds) {
@@ -148,44 +170,75 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             </EuiText>
             <EuiSpacer size="s" />
 
-            <EuiSplitPanel.Outer hasBorder>
-              {visibleEndpoints.map((endpointId, index) => (
-                <React.Fragment key={endpointId}>
-                  <EuiSplitPanel.Inner
-                    paddingSize="s"
-                    data-test-subj={`endpoint-row-${endpointId}`}
-                  >
-                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon
-                          type={endpointDisplayMap.get(endpointId)?.icon ?? 'compute'}
-                          size="m"
-                          aria-hidden
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow>
-                        <EuiToolTip
-                          title={endpointDisplayMap.get(endpointId)?.label ?? endpointId}
-                          content={endpointId}
-                          position="top"
-                        >
-                          <EuiText size="s" tabIndex={0}>
-                            {endpointDisplayMap.get(endpointId)?.label ?? endpointId}
-                          </EuiText>
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                      {index === 0 && (
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge color="hollow">{translations.SETTINGS_DEFAULT_BADGE}</EuiBadge>
-                        </EuiFlexItem>
+            <EuiDragDropContext onDragEnd={handleDragEnd}>
+              <EuiSplitPanel.Outer hasBorder>
+                <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
+                  {visibleEndpoints.map((endpointId, index) => (
+                    <EuiDraggable
+                      key={endpointId}
+                      index={index}
+                      draggableId={endpointId}
+                      customDragHandle
+                      hasInteractiveChildren
+                    >
+                      {(provided) => (
+                        <>
+                          <EuiSplitPanel.Inner
+                            paddingSize="s"
+                            data-test-subj={`endpoint-row-${endpointId}`}
+                          >
+                            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                              <EuiFlexItem grow={false}>
+                                <EuiPanel
+                                  color="transparent"
+                                  paddingSize="none"
+                                  {...provided.dragHandleProps}
+                                  aria-label={i18n.translate(
+                                    'xpack.searchInferenceEndpoints.settings.dragHandle',
+                                    { defaultMessage: 'Drag to reorder' }
+                                  )}
+                                >
+                                  <EuiIcon type="grab" size="s" color="subdued" aria-hidden />
+                                </EuiPanel>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiIcon
+                                  type={endpointDisplayMap.get(endpointId)?.icon ?? 'compute'}
+                                  size="m"
+                                  aria-hidden
+                                />
+                              </EuiFlexItem>
+                              <EuiFlexItem grow>
+                                <EuiToolTip
+                                  title={endpointDisplayMap.get(endpointId)?.label ?? endpointId}
+                                  content={endpointId}
+                                  position="top"
+                                >
+                                  <EuiText size="s" tabIndex={0}>
+                                    {endpointDisplayMap.get(endpointId)?.label ?? endpointId}
+                                  </EuiText>
+                                </EuiToolTip>
+                              </EuiFlexItem>
+                              {index === 0 && (
+                                <EuiFlexItem grow={false}>
+                                  <EuiBadge color="hollow">
+                                    {translations.SETTINGS_DEFAULT_BADGE}
+                                  </EuiBadge>
+                                </EuiFlexItem>
+                              )}
+                              {removeButton(endpointId, index)}
+                            </EuiFlexGroup>
+                          </EuiSplitPanel.Inner>
+                          {index !== visibleEndpoints.length - 1 && (
+                            <EuiHorizontalRule margin="none" />
+                          )}
+                        </>
                       )}
-                      {removeButton(endpointId, index)}
-                    </EuiFlexGroup>
-                  </EuiSplitPanel.Inner>
-                  {index !== visibleEndpoints.length - 1 && <EuiHorizontalRule margin="none" />}
-                </React.Fragment>
-              ))}
-            </EuiSplitPanel.Outer>
+                    </EuiDraggable>
+                  ))}
+                </EuiDroppable>
+              </EuiSplitPanel.Outer>
+            </EuiDragDropContext>
 
             <EuiSpacer size="xs" />
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
