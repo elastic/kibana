@@ -42,6 +42,7 @@ const SCHEMA_URI = `inmemory://schemas/test-step-json-historical-editor-schema`;
 export interface StepExecuteHistoricalFormProps {
   value: string;
   setValue: (value: string) => void;
+  warnings: string | null;
   errors: string | null;
   setErrors: (errors: string | null) => void;
   /** When provided (e.g. from replay), pre-select this step execution in the combo */
@@ -62,6 +63,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     setValue,
     errors,
     setErrors,
+    warnings,
     initialStepExecutionId,
     initialWorkflowRunId,
     stepId,
@@ -262,9 +264,9 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         {selectedStepExecution && (
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="s">
-              {errors && errors !== NOT_READY_SENTINEL && (
+              {((errors && errors !== NOT_READY_SENTINEL) || warnings) && (
                 <EuiFlexItem grow={false}>
-                  <InputValidationCallout errors={errors} />
+                  <InputValidationCallout errors={errors} warnings={warnings} />
                 </EuiFlexItem>
               )}
               <EuiFlexItem>

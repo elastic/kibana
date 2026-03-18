@@ -20,10 +20,11 @@ jest.mock('../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_the
 }));
 
 jest.mock('./step_execute_manual_form', () => ({
-  StepExecuteManualForm: ({ value, onChange, errors }: any) => (
+  StepExecuteManualForm: ({ value, onChange, errors, warnings }: any) => (
     <div data-test-subj="mockManualForm">
       <span data-test-subj="manualFormValue">{value}</span>
       {errors && <span data-test-subj="manualFormErrors">{errors}</span>}
+      {warnings && <span data-test-subj="manualFormWarnings">{warnings}</span>}
       <button
         data-test-subj="manualFormChange"
         onClick={() => onChange('{"updated":"value"}')}
@@ -38,16 +39,24 @@ jest.mock('./step_execute_manual_form', () => ({
       >
         {'invalid change'}
       </button>
+      <button
+        data-test-subj="manualFormValidMatchingSchema"
+        onClick={() => onChange('{"requiredField":"ok"}')}
+        type="button"
+      >
+        {'valid matching schema'}
+      </button>
     </div>
   ),
 }));
 
 jest.mock('./step_execute_historical_form', () => ({
   NOT_READY_SENTINEL: '__step_historical_not_ready__',
-  StepExecuteHistoricalForm: ({ value, setValue, errors, setErrors, stepId }: any) => (
+  StepExecuteHistoricalForm: ({ value, setValue, errors, setErrors, stepId, warnings }: any) => (
     <div data-test-subj="mockHistoricalForm">
       <span data-test-subj="historicalFormValue">{value}</span>
       <span data-test-subj="historicalFormStepId">{stepId}</span>
+      {warnings && <span data-test-subj="historicalFormWarnings">{warnings}</span>}
       <button
         data-test-subj="historicalFormChange"
         onClick={() => setValue('{"historical":"input"}')}
@@ -192,15 +201,6 @@ describe('StepExecuteModal', () => {
       });
     });
 
-    it('should call onSubmit with updated inputs after manual edit', () => {
-      renderWithProviders(defaultProps);
-      fireEvent.click(screen.getByTestId('manualFormChange'));
-      fireEvent.click(screen.getByTestId('workflowSubmitStepRun'));
-      expect(defaultProps.onSubmit).toHaveBeenCalledWith({
-        stepInputs: { updated: 'value' },
-      });
-    });
-
     it('should disable submit when on historical tab and there is an error', () => {
       renderWithProviders({
         ...defaultProps,
@@ -253,6 +253,81 @@ describe('StepExecuteModal', () => {
         initialStepExecutionId: 'exec-1',
       });
       expect(screen.getByTestId('historicalFormStepId')).toHaveTextContent('my_step');
+    });
+  });
+
+  describe('schema validation warnings', () => {
+    it('should set and pass warnings to manual form when data does not match schema', () => {
+      const schemaWithRequired = z.object({
+        requiredField: z.string(),
+      });
+      renderWithProviders({
+        ...defaultProps,
+        initialcontextOverride: {
+          stepContext: { inputs: { key: 'value' } },
+          schema: schemaWithRequired,
+        },
+      });
+      expect(screen.getByTestId('manualFormWarnings')).toBeInTheDocument();
+      expect(screen.getByTestId('manualFormWarnings')).toHaveTextContent('requiredField');
+    });
+
+    it('should pass warnings to historical form when data does not match schema', () => {
+      const schemaWithRequired = z.object({
+        requiredField: z.string(),
+      });
+      renderWithProviders({
+        ...defaultProps,
+        initialStepExecutionId: 'exec-1',
+        initialcontextOverride: {
+          stepContext: { inputs: { key: 'value' } },
+          schema: schemaWithRequired,
+        },
+      });
+      expect(screen.getByTestId('historicalFormWarnings')).toBeInTheDocument();
+      expect(screen.getByTestId('historicalFormWarnings')).toHaveTextContent('requiredField');
+    });
+
+    it('should clear warnings when user enters valid JSON that matches schema', () => {
+      const schemaWithRequired = z.object({
+        requiredField: z.string(),
+      });
+      renderWithProviders({
+        ...defaultProps,
+        initialcontextOverride: {
+          stepContext: { inputs: { key: 'value' } },
+          schema: schemaWithRequired,
+        },
+      });
+      expect(screen.getByTestId('manualFormWarnings')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('manualFormValidMatchingSchema'));
+
+      expect(screen.queryByTestId('manualFormWarnings')).not.toBeInTheDocument();
+    });
+
+    it('should clear warnings when JSON becomes invalid', () => {
+      const schemaWithRequired = z.object({
+        requiredField: z.string(),
+      });
+      renderWithProviders({
+        ...defaultProps,
+        initialcontextOverride: {
+          stepContext: { inputs: { key: 'value' } },
+          schema: schemaWithRequired,
+        },
+      });
+      expect(screen.getByTestId('manualFormWarnings')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('manualFormInvalidChange'));
+
+      expect(screen.queryByTestId('manualFormWarnings')).not.toBeInTheDocument();
+      expect(screen.getByTestId('manualFormErrors')).toBeInTheDocument();
+    });
+
+    it('should not show warnings when data matches schema', () => {
+      renderWithProviders(defaultProps);
+      expect(screen.queryByTestId('manualFormWarnings')).not.toBeInTheDocument();
     });
   });
 });

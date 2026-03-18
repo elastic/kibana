@@ -70,6 +70,7 @@ describe('StepExecuteHistoricalForm', () => {
     value: '{}',
     setValue: jest.fn(),
     errors: null as string | null,
+    warnings: null as string | null,
     setErrors: jest.fn(),
     stepId: 'my_step',
   };
@@ -336,6 +337,47 @@ describe('StepExecuteHistoricalForm', () => {
         />
       );
       expect(screen.getAllByText('Invalid JSON').length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('warnings display', () => {
+    it('should show warnings callout when warnings is provided', () => {
+      mockUseStepExecution.mockReturnValue({
+        data: { input: { key: 'value' } },
+        isLoading: false,
+      });
+      mockUseWorkflowStepExecutions.mockReturnValue({
+        data: {
+          total: 1,
+          results: [
+            {
+              id: 'step-exec-1',
+              workflowRunId: 'run-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              status: 'completed',
+            },
+          ],
+        },
+      });
+      renderWithProviders(
+        <StepExecuteHistoricalForm
+          {...defaultProps}
+          warnings="requiredField: Required"
+          initialStepExecutionId="step-exec-1"
+          initialWorkflowRunId="run-1"
+        />
+      );
+      expect(screen.getByTestId('workflow-input-warnings-callout')).toBeInTheDocument();
+      expect(screen.getByText('Input data does not match the expected shape')).toBeInTheDocument();
+      expect(screen.getByText('requiredField: Required')).toBeInTheDocument();
+    });
+
+    it('should not show warnings callout when warnings is null', () => {
+      mockUseWorkflowStepExecutions.mockReturnValue({
+        data: { results: [], total: 0 },
+      });
+      renderWithProviders(<StepExecuteHistoricalForm {...defaultProps} warnings={null} />);
+      expect(screen.queryByTestId('workflow-input-warnings-callout')).not.toBeInTheDocument();
     });
   });
 });

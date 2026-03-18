@@ -22,11 +22,12 @@ export interface StepExecuteManualFormProps {
   value: string;
   onChange: (value: string) => void;
   errors: string | null;
+  warnings: string | null;
   contextJsonSchema?: z.core.JSONSchema.BaseSchema;
 }
 
 export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
-  ({ value, onChange, errors, contextJsonSchema }) => {
+  ({ value, onChange, errors, warnings, contextJsonSchema }) => {
     // Hook Monaco on mount to register the schema for validation + suggestions
     const mountedOnce = useRef(false);
     const handleMount = useCallback(
@@ -58,9 +59,9 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
 
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
-        {errors && (
+        {(errors || warnings) && (
           <EuiFlexItem grow={false}>
-            <InputValidationCallout errors={errors} />
+            <InputValidationCallout errors={errors} warnings={warnings} />
           </EuiFlexItem>
         )}
         <EuiFlexItem>

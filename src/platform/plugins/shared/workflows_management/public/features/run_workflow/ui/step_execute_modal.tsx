@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -24,7 +22,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
@@ -55,7 +53,7 @@ const STEP_TAB_DESCRIPTIONS: Record<StepInputTab, string> = {
 
 export interface StepExecuteModalProps {
   initialcontextOverride: ContextOverrideData;
-  onSubmit?: (params: { stepInputs: Record<string, any> }) => void;
+  onSubmit?: (params: { stepInputs: Record<string, unknown> }) => void;
   onClose: () => void;
   initialStepExecutionId?: string;
   initialWorkflowRunId?: string;
@@ -89,29 +87,48 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
     );
     const [stepInputs, setStepInputs] = useState<Record<string, unknown>>(stepContextOverride);
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
+    const [executionInputWarnings, setExecutionInputWarnings] = useState<string | null>(null);
 
     const contextJsonSchema = useMemo(
       () => z.toJSONSchema(initialcontextOverride.schema, { target: 'draft-7' }),
       [initialcontextOverride.schema]
     );
 
+    // Validate inputs on initial load and when json definition changes (same for manual and historical tabs)
+    useEffect(() => {
+      if (inputsJson) {
+        let parsedJson = null;
+        try {
+          parsedJson = JSON.parse(inputsJson);
+          setExecutionInputErrors(null);
+        } catch (e: Error | unknown) {
+          setExecutionInputWarnings(null);
+          setExecutionInputErrors(
+            i18n.translate('workflows.workflowExecuteManualForm.invalidJson', {
+              defaultMessage: 'Invalid JSON: {message}',
+              values: { message: e instanceof Error ? e.message : String(e) },
+            })
+          );
+        }
+        if (parsedJson) {
+          const res = initialcontextOverride.schema.safeParse(parsedJson);
+          if (!res.success) {
+            setExecutionInputWarnings(
+              res.error.issues
+                .map((e) => (e.path.length > 0 ? `${e.path.join('.')}: ${e.message}` : e.message))
+                .join(', ')
+            );
+          } else {
+            setExecutionInputWarnings(null);
+          }
+        }
+      }
+    }, [initialcontextOverride.schema, inputsJson, setExecutionInputErrors]);
+
     const modalTitleId = useGeneratedHtmlId();
 
     const handleInputChange = useCallback((value: string) => {
       setInputsJson(value);
-      try {
-        setStepInputs(JSON.parse(value));
-        setExecutionInputErrors(null);
-      } catch (error) {
-        setExecutionInputErrors(
-          i18n.translate('workflows.testStepModal.invalidJsonError', {
-            defaultMessage: 'Invalid JSON: {message}',
-            values: {
-              message: error instanceof Error ? error.message : String(error),
-            },
-          })
-        );
-      }
     }, []);
 
     const handleChangeTab = useCallback(
@@ -227,6 +244,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
                   value={inputsJson}
                   onChange={handleInputChange}
                   errors={executionInputErrors}
+                  warnings={executionInputWarnings}
                   contextJsonSchema={contextJsonSchema}
                 />
               )}
@@ -234,6 +252,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
                 <StepExecuteHistoricalForm
                   value={inputsJson}
                   setValue={handleInputChange}
+                  warnings={executionInputWarnings}
                   errors={executionInputErrors}
                   setErrors={setExecutionInputErrors}
                   initialStepExecutionId={initialStepExecutionId ?? undefined}

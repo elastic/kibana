@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import { applyInputDefaults } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import type { z } from '@kbn/zod/v4';
 import { InputValidationCallout } from './input_validation_callout';
 import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
@@ -71,9 +70,7 @@ export const WorkflowExecuteManualForm = ({
         if (!res.success) {
           setErrors(
             res.error.issues
-              .map((e: z.ZodIssue) =>
-                e.path.length > 0 ? `${e.path.join('.')}: ${e.message}` : e.message
-              )
+              .map((e) => (e.path.length > 0 ? `${e.path.join('.')}: ${e.message}` : e.message))
               .join(', ')
           );
         } else {

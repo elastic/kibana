@@ -60,7 +60,8 @@ function buildStepContextSchemaFromObject(obj: any): z.ZodType {
     return z.object(config).strict();
   }
 
-  return z.any();
+  // z.any() accepts undefined, so without nonoptional() required keys would not be enforced.
+  return z.any().nonoptional();
 }
 
 function readPropertyRecursive(

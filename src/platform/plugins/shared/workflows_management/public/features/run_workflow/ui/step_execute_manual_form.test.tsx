@@ -43,6 +43,7 @@ describe('StepExecuteManualForm', () => {
     value: '{"foo":"bar"}',
     onChange: mockOnChange,
     errors: null as string | null,
+    warnings: null as string | null,
   };
 
   beforeEach(() => {
@@ -83,5 +84,19 @@ describe('StepExecuteManualForm', () => {
   it('should not show error callout when errors is null', () => {
     renderWithProviders(<StepExecuteManualForm {...defaultProps} errors={null} />);
     expect(screen.queryByText('Invalid JSON')).not.toBeInTheDocument();
+  });
+
+  it('should show warnings callout when warnings is provided', () => {
+    renderWithProviders(
+      <StepExecuteManualForm {...defaultProps} warnings="requiredField: Required" />
+    );
+    expect(screen.getByTestId('workflow-input-warnings-callout')).toBeInTheDocument();
+    expect(screen.getByText('Input data does not match the expected shape')).toBeInTheDocument();
+    expect(screen.getByText('requiredField: Required')).toBeInTheDocument();
+  });
+
+  it('should not show warnings callout when warnings is null', () => {
+    renderWithProviders(<StepExecuteManualForm {...defaultProps} warnings={null} />);
+    expect(screen.queryByTestId('workflow-input-warnings-callout')).not.toBeInTheDocument();
   });
 });
