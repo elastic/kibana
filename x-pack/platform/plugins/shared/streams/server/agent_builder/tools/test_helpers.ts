@@ -129,5 +129,9 @@ export const createMockToolContext = (): ToolHandlerContext => {
       getDynamicToolIds: jest.fn(),
       getSummarizer: jest.fn(),
     } as unknown as ToolHandlerContext['toolManager'],
+    runContext: {
+      runId: 'test-run-id',
+      stack: [],
+    } as unknown as ToolHandlerContext['runContext'],
   };
 };
