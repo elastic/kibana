@@ -44,7 +44,7 @@ apiTest.describe(
         await testBed.ingest('cond-eq-bool-esql', [mappingDoc, ...docs]);
         const esqlRes = await esql.queryOnIndex('cond-eq-bool-esql', query);
         const esqlTagged = esqlRes.documentsOrdered.filter(
-          (d: any) => d['attributes.bool_eq_true'] === 'matched'
+          (d: Record<string, unknown>) => d['attributes.bool_eq_true'] === 'matched'
         );
 
         // EXPECTED DIFFERENCE: ESQL matches both because the column becomes keyword since it has mixed types
@@ -149,7 +149,7 @@ apiTest.describe(
             action: 'set',
             to: 'attributes.contains_450',
             value: 'matched',
-            where: { field: 'attributes.val', contains: '450' as any },
+            where: { field: 'attributes.val', contains: '450' },
           } as SetProcessor,
         ],
       };
@@ -173,7 +173,7 @@ apiTest.describe(
       await testBed.ingest('cond-contains-esql', [mappingDoc, ...docs]);
       const esqlRes = await esql.queryOnIndex('cond-contains-esql', query);
       const esqlTagged = esqlRes.documentsOrdered.filter(
-        (d: any) => d['attributes.contains_450'] === 'matched'
+        (d: Record<string, unknown>) => d['attributes.contains_450'] === 'matched'
       );
       expect(esqlTagged).toHaveLength(2);
     });
@@ -250,7 +250,7 @@ apiTest.describe(
         await testBed.ingest('cond-range-num-esql', [mappingDoc, ...docs]);
         const esqlRes = await esql.queryOnIndex('cond-range-num-esql', query);
         const esqlTagged = esqlRes.documentsOrdered.filter(
-          (d: any) => d['attributes.range_num_match'] === 'matched'
+          (d: Record<string, unknown>) => d['attributes.range_num_match'] === 'matched'
         );
         expect(esqlTagged).toHaveLength(2);
       }
