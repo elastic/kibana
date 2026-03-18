@@ -82,7 +82,7 @@ import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensu
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
-const DEFAULT_AGENTLESS_LIMIT = 5;
+const DEFAULT_AGENTLESS_LIMIT = 15;
 
 export async function createAgentPolicy({
   packagePolicy,
