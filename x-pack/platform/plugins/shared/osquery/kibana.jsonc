@@ -42,8 +42,7 @@
       "kibanaUtils",
       "kibanaReact",
       "lens",
-      "cases",
-      "uiActions"
+      "cases"
     ],
     "extraPublicDirs": [
       "common"
