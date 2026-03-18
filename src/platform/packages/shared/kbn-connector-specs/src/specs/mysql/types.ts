@@ -28,7 +28,9 @@ export const ListTablesInputSchema = z.object({
   database: z
     .string()
     .optional()
-    .describe('Database name to list tables from. Uses the configured default database if omitted.'),
+    .describe(
+      'Database name to list tables from. Uses the configured default database if omitted.'
+    ),
 });
 export type ListTablesInput = z.infer<typeof ListTablesInputSchema>;
 
@@ -37,7 +39,9 @@ export const DescribeTableInputSchema = z.object({
   database: z
     .string()
     .optional()
-    .describe('Database name containing the table. Uses the configured default database if omitted.'),
+    .describe(
+      'Database name containing the table. Uses the configured default database if omitted.'
+    ),
 });
 export type DescribeTableInput = z.infer<typeof DescribeTableInputSchema>;
 
@@ -58,6 +62,8 @@ export const SearchRowsInputSchema = z.object({
   database: z
     .string()
     .optional()
-    .describe('Database name containing the table. Uses the configured default database if omitted.'),
+    .describe(
+      'Database name containing the table. Uses the configured default database if omitted.'
+    ),
 });
 export type SearchRowsInput = z.infer<typeof SearchRowsInputSchema>;
