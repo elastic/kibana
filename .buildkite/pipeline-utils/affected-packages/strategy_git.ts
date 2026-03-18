@@ -8,96 +8,89 @@
  */
 
 import { execSync } from 'child_process';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as yaml from 'js-yaml';
-import * as JSON5 from 'json5';
 import { getKibanaDir } from '../utils';
-import { getPackageLookup, findPackageForPath } from './package_lookup';
+import {
+  findModuleForPath,
+  buildModuleDownstreamGraph,
+  UNCATEGORIZED_MODULE_ID,
+} from './module_lookup';
+import { filterIgnoredFiles } from './utils';
 
-const REPO_ROOT = getKibanaDir();
+const isCI = !!process.env.CI?.match(/^(1|true)$/i);
 
-/**
- * Parse a JSON5/JSONC file (like tsconfig.json) that may contain comments and trailing commas
- */
-function parseJsoncFile(filePath: string): any {
-  try {
-    const content = fs.readFileSync(filePath, 'utf8');
-    return JSON5.parse(content);
-  } catch (error) {
-    return null;
-  }
-}
+export function getAffectedModulesGit({
+  mergeBase,
+  includeDownstream,
+  ignorePatterns = [],
+  commit = 'HEAD',
+  ignoreUncategorizedChanges = false,
+}: {
+  mergeBase: string;
+  includeDownstream: boolean;
+  ignorePatterns?: string[];
+  commit?: string;
+  ignoreUncategorizedChanges?: boolean;
+}): Set<string> {
+  const allChangedFiles = listChangedFiles({ mergeBase, commit });
 
-/**
- * Get dependencies for a package from its moon.yml or tsconfig.json
- */
-function getDependenciesForPackage(packageDir: string): string[] {
-  // Try to read dependencies from moon.yml first
-  const moonYmlPath = path.join(REPO_ROOT, packageDir, 'moon.yml');
-  try {
-    const moonYmlContent = fs.readFileSync(moonYmlPath, 'utf8');
-    const moonConfig = yaml.load(moonYmlContent) as any;
-    if (moonConfig?.dependsOn && Array.isArray(moonConfig.dependsOn)) {
-      return moonConfig.dependsOn;
-    }
-  } catch (error) {
-    // moon.yml doesn't exist or can't be read, try tsconfig
-  }
+  const changedFiles = filterIgnoredFiles(allChangedFiles, ignorePatterns);
 
-  // Fallback to tsconfig.json kbn_references
-  const tsconfigPath = path.join(REPO_ROOT, packageDir, 'tsconfig.json');
-  const tsconfig = parseJsoncFile(tsconfigPath);
-  if (tsconfig?.kbn_references && Array.isArray(tsconfig.kbn_references)) {
-    return tsconfig.kbn_references;
-  }
-
-  return [];
-}
-
-/**
- * Build a dependency graph that maps each package to its downstream dependents
- */
-function buildDownstreamDependencyGraph(): Map<string, Set<string>> {
-  const downstreamMap = new Map<string, Set<string>>();
-  const packageLookup = getPackageLookup();
-
-  // Initialize empty sets for all packages
-  for (const packageName of packageLookup.values()) {
-    downstreamMap.set(packageName, new Set<string>());
-  }
-
-  // For each package, add it to the downstream set of all its dependencies
-  for (const [packageDir, packageName] of packageLookup.entries()) {
-    const dependencies = getDependenciesForPackage(packageDir);
-    for (const depId of dependencies) {
-      const downstreams = downstreamMap.get(depId);
-      if (downstreams) {
-        downstreams.add(packageName);
-      }
+  const directlyAffected = new Set<string>();
+  for (const file of changedFiles) {
+    const moduleId = findModuleForPath(file);
+    if (moduleId) {
+      directlyAffected.add(moduleId);
     }
   }
 
-  return downstreamMap;
+  if (ignoreUncategorizedChanges) {
+    directlyAffected.delete(UNCATEGORIZED_MODULE_ID);
+  }
+
+  return includeDownstream ? getDownstreamDependents(directlyAffected) : directlyAffected;
 }
 
-/**
- * Get the downstream dependents of a set of packages (deep traversal)
- */
-function getDownstreamDependents(packageIds: Set<string>): Set<string> {
-  const downstreamMap = buildDownstreamDependencyGraph();
-  const result = new Set<string>(packageIds);
+function listChangedFiles({ mergeBase, commit }: { mergeBase: string; commit: string }): string[] {
+  const execOptions = {
+    cwd: getKibanaDir(),
+    encoding: 'utf8' as const,
+    maxBuffer: 10 * 1024 * 1024,
+  };
 
-  // Deep traversal: keep adding dependents until no new ones are found
-  const queue = Array.from(packageIds);
-  const visited = new Set<string>(packageIds);
+  // To avoid symmetric diffs, and only care for changes from local towards the merge base
+  const actualBase = execSync(`git merge-base ${mergeBase} HEAD`, execOptions).trim();
+
+  let fileListOutput: string;
+
+  if (isCI) {
+    fileListOutput = execSync(`git diff --name-only ${actualBase} ${commit}`, execOptions);
+  } else {
+    // Committed + staged + unstaged changes to tracked files, excluding deletes
+    const diffOutput = execSync(`git diff --name-only ${actualBase}`, execOptions);
+    // Brand new untracked files
+    const untrackedOutput = execSync(`git ls-files --others --exclude-standard`, execOptions);
+
+    fileListOutput = `${diffOutput}\n${untrackedOutput}`;
+  }
+
+  return fileListOutput
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function getDownstreamDependents(moduleIds: Set<string>): Set<string> {
+  const downstreamMap = buildModuleDownstreamGraph();
+  const result = new Set<string>(moduleIds);
+  const queue = Array.from(moduleIds);
+  const visited = new Set<string>(moduleIds);
 
   while (queue.length > 0) {
     const current = queue.shift()!;
     const dependents = downstreamMap.get(current);
 
     if (dependents) {
-      for (const dependent of Array.from(dependents)) {
+      for (const dependent of dependents) {
         if (!visited.has(dependent)) {
           visited.add(dependent);
           queue.push(dependent);
@@ -106,39 +99,5 @@ function getDownstreamDependents(packageIds: Set<string>): Set<string> {
       }
     }
   }
-
   return result;
-}
-
-/**
- * Git-based strategy: Get affected packages by mapping changed files to packages
- */
-export function getAffectedPackagesGit(mergeBase: string, includeDownstream: boolean): Set<string> {
-  // Get changed files from git
-  const output = execSync(`git diff --name-only ${mergeBase} HEAD`, {
-    cwd: REPO_ROOT,
-    encoding: 'utf8',
-    maxBuffer: 10 * 1024 * 1024, // 10MB buffer
-  });
-
-  const changedFiles = output
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    // Ignore Scout test manifest updates (e.g. from update-test-config-manifests); only real code changes should affect packages
-    .filter((file) => !file.includes('test/scout/.meta'));
-
-  // Map files to packages
-  const directlyAffectedPackages = new Set<string>();
-  for (const file of changedFiles) {
-    const pkgId = findPackageForPath(file);
-    if (pkgId) {
-      directlyAffectedPackages.add(pkgId);
-    }
-  }
-
-  // Get downstream dependents if requested
-  return includeDownstream
-    ? getDownstreamDependents(directlyAffectedPackages)
-    : directlyAffectedPackages;
 }
