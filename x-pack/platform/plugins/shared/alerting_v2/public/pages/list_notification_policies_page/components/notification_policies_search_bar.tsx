@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -33,38 +33,16 @@ const ENABLED_OPTIONS = [
   },
 ];
 
-const DESTINATION_TYPE_OPTIONS = [
-  {
-    value: '',
-    text: i18n.translate('xpack.alertingV2.notificationPoliciesSearchBar.destinationType.all', {
-      defaultMessage: 'All destinations',
-    }),
-  },
-  {
-    value: 'workflow',
-    text: i18n.translate(
-      'xpack.alertingV2.notificationPoliciesSearchBar.destinationType.workflow',
-      { defaultMessage: 'Workflow' }
-    ),
-  },
-];
-
 interface NotificationPoliciesSearchBarProps {
   onSearchChange: (search: string) => void;
-  destinationType: string;
-  onDestinationTypeChange: (destinationType: string) => void;
   enabled: string;
   onEnabledChange: (enabled: string) => void;
-  onRefresh: () => void;
 }
 
 export const NotificationPoliciesSearchBar = ({
   onSearchChange,
-  destinationType,
-  onDestinationTypeChange,
   enabled,
   onEnabledChange,
-  onRefresh,
 }: NotificationPoliciesSearchBarProps) => {
   const [searchInput, setSearchInput] = useState('');
 
@@ -93,18 +71,6 @@ export const NotificationPoliciesSearchBar = ({
       <EuiFlexItem grow={false}>
         <EuiSelect
           compressed
-          options={DESTINATION_TYPE_OPTIONS}
-          value={destinationType}
-          onChange={(e) => onDestinationTypeChange(e.target.value)}
-          aria-label={i18n.translate(
-            'xpack.alertingV2.notificationPoliciesSearchBar.destinationTypeAriaLabel',
-            { defaultMessage: 'Filter by destination type' }
-          )}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSelect
-          compressed
           options={ENABLED_OPTIONS}
           value={enabled}
           onChange={(e) => onEnabledChange(e.target.value)}
@@ -113,13 +79,6 @@ export const NotificationPoliciesSearchBar = ({
             { defaultMessage: 'Filter by state' }
           )}
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton iconType="refresh" onClick={onRefresh} css={{ blockSize: 32 }}>
-          {i18n.translate('xpack.alertingV2.notificationPoliciesSearchBar.refreshButton', {
-            defaultMessage: 'Refresh',
-          })}
-        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

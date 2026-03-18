@@ -23,6 +23,7 @@ import type {
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
 import React, { useState } from 'react';
 import { DeleteNotificationPolicyConfirmModal } from '../../components/notification_policy/delete_confirmation_modal';
 import { NotificationPolicyDestinationBadge } from '../../components/notification_policy/notification_policy_destination_badge';
@@ -45,7 +46,6 @@ export const ListNotificationPoliciesPage = () => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [search, setSearch] = useState('');
-  const [destinationType, setDestinationType] = useState('');
   const [enabled, setEnabled] = useState('');
   const [sortField, setSortField] = useState<'name' | 'updatedAt' | 'updatedByUsername'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -53,6 +53,8 @@ export const ListNotificationPoliciesPage = () => {
 
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
+  const settings = useService(CoreStart('settings'));
+  const dateTimeFormat = settings.client.get<string>('dateFormat');
 
   const { mutate: createNotificationPolicy } = useCreateNotificationPolicy();
   const { mutate: deleteNotificationPolicy, isLoading: isDeleting } = useDeleteNotificationPolicy();
@@ -98,11 +100,10 @@ export const ListNotificationPoliciesPage = () => {
     createNotificationPolicy(data);
   };
 
-  const { data, isLoading, isError, error, refetch } = useFetchNotificationPolicies({
+  const { data, isLoading, isError, error } = useFetchNotificationPolicies({
     page: page + 1,
     perPage,
     search: search || undefined,
-    destinationType: destinationType || undefined,
     enabled: enabled === 'true' ? true : enabled === 'false' ? false : undefined,
     sortField,
     sortOrder: sortDirection,
@@ -110,11 +111,6 @@ export const ListNotificationPoliciesPage = () => {
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
-    setPage(0);
-  };
-
-  const handleDestinationTypeChange = (value: string) => {
-    setDestinationType(value);
     setPage(0);
   };
 
@@ -231,15 +227,7 @@ export const ListNotificationPoliciesPage = () => {
         />
       ),
       sortable: true,
-      width: '200px',
-      render: (updatedAt: string) =>
-        new Date(updatedAt).toLocaleString(undefined, {
-          month: 'short',
-          year: 'numeric',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-        }),
+      render: (updatedAt: string) => moment(updatedAt).format(dateTimeFormat),
     },
     {
       field: 'updatedByUsername',
@@ -301,11 +289,8 @@ export const ListNotificationPoliciesPage = () => {
         <EuiFlexItem grow={false}>
           <NotificationPoliciesSearchBar
             onSearchChange={handleSearchChange}
-            destinationType={destinationType}
-            onDestinationTypeChange={handleDestinationTypeChange}
             enabled={enabled}
             onEnabledChange={handleEnabledChange}
-            onRefresh={() => refetch()}
           />
         </EuiFlexItem>
         {errorMessage ? (

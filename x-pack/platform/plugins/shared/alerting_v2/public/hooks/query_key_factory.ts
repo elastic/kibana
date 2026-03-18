@@ -36,7 +36,6 @@ export const notificationPolicyKeys = {
     page: number;
     perPage: number;
     search?: string;
-    destinationType?: string;
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
