@@ -6,7 +6,6 @@
  */
 
 import { useCallback } from 'react';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ConverseAttachmentInput } from '@kbn/agent-builder-plugin/common/http_api/chat';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
