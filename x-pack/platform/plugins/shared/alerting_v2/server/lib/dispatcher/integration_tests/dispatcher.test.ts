@@ -704,7 +704,9 @@ async function seedRulesAndPolicies(
       createdByUser: false,
     },
     createdBy: null,
+    createdByUsername: null,
     updatedBy: null,
+    updatedByUsername: null,
     createdAt: '2026-01-20T00:00:00.000Z',
     updatedAt: '2026-01-20T00:00:00.000Z',
   };

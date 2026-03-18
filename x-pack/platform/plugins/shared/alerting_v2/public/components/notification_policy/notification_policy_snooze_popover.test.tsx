@@ -12,23 +12,29 @@ import { NotificationPolicySnoozePopover } from './notification_policy_snooze_po
 
 const createPolicy = (
   overrides: Partial<NotificationPolicyResponse> = {}
-): NotificationPolicyResponse => ({
-  id: 'policy-1',
-  name: 'Test policy',
-  description: '',
-  enabled: true,
-  matcher: null,
-  groupBy: null,
-  throttle: null,
-  snoozedUntil: null,
-  destinations: [],
-  auth: { owner: 'elastic', createdByUser: true },
-  createdBy: 'elastic',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedBy: 'elastic',
-  updatedAt: '2026-01-01T00:00:00.000Z',
-  ...overrides,
-});
+): NotificationPolicyResponse => {
+  const { createdByUsername = null, updatedByUsername = null, ...restOverrides } = overrides;
+
+  return {
+    id: 'policy-1',
+    name: 'Test policy',
+    description: '',
+    enabled: true,
+    matcher: null,
+    groupBy: null,
+    throttle: null,
+    snoozedUntil: null,
+    destinations: [],
+    auth: { owner: 'elastic', createdByUser: true },
+    createdBy: 'elastic',
+    createdByUsername,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedBy: 'elastic',
+    updatedByUsername,
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    ...restOverrides,
+  };
+};
 
 const defaultProps = {
   onSnooze: jest.fn(),
