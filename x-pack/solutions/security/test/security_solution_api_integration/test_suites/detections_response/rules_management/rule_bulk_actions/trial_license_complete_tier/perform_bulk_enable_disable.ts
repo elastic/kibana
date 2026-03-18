@@ -17,7 +17,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const detectionsApi = getService('detectionsApi');
   const log = getService('log');
-  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless @serverlessQA Bulk enable/disable', () => {
     beforeEach(async () => {
