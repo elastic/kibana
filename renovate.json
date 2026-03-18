@@ -2681,6 +2681,42 @@
       "minimumReleaseAge": "14 days"
     },
     {
+      "groupName": "@swc/core",
+      "matchDepNames": ["@swc/core"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "lightningcss",
+      "matchDepNames": ["lightningcss"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "tar-fs",
+      "matchDepNames": ["tar-fs"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "browserslist",
+      "matchDepNames": ["browserslist"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "react-day-picker",
       "matchDepNames": ["react-day-picker"],
       "reviewers": ["team:eui-team"],

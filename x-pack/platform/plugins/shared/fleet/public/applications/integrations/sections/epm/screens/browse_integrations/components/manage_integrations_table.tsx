@@ -589,26 +589,6 @@ export const ManageIntegrationsTable: React.FC<{
             );
           }
 
-          if (item.status === 'failed' || item.status === 'cancelled') {
-            return (
-              <ManageIntegrationActions
-                integration={item}
-                isPackageReady={false}
-                inlineActionType="editIntegration"
-                showMenuButton={false}
-                onEdit={goToEditIntegration}
-                onDelete={deleteIntegration}
-                DataStreamResultsFlyoutComponent={
-                  automaticImportVTwo?.components.DataStreamResultsFlyout
-                }
-                onFetchReviewDetails={fetchIntegrationReviewDetails}
-                onApproveAndDeploy={approveAndDeployIntegration}
-                onDownloadZip={downloadZipPackage}
-                onInstallToCluster={installToCluster}
-              />
-            );
-          }
-
           return null;
         },
       },
@@ -713,9 +693,10 @@ export const ManageIntegrationsTable: React.FC<{
       <EuiFlexItem grow={false}>
         <EuiFilterGroup css={filterButtonStyle}>
           <EuiPopover
-            aria-label={i18n.translate('xpack.fleet.epmList.manageIntegrations.actionsFilter', {
-              defaultMessage: 'Actions',
-            })}
+            aria-label={i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actionsFilterPopover',
+              { defaultMessage: 'Filter by actions' }
+            )}
             button={
               <EuiFilterButton
                 iconType="arrowDown"
@@ -742,9 +723,10 @@ export const ManageIntegrationsTable: React.FC<{
       <EuiFlexItem grow={false}>
         <EuiFilterGroup css={filterButtonStyle}>
           <EuiPopover
-            aria-label={i18n.translate('xpack.fleet.epmList.manageIntegrations.statusFilter', {
-              defaultMessage: 'Status',
-            })}
+            aria-label={i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.statusFilterPopover',
+              { defaultMessage: 'Filter by status' }
+            )}
             button={
               <EuiFilterButton
                 iconType="arrowDown"

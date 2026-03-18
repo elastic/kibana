@@ -20,6 +20,7 @@ import type {
   RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
@@ -56,6 +57,14 @@ export interface DataStreamTaskParams extends DataStreamParams {
 export interface DataStreamParams {
   integrationId: string;
   dataStreamId: string;
+}
+
+export function isUnrecoverableByStatus(error: unknown): boolean {
+  const s =
+    (error as { statusCode?: number })?.statusCode ??
+    (error as { meta?: { status?: number } })?.meta?.status ??
+    (error as { output?: { statusCode?: number } })?.output?.statusCode;
+  return s !== undefined && s !== 200 && s !== 201;
 }
 
 export class TaskManagerService {
@@ -286,17 +295,6 @@ export class TaskManagerService {
       this.logger.debug(`Data stream ${dataStreamId} updated successfully`);
       this.logger.debug(`Task ${taskId} result: ${JSON.stringify(result)}`);
 
-      // Report telemetry for successful completion
-      const durationMs = Date.now() - startTime;
-      this.reportDataStreamCreationComplete({
-        integrationId,
-        integrationName,
-        dataStreamId,
-        dataStreamName,
-        durationMs,
-        success: true,
-      });
-
       return {
         state: {
           task_status: TASK_STATUSES.completed,
@@ -310,17 +308,43 @@ export class TaskManagerService {
       this.logger.error(`Task ${taskId} failed: ${JSON.stringify(error)}`);
 
       // Report telemetry for failed completion
-      const durationMs = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : String(error);
+
+      try {
+        await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
+          integrationId,
+          dataStreamId,
+          status: TASK_STATUSES.failed,
+        });
+        this.logger.debug(
+          `Data stream ${dataStreamId} marked as failed for integration ${integrationId}`
+        );
+      } catch (updateError) {
+        this.reportDataStreamCreationComplete({
+          integrationId,
+          integrationName,
+          dataStreamId,
+          dataStreamName,
+          durationMs: Date.now() - startTime,
+          success: false,
+          errorMessage,
+        });
+        this.logger.error(
+          `Failed to mark data stream ${dataStreamId} as failed: ${JSON.stringify(updateError)}`
+        );
+      }
+
       this.reportDataStreamCreationComplete({
         integrationId,
         integrationName,
         dataStreamId,
         dataStreamName,
-        durationMs,
-        success: false,
-        errorMessage,
+        durationMs: Date.now() - startTime,
+        success: true,
       });
+
+      if (isUnrecoverableByStatus(error))
+        throwUnrecoverableError(error instanceof Error ? error : new Error(String(error)));
 
       return { state: { task_status: TASK_STATUSES.failed }, error };
     }
