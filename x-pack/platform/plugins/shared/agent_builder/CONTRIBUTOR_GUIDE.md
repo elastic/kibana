@@ -672,11 +672,11 @@ class MyPlugin {
 
 This is useful when the save operation happens outside the attachment's UI, such as when a separate "Save to library" workflow completes asynchronously. It is your responsibility to pass the `conversationId` and `attachmentId` to your plugin when navigating away from the chat - how you do this is up to you (e.g., URL parameters, local storage, or other mechanisms).
 
-#### Attachment lifecycle hook: onAttachmentAdd
+#### Attachment lifecycle hook: onAttachmentMount
 
-The `onAttachmentAdd` lifecycle hook allows you to run side effects when an attachment is added to a conversation, and clean them up when the attachment is removed.
+The `onAttachmentMount` lifecycle hook allows you to run side effects when an attachment is mounted to a conversation, and clean them up when the attachment is removed.
 
-**When to use `onAttachmentAdd`:**
+**When to use `onAttachmentMount`:**
 
 - Setting up subscriptions that should live for the duration of the attachment's presence in the conversation
 - Syncing attachment state with external systems
@@ -704,7 +704,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   getLabel: () => 'My attachment',
   getIcon: () => 'document',
 
-  onAttachmentAdd: ({ attachment, conversationId }) => {
+  onAttachmentMount: ({ attachment, conversationId }) => {
     // Set up a subscription when the attachment is added
     const subscription = someObservable$.subscribe((newValue) => {
       if (newValue !== attachment.origin) {
@@ -727,7 +727,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
 
 - The cleanup function is called when the attachment is removed from the conversation
 - It's also called when the conversation component unmounts (e.g., navigating away)
-- If `onAttachmentAdd` returns `undefined` or `void`, no cleanup is performed
+- If `onAttachmentMount` returns `undefined` or `void`, no cleanup is performed
 
 ## Registering skills
 

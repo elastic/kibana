@@ -150,7 +150,7 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    *
    * @returns Optional cleanup function called when the attachment is removed from the conversation.
    */
-  onAttachmentAdd?: (params: AttachmentLifecycleParams<TAttachment>) => void | (() => void);
+  onAttachmentMount?: (params: AttachmentLifecycleParams<TAttachment>) => void | (() => void);
 }
 
 /**

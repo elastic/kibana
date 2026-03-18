@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { Subscription } from 'rxjs';
+import { pairwise, startWith } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
@@ -34,6 +35,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   dashboardPlugin: DashboardStart;
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
+  // maintains a dashboardApi reference for access in getActionButtons
   const dashboardAppApiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
     dashboardApi = api;
   });
@@ -54,29 +56,36 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    onAttachmentAdd: ({
+    onAttachmentMount: ({
       attachment,
       conversationId,
     }: AttachmentLifecycleParams<DashboardAttachment>) => {
       let savedObjectIdSubscription: Subscription | undefined;
-      const subscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
-        if (!api) return;
-        savedObjectIdSubscription = api.savedObjectId$.subscribe((savedObjectId) => {
-          if (savedObjectId && savedObjectId !== attachment.origin) {
-            updateAttachmentOrigin(conversationId, attachment.id, savedObjectId);
-          }
-        });
+      // The per-attachment subscription in onAttachmentMount needs to react to API availability changes to manage the savedObjectId$ subscription lifecycle
+      const apiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
+        savedObjectIdSubscription?.unsubscribe();
+        savedObjectIdSubscription = undefined;
 
-        return () => {
-          savedObjectIdSubscription?.unsubscribe();
-          savedObjectIdSubscription = undefined;
-        };
+        if (!api) return;
+
+        savedObjectIdSubscription = api.savedObjectId$
+          .pipe(startWith<string | undefined>(attachment.origin), pairwise())
+          .subscribe(([previousId, currentId]) => {
+            // Only update origin if:
+            // 1. The attachment has no origin (unsaved), OR
+            // 2. The previous savedObjectId matches the attachment origin (we're on the same dashboard)
+            // This prevents linking to unrelated dashboards when navigating
+            const shouldUpdateOrigin = !attachment.origin || previousId === attachment.origin;
+
+            if (currentId && currentId !== attachment.origin && shouldUpdateOrigin) {
+              updateAttachmentOrigin(conversationId, attachment.id, currentId);
+            }
+          });
       });
 
       return () => {
-        subscription.unsubscribe();
+        apiSubscription.unsubscribe();
         savedObjectIdSubscription?.unsubscribe();
-        savedObjectIdSubscription = undefined;
       };
     },
     renderCanvasContent: (props, callbacks) => (

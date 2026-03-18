@@ -17,7 +17,7 @@ interface UseAttachmentLifecycleParams {
 
 /**
  * Manages attachment lifecycle at the conversation level.
- * Tracks which attachments are present and calls onAttachmentAdd/cleanup
+ * Tracks which attachments are present and calls onAttachmentMount/cleanup
  * when attachments are added to or removed from the conversation.
  */
 export const useAttachmentLifecycle = ({
@@ -41,8 +41,8 @@ export const useAttachmentLifecycle = ({
       if (!previousAttachmentIds.has(attachment.id)) {
         const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
-        if (uiDefinition?.onAttachmentAdd) {
-          const cleanup = uiDefinition.onAttachmentAdd({
+        if (uiDefinition?.onAttachmentMount) {
+          const cleanup = uiDefinition.onAttachmentMount({
             attachment: {
               id: attachment.id,
               type: attachment.type,
