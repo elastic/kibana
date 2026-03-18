@@ -189,7 +189,7 @@ export const CloudResources = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize='l'>
           {cards.map((card, index) => (
             <EuiFlexItem key={`resource-${index}`}>
               <ResourceCard
