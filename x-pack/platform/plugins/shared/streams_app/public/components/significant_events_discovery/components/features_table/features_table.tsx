@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useBoolean } from '@kbn/react-hooks';
 import { useFetchFeatures } from '../../../../hooks/use_fetch_features';
@@ -29,7 +29,11 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { LoadingPanel } from '../../../loading_panel';
 import { FeatureDetailsFlyout } from '../../../stream_detail_systems/stream_features/feature_details_flyout';
 import { DeleteFeatureModal } from '../../../stream_detail_systems/stream_features/delete_feature_modal';
-import { getConfidenceColor } from '../../../stream_detail_systems/stream_features/use_stream_features_table';
+import {
+  getConfidenceColor,
+  CLEAR_SELECTION,
+  DELETE_SELECTED,
+} from '../../../stream_detail_systems/stream_features/use_stream_features_table';
 
 export function FeaturesTable() {
   const { data, isLoading: loading, refetch } = useFetchFeatures();
@@ -92,102 +96,105 @@ export function FeaturesTable() {
     }
   }, [selectedFeatures, deleteFeaturesInBulk, refetch, notifications.toasts, hideBulkDeleteModal]);
 
+  const columns: Array<EuiBasicTableColumn<Feature>> = useMemo(
+    () => [
+      {
+        field: 'details',
+        name: '',
+        width: '40px',
+        render: (_: unknown, feature: Feature) => (
+          <EuiButtonIcon
+            data-test-subj="featuresDiscoveryDetailsButton"
+            iconType="expand"
+            aria-label={i18n.translate(
+              'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.detailsButtonAriaLabel',
+              { defaultMessage: 'View details' }
+            )}
+            onClick={() => handleSelectFeature(feature)}
+          />
+        ),
+      },
+      {
+        field: 'name',
+        name: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.knowledgeIndicatorColumn',
+          {
+            defaultMessage: 'Knowledge Indicator',
+          }
+        ),
+        sortable: (feature: Feature) => (feature.title ?? feature.id).toLowerCase(),
+        truncateText: true,
+        render: (_name: string, feature: Feature) => {
+          const displayTitle = feature.title ?? feature.id;
+          const secondaryText = feature.subtype ?? feature.type ?? '';
+          return (
+            <EuiLink
+              onClick={() => handleSelectFeature(feature)}
+              data-test-subj="featuresDiscoveryFeatureNameLink"
+            >
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">{displayTitle}</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {secondaryText}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiLink>
+          );
+        },
+      },
+      {
+        field: 'type',
+        name: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.typeColumn',
+          {
+            defaultMessage: 'Type',
+          }
+        ),
+        sortable: true,
+        width: '15%',
+        render: (type: string) => <EuiBadge color="hollow">{upperFirst(type ?? '–')}</EuiBadge>,
+      },
+      {
+        field: 'confidence',
+        name: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.confidenceColumn',
+          {
+            defaultMessage: 'Confidence',
+          }
+        ),
+        sortable: true,
+        width: '12%',
+        render: (confidence: number) => (
+          <EuiHealth color={getConfidenceColor(confidence ?? 0)}>{confidence ?? '–'}</EuiHealth>
+        ),
+      },
+      {
+        field: 'stream_name',
+        name: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.streamColumn',
+          {
+            defaultMessage: 'Stream',
+          }
+        ),
+        sortable: true,
+        width: '15%',
+        render: (_streamName: string, feature: Feature) => (
+          <EuiBadge color="hollow">{feature.stream_name || '--'}</EuiBadge>
+        ),
+      },
+    ],
+    [handleSelectFeature]
+  );
+
   if (loading && !data) {
     return <LoadingPanel size="l" />;
   }
 
-  const isSelectionActionsDisabled = selectedFeatures.length === 0 || loading;
-
-  const columns: Array<EuiBasicTableColumn<Feature>> = [
-    {
-      field: 'details',
-      name: '',
-      width: '40px',
-      render: (_: unknown, feature: Feature) => (
-        <EuiButtonIcon
-          data-test-subj="featuresDiscoveryDetailsButton"
-          iconType="expand"
-          aria-label={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.detailsButtonAriaLabel',
-            { defaultMessage: 'View details' }
-          )}
-          onClick={() => handleSelectFeature(feature)}
-        />
-      ),
-    },
-    {
-      field: 'name',
-      name: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.knowledgeIndicatorColumn',
-        {
-          defaultMessage: 'Knowledge Indicator',
-        }
-      ),
-      sortable: (feature: Feature) => (feature.title ?? feature.id).toLowerCase(),
-      truncateText: true,
-      render: (_name: string, feature: Feature) => {
-        const displayTitle = feature.title ?? feature.id;
-        const secondaryText = feature.subtype ?? feature.type ?? '';
-        return (
-          <EuiLink
-            onClick={() => handleSelectFeature(feature)}
-            data-test-subj="featuresDiscoveryFeatureNameLink"
-          >
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">{displayTitle}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {secondaryText}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiLink>
-        );
-      },
-    },
-    {
-      field: 'type',
-      name: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.typeColumn',
-        {
-          defaultMessage: 'Type',
-        }
-      ),
-      sortable: true,
-      width: '15%',
-      render: (type: string) => <EuiBadge color="hollow">{upperFirst(type ?? '–')}</EuiBadge>,
-    },
-    {
-      field: 'confidence',
-      name: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.confidenceColumn',
-        {
-          defaultMessage: 'Confidence',
-        }
-      ),
-      sortable: true,
-      width: '12%',
-      render: (confidence: number) => (
-        <EuiHealth color={getConfidenceColor(confidence ?? 0)}>{confidence ?? '–'}</EuiHealth>
-      ),
-    },
-    {
-      field: 'stream_name',
-      name: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.streamColumn',
-        {
-          defaultMessage: 'Stream',
-        }
-      ),
-      sortable: true,
-      width: '15%',
-      render: (_streamName: string, feature: Feature) => (
-        <EuiBadge color="hollow">{feature.stream_name || '--'}</EuiBadge>
-      ),
-    },
-  ];
+  const isSelectionActionsDisabled = selectedFeatures.length === 0 || loading || isBulkDeleting;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -209,17 +216,11 @@ export function FeaturesTable() {
             <EuiButtonEmpty
               iconType="cross"
               size="xs"
-              aria-label={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.featuresTable.clearSelection',
-                { defaultMessage: 'Clear selection' }
-              )}
+              aria-label={CLEAR_SELECTION}
               isDisabled={isSelectionActionsDisabled}
               onClick={clearSelection}
             >
-              {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.featuresTable.clearSelection',
-                { defaultMessage: 'Clear selection' }
-              )}
+              {CLEAR_SELECTION}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -228,17 +229,11 @@ export function FeaturesTable() {
               size="xs"
               iconType="trash"
               color="danger"
-              aria-label={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.featuresTable.deleteSelected',
-                { defaultMessage: 'Delete selected' }
-              )}
+              aria-label={DELETE_SELECTED}
               isDisabled={isSelectionActionsDisabled}
               onClick={showBulkDeleteModal}
             >
-              {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.featuresTable.deleteSelected',
-                { defaultMessage: 'Delete selected' }
-              )}
+              {DELETE_SELECTED}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
