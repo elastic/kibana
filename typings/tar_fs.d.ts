@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { asPrettyString } from './as_pretty_string';
-export { getHighlightHtml, getHighlightRequest } from './highlight';
-export { shortenDottedString } from './shorten_dotted_string';
-export { checkForMissingValueHtml } from './missing_value_html';
-export * as geoUtils from './geo_utils';
+declare module 'tar-fs' {
+  interface PackOptions {
+    map?: (header: { name: string; type: string }) => { name: string; type: string };
+    filter?: (name: string) => boolean;
+  }
+
+  function pack(
+    cwd: string,
+    opts?: PackOptions
+  ): NodeJS.ReadableStream & {
+    on(event: 'entry', cb: (header: { type: string }) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
+  };
+}
