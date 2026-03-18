@@ -68,14 +68,14 @@ export class RulesClient {
       );
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const username = await this.userService.getCurrentUsername();
     const nowIso = new Date().toISOString();
 
     const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed.data, {
       enabled: true,
-      createdBy: userProfileUid,
+      createdBy: username,
       createdAt: nowIso,
-      updatedBy: userProfileUid,
+      updatedBy: username,
       updatedAt: nowIso,
     });
 
@@ -128,7 +128,7 @@ export class RulesClient {
       );
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const username = await this.userService.getCurrentUsername();
     const nowIso = new Date().toISOString();
 
     let existingAttrs: RuleSavedObjectAttributes;
@@ -149,7 +149,7 @@ export class RulesClient {
     }
 
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed.data, {
-      updatedBy: userProfileUid,
+      updatedBy: username,
       updatedAt: nowIso,
     });
 
@@ -226,6 +226,106 @@ export class RulesClient {
   }
 
   @withApm
+  public async enableRule({ id }: { id: string }): Promise<RuleResponse> {
+    const { spaceId } = this.getSpaceContext();
+
+    const username = await this.userService.getCurrentUsername();
+    const nowIso = new Date().toISOString();
+
+    let existingAttrs: RuleSavedObjectAttributes;
+    let existingVersion: string | undefined;
+    try {
+      const doc = await this.rulesSavedObjectService.get(id);
+      existingAttrs = doc.attributes;
+      existingVersion = doc.version;
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw Boom.notFound(`Rule with id "${id}" not found`);
+      }
+      throw e;
+    }
+
+    const nextAttrs: RuleSavedObjectAttributes = {
+      ...existingAttrs,
+      enabled: true,
+      updatedBy: username,
+      updatedAt: nowIso,
+    };
+
+    // Ensure the task schedule is up-to-date.
+    await ensureRuleExecutorTaskScheduled({
+      services: { taskManager: this.taskManager },
+      input: {
+        ruleId: id,
+        spaceId,
+        schedule: { interval: nextAttrs.schedule.every },
+        request: this.request as unknown as CoreKibanaRequest,
+      },
+    });
+
+    try {
+      await this.rulesSavedObjectService.update({
+        id,
+        attrs: nextAttrs,
+        version: existingVersion,
+      });
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isConflictError(e)) {
+        throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`);
+      }
+      throw e;
+    }
+
+    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
+  }
+
+  @withApm
+  public async disableRule({ id }: { id: string }): Promise<RuleResponse> {
+    const { spaceId } = this.getSpaceContext();
+
+    const username = await this.userService.getCurrentUsername();
+    const nowIso = new Date().toISOString();
+
+    let existingAttrs: RuleSavedObjectAttributes;
+    let existingVersion: string | undefined;
+    try {
+      const doc = await this.rulesSavedObjectService.get(id);
+      existingAttrs = doc.attributes;
+      existingVersion = doc.version;
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw Boom.notFound(`Rule with id "${id}" not found`);
+      }
+      throw e;
+    }
+
+    const nextAttrs: RuleSavedObjectAttributes = {
+      ...existingAttrs,
+      enabled: false,
+      updatedBy: username,
+      updatedAt: nowIso,
+    };
+
+    // When disabling, remove the task.
+    const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
+    await this.taskManager.removeIfExists(taskId);
+
+    try {
+      await this.rulesSavedObjectService.update({
+        id,
+        attrs: nextAttrs,
+        version: existingVersion,
+      });
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isConflictError(e)) {
+        throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`);
+      }
+      throw e;
+    }
+
+    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
+  }
+
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 20;

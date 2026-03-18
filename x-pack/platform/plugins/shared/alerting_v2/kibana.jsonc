@@ -22,6 +22,7 @@
       "workflowsManagement"
     ],
     "optionalPlugins": ["management"],
+    "requiredBundles": ["alerting"],
     "extraPublicDirs": []
   }
 }

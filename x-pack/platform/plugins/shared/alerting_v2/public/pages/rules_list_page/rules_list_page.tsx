@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiHorizontalRule,
   EuiPageHeader,
   EuiPopover,
@@ -33,8 +34,9 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
-import { DeleteConfirmationModal } from '../../components/rule/delete_confirmation_modal';
+import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
 import { paths } from '../../constants';
 
 const DEFAULT_PER_PAGE = 20;
@@ -147,6 +149,8 @@ export const RulesListPage = () => {
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
 
+  useBreadcrumbs('rules_list');
+
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
@@ -181,16 +185,24 @@ export const RulesListPage = () => {
       field: 'metadata',
       name: <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />,
       width: '20%',
-      render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
-        <div>
-          <EuiText size="s">{metadata?.name ?? rule.id}</EuiText>
-          {metadata?.description && (
-            <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
-              {metadata.description}
-            </EuiText>
-          )}
-        </div>
-      ),
+      truncateText: true,
+      render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => {
+        return (
+          <div>
+            <EuiLink
+              href={basePath.prepend(paths.ruleDetails(rule.id))}
+              data-test-subj={`ruleDetailsLink-${rule.id}`}
+            >
+              {metadata?.name ?? rule.id}
+            </EuiLink>
+            {metadata?.description && (
+              <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
+                {metadata.description}
+              </EuiText>
+            )}
+          </div>
+        );
+      },
     },
     {
       field: 'evaluation',
@@ -310,7 +322,7 @@ export const RulesListPage = () => {
         rightSideItems={[
           <EuiButton
             key="create-rule"
-            onClick={() => navigateToUrl(basePath.prepend(paths.ruleCreate))}
+            href={basePath.prepend(paths.ruleCreate)}
             data-test-subj="createRuleButton"
           >
             <FormattedMessage
