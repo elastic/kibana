@@ -72,24 +72,7 @@ describe('approveIntegrationRoute telemetry', () => {
   const makeResponse = () => httpServerMock.createResponseFactory();
 
   it('calls reportTelemetryEvent once per data stream on successful approve', async () => {
-    getAllDataStreams.mockResolvedValue([
-      {
-        title: 'DS One',
-        result: {
-          ingest_pipeline: {
-            processors: [{ set: {} }, { grok: {} }, { set: {} }],
-          },
-        },
-      },
-      {
-        title: 'DS Two',
-        result: {
-          ingest_pipeline: {
-            processors: [{ grok: {} }],
-          },
-        },
-      },
-    ]);
+    getAllDataStreams.mockResolvedValue([{ title: 'DS One' }, { title: 'DS Two' }]);
 
     const handler = getVersionedRouteHandler(router, 'post', APPROVE_PATH);
     const response = makeResponse();
@@ -106,8 +89,6 @@ describe('approveIntegrationRoute telemetry', () => {
         version: '1.0.0',
         dataStreamCount: 2,
         dataStreamName: 'DS One',
-        processorCount: 3,
-        processorTypes: ['set', 'grok'],
       })
     );
 
@@ -116,8 +97,6 @@ describe('approveIntegrationRoute telemetry', () => {
       AIV2TelemetryEventType.IntegrationInstalled,
       expect.objectContaining({
         dataStreamName: 'DS Two',
-        processorCount: 1,
-        processorTypes: ['grok'],
       })
     );
   });
@@ -153,29 +132,5 @@ describe('approveIntegrationRoute telemetry', () => {
 
     expect(response.ok).not.toHaveBeenCalled();
     expect(reportTelemetryEvent).not.toHaveBeenCalled();
-  });
-
-  it('deduplicates processor types within a data stream', async () => {
-    getAllDataStreams.mockResolvedValue([
-      {
-        title: 'DS',
-        result: {
-          ingest_pipeline: {
-            processors: [{ set: {} }, { set: {} }, { grok: {} }],
-          },
-        },
-      },
-    ]);
-
-    const handler = getVersionedRouteHandler(router, 'post', APPROVE_PATH);
-    await handler(makeContext(), makeRequest(), makeResponse());
-
-    expect(reportTelemetryEvent).toHaveBeenCalledWith(
-      AIV2TelemetryEventType.IntegrationInstalled,
-      expect.objectContaining({
-        processorCount: 3,
-        processorTypes: ['set', 'grok'],
-      })
-    );
   });
 });

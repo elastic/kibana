@@ -88,24 +88,6 @@ export const telemetryEventsSchemas: Partial<
         type: 'keyword',
         _meta: { description: 'Data stream name (dataset) for this event', optional: false },
       },
-      processorCount: {
-        type: 'long',
-        _meta: {
-          description: 'Number of processors in this data stream pipeline',
-          optional: false,
-        },
-      },
-      processorTypes: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: { description: 'Processor type', optional: false },
-        },
-        _meta: {
-          description: 'Unique processor types used in this data stream pipeline',
-          optional: false,
-        },
-      },
     },
   },
 };

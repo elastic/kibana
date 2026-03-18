@@ -101,8 +101,6 @@ export interface IntegrationInstalledPayload {
   version: string;
   dataStreamCount: number;
   dataStreamName: string;
-  processorCount: number;
-  processorTypes: string[];
 }
 
 export type ManageIntegrationsTableViewedPayload = Record<string, never>;

@@ -269,24 +269,12 @@ const approveIntegrationRoute = (
             const dataStreams = await automaticImportService.getAllDataStreams(integrationId);
 
             dataStreams.forEach((ds) => {
-              const processors = ds.result?.ingest_pipeline?.processors ?? [];
-              const processorCount = processors.length;
-              const processorTypes: string[] = [];
-              processors.forEach((processor: Record<string, unknown>) => {
-                const processorType = Object.keys(processor)[0];
-                if (processorType && !processorTypes.includes(processorType)) {
-                  processorTypes.push(processorType);
-                }
-              });
-
               reportTelemetryEvent(AIV2TelemetryEventType.IntegrationInstalled, {
                 sessionId: request.headers['x-session-id'] || 'unknown',
                 integrationName: integration.title,
                 version,
                 dataStreamCount: dataStreams.length,
                 dataStreamName: ds.title,
-                processorCount,
-                processorTypes,
               });
             });
           } catch (telemetryError) {
