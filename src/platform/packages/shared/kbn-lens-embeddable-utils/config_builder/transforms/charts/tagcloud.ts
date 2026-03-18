@@ -142,7 +142,7 @@ function reverseBuildVisualizationState(
   const tagBy = getTagcloudTagBy(layer, visualization);
 
   return {
-    type: 'tagcloud',
+    type: 'tag_cloud',
     dataset,
     ...generateApiLayer(layer),
     metric,
@@ -225,7 +225,7 @@ export function fromAPItoLensState(
 
 export function fromLensStateToAPI(
   config: LensAttributes
-): Extract<LensApiState, { type: 'tagcloud' }> {
+): Extract<LensApiState, { type: 'tag_cloud' }> {
   const { state } = config;
   const visualization = state.visualization as LensTagCloudState;
   const layers = getDatasourceLayers(state);
