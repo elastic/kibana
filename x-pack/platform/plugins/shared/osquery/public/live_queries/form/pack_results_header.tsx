@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
