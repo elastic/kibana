@@ -21,6 +21,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
+import { registerFlyoutViewedEvent } from './analytics/flyout_viewed_event';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
   createGetterSetter<UnifiedDocViewerServices>('UnifiedDocViewerServices');
@@ -56,6 +57,8 @@ export class UnifiedDocViewerPublicPlugin
   private docViewsRegistry = new DocViewsRegistry();
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
+    registerFlyoutViewedEvent(core.analytics);
+
     this.docViewsRegistry.add({
       id: 'doc_view_table',
       title: i18n.translate('unifiedDocViewer.docViews.table.tableTitle', {
