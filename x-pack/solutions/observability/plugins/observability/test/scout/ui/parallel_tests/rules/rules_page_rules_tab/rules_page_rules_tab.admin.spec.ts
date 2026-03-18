@@ -21,6 +21,13 @@ test.describe(
       await pageObjects.rulesPage.goto();
     });
 
+    test.afterEach(async ({ apiServices }) => {
+      const ruleId = await getRuleIdByName(apiServices, RULE_NAMES.FIRST_RULE_TEST);
+      if (ruleId) {
+        await apiServices.alerting.rules.enable(ruleId);
+      }
+    });
+
     test('should see the Rules Table container', async ({ pageObjects }) => {
       await expect(pageObjects.rulesPage.rulesTableContainer).toBeVisible();
     });
@@ -82,9 +89,6 @@ test.describe(
 
         await pageObjects.rulesPage.expectRuleToBeDisabled(RULE_NAMES.FIRST_RULE_TEST);
       });
-
-      // Restore the rule to enabled so other tests see a consistent starting state.
-      await apiServices.alerting.rules.enable(ruleId!);
     });
   }
 );
