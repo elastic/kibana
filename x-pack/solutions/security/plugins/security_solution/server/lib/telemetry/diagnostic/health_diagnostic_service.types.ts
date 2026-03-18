@@ -10,6 +10,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { CircuitBreakerResult } from './health_diagnostic_circuit_breakers.types';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 
@@ -61,6 +62,7 @@ export interface HealthDiagnosticServiceStart {
   esClient: ElasticsearchClient;
   analytics: AnalyticsServiceStart;
   telemetryConfigProvider: TelemetryConfigProvider;
+  packageService: PackageService;
 }
 
 export interface HealthDiagnosticService {
@@ -82,59 +84,80 @@ export interface HealthDiagnosticQueryConfig {
 }
 
 /**
- * Defines a health diagnostic query configuration with scheduling and filtering options.
+ * Fields shared across all known query descriptor versions.
  */
-export interface HealthDiagnosticQuery {
-  /**
-   * A unique identifier for this query.
-   */
+export interface HealthDiagnosticQueryBase {
   id: string;
-  /**
-   * A descriptive name for this query.
-   */
   name: string;
-  /**
-   * The index pattern on which this query will be executed.
-   */
-  index: string;
-  /**
-   * Only include indices in the specified tiers. Note that if the `index`
-   * hasn't a life cycle management or we are on serverless, this will be
-   * ignored.
-   */
-  tiers?: string[];
-  /**
-   * Specifies the query type, as defined by the QueryType enum.
-   */
   type: QueryType;
-  /**
-   * The query string to be executed against the data store.
-   */
   query: string;
-  /**
-   * A cron expression that schedules when the query should be run.
-   */
   scheduleCron: string;
-  /**
-   * Optional mapping of dot-separated paths to associated actions for filtering results.
-   */
   filterlist: Record<string, Action>;
-  /**
-   * Optional flag indicating whether this query is active and should be executed.
-   */
   enabled?: boolean;
-  /**
-   * Query size
-   */
   size?: number;
-  /**
-   * Optional RSA public key identifier used for encrypting fields marked with `encrypt` action
-   * in the filterlist. Required when the filterlist contains any `encrypt` actions.
-   * This ID corresponds to keys configured in the plugin-level `encryption_public_keys` map.
-   * Example: "rsa-keypair-v1-2025-q4"
-   */
   encryptionKeyId?: string;
+  tiers?: string[];
 }
+
+/**
+ * v1 query descriptor — targets a fixed index pattern.
+ * Produced when the descriptor has `version: 1` or no version field.
+ */
+export interface HealthDiagnosticQueryV1 extends HealthDiagnosticQueryBase {
+  version: 1;
+  index: string;
+}
+
+/**
+ * v2 query descriptor — targets integrations matched by regex patterns.
+ * The executor resolves patterns to concrete indices via Fleet before running.
+ */
+export interface HealthDiagnosticQueryV2 extends HealthDiagnosticQueryBase {
+  version: 2;
+  integrations: string[]; // regex patterns, parsed from comma-separated YAML value
+}
+
+/**
+ * Produced when the parser encounters a version number it doesn't recognise.
+ * Carries the raw data for logging; always results in a skipped execution.
+ */
+export interface UnknownVersionQuery {
+  version: number;
+  id?: string;
+  name?: string;
+  _raw: unknown;
+}
+
+export type HealthDiagnosticQuery =
+  | HealthDiagnosticQueryV1
+  | HealthDiagnosticQueryV2
+  | UnknownVersionQuery;
+
+/**
+ * Result of resolving a v2 query's integration patterns against Fleet.
+ */
+export interface IntegrationResolution {
+  patterns: string[];
+  matched: Array<{ name: string; version: string }>;
+  resolvedIndices: string[];
+}
+
+/**
+ * A query that has been resolved and is ready for ES execution.
+ * Version-specific shape is preserved for stats reporting.
+ */
+export type ExecutableQuery =
+  | { kind: 'executable'; query: HealthDiagnosticQueryV1 }
+  | { kind: 'executable'; query: HealthDiagnosticQueryV2; resolution: IntegrationResolution };
+
+export interface SkippedQuery {
+  kind: 'skipped';
+  query: HealthDiagnosticQuery;
+  reason: 'integration_not_installed' | 'unknown_version';
+  resolution?: IntegrationResolution; // present for v2 with no matches
+}
+
+export type ResolvedQuery = ExecutableQuery | SkippedQuery;
 
 export interface HealthDiagnosticQueryResult {
   name: string;
@@ -145,15 +168,22 @@ export interface HealthDiagnosticQueryResult {
 }
 
 export interface HealthDiagnosticQueryStats {
+  // existing — unchanged
   name: string;
   started: string;
   finished: string;
   traceId: string;
   numDocs: number;
+  /** Kept for downstream backward compatibility. Derived from `status`. */
   passed: boolean;
   failure?: HealthDiagnosticQueryFailure;
   fieldNames: string[];
   circuitBreakers?: Record<string, unknown>;
+  // new fields
+  descriptorVersion: number;
+  status: 'success' | 'failed' | 'skipped';
+  skipReason?: 'integration_not_installed' | 'unknown_version';
+  integration?: IntegrationResolution;
 }
 
 export interface HealthDiagnosticQueryFailure {
