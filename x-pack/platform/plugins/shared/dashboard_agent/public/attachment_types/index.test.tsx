@@ -116,16 +116,13 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId('new-dashboard-id');
 
-      expect(updateOrigin).toHaveBeenCalledWith(
-        'new-dashboard-id'
-      );
+      expect(updateOrigin).toHaveBeenCalledWith('new-dashboard-id');
       cleanup?.();
     });
 
     it('updates origin when the same dashboard is saved again', () => {
       const { getAttachment } = createMockAttachment('attachment-1', 'existing-dashboard-id');
       const mockApi = createMockDashboardApi('existing-dashboard-id');
-      
 
       const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
