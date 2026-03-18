@@ -100,7 +100,13 @@ export const SearchHomepagePage = () => {
                   ? docLinks.hostedCloudReleaseNotes
                   : docLinks.serverlessReleaseNotes
               }
-              kibanaVersion={!cloud?.isServerlessEnabled ? `v${kibanaVersion}` : 'Changelog'}
+              kibanaVersion={
+                !cloud?.isServerlessEnabled
+                  ? `v${kibanaVersion}`
+                  : i18n.translate('xpack.searchHomepage.versionLabel.changelog', {
+                      defaultMessage: 'Changelog',
+                    })
+              }
             />
           </EuiFlexItem>
         </EuiFlexGroup>
