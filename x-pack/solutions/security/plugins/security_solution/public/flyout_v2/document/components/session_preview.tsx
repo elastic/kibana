@@ -6,13 +6,13 @@
  */
 
 import { EuiCode, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
-import React, { useMemo, type FC, type PropsWithChildren, type ReactElement } from 'react';
+import React, { type FC, type PropsWithChildren, type ReactElement, useMemo } from 'react';
 import { css } from '@emotion/react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
+import { useRuleDetailsLink } from '../../../flyout/document_details/shared/hooks/use_rule_details_link';
 import { SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID, SESSION_PREVIEW_TEST_ID } from './test_ids';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { useProcessData } from '../hooks/use_process_data';
 
 /**
@@ -34,16 +34,29 @@ const ValueContainer: FC<PropsWithChildren<{ text?: ReactElement }>> = ({ text, 
 /**
  * Renders session preview under Visualizations section in the flyout right EuiPanel
  */
-export const SessionPreview: FC = () => {
-  const { isRulePreview } = useDocumentDetailsContext();
+interface SessionPreviewProps {
+  /**
+   * Whether the navigation to session view should be disabled. This is true when in rule preview mode or when session view is not enabled, as in both cases we don't want to show the link to session view in the header.
+   */
+  disableNavigation: boolean;
+  /**
+   * DataTableRecord of the document for which session preview will be rendered
+   */
+  hit: DataTableRecord;
+}
 
-  const { processName, userName, startAt, ruleName, ruleId, workdir, command } = useProcessData();
+/**
+ * Renders session preview under Visualizations section in the flyout right EuiPanel. It shows who started the process, what process was started, when it was started, by which command and if available with which rule. If rule information is available and navigation is not disabled, the rule name will be a link to the rule details page.
+ */
+export const SessionPreview = ({ disableNavigation, hit }: SessionPreviewProps) => {
   const { euiTheme } = useEuiTheme();
-
   const emphasisStyles = useMemo(
     () => ({ fontWeight: euiTheme.font.weight.bold }),
     [euiTheme.font.weight.bold]
   );
+
+  const { processName, userName, startAt, ruleName, ruleId, workdir, command } =
+    useProcessData(hit);
 
   const processNameFragment = useMemo(() => {
     return (
@@ -81,7 +94,7 @@ export const SessionPreview: FC = () => {
     );
   }, [startAt]);
 
-  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null });
+  const href = useRuleDetailsLink({ ruleId: !disableNavigation ? ruleId : null });
 
   const ruleFragment = useMemo(() => {
     return (
@@ -138,7 +151,7 @@ export const SessionPreview: FC = () => {
       data-test-subj={SESSION_PREVIEW_TEST_ID}
     >
       <ValueContainer>
-        <EuiIcon type="user" />
+        <EuiIcon type="user" aria-hidden={true} />
         &nbsp;
         <span css={emphasisStyles}>{userName}</span>
       </ValueContainer>
