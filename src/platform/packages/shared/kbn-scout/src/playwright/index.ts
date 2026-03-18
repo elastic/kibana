@@ -9,8 +9,6 @@
 
 // Needed for Scout tests dependent on .peggy grammar files (`@kbn/tinymath`)
 import './peggy_setup';
-// Needed for packages that import .text files (e.g. @kbn/evals LLM prompt templates)
-import './dot_text_setup';
 
 // Config and utilities
 export { createPlaywrightConfig } from './config';
