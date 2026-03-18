@@ -77,7 +77,10 @@ export function VerticalLinesContainer({ xMax, xMin, margins, marks }: TimelineP
         const plotValues = getPlotValues({ width, xMin, xMax, margins });
         const topTraceDuration = xMax - (xMin ?? 0);
         return (
-          <div style={{ width: '100%', height: '100%', position: 'absolute' }} ref={resizeRef}>
+          <div
+            style={{ width: '100%', height: '100%', position: 'absolute', bottom: 0 }}
+            ref={resizeRef}
+          >
             <VerticalLines
               plotValues={plotValues}
               marks={marks}
