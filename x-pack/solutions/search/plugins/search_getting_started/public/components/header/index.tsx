@@ -15,6 +15,8 @@ import {
   EuiText,
   EuiButtonEmpty,
   useCurrentEuiBreakpoint,
+  EuiSkeletonRectangle,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -38,7 +40,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
   const {
     services: { application, cloud, kibanaVersion },
   } = useKibana();
-
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup gutterSize={currentBreakpoint === 'xl' ? 'l' : 'xl'} direction="column">
       <EuiFlexGroup gutterSize="m" alignItems="stretch" direction="rowReverse">
@@ -82,6 +84,11 @@ export const SearchGettingStartedHeader: React.FC = () => {
                   {skipAndGoHomeLabel}
                 </EuiButtonEmpty>
               </EuiFlexItem>
+              <EuiSkeletonRectangle
+                width={euiTheme.size.xxs}
+                height={euiTheme.size.xxl}
+                borderRadius="none"
+              />
               <EuiFlexItem grow={false}>
                 <SearchHomepageVersionBadge
                   docLink={
