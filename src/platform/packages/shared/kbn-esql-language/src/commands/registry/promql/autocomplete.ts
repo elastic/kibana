@@ -128,7 +128,7 @@ function suggestForIndexAssignment(
   }
 
   const availableSources = sources ?? [];
-  const { valueText, valueStart } = indexContext;
+  const { valueText } = indexContext;
   const valueTrimmed = valueText.trimEnd();
 
   if (valueTrimmed.endsWith(',')) {
