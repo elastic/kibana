@@ -7,6 +7,7 @@
 
 import { of, throwError, from } from 'rxjs';
 import type { ElasticsearchClient, AnalyticsServiceStart, Logger } from '@kbn/core/server';
+import type { PackageService } from '@kbn/fleet-plugin/server';
 import { HealthDiagnosticServiceImpl } from './health_diagnostic_service';
 import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
 import { ValidationError } from './health_diagnostic_circuit_breakers.types';
@@ -22,7 +23,9 @@ import {
   createMockQueryExecutor,
   createMockDocument,
   createMockArtifactData,
+  createMockPackageService,
 } from './__mocks__';
+import { TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT } from '../event_based/events';
 
 jest.mock('./health_diagnostic_receiver');
 jest.mock('../artifact');
@@ -39,6 +42,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
   let mockAnalytics: jest.Mocked<AnalyticsServiceStart>;
   let mockTelemetryConfigProvider: jest.Mocked<TelemetryConfigProvider>;
   let mockQueryExecutor: jest.Mocked<CircuitBreakingQueryExecutorImpl>;
+  let mockPackageService: ReturnType<typeof createMockPackageService>;
 
   const mockDocument = createMockDocument();
 
@@ -49,6 +53,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
     mockAnalytics = createMockAnalytics();
     mockTelemetryConfigProvider = createMockTelemetryConfigProvider();
     mockQueryExecutor = createMockQueryExecutor();
+    mockPackageService = createMockPackageService([]);
 
     MockedCircuitBreakingQueryExecutorImpl.mockImplementation(() => mockQueryExecutor);
     service = new HealthDiagnosticServiceImpl(mockLogger);
@@ -63,9 +68,10 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
   const startService = async () => {
     await service.start({
       taskManager: mockTaskManager,
-      esClient: mockEsClient,
+      esClient: mockEsClient as unknown as ElasticsearchClient,
       analytics: mockAnalytics,
       telemetryConfigProvider: mockTelemetryConfigProvider,
+      packageService: mockPackageService as unknown as PackageService,
     });
   };
 
@@ -91,6 +97,8 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         expect(result[0]).toMatchObject({
           name: 'test-query',
           passed: true,
+          status: 'success',
+          descriptorVersion: 1,
           numDocs: 1,
           fieldNames: expect.arrayContaining(['@timestamp', 'user.name', 'event.action']),
         });
@@ -170,6 +178,8 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         expect(result[0]).toMatchObject({
           name: 'test-query',
           passed: false,
+          status: 'failed',
+          descriptorVersion: 1,
           failure: {
             message: 'Query execution failed',
             reason: undefined,
@@ -333,6 +343,37 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
             traceId: expect.any(String),
           })
         );
+      });
+
+      it('emits skipped stats EBT when integration is not installed', async () => {
+        mockPackageService.asInternalUser.getPackages.mockResolvedValue([]);
+
+        // Set up artifact with a v2 query descriptor (integrations-based)
+        (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+          data: `---
+id: test-query-v2
+name: test-query-v2
+version: 2
+integrations: endpoint.*
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`,
+        });
+
+        await service.runHealthDiagnosticQueries({});
+
+        expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+          TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT.eventType,
+          expect.objectContaining({
+            status: 'skipped',
+            skipReason: 'integration_not_installed',
+            passed: false,
+          })
+        );
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
       });
     });
 

@@ -122,7 +122,6 @@ export interface HealthDiagnosticQueryV2 extends HealthDiagnosticQueryBase {
  * Carries the raw data for logging; always results in a skipped execution.
  */
 export interface UnknownVersionQuery {
-  version: number;
   id?: string;
   name?: string;
   _raw: unknown;

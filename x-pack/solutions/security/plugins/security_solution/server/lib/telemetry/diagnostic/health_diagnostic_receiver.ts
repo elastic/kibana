@@ -251,7 +251,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     let baseIndices: string[];
     if (query.version === 1) {
       baseIndices = [query.index];
-      this.logger.debug('Using index from v1 query', { queryName: query.name });
+      this.logger.debug('Using index from v1 query', { queryName: query.name } as LogMeta);
     } else {
       const v2Query = executableQuery as Extract<
         ExecutableQuery,
@@ -261,13 +261,13 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
       this.logger.debug('Using resolved indices from v2 query', {
         queryName: query.name,
         count: baseIndices.length,
-      });
+      } as LogMeta);
     }
 
     if (tiers === undefined || baseIndices.length === 0) {
       this.logger.debug('No tiers defined or no base indices, returning as-is', {
         queryName: query.name,
-      });
+      } as LogMeta);
       return baseIndices;
     }
 
