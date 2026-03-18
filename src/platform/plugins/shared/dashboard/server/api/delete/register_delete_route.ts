@@ -61,7 +61,7 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }
-        return res.badRequest(e.message);
+        return res.badRequest({ body: { message: e.message } });
       }
 
       return res.noContent();
