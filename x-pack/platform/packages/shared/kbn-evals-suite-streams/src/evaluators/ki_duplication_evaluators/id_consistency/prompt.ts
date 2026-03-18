@@ -20,7 +20,7 @@ const ID_CONSISTENCY_OUTPUT_SCHEMA = {
         properties: {
           id: {
             type: 'string',
-            description: 'The feature id that is a collision',
+            description: 'The KI id that is a collision',
           },
           reason: {
             type: 'string',
