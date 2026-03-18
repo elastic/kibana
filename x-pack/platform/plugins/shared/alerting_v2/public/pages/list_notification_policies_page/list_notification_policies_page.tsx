@@ -231,6 +231,7 @@ export const ListNotificationPoliciesPage = () => {
         />
       ),
       sortable: true,
+      width: '200px',
       render: (updatedAt: string) =>
         new Date(updatedAt).toLocaleString(undefined, {
           month: 'short',
@@ -243,6 +244,7 @@ export const ListNotificationPoliciesPage = () => {
     {
       field: 'updatedByUsername',
       sortable: true,
+      width: '200px',
       name: (
         <FormattedMessage
           id="xpack.alertingV2.notificationPoliciesList.column.updatedByUsername"
