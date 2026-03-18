@@ -123,7 +123,7 @@ const useMessageEditorController = ({
   syncIsEmpty: () => void;
   isEmpty: boolean;
   setIsEmpty: (next: boolean) => void;
-}) => {
+}): MessageEditorController => {
   const controller = useMemo(
     () => ({
       focus: () => {

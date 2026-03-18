@@ -20,6 +20,13 @@ interface BadgeSegment {
 }
 export type ContentSegment = TextSegment | BadgeSegment;
 
+export class CommandBadgeSerializationError extends Error {
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = 'CommandBadgeSerializationError';
+  }
+}
+
 export const serializeCommandBadge = (element: HTMLElement): string => {
   const commandId = element.getAttribute(COMMAND_ID_ATTRIBUTE) ?? '';
   const commandDefinition = getCommandDefinition(commandId);
@@ -34,8 +41,22 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
   let queryString = '';
 
   if (metadataRaw) {
-    const { id: parsedId, ...rest } = JSON.parse(metadataRaw);
-    id = parsedId ?? '';
+    const metadata: Record<string, string> & { id: string } = { id: '' };
+    try {
+      const object: unknown = JSON.parse(metadataRaw);
+      if (!object || typeof object !== 'object') {
+        throw new Error('Could not parse metadata');
+      }
+      if ('id' in object && typeof object.id === 'string') {
+        Object.assign(metadata, object);
+      }
+    } catch (error) {
+      throw new CommandBadgeSerializationError('Could not serialize command badge', {
+        cause: error,
+      });
+    }
+    const { id: parsedId, ...rest } = metadata;
+    id = parsedId;
 
     const params = new URLSearchParams(rest);
     const paramString = params.toString();

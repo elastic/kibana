@@ -32,7 +32,8 @@ import {
   useHasActiveConversation,
   useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
-import { MessageEditor, useMessageEditor } from './message_editor';
+import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
+import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { borderRadiusXlStyles } from '../../../../common.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -169,6 +170,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const conversationId = useConversationId();
 
   const { messageEditor, controller: messageEditorController } = useMessageEditor();
+  const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
   const { conversation } = useConversation();
@@ -236,7 +238,20 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
     if (isSubmitDisabled) {
       return;
     }
-    const content = messageEditorController.getContent();
+    let content: string;
+    try {
+      content = messageEditorController.getContent();
+    } catch (contentError) {
+      if (contentError instanceof CommandBadgeSerializationError) {
+        addErrorToast(
+          i18n.translate('xpack.agentBuilder.conversationInput.invalidCommandBadge', {
+            defaultMessage:
+              'Your message contains an invalid command. Remove the command and try again.',
+          })
+        );
+      }
+      return;
+    }
     sendMessage({ message: content });
     messageEditorController.clear();
     onSubmit?.();

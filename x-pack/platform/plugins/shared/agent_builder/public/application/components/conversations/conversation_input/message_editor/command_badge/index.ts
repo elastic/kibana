@@ -9,5 +9,9 @@ export type { CommandBadgeData } from './types';
 export type { ContentSegment } from './command_badge_serializer';
 export { COMMAND_BADGE_ATTRIBUTE } from './attributes';
 export { createCommandBadgeElement, isElementCommandBadge } from './create_badge_element';
-export { deserializeCommandBadge, serializeCommandBadge } from './command_badge_serializer';
+export {
+  deserializeCommandBadge,
+  serializeCommandBadge,
+  CommandBadgeSerializationError,
+} from './command_badge_serializer';
 export { charOffsetToDomPosition } from './char_offset_to_dom_position';
