@@ -32,6 +32,7 @@ export interface ProposedChange {
 export interface PendingProposal extends ProposedChange {
   originalContent: string;
   viewZoneId: string;
+  pillZoneId: string;
   decorationIds: string[];
   /** Line where the undo range ends (inclusive for replace/delete, exclusive col-1 for insert) */
   undoEndLine: number;
@@ -58,6 +59,14 @@ export class ProposalManager {
   private pillElements = new Map<string, HTMLDivElement>();
 
   private mouseMoveDisposable: monaco.IDisposable | null = null;
+  private contentChangeDisposable: monaco.IDisposable | null = null;
+
+  /**
+   * Guard flag: true while proposeChange / rejectProposal / revertAllSilently
+   * are modifying the model. Allows the onDidChangeContent listener to
+   * distinguish internal edits from external ones (undo, user typing).
+   */
+  private isInternalEdit = false;
 
   initialize(editor: monaco.editor.IStandaloneCodeEditor, options?: ProposalManagerOptions): void {
     this.editor = editor;
@@ -100,6 +109,15 @@ export class ProposalManager {
         }
       }
     });
+
+    const model = editor.getModel();
+    if (model) {
+      this.contentChangeDisposable = model.onDidChangeContent(() => {
+        if (!this.isInternalEdit && this.hasPendingProposals()) {
+          this.dismissAll();
+        }
+      });
+    }
   }
 
   proposeChange(change: ProposedChange): void {
@@ -127,6 +145,7 @@ export class ProposalManager {
 
     const lineCountBefore = model.getLineCount();
 
+    this.isInternalEdit = true;
     this.editor.pushUndoStop();
     model.pushEditOperations(
       null,
@@ -139,6 +158,7 @@ export class ProposalManager {
       () => null
     );
     this.editor.pushUndoStop();
+    this.isInternalEdit = false;
 
     const linesDelta = model.getLineCount() - lineCountBefore;
     const origLineSpan = change.type === 'insert' ? 0 : endLine - change.startLine + 1;
@@ -155,7 +175,7 @@ export class ProposalManager {
       undoEndColumn = model.getLineMaxColumn(undoEndLine);
     }
 
-    const { viewZoneId, decorationIds } = this.showProposalUI(
+    const { viewZoneId, pillZoneId, decorationIds } = this.showProposalUI(
       change,
       originalContent,
       newContentLineCount
@@ -165,6 +185,7 @@ export class ProposalManager {
       ...change,
       originalContent,
       viewZoneId,
+      pillZoneId,
       decorationIds,
       undoEndLine,
       undoEndColumn,
@@ -194,6 +215,7 @@ export class ProposalManager {
     const model = this.editor.getModel();
     if (!model) return;
 
+    this.isInternalEdit = true;
     this.editor.pushUndoStop();
     model.pushEditOperations(
       null,
@@ -211,6 +233,7 @@ export class ProposalManager {
       () => null
     );
     this.editor.pushUndoStop();
+    this.isInternalEdit = false;
 
     this.clearProposal(proposalId);
     this.options.onReject?.(proposalId);
@@ -240,6 +263,56 @@ export class ProposalManager {
     }
   }
 
+  /**
+   * Revert all pending proposals: restore original content in the model
+   * and remove decorations/view zones, without firing onAccept/onReject
+   * callbacks. Used when a new event supersedes existing proposals and
+   * needs a clean model state. Returns the proposalIds that were reverted.
+   */
+  revertAllSilently(): string[] {
+    if (!this.editor || this.proposals.size === 0) return [];
+
+    const model = this.editor.getModel();
+    if (!model) return [];
+
+    this.isInternalEdit = true;
+    this.editor.pushUndoStop();
+
+    const ids = Array.from(this.proposals.keys());
+    const reverted: string[] = [];
+
+    for (const id of ids) {
+      const proposal = this.proposals.get(id);
+      if (proposal) {
+        model.pushEditOperations(
+          null,
+          [
+            {
+              range: new monaco.Range(
+                proposal.startLine,
+                1,
+                proposal.undoEndLine,
+                proposal.undoEndColumn
+              ),
+              text: proposal.originalContent,
+            },
+          ],
+          () => null
+        );
+
+        this.clearProposal(id);
+        reverted.push(id);
+      }
+    }
+
+    this.editor.pushUndoStop();
+    this.isInternalEdit = false;
+    this.updatePillVisibility();
+    this.updateBulkBar();
+
+    return reverted;
+  }
+
   getPendingProposals(): PendingProposal[] {
     return Array.from(this.proposals.values());
   }
@@ -248,12 +321,29 @@ export class ProposalManager {
     return this.proposals.size > 0;
   }
 
+  /**
+   * Clear all pending proposal UI (decorations + view zones) and fire
+   * onReject for each, without modifying the model. Used when an external
+   * change (undo, user typing) invalidates the proposals in-place.
+   */
+  private dismissAll(): void {
+    const ids = Array.from(this.proposals.keys());
+    for (const id of ids) {
+      this.clearProposal(id);
+      this.options.onReject?.(id);
+    }
+    this.updatePillVisibility();
+    this.updateBulkBar();
+  }
+
   dispose(): void {
     this.rejectAll();
     this.removeBulkBar();
 
     this.mouseMoveDisposable?.dispose();
     this.mouseMoveDisposable = null;
+    this.contentChangeDisposable?.dispose();
+    this.contentChangeDisposable = null;
 
     if (this.editor && this.keydownHandler) {
       const domNode = this.editor.getDomNode();
@@ -455,10 +545,11 @@ export class ProposalManager {
     newContentLineCount: number
   ): {
     viewZoneId: string;
+    pillZoneId: string;
     decorationIds: string[];
   } {
     const editor = this.editor;
-    if (!editor) return { viewZoneId: '', decorationIds: [] };
+    if (!editor) return { viewZoneId: '', pillZoneId: '', decorationIds: [] };
 
     const wrapper = document.createElement('div');
     wrapper.className = 'wfDiffWrapper';
@@ -511,6 +602,9 @@ export class ProposalManager {
 
       tempModel.dispose();
     }
+
+    const pillWrapper = document.createElement('div');
+    pillWrapper.className = 'wfDiffPillWrapper';
 
     const pill = document.createElement('div');
     pill.className = 'wfDiffButtonsPill';
@@ -584,23 +678,38 @@ export class ProposalManager {
 
     this.pillElements.set(change.proposalId, pill);
 
+    pillWrapper.appendChild(pill);
+
+    const afterLineNumber = change.startLine - 1;
+    const heightInLines = hasOriginalContent ? originalLines.length : 0;
+
+    const pillAfterLine = change.startLine + Math.max(newContentLineCount - 1, 0);
+
+    let viewZoneId = '';
+    let pillZoneId = '';
+    editor.changeViewZones((accessor) => {
+      if (heightInLines > 0) {
+        viewZoneId = accessor.addZone({
+          afterLineNumber,
+          heightInLines,
+          domNode: wrapper,
+          suppressMouseDown: true,
+        });
+      }
+
+      pillZoneId = accessor.addZone({
+        afterLineNumber: pillAfterLine,
+        heightInPx: 28,
+        domNode: pillWrapper,
+        suppressMouseDown: true,
+      });
+    });
+
     wrapper.addEventListener('mouseenter', () => {
       this.focusProposal(change.proposalId);
     });
-
-    wrapper.appendChild(pill);
-
-    const afterLineNumber = change.startLine - 1;
-    const heightInLines = hasOriginalContent ? originalLines.length : 1;
-
-    let viewZoneId = '';
-    editor.changeViewZones((accessor) => {
-      viewZoneId = accessor.addZone({
-        afterLineNumber,
-        heightInLines,
-        domNode: wrapper,
-        suppressMouseDown: true,
-      });
+    pillWrapper.addEventListener('mouseenter', () => {
+      this.focusProposal(change.proposalId);
     });
 
     const decorationIds: string[] = [];
@@ -621,7 +730,7 @@ export class ProposalManager {
       this.decorationCollections.set(change.proposalId, collection);
     }
 
-    return { viewZoneId, decorationIds };
+    return { viewZoneId, pillZoneId, decorationIds };
   }
 
   private clearProposal(proposalId: string): void {
@@ -637,7 +746,12 @@ export class ProposalManager {
     this.pillElements.delete(proposalId);
 
     this.editor.changeViewZones((accessor) => {
-      accessor.removeZone(proposal.viewZoneId);
+      if (proposal.viewZoneId) {
+        accessor.removeZone(proposal.viewZoneId);
+      }
+      if (proposal.pillZoneId) {
+        accessor.removeZone(proposal.pillZoneId);
+      }
     });
 
     this.proposals.delete(proposalId);

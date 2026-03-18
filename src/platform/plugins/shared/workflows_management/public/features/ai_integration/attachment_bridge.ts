@@ -145,10 +145,10 @@ export const computeChanges = (
  * workflow YAML changes to the Monaco ProposalManager.
  *
  * Listens for `workflow:yaml_changed` ToolUiEvents emitted by server-side
- * edit tools. Each event is processed immediately against the editor's
- * current content — since `proposeChange` applies edits to the model,
- * chained events naturally diff against already-applied changes, producing
- * tight per-event hunks without explicit collapsing.
+ * edit tools. When multiple events arrive in sequence, existing proposals
+ * are reverted first (restoring the model to its pre-proposal state) so
+ * that the new diff is computed against the user's original content and
+ * applied with correct line coordinates.
  */
 export class AttachmentBridge {
   private static readonly PROCESSED_PROPOSALS_CAP = 500;
@@ -222,6 +222,14 @@ export class AttachmentBridge {
       toolId: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
       attachmentVersion: attachmentVersion ?? 0,
     });
+
+    if (manager.hasPendingProposals()) {
+      const revertedIds = manager.revertAllSilently();
+      const revertedBaseIds = [...new Set(revertedIds.map(baseProposalId))];
+      for (const baseId of revertedBaseIds) {
+        this.tracker.updateStatus(baseId, 'accepted');
+      }
+    }
 
     const declined = this.tracker.getDeclinedFingerprints();
     const currentContent = model.getValue();

@@ -676,6 +676,42 @@ describe('real payload regression: trailing newline mismatch', () => {
   });
 });
 
+const makeYamlChangedEvent = (payload: Record<string, unknown>): BrowserChatEvent =>
+  ({
+    type: ChatEventType.toolUi,
+    data: {
+      tool_id: 'some-tool',
+      tool_call_id: 'call-1',
+      custom_event: WORKFLOW_YAML_CHANGED_EVENT,
+      data: payload,
+    },
+  } as unknown as BrowserChatEvent);
+
+const createMockEditor = (initialValue: string) => {
+  let content = initialValue;
+  return {
+    getModel: () => ({
+      getValue: () => content,
+      _setValue: (v: string) => {
+        content = v;
+      },
+    }),
+  } as unknown as import('@kbn/monaco').monaco.editor.IStandaloneCodeEditor;
+};
+
+const createMockProposalManager = () => {
+  const proposed: ProposedChange[] = [];
+  const manager = {
+    proposeChange: jest.fn((change: ProposedChange) => {
+      proposed.push(change);
+    }),
+    acceptOverlapping: jest.fn(),
+    hasPendingProposals: jest.fn(() => false),
+    revertAllSilently: jest.fn(() => []),
+  } as unknown as ProposalManager;
+  return { manager, proposed };
+};
+
 describe('AttachmentBridge: workflow navigation', () => {
   const WORKFLOW_A_YAML = [
     "version: '1'",
@@ -700,40 +736,6 @@ describe('AttachmentBridge: workflow navigation', () => {
     '    with:',
     '      url: https://example.com',
   ].join('\n');
-
-  const makeYamlChangedEvent = (payload: Record<string, unknown>): BrowserChatEvent =>
-    ({
-      type: ChatEventType.toolUi,
-      data: {
-        tool_id: 'some-tool',
-        tool_call_id: 'call-1',
-        custom_event: WORKFLOW_YAML_CHANGED_EVENT,
-        data: payload,
-      },
-    } as unknown as BrowserChatEvent);
-
-  const createMockEditor = (initialValue: string) => {
-    let content = initialValue;
-    return {
-      getModel: () => ({
-        getValue: () => content,
-        _setValue: (v: string) => {
-          content = v;
-        },
-      }),
-    } as unknown as import('@kbn/monaco').monaco.editor.IStandaloneCodeEditor;
-  };
-
-  const createMockProposalManager = () => {
-    const proposed: ProposedChange[] = [];
-    const manager = {
-      proposeChange: jest.fn((change: ProposedChange) => {
-        proposed.push(change);
-      }),
-      acceptOverlapping: jest.fn(),
-    } as unknown as ProposalManager;
-    return { manager, proposed };
-  };
 
   it('event for previous workflow arriving after navigation should not corrupt the current editor', () => {
     const chat$ = new Subject<BrowserChatEvent>();
@@ -817,6 +819,222 @@ describe('AttachmentBridge: workflow navigation', () => {
     expect(
       workflowBChanges.some((c: ProposedChange) => c.newText.includes('EDITED second workflow'))
     ).toBe(true);
+
+    bridge.stop();
+  });
+});
+
+describe('AttachmentBridge: revert-before-reapply for sequential events', () => {
+  const ORIGINAL_YAML = [
+    "version: '1'",
+    'name: My Workflow',
+    'description: original description',
+    '',
+    'enabled: true',
+    '',
+    'triggers:',
+    '  - type: manual',
+    '',
+    'steps:',
+    '  - name: step1',
+    '    type: console',
+    '    with:',
+    '      message: hello',
+  ].join('\n');
+
+  const V1_YAML = ORIGINAL_YAML.replace(
+    'description: original description',
+    'description: updated by tool 1'
+  );
+
+  const V2_YAML = V1_YAML.replace('enabled: true', 'enabled: false');
+
+  /**
+   * Mock ProposalManager that simulates model mutations and supports
+   * revertAllSilently: captures a baseline before the first proposeChange
+   * and restores it on revert.
+   */
+  const createMutatingMockManager = (editor: ReturnType<typeof createMockEditor>) => {
+    const proposed: ProposedChange[] = [];
+    let savedBaseline: string | null = null;
+    let pendingIds: string[] = [];
+
+    const getModel = () =>
+      editor.getModel() as unknown as { getValue: () => string; _setValue: (v: string) => void };
+
+    const applyChange = (change: ProposedChange) => {
+      const model = getModel();
+      const currentLines = model.getValue().split('\n');
+      const endLine = change.endLine ?? change.startLine;
+
+      if (change.type === 'insert') {
+        const before = currentLines.slice(0, change.startLine - 1);
+        const after = currentLines.slice(change.startLine - 1);
+        const newLines = change.newText ? change.newText.replace(/\n$/, '').split('\n') : [];
+        model._setValue([...before, ...newLines, ...after].join('\n'));
+      } else if (change.type === 'replace') {
+        const before = currentLines.slice(0, change.startLine - 1);
+        const after = currentLines.slice(endLine);
+        const newLines = change.newText ? change.newText.replace(/\n$/, '').split('\n') : [];
+        model._setValue([...before, ...newLines, ...after].join('\n'));
+      } else if (change.type === 'delete') {
+        const before = currentLines.slice(0, change.startLine - 1);
+        const after = currentLines.slice(endLine);
+        model._setValue([...before, ...after].join('\n'));
+      }
+    };
+
+    const manager = {
+      proposeChange: jest.fn((change: ProposedChange) => {
+        if (savedBaseline === null) {
+          savedBaseline = getModel().getValue();
+        }
+        proposed.push(change);
+        pendingIds.push(change.proposalId);
+        applyChange(change);
+      }),
+      acceptOverlapping: jest.fn(),
+      hasPendingProposals: jest.fn(() => pendingIds.length > 0),
+      revertAllSilently: jest.fn(() => {
+        const ids = [...pendingIds];
+        if (savedBaseline !== null) {
+          getModel()._setValue(savedBaseline);
+        }
+        pendingIds = [];
+        savedBaseline = null;
+        return ids;
+      }),
+    } as unknown as ProposalManager;
+    return { manager, proposed };
+  };
+
+  it('second sequential event reverts first, then diffs against restored model', () => {
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor(ORIGINAL_YAML);
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager, proposed } = createMutatingMockManager(editor);
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker);
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'p1',
+        beforeYaml: ORIGINAL_YAML,
+        afterYaml: V1_YAML,
+        attachmentVersion: 1,
+      })
+    );
+
+    expect(proposed.length).toBeGreaterThan(0);
+    expect(proposed.some((c) => c.newText.includes('updated by tool 1'))).toBe(true);
+
+    // Model is now mutated to V1_YAML by proposeChange
+    expect(editor.getModel()!.getValue()).toContain('updated by tool 1');
+
+    const proposedBeforeEvent2 = proposed.length;
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'p2',
+        beforeYaml: V1_YAML,
+        afterYaml: V2_YAML,
+        attachmentVersion: 2,
+      })
+    );
+
+    // revertAllSilently was called before the second event's changes
+    expect(manager.revertAllSilently).toHaveBeenCalledTimes(1);
+
+    // New proposals were created from the second event
+    const newProposals = proposed.slice(proposedBeforeEvent2);
+    expect(newProposals.length).toBeGreaterThan(0);
+
+    // The diff was computed against the restored model (ORIGINAL_YAML),
+    // so it includes the cumulative change (both description and enabled).
+    const allNewText = newProposals.map((c) => c.newText).join('');
+    expect(allNewText).toContain('enabled: false');
+    expect(allNewText).toContain('updated by tool 1');
+
+    // The first proposal was marked as accepted in the tracker
+    expect(tracker.getRecord('p1')?.status).toBe('accepted');
+
+    bridge.stop();
+  });
+
+  it('no revert when there are no pending proposals', () => {
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor(ORIGINAL_YAML);
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager, proposed } = createMutatingMockManager(editor);
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker);
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'p1',
+        beforeYaml: ORIGINAL_YAML,
+        afterYaml: V1_YAML,
+        attachmentVersion: 1,
+      })
+    );
+
+    // First event should NOT trigger revert (no prior proposals)
+    expect(manager.revertAllSilently).not.toHaveBeenCalled();
+
+    expect(proposed.length).toBeGreaterThan(0);
+    expect(proposed.some((c) => c.newText.includes('updated by tool 1'))).toBe(true);
+
+    bridge.stop();
+  });
+
+  it('after stop/restart, new manager has no pending proposals to revert', () => {
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor(ORIGINAL_YAML);
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMutatingMockManager(editor);
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker);
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'p1',
+        beforeYaml: ORIGINAL_YAML,
+        afterYaml: V1_YAML,
+        attachmentVersion: 1,
+      })
+    );
+
+    bridge.stop();
+
+    // Model was mutated to V1_YAML by proposeChange during first bridge session.
+    // Re-start with a fresh manager and tracker.
+    const tracker2 = new ProposalTracker();
+    const { manager: manager2, proposed: proposed2 } = createMutatingMockManager(editor);
+    bridge.start(chat$, manager2, editorRef, tracker2);
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'p2',
+        beforeYaml: V1_YAML,
+        afterYaml: V2_YAML,
+        attachmentVersion: 2,
+      })
+    );
+
+    // Fresh manager has no pending proposals, so no revert needed
+    expect(manager2.revertAllSilently).not.toHaveBeenCalled();
+
+    expect(proposed2.length).toBeGreaterThan(0);
+    // Diff is against the current model (V1_YAML), so only shows enabled change
+    const allNewText = proposed2.map((c) => c.newText).join('');
+    expect(allNewText).toContain('enabled: false');
+    expect(allNewText).not.toContain('original description');
 
     bridge.stop();
   });

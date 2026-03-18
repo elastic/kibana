@@ -36,8 +36,9 @@ const createMockEditor = () => {
   const decorationsCollection = { clear: jest.fn() };
   const viewZones: string[] = [];
   let zoneCounter = 0;
+  const contentChangeListeners: Array<() => void> = [];
 
-  return {
+  const editor = {
     getDomNode: jest.fn().mockReturnValue({
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
@@ -50,6 +51,10 @@ const createMockEditor = () => {
       pushEditOperations: jest.fn(),
       getLanguageId: jest.fn().mockReturnValue('yaml'),
       getOptions: jest.fn().mockReturnValue({ tabSize: 2 }),
+      onDidChangeContent: jest.fn((listener: () => void) => {
+        contentChangeListeners.push(listener);
+        return { dispose: jest.fn() };
+      }),
     }),
     getOption: jest.fn().mockReturnValue({
       fontFamily: 'monospace',
@@ -76,7 +81,14 @@ const createMockEditor = () => {
     }),
     createDecorationsCollection: jest.fn().mockReturnValue(decorationsCollection),
     deltaDecorations: jest.fn().mockReturnValue([]),
+    onMouseMove: jest.fn().mockReturnValue({ dispose: jest.fn() }),
+    /** Simulate an external model change (e.g. undo) by firing content change listeners */
+    _simulateExternalContentChange: () => {
+      contentChangeListeners.forEach((l) => l());
+    },
   } as any;
+
+  return editor;
 };
 
 const createInsertChange = (id: string): ProposedChange => ({
@@ -355,6 +367,90 @@ describe('ProposalManager', () => {
 
       expect(onAccept).toHaveBeenCalledWith('insert-at-5');
       expect(manager.hasPendingProposals()).toBe(false);
+    });
+  });
+
+  describe('external content changes (undo)', () => {
+    it('dismisses all proposals and clears decorations on external model change', () => {
+      const onReject = jest.fn();
+      const editor = createMockEditor();
+      manager.initialize(editor, { onReject });
+
+      manager.proposeChange(createInsertChange('test-1'));
+      manager.proposeChange(createReplaceChange('test-2'));
+
+      expect(manager.hasPendingProposals()).toBe(true);
+      expect(manager.getPendingProposals()).toHaveLength(2);
+
+      editor._simulateExternalContentChange();
+
+      expect(manager.hasPendingProposals()).toBe(false);
+      expect(onReject).toHaveBeenCalledTimes(2);
+
+      const decoCollection = editor.createDecorationsCollection.mock.results[0].value;
+      expect(decoCollection.clear).toHaveBeenCalled();
+    });
+
+    it('does not dismiss proposals when content change is from proposeChange', () => {
+      const onReject = jest.fn();
+      const editor = createMockEditor();
+
+      const model = editor.getModel();
+      model.pushEditOperations.mockImplementation(
+        (_sel: unknown, _ops: unknown, cb: () => void) => {
+          cb();
+          editor._simulateExternalContentChange();
+          return null;
+        }
+      );
+
+      manager.initialize(editor, { onReject });
+
+      manager.proposeChange(createInsertChange('test-1'));
+
+      expect(manager.hasPendingProposals()).toBe(true);
+      expect(onReject).not.toHaveBeenCalled();
+    });
+
+    it('does not dismiss proposals when content change is from rejectProposal', () => {
+      const onReject = jest.fn();
+      const editor = createMockEditor();
+
+      let editCallCount = 0;
+      const model = editor.getModel();
+      model.pushEditOperations.mockImplementation(
+        (_sel: unknown, _ops: unknown, cb: () => void) => {
+          editCallCount++;
+          cb();
+          // Only fire content change on the second call (rejectProposal)
+          if (editCallCount > 1) {
+            editor._simulateExternalContentChange();
+          }
+          return null;
+        }
+      );
+
+      manager.initialize(editor, { onReject });
+
+      manager.proposeChange(createInsertChange('test-1'));
+      expect(manager.hasPendingProposals()).toBe(true);
+
+      manager.rejectProposal('test-1');
+
+      expect(manager.hasPendingProposals()).toBe(false);
+      // onReject is called exactly once — from rejectProposal, not from dismissAll
+      expect(onReject).toHaveBeenCalledTimes(1);
+      expect(onReject).toHaveBeenCalledWith('test-1');
+    });
+
+    it('is a no-op when there are no pending proposals', () => {
+      const onReject = jest.fn();
+      const editor = createMockEditor();
+      manager.initialize(editor, { onReject });
+
+      editor._simulateExternalContentChange();
+
+      expect(onReject).not.toHaveBeenCalled();
     });
   });
 });
