@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useLocation } from 'react-router-dom';
 
-import { useNavigation } from '../../../common/lib/kibana';
 import { useGetWatchlists } from '../../api/hooks/use_get_watchlists';
-import {
-  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
-  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-} from '../../../../common/constants';
 import {
   WATCHLIST_FILTER_LABEL,
   WATCHLIST_FILTER_PLACEHOLDER,
@@ -25,22 +19,21 @@ import {
   WATCHLIST_ICON_PIN_ARIA_LABEL,
 } from './translations';
 import type { WatchlistItem, WatchlistOption } from './types';
+import { PREBUILT_WATCHLIST_NAMES } from '../../../../common/entity_analytics/watchlists/constants';
 
 interface WatchlistFilterProps {
-  onChangeSelectedId?: (id: string) => void;
+  onChangeSelectedId?: (id: string | undefined) => void;
+  selectedId?: string;
 }
 
-// TODO: remove this when backend route available for mapping specific prebuilt watchlists to routes
-const WATCHLIST_ROUTE_MAP: Record<string, string> = {
-  'prebuilt-priv': ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-};
-
-const ROUTE_TO_WATCHLIST_MAP: Record<string, string> = Object.fromEntries(
-  Object.entries(WATCHLIST_ROUTE_MAP).map(([id, path]) => [path, id])
-) as Record<string, string>;
-
-export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) => {
+export const WatchlistFilter = ({
+  onChangeSelectedId,
+  selectedId: propSelectedId,
+}: WatchlistFilterProps) => {
   const { data: watchlists, isLoading } = useGetWatchlists();
+
+  const [internalSelectedId, setInternalSelectedId] = useState<string | undefined>();
+  const currentSelectedId = propSelectedId !== undefined ? propSelectedId : internalSelectedId;
 
   const options = useMemo<WatchlistOption[]>(() => {
     if (!watchlists) return [];
@@ -78,7 +71,7 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
     watchlists.forEach((watchlist) => {
       const option: WatchlistItem = {
         id: watchlist.name, // Changed to match by name
-        label: watchlist.name,
+        label: PREBUILT_WATCHLIST_NAMES[watchlist.name] ?? watchlist.name,
       };
 
       if (watchlist.managed) {
@@ -96,10 +89,6 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
     return result;
   }, [watchlists]);
 
-  const { pathname } = useLocation();
-
-  const { navigateTo } = useNavigation();
-
   const getItemById = useCallback(
     (id?: string) =>
       options.find(
@@ -108,25 +97,9 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
     [options]
   );
 
-  const selectedIdFromRoute = useMemo(() => ROUTE_TO_WATCHLIST_MAP[pathname], [pathname]);
-
   const selected = useMemo(
-    () => (selectedIdFromRoute ? getItemById(selectedIdFromRoute) : null),
-    [getItemById, selectedIdFromRoute]
-  );
-
-  const navigateToWatchlist = useCallback(
-    (watchlistId?: string) => {
-      const isCleared = !watchlistId;
-      const mappedPath = watchlistId ? WATCHLIST_ROUTE_MAP[watchlistId] : undefined;
-      const nextPath = !isCleared && mappedPath ? mappedPath : ENTITY_ANALYTICS_THREAT_HUNTING_PATH;
-
-      navigateTo({
-        path: nextPath,
-        state: { retainFilters: true }, // Add this to preserve global filters/time range on navigation
-      });
-    },
-    [navigateTo]
+    () => (currentSelectedId ? getItemById(currentSelectedId) : null),
+    [getItemById, currentSelectedId]
   );
 
   const onChangeComboBox = useCallback(
@@ -135,26 +108,11 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
         | WatchlistItem
         | undefined;
 
-      if (newlySelected?.id) {
-        onChangeSelectedId?.(newlySelected.id);
-
-        const mappedPath = WATCHLIST_ROUTE_MAP[newlySelected.id];
-        // eslint-disable-next-line no-console
-        console.log(
-          `[Watchlist Filter] Selected ID: "${newlySelected.id}". ` +
-            `Available mappings: ${JSON.stringify(WATCHLIST_ROUTE_MAP)}. ` +
-            `Would map to Privileged User Monitoring? ${
-              mappedPath === ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH ? 'YES' : 'NO'
-            }`
-        );
-
-        navigateToWatchlist(newlySelected.id);
-      } else {
-        onChangeSelectedId?.('');
-        navigateToWatchlist(undefined);
-      }
+      const newId = newlySelected?.id;
+      setInternalSelectedId(newId);
+      onChangeSelectedId?.(newId);
     },
-    [onChangeSelectedId, navigateToWatchlist]
+    [onChangeSelectedId]
   );
 
   return (
