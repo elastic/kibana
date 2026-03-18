@@ -11,17 +11,17 @@ import { createGcsRepository, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import type { Feature } from '@kbn/streams-schema';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
-import { getSigeventsSnapshotFeaturesIndex } from './sigevents_features_index';
+import { getSigeventsSnapshotKIsIndex } from './sigevents_kis_index';
 
-export const FEATURES_TEMP_INDEX = 'sigevents-replay-temp-features';
-const FEATURES_SEARCH_LIMIT = 1000;
+export const KIS_TEMP_INDEX = 'sigevents-replay-temp-features';
+const KIS_SEARCH_LIMIT = 1000;
 
 /**
- * Restores sigevents-captured features from a snapshot and returns all
+ * Restores sigevents-captured KIs from a snapshot and returns all
  * {@link Feature} documents for the given stream. The temp index is cleaned
  * up before returning.
  */
-export async function loadFeaturesFromSnapshot(
+export async function loadKIsFromSnapshot(
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
@@ -30,19 +30,19 @@ export async function loadFeaturesFromSnapshot(
 ): Promise<Feature[]> {
   const basePath = resolveBasePath(gcs);
   const repository = createGcsRepository({ bucket: gcs.bucket, basePath });
-  const featuresIndex = getSigeventsSnapshotFeaturesIndex(snapshotName);
+  const kiIndex = getSigeventsSnapshotKIsIndex(snapshotName);
 
   try {
-    await esClient.indices.delete({ index: FEATURES_TEMP_INDEX, ignore_unavailable: true });
+    await esClient.indices.delete({ index: KIS_TEMP_INDEX, ignore_unavailable: true });
 
     const restoreResult = await restoreSnapshot({
       esClient,
       log,
       repository,
       snapshotName,
-      indices: [featuresIndex],
+      indices: [kiIndex],
       renamePattern: '(.+)',
-      renameReplacement: FEATURES_TEMP_INDEX,
+      renameReplacement: KIS_TEMP_INDEX,
       allowNoMatches: true,
     });
 
@@ -56,32 +56,32 @@ export async function loadFeaturesFromSnapshot(
       return [];
     }
 
-    if (!restoreResult.restoredIndices.includes(FEATURES_TEMP_INDEX)) {
+    if (!restoreResult.restoredIndices.includes(KIS_TEMP_INDEX)) {
       throw new Error(
-        `Snapshot "${snapshotName}" restore did not produce expected temp index "${FEATURES_TEMP_INDEX}". ` +
+        `Snapshot "${snapshotName}" restore did not produce expected temp index "${KIS_TEMP_INDEX}". ` +
           `Restored indices: ${restoreResult.restoredIndices.join(', ')}`
       );
     }
 
     const searchResult = await esClient.search<Record<string, unknown>>({
-      index: FEATURES_TEMP_INDEX,
-      size: FEATURES_SEARCH_LIMIT,
+      index: KIS_TEMP_INDEX,
+      size: KIS_SEARCH_LIMIT,
       query: { term: { stream_name: streamName } },
     });
 
-    const features: Feature[] = searchResult.hits.hits
+    const kis: Feature[] = searchResult.hits.hits
       .map((hit) => hit._source as Feature)
       .filter(Boolean);
 
     log.info(
-      `Loaded ${features.length} features from snapshot "${snapshotName}" (search limit: ${FEATURES_SEARCH_LIMIT})`
+      `Loaded ${kis.length} KIs from snapshot "${snapshotName}" (search limit: ${KIS_SEARCH_LIMIT})`
     );
-    return features;
+    return kis;
   } finally {
     try {
-      await esClient.indices.delete({ index: FEATURES_TEMP_INDEX, ignore_unavailable: true });
+      await esClient.indices.delete({ index: KIS_TEMP_INDEX, ignore_unavailable: true });
     } catch {
-      log.debug(`Failed to delete temp features index`);
+      log.debug(`Failed to delete temp KIs index`);
     }
   }
 }

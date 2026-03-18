@@ -11,8 +11,9 @@ import type { BaseFeature } from '@kbn/streams-schema';
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { createScenarioCriteriaLlmEvaluator } from './scenario_criteria_llm_evaluator';
+import { matchesEvidenceText } from './evidence_text_matching';
 
-export const VALID_FEATURE_TYPES = [
+export const VALID_KI_TYPES = [
   'entity',
   'infrastructure',
   'technology',
@@ -20,9 +21,9 @@ export const VALID_FEATURE_TYPES = [
   'schema',
 ] as const;
 
-export type ValidFeatureType = (typeof VALID_FEATURE_TYPES)[number];
+export type ValidKIType = (typeof VALID_KI_TYPES)[number];
 
-export interface FeatureExtractionEvaluationExample {
+export interface KIExtractionEvaluationExample {
   input: {
     sample_documents: Array<SearchHit<Record<string, unknown>>>;
   };
@@ -32,38 +33,30 @@ export interface FeatureExtractionEvaluationExample {
     min_features?: number;
     max_features?: number;
     max_confidence?: number;
-    required_types?: ValidFeatureType[];
-    forbidden_types?: ValidFeatureType[];
+    required_types?: ValidKIType[];
+    forbidden_types?: ValidKIType[];
     expected_ground_truth: string;
     expected?: string;
   };
   metadata: Record<string, unknown> | null;
 }
 
-export interface FeatureIdentificationEvaluationDataset {
+export interface KIIdentificationEvaluationDataset {
   name: string;
   description: string;
-  examples: FeatureExtractionEvaluationExample[];
+  examples: KIExtractionEvaluationExample[];
 }
 
-/**
- * Deterministic CODE evaluators that run alongside the LLM-based criteria evaluator.
- * These verify objectively measurable properties without relying on an LLM judge.
- */
-
-interface FeatureExtractionTaskOutput {
+interface KIExtractionTaskOutput {
   features: BaseFeature[];
   traceId?: string | null;
 }
 
-type FeatureExtractionOutput = BaseFeature[] | FeatureExtractionTaskOutput;
+type KIExtractionOutput = BaseFeature[] | KIExtractionTaskOutput;
 
-type FeatureExtractionEvaluator = Evaluator<
-  FeatureExtractionEvaluationExample,
-  FeatureExtractionOutput
->;
+type KIExtractionEvaluator = Evaluator<KIExtractionEvaluationExample, KIExtractionOutput>;
 
-const getFeaturesFromOutput = (output: FeatureExtractionOutput | undefined): BaseFeature[] => {
+const getKIsFromOutput = (output: KIExtractionOutput | undefined): BaseFeature[] => {
   if (!output) {
     return [];
   }
@@ -71,7 +64,7 @@ const getFeaturesFromOutput = (output: FeatureExtractionOutput | undefined): Bas
 };
 
 /**
- * Validates that every feature's `type` is one of the valid feature types.
+ * Validates that every KI's `type` is one of the valid KI types.
  * Other schema fields (id, description, confidence, etc.) are already enforced
  * by the inference client's tool output schema in the prompt.ts file.
  */
@@ -79,32 +72,30 @@ const typeValidationEvaluator = {
   name: 'type_validation',
   kind: 'CODE' as const,
   evaluate: async ({ output }) => {
-    const features = getFeaturesFromOutput(output);
-    if (features.length === 0) {
-      return { score: 1, explanation: 'No features to validate (vacuously valid)' };
+    const kis = getKIsFromOutput(output);
+    if (kis.length === 0) {
+      return { score: 1, explanation: 'No KIs to validate (vacuously valid)' };
     }
 
-    const invalidFeatures = features.filter(
-      (feature) => !VALID_FEATURE_TYPES.includes(feature.type as ValidFeatureType)
-    );
+    const invalidKIs = kis.filter((ki) => !VALID_KI_TYPES.includes(ki.type as ValidKIType));
 
-    const score = (features.length - invalidFeatures.length) / features.length;
+    const score = (kis.length - invalidKIs.length) / kis.length;
 
     return {
       score,
       explanation:
-        invalidFeatures.length > 0
-          ? `Invalid types: ${invalidFeatures
-              .map((f) => `"${f.id}" has type "${f.type}"`)
-              .join('; ')} (expected one of: ${VALID_FEATURE_TYPES.join(', ')})`
-          : 'All features have a valid type',
+        invalidKIs.length > 0
+          ? `Invalid types: ${invalidKIs
+              .map((ki) => `"${ki.id}" has type "${ki.type}"`)
+              .join('; ')} (expected one of: ${VALID_KI_TYPES.join(', ')})`
+          : 'All KIs have a valid type',
       details: {
-        total: features.length,
-        invalidFeatures: invalidFeatures.map((f) => ({ id: f.id, type: f.type })),
+        total: kis.length,
+        invalidKIs: invalidKIs.map((ki) => ({ id: ki.id, type: ki.type })),
       },
     };
   },
-} satisfies FeatureExtractionEvaluator;
+} satisfies KIExtractionEvaluator;
 
 /**
  * Parses a `field.path=value` evidence string into key-value pairs.
@@ -113,7 +104,7 @@ const typeValidationEvaluator = {
  */
 function parseKeyValuePairs(evidence: string): Array<{ key: string; value: string }> {
   const regex =
-    /([a-zA-Z_][a-zA-Z0-9_.]*)\s*=\s*([^\s]+(?:\s+(?![a-zA-Z_][a-zA-Z0-9_.]*\s*=)[^\s]+)*)/g;
+    /([a-zA-Z_][a-zA-Z0-9_]*(?:\.(?:[a-zA-Z_][a-zA-Z0-9_]*|\d+))*)\s*=\s*([^\s]+(?:\s+(?![a-zA-Z_][a-zA-Z0-9_]*(?:\.(?:[a-zA-Z_][a-zA-Z0-9_]*|\d+))*\s*=)[^\s]+)*)/g;
   const pairs: Array<{ key: string; value: string }> = [];
   let match: RegExpExecArray | null;
 
@@ -166,18 +157,17 @@ function getAllStringValues(doc: Record<string, unknown>): string[] {
  *    string value across all document fields.
  */
 function isEvidenceGrounded(evidence: string, documents: Array<Record<string, unknown>>): boolean {
-  // Direct quote: check against all string values in all documents
   const matchesStringValue = documents.some((doc) => {
     const allValues = getAllStringValues(doc);
-    return allValues.some((val) => val.includes(evidence) || evidence.includes(val));
+    return allValues.some((val) => matchesEvidenceText(val, evidence));
   });
+
   if (matchesStringValue) {
     return true;
   }
 
   const kvPairs = parseKeyValuePairs(evidence);
   if (kvPairs.length > 0) {
-    // field=value: at least one pair must match a document field
     const matchesDocumentKey = documents.some((doc) =>
       kvPairs.some(({ key, value }) => {
         const docValue = getNestedValue(doc, key);
@@ -193,11 +183,11 @@ function isEvidenceGrounded(evidence: string, documents: Array<Record<string, un
 }
 
 /**
- * Checks that every evidence string in every feature is grounded in the input
+ * Checks that every evidence string in every KI is grounded in the input
  * documents — either as a `field.path=value` snippet matching a document field,
  * or as a direct quote appearing in any string value.
  *
- * When features include `evidence_doc_ids`, additionally validates that:
+ * When KIs include `evidence_doc_ids`, additionally validates that:
  * 1. All referenced `_id`s exist in the input documents.
  * 2. Evidence strings are grounded in the specific referenced docs, not just
  *    any input document.
@@ -206,7 +196,7 @@ const evidenceGroundingEvaluator = {
   name: 'evidence_grounding',
   kind: 'CODE' as const,
   evaluate: async ({ input, output }) => {
-    const features = getFeaturesFromOutput(output);
+    const kis = getKIsFromOutput(output);
     const rawDocs: Array<Record<string, unknown>> = input.sample_documents.map((hit) => ({
       _id: hit._id,
       _source: hit._source,
@@ -236,18 +226,18 @@ const evidenceGroundingEvaluator = {
     let groundedRefEvidence = 0;
     const docIdIssues: string[] = [];
 
-    for (const feature of features) {
-      const evidenceList = feature.evidence ?? [];
+    for (const ki of kis) {
+      const evidenceList = ki.evidence ?? [];
       for (const evidence of evidenceList) {
         totalEvidence++;
         if (isEvidenceGrounded(evidence, documents)) {
           groundedEvidence++;
         } else {
-          ungroundedItems.push(`Feature "${feature.id}": "${evidence}"`);
+          ungroundedItems.push(`KI "${ki.id}": "${evidence}"`);
         }
       }
 
-      const docIds = feature.evidence_doc_ids ?? [];
+      const docIds = ki.evidence_doc_ids ?? [];
       if (docIds.length > 0) {
         const refDocs: Array<Record<string, unknown>> = [];
         for (const docId of docIds) {
@@ -257,7 +247,7 @@ const evidenceGroundingEvaluator = {
             validDocIds++;
             refDocs.push(doc);
           } else {
-            docIdIssues.push(`Feature "${feature.id}": unknown doc ID "${docId}"`);
+            docIdIssues.push(`KI "${ki.id}": unknown doc ID "${docId}"`);
           }
         }
 
@@ -267,9 +257,7 @@ const evidenceGroundingEvaluator = {
             if (isEvidenceGrounded(evidence, refDocs)) {
               groundedRefEvidence++;
             } else {
-              docIdIssues.push(
-                `Feature "${feature.id}": evidence not in referenced docs: "${evidence}"`
-              );
+              docIdIssues.push(`KI "${ki.id}": evidence not in referenced docs: "${evidence}"`);
             }
           }
         }
@@ -278,11 +266,11 @@ const evidenceGroundingEvaluator = {
 
     if (totalEvidence === 0) {
       return {
-        score: features.length === 0 ? 1 : 0,
+        score: kis.length === 0 ? 1 : 0,
         explanation:
-          features.length === 0
-            ? 'No features, no evidence to check'
-            : 'Features present but none have evidence arrays',
+          kis.length === 0
+            ? 'No KIs, no evidence to check'
+            : 'KIs present but none have evidence arrays',
       };
     }
 
@@ -315,42 +303,44 @@ const evidenceGroundingEvaluator = {
       },
     };
   },
-} satisfies FeatureExtractionEvaluator;
+} satisfies KIExtractionEvaluator;
 
 /**
  * If min_features or max_features is specified in expected output,
- * verifies the feature count falls within bounds.
+ * verifies the KI count falls within bounds with proportional penalties.
  */
-const featureCountEvaluator = {
-  name: 'feature_count',
+const kiCountEvaluator = {
+  name: 'ki_count',
   kind: 'CODE' as const,
   evaluate: async ({ output, expected }) => {
-    const count = getFeaturesFromOutput(output).length;
+    const count = getKIsFromOutput(output).length;
     const { min_features = -Infinity, max_features = Infinity } = expected;
 
     const issues: string[] = [];
+    let score = 1;
+
     if (count < min_features) {
-      issues.push(`Expected at least ${min_features} features, got ${count}`);
+      issues.push(`Expected at least ${min_features} KIs, got ${count}`);
+      score = min_features > 0 ? Math.max(0, count / min_features) : 0;
     }
     if (count > max_features) {
-      issues.push(`Expected at most ${max_features} features, got ${count}`);
+      issues.push(`Expected at most ${max_features} KIs, got ${count}`);
+      score = max_features > 0 ? Math.max(0, 1 - (count - max_features) / max_features) : 0;
     }
 
     return {
-      score: issues.length === 0 ? 1 : 0,
+      score,
       explanation:
         issues.length > 0
-          ? issues.join('; ')
-          : `Feature count ${count} is within bounds [${min_features ?? '∞'}, ${
-              max_features ?? '∞'
-            }]`,
+          ? `${issues.join('; ')} (score=${score.toFixed(2)})`
+          : `KI count ${count} is within bounds [${min_features ?? '∞'}, ${max_features ?? '∞'}]`,
       details: { count, min_features, max_features },
     };
   },
-} satisfies FeatureExtractionEvaluator;
+} satisfies KIExtractionEvaluator;
 
 /**
- * If max_confidence is specified, verifies no feature exceeds it.
+ * If max_confidence is specified, verifies no KI exceeds it.
  */
 const confidenceBoundsEvaluator = {
   name: 'confidence_bounds',
@@ -358,36 +348,36 @@ const confidenceBoundsEvaluator = {
   evaluate: async ({ output, expected }) => {
     const { max_confidence = 100 } = expected;
 
-    const features = getFeaturesFromOutput(output);
-    if (features.length === 0) {
+    const kis = getKIsFromOutput(output);
+    if (kis.length === 0) {
       return {
         score: 1,
-        explanation: 'No features emitted — confidence bounds satisfied trivially',
+        explanation: 'No KIs emitted — confidence bounds satisfied trivially',
       };
     }
 
-    const violations = features.filter((f) => f.confidence > max_confidence);
+    const violations = kis.filter((ki) => ki.confidence > max_confidence);
 
     return {
-      score: violations.length === 0 ? 1 : 1 - violations.length / features.length,
+      score: violations.length === 0 ? 1 : 1 - violations.length / kis.length,
       explanation:
         violations.length > 0
           ? `${violations.length}/${
-              features.length
-            } features exceed max confidence ${max_confidence}: ${violations
-              .map((f) => `"${f.id}" (${f.confidence})`)
+              kis.length
+            } KIs exceed max confidence ${max_confidence}: ${violations
+              .map((ki) => `"${ki.id}" (${ki.confidence})`)
               .join(', ')}`
-          : `All features have confidence ≤ ${max_confidence}`,
+          : `All KIs have confidence ≤ ${max_confidence}`,
       details: {
         max_confidence,
-        violations: violations.map((f) => ({ id: f.id, confidence: f.confidence })),
+        violations: violations.map((ki) => ({ id: ki.id, confidence: ki.confidence })),
       },
     };
   },
-} satisfies FeatureExtractionEvaluator;
+} satisfies KIExtractionEvaluator;
 
 /**
- * If required_types or forbidden_types is specified, checks feature types accordingly.
+ * If required_types or forbidden_types is specified, checks KI types accordingly.
  */
 const typeAssertionsEvaluator = {
   name: 'type_assertions',
@@ -399,8 +389,8 @@ const typeAssertionsEvaluator = {
       return { score: 1, explanation: 'No type assertions specified — skipping' };
     }
 
-    const features = getFeaturesFromOutput(output);
-    const presentTypes = new Set(features.map((f) => f.type));
+    const kis = getKIsFromOutput(output);
+    const presentTypes = new Set(kis.map((ki) => ki.type));
     const issues: string[] = [];
     let totalAssertions = 0;
     let passedAssertions = 0;
@@ -422,10 +412,8 @@ const typeAssertionsEvaluator = {
         if (!presentTypes.has(forbiddenType)) {
           passedAssertions++;
         } else {
-          const violating = features.filter((f) => f.type === forbiddenType).map((f) => f.id);
-          issues.push(
-            `Forbidden type "${forbiddenType}" found in features: ${violating.join(', ')}`
-          );
+          const violating = kis.filter((ki) => ki.type === forbiddenType).map((ki) => ki.id);
+          issues.push(`Forbidden type "${forbiddenType}" found in KIs: ${violating.join(', ')}`);
         }
       }
     }
@@ -439,16 +427,16 @@ const typeAssertionsEvaluator = {
       details: { presentTypes: [...presentTypes], required_types, forbidden_types, issues },
     };
   },
-} satisfies FeatureExtractionEvaluator;
+} satisfies KIExtractionEvaluator;
 
-export const createFeatureExtractionEvaluators = (scenarioCriteria?: {
+export const createKIExtractionEvaluators = (scenarioCriteria?: {
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
   criteria: EvaluationCriterion[];
 }) => {
   const base = selectEvaluators([
     typeValidationEvaluator,
     evidenceGroundingEvaluator,
-    featureCountEvaluator,
+    kiCountEvaluator,
     confidenceBoundsEvaluator,
     typeAssertionsEvaluator,
   ]);
@@ -460,13 +448,11 @@ export const createFeatureExtractionEvaluators = (scenarioCriteria?: {
   const { criteriaFn, criteria } = scenarioCriteria;
   return [
     ...base,
-    createScenarioCriteriaLlmEvaluator<FeatureExtractionEvaluationExample, FeatureExtractionOutput>(
-      {
-        criteriaFn: (c) =>
-          criteriaFn(c) as Evaluator<FeatureExtractionEvaluationExample, FeatureExtractionOutput>,
-        criteria,
-        transformOutput: (output) => getFeaturesFromOutput(output),
-      }
-    ),
+    createScenarioCriteriaLlmEvaluator<KIExtractionEvaluationExample, KIExtractionOutput>({
+      criteriaFn: (c) =>
+        criteriaFn(c) as Evaluator<KIExtractionEvaluationExample, KIExtractionOutput>,
+      criteria,
+      transformOutput: (output) => getKIsFromOutput(output),
+    }),
   ];
 };

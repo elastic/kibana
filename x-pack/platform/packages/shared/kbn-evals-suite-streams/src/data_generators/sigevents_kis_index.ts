@@ -19,13 +19,13 @@ function sanitizeIndexComponent(value: string): string {
 }
 
 /**
- * Name of the non-system index that stores extracted features for a
+ * Name of the non-system index that stores extracted KIs for a
  * given snapshot scenario.
  *
  * We intentionally keep this as a **regular** index (no leading `.`) so it can
  * be included in snapshots via the `indices` parameter.
  */
-export function getSigeventsSnapshotFeaturesIndex(snapshotName: string): string {
+export function getSigeventsSnapshotKIsIndex(snapshotName: string): string {
   const component = sanitizeIndexComponent(snapshotName) || 'unknown';
   return `${SIGEVENTS_FEATURES_INDEX_PREFIX}${component}`;
 }
