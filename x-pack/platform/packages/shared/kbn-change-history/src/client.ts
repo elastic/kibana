@@ -155,7 +155,6 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @param opts.username - Current login name for the user who performed the change.
    * @param opts.userProfileId - Optional user profile ID (auth realm). See Elastic User Profiles.
    * @param opts.spaceId - The ID of the space that the change belongs to.
-   * @param opts.timestamp - Optional timestamp of the change.
    * @param opts.correlationId - Optional correlation ID for the bulk change.
    * @param opts.data - Optional data to merge into the change history document.
    * @param opts.ignoreFields - Optional fields to ignore in the diff calculation.
@@ -267,7 +266,6 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @param opts.sort - The sort order for the history query.
    * @param opts.from - The starting index for the history query.
    * @param opts.size - The number of results to return.
-   * @param opts.transportOpts - Additional ES transport options
    * @returns The history of the object.
    * @throws An error if the data stream is not initialized, or if an error occurs while getting the history.
    */

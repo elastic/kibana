@@ -60,7 +60,6 @@ All persisted documents follow the same schema (see below).
 - **`LogChangeHistoryOptions`** — Options for logging a change.
   - Required: `action`, `username`, `spaceId`.
   - Optional:
-    - `timestamp` an ISO8601 string; defaults to now,
     - `userProfileId` [user profile](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles) from auth realm,
     - `correlationId` that groups bulk events when set,
     - change `data` overrides (partial `event`, `tags`, and `metadata` to merge into the document),
@@ -110,9 +109,9 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | `user.id`               | `keyword`   | Optional user profile ID from auth realm. Refer to ES [User Profiles](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles).      |
 | `user.name`             | `keyword`   | Current login name. (Required)        |
 | `event`                 | `object`    | Event metadata.                                                             |
-| `event.id`              | `keyword`   | Unique identifier for the event.                                            |
-| `event.module`          | `keyword`   | Kibana module / domain (e.g. `security`). Part of the data stream name.              |
-| `event.dataset`         | `keyword`   | Feature Dataset (e.g. `alerting-rules`). Part of the data stream name.              |
+| `event.id`              | `keyword`   | Unique identifier for the event. |
+| `event.module`          | `keyword`   | Kibana module / domain (e.g. `security`). Used to scope writes and queries.          |
+| `event.dataset`         | `keyword`   | Feature dataset (e.g. `alerting-rules`). Used to scope writes and queries.           |
 | `event.action`          | `keyword`   | Action that triggered the change (e.g. `rule_create`, `rule_update`, `rule_delete`). See additional [examples](https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging).  |
 | `event.type`            | `keyword`   | ECS categorization: `creation`, `change`, `deletion`.                         |
 | `event.reason`          | `text`      | User-specified reason for the change. (Optional)                            |

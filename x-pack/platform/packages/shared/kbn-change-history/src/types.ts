@@ -97,7 +97,7 @@ export interface ChangeHistoryDocument {
 }
 
 export interface ObjectChange {
-  /** The change `event.id`. If provided. */
+  /** The change `event.id`. It is recommended to let the library generate the event id instead of providing it. */
   id?: string;
   /** ISO8601 `@timestamp` when this change was confirmed. */
   timestamp?: string;
@@ -107,7 +107,7 @@ export interface ObjectChange {
   objectId: string;
   /** ES backing `_index` where this object was stored. */
   index?: string;
-  /** A sequentially increasing version for ordering changes. */
+  /** A sequentially increasing version for ordering changes. Please avoid ES _seq_no or _version as these are not reliable */
   sequence?: number;
   /** Raw version of the object. Before changes. If available. */
   before?: Record<string, any>;
@@ -116,7 +116,7 @@ export interface ObjectChange {
 }
 
 export interface LogChangeHistoryOptions {
-  /** Human readable action performed by the user (`rule_create`, `rule_update`, `rule_delete`, etc.). Some Audit log examples (@see https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging) */
+  /** Action performed by the user (`rule_create`, `rule_update`, `rule_delete`, etc.). Some Audit log examples (@see https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging) */
   action: string;
   /** Current login name for user that generated the change. */
   username: string;
