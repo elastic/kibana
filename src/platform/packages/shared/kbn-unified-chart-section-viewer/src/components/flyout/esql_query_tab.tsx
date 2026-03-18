@@ -9,18 +9,18 @@
 
 import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
-import type { MetricField } from '../../types';
+import type { ParsedMetricItem } from '../../types';
 import { TabTitleAndDescription } from './tab_title_and_description';
 
 interface EsqlQueryTabProps {
   esqlQuery?: string;
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
 }
 
-export const EsqlQueryTab = ({ esqlQuery, metric }: EsqlQueryTabProps) => {
+export const EsqlQueryTab = ({ esqlQuery, metricItem }: EsqlQueryTabProps) => {
   return (
     <>
-      <TabTitleAndDescription metric={metric} />
+      <TabTitleAndDescription metricItem={metricItem} />
       <EuiCodeBlock
         language="esql"
         fontSize="s"
