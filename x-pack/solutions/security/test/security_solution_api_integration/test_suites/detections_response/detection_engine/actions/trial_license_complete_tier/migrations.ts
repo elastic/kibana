@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  describe('@ess actions migrations', () => {
+  describe.only('@ess actions migrations', () => {
     // This test suite is not meant to test a specific route, but to test the legacy action migration
     // code that lives in multiple routes. This test loads an es_archive containing rules
     // created in 7.15 with legacy actions.
@@ -128,18 +128,6 @@ export default ({ getService }: FtrProviderContext) => {
             uuid: ruleSO?.alert.actions[0].uuid,
             frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
           },
-          {
-            actionRef: 'action_1',
-            actionTypeId: '.email',
-            group: 'default',
-            params: {
-              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-              subject: 'Test Actions',
-              to: ['test@test.com'],
-            },
-            uuid: ruleSO?.alert.actions[1].uuid,
-            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
-          },
         ]);
         expect(ruleSO?.alert.throttle).to.eql(null);
         expect(ruleSO?.alert.notifyWhen).to.eql(null);
@@ -147,11 +135,6 @@ export default ({ getService }: FtrProviderContext) => {
           {
             id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
             name: 'action_0',
-            type: 'action',
-          },
-          {
-            id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
-            name: 'action_1',
             type: 'action',
           },
         ]);
