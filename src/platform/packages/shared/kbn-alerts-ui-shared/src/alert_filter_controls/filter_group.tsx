@@ -302,7 +302,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
             // option List controls will handle an invalid dataview
             // & display an appropriate message
             data_view_id: dataViewId ?? '',
-            selected_options: control.selected_options,
             ...control,
             display_settings: {
               ...COMMON_OPTIONS_LIST_CONTROL_INPUTS.display_settings,
@@ -359,6 +358,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
             // option List controls will handle an invalid dataview
             // & display an appropriate message
             data_view_id: dataViewId ?? '',
+            selected_options: control.selected_options,
             ...control,
             display_settings: {
               ...COMMON_OPTIONS_LIST_CONTROL_INPUTS.display_settings,

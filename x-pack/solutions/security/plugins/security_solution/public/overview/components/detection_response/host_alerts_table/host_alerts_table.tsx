@@ -18,6 +18,7 @@ import {
   EuiTablePagination,
   EuiToolTip,
 } from '@elastic/eui';
+
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { SECURITY_CELL_ACTIONS_ALERTS_COUNT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../../data_view_manager/constants';

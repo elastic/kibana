@@ -35,6 +35,7 @@ export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
   {
     title: 'Severity',
     field_name: 'kibana.alert.severity',
+    selected_options: [],
     display_settings: {
       hide_action_bar: true,
       hide_exists: true,

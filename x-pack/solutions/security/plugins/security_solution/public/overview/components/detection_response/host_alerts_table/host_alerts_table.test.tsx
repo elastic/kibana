@@ -136,11 +136,7 @@ describe('HostAlertsTable', () => {
     fireEvent.click(getByTestId('hostSeverityAlertsTable-totalAlertsLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
-      {
-        field_name: 'host.name',
-        selected_options: ['Host-342m5gl1g2'],
-        title: 'Host name',
-      },
+      { field_name: 'host.name', selected_options: ['Host-342m5gl1g2'], title: 'Host name' },
     ]);
   });
 

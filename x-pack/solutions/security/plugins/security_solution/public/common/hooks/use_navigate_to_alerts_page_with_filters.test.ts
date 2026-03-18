@@ -20,6 +20,8 @@ describe('useNavigateToAlertsPageWithFilters', () => {
       title: 'test filter',
       selected_options: ['test value'],
       field_name: 'test field',
+      exclude: false,
+      exists_selected: false,
     };
 
     const {
@@ -41,6 +43,8 @@ describe('useNavigateToAlertsPageWithFilters', () => {
         title: 'test filter 1',
         selected_options: ['test value 1'],
         field_name: 'test field 1',
+        exclude: false,
+        exists_selected: false,
       },
       {
         title: 'test filter 2',
@@ -82,6 +86,8 @@ describe('useNavigateToAlertsPageWithFilters', () => {
       title: 'test filter',
       selected_options: ['test value'],
       field_name: 'test field',
+      exclude: false,
+      exists_selected: false,
     };
     const openInNewTab = true;
 
@@ -103,6 +109,8 @@ describe('useNavigateToAlertsPageWithFilters', () => {
       title: 'test filter',
       selected_options: ['test value'],
       field_name: 'test field',
+      exclude: false,
+      exists_selected: false,
     };
 
     const timerange =

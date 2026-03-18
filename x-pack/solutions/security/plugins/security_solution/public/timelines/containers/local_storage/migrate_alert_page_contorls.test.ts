@@ -40,6 +40,8 @@ const OLD_FORMAT = {
         hideActionBar: true,
         persist: true,
         hideExists: true,
+        existsSelected: false,
+        exclude: false,
       },
     },
     '1': {
@@ -59,8 +61,11 @@ const OLD_FORMAT = {
         ignoreParentSettings: {
           ignoreValidations: true,
         },
+        selectedOptions: [],
         hideActionBar: true,
         hideExists: true,
+        existsSelected: false,
+        exclude: false,
       },
     },
     '2': {
@@ -80,6 +85,9 @@ const OLD_FORMAT = {
         ignoreParentSettings: {
           ignoreValidations: true,
         },
+        selectedOptions: [],
+        existsSelected: false,
+        exclude: false,
       },
     },
     '3': {
@@ -99,6 +107,9 @@ const OLD_FORMAT = {
         ignoreParentSettings: {
           ignoreValidations: true,
         },
+        selectedOptions: [],
+        existsSelected: false,
+        exclude: false,
       },
     },
   },
