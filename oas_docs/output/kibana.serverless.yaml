@@ -3550,7 +3550,13 @@ paths:
 
         List all available skills (built-in and user-created).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-skills
-      parameters: []
+      parameters:
+        - in: query
+          name: include_plugins
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses: {}
       summary: List skills
       tags:
