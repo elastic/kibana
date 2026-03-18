@@ -32,10 +32,28 @@ export class NotificationPoliciesApi {
     );
   }
 
-  public async listNotificationPolicies(params: { page?: number; perPage?: number }) {
+  public async listNotificationPolicies(params: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+    destinationType?: string;
+    enabled?: boolean;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
     return this.http.get<FindNotificationPoliciesResponse>(
       INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
-      { query: { page: params.page, perPage: params.perPage } }
+      {
+        query: {
+          page: params.page,
+          perPage: params.perPage,
+          search: params.search || undefined,
+          destinationType: params.destinationType || undefined,
+          enabled: params.enabled,
+          sortField: params.sortField,
+          sortOrder: params.sortOrder,
+        },
+      }
     );
   }
 
@@ -55,5 +73,30 @@ export class NotificationPoliciesApi {
 
   public async deleteNotificationPolicy(id: string) {
     await this.http.delete(`${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}`);
+  }
+
+  public async enableNotificationPolicy(id: string) {
+    return this.http.post<NotificationPolicyResponse>(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_enable`
+    );
+  }
+
+  public async disableNotificationPolicy(id: string) {
+    return this.http.post<NotificationPolicyResponse>(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_disable`
+    );
+  }
+
+  public async snoozeNotificationPolicy(id: string, snoozedUntil: string) {
+    return this.http.post<NotificationPolicyResponse>(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_snooze`,
+      { body: JSON.stringify({ snoozed_until: snoozedUntil }) }
+    );
+  }
+
+  public async unsnoozeNotificationPolicy(id: string) {
+    return this.http.post<NotificationPolicyResponse>(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_unsnooze`
+    );
   }
 }

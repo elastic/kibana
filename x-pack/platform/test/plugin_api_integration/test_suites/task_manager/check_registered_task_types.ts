@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
     'sampleLongRunningRecurringTask',
+    'sampleRecurringTaskTimingOutWithError',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -161,8 +162,6 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:xpack.uptime.alerts.tlsCertificate',
         'alerting_health_check',
         'alerting_telemetry',
-        'alerting_v2:dispatcher',
-        'alerting_v2:rule_executor',
         'alerts_invalidate_api_keys',
         'apm-source-map-migration-task',
         'apm-telemetry-task',

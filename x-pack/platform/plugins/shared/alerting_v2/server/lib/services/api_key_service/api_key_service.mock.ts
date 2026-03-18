@@ -13,4 +13,5 @@ export const createMockApiKeyService = (): jest.Mocked<ApiKeyServiceContract> =>
     owner: 'test-user',
     createdByUser: false,
   }),
+  markApiKeysForInvalidation: jest.fn().mockResolvedValue(undefined),
 });

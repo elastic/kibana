@@ -123,6 +123,41 @@ describe('createRuleDataSchema', () => {
     });
   });
 
+  describe('metadata.description', () => {
+    it('accepts a valid description', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', description: 'A useful description' },
+      });
+
+      expect(result.metadata.description).toBe('A useful description');
+    });
+
+    it('accepts metadata without description (optional)', () => {
+      const result = createRuleDataSchema.parse(validCreateData);
+
+      expect(result.metadata.description).toBeUndefined();
+    });
+
+    it('rejects a description exceeding 1024 characters', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', description: 'a'.repeat(1025) },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a description at the 1024 character limit', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', description: 'a'.repeat(1024) },
+      });
+
+      expect(result.metadata.description).toHaveLength(1024);
+    });
+  });
+
   describe('metadata.labels', () => {
     it('rejects labels exceeding 100 items', () => {
       const result = createRuleDataSchema.safeParse({
@@ -542,6 +577,13 @@ describe('updateRuleDataSchema', () => {
     expect(result).toEqual({ metadata: { name: 'updated name' } });
   });
 
+  it('accepts a description update', () => {
+    const result = updateRuleDataSchema.parse({
+      metadata: { description: 'updated description' },
+    });
+    expect(result.metadata?.description).toBe('updated description');
+  });
+
   it('accepts an enabled field set to true', () => {
     const result = updateRuleDataSchema.parse({ enabled: true });
     expect(result).toEqual({ enabled: true });
@@ -584,6 +626,13 @@ describe('updateRuleDataSchema', () => {
     it('rejects a name exceeding 256 characters', () => {
       const result = updateRuleDataSchema.safeParse({
         metadata: { name: 'a'.repeat(257) },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a description exceeding 1024 characters', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { description: 'a'.repeat(1025) },
       });
       expect(result.success).toBe(false);
     });

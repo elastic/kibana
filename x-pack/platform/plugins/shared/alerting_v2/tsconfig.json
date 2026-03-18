@@ -56,6 +56,7 @@
     "@kbn/es-mappings",
     "@kbn/std",
     "@kbn/eval-kql",
+    "@kbn/alerting-plugin",
     "@kbn/react-query",
     "@kbn/core-security-server",
     "@kbn/encrypted-saved-objects-plugin",
@@ -63,7 +64,10 @@
     "@kbn/workflows",
     "@kbn/core-http-server-utils",
     "@kbn/eval-kql",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/es-query",
+    "@kbn/react-hooks",
+    "@kbn/core-security-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

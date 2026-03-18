@@ -8,7 +8,12 @@
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { Logger, SavedObject, SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { notificationPolicyModelVersions, ruleModelVersions } from './model_versions';
+import {
+  apiKeyPendingInvalidationModelVersions,
+  notificationPolicyModelVersions,
+  ruleModelVersions,
+} from './model_versions';
+import { apiKeyPendingInvalidationMappings } from './api_key_pending_invalidation_mappings';
 import { notificationPolicyMappings } from './notification_policy_mappings';
 import { ruleMappings } from './rule_mappings';
 import type { NotificationPolicySavedObjectAttributes } from './schemas/notification_policy_saved_object_attributes';
@@ -16,6 +21,7 @@ import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attr
 
 export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
 export const NOTIFICATION_POLICY_SAVED_OBJECT_TYPE = 'alerting_notification_policy';
+export const API_KEY_PENDING_INVALIDATION_TYPE = 'alerting_api_key_pending_invalidation';
 
 export const NotificationPolicyAttributesToEncrypt = ['auth.apiKey'];
 
@@ -58,6 +64,15 @@ export function registerSavedObjects({
       },
     },
     modelVersions: notificationPolicyModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: API_KEY_PENDING_INVALIDATION_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: apiKeyPendingInvalidationMappings,
+    modelVersions: apiKeyPendingInvalidationModelVersions,
   });
 
   encryptedSavedObjects.registerType({

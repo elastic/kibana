@@ -57,7 +57,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   {
     id: 'playground',
     label: 'Playground',
-    iconType: 'console',
+    iconType: 'commandLine',
     href: '/playground',
   },
   {
@@ -84,7 +84,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
   {
     id: 'getting_started',
     label: 'Getting started',
-    iconType: 'launch',
+    iconType: 'rocket',
     href: '/getting-started',
   },
   {
