@@ -52,6 +52,17 @@ interface StreamsProcessingPipelineSuggestedProps {
   stream_type: StreamType;
 }
 
+interface StreamsFeaturesIterationTelemetry {
+  iteration: number;
+  docs_count: number;
+  features_new: number;
+  features_updated: number;
+  input_tokens_used: number;
+  output_tokens_used: number;
+  total_tokens_used: number;
+  cached_tokens_used: number;
+}
+
 interface StreamsFeaturesIdentifiedProps {
   total_duration_ms: number;
   identification_duration_ms: number;
@@ -60,6 +71,8 @@ interface StreamsFeaturesIdentifiedProps {
   input_tokens_used: number;
   output_tokens_used: number;
   total_tokens_used: number;
+  cached_tokens_used?: number;
+  iteration_telemetry?: StreamsFeaturesIterationTelemetry[];
   stream_name: string;
   stream_type: StreamType;
   state: 'success' | 'failure' | 'canceled';
@@ -73,4 +86,5 @@ export {
   type StreamsInsightsGeneratedProps,
   type StreamsProcessingPipelineSuggestedProps,
   type StreamsFeaturesIdentifiedProps,
+  type StreamsFeaturesIterationTelemetry,
 };

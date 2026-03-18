@@ -1,2 +1,12 @@
 `sample_documents`:
 {{{sample_documents}}}
+
+{{#previously_identified_features}}
+`previously_identified_features`:
+{{{previously_identified_features}}}
+
+The list above contains features already identified in previous iterations (each with `id`, `type`, `subtype`, and `properties` only). Follow these rules:
+1. **Prioritize discovering new features** that are not yet in the list above.
+2. If a feature in the current sample documents **matches** an existing one (same `type`, `subtype`, and `properties`), **re-emit it using the exact same `id`** from the list. Return the information extracted from the current sample documents — the system will merge it with the prior version.
+3. **Do not re-emit existing features unchanged** — only re-emit a feature when the current documents contain matching evidence and genuinely new information to add.
+{{/previously_identified_features}}

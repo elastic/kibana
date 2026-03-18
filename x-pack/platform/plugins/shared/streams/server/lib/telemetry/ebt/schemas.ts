@@ -265,6 +265,53 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
       description: 'The total number of tokens used for the identification request',
     },
   },
+  cached_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of cached tokens used for the identification request',
+      optional: true,
+    },
+  },
+  iteration_telemetry: {
+    type: 'array',
+    items: {
+      properties: {
+        iteration: { type: 'long', _meta: { description: 'Iteration number (1-based)' } },
+        docs_count: {
+          type: 'long',
+          _meta: { description: 'Number of documents used in this iteration' },
+        },
+        features_new: {
+          type: 'long',
+          _meta: { description: 'New features added in this iteration' },
+        },
+        features_updated: {
+          type: 'long',
+          _meta: { description: 'Existing features updated in this iteration' },
+        },
+        input_tokens_used: {
+          type: 'long',
+          _meta: { description: 'Input tokens used in this iteration' },
+        },
+        output_tokens_used: {
+          type: 'long',
+          _meta: { description: 'Output tokens used in this iteration' },
+        },
+        total_tokens_used: {
+          type: 'long',
+          _meta: { description: 'Total tokens used in this iteration' },
+        },
+        cached_tokens_used: {
+          type: 'long',
+          _meta: { description: 'Cached tokens used in this iteration' },
+        },
+      },
+    },
+    _meta: {
+      description: 'Per-iteration telemetry: features found, tokens used, and features updated',
+      optional: true,
+    },
+  },
   total_duration_ms: {
     type: 'long',
     _meta: {

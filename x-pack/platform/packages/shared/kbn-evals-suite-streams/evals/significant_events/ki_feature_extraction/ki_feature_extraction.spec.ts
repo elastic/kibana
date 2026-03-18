@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { identifyFeatures } from '@kbn/streams-ai';
+import { identifyFeaturesIteratively } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
@@ -112,7 +112,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                   input as { sample_documents: Array<SearchHit<Record<string, unknown>>> }
                 ).sample_documents;
 
-                const { features } = await identifyFeatures({
+                const { features } = await identifyFeaturesIteratively({
                   streamName: MANAGED_STREAM_NAME,
                   sampleDocuments: taskSampleDocuments,
                   systemPrompt: featuresPrompt,

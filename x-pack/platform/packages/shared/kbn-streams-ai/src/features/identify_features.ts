@@ -16,6 +16,13 @@ import { createIdentifyFeaturesPrompt } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
 
+export interface PreviouslyIdentifiedFeature {
+  id: string;
+  type: string;
+  subtype?: string;
+  properties: Record<string, unknown>;
+}
+
 export interface IdentifyFeaturesOptions {
   streamName: string;
   sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
@@ -23,6 +30,7 @@ export interface IdentifyFeaturesOptions {
   systemPrompt: string;
   logger: Logger;
   signal: AbortSignal;
+  previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
 }
 
 export async function identifyFeatures({
@@ -32,6 +40,7 @@ export async function identifyFeatures({
   inferenceClient,
   logger,
   signal,
+  previouslyIdentifiedFeatures = [],
 }: IdentifyFeaturesOptions): Promise<{
   features: BaseFeature[];
   tokensUsed: ChatCompletionTokenCount;
@@ -49,9 +58,15 @@ export async function identifyFeatures({
     )
   );
 
+  const previousFeaturesContext =
+    previouslyIdentifiedFeatures.length > 0 ? JSON.stringify(previouslyIdentifiedFeatures) : '';
+
   const response = await withSpan('invoke_prompt', () =>
     inferenceClient.prompt({
-      input: { sample_documents: JSON.stringify(formattedDocuments) },
+      input: {
+        sample_documents: JSON.stringify(formattedDocuments),
+        previously_identified_features: previousFeaturesContext,
+      },
       prompt: createIdentifyFeaturesPrompt({ systemPrompt }),
       abortSignal: signal,
     })

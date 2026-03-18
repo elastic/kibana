@@ -17,5 +17,14 @@ export {
   type SignificantEventsToolUsage,
 } from './src/significant_events/tools/tool_usage';
 export { sumTokens } from './src/helpers/sum_tokens';
-export { identifyFeatures, type IdentifyFeaturesOptions } from './src/features/identify_features';
+export {
+  identifyFeatures,
+  type IdentifyFeaturesOptions,
+  type PreviouslyIdentifiedFeature,
+} from './src/features/identify_features';
+export {
+  identifyFeaturesIteratively,
+  type IdentifyFeaturesIterativelyOptions,
+  type IterationTelemetry,
+} from './src/features/identify_features_iteratively';
 export { generateAllComputedFeatures } from './src/features/computed';

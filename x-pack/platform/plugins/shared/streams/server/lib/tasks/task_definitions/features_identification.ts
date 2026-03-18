@@ -13,7 +13,7 @@ import {
   isComputedFeature,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
-import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
+import { identifyFeaturesIteratively, generateAllComputedFeatures } from '@kbn/streams-ai';
 import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
@@ -64,6 +64,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 input_tokens_used: 0,
                 output_tokens_used: 0,
                 total_tokens_used: 0,
+                cached_tokens_used: 0,
                 inferred_total_count: 0,
                 inferred_dedup_count: 0,
                 state: 'success',
@@ -110,7 +111,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   index: stream.name,
                   start,
                   end,
-                  size: 20,
+                  size: 100,
                 });
 
                 if (sampleDocuments.length === 0) {
@@ -123,7 +124,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const identifyFeaturesStart = Date.now();
                 const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
-                  identifyFeatures({
+                  identifyFeaturesIteratively({
                     streamName: stream.name,
                     sampleDocuments,
                     inferenceClient: boundInferenceClient,
@@ -135,6 +136,17 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                       telemetryProps.input_tokens_used = result.tokensUsed.prompt;
                       telemetryProps.output_tokens_used = result.tokensUsed.completion;
                       telemetryProps.total_tokens_used = result.tokensUsed.total;
+                      telemetryProps.cached_tokens_used = result.tokensUsed.cached ?? 0;
+                      telemetryProps.iteration_telemetry = result.iterationTelemetry.map((it) => ({
+                        iteration: it.iteration,
+                        docs_count: it.docsCount,
+                        features_new: it.featuresNew,
+                        features_updated: it.featuresUpdated,
+                        input_tokens_used: it.tokensUsed.prompt,
+                        output_tokens_used: it.tokensUsed.completion,
+                        total_tokens_used: it.tokensUsed.total,
+                        cached_tokens_used: it.tokensUsed.cached ?? 0,
+                      }));
                       return result;
                     })
                     .finally(() => {
