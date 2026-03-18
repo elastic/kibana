@@ -6,10 +6,8 @@
  */
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import {
-  PrebuiltRuleAsset,
-  DeprecatedPrebuiltRuleAsset,
-} from '../../model/rule_assets/prebuilt_rule_asset';
+import { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import { DeprecatedPrebuiltRuleAsset } from '../../model/rule_assets/deprecated_prebuilt_rule_asset';
 
 export const validatePrebuiltRuleAssets = (rules: PrebuiltRuleAsset[]): PrebuiltRuleAsset[] => {
   return rules.map((rule) => validatePrebuiltRuleAsset(rule));

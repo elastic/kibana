@@ -37,11 +37,6 @@ const securityRuleV2 = securityRuleV1.extends(
   { unknowns: 'allow' }
 );
 
-/**
- * V3 relaxes severity and risk_score to be optional so that deprecated rule stubs
- * (which only carry rule_id, version, name, deprecated, and optionally deprecated_reason)
- * can pass SO create validation when Fleet installs them via bulkCreate.
- */
 const securityRuleV3 = schema.object(
   {
     rule_id: schema.string(),
@@ -50,6 +45,7 @@ const securityRuleV3 = schema.object(
     tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_RULE })),
     severity: schema.maybe(schema.string()),
     risk_score: schema.maybe(schema.number()),
+    // New fields for deprecated detection-rule objects
     deprecated: schema.maybe(schema.boolean()),
     deprecated_reason: schema.maybe(schema.string()),
   },
