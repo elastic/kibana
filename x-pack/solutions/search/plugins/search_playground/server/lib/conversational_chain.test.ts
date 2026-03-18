@@ -108,6 +108,7 @@ describe('conversational chain', () => {
     });
 
     const mockElasticsearchClient = {
+      search: searchMock,
       transport: {
         request: searchMock,
       },
@@ -197,9 +198,9 @@ describe('conversational chain', () => {
       ],
       expectedSearchRequest: [
         {
-          method: 'POST',
-          path: '/index,website/_search',
-          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+          index: 'index,website',
+          query: { match: { field: 'what is the work from home policy?' } },
+          size: 3,
         },
       ],
     });
@@ -231,9 +232,9 @@ describe('conversational chain', () => {
       ],
       expectedSearchRequest: [
         {
-          method: 'POST',
-          path: '/index,website/_search',
-          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+          index: 'index,website',
+          query: { match: { field: 'what is the work from home policy?' } },
+          size: 3,
         },
       ],
       contentField: { index: 'field', website: 'metadata.source' },
@@ -270,9 +271,9 @@ describe('conversational chain', () => {
       ],
       expectedSearchRequest: [
         {
-          method: 'POST',
-          path: '/index,website/_search',
-          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+          index: 'index,website',
+          query: { match: { field: 'what is the work from home policy?' } },
+          size: 3,
         },
       ],
       contentField: { index: 'field' },
@@ -309,9 +310,9 @@ describe('conversational chain', () => {
       ],
       expectedSearchRequest: [
         {
-          method: 'POST',
-          path: '/index,website/_search',
-          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+          index: 'index,website',
+          query: { match: { field: 'what is the work from home policy?' } },
+          size: 3,
         },
       ],
     });
@@ -353,9 +354,9 @@ describe('conversational chain', () => {
       ],
       expectedSearchRequest: [
         {
-          method: 'POST',
-          path: '/index,website/_search',
-          body: { query: { match: { field: 'rewrite the question' } }, size: 3 },
+          index: 'index,website',
+          query: { match: { field: 'rewrite the question' } },
+          size: 3,
         },
       ],
     });
@@ -392,9 +393,9 @@ describe('conversational chain', () => {
       ],
       expectedSearchRequest: [
         {
-          method: 'POST',
-          path: '/index,website/_search',
-          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+          index: 'index,website',
+          query: { match: { field: 'what is the work from home policy?' } },
+          size: 3,
         },
       ],
     });
@@ -436,9 +437,9 @@ describe('conversational chain', () => {
       ],
       expectedSearchRequest: [
         {
-          method: 'POST',
-          path: '/index,website/_search',
-          body: { query: { match: { field: 'rewrite "the" question' } }, size: 3 },
+          index: 'index,website',
+          query: { match: { field: 'rewrite "the" question' } },
+          size: 3,
         },
       ],
     });
@@ -480,9 +481,9 @@ describe('conversational chain', () => {
       ],
       expectedSearchRequest: [
         {
-          method: 'POST',
-          path: '/index,website/_search',
-          body: { query: { match: { field: 'rewrite "the" question' } }, size: 3 },
+          index: 'index,website',
+          query: { match: { field: 'rewrite "the" question' } },
+          size: 3,
         },
       ],
       isChatModel: false,
@@ -540,9 +541,9 @@ describe('conversational chain', () => {
       ],
       expectedSearchRequest: [
         {
-          method: 'POST',
-          path: '/index,website/_search',
-          body: { query: { match: { field: 'rewrite "the" question' } }, size: 3 },
+          index: 'index,website',
+          query: { match: { field: 'rewrite "the" question' } },
+          size: 3,
         },
       ],
       expectedTokens: [],

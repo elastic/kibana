@@ -110,7 +110,7 @@ describe('buildLiveActionsQuery', () => {
 
       expect(filters).toContainEqual({
         simple_query_string: {
-          query: '*myquery*',
+          query: 'myquery*',
           fields: ['pack_name', 'queries.query', 'queries.id'],
           analyze_wildcard: true,
         },
@@ -135,6 +135,50 @@ describe('buildLiveActionsQuery', () => {
     });
   });
 
+  describe('tags filter', () => {
+    test('adds terms filter for tags when provided', () => {
+      const result = buildLiveActionsQuery({
+        pageSize: 20,
+        spaceId: 'default',
+        tags: ['important', 'reviewed'],
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ terms: { tags: ['important', 'reviewed'] } });
+    });
+
+    test('does not add tags filter when tags is undefined', () => {
+      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      const tagsFilters = filters.filter(
+        (f) =>
+          typeof f === 'object' &&
+          f !== null &&
+          'terms' in f &&
+          'tags' in ((f as Record<string, unknown>).terms as Record<string, unknown>)
+      );
+      expect(tagsFilters).toHaveLength(0);
+    });
+
+    test('does not add tags filter when tags is empty array', () => {
+      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default', tags: [] });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      const tagsFilters = filters.filter(
+        (f) =>
+          typeof f === 'object' &&
+          f !== null &&
+          'terms' in f &&
+          'tags' in ((f as Record<string, unknown>).terms as Record<string, unknown>)
+      );
+      expect(tagsFilters).toHaveLength(0);
+    });
+  });
+
   describe('combined options', () => {
     test('applies searchAfter, kuery, and date range together', () => {
       const result = buildLiveActionsQuery({
@@ -151,7 +195,7 @@ describe('buildLiveActionsQuery', () => {
       expect(result.body.search_after).toEqual([1710936000000, 42]);
       expect(filters).toContainEqual({
         simple_query_string: {
-          query: '*myquery*',
+          query: 'myquery*',
           fields: ['pack_name', 'queries.query', 'queries.id'],
           analyze_wildcard: true,
         },

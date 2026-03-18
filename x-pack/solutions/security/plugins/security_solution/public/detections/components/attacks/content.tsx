@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiWindowEvent,
+  useEuiTheme,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
@@ -31,6 +32,7 @@ import { Schedule } from '../../../attack_discovery/pages/header/schedule';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
 import { HeaderPage } from '../../../common/components/header_page';
+import { IconSparkles } from '../../../common/icons/sparkles';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../explore/hosts/pages/display';
@@ -80,6 +82,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const {
     services: { settings, telemetry },
   } = useKibana();
+  const { euiTheme } = useEuiTheme();
 
   const { http, inferenceEnabled } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
@@ -141,7 +144,20 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
         data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
       >
         <Display show={!globalFullScreen}>
-          <HeaderPage title={PAGE_TITLE}>
+          <HeaderPage
+            title={
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+                <EuiFlexItem grow={false}>{PAGE_TITLE}</EuiFlexItem>
+                <EuiSpacer size="m" />
+                <EuiFlexItem
+                  grow={false}
+                  style={{ marginLeft: euiTheme.size.s, marginTop: euiTheme.size.s }}
+                >
+                  <IconSparkles />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
                 <Schedule openFlyout={openSchedulesFlyout} />
