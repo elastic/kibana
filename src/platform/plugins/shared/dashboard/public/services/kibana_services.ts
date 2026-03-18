@@ -61,9 +61,10 @@ export let dashboardBackupService: DashboardBackupService | undefined;
 
 const servicesReady$ = new BehaviorSubject(false);
 
-export const setKibanaServices = async (
+export const setKibanaServices = (
   kibanaCore: CoreStart,
-  deps: DashboardStartDependencies
+  deps: DashboardStartDependencies,
+  backupService: DashboardBackupService
 ) => {
   coreServices = kibanaCore;
   cpsService = deps.cps;
@@ -87,9 +88,17 @@ export const setKibanaServices = async (
   urlForwardingService = deps.urlForwarding;
   usageCollectionService = deps.usageCollection;
 
-  dashboardBackupService = await createDashboardBackupService(deps.spaces);
+  dashboardBackupService = backupService;
 
   servicesReady$.next(true);
+};
+
+export const buildDashboardServices = async (
+  kibanaCore: CoreStart,
+  deps: DashboardStartDependencies
+) => {
+  const backupService = await createDashboardBackupService(deps.spaces);
+  setKibanaServices(kibanaCore, deps, backupService);
 };
 
 export const untilPluginStartServicesReady = () => {
