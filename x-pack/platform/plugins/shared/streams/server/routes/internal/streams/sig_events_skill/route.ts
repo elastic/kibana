@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import { createServerRoute } from '../../../create_server_route';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
