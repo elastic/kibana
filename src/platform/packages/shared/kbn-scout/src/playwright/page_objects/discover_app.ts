@@ -404,18 +404,12 @@ export class DiscoverApp {
 
     await this.waitUntilFieldListHasCountOfFields();
 
-    const breakdownButton = this.page.testSubj.locator(
-      `fieldPopoverHeader_addBreakdownField-${field}`
-    );
+    const fieldLocator = this.page.testSubj.locator(`field-${field}`);
+    await fieldLocator.hover();
+    await fieldLocator.click();
+    await this.waitUntilFieldPopoverIsLoaded();
 
-    if (!(await breakdownButton.isVisible())) {
-      const fieldLocator = this.page.testSubj.locator(`field-${field}`);
-      await fieldLocator.hover();
-      await fieldLocator.click();
-      await this.waitUntilFieldPopoverIsLoaded();
-    }
-
-    await breakdownButton.click();
+    await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
     await this.waitUntilSearchingHasFinished();
   }
 
