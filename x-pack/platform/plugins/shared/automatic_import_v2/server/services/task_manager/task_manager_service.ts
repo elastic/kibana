@@ -234,19 +234,12 @@ export class TaskManagerService {
 
       this.logger.debug(`Task ${taskId} completed successfully`);
 
-      const pipelineObject = (result.current_pipeline || {}) as Pipeline;
-      const pipelineGenerationResultsObjects = result.pipeline_generation_results ?? [];
-
-      // Validate agent produced a usable pipeline; treat empty/invalid result as failure
-      if (
-        !pipelineObject ||
-        !Array.isArray(pipelineObject.processors) ||
-        pipelineObject.processors.length === 0
-      ) {
-        throw new Error(
-          `Agent did not produce a valid ingest pipeline: missing or empty processors`
-        );
+      if (!result.current_pipeline) {
+        throw new Error('Agent did not produce a valid ingest pipeline');
       }
+
+      const pipelineObject = result.current_pipeline as Pipeline;
+      const pipelineGenerationResultsObjects = result.pipeline_generation_results ?? [];
 
       this.logger.debug(`Pipeline object: ${JSON.stringify(pipelineObject)}`);
       this.logger.debug(
