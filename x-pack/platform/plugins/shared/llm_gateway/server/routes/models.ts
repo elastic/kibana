@@ -23,6 +23,9 @@ export const registerModelsRoute = ({
       security: {
         authz: { enabled: false, reason: 'This route delegates to the inference plugin' },
       },
+      options: {
+        access: 'public',
+      },
       validate: {},
     },
     async (ctx, request, response) => {

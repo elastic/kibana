@@ -746,6 +746,7 @@
     "@kbn/kibana-react-plugin": "link:src/platform/plugins/shared/kibana_react",
     "@kbn/kibana-usage-collection-plugin": "link:src/platform/plugins/private/kibana_usage_collection",
     "@kbn/kibana-utils-plugin": "link:src/platform/plugins/shared/kibana_utils",
+    "@kbn/knowledge-mining-plugin": "link:x-pack/platform/plugins/shared/knowledge_mining",
     "@kbn/kql": "link:src/platform/plugins/shared/kql",
     "@kbn/kubernetes-security-plugin": "link:x-pack/solutions/security/plugins/kubernetes_security",
     "@kbn/langchain": "link:x-pack/platform/packages/shared/kbn-langchain",
@@ -764,6 +765,7 @@
     "@kbn/licensing-types": "link:src/platform/packages/shared/kbn-licensing-types",
     "@kbn/links-plugin": "link:src/platform/plugins/private/links",
     "@kbn/lists-plugin": "link:x-pack/solutions/security/plugins/lists",
+    "@kbn/llm-gateway-plugin": "link:x-pack/platform/plugins/shared/llm_gateway",
     "@kbn/llm-tasks-plugin": "link:x-pack/platform/plugins/shared/ai_infra/llm_tasks",
     "@kbn/locator-examples-plugin": "link:examples/locator_examples",
     "@kbn/locator-explorer-plugin": "link:examples/locator_explorer",
@@ -1520,8 +1522,7 @@
     "yauzl": "3.2.1",
     "yazl": "3.3.1",
     "zod": "3.25.76",
-    "zod-to-json-schema": "3.25.0",
-    "@kbn/llm-gateway-plugin": "link:x-pack/platform/plugins/shared/llm_gateway"
+    "zod-to-json-schema": "3.25.0"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "12.1.0",

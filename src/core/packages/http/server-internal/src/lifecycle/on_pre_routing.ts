@@ -58,6 +58,20 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
 
     try {
+      // POC hack: convert Anthropic-style x-api-key header to Kibana Authorization header
+      // for LLM Gateway routes so Claude Code can authenticate directly
+      if (request.url.pathname?.startsWith('/api/llm_gateway/')) {
+        if (request.headers['x-api-key']) {
+          request.headers.authorization = `ApiKey ${request.headers['x-api-key']}`;
+        }
+        if (!request.headers['kbn-xsrf']) {
+          request.headers['kbn-xsrf'] = 'true';
+        }
+        if (!request.headers['elastic-api-version']) {
+          request.headers['elastic-api-version'] = '2023-10-31';
+        }
+      }
+
       const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
       if (isKibanaResponse(result)) {
         return hapiResponseAdapter.handle(result);

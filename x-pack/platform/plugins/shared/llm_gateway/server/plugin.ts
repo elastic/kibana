@@ -33,9 +33,20 @@ export class LlmGatewayPlugin
 
   setup(
     coreSetup: CoreSetup<LlmGatewayStartDependencies, LlmGatewayPluginStart>,
-    _setupDeps: LlmGatewaySetupDependencies
+    setupDeps: LlmGatewaySetupDependencies
   ): LlmGatewayPluginSetup {
     this.logger.info('LLM Gateway plugin is setting up');
+
+    setupDeps.agentBuilder.agents.register({
+      id: 'platform.llm_gateway.agent',
+      name: 'LLM Gateway',
+      description: 'Conversations from external coding agents via the LLM Gateway',
+      avatar_icon: 'sparkles',
+      configuration: {
+        instructions: '',
+        tools: [],
+      },
+    });
 
     const router = coreSetup.http.createRouter();
 

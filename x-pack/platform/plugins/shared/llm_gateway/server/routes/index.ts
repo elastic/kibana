@@ -9,6 +9,7 @@ import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { LlmGatewayPluginStart, LlmGatewayStartDependencies } from '../types';
 import { registerChatCompletionsRoute } from './chat_completions';
 import { registerModelsRoute } from './models';
+import { registerAnthropicMessagesRoute } from './anthropic_messages';
 
 export const registerRoutes = ({
   router,
@@ -21,4 +22,5 @@ export const registerRoutes = ({
 }) => {
   registerChatCompletionsRoute({ router, coreSetup, logger });
   registerModelsRoute({ router, coreSetup, logger });
+  registerAnthropicMessagesRoute({ router, coreSetup, logger });
 };

@@ -7,9 +7,11 @@
 
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 
-export type LlmGatewaySetupDependencies = Record<string, never>;
+export interface LlmGatewaySetupDependencies {
+  agentBuilder: AgentBuilderPluginSetup;
+}
 
 export interface LlmGatewayStartDependencies {
   inference: InferenceServerStart;

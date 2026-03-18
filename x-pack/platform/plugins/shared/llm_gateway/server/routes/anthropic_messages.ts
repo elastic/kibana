@@ -16,19 +16,24 @@ import {
 } from '@kbn/inference-common';
 import type { LlmGatewayPluginStart, LlmGatewayStartDependencies } from '../types';
 import {
-  type OpenAiMessage,
-  openAiMessagesToInference,
-  openAiToolsToInference,
-  inferenceChunkToOpenAi,
-  createFinalChunk,
-  inferenceResponseToOpenAi,
-} from '../lib/openai_format';
+  type AnthropicMessage,
+  anthropicMessagesToInference,
+  anthropicToolsToInference,
+  inferenceChunkToAnthropicEvents,
+  createMessageStartEvent,
+  createContentBlockStartEvent,
+  createContentBlockStopEvent,
+  createMessageDeltaEvent,
+  createMessageStopEvent,
+  inferenceResponseToAnthropic,
+  getLastUserMessageFromAnthropic,
+} from '../lib/anthropic_format';
 import { recordConversation } from '../lib/conversation_recorder';
 import { resolveConnector } from '../lib/resolve_connector';
 
 const SOCKET_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 
-export const registerChatCompletionsRoute = ({
+export const registerAnthropicMessagesRoute = ({
   router,
   coreSetup,
   logger,
@@ -39,7 +44,7 @@ export const registerChatCompletionsRoute = ({
 }) => {
   router.post(
     {
-      path: '/api/llm_gateway/v1/chat/completions',
+      path: '/api/llm_gateway/anthropic/v1/messages',
       security: {
         authz: { enabled: false, reason: 'This route delegates to the inference plugin' },
       },
@@ -52,65 +57,57 @@ export const registerChatCompletionsRoute = ({
       validate: {
         body: schema.object({
           model: schema.string({ defaultValue: 'default' }),
+          max_tokens: schema.number(),
           messages: schema.arrayOf(
             schema.object({
               role: schema.string(),
-              content: schema.nullable(
-                schema.oneOf([
-                  schema.string(),
-                  schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
-                ])
-              ),
-              tool_calls: schema.maybe(
-                schema.arrayOf(
-                  schema.object({
-                    id: schema.string(),
-                    type: schema.string(),
-                    function: schema.object({
-                      name: schema.string(),
-                      arguments: schema.string(),
-                    }),
-                  })
-                )
-              ),
-              tool_call_id: schema.maybe(schema.string()),
-              name: schema.maybe(schema.string()),
+              content: schema.oneOf([
+                schema.string(),
+                schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+              ]),
             }),
             { minSize: 1 }
           ),
+          system: schema.maybe(
+            schema.oneOf([
+              schema.string(),
+              schema.arrayOf(
+                schema.object({
+                  type: schema.string(),
+                  text: schema.string(),
+                  cache_control: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+                })
+              ),
+            ])
+          ),
           stream: schema.boolean({ defaultValue: false }),
           temperature: schema.maybe(schema.number()),
-          max_tokens: schema.maybe(schema.number()),
+          top_p: schema.maybe(schema.number()),
+          top_k: schema.maybe(schema.number()),
           tools: schema.maybe(
             schema.arrayOf(
               schema.object({
-                type: schema.string(),
-                function: schema.object({
-                  name: schema.string(),
-                  description: schema.maybe(schema.string()),
-                  parameters: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-                }),
+                name: schema.string(),
+                description: schema.maybe(schema.string()),
+                input_schema: schema.maybe(schema.recordOf(schema.string(), schema.any())),
               })
             )
           ),
           tool_choice: schema.maybe(
             schema.oneOf([
-              schema.string(),
               schema.object({
                 type: schema.string(),
-                function: schema.maybe(
-                  schema.object({
-                    name: schema.string(),
-                  })
-                ),
+                name: schema.maybe(schema.string()),
               }),
             ])
           ),
-          stream_options: schema.maybe(
+          metadata: schema.maybe(
             schema.object({
-              include_usage: schema.maybe(schema.boolean()),
+              user_id: schema.maybe(schema.nullable(schema.string())),
             })
           ),
+          stop_sequences: schema.maybe(schema.arrayOf(schema.string())),
+          thinking: schema.maybe(schema.recordOf(schema.string(), schema.any())),
         }, { unknowns: 'allow' }),
       },
     },
@@ -119,41 +116,30 @@ export const registerChatCompletionsRoute = ({
         const [, { inference, agentBuilder }] = await coreSetup.getStartServices();
         const client = inference.getClient({ request });
 
+        const { model, messages, system, stream, temperature, tools, tool_choice: toolChoice } =
+          request.body;
 
-
-        const {
-          model,
-          messages,
-          stream,
-          temperature,
-          tools,
-          tool_choice: toolChoice,
-        } = request.body;
-
-        // Resolve connector: use x-connector-id header, or try model as connector ID, or use default
+        // Resolve connector
         const connectorIdHeader = request.headers['x-connector-id'];
         const connectorId =
           typeof connectorIdHeader === 'string' ? connectorIdHeader : model || 'default';
-
-        // Resolve the actual connector to use
         const resolvedConnectorId = await resolveConnector(inference, request, connectorId);
 
-        // Convert OpenAI messages to inference format
-        const { system, messages: inferenceMessages } = openAiMessagesToInference(
-          messages as OpenAiMessage[]
-        );
+        // Convert Anthropic messages to inference format
+        const { system: inferenceSystem, messages: inferenceMessages } =
+          anthropicMessagesToInference(messages as AnthropicMessage[], system as any);
 
-        // Convert OpenAI tools to inference format
-        const inferenceTools = openAiToolsToInference(tools as any);
+        // Convert tools
+        const inferenceTools = anthropicToolsToInference(tools as any);
 
         // Convert tool_choice
-        const inferenceToolChoice = convertToolChoice(toolChoice);
+        const inferenceToolChoice = convertAnthropicToolChoice(toolChoice);
 
         if (stream) {
           return handleStreamingRequest({
             client,
             connectorId: resolvedConnectorId,
-            system,
+            system: inferenceSystem,
             messages: inferenceMessages,
             temperature,
             tools: inferenceTools,
@@ -163,14 +149,14 @@ export const registerChatCompletionsRoute = ({
             response,
             logger,
             agentBuilder,
-            originalMessages: messages as OpenAiMessage[],
+            originalMessages: messages as AnthropicMessage[],
           });
         }
 
         return handleNonStreamingRequest({
           client,
           connectorId: resolvedConnectorId,
-          system,
+          system: inferenceSystem,
           messages: inferenceMessages,
           temperature,
           tools: inferenceTools,
@@ -180,19 +166,19 @@ export const registerChatCompletionsRoute = ({
           response,
           logger,
           agentBuilder,
-          originalMessages: messages as OpenAiMessage[],
+          originalMessages: messages as AnthropicMessage[],
         });
       } catch (error) {
-        logger.error(`Chat completions error: ${error.message}`);
+        logger.error(`Anthropic messages error: ${error.message}`);
         return response.customError({
           statusCode: error.statusCode || 500,
           body: {
             message: error.message,
             attributes: {
+              type: 'error',
               error: {
-                message: error.message,
                 type: 'api_error',
-                code: error.statusCode?.toString() || '500',
+                message: error.message,
               },
             },
           },
@@ -202,22 +188,25 @@ export const registerChatCompletionsRoute = ({
   );
 };
 
-const convertToolChoice = (
-  toolChoice: string | { type: string; function?: { name: string } } | undefined
+const convertAnthropicToolChoice = (
+  toolChoice: { type: string; name?: string } | undefined
 ): any => {
   if (!toolChoice) {
     return undefined;
   }
-  if (typeof toolChoice === 'string') {
-    if (toolChoice === 'none' || toolChoice === 'auto' || toolChoice === 'required') {
-      return toolChoice;
-    }
-    return undefined;
+  if (toolChoice.type === 'auto') {
+    return 'auto';
   }
-  if (toolChoice.type === 'function' && toolChoice.function?.name) {
-    return { function: toolChoice.function.name };
+  if (toolChoice.type === 'any') {
+    return 'required';
   }
-  return toolChoice.type;
+  if (toolChoice.type === 'none') {
+    return 'none';
+  }
+  if (toolChoice.type === 'tool' && toolChoice.name) {
+    return { function: toolChoice.name };
+  }
+  return undefined;
 };
 
 const handleStreamingRequest = async ({
@@ -247,12 +236,14 @@ const handleStreamingRequest = async ({
   response: any;
   logger: Logger;
   agentBuilder: LlmGatewayStartDependencies['agentBuilder'];
-  originalMessages: OpenAiMessage[];
+  originalMessages: AnthropicMessage[];
 }) => {
-  const completionId = `chatcmpl-${uuidv4()}`;
+  const messageId = `msg_${uuidv4()}`;
   const stream = new PassThrough();
   let hasToolCalls = false;
   let tokenCount: ChatCompletionTokenCount | undefined;
+  let contentBlockStarted = false;
+  let currentBlockIndex = 0;
   const contentParts: string[] = [];
   const collectedToolCalls: Array<{
     id: string;
@@ -265,6 +256,9 @@ const handleStreamingRequest = async ({
     abortController.abort();
   });
 
+  // Send message_start
+  stream.write(createMessageStartEvent(messageId, model, 0));
+
   const events$ = client.chatComplete({
     connectorId,
     system,
@@ -276,23 +270,51 @@ const handleStreamingRequest = async ({
     abortSignal: abortController.signal,
   });
 
-  // Subscribe to events and convert to OpenAI SSE format
   events$.subscribe({
     next: (event: any) => {
       if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
         const chunk = event as ChatCompletionChunkEvent;
+
+        // Start text content block on first text chunk
+        if (chunk.content && !contentBlockStarted) {
+          stream.write(
+            createContentBlockStartEvent(currentBlockIndex, { type: 'text', text: '' })
+          );
+          contentBlockStarted = true;
+        }
+
         if (chunk.content) {
           contentParts.push(chunk.content);
         }
-        if (chunk.tool_calls && chunk.tool_calls.length > 0) {
-          hasToolCalls = true;
+
+        // Handle tool call starts
+        if (chunk.tool_calls) {
           for (const tc of chunk.tool_calls) {
+            hasToolCalls = true;
             if (!collectedToolCalls[tc.index]) {
+              // Close text block if open
+              if (contentBlockStarted) {
+                stream.write(createContentBlockStopEvent(currentBlockIndex));
+                currentBlockIndex++;
+                contentBlockStarted = false;
+              }
               collectedToolCalls[tc.index] = {
-                id: tc.toolCallId || '',
+                id: tc.toolCallId || `toolu_${uuidv4()}`,
                 type: 'function',
                 function: { name: '', arguments: '' },
               };
+              if (tc.function?.name) {
+                collectedToolCalls[tc.index].function.name = tc.function.name;
+              }
+              // Start tool_use content block
+              stream.write(
+                createContentBlockStartEvent(currentBlockIndex + tc.index, {
+                  type: 'tool_use',
+                  id: collectedToolCalls[tc.index].id,
+                  name: tc.function?.name || '',
+                  input: {},
+                })
+              );
             }
             const existing = collectedToolCalls[tc.index];
             if (tc.toolCallId) {
@@ -306,38 +328,59 @@ const handleStreamingRequest = async ({
             }
           }
         }
-        const openAiChunk = inferenceChunkToOpenAi(chunk, model, completionId);
-        stream.write(`data: ${JSON.stringify(openAiChunk)}\n\n`);
+
+        // Write chunk events
+        const chunkEvents = inferenceChunkToAnthropicEvents(chunk, contentBlockStarted ? 0 : currentBlockIndex);
+        for (const evt of chunkEvents) {
+          stream.write(evt);
+        }
       } else if (event.type === ChatCompletionEventType.ChatCompletionTokenCount) {
         tokenCount = event.tokens;
       }
-      // ChatCompletionMessage events are ignored for streaming - we use chunks instead
     },
     error: (error: Error) => {
-      routeLogger.error(`Streaming error: ${error.message}`);
-      const errorChunk = {
-        error: {
-          message: error.message,
-          type: 'api_error',
-        },
-      };
-      stream.write(`data: ${JSON.stringify(errorChunk)}\n\n`);
-      stream.write('data: [DONE]\n\n');
+      routeLogger.error(`Anthropic streaming error: ${error.message}`);
+      stream.write(
+        `event: error\ndata: ${JSON.stringify({
+          type: 'error',
+          error: { type: 'api_error', message: error.message },
+        })}\n\n`
+      );
       stream.end();
     },
     complete: () => {
-      // Send final chunk with finish_reason
-      const finalChunk = createFinalChunk(model, completionId, hasToolCalls, tokenCount);
-      stream.write(`data: ${JSON.stringify(finalChunk)}\n\n`);
-      stream.write('data: [DONE]\n\n');
+      // Close any open content blocks
+      if (contentBlockStarted) {
+        stream.write(createContentBlockStopEvent(currentBlockIndex));
+        currentBlockIndex++;
+      }
+      for (let i = 0; i < collectedToolCalls.length; i++) {
+        if (collectedToolCalls[i]) {
+          stream.write(createContentBlockStopEvent(currentBlockIndex + i));
+        }
+      }
+
+      const stopReason = hasToolCalls ? 'tool_use' : 'end_turn';
+      stream.write(createMessageDeltaEvent(stopReason, tokenCount?.completion ?? 0));
+      stream.write(createMessageStopEvent());
       stream.end();
 
       // Fire-and-forget: record conversation
+      const userMessage = getLastUserMessageFromAnthropic(originalMessages);
       recordConversation({
         request,
         agentBuilder,
         logger: routeLogger,
-        messages: originalMessages,
+        messages: originalMessages.map((m) => ({
+          role: m.role,
+          content:
+            typeof m.content === 'string'
+              ? m.content
+              : m.content
+                  .filter((b: any) => b.type === 'text')
+                  .map((b: any) => b.text)
+                  .join(''),
+        })),
         assistantMessage: contentParts.join(''),
         toolCalls: collectedToolCalls.filter(Boolean),
         tokenUsage: tokenCount
@@ -390,7 +433,7 @@ const handleNonStreamingRequest = async ({
   response: any;
   logger: Logger;
   agentBuilder: LlmGatewayStartDependencies['agentBuilder'];
-  originalMessages: OpenAiMessage[];
+  originalMessages: AnthropicMessage[];
 }) => {
   const result = await client.chatComplete({
     connectorId,
@@ -402,7 +445,7 @@ const handleNonStreamingRequest = async ({
     stream: false,
   });
 
-  const openAiResponse = inferenceResponseToOpenAi(result, model);
+  const anthropicResponse = inferenceResponseToAnthropic(result, model);
 
   const assistantMessage = result.content || '';
   const resultToolCalls = result.toolCalls?.map((tc: any) => ({
@@ -415,31 +458,32 @@ const handleNonStreamingRequest = async ({
   }));
 
   // Fire-and-forget: record conversation
-  const conversationIdPromise = recordConversation({
+  recordConversation({
     request,
     agentBuilder,
     logger: routeLogger,
-    messages: originalMessages,
+    messages: originalMessages.map((m) => ({
+      role: m.role,
+      content:
+        typeof m.content === 'string'
+          ? m.content
+          : m.content
+              .filter((b: any) => b.type === 'text')
+              .map((b: any) => b.text)
+              .join(''),
+    })),
     assistantMessage,
     toolCalls: resultToolCalls,
     model,
     connectorId,
   }).catch((err) => {
     routeLogger.error(`Failed to record conversation: ${err.message}`);
-    return undefined;
   });
 
-  const conversationId = await conversationIdPromise;
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  if (conversationId) {
-    headers['x-conversation-id'] = conversationId;
-  }
-
   return response.ok({
-    headers,
-    body: openAiResponse,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: anthropicResponse,
   });
 };

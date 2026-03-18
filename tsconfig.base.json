@@ -1440,6 +1440,8 @@
       "@kbn/kibana-usage-collection-plugin/*": ["src/platform/plugins/private/kibana_usage_collection/*"],
       "@kbn/kibana-utils-plugin": ["src/platform/plugins/shared/kibana_utils"],
       "@kbn/kibana-utils-plugin/*": ["src/platform/plugins/shared/kibana_utils/*"],
+      "@kbn/knowledge-mining-plugin": ["x-pack/platform/plugins/shared/knowledge_mining"],
+      "@kbn/knowledge-mining-plugin/*": ["x-pack/platform/plugins/shared/knowledge_mining/*"],
       "@kbn/kql": ["src/platform/plugins/shared/kql"],
       "@kbn/kql/*": ["src/platform/plugins/shared/kql/*"],
       "@kbn/kubernetes-security-plugin": ["x-pack/solutions/security/plugins/kubernetes_security"],
