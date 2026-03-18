@@ -218,9 +218,18 @@ const UnifiedHistoryTableComponent = () => {
 
   // Empty deps: callback derives output solely from the row argument and module-level helpers
   const renderQueryColumn = useCallback((_: unknown, row: UnifiedHistoryRow) => {
-    // Scheduled rows: show query name only (pack name appears on details page only)
+    // Scheduled rows: show query name with pack badge
     if (isScheduledRow(row) && (row.queryName || row.packName)) {
-      return <>{row.queryName ?? row.packName}</>;
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow>{row.queryName ?? row.packName}</EuiFlexItem>
+          {row.packName && row.queryName && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{row.packName}</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
     }
 
     // Live pack rows: show pack name
@@ -436,7 +445,6 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.queryColumnTitle', {
           defaultMessage: 'Query',
         }),
-        truncateText: true,
         width: '40%',
         render: renderQueryColumn,
       },
