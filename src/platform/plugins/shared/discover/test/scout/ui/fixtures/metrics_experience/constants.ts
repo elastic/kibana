@@ -57,7 +57,7 @@ export const KBN_ARCHIVE =
 export const METRICS_EXPERIENCE_TAGS = [
   ...tags.stateful.all,
   ...tags.serverless.observability.complete,
-  // ...tags.serverless.security.complete,
+  ...tags.serverless.security.complete,
 ];
 
 export const RECOMMENDED_QUERY_TAGS = [
