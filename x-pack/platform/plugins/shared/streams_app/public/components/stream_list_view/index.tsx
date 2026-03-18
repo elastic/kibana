@@ -168,9 +168,22 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                href={router.link('/_significant_events')}
+                iconType="bellSlash"
+                data-test-subj="streamsSignificantEventsButton"
+              >
+                {i18n.translate('xpack.streams.streamsListView.significantEventsButtonLabel', {
+                  defaultMessage: 'Significant events',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
             {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  size="s"
                   href={router.link('/_discovery')}
                   iconType="crosshairs"
                   data-test-subj="streamsSignificantEventsDiscoveryButton"

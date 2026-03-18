@@ -16,6 +16,8 @@ import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
 import { SignificantEventsDiscoveryPage } from '../components/significant_events_discovery/page';
+import { SignificantEventsPage } from '../components/significant_events/page';
+import { AdvancedSettingsPage } from '../components/significant_events/advanced_settings_page';
 
 /**
  * Optional time range query params.
@@ -63,6 +65,18 @@ const streamsAppRoutes = {
     children: {
       '/': {
         element: <StreamListView />,
+        params: t.partial({
+          query: timeRangeQueryParams,
+        }),
+      },
+      '/_significant_events': {
+        element: <SignificantEventsPage />,
+        params: t.partial({
+          query: timeRangeQueryParams,
+        }),
+      },
+      '/_significant_events_advanced_settings': {
+        element: <AdvancedSettingsPage />,
         params: t.partial({
           query: timeRangeQueryParams,
         }),

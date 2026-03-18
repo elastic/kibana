@@ -113,6 +113,20 @@ const imageSets = {
       defaultMessage: 'Suggest AI partitioning image for the streams app',
     }),
   },
+  significantEventsOnboarding: {
+    light: () => import('./significant_events_onboarding_light.svg'),
+    dark: () => import('./significant_events_onboarding_dark.svg'),
+    alt: i18n.translate('xpack.streams.significantEvents.onboardingImage', {
+      defaultMessage: 'Illustration for the Significant events onboarding page',
+    }),
+  },
+  significantEventsListening: {
+    light: () => import('./significant_events_listening_light.svg'),
+    dark: () => import('./significant_events_listening_dark.svg'),
+    alt: i18n.translate('xpack.streams.significantEvents.listeningImage', {
+      defaultMessage: 'Illustration for the Significant events listening state',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {

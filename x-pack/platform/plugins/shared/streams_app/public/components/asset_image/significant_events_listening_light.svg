@@ -1,0 +1,37 @@
+<svg width="174" height="188" viewBox="0 0 174 188" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Floating cube top-left -->
+  <g transform="translate(22, 18) rotate(-15, 16, 16)">
+    <rect x="4" y="4" width="24" height="24" rx="3" fill="#D6E4FF" stroke="#4A90D9" stroke-width="1.5"/>
+    <rect x="9" y="9" width="14" height="14" rx="2" fill="#6EB3F7" opacity="0.7"/>
+  </g>
+  <!-- Floating cube top-right -->
+  <g transform="translate(120, 10) rotate(12, 18, 18)">
+    <rect x="0" y="6" width="22" height="22" rx="3" fill="#E8F4FF" stroke="#5BA3E0" stroke-width="1.5"/>
+    <rect x="5" y="11" width="12" height="12" rx="2" fill="#02BCB7" opacity="0.6"/>
+  </g>
+  <!-- Floating small square mid-right -->
+  <g transform="translate(142, 52) rotate(20, 10, 10)">
+    <rect x="0" y="0" width="16" height="16" rx="2" fill="#C8DFFF" stroke="#4A90D9" stroke-width="1.2"/>
+  </g>
+  <!-- Vertical tower / antenna -->
+  <rect x="83" y="56" width="8" height="54" rx="4" fill="#1D5FAF"/>
+  <circle cx="87" cy="54" r="6" fill="#0B64DD"/>
+  <circle cx="87" cy="54" r="3" fill="#6EB3F7"/>
+  <!-- Signal ring 1 -->
+  <ellipse cx="87" cy="128" rx="26" ry="8" fill="none" stroke="#4A90D9" stroke-width="1.5" opacity="0.5" stroke-dasharray="4 3"/>
+  <!-- Signal ring 2 -->
+  <ellipse cx="87" cy="128" rx="42" ry="13" fill="none" stroke="#4A90D9" stroke-width="1" opacity="0.3" stroke-dasharray="4 4"/>
+  <!-- Dish base cylinder top ellipse -->
+  <ellipse cx="87" cy="128" rx="52" ry="16" fill="#1D2E45"/>
+  <!-- Dish base cylinder body -->
+  <rect x="35" y="128" width="104" height="32" rx="0" fill="#1D2E45"/>
+  <ellipse cx="87" cy="160" rx="52" ry="16" fill="#152236"/>
+  <!-- Subtle highlight on cylinder -->
+  <ellipse cx="87" cy="128" rx="52" ry="16" fill="none" stroke="#2E4D6E" stroke-width="1"/>
+  <!-- Small indicator dot on top -->
+  <circle cx="87" cy="128" r="4" fill="#02BCB7"/>
+  <!-- Floating small particle left -->
+  <circle cx="44" cy="82" r="3" fill="#0B64DD" opacity="0.5"/>
+  <!-- Floating small particle right -->
+  <circle cx="132" cy="76" r="2.5" fill="#02BCB7" opacity="0.6"/>
+</svg>
