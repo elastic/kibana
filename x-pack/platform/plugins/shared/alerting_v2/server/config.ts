@@ -7,9 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
+import { validateDuration } from './lib/duration';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  invalidateApiKeysTask: schema.object({
+    interval: schema.string({ defaultValue: '5m', validate: validateDuration }),
+    removalDelay: schema.string({ defaultValue: '1h', validate: validateDuration }),
+  }),
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;

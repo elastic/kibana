@@ -53,6 +53,7 @@ const buildRecoveryQuery = (
 
 const mapMetadata = (metadata: FormValues['metadata']) => ({
   name: metadata.name,
+  description: metadata.description,
   owner: metadata.owner,
   labels: metadata.labels,
 });
@@ -117,7 +118,7 @@ const mapStateTransition = (
  * Contains all fields except `kind` (only required for create).
  */
 export interface RuleRequestCommon {
-  metadata: { name: string; owner?: string; labels?: string[] };
+  metadata: { name: string; description?: string; owner?: string; labels?: string[] };
   time_field: string;
   schedule: { every: string; lookback?: string };
   evaluation: { query: { base: string; condition?: string } };
@@ -198,6 +199,7 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
   kind: rule.kind,
   metadata: {
     name: rule.metadata.name,
+    description: rule.metadata.description,
     enabled: rule.enabled,
     owner: rule.metadata.owner,
     labels: rule.metadata.labels,

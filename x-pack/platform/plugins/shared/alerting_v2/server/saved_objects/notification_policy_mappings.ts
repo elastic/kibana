@@ -32,7 +32,6 @@ export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
         createdByUser: { type: 'boolean' },
       },
     },
-    rule_labels: { type: 'keyword' },
     createdBy: { type: 'keyword' },
     createdAt: { type: 'date' },
     updatedBy: { type: 'keyword' },

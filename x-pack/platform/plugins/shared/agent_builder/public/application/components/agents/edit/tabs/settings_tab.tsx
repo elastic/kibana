@@ -23,6 +23,7 @@ import {
   EuiPanel,
   EuiMarkdownEditor,
   EuiHorizontalRule,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -254,6 +255,62 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               )}
             />
           </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule />
+
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="xl"
+        alignItems="flexStart"
+        aria-labelledby="elastic-capabilities-section-title"
+      >
+        <EuiFlexItem grow={1}>
+          <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiIcon type="sparkles" aria-hidden={true} />
+              <EuiTitle size="xs">
+                <h2 id="elastic-capabilities-section-title">
+                  {i18n.translate(
+                    'xpack.agentBuilder.agents.form.settings.elasticCapabilitiesTitle',
+                    {
+                      defaultMessage: 'Elastic capabilities',
+                    }
+                  )}
+                </h2>
+              </EuiTitle>
+            </EuiFlexGroup>
+            <EuiText size="s" color="subdued">
+              {i18n.translate(
+                'xpack.agentBuilder.agents.form.settings.elasticCapabilitiesDescription',
+                {
+                  defaultMessage:
+                    'Enable built-in Elastic capabilities that enhance the agent with additional tools and skills provided by Elastic.',
+                }
+              )}
+            </EuiText>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2} css={formFlexColumnStyles}>
+          <Controller
+            name="configuration.enable_elastic_capabilities"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <EuiSwitch
+                label={i18n.translate(
+                  'xpack.agentBuilder.agents.form.settings.enableElasticCapabilitiesLabel',
+                  {
+                    defaultMessage: 'Enable Elastic capabilities',
+                  }
+                )}
+                checked={Boolean(value)}
+                onChange={(e) => onChange(e.target.checked)}
+                disabled={isFormDisabled}
+                data-test-subj="agentSettingsEnableElasticCapabilitiesSwitch"
+              />
+            )}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

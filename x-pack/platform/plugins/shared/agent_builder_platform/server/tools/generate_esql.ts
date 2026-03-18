@@ -13,8 +13,6 @@ import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
 
-const NAMED_PARAMS_INSTRUCTION = `You should ALWAYS use named parameters for start and end time (?_tstart and ?_tend), for example "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend". NEVER hardcode time ranges into the query itself.`;
-
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('A natural language query to generate an ES|QL query from.'),
   index: z
@@ -77,15 +75,14 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
     ) => {
       const model = await modelProvider.getDefaultModel();
 
-      const additionalInstructions = disableNamedParams ? undefined : NAMED_PARAMS_INSTRUCTION;
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
       const esqlResponse = await generateEsql({
         nlQuery,
         index,
         additionalContext: context,
-        additionalInstructions,
         executeQuery,
+        disableNamedParams,
         timeRange,
         model,
         esClient: esClient.asCurrentUser,
