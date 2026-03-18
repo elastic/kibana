@@ -453,6 +453,8 @@ export class RulesPage {
     for (const btn of await this.page.locator('.euiToast__closeButton').all()) {
       await btn.click().catch(() => {});
     }
+    // Wait for all toasts to fully disappear before clicking save to avoid pointer event interception
+    await expect(this.page.locator('.euiToast')).toHaveCount(0, { timeout: SHORTER_TIMEOUT });
 
     // Scroll the save button into view to ensure it's accessible
     await this.ruleSaveButton.scrollIntoViewIfNeeded();
