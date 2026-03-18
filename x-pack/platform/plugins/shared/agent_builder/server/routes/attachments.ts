@@ -190,7 +190,7 @@ export function registerAttachmentRoutes({
                 schema.string({
                   meta: {
                     description:
-                      'Origin string (e.g. saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.',
+                      'Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.',
                   },
                 })
               ),
