@@ -30,30 +30,30 @@ export interface IRuleExecutionLogForExecutors {
   /**
    * Writes a trace message to the event log and console at TRACE level.
    */
-  trace(message: string): void;
+  trace(message: string, options?: LogMessageOptions): void;
 
   /**
    * Writes a debug message to the event log and console at DEBUG level.
    */
-  debug(message: string): void;
+  debug(message: string, options?: LogMessageOptions): void;
 
   /**
    * Writes an info message to the event log at INFO level.
    * Writes to console at DEBUG level by default (override via options.consoleLogLevel).
    */
-  info(message: string): void;
+  info(message: string, options?: LogMessageOptions): void;
 
   /**
    * Writes a warning message to the event log at WARN level.
    * Writes to console at DEBUG level by default (override via options.consoleLogLevel).
    */
-  warn(message: string): void;
+  warn(message: string, options?: LogMessageOptions): void;
 
   /**
    * Writes an error message to the event log at ERROR level.
    * Writes to console at DEBUG level by default (override via options.consoleLogLevel).
    */
-  error(message: string): void;
+  error(message: string, options?: LogMessageOptions): void;
 
   /**
    * Logs a rule execution metric like a number of source events found and a number of generated alerts.
@@ -139,7 +139,7 @@ export interface LogMessageOptions {
 }
 
 /**
- * Arguments for logging the final execution result. The outcome must not be 'running'.
+ * Arguments for logging the final execution result. The status must not be 'running'.
  */
 export interface ExecutionResult {
   status: Exclude<RuleExecutionStatus, RuleExecutionStatusEnum['running']>;
