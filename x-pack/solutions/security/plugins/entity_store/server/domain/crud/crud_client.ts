@@ -18,7 +18,11 @@ import { getEuidFromObject } from '../../../common/domain/euid';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { BadCRUDRequestError, EntityNotFoundError } from '../errors';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
-import { hashEuid, validateAndTransformDocForUpsert } from './utils';
+import {
+  hashEuid,
+  validateAndTransformDocForUpsert,
+  validateUpdateDocIdentification,
+} from './utils';
 import { runWithSpan } from '../../telemetry/traces';
 
 const RETRY_ON_CONFLICT = 3;
@@ -151,22 +155,8 @@ export class CRUDClient {
   // 3. no ID and identifying data: ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     const id = getEuidFromObject(entityType, doc);
-
-    if (!doc.entity?.id && id === undefined) {
-      throw new BadCRUDRequestError(`Could not derive EUID from document or find it in entity.id`);
-    }
-
-    if (doc.entity?.id && id !== undefined && doc.entity?.id !== id) {
-      throw new BadCRUDRequestError(
-        `Supplied ID ${doc.entity?.id} does not match generated EUID ${id}`
-      );
-    }
-
-    if (!doc.entity?.id && id) {
-      doc.entity.id = id as string;
-    }
-
-    const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, force);
+    validateUpdateDocIdentification(doc, id);
+    const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, id, force);
     const { result } = await this.esClient.update({
       index: getLatestEntitiesIndexName(this.namespace),
       id: hashEuid(doc.entity.id),
@@ -195,7 +185,7 @@ export class CRUDClient {
     }
     doc.entity.id = id;
 
-    const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, true);
+    const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, id, true);
     const { result } = await this.esClient.create({
       index: getLatestEntitiesIndexName(this.namespace),
       id: hashEuid(doc.entity.id),

@@ -26,12 +26,34 @@ export function hashEuid(id: string): string {
   return createHash('md5').update(id).digest('hex');
 }
 
+// validateUpdateDoc checks provided and generated EUIDs according to rules
+// expected by updateEntity() method. updateEntity() and bulkUpdateEntity()
+// methods are the only ones that consume this validator.
+export function validateUpdateDocIdentification(
+  doc: Entity,
+  generatedId: string | undefined
+): void {
+  if (!doc.entity?.id && generatedId === undefined) {
+    throw new BadCRUDRequestError(`Could not derive EUID from document or find it in entity.id`);
+  }
+
+  if (doc.entity?.id && generatedId !== undefined && doc.entity?.id !== generatedId) {
+    throw new BadCRUDRequestError(
+      `Supplied ID ${doc.entity?.id} does not match generated EUID ${generatedId}`
+    );
+  }
+}
+
 export function validateAndTransformDocForUpsert(
   entityType: EntityType,
   namespace: string,
   doc: Entity,
+  generatedId: string | undefined,
   force: boolean
 ): Record<string, unknown> {
+  if (!doc.entity?.id && generatedId) {
+    doc.entity.id = generatedId as string;
+  }
   const definition = getEntityDefinition(entityType, namespace);
   if (!force) {
     const flat = getFlattenedObject(doc);
