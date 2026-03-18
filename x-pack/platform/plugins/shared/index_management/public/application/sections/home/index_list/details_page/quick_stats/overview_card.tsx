@@ -22,7 +22,6 @@ interface Props {
   content: {
     left: ReactNode;
     right: ReactNode;
-    center?: ReactNode;
   };
   footer?: {
     left?: ReactNode;
@@ -33,7 +32,7 @@ interface Props {
 
 export const OverviewCard: FunctionComponent<Props> = ({
   title,
-  content: { left: contentLeft, right: contentRight, center: contentCenter },
+  content: { left: contentLeft, right: contentRight },
   footer: { left: footerLeft, right: footerRight } = {},
   'data-test-subj': dataTestSubj,
 }) => {
@@ -56,7 +55,6 @@ export const OverviewCard: FunctionComponent<Props> = ({
             `}
           >
             <EuiFlexItem grow={false}>{contentLeft}</EuiFlexItem>
-            {contentCenter && <EuiFlexItem grow={false}>{contentCenter}</EuiFlexItem>}
             <EuiFlexItem grow={false}>{contentRight}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>

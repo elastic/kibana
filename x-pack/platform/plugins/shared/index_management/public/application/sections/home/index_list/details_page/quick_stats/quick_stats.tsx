@@ -8,20 +8,18 @@
 import React from 'react';
 import { EuiFlexGrid, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { formatBytes } from '../../../../../lib/format_bytes';
-import type { MappingsResponse, Index } from '../../../../../../../common';
+import type { Index } from '../../../../../../../common';
 import { StorageDetails } from './storage_details';
 import { StatusDetails } from './status_details';
 import { SizeDocCountDetails } from './size_doc_count_details';
 import { AliasesDetails } from './aliases_details';
 import { DataStreamDetails } from './data_stream_details';
-import { AISearchQuickStats } from './ai_search_stats';
 
 interface Props {
   indexDetails: Index;
-  mappings: MappingsResponse | null | undefined;
 }
 
-export const QuickStats = ({ indexDetails, mappings }: Props) => {
+export const QuickStats = ({ indexDetails }: Props) => {
   const isLarge = useIsWithinMinBreakpoint('xl');
   const {
     status,
@@ -55,7 +53,6 @@ export const QuickStats = ({ indexDetails, mappings }: Props) => {
       <SizeDocCountDetails size={sizeFormatted} documents={documents} />
       <AliasesDetails aliases={aliases} />
       {dataStream && <DataStreamDetails dataStreamName={dataStream} />}
-      {mappings && <AISearchQuickStats mappings={mappings} />}
     </EuiFlexGrid>
   );
 };

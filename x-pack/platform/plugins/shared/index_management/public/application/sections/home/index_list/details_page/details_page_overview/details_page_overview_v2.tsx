@@ -141,7 +141,7 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({
         />
       )}
 
-      <QuickStats indexDetails={indexDetails} mappings={mappingsData} />
+      <QuickStats indexDetails={indexDetails} />
 
       <EuiSpacer />
 
