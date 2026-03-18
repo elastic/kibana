@@ -7,7 +7,15 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -94,24 +102,44 @@ export const SearchHomepagePage = () => {
         <EuiFlexGroup>
           <BasicMetricBadges />
           <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj="homepage-kibana-version"
-              color="text"
-              external
-              href={
-                !cloud?.isServerlessEnabled
-                  ? docLinks.hostedCloudReleaseNotes
-                  : docLinks.serverlessReleaseNotes
-              }
-            >
-              <FormattedMessage
-                id="xpack.searchHomepage.versionTextLabel"
-                defaultMessage="{version}"
-                values={{
-                  version: !cloud?.isServerlessEnabled ? `v${kibanaVersion}` : 'Changelog',
-                }}
-              />
-            </EuiLink>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="homepage-kibana-version"
+                  color="text"
+                  target="_blank"
+                  href={
+                    !cloud?.isServerlessEnabled
+                      ? docLinks.hostedCloudReleaseNotes
+                      : docLinks.serverlessReleaseNotes
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.searchHomepage.versionTextLabel"
+                    defaultMessage="{version}"
+                    values={{
+                      version: !cloud?.isServerlessEnabled ? `v${kibanaVersion}` : 'Changelog',
+                    }}
+                  />
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiCopy textToCopy={`v${kibanaVersion}`}>
+                  {(copy) => (
+                    <EuiButtonIcon
+                      aria-label={i18n.translate('xpack.searchHomepage.versionCopyButton', {
+                        defaultMessage: 'Copy version to clipboard',
+                      })}
+                      data-test-subj="homepage-copy-version"
+                      iconType="copyClipboard"
+                      color="text"
+                      size="xs"
+                      onClick={copy}
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
