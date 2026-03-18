@@ -12,7 +12,6 @@ import type {
   UserMessagesGetter,
   LensDocument,
   LensInspector,
-  LensDatasourceId,
 } from '@kbn/lens-common';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
