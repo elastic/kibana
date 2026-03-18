@@ -75,7 +75,165 @@ apiTest.describe(
           tags_array: ['foo', 'bar', 'baz'], // New field created
         })
       );
-    });
+    }
+  );
+
+  apiTest('should correctly split a string to a target field', async ({ testBed, esql }) => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'split',
+          from: 'tags',
+          to: 'tags_array',
+          separator: ',',
+        } as SplitProcessor,
+      ],
+    };
+
+    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { query } = transpileEsql(streamlangDSL);
+
+    const docs = [{ tags: 'foo,bar,baz' }];
+    await testBed.ingest('ingest-split-target', docs, processors);
+    const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-split-target');
+
+    await testBed.ingest('esql-split-target', docs);
+    const esqlResult = await esql.queryOnIndex('esql-split-target', query);
+
+    expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+    expect(ingestResult[0]).toStrictEqual(
+      expect.objectContaining({
+        tags: 'foo,bar,baz', // Original preserved
+        tags_array: ['foo', 'bar', 'baz'], // New field created
+      })
+    );
+  });
+
+  apiTest('should split with different delimiters', async ({ testBed, esql }) => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'split',
+          from: 'path',
+          separator: '/',
+        } as SplitProcessor,
+      ],
+    };
+
+    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { query } = transpileEsql(streamlangDSL);
+
+    const docs = [{ path: 'home/user/documents' }];
+    await testBed.ingest('ingest-split-slash', docs, processors);
+    const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-split-slash');
+
+    await testBed.ingest('esql-split-slash', docs);
+    const esqlResult = await esql.queryOnIndex('esql-split-slash', query);
+
+    expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+    expect(ingestResult[0]).toStrictEqual(
+      expect.objectContaining({ path: ['home', 'user', 'documents'] })
+    );
+  });
+
+  apiTest('should handle single value (no delimiter found)', async ({ testBed, esql }) => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'split',
+          from: 'tags',
+          separator: ',',
+        } as SplitProcessor,
+      ],
+    };
+
+    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { query } = transpileEsql(streamlangDSL);
+
+    const docs = [{ tags: 'single' }];
+    await testBed.ingest('ingest-split-single', docs, processors);
+    const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-split-single');
+
+    await testBed.ingest('esql-split-single', docs);
+    const esqlResult = await esql.queryOnIndex('esql-split-single', query);
+
+    expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+    expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ tags: ['single'] }));
+  });
+
+  apiTest('should support conditional split with where clause', async ({ testBed, esql }) => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'split',
+          from: 'tags',
+          separator: ',',
+          where: {
+            field: 'should_split',
+            eq: 'yes',
+          },
+        } as SplitProcessor,
+      ],
+    };
+
+    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { query } = transpileEsql(streamlangDSL);
+
+    const docs = [
+      { tags: 'foo,bar,baz', should_split: 'yes' },
+      { tags: 'one,two,three', should_split: 'no' },
+    ];
+    await testBed.ingest('ingest-split-conditional', docs, processors);
+    const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-split-conditional');
+
+    await testBed.ingest('esql-split-conditional', docs);
+    const esqlResult = await esql.queryOnIndex('esql-split-conditional', query);
+
+    expect(ingestResult).toHaveLength(2);
+    expect(esqlResult.documents).toHaveLength(2);
+
+    const ingestDoc1 = ingestResult.find((d: Record<string, unknown>) => d.should_split === 'yes');
+    const ingestDoc2 = ingestResult.find((d: Record<string, unknown>) => d.should_split === 'no');
+    const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
+      (d: Record<string, unknown>) => d.should_split === 'yes'
+    );
+    const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
+      (d: Record<string, unknown>) => d.should_split === 'no'
+    );
+
+    expect(ingestDoc1).toStrictEqual(esqlDoc1);
+    expect(ingestDoc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
+
+    // Both transpilers should keep the original string when condition doesn't match
+    expect(ingestDoc2).toStrictEqual(expect.objectContaining({ tags: 'one,two,three' }));
+    expect(esqlDoc2).toStrictEqual(expect.objectContaining({ tags: 'one,two,three' }));
+  });
+
+  // *** Template validation tests ***
+  [
+    {
+      templateType: '{{ }}',
+      from: '{{template_from}}',
+      separator: ',',
+    },
+    {
+      templateType: '{{{ }}}',
+      from: '{{{template_from}}}',
+      separator: ',',
+    },
+  ].forEach(({ templateType, from, separator }) => {
+    apiTest(
+      `should consistently reject ${templateType} template syntax in both Ingest Pipeline and ES|QL transpilers`,
+      async () => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'split',
+              from,
+              separator,
+            } as SplitProcessor,
+          ],
+        };
 
     apiTest('should split with different delimiters', async ({ testBed, esql }) => {
       const streamlangDSL: StreamlangDSL = {

@@ -219,78 +219,130 @@ apiTest.describe.skip(
             event: { kind: 'test' },
             status: 'doc1',
           },
-          {
-            tags: ['zulu', 'xray', 'yankee'],
-            sorted_tags: [],
-            event: { kind: 'production' },
-            status: 'doc2',
+        } as SortProcessor,
+      ],
+    };
+
+    const { query } = transpile(streamlangDSL);
+
+    const docs = [
+      { tags: ['charlie', 'alpha', 'bravo'], event: { kind: 'test' }, status: 'doc1' },
+      { tags: ['zulu', 'xray', 'yankee'], event: { kind: 'production' }, status: 'doc2' },
+    ];
+    await testBed.ingest(indexName, docs);
+    const esqlResult = await esql.queryOnIndex(indexName, query);
+
+    expect(esqlResult.documents).toHaveLength(2);
+
+    // First doc should have tags sorted (where condition matched)
+    const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+    expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] }));
+    expect(doc1?.['event.kind']).toBe('test');
+
+    // Second doc: where condition not matched, processor doesn't sort
+    const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+    expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
+    expect(doc2?.tags).toHaveLength(3);
+    expect(doc2?.['event.kind']).toBe('production');
+  });
+
+  apiTest('should sort to target field conditionally with EVAL CASE', async ({ testBed, esql }) => {
+    const indexName = 'stream-e2e-test-sort-conditional-target';
+
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'sort',
+          from: 'tags',
+          to: 'sorted_tags',
+          order: 'asc',
+          where: {
+            field: 'event.kind',
+            eq: 'test',
           },
-        ];
-        await testBed.ingest(indexName, docs);
-        const esqlResult = await esql.queryOnIndex(indexName, query);
+        } as SortProcessor,
+      ],
+    };
 
-        expect(esqlResult.documents).toHaveLength(2);
+    const { query } = transpile(streamlangDSL);
 
-        // First doc should have sorted_tags created (where condition matched)
-        const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-        expect(doc1).toStrictEqual(
-          expect.objectContaining({
-            tags: ['charlie', 'alpha', 'bravo'], // Original preserved
-            sorted_tags: ['alpha', 'bravo', 'charlie'], // New field sorted
-          })
-        );
-        expect(doc1?.['event.kind']).toBe('test');
+    const docs = [
+      {
+        tags: ['charlie', 'alpha', 'bravo'],
+        sorted_tags: [],
+        event: { kind: 'test' },
+        status: 'doc1',
+      },
+      {
+        tags: ['zulu', 'xray', 'yankee'],
+        sorted_tags: [],
+        event: { kind: 'production' },
+        status: 'doc2',
+      },
+    ];
+    await testBed.ingest(indexName, docs);
+    const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        // Second doc should have sorted_tags as empty array (where condition not matched)
-        const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-        expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
-        expect(doc2?.tags).toHaveLength(3);
-        expect(doc2).toStrictEqual(expect.objectContaining({ sorted_tags: [] }));
-        expect(doc2?.['event.kind']).toBe('production');
-      }
+    expect(esqlResult.documents).toHaveLength(2);
+
+    // First doc should have sorted_tags created (where condition matched)
+    const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+    expect(doc1).toStrictEqual(
+      expect.objectContaining({
+        tags: ['charlie', 'alpha', 'bravo'], // Original preserved
+        sorted_tags: ['alpha', 'bravo', 'charlie'], // New field sorted
+      })
     );
+    expect(doc1?.['event.kind']).toBe('test');
 
-    apiTest('should handle ignore_missing: true', async ({ testBed, esql }) => {
-      const indexName = 'stream-e2e-test-sort-ignore-missing';
+    // Second doc should have sorted_tags as empty array (where condition not matched)
+    const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+    expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
+    expect(doc2?.tags).toHaveLength(3);
+    expect(doc2).toStrictEqual(expect.objectContaining({ sorted_tags: [] }));
+    expect(doc2?.['event.kind']).toBe('production');
+  });
 
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'sort',
-            from: 'tags',
-            ignore_missing: true,
-          } as SortProcessor,
-        ],
-      };
+  apiTest('should handle ignore_missing: true', async ({ testBed, esql }) => {
+    const indexName = 'stream-e2e-test-sort-ignore-missing';
 
-      const { query } = transpile(streamlangDSL);
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'sort',
+          from: 'tags',
+          ignore_missing: true,
+        } as SortProcessor,
+      ],
+    };
 
-      const docWithField = { tags: ['charlie', 'alpha', 'bravo'], status: 'doc1' };
-      const docWithoutField = { status: 'doc2' }; // Should pass through
-      const docs = [docWithField, docWithoutField];
-      await testBed.ingest(indexName, docs);
-      const esqlResult = await esql.queryOnIndex(indexName, query);
+    const { query } = transpile(streamlangDSL);
 
-      // Both documents should be present
-      expect(esqlResult.documents).toHaveLength(2);
-      const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-      const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-      expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] }));
-      expect(doc2).toStrictEqual(expect.objectContaining({ tags: null }));
-    });
+    const docWithField = { tags: ['charlie', 'alpha', 'bravo'], status: 'doc1' };
+    const docWithoutField = { status: 'doc2' }; // Should pass through
+    const docs = [docWithField, docWithoutField];
+    await testBed.ingest(indexName, docs);
+    const esqlResult = await esql.queryOnIndex(indexName, query);
 
-    apiTest('should reject Mustache template syntax {{ and {{{ in field names', async () => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'sort',
-            from: '{{field.name}}',
-          } as SortProcessor,
-        ],
-      };
-      expect(() => transpile(streamlangDSL)).toThrow(
-        'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
-      );
-    });
-  }
-);
+    // Both documents should be present
+    expect(esqlResult.documents).toHaveLength(2);
+    const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+    const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+    expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] }));
+    expect(doc2).toStrictEqual(expect.objectContaining({ tags: null }));
+  });
+
+  apiTest('should reject Mustache template syntax {{ and {{{ in field names', async () => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'sort',
+          from: '{{field.name}}',
+        } as SortProcessor,
+      ],
+    };
+    expect(() => transpile(streamlangDSL)).toThrow(
+      'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
+    );
+  });
+});

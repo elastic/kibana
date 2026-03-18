@@ -1885,12 +1885,36 @@ module.exports = {
     },
 
     /**
-     * Streams overrides
+     * Onboarding team overrides
      */
     {
       files: [
         'x-pack/platform/plugins/shared/streams/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/streams_app/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/observability_onboarding/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/fields_metadata/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/dataset_quality/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/data_quality/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-streams-schema/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-streams-ai/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-streamlang/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-streamlang-tests/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-sample-parser/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-grok-heuristics/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-evals-suite-streams/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-dissect-heuristics/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-content-packs-schema/**/*.{ts,tsx}',
+        'x-pack/platform/packages/private/kbn-data-quality/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-xstate-utils/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-use-tracked-promise/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-timerange/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-synthtrace/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-synthtrace-client/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-react-hooks/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-otel-semantic-conventions/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-otel-demo/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-grok-ui/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',

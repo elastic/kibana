@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import type { SortProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { tags } from '@kbn/scout';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -249,15 +250,19 @@ apiTest.describe(
       expect(ingestedDocs).toHaveLength(2);
 
       // First doc should have tags sorted (where condition matched)
-      const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
+      const doc1 = ingestedDocs.find(
+        (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'test'
+      );
       expect(doc1).toStrictEqual(
         expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'], 'event.kind': 'test' })
       );
 
       // Second doc: where condition not matched, processor doesn't sort
-      const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
-      expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
-      expect(doc2?.tags).toHaveLength(3);
+      const doc2 = ingestedDocs.find(
+        (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'production'
+      );
+      expect(asDoc(doc2)?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
+      expect(asDoc(doc2)?.tags).toHaveLength(3);
       expect(doc2).toStrictEqual(expect.objectContaining({ 'event.kind': 'production' }));
     });
 
@@ -293,7 +298,9 @@ apiTest.describe(
         expect(ingestedDocs).toHaveLength(2);
 
         // First doc should have sorted_tags created (where condition matched)
-        const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
+        const doc1 = ingestedDocs.find(
+          (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'test'
+        );
         expect(doc1).toStrictEqual(
           expect.objectContaining({
             tags: ['charlie', 'alpha', 'bravo'], // Original preserved
@@ -304,11 +311,13 @@ apiTest.describe(
 
         // Second doc should not have sorted_tags (where condition not matched)
         // Note: ES may reorder multi-valued keyword fields internally, so we check array contents
-        const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
-        expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
-        expect(doc2?.tags).toHaveLength(3);
+        const doc2 = ingestedDocs.find(
+          (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'production'
+        );
+        expect(asDoc(doc2)?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
+        expect(asDoc(doc2)?.tags).toHaveLength(3);
         expect(doc2).toStrictEqual(expect.objectContaining({ 'event.kind': 'production' }));
-        expect((doc2 as Record<string, unknown>).sorted_tags).toBeUndefined();
+        expect(asDoc(doc2)?.sorted_tags).toBeUndefined();
       }
     );
 
