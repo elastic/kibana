@@ -73,6 +73,7 @@ fileGroups:
     - common/**/*
     - server/**/*
     - public/**/*
+    - scripts/**/*
     - '!target/**/*'
 tasks:
   jest:
