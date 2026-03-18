@@ -190,5 +190,33 @@ describe('RuleMonitoringService', () => {
       expect(metrics.gap_range?.gte).toEqual('2020-01-01T00:00:00.000Z');
       expect(metrics.gap_range?.lte).toEqual('2020-01-01T01:00:00.000Z');
     });
+
+    it('should clear the previously set gapRange', () => {
+      const ruleMonitoringService = new RuleMonitoringService();
+      const { setMetric, clearGapRange } = ruleMonitoringService.getSetters();
+
+      setMetric('gap_range', {
+        gte: '2020-01-01T00:00:00.000Z',
+        lte: '2020-01-01T01:00:00.000Z',
+      });
+
+      const {
+        run: {
+          last_run: { metrics: metricBeforeClearing },
+        },
+      } = ruleMonitoringService.getMonitoring();
+
+      expect(metricBeforeClearing.gap_range).toBeDefined();
+
+      clearGapRange();
+
+      const {
+        run: {
+          last_run: { metrics: metricsAfterClearing },
+        },
+      } = ruleMonitoringService.getMonitoring();
+
+      expect(metricsAfterClearing.gap_range).toBeUndefined();
+    });
   });
 });
