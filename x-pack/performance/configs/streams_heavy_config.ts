@@ -9,12 +9,10 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 
 /**
  * Extended FTR config for heavy Streams performance journeys (e.g. large wired hierarchy).
- * Increases mochaOpts.timeout to 20 minutes for individual test steps within journeys.
- * The heavy data setup in beforeSteps runs outside Mocha, so it is not affected by this timeout.
- * The overall run is guarded by the pipeline-level timeout_in_minutes (180 min).
+ * Increases mochaOpts.timeout to 1 hour because beforeSteps runs inside Mocha's before() hook,
+ * meaning the entire data setup (batched content pack imports for 1000 wired children) is
+ * subject to this timeout. On CI bare metal workers the setup alone takes ~25-30 minutes.
  *
- * TODO(streams-program#958): reduce timeout back to default once the import API scales without
- * server-side timeouts at large hierarchy sizes.
  */
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -24,7 +22,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...baseConfig.getAll(),
     mochaOpts: {
       ...baseConfig.get('mochaOpts'),
-      timeout: 1_200_000, // 20 minutes
+      timeout: 3_600_000, // 1 hour
     },
   };
 }
