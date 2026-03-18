@@ -339,7 +339,11 @@ describe('Task Runner', () => {
     testAlertingEventLogCalls({ status: 'ok' });
 
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-      ...generateRuleUpdateParams({})
+      ...generateRuleUpdateParams({
+        metrics: {
+          total_search_duration_ms: 23423,
+        },
+      })
     );
 
     expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -2756,7 +2760,10 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-      ...generateRuleUpdateParams({ nextRun: '1970-01-01T00:00:10.000Z' })
+      ...generateRuleUpdateParams({
+        nextRun: '1970-01-01T00:00:10.000Z',
+        metrics: { total_search_duration_ms: 23423 },
+      })
     );
   });
 
@@ -2915,6 +2922,9 @@ describe('Task Runner', () => {
         outcome: 'warning',
         warning,
         alertsCount: { active: 1, new: 1 },
+        metrics: {
+          total_search_duration_ms: 23423,
+        },
       })
     );
 
@@ -3088,6 +3098,9 @@ describe('Task Runner', () => {
         outcome: 'warning',
         warning,
         alertsCount: { active: 2, new: 2 },
+        metrics: {
+          total_search_duration_ms: 23423,
+        },
       })
     );
 
@@ -3690,6 +3703,7 @@ describe('Task Runner', () => {
           triggeredActionsStatus: 'complete',
           hasReachedQueuedActionsLimit,
         },
+        consumerMetrics: undefined,
         status: {
           lastExecutionDate: new Date('1970-01-01T00:00:00.000Z'),
           status,

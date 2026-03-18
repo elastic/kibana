@@ -33,7 +33,18 @@ export class RuleMonitoringService {
   public setMonitoring(monitoringFromSO: RuleMonitoring | undefined) {
     if (monitoringFromSO) {
       this.monitoring = monitoringFromSO;
-      Object.assign(this.metrics, monitoringFromSO.run.last_run.metrics);
+
+      const metricsSO = monitoringFromSO.run.last_run.metrics;
+
+      Object.assign(this.frameworkMetrics, {
+        total_search_duration_ms: metricsSO.total_search_duration_ms,
+      });
+
+      Object.assign(this.metrics, {
+        total_indexing_duration_ms: metricsSO.total_indexing_duration_ms,
+        gap_duration_s: metricsSO.gap_duration_s,
+        gap_range: metricsSO.gap_range,
+      });
     }
   }
 
@@ -56,10 +67,12 @@ export class RuleMonitoringService {
     return result;
   }
 
-  public getExecutorMetrics(): Partial<ConsumerExecutionMetrics> {
-    return {
-      ...this.metrics,
-    };
+  public getExecutorMetrics(): Partial<ConsumerExecutionMetrics> | undefined {
+    if (Object.values(this.metrics).some((value) => value != null)) {
+      return {
+        ...this.metrics,
+      };
+    }
   }
 
   public addFrameworkMetrics(fwkMetrics: Partial<FrameworkMetrics>): void {

@@ -74,6 +74,7 @@ export const generateRuleUpdateParams = ({
   successRatio = 1,
   history = defaultHistory,
   alertsCount,
+  metrics,
 }: {
   error?: null | { reason: string; message: string };
   warning?: null | { reason: string; message: string };
@@ -83,6 +84,7 @@ export const generateRuleUpdateParams = ({
   successRatio?: number;
   history?: RuleMonitoring['run']['history'];
   alertsCount?: Record<string, number>;
+  metrics?: Record<string, unknown>;
 }) => [
   {
     id: `alert:1`,
@@ -106,6 +108,7 @@ export const generateRuleUpdateParams = ({
                 total_alerts_detected: null,
                 total_indexing_duration_ms: null,
                 total_search_duration_ms: null,
+                ...metrics,
               },
             },
           },

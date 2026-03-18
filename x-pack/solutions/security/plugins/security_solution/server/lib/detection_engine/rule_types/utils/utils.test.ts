@@ -503,7 +503,7 @@ describe('utils', () => {
         },
       };
 
-      const { foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices, warningMessage } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           FieldCapsResponse,
@@ -513,11 +513,9 @@ describe('utils', () => {
       });
 
       expect(foundNoIndices).toBeFalsy();
-      expect(ruleExecutionLogger.logExecutionResult).toHaveBeenCalledWith({
-        status: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"]',
-      });
+      expect(warningMessage).toBe(
+        'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"]'
+      );
     });
 
     test('returns true when missing timestamp field', async () => {
@@ -544,7 +542,7 @@ describe('utils', () => {
         },
       };
 
-      const { foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices, warningMessage } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           FieldCapsResponse,
@@ -554,11 +552,9 @@ describe('utils', () => {
       });
 
       expect(foundNoIndices).toBeFalsy();
-      expect(ruleExecutionLogger.logExecutionResult).toHaveBeenCalledWith({
-        sampleDocSearchResultsNoSortIdNoHitstatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]',
-      });
+      expect(warningMessage).toBe(
+        'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]'
+      );
     });
   });
 

@@ -1672,6 +1672,7 @@ describe('Ad Hoc Task Runner', () => {
         name: mockedAdHocRunSO.attributes.rule.name,
         consumer: mockedAdHocRunSO.attributes.rule.consumer,
         revision: mockedAdHocRunSO.attributes.rule.revision,
+        uuid: expect.any(String),
       });
     }
 

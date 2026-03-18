@@ -8,8 +8,9 @@
 function createRuleMonitoringServiceMock() {
   return jest.fn().mockImplementation(() => {
     return {
+      addFrameworkMetrics: jest.fn(),
       addHistory: jest.fn(),
-      getLastRunMetricsSetters: jest.fn(),
+      getSetters: jest.fn(),
       getMonitoring: jest.fn(),
       setLastRunMetricsDuration: jest.fn(),
       setMonitoring: jest.fn(),
