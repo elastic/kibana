@@ -46,7 +46,7 @@ function getOrientationFromRotation(rotation: number): 'angled' | 'vertical' | '
 
 function getGridConfigProps(
   gridConfig: HeatmapVisualizationState['gridConfig']
-): HeatmapState['axes'] {
+): HeatmapState['axis'] {
   return {
     x: {
       labels: {
@@ -89,7 +89,7 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     type: 'heat_map' as const,
     legend: getLegendProps(visualization.legend),
-    axes: getGridConfigProps(visualization.gridConfig),
+    axis: getGridConfigProps(visualization.gridConfig),
     cells: {
       labels: { visible: visualization.gridConfig.isCellLabelVisible },
     },
@@ -115,8 +115,8 @@ function reverseBuildVisualizationState(
         ...getValueApiColumn(valueAccessor, layer),
         ...paletteProps,
       },
-      xAxis: getValueApiColumn(visualization.xAccessor, layer),
-      ...(visualization.yAccessor && { yAxis: getValueApiColumn(visualization.yAccessor, layer) }),
+      x: getValueApiColumn(visualization.xAccessor, layer),
+      ...(visualization.yAccessor && { y: getValueApiColumn(visualization.yAccessor, layer) }),
     } satisfies HeatmapStateESQL;
   }
 
@@ -135,8 +135,8 @@ function reverseBuildVisualizationState(
       ...operationFromColumn(valueAccessor, layer),
       ...paletteProps,
     } as LensApiAllMetricOperations,
-    xAxis: operationFromColumn(visualization.xAccessor!, layer),
-    yAxis: visualization.yAccessor && operationFromColumn(visualization.yAccessor, layer),
+    x: operationFromColumn(visualization.xAccessor!, layer),
+    y: visualization.yAccessor && operationFromColumn(visualization.yAccessor, layer),
   } as HeatmapStateNoESQL;
 }
 

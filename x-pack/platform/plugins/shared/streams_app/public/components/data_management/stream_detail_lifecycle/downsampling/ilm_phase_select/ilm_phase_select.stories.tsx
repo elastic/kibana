@@ -29,7 +29,13 @@ export const Default: Story = {
           <EuiFlexItem grow={false}>
             <IlmPhaseSelect
               renderButton={(props) => (
-                <EuiButton {...props} color="text" size="s" iconType="arrowDown" iconSide="right">
+                <EuiButton
+                  {...props}
+                  color="text"
+                  size="s"
+                  iconType="chevronSingleDown"
+                  iconSide="right"
+                >
                   Add data phase and downsampling
                 </EuiButton>
               )}
