@@ -64,6 +64,10 @@ const gridStyleOverride = {
   stripes: false,
 };
 
+const EMPTY_SORT: [] = [];
+const EMPTY_CONTROL_COLUMN_IDS: string[] = [];
+const noop = () => {};
+
 const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   actionId,
   expirationDate,
@@ -86,12 +90,15 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
   const uiActions = uiActionsService!;
   const { euiTheme } = useEuiTheme();
 
-  const headerBackgroundCss = useMemo(
-    () => ({
-      '.euiDataGridHeaderCell': {
-        backgroundColor: euiTheme.colors.lightestShade,
+  const tableWrapperCss = useMemo(
+    () => [
+      unifiedTableWrapperCss,
+      {
+        '.euiDataGridHeaderCell': {
+          backgroundColor: euiTheme.colors.lightestShade,
+        },
       },
-    }),
+    ],
     [euiTheme.colors.lightestShade]
   );
 
@@ -204,10 +211,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
       {isLive && <EuiProgress color="primary" size="xs" css={euiProgressCss} />}
 
       <div css={statusTableContainerCss}>
-        <div
-          css={[unifiedTableWrapperCss, headerBackgroundCss]}
-          data-test-subj="osqueryStatusTable"
-        >
+        <div css={tableWrapperCss} data-test-subj="osqueryStatusTable">
           <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
             <UnifiedDataTable
               ariaLabelledBy="osquery-status-results"
@@ -216,7 +220,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               rows={rows}
               loadingState={isLive ? DataLoadingState.loading : DataLoadingState.loaded}
               externalCustomRenderers={externalCustomRenderers}
-              sort={[]}
+              sort={EMPTY_SORT}
               showTimeCol={false}
               showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
               canDragAndDropColumns={false}
@@ -229,8 +233,8 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               columnsMeta={STATUS_COLUMNS_META}
               showColumnTokens={false}
               settings={COLUMN_DISPLAY_SETTINGS}
-              onSetColumns={() => {}}
-              controlColumnIds={[]}
+              onSetColumns={noop}
+              controlColumnIds={EMPTY_CONTROL_COLUMN_IDS}
               gridStyleOverride={gridStyleOverride}
               dataGridDensityState={DataGridDensity.EXPANDED}
             />
