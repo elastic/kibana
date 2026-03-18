@@ -11519,6 +11519,7 @@
   integrity sha512-9FC/6ho8uFa8fV50+FPy/ngWN53jaUu4GRXlAjcxIRrzhltJnpKkBG2Tp0IDraFJeWrOpk84RJ9EMEEYzaI1Bw==
 
 "@redocly/ajv@8.17.1", "ajv@npm:@redocly/ajv@8.17.1":
+  name ajv
   version "8.17.1"
   resolved "https://registry.yarnpkg.com/@redocly/ajv/-/ajv-8.17.1.tgz#e2b1722cbc8b4cd7e05da14a745d3ddd03293734"
   integrity sha512-EDtsGZS964mf9zAUXAl9Ew16eYbeyAFWhsPr0fX6oaJxgd8rApYlPBf0joyhnUHz88WxrigyFtTaqqzXNzPgqw==
