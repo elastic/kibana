@@ -23,14 +23,21 @@ export interface EsqlResponse {
  */
 export const executeEsql = async ({
   query,
+  params,
   esClient,
 }: {
   query: string;
+  params?: Array<Record<string, FieldValue>>;
   esClient: ElasticsearchClient;
 }): Promise<EsqlResponse> => {
   try {
     const response = await esClient.esql.query(
-      { query, drop_null_columns: true, allow_partial_results: true },
+      {
+        query,
+        drop_null_columns: true,
+        allow_partial_results: true,
+        ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
+      },
       { maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES }
     );
     return {
