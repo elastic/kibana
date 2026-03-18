@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './ai';
-export * from './data';
-export * from './flow_control';
+export {
+  WaitForInputStepCommonDefinition,
+  WaitForInputStepTypeId,
+  type WaitForInputInputSchema,
+  type WaitForInputOutputSchema,
+} from './wait_for_input_step';

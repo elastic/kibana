@@ -8,7 +8,6 @@
  */
 
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { isAtomic } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { structuralStepOutputSchemas } from './structural_step_output_schemas';
 import { stepSchemas } from '../../../../common/step_schemas';
@@ -17,23 +16,21 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
   // Handle internal actions with pattern matching first
   // TODO: add output schema support for elasticsearch.request and kibana.request connectors
 
-  if (isAtomic(node)) {
-    const stepDefinition = stepSchemas.getStepDefinition(node.stepType);
+  const stepDefinition = stepSchemas.getStepDefinition(node.stepType);
 
-    if (stepDefinition && stepSchemas.isPublicStepDefinition(stepDefinition)) {
-      try {
-        if (stepDefinition?.editorHandlers?.dynamicSchema?.getOutputSchema) {
-          return stepDefinition.editorHandlers.dynamicSchema.getOutputSchema({
-            input: node.configuration.with,
-            config: node.configuration,
-          });
-        }
-      } catch (error) {
-        // If dynamic schema generation fails, fallback to static output schema
+  if (stepDefinition && stepSchemas.isPublicStepDefinition(stepDefinition)) {
+    try {
+      if (stepDefinition?.editorHandlers?.dynamicSchema?.getOutputSchema) {
+        return stepDefinition.editorHandlers.dynamicSchema.getOutputSchema({
+          input: node.configuration.with,
+          config: node.configuration,
+        });
       }
-
-      return stepDefinition.outputSchema;
+    } catch (error) {
+      // If dynamic schema generation fails, fallback to static output schema
     }
+
+    return stepDefinition.outputSchema;
   }
 
   const allConnectorsMap = stepSchemas.getAllConnectorsMapCache();

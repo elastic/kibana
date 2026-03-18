@@ -34,6 +34,7 @@ interface WorkflowStepExecutionDetailsProps {
   isLoadingStepData?: boolean;
   workflowExecutionStatus?: ExecutionStatus;
   resumeMessage?: string;
+  resumeSchema?: Record<string, unknown>;
   shouldAutoResume?: boolean;
 }
 
@@ -45,6 +46,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     isLoadingStepData,
     workflowExecutionStatus,
     resumeMessage,
+    resumeSchema,
     shouldAutoResume = false,
   }) => {
     // Show data for terminal steps OR steps paused for input (they have input but no output yet)
@@ -119,6 +121,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           showResumeUI={workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT}
           executionId={workflowExecutionId}
           resumeMessage={resumeMessage}
+          resumeSchema={resumeSchema}
           shouldAutoResume={shouldAutoResume}
         />
       );
@@ -199,6 +202,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                           <ResumeExecutionButton
                             executionId={workflowExecutionId}
                             resumeMessage={resumeMessage}
+                            resumeSchema={resumeSchema}
                             autoOpen={shouldAutoResume}
                           />
                           <EuiSpacer size="m" />

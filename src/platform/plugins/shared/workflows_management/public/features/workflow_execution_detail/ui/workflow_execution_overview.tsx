@@ -26,6 +26,7 @@ interface WorkflowExecutionOverviewProps {
   showResumeUI?: boolean;
   executionId?: string;
   resumeMessage?: string;
+  resumeSchema?: Record<string, unknown>;
   shouldAutoResume?: boolean;
 }
 
@@ -56,6 +57,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     showResumeUI = false,
     executionId,
     resumeMessage,
+    resumeSchema,
     shouldAutoResume = false,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -194,6 +196,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
               <ResumeExecutionButton
                 executionId={executionId}
                 resumeMessage={resumeMessage}
+                resumeSchema={resumeSchema}
                 autoOpen={shouldAutoResume}
               />
             </EuiFlexItem>

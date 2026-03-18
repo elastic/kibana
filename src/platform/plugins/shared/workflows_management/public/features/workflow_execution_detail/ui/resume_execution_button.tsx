@@ -8,17 +8,22 @@
  */
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import type { JSONSchema7 } from 'json-schema';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
+import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { TestStepModal } from '../../run_workflow/ui/test_step_modal';
 
 interface ResumeExecutionButtonProps {
   executionId: string;
   resumeMessage?: string;
+  resumeSchema?: Record<string, unknown>;
   /** When true, opens the input modal immediately on mount */
   autoOpen?: boolean;
 }
@@ -26,6 +31,7 @@ interface ResumeExecutionButtonProps {
 export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   executionId,
   resumeMessage,
+  resumeSchema,
   autoOpen = false,
 }) => {
   const { http, notifications } = useKibana().services;
@@ -39,6 +45,14 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   useEffect(() => {
     if (autoOpen) setIsModalOpen(true);
   }, [autoOpen]);
+
+  const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
+    if (!resumeSchema) return undefined;
+    const jsonSchema = resumeSchema as JSONSchema7;
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+    const defaults = generateSampleFromJsonSchema(jsonSchema);
+    return { schema: zodSchema, stepContext: defaults, rawJsonSchema: resumeSchema };
+  }, [resumeSchema]);
 
   const openModal = useCallback(() => setIsModalOpen(true), []);
   const closeModal = useCallback(() => {
@@ -115,6 +129,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       {isModalOpen && (
         <TestStepModal
           mode="resume"
+          initialcontextOverride={contextOverride}
           resumeMessage={resumeMessage}
           onClose={closeModal}
           onSubmit={handleSubmit}

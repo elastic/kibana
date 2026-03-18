@@ -449,5 +449,45 @@ describe('getOutputSchemaForStepType', () => {
       expect(result).toBe(mockStaticSchema);
       expect(result.def.type).toBe('array');
     });
+
+    it('should resolve dynamic output schema for non-atomic node types', () => {
+      const mockDynamicSchema = z.object({ approved: z.boolean() });
+
+      mockStepDefinition = {
+        id: 'waitForInput',
+        inputSchema: {} as any,
+        outputSchema: z.record(z.string(), z.unknown()),
+        editorHandlers: {
+          dynamicSchema: {
+            getOutputSchema: jest.fn().mockReturnValue(mockDynamicSchema),
+          },
+        },
+      };
+
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'waitForInput',
+        type: 'waitForInput' as const,
+        configuration: {
+          with: {
+            schema: {
+              type: 'object',
+              properties: { approved: { type: 'boolean' } },
+            },
+          },
+        },
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+
+      expect(
+        mockStepDefinition.editorHandlers?.dynamicSchema?.getOutputSchema
+      ).toHaveBeenCalledWith({
+        input: mockNode.configuration.with,
+        config: mockNode.configuration,
+      });
+      expect(result).toBe(mockDynamicSchema);
+    });
   });
 });

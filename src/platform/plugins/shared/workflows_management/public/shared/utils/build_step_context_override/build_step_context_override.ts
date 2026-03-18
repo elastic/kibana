@@ -27,6 +27,8 @@ import { z } from '@kbn/zod/v4';
 export interface ContextOverrideData {
   stepContext: Partial<StepContext>;
   schema: z.ZodType;
+  /** Original JSON Schema (avoids lossy Zod → JSON Schema round-trip for Monaco validation) */
+  rawJsonSchema?: Record<string, unknown>;
 }
 
 export interface StaticContextData extends Pick<StepContext, 'consts' | 'workflow'> {

@@ -104,8 +104,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       return null;
     }, [workflowExecution]);
 
-    // Derive the resume message from the paused waitForInput step's config, if available.
-    const resumeMessage = useMemo<string | undefined>(() => {
+    // Derive the resume message and schema from the paused waitForInput step's config.
+    const pausedStepDef = useMemo<WaitForInputStep | undefined>(() => {
       if (!workflowExecution || workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
         return undefined;
       }
@@ -113,11 +113,13 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         (s) => s.status === ExecutionStatus.WAITING_FOR_INPUT
       );
       if (!pausedStep) return undefined;
-      const stepDef = workflowDefinition?.steps?.find(
+      return workflowDefinition?.steps?.find(
         (s): s is WaitForInputStep => s.type === 'waitForInput' && s.name === pausedStep.stepId
       );
-      return stepDef?.with?.message;
     }, [workflowExecution, workflowDefinition]);
+
+    const resumeMessage = pausedStepDef?.with?.message;
+    const resumeSchema = pausedStepDef?.with?.schema;
 
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
@@ -215,6 +217,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
               workflowExecutionStatus={workflowExecution?.status}
               resumeMessage={resumeMessage}
+              resumeSchema={resumeSchema}
               shouldAutoResume={shouldAutoResume}
             />
           }

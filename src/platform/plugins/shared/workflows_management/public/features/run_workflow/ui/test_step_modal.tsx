@@ -54,8 +54,7 @@ export function TestStepModal({
 }) {
   const styles = useMemoCss(componentStyles);
   useWorkflowsMonacoTheme();
-  const contextOverride =
-    mode === 'resume' ? RESUME_MODE_DEFAULT : initialcontextOverride ?? RESUME_MODE_DEFAULT;
+  const contextOverride = initialcontextOverride ?? RESUME_MODE_DEFAULT;
   const [inputsJson, setInputsJson] = React.useState<string>(
     JSON.stringify(contextOverride.stepContext, null, 2)
   );
@@ -64,10 +63,13 @@ export function TestStepModal({
   const id = 'json-editor-schema';
 
   const jsonSchema = useMemo(() => {
+    if (contextOverride.rawJsonSchema) {
+      return contextOverride.rawJsonSchema;
+    }
     return z.toJSONSchema(contextOverride.schema, {
       target: 'draft-7',
     });
-  }, [contextOverride.schema]);
+  }, [contextOverride.rawJsonSchema, contextOverride.schema]);
 
   const schemaUri = useMemo(() => `inmemory://schemas/${id}`, [id]);
 
