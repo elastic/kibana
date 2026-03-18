@@ -201,6 +201,7 @@ export {
   hasSameFingerprint,
   featureSchema,
   baseFeatureSchema,
+  identifiedFeatureSchema,
   featureStatusSchema,
 } from './src/feature';
 

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
 import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
@@ -119,7 +120,7 @@ export const listFeaturesRoute = createServerRoute({
     query: z.optional(
       z.object({
         type: z.string().optional(),
-        include_deleted: z.coerce.boolean().optional(),
+        include_deleted: BooleanFromString.optional(),
       })
     ),
   }),

@@ -9,7 +9,7 @@ import { compact, uniqBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import { type BaseFeature, baseFeatureSchema } from '@kbn/streams-schema';
+import { type BaseFeature, identifiedFeatureSchema } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { createIdentifyFeaturesPrompt } from './prompt';
@@ -91,8 +91,7 @@ export async function identifyFeatures({
         };
       })
       .filter((feature) => {
-        const result = baseFeatureSchema.safeParse(feature);
-        if (!result.success) {
+        if (!identifiedFeatureSchema.safeParse(feature).success) {
           return false;
         }
 
