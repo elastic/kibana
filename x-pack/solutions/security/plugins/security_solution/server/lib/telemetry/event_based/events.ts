@@ -1500,33 +1500,19 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
       },
       integration: {
         properties: {
-          patterns: {
+          name: {
+            type: 'keyword',
+            _meta: { description: 'Name of the matched integration.' },
+          },
+          version: {
+            type: 'keyword',
+            _meta: { description: 'Version of the matched integration.' },
+          },
+          indices: {
             type: 'array',
             items: {
               type: 'keyword',
-              _meta: { description: 'Regex pattern used to match integrations.' },
-            },
-          },
-          matched: {
-            type: 'array',
-            items: {
-              properties: {
-                name: {
-                  type: 'keyword',
-                  _meta: { description: 'Name of the matched integration.' },
-                },
-                version: {
-                  type: 'keyword',
-                  _meta: { description: 'Version of the matched integration.' },
-                },
-              },
-            },
-          },
-          resolvedIndices: {
-            type: 'array',
-            items: {
-              type: 'keyword',
-              _meta: { description: 'Index patterns resolved from matched integrations.' },
+              _meta: { description: 'Index patterns for this integration after type filtering.' },
             },
           },
         },

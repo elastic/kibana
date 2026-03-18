@@ -345,6 +345,46 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         );
       });
 
+      it('reports per-integration stats for a successful v2 query', async () => {
+        mockPackageService.asInternalUser.getPackages.mockResolvedValue([
+          {
+            name: 'endpoint',
+            version: '8.14.2',
+            status: 'installed',
+            data_streams: [
+              { dataset: 'endpoint.events.process', type: 'logs' },
+              { dataset: 'endpoint.events.network', type: 'traces' },
+            ],
+          },
+        ]);
+
+        (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+          data: `---
+id: test-query-v2
+name: test-query-v2
+version: 2
+integrations: endpoint
+datastreamTypes: logs
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`,
+        });
+
+        mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(1);
+        expect(result[0].integration).toMatchObject({
+          name: 'endpoint',
+          version: '8.14.2',
+          indices: ['logs-endpoint.events.process-*'],
+        });
+      });
+
       it('emits skipped stats EBT when integration is not installed', async () => {
         mockPackageService.asInternalUser.getPackages.mockResolvedValue([]);
 

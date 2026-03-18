@@ -122,7 +122,7 @@ version: 2
 id: q-types
 name: q-types
 integrations: 'endpoint.*'
-types: 'logs,metrics.*'
+datastreamTypes: 'logs,metrics.*'
 type: DSL
 query: '{"query": {"match_all": {}}}'
 scheduleCron: 5m

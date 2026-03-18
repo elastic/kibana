@@ -144,10 +144,9 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       numDocs: 0,
       passed: false,
       fieldNames: [],
-      descriptorVersion: query.version,
+      descriptorVersion: 'version' in query ? query.version : 0,
       status: 'skipped',
       skipReason: skipped.reason,
-      integration: skipped.resolution,
     };
   }
 

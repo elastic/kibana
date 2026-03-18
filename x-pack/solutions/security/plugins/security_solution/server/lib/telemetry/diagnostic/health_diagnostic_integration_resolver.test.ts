@@ -152,6 +152,57 @@ describe('IntegrationResolverImpl', () => {
         const resolution = (results[0] as { resolution: IntegrationResolution }).resolution;
         expect(resolution.indices).toHaveLength(3);
       });
+
+      it('selects only traces datastreams when filtering by traces', async () => {
+        const query = createMockQueryV2(QueryType.DSL, {
+          integrations: ['endpoint'],
+          datastreamTypes: ['traces'],
+        });
+        const results = await resolver.resolve([query]);
+
+        expect(results).toHaveLength(1);
+        expect(results[0].kind).toBe('executable');
+        const resolution = (results[0] as { resolution: IntegrationResolution }).resolution;
+        expect(resolution.indices).toHaveLength(1);
+        expect(resolution.indices).toContain('traces-endpoint.events.network-*');
+        expect(resolution.indices).not.toContain('logs-endpoint.events.process-*');
+        expect(resolution.indices).not.toContain('logs-endpoint.events.network-*');
+      });
+
+      it('produces executable for integration with matching type and skipped for one without', async () => {
+        const query = createMockQueryV2(QueryType.DSL, {
+          integrations: ['endpoint', 'fleet_server'],
+          datastreamTypes: ['traces'],
+        });
+        const results = await resolver.resolve([query]);
+
+        expect(results).toHaveLength(2);
+        const endpointResult = results.find(
+          (r) =>
+            'resolution' in r &&
+            (r as { resolution: IntegrationResolution }).resolution.name === 'endpoint'
+        );
+        const fleetResult = results.find(
+          (r) =>
+            !('resolution' in r) ||
+            (r as { resolution: IntegrationResolution }).resolution.name === 'fleet_server'
+        );
+        expect(endpointResult?.kind).toBe('executable');
+        expect(fleetResult?.kind).toBe('skipped');
+      });
+
+      it('matches multiple types with a regex alternation pattern', async () => {
+        const query = createMockQueryV2(QueryType.DSL, {
+          integrations: ['endpoint'],
+          datastreamTypes: ['logs|traces'],
+        });
+        const results = await resolver.resolve([query]);
+
+        expect(results).toHaveLength(1);
+        expect(results[0].kind).toBe('executable');
+        const resolution = (results[0] as { resolution: IntegrationResolution }).resolution;
+        expect(resolution.indices).toHaveLength(3);
+      });
     });
 
     test.each([
