@@ -144,7 +144,7 @@ test.describe('Getting Started - Admin', { tag: [...tags.stateful.classic, ...ta
   test('Tutorial cards open embedded console', async ({ pageObjects }) => {
     await pageObjects.gettingStarted.expandTutorialCards();
     await test.step('search basics card opens console', async () => {
-      await pageObjects.gettingStarted.clickTutorialCard('search_basics');
+        await pageObjects.gettingStarted.clickTutorialCardButton('search_basics');
 
       const embeddedConsole = await pageObjects.gettingStarted.getEmbeddedConsole();
       await expect(embeddedConsole).toBeVisible();
