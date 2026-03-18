@@ -11,6 +11,7 @@ import Os from 'os';
 import Path from 'path';
 import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
+import { set } from '@kbn/safer-lodash-set';
 import { parseConnectorsFromEnv, parseConnectorsFromKibanaDevYml } from '../prompts';
 import { safeExec, VAULT_SECRET_PATH } from '../utils';
 import { buildApiKeyPayload } from '../../api_key/build_api_key_payload';
@@ -50,7 +51,7 @@ const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => 
     return getNestedValue(arr[Number(indexStr)] as Record<string, unknown>, rest);
   }
   return path.split('.').reduce<unknown>((cur, key) => {
-    if (cur && typeof cur === 'object' && key in (cur as Record<string, unknown>)) {
+    if (cur && typeof cur === 'object' && Object.hasOwn(cur as Record<string, unknown>, key)) {
       return (cur as Record<string, unknown>)[key];
     }
     return undefined;
@@ -58,24 +59,7 @@ const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => 
 };
 
 const setNestedValue = (obj: Record<string, unknown>, path: string, value: unknown): void => {
-  const arrayMatch = path.match(/^(.+)\[(\d+)\]\.(.+)$/);
-  if (arrayMatch) {
-    const [, arrayPath, indexStr, rest] = arrayMatch;
-    const arr = getNestedValue(obj, arrayPath) as unknown[];
-    if (Array.isArray(arr)) {
-      setNestedValue(arr[Number(indexStr)] as Record<string, unknown>, rest, value);
-    }
-    return;
-  }
-  const keys = path.split('.');
-  let cur: Record<string, unknown> = obj;
-  for (let i = 0; i < keys.length - 1; i++) {
-    if (!(keys[i] in cur) || typeof cur[keys[i]] !== 'object') {
-      cur[keys[i]] = {};
-    }
-    cur = cur[keys[i]] as Record<string, unknown>;
-  }
-  cur[keys[keys.length - 1]] = value;
+  set(obj, path, value);
 };
 
 const openBrowser = (url: string): boolean => {
