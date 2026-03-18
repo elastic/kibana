@@ -519,7 +519,7 @@ describe('Attachment Routes', () => {
       const attachment = createMockAttachment({
         id: 'att-no-resolve',
         type: 'text',
-        origin: { id: 'source-1' },
+        origin: 'source-1',
       });
       mockConversationsClient.get.mockResolvedValue(createMockConversation([attachment]));
 
@@ -544,7 +544,7 @@ describe('Attachment Routes', () => {
       const attachment = createMockAttachment({
         id: 'att-custom',
         type: 'custom',
-        origin: { id: 'source-1' },
+        origin: 'source-1',
         origin_snapshot_at: '2024-01-01T12:00:00.000Z',
         versions: [
           {
@@ -588,7 +588,7 @@ describe('Attachment Routes', () => {
         expect.objectContaining({
           id: 'att-custom',
           type: 'custom',
-          origin: { id: 'source-1' },
+          origin: 'source-1',
           origin_snapshot_at: '2024-01-01T12:00:00.000Z',
           versions: attachment.versions,
           current_version: 1,
@@ -603,7 +603,7 @@ describe('Attachment Routes', () => {
           is_stale: true,
           data: resolvedData,
           type: 'custom',
-          origin: { id: 'source-1' },
+          origin: 'source-1',
         }),
       ]);
     });

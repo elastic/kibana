@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { hashContent } from '@kbn/agent-builder-common/attachments';
+import type { StaleAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ConverseAttachmentInput } from '../../../common/http_api/chat';
-import type { StaleAttachment } from '../../../common/http_api/attachments';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 
 const STALE_CHECK_DEBOUNCE_MS = 300;
@@ -33,8 +33,10 @@ export const useStaleAttachments = (
 ): UseStaleAttachmentsCheckResult => {
   const { attachmentsService } = useAgentBuilderServices();
   const [staleAttachments, setStaleAttachments] = useState<ConverseAttachmentInput[]>([]);
-  const staleHash = useMemo(() => hashContent(staleAttachments), [staleAttachments]);
-  const isStaleCheckInFlightRef = useRef(false);
+
+  // Always hold the latest stale attachments to avoid stale-closure issues in the debounced fn.
+  const staleAttachmentsRef = useRef(staleAttachments);
+  staleAttachmentsRef.current = staleAttachments;
 
   const { run: scheduleStaleCheck } = useDebounceFn(async () => {
     if (!conversationId) {
@@ -42,26 +44,16 @@ export const useStaleAttachments = (
       return;
     }
 
-    if (isStaleCheckInFlightRef.current) {
+    const response = await attachmentsService.checkStale(conversationId);
+    const stale = (response.attachments ?? [])
+      .filter((attachment): attachment is StaleAttachment => attachment.is_stale)
+      .map(({ is_stale, origin, ...attachment }) => attachment);
+
+    if (hashContent(stale) === hashContent(staleAttachmentsRef.current)) {
       return;
     }
 
-    isStaleCheckInFlightRef.current = true;
-    try {
-      const response = await attachmentsService.checkStale(conversationId);
-      const stale = (response.attachments ?? [])
-        .filter((attachment): attachment is StaleAttachment => attachment.is_stale)
-        .map(({ is_stale, origin, ...attachment }) => attachment);
-
-      const nextHash = hashContent(stale);
-      if (nextHash === staleHash) {
-        return;
-      }
-
-      setStaleAttachments(stale);
-    } finally {
-      isStaleCheckInFlightRef.current = false;
-    }
+    setStaleAttachments(stale);
   }, STALE_CHECK_DEBOUNCE_OPTIONS);
 
   useEffect(() => {

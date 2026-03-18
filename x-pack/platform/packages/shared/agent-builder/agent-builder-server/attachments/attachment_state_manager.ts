@@ -59,11 +59,6 @@ export interface ResolvedAttachmentRef {
 }
 
 /**
- * Result of evaluating staleness for a single attachment.
- */
-export type StaleCheckResult = AttachmentStaleCheckResult;
-
-/**
  * Interface for managing conversation attachment state.
  * Provides CRUD operations with version tracking.
  */
@@ -117,7 +112,7 @@ export interface AttachmentStateManager {
   /** Evaluate staleness for all active attachments. Only attachments with origin are checked via the type's isStale; others are considered not stale. */
   evaluateStalenessForActiveAttachments(
     context: AttachmentResolveContext
-  ): Promise<StaleCheckResult[]>;
+  ): Promise<AttachmentStaleCheckResult[]>;
 
   /** Get all attachment version refs that were accessed during this round */
   getAccessedRefs(): AttachmentVersionRef[];
@@ -542,11 +537,11 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   async evaluateStalenessForActiveAttachments(
     resolveContext: AttachmentResolveContext
-  ): Promise<StaleCheckResult[]> {
+  ): Promise<AttachmentStaleCheckResult[]> {
     const activeAttachments = this.getActive();
 
     return Promise.all(
-      activeAttachments.map(async (attachment): Promise<StaleCheckResult> => {
+      activeAttachments.map(async (attachment): Promise<AttachmentStaleCheckResult> => {
         if (attachment.origin === undefined) {
           return { id: attachment.id, is_stale: false };
         }

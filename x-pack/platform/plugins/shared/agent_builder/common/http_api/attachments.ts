@@ -6,11 +6,7 @@
  */
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
-import type {
-  AttachmentStaleCheckResult,
-  FreshAttachment,
-  StaleAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import type { AttachmentStaleCheckResult } from '@kbn/agent-builder-common/attachments';
 
 export interface ListAttachmentsResponse {
   results: VersionedAttachment[];
@@ -40,8 +36,6 @@ export interface RenameAttachmentResponse {
   success: boolean;
   attachment: VersionedAttachment;
 }
-
-export type { AttachmentStaleCheckResult, FreshAttachment, StaleAttachment };
 
 export interface CheckStaleAttachmentsResponse {
   attachments: AttachmentStaleCheckResult[];

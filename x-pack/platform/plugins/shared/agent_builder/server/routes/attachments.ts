@@ -26,6 +26,7 @@ import type {
 } from '../../common/http_api/attachments';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
+import { AGENT_BUILDER_READ_SECURITY } from './route_security';
 
 /**
  * Check if an attachment is referenced in any conversation round.
@@ -146,9 +147,7 @@ export function registerAttachmentRoutes({
   router.versioned
     .get({
       path: `${publicApiPath}/conversations/{conversation_id}/attachments/stale`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Check attachment staleness',
       description:

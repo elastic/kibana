@@ -25,6 +25,5 @@ export type {
   AttachmentStateManager,
   AttachmentUpdateInput,
   ResolvedAttachmentRef,
-  StaleCheckResult,
 } from './attachment_state_manager';
 export { createAttachmentStateManager } from './attachment_state_manager';

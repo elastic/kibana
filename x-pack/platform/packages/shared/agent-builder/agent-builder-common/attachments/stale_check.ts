@@ -7,7 +7,7 @@
 
 import type { Attachment } from './attachments';
 
-export type StaleAttachment = Attachment & { is_stale: true };
+export type StaleAttachment = Attachment & { is_stale: true; origin: string };
 
 export interface FreshAttachment {
   id: string;

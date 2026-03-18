@@ -79,12 +79,12 @@ export const Conversation: React.FC<{}> = () => {
   }, [stagedAttachments]);
 
   const staleAttachmentInputs = useMemo(() => {
-    return staleAttachments.filter((attachment) => !stagedAttachmentIds.has(attachment.id!));
+    return staleAttachments.filter((a) => !a.id || !stagedAttachmentIds.has(a.id));
   }, [staleAttachments, stagedAttachmentIds]);
 
   const handleStageStaleAttachments = useCallback(() => {
-    if (upsertAttachments && staleAttachmentInputs.length > 0) {
-      upsertAttachments(staleAttachmentInputs);
+    if (staleAttachmentInputs.length > 0) {
+      upsertAttachments?.(staleAttachmentInputs);
     }
     setDismissStaleAttachments(true);
   }, [staleAttachmentInputs, upsertAttachments]);
