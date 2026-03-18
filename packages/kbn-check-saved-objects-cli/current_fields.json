@@ -102,15 +102,18 @@
     "auth.owner",
     "createdAt",
     "createdBy",
+    "createdByUsername",
     "description",
     "destinations",
     "destinations.id",
     "destinations.type",
     "enabled",
+    "groupBy",
     "name",
     "snoozedUntil",
     "updatedAt",
-    "updatedBy"
+    "updatedBy",
+    "updatedByUsername"
   ],
   "alerting_rule": [
     "createdAt",

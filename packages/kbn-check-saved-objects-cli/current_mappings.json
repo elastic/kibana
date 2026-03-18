@@ -338,6 +338,9 @@
       "createdBy": {
         "type": "keyword"
       },
+      "createdByUsername": {
+        "type": "keyword"
+      },
       "description": {
         "fields": {
           "keyword": {
@@ -361,6 +364,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "groupBy": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -377,6 +383,9 @@
         "type": "date"
       },
       "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedByUsername": {
         "type": "keyword"
       }
     }
