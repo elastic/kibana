@@ -16,28 +16,44 @@ export interface UseFetchIndicesResult {
   refetch: () => void;
 }
 
-interface ResolveIndexResponse {
-  indices: Array<{ name: string }>;
-  aliases: Array<{ name: string }>;
-  data_streams: Array<{ name: string }>;
+const INDEX_MANAGEMENT_INDICES_PATH = '/api/index_management/indices';
+
+/** Minimal shape from Index Management list API */
+interface IndexManagementListItem {
+  name: string;
+  hidden?: boolean;
+  data_stream?: string | null;
 }
 
-export function useFetchIndices(search: string = '*'): UseFetchIndicesResult {
+export function buildSelectableIndexAndDataStreamNames(rows: IndexManagementListItem[]): string[] {
+  const names = new Set<string>();
+  for (const row of rows) {
+    // Backing indices for data streams are often hidden; still surface the stream name.
+    if (row.data_stream) {
+      names.add(row.data_stream);
+      continue;
+    }
+    if (row.hidden === true) {
+      continue;
+    }
+    names.add(row.name);
+  }
+  return [...names].sort((a, b) => a.localeCompare(b));
+}
+
+export function useFetchIndices(): UseFetchIndicesResult {
   const { http } = useKibana().services;
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['fetchIndices', search],
-    queryFn: async () => {
-      const searchPattern = search.endsWith('*') ? search : `${search}*`;
-      const response = await http.get<ResolveIndexResponse>(
-        `/internal/automatic_import_v2/indices/resolve`,
-        { query: { name: searchPattern } }
-      );
-      return [
-        ...response.indices.map((index) => index.name),
-        ...response.data_streams.map((ds) => ds.name),
-      ];
+    queryKey: ['automaticImportV2', 'indexManagementIndices'],
+    queryFn: async ({ signal }) => {
+      const response = await http.get<IndexManagementListItem[]>(INDEX_MANAGEMENT_INDICES_PATH, {
+        version: '1',
+        signal,
+      });
+      return buildSelectableIndexAndDataStreamNames(response);
     },
+    staleTime: 60_000,
   });
 
   return {
