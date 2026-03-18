@@ -74,6 +74,7 @@ import {
   DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ENTITIES_TO_LOAD,
   TEST_SUBJ_DATA_GRID,
+  TEST_SUBJ_GROUPING,
   LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
   ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
 } from './constants';
@@ -500,7 +501,9 @@ export const EntitiesDataTable = ({
                 <LastUpdated updatedAt={lastUpdatedAt} />
               </EuiFlexItem>
               {groupSelectorComponent && (
-                <EuiFlexItem grow={false}>{groupSelectorComponent}</EuiFlexItem>
+                <EuiFlexItem grow={false} data-test-subj={TEST_SUBJ_GROUPING}>
+                  {groupSelectorComponent}
+                </EuiFlexItem>
               )}
               {gridProps.inTableSearchControl && (
                 <EuiFlexItem grow={false}>{gridProps.inTableSearchControl}</EuiFlexItem>

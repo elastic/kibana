@@ -32,6 +32,7 @@ const ARCHIVE_NAME = 'entity_store_v2_home';
 const waitForTableToLoad = () => {
   cy.get(PAGE_TITLE).should('exist');
   cy.get(ENTITIES_TABLE_GRID).should('exist');
+  cy.get('[data-test-subj="dataGridRowCell"]').should('have.length.at.least', 1);
 };
 
 describe(
@@ -123,9 +124,9 @@ describe(
 
     describe('Row actions', () => {
       it('expand button opens the entity flyout with the correct entity', () => {
-        cy.get('[data-gridcell-column-id="entity.name"]')
+        cy.get('[data-test-subj="dataGridRowCell"][data-gridcell-column-id="entity.name"]')
           .first()
-          .find('.euiDataGridRowCell__content')
+          .find('.unifiedDataTable__cellValue')
           .invoke('text')
           .then((entityName) => {
             cy.get(EXPAND_ROW_BUTTON).first().click();
