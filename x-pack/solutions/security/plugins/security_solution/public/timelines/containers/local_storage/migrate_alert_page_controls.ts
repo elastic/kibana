@@ -119,7 +119,6 @@ export async function migrateAlertPageControlsTo816(storage: Storage, plugins: S
     for (const [key, value] of Object.entries(oldFormat.panels)) {
       newFormat.initialChildControlState[key] = {
         ...DEFAULT_PINNED_CONTROL_STATE,
-        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         type: 'optionsListControl',
         order: value.order,
         displaySettings: {
@@ -133,7 +132,8 @@ export async function migrateAlertPageControlsTo816(storage: Storage, plugins: S
         dataViewId: value.explicitInput.dataViewId ?? 'security_solution_alerts_dv',
         title: value.explicitInput.title,
         fieldName: value.explicitInput.fieldName,
-        selectedOptions: value.explicitInput.selectedOptions,
+        selectedOptions:
+          value.explicitInput.selectedOptions ?? DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options,
         persist: value.explicitInput.persist ?? false,
       };
     }

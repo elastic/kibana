@@ -13,10 +13,7 @@ import {
 } from './migrate_alert_page_controls';
 import type { StartPlugins } from '../../../types';
 import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/control-group-renderer';
-import {
-  DEFAULT_DSL_OPTIONS_LIST_STATE,
-  DEFAULT_PINNED_CONTROL_STATE,
-} from '@kbn/controls-constants';
+import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 
 const OLD_FORMAT = {
   viewMode: 'view',
@@ -91,7 +88,6 @@ const OLD_FORMAT = {
       grow: true,
       width: 'small',
       explicitInput: {
-        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         id: '3',
         dataViewId: 'security_solution_alerts_dv',
         fieldName: 'host.name',
