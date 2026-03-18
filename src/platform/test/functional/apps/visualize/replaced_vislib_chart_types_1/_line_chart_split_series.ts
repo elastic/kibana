@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check inspector panel request stats for timestamp
       await inspector.open();
       await inspector.openInspectorRequestsView();
-      const requestStatsBefore = await inspector.getTableData();
+      const requestStatsBefore: string[][] = await inspector.getTableData();
       const requestTimestampBefore = requestStatsBefore.filter((r) =>
         r[0].includes('Request timestamp')
       )[0][1];
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.sleep(intervalS * 1000 * 1.5);
 
       // get the latest timestamp from request stats
-      const requestStatsAfter = await inspector.getTableData();
+      const requestStatsAfter: string[][] = await inspector.getTableData();
       const requestTimestampAfter = requestStatsAfter.filter((r) =>
         r[0].includes('Request timestamp')
       )[0][1];

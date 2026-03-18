@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await retry.try(async () => {
-          const avgMemoryData = await visChart.getLineChartData(
+          const avgMemoryData: number[] = await visChart.getLineChartData(
             xyChartSelector,
             'Average machine.ram'
           );
@@ -135,7 +135,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show category grid lines', async function () {
         await visEditor.toggleGridCategoryLines();
         await visEditor.clickGo();
-        const gridLines = await visChart.getGridLines(xyChartSelector);
+        const gridLines: Array<{ x: number; y: number }> = await visChart.getGridLines(
+          xyChartSelector
+        );
         // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
         // The objective here is to check whenever the grid lines are rendered, not the exact quantity
         expect(gridLines.length).to.be.greaterThan(0);
@@ -148,7 +150,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.setGridValueAxis('ValueAxis-2');
         await visEditor.toggleGridCategoryLines();
         await visEditor.clickGo();
-        const gridLines = await visChart.getGridLines(xyChartSelector);
+        const gridLines: Array<{ x: number; y: number }> = await visChart.getGridLines(
+          xyChartSelector
+        );
         // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
         // The objective here is to check whenever the grid lines are rendered, not the exact quantity
         expect(gridLines.length).to.be.greaterThan(0);

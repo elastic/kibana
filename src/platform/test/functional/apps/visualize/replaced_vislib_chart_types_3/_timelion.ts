@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { timePicker, visChart, visEditor, visualize, timelion, common } = getPageObjects([
@@ -59,8 +59,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         '.es(*), .es(*).color("#FFCFDF"), .es(*).color("#BFA7DA"), .es(*).color("#AD7DE6")'
       );
 
-      const areas = (await elasticChart.getChartDebugData())?.areas;
-      expect(areas?.map(({ color }) => color)).to.eql(expectedColors);
+      const areas = (await elasticChart.getChartDebugData())?.areas as
+        | Array<{ color: string }>
+        | undefined;
+      expect(areas?.map((area) => area.color)).to.eql(expectedColors);
     });
 
     it('should display correct chart data for average, min, max and cardinality aggregations', async () => {
