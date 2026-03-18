@@ -17,10 +17,10 @@ import type {
   ToolHandlerContext,
   ToolHandlerReturn,
 } from '@kbn/agent-builder-server';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
-  RunAgentStackEntry,
 } from '@kbn/agent-builder-server/runner';
 import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain';
 import { createErrorResult } from '@kbn/agent-builder-server';
@@ -276,8 +276,8 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   };
 };
 
-const getAgentExecutionContext = (manager: RunnerManager): RunAgentStackEntry | undefined => {
-  return [...manager.context.stack].reverse().find((entry) => entry.type === 'agent');
+const getAgentExecutionContext = (manager: RunnerManager) => {
+  return getAgentFromRunContext(manager.context);
 };
 
 const reportToolCallTelemetry = ({
