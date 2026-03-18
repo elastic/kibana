@@ -22,7 +22,11 @@ export class DiscoverApp {
 
   async goto() {
     await this.page.gotoApp('discover');
-    await this.waitForDataViewSwitch();
+    await this.waitForDiscoverPage();
+  }
+
+  private async waitForDiscoverPage() {
+    await expect(this.page.testSubj.locator('dscPage')).toBeVisible();
   }
 
   private async getVisibleDataViewSwitch() {
@@ -43,10 +47,6 @@ export class DiscoverApp {
     }
 
     return discoverVisible ? discoverSwitch : fallbackSwitch;
-  }
-
-  private async waitForDataViewSwitch() {
-    await this.getVisibleDataViewSwitch();
   }
 
   async selectDataView(name: string) {
@@ -359,5 +359,103 @@ export class DiscoverApp {
     await this.page.testSubj.click('querySubmitButton');
     await this.waitUntilSearchingHasFinished();
     await rowLocator.waitFor({ state: 'visible', timeout });
+  }
+
+  public get esqlMenuPopover(): Locator {
+    return this.page.testSubj.locator('esql-menu-popover');
+  }
+
+  async openRecommendedQueriesPanel() {
+    const menuPopover = this.esqlMenuPopover;
+    if (!(await menuPopover.isVisible())) {
+      await this.page.testSubj.click('esql-help-popover-button');
+    }
+
+    await menuPopover.waitFor({ state: 'visible' });
+
+    const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
+    await expect(recommendedQueriesButton).toBeVisible();
+    await recommendedQueriesButton.click();
+    await this.page.testSubj.locator('contextMenuPanelTitleButton').waitFor({ state: 'visible' });
+  }
+
+  async runRecommendedEsqlQuery(queryLabel: string) {
+    await this.openRecommendedQueriesPanel();
+
+    const queryOption = this.esqlMenuPopover.getByRole('button', {
+      exact: true,
+      name: queryLabel,
+    });
+
+    await expect(queryOption).toBeVisible();
+    await queryOption.click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
+    return this.codeEditor.getCodeEditorValue(nthIndex);
+  }
+
+  async addBreakdownFieldFromSidebar(field: string) {
+    const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
+    if (await sidebarToggleButton.isVisible()) {
+      await sidebarToggleButton.click();
+    }
+
+    await this.waitUntilFieldListHasCountOfFields();
+
+    const fieldLocator = this.page.testSubj.locator(`field-${field}`);
+    await fieldLocator.hover();
+    await fieldLocator.click();
+    await this.waitUntilFieldPopoverIsLoaded();
+
+    await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  private async waitUntilFieldPopoverIsLoaded() {
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await expect(this.page.locator('[data-test-subj*="-statsLoading"]')).toBeHidden();
+  }
+
+  /**
+   * Scrolls through the virtualized doc table grid to assert that the given
+   * text exists somewhere in the rendered rows. Necessary because virtual
+   * scrolling only keeps a subset of rows in the DOM at any time.
+   */
+  async expectDocTableToContainText(text: string) {
+    // 200px per step × 50 steps = 10 000px of total scroll coverage,
+    // enough for grids with hundreds of rows at default row height (~34px).
+    const SCROLL_STEP_PX = 200;
+    const MAX_SCROLL_STEPS = 50;
+    // Per-position timeout: long enough for Playwright to retry through
+    // transient re-renders, short enough to not stall at positions where
+    // the text genuinely isn't in the DOM.
+    const PER_POSITION_TIMEOUT_MS = 500;
+
+    await this.waitUntilSearchingHasFinished();
+    const docTable = this.page.testSubj.locator('discoverDocTable');
+    await expect(docTable).toBeVisible();
+
+    const grid = docTable.locator('.euiDataGrid__virtualized');
+    await grid.evaluate((el) => el.scrollTo(0, 0));
+
+    for (let i = 0; i < MAX_SCROLL_STEPS; i++) {
+      try {
+        await expect(docTable).toContainText(text, { timeout: PER_POSITION_TIMEOUT_MS });
+        return;
+      } catch {
+        // Text not found at this scroll position, continue scrolling
+      }
+
+      const atBottom = await grid.evaluate((el, step) => {
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight) return true;
+        el.scrollBy(0, step);
+        return false;
+      }, SCROLL_STEP_PX);
+      if (atBottom) break;
+    }
+
+    await expect(docTable).toContainText(text);
   }
 }

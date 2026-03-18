@@ -94,8 +94,7 @@ describe('links', () => {
         SecurityPageName.endpoints,
         SecurityPageName.policies,
         SecurityPageName.cloudDefendPolicies,
-        SecurityPageName.responseActionsHistory,
-        SecurityPageName.scriptsLibrary
+        SecurityPageName.scriptLibrary
       )
     );
   });
@@ -172,7 +171,7 @@ describe('links', () => {
       );
     });
 
-    it('should hide Scripts library for user without `canReadScriptsLibrary` privilege', async () => {
+    it('should hide `Script library` for user without `canReadScriptsLibrary` privilege', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadScriptsLibrary: false,
@@ -181,9 +180,7 @@ describe('links', () => {
 
       const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
-      expect(filteredLinks.links?.map((l) => l.id)).toEqual(
-        getLinksWithout(SecurityPageName.scriptsLibrary).links?.map((l) => l.id)
-      );
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.scriptLibrary));
     });
   });
 

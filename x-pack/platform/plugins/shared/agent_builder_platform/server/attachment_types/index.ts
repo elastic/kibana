@@ -26,7 +26,7 @@ export const registerAttachmentTypes = ({
 }) => {
   const { agentBuilder } = setupDeps;
 
-  const attachmentTypes: AttachmentTypeDefinition<any, any, any>[] = [
+  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
     createEsqlAttachmentType(),
