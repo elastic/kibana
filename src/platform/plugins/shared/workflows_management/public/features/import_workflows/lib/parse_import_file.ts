@@ -8,6 +8,7 @@
  */
 
 import JSZip from 'jszip';
+import { v4 as generateUuid } from 'uuid';
 import YAML from 'yaml';
 import {
   detectFileFormat,
@@ -142,9 +143,7 @@ function parseYamlFile(content: string, filename: string): ClientPreflightResult
     );
   }
 
-  const ext = filename.lastIndexOf('.') !== -1 ? filename.slice(filename.lastIndexOf('.')) : '.yml';
-  const rawId = filename.slice(0, filename.length - ext.length);
-  const id = rawId && isValidWorkflowId(rawId) ? rawId : 'workflow';
+  const id = `workflow-${generateUuid()}`;
 
   const preview = extractWorkflowPreview(id, content);
 
