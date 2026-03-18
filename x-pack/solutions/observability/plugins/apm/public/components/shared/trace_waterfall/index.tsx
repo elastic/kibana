@@ -150,6 +150,7 @@ function TraceWaterfallComponent() {
       css={css`
         flex: 1;
         min-height: 0;
+        position: relative;
       `}
     >
       {showCriticalPathControl && (
@@ -225,19 +226,8 @@ function TraceWaterfallComponent() {
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <VerticalLinesContainer
-            xMax={duration}
-            margins={{
-              top: 40,
-              left,
-              right,
-              bottom: 0,
-            }}
-            marks={marks}
-          />
           <div
             css={css`
-              position: relative;
               flex: 1;
               min-height: 0;
             `}
@@ -258,7 +248,13 @@ function TraceTree() {
     toggleAccordionState,
     highlightedSpanId,
     scrollStrategy = 'window',
+    duration,
+    margin: { left, right },
+    agentMarks,
+    errorMarks,
   } = useTraceWaterfallContext();
+
+  const marks = useMemo(() => [...agentMarks, ...errorMarks], [agentMarks, errorMarks]);
 
   const listRef = useRef<List>(null);
 
@@ -272,6 +268,12 @@ function TraceTree() {
   const visibleList = useMemo(
     () => convertTreeToList(traceWaterfallMap, accordionStatesMap, traceWaterfall[0]),
     [accordionStatesMap, traceWaterfall, traceWaterfallMap]
+  );
+
+  const totalContentHeight = useMemo(
+    () =>
+      visibleList.reduce((sum, _, index) => sum + rowHeightCache.current.rowHeight({ index }), 0),
+    [visibleList]
   );
 
   const scrollToIndex = useMemo(() => {
@@ -312,44 +314,59 @@ function TraceTree() {
     containerRole: 'rowgroup' as const,
   };
 
+  const verticalLines = (
+    <VerticalLinesContainer
+      xMax={duration}
+      margins={{ top: 0, left, right, bottom: 0 }}
+      marks={marks}
+      height={totalContentHeight}
+    />
+  );
+
   if (scrollStrategy === 'window') {
     return (
-      <WindowScroller
-        scrollElement={document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined}
-      >
-        {({ height, onChildScroll, scrollTop, registerChild }) => (
-          <AutoSizer disableHeight>
-            {({ width }) => (
-              <div data-test-subj="waterfall" ref={registerChild}>
-                <List
-                  ref={listRef}
-                  autoHeight
-                  height={height}
-                  onScroll={onChildScroll}
-                  scrollTop={scrollTop}
-                  width={width}
-                  rowCount={visibleList.length}
-                  deferredMeasurementCache={rowHeightCache.current}
-                  rowHeight={rowHeightCache.current.rowHeight}
-                  rowRenderer={rowRenderer}
-                  containerRole="rowgroup"
-                />
-              </div>
-            )}
-          </AutoSizer>
-        )}
-      </WindowScroller>
+      <div style={{ position: 'relative' }}>
+        {verticalLines}
+        <WindowScroller
+          scrollElement={document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined}
+        >
+          {({ height, onChildScroll, scrollTop, registerChild }) => (
+            <AutoSizer disableHeight>
+              {({ width }) => (
+                <div data-test-subj="waterfall" ref={registerChild}>
+                  <List
+                    ref={listRef}
+                    autoHeight
+                    height={height}
+                    onScroll={onChildScroll}
+                    scrollTop={scrollTop}
+                    width={width}
+                    rowCount={visibleList.length}
+                    deferredMeasurementCache={rowHeightCache.current}
+                    rowHeight={rowHeightCache.current.rowHeight}
+                    rowRenderer={rowRenderer}
+                    containerRole="rowgroup"
+                  />
+                </div>
+              )}
+            </AutoSizer>
+          )}
+        </WindowScroller>
+      </div>
     );
   }
 
   return (
-    <AutoSizer>
-      {({ width, height }) => (
-        <div data-test-subj="waterfall">
-          <List {...listProps} scrollToIndex={scrollToIndex} height={height} width={width} />
-        </div>
-      )}
-    </AutoSizer>
+    <div style={{ position: 'relative', height: '100%' }}>
+      {verticalLines}
+      <AutoSizer>
+        {({ width, height }) => (
+          <div data-test-subj="waterfall">
+            <List {...listProps} scrollToIndex={scrollToIndex} height={height} width={width} />
+          </div>
+        )}
+      </AutoSizer>
+    </div>
   );
 }
 
