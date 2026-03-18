@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
@@ -52,10 +52,19 @@ const TOOLBAR_BACKGROUND_COLOR = 'rgb(11, 100, 221)'; // punchy blue
 const ToolbarToggleTooltipContent: React.FC<{
   action: 'Expand' | 'Minimize';
   keyboardShortcutLabel: string;
-}> = ({ action, keyboardShortcutLabel }) => {
+  consoleError?: ConsoleErrorInfo | null;
+}> = ({ action, keyboardShortcutLabel, consoleError }) => {
   return (
     <>
       {action} {keyboardShortcutLabel}
+      {consoleError && (
+        <>
+          <br />
+          {consoleError.type === 'error' ? 'Error' : 'Warning'}:{' '}
+          {consoleError.message.trim().slice(0, 80)}
+          {consoleError.message.trim().length > 80 ? '…' : ''}
+        </>
+      )}
       <br />
       Right click to hide
       <br />
@@ -147,6 +156,7 @@ const MinimizedDeveloperToolbarButtonInner: React.FC<
   MinimizedDeveloperToolbarButtonProps & { hasConsoleIssue: boolean }
 > = ({ keyboardShortcutLabel, hasConsoleIssue, consoleError, onExpand, onHide }) => {
   const { euiTheme } = useEuiTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const backgroundColor = getMinimizedToolbarBackgroundColor(hasConsoleIssue, consoleError);
   const ariaLabel = getMinimizedToolbarAriaLabel(hasConsoleIssue, consoleError);
@@ -154,16 +164,25 @@ const MinimizedDeveloperToolbarButtonInner: React.FC<
   const glowColor = getMinimizedToolbarGlowColor(hasConsoleIssue, consoleError);
   const attentionKey = getMinimizedToolbarAttentionKey(hasConsoleIssue, consoleError);
 
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !hasConsoleIssue) return;
+    el.style.animationName = 'none';
+    void el.offsetHeight; // force reflow to reset animation state
+    el.style.animationName = '';
+  }, [attentionKey, hasConsoleIssue]);
+
   return (
     <div
+      ref={containerRef}
       css={getMinimizedToolbarStyles(euiTheme, backgroundColor, shouldPop, glowColor)}
-      key={attentionKey}
     >
       <EuiToolTip
         content={
           <ToolbarToggleTooltipContent
             action="Expand"
             keyboardShortcutLabel={keyboardShortcutLabel}
+            consoleError={consoleError}
           />
         }
         disableScreenReaderOutput={true}
