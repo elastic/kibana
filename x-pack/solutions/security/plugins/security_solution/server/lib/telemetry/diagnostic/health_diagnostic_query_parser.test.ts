@@ -115,6 +115,33 @@ filterlist:
     });
   });
 
+  describe('types field', () => {
+    it('parses a comma-separated datastreamTypes string into an array', () => {
+      const yaml = `---
+version: 2
+id: q-types
+name: q-types
+integrations: 'endpoint.*'
+types: 'logs,metrics.*'
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      const v2 = q as unknown as HealthDiagnosticQueryV2;
+      expect(v2.version).toBe(2);
+      expect(v2.datastreamTypes).toEqual(['logs', 'metrics.*']);
+    });
+
+    it('leaves types undefined when the field is absent', () => {
+      const [q] = parseHealthDiagnosticQueries(V2_YAML);
+      const v2 = q as unknown as HealthDiagnosticQueryV2;
+      expect(v2.datastreamTypes).toBeUndefined();
+    });
+  });
+
   describe('unknown version', () => {
     it('returns UnknownVersionQuery for an unrecognised version', () => {
       const [q] = parseHealthDiagnosticQueries(UNKNOWN_VERSION_YAML);

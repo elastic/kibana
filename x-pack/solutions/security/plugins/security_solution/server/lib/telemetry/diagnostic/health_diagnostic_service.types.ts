@@ -115,6 +115,7 @@ export interface HealthDiagnosticQueryV1 extends HealthDiagnosticQueryBase {
 export interface HealthDiagnosticQueryV2 extends HealthDiagnosticQueryBase {
   version: 2;
   integrations: string[]; // regex patterns, parsed from comma-separated YAML value
+  datastreamTypes?: string[]; // optional datastream-type regex filters, e.g. ['logs', 'metrics.*']
 }
 
 /**
@@ -136,9 +137,9 @@ export type HealthDiagnosticQuery =
  * Result of resolving a v2 query's integration patterns against Fleet.
  */
 export interface IntegrationResolution {
-  patterns: string[];
-  matched: Array<{ name: string; version: string }>;
-  resolvedIndices: string[];
+  name: string;
+  version: string;
+  indices: string[];
 }
 
 /**
@@ -153,7 +154,6 @@ export interface SkippedQuery {
   kind: 'skipped';
   query: HealthDiagnosticQuery;
   reason: 'integration_not_installed' | 'unknown_version';
-  resolution?: IntegrationResolution; // present for v2 with no matches
 }
 
 export type ResolvedQuery = ExecutableQuery | SkippedQuery;

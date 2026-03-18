@@ -59,10 +59,20 @@ const parseV2 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV2 =
     .map((p) => p.trim())
     .filter((p) => p.length > 0);
 
+  const typesRaw = (raw as Record<string, unknown>).types;
+  const types =
+    typeof typesRaw === 'string'
+      ? typesRaw
+          .split(',')
+          .map((p) => p.trim())
+          .filter((p) => p.length > 0)
+      : undefined;
+
   return {
     ...(raw as Record<string, unknown>),
     version: 2,
     integrations,
+    datastreamTypes: types,
   } as HealthDiagnosticQueryV2;
 };
 
