@@ -37,6 +37,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => updateResponseBodySchema,
+            description: 'Indicates that the markdown panel was updated successfully.',
           },
           403: {
             description: 'Indicates that this call is forbidden.',

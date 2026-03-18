@@ -37,6 +37,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           201: {
             body: () => createResponseBodySchema,
+            description: 'Indicates that a markdown panel was created successfully.',
           },
           403: {
             description: 'Indicates that this call is forbidden.',

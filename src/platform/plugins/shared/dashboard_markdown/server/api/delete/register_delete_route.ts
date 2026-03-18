@@ -36,7 +36,7 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
         },
         response: {
           204: {
-            description: 'Indicates a successful delete operation.',
+            description: 'Indicates that the markdown panel was deleted successfully.',
           },
           403: {
             description: 'Indicates that this call is forbidden.',
