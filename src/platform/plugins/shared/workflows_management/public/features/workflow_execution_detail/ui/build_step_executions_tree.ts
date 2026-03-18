@@ -234,20 +234,19 @@ export function injectChildWorkflowSteps(
 
     if (childExecutionsMap.has(node.stepExecutionId!)) {
       const childExecution = childExecutionsMap.get(node.stepExecutionId!)!;
-      const childItems: StepExecutionTreeItem[] = childExecution.stepExecutions
-        .filter((step) => isVisibleStepType(step.stepType ?? ''))
-        .map((step) => {
-          childStepExecutions.push(step);
-          return {
-            stepId: step.stepId,
-            stepType: step.stepType ?? 'unknown',
-            executionIndex: step.stepExecutionIndex,
-            stepExecutionId: step.id,
-            status: step.status,
-            isChildWorkflowStep: true,
-            children: [],
-          };
-        });
+      const visibleSteps = childExecution.stepExecutions.filter((step) =>
+        isVisibleStepType(step.stepType ?? '')
+      );
+      childStepExecutions.push(...visibleSteps);
+      const childItems: StepExecutionTreeItem[] = visibleSteps.map((step) => ({
+        stepId: step.stepId,
+        stepType: step.stepType ?? 'unknown',
+        executionIndex: step.stepExecutionIndex,
+        stepExecutionId: step.id,
+        status: step.status,
+        isChildWorkflowStep: true,
+        children: [],
+      }));
 
       return {
         ...node,
