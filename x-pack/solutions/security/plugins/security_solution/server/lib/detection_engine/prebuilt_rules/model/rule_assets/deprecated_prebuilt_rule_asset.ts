@@ -13,7 +13,7 @@ import {
 
 /**
  * Minimal schema for deprecated prebuilt rule assets. These are installed by Fleet
- * as "security-rule" SOs with `deprecated: true` and carry only identification fields.
+ * as "security-rule" SOs with `deprecated: true` and only contain identification fields.
  * They are excluded from all install/upgrade flows and fetched separately.
  */
 export type DeprecatedPrebuiltRuleAsset = z.infer<typeof DeprecatedPrebuiltRuleAsset>;
