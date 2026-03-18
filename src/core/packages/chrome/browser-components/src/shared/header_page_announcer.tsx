@@ -12,7 +12,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { EuiSkipLink, EuiLiveAnnouncer, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FLYOUT_SELECTOR, MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
-import type { Observable } from 'rxjs';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { useCustomBranding } from './chrome_hooks';
 
