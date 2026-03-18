@@ -6,11 +6,8 @@
  */
 
 import React from 'react';
-import type { Subscription } from 'rxjs';
-import { pairwise, startWith } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type {
@@ -22,6 +19,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
 import { handlePreviewInDashboard } from './handle_preview_in_dashboard';
+import { createAttachmentMountHandler } from './create_attachment_mount_handler';
 
 export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder: { attachments, updateAttachmentOrigin },
@@ -56,38 +54,7 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    onAttachmentMount: ({
-      attachment,
-      conversationId,
-    }: AttachmentLifecycleParams<DashboardAttachment>) => {
-      let savedObjectIdSubscription: Subscription | undefined;
-      // The per-attachment subscription in onAttachmentMount needs to react to API availability changes to manage the savedObjectId$ subscription lifecycle
-      const apiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
-        savedObjectIdSubscription?.unsubscribe();
-        savedObjectIdSubscription = undefined;
-
-        if (!api) return;
-
-        savedObjectIdSubscription = api.savedObjectId$
-          .pipe(startWith<string | undefined>(attachment.origin), pairwise())
-          .subscribe(([previousId, currentId]) => {
-            // Only update origin if:
-            // 1. The attachment has no origin (unsaved), OR
-            // 2. The previous savedObjectId matches the attachment origin (we're on the same dashboard)
-            // This prevents linking to unrelated dashboards when navigating
-            const shouldUpdateOrigin = !attachment.origin || previousId === attachment.origin;
-
-            if (currentId && currentId !== attachment.origin && shouldUpdateOrigin) {
-              updateAttachmentOrigin(conversationId, attachment.id, currentId);
-            }
-          });
-      });
-
-      return () => {
-        apiSubscription.unsubscribe();
-        savedObjectIdSubscription?.unsubscribe();
-      };
-    },
+    onAttachmentMount: createAttachmentMountHandler({ dashboardPlugin, updateAttachmentOrigin }),
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}
