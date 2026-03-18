@@ -198,6 +198,7 @@ describe('PluginsService', () => {
           {
             id: 'my-plugin-pdf-processor',
             name: 'PDF Processor',
+            base_path: '/skills/my-plugin',
             description: 'Processes PDFs',
             content: 'Skill instructions for PDF.',
             referenced_content: [
@@ -209,6 +210,7 @@ describe('PluginsService', () => {
           {
             id: 'my-plugin-code-reviewer',
             name: 'code-reviewer',
+            base_path: '/skills/my-plugin',
             description: '',
             content: 'Review code.',
             referenced_content: [],
