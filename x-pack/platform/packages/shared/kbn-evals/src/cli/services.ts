@@ -22,6 +22,8 @@ interface ServiceEntry {
   startedAt: string;
   /** SHA-256 of KIBANA_TESTING_AI_CONNECTORS at boot time (Scout only) */
   connectorsHash?: string;
+  /** The serverConfigSet used to start Scout */
+  serverConfigSet?: string;
 }
 
 interface ServicesState {
@@ -72,13 +74,30 @@ export const isServiceRunning = (repoRoot: string, name: ServiceName): boolean =
 
 /**
  * Returns true if the running Scout was started with a different set of connectors
- * than what's currently in the environment.
+ * than what's currently in the environment, or with a different serverConfigSet.
  */
-export const isScoutStale = (repoRoot: string): boolean => {
+export const isScoutStale = (
+  repoRoot: string,
+  requestedConfigSet?: string
+): { stale: boolean; reason?: string } => {
   const state = readState(repoRoot);
   const entry = state.scout;
-  if (!entry || !isAlive(entry.pid)) return false;
-  return entry.connectorsHash !== connectorsHash();
+  if (!entry || !isAlive(entry.pid)) return { stale: false };
+
+  if (entry.connectorsHash !== connectorsHash()) {
+    return { stale: true, reason: 'KIBANA_TESTING_AI_CONNECTORS changed' };
+  }
+
+  if (requestedConfigSet && entry.serverConfigSet !== requestedConfigSet) {
+    return {
+      stale: true,
+      reason: `serverConfigSet changed (running: ${
+        entry.serverConfigSet ?? 'evals_tracing'
+      }, requested: ${requestedConfigSet})`,
+    };
+  }
+
+  return { stale: false };
 };
 
 /**
@@ -91,7 +110,11 @@ export const startService = (
   command: string,
   args: string[],
   log: ToolingLog,
-  opts?: { connectorsHash?: string; env?: Record<string, string | undefined> }
+  opts?: {
+    connectorsHash?: string;
+    serverConfigSet?: string;
+    env?: Record<string, string | undefined>;
+  }
 ): number => {
   const dir = ensureDir(repoRoot);
   const logFile = Path.join(dir, `${name}.log`);
@@ -120,6 +143,7 @@ export const startService = (
     logFile: Path.relative(repoRoot, logFile),
     startedAt: new Date().toISOString(),
     ...(opts?.connectorsHash ? { connectorsHash: opts.connectorsHash } : {}),
+    ...(opts?.serverConfigSet ? { serverConfigSet: opts.serverConfigSet } : {}),
   };
   writeState(repoRoot, state);
 
