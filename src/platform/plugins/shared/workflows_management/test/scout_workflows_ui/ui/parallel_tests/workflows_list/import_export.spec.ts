@@ -8,6 +8,7 @@
  */
 
 import AdmZip from 'adm-zip';
+import { v4 as generateUuid } from 'uuid';
 import YAML from 'yaml';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -69,7 +70,7 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
   test('should import ZIP with multiple workflows via flyout', async ({ pageObjects }) => {
     const zipBuffer = await buildTestZip([
       {
-        id: `import-zip-w1-${Date.now()}`,
+        id: `workflow-${generateUuid()}`,
         yaml: getListTestWorkflowYaml({
           name: 'ImportZIP First',
           description: 'first',
@@ -77,7 +78,7 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
         }),
       },
       {
-        id: `import-zip-w2-${Date.now()}`,
+        id: `workflow-${generateUuid()}`,
         yaml: getListTestWorkflowYaml({
           name: 'ImportZIP Second',
           description: 'second',

@@ -57,10 +57,13 @@ describe('parseImportFile', () => {
       expect(result.format).toBe('yaml');
       expect(result.totalWorkflows).toBe(1);
       expect(result.workflows).toHaveLength(1);
-      expect(result.workflows[0].id).toBe('my-workflow');
+      expect(result.workflows[0].id).toMatch(/^workflow-[0-9a-f-]+$/);
       expect(result.workflows[0].name).toBe('Test Workflow');
-      expect(result.workflowIds).toEqual(['my-workflow']);
-      expect(result.rawWorkflows).toEqual([{ id: 'my-workflow', yaml }]);
+      expect(result.workflowIds).toHaveLength(1);
+      expect(result.workflowIds[0]).toMatch(/^workflow-[0-9a-f-]+$/);
+      expect(result.rawWorkflows).toHaveLength(1);
+      expect(result.rawWorkflows[0].id).toMatch(/^workflow-[0-9a-f-]+$/);
+      expect(result.rawWorkflows[0].yaml).toBe(yaml);
       expect(result.parseErrors).toHaveLength(0);
     });
 
