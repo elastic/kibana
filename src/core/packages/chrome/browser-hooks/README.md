@@ -35,4 +35,4 @@ before subscribing to observables.
 All hooks consume `useChromeService()` from `@kbn/core-chrome-browser-context`,
 which returns `InternalChromeStart` — the full internal chrome API injected by core
 through `chrome.withProvider(...)`. Public hooks only use the `ChromeStart` subset;
-internal hooks may access internal-only APIs such as `componentDeps` and `getGlobalFooter$()`.
+internal hooks may access internal-only APIs such as `getGlobalFooter$()`.

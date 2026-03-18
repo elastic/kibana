@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import type { GrokPatternNode } from '@kbn/grok-heuristics';
 import {
   extractGrokPatternDangerouslySlow,
-  getReviewFields as getGrokReviewFields,
-  getGrokProcessor,
+  assembleGrokProcessor,
   getGrokPattern,
+  type NormalizedReviewResult as GrokNormalizedReviewResult,
 } from '@kbn/grok-heuristics';
-import type { DissectPattern } from '@kbn/dissect-heuristics';
 import {
   extractDissectPattern,
   serializeAST,
-  getReviewFields as getDissectReviewFields,
-  getDissectProcessorWithReview,
+  assembleDissectProcessor,
+  type NormalizedReviewResult as DissectNormalizedReviewResult,
 } from '@kbn/dissect-heuristics';
 import { tags } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
@@ -54,6 +52,41 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     await apiServices.streams.disable();
   });
 
+  function parseSSEResponse(data: string): Record<string, unknown> | null {
+    const lines = data.split('\n').filter((line) => line.startsWith('data: '));
+    const lastLine = lines[lines.length - 1];
+    return lastLine ? JSON.parse(lastLine.slice(6)) : null;
+  }
+
+  async function callLlmSuggestionApi(
+    kbnClient: KbnClient,
+    connectorId: string,
+    patternType: 'grok' | 'dissect',
+    reviewFields: Record<string, { example_values: string[]; [key: string]: unknown }>,
+    messages: string[]
+  ): Promise<GrokNormalizedReviewResult | DissectNormalizedReviewResult> {
+    const response = await kbnClient.request({
+      method: 'POST',
+      path: `/internal/streams/logs.otel/processing/_suggestions/${patternType}`,
+      body: {
+        connector_id: connectorId,
+        sample_messages: messages,
+        review_fields: reviewFields,
+      },
+    });
+
+    const data = parseSSEResponse(response.data as string);
+    if (!data) throw new Error('No SSE data in LLM response');
+
+    if (patternType === 'grok') {
+      if (!data.grokProcessor) throw new Error('No grok processor in LLM response');
+      return data.grokProcessor as GrokNormalizedReviewResult;
+    } else {
+      if (!data.dissectProcessor) throw new Error('No dissect processor in LLM response');
+      return data.dissectProcessor as DissectNormalizedReviewResult;
+    }
+  }
+
   /**
    * Run pattern extraction and simulation for a single example.
    */
@@ -67,7 +100,12 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     output: {
       patternType: 'grok' | 'dissect';
       heuristicPattern: string;
-      suggestedProcessor: Record<string, unknown> | null;
+      suggestedProcessor: {
+        patterns?: string[];
+        pattern?: string;
+        pattern_definitions?: Record<string, string>;
+        append_separator?: string;
+      } | null;
       parsedLogs: ParsedLog[];
       metrics: PatternQualityMetrics;
     };
@@ -75,35 +113,67 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     metadata: typeof example.metadata;
   }> {
     const { input, output: expected, metadata } = example;
+    const { sample_messages: messages, field_to_parse: fieldToParse } = input;
 
-    // Step 1: Generate pattern using heuristics
-    const { heuristicPattern, reviewFields, patternNodes, dissectResult } =
-      generateHeuristicPattern(input.sample_messages, patternType);
+    let heuristicPattern: string;
+    let processor: {
+      patterns?: string[];
+      pattern?: string;
+      pattern_definitions?: Record<string, string>;
+      append_separator?: string;
+    } | null = null;
 
-    // Step 2: Get LLM suggestions
-    const { processor, suggestedPattern } = await getLlmSuggestions(
-      kbnClient,
-      connector.id,
-      input.sample_messages,
-      reviewFields,
-      patternType,
-      heuristicPattern,
-      patternNodes,
-      dissectResult,
-      input.field_to_parse
-    );
+    try {
+      if (patternType === 'grok') {
+        const patternNodes = extractGrokPatternDangerouslySlow(messages);
+        heuristicPattern = getGrokPattern(patternNodes);
 
-    // Step 3: Simulate processing
+        processor = await assembleGrokProcessor({
+          from: fieldToParse,
+          patternGroups: [{ messages, nodes: patternNodes }],
+          reviewFn: async (reviewFields, msgs) =>
+            callLlmSuggestionApi(
+              kbnClient,
+              connector.id,
+              'grok',
+              reviewFields,
+              msgs
+            ) as Promise<GrokNormalizedReviewResult>,
+        });
+      } else {
+        const rawPattern = extractDissectPattern(messages);
+        heuristicPattern = serializeAST(rawPattern.ast);
+
+        processor = await assembleDissectProcessor({
+          from: fieldToParse,
+          messages,
+          reviewFn: async (reviewFields, msgs) =>
+            callLlmSuggestionApi(
+              kbnClient,
+              connector.id,
+              'dissect',
+              reviewFields,
+              msgs
+            ) as Promise<DissectNormalizedReviewResult>,
+        });
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error assembling processor:', error);
+      heuristicPattern = heuristicPattern!;
+    }
+
+    const suggestedPattern = processor?.patterns?.[0] || processor?.pattern || heuristicPattern;
+
     const parsedLogs = await simulateProcessing(
       kbnClient,
-      input.sample_messages,
-      input.field_to_parse,
+      messages,
+      fieldToParse,
       patternType,
       processor,
       suggestedPattern
     );
 
-    // Step 4: Calculate quality metrics
     const metrics = calculateOverallQuality(parsedLogs, expected);
 
     return {
@@ -114,111 +184,17 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     };
   }
 
-  function generateHeuristicPattern(
-    messages: string[],
-    patternType: 'grok' | 'dissect'
-  ): {
-    heuristicPattern: string;
-    reviewFields: Record<
-      string,
-      { example_values: string[]; position?: number; grok_component?: string }
-    >;
-    patternNodes?: GrokPatternNode[];
-    dissectResult?: DissectPattern;
-  } {
-    if (patternType === 'grok') {
-      const patternNodes = extractGrokPatternDangerouslySlow(messages);
-      return {
-        heuristicPattern: getGrokPattern(patternNodes),
-        reviewFields: getGrokReviewFields(patternNodes, 10),
-        patternNodes,
-      };
-    } else {
-      const dissectResult = extractDissectPattern(messages);
-      return {
-        heuristicPattern: serializeAST(dissectResult.ast),
-        reviewFields: getDissectReviewFields(dissectResult, 10),
-        dissectResult,
-      };
-    }
-  }
-
-  async function getLlmSuggestions(
-    kbnClient: KbnClient,
-    connectorId: string,
-    messages: string[],
-    reviewFields: Record<
-      string,
-      { example_values: string[]; position?: number; grok_component?: string }
-    >,
-    patternType: 'grok' | 'dissect',
-    heuristicPattern: string,
-    patternNodes?: GrokPatternNode[],
-    dissectResult?: DissectPattern,
-    fieldToParse?: string
-  ): Promise<{ processor: Record<string, unknown> | null; suggestedPattern: string }> {
-    try {
-      const response = await kbnClient.request({
-        method: 'POST',
-        path: `/internal/streams/logs.otel/processing/_suggestions/${patternType}`,
-        body: {
-          connector_id: connectorId,
-          sample_messages: messages,
-          review_fields: reviewFields,
-        },
-      });
-
-      const suggestionData = parseSSEResponse(response.data as string);
-      if (!suggestionData) {
-        return { processor: null, suggestedPattern: heuristicPattern };
-      }
-
-      if (patternType === 'grok' && suggestionData.grokProcessor && patternNodes) {
-        const processor = getGrokProcessor(
-          patternNodes,
-          suggestionData.grokProcessor as Parameters<typeof getGrokProcessor>[1]
-        );
-        return {
-          processor: processor as unknown as Record<string, unknown>,
-          suggestedPattern: processor?.patterns?.[0] || heuristicPattern,
-        };
-      }
-
-      if (patternType === 'dissect' && suggestionData.dissectProcessor && dissectResult) {
-        if (!fieldToParse) {
-          return { processor: null, suggestedPattern: heuristicPattern };
-        }
-        const processor = getDissectProcessorWithReview(
-          dissectResult,
-          suggestionData.dissectProcessor as Parameters<typeof getDissectProcessorWithReview>[1],
-          fieldToParse
-        );
-        return {
-          processor: processor as unknown as Record<string, unknown>,
-          suggestedPattern: processor?.pattern || heuristicPattern,
-        };
-      }
-
-      return { processor: null, suggestedPattern: heuristicPattern };
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error getting LLM suggestions:', error);
-      return { processor: null, suggestedPattern: heuristicPattern };
-    }
-  }
-
-  function parseSSEResponse(data: string): Record<string, unknown> | null {
-    const lines = data.split('\n').filter((line) => line.startsWith('data: '));
-    const lastLine = lines[lines.length - 1];
-    return lastLine ? JSON.parse(lastLine.slice(6)) : null;
-  }
-
   async function simulateProcessing(
     kbnClient: KbnClient,
     messages: string[],
     fieldToParse: string,
     patternType: 'grok' | 'dissect',
-    processor: Record<string, unknown> | null,
+    processor: {
+      patterns?: string[];
+      pattern?: string;
+      pattern_definitions?: Record<string, string>;
+      append_separator?: string;
+    } | null,
     suggestedPattern: string
   ): Promise<ParsedLog[]> {
     const step =
@@ -235,10 +211,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
             customIdentifier: 'eval-dissect',
             from: fieldToParse,
             pattern: processor?.pattern || suggestedPattern,
-            append_separator: (
-              ((processor as Record<string, unknown>)?.processor as Record<string, unknown>)
-                ?.dissect as Record<string, unknown>
-            )?.append_separator,
+            append_separator: processor?.append_separator,
           };
 
     const documents = messages.map((msg) => ({
