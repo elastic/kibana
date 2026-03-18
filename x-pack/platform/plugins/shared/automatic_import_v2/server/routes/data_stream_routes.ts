@@ -123,8 +123,7 @@ const uploadSamplesRoute = (
             dataStreamId,
             rawSamples,
             originalSource,
-            authenticatedUser: currentUser,
-            esClient,
+            createdBy: currentUser.username,
           });
           return response.ok({ body: result });
         } catch (err) {
@@ -172,8 +171,7 @@ const deleteDataStreamRoute = (
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
           const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
-          const esClient = automaticImportv2.esClient;
-          await automaticImportService.deleteDataStream(integrationId, dataStreamId, esClient);
+          await automaticImportService.deleteDataStream(integrationId, dataStreamId);
           return response.ok();
         } catch (err) {
           logger.error(`deleteDataStreamRoute: Caught error:`, err);
