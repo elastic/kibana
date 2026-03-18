@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-search/ui';
 import { test } from '../fixtures';
 import { tags } from '@kbn/scout-search';
 
-test.describe('Getting Started - Admin', { tag: [...tags.stateful.classic, ...tags.serverless.search.complete] }, () => {
+test.describe('Getting Started - Admin', { tag: [...tags.stateful.classic, ...tags.serverless.search] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.gettingStarted.goto();

@@ -11,7 +11,7 @@ import { tags } from '@kbn/scout';
 
 spaceTest.describe(
   'GenAI Settings - Page Display',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete, ...tags.serverless.observability.complete, ...tags.serverless.search.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete, ...tags.serverless.observability.complete, ...tags.serverless.search] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsFullAIPrivilegesUser();

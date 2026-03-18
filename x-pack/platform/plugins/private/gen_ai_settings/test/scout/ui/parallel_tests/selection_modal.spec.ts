@@ -61,8 +61,8 @@ spaceTest.describe('GenAI Settings - AI Selection Modal Changes', { tag: [...tag
       });
 
       await spaceTest.step('verify AI Agent flyout is visible', async () => {
-        const aiAgentFlyout = pageObjects.genAiSettings.getAIAgentFlyout();
-        await expect(aiAgentFlyout).toBeVisible();
+        const aiAgentSidebar = pageObjects.genAiSettings.getAIAgentSidebar();
+        await expect(aiAgentSidebar).toBeVisible();
       });
 
       await spaceTest.step('verify AI chat experience is set to Agent', async () => {
