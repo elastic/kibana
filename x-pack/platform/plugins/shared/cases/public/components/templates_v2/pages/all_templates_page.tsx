@@ -68,7 +68,6 @@ export const AllTemplatesPage: React.FC = () => {
   const {
     handleEdit,
     handleClone,
-    handleSetAsDefault,
     handleExport,
     handleDelete,
     confirmDelete,
@@ -79,7 +78,6 @@ export const AllTemplatesPage: React.FC = () => {
   const { columns } = useTemplatesColumns({
     onEdit: handleEdit,
     onClone: handleClone,
-    onSetAsDefault: handleSetAsDefault,
     onExport: handleExport,
     onDelete: handleDelete,
     disableActions: selectedTemplates.length > 0,

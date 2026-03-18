@@ -40,7 +40,11 @@ describe('CascadeRowHeaderPrimitive', () => {
     ...overrides
   }: Partial<ComponentProps<typeof CascadeRowHeaderPrimitive>> = {}) => {
     return render(
-      <DataCascadeProvider cascadeGroups={cascadeGroups} initialGroupColumn={initialGroupColumn}>
+      <DataCascadeProvider
+        data={[]}
+        cascadeGroups={cascadeGroups}
+        initialGroupColumn={initialGroupColumn}
+      >
         <CascadeRowHeaderPrimitive {...defaultProps} {...overrides} />
       </DataCascadeProvider>
     );
