@@ -10,7 +10,7 @@
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import fs from 'node:fs';
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod';
 import {
   SCOUT_TEST_EVENTS_INDEX_PATTERN,
   ScoutTestTarget,
