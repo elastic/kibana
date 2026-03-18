@@ -65,10 +65,16 @@ spaceTest.describe(
           ).not.toHaveText(timeConfigBefore.start);
         });
 
+        await spaceTest.step(
+          'first chart should re-render with the narrowed time range',
+          async () => {
+            await metricsExperience.waitForCardRenderComplete(0);
+            await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+          }
+        );
+
         await spaceTest.step('grid should still be visible after zoom', async () => {
-          await pageObjects.discover.waitUntilSearchingHasFinished();
           await expect(metricsExperience.grid).toBeVisible();
-          await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
         });
       }
     );
