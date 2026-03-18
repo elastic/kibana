@@ -165,8 +165,7 @@ Body:
 {
   "agent_id": "my-agent",
   "title": "New conversation",
-  "conversation_rounds": [],
-  "user_name": "optional-user-name"
+  "conversation_rounds": []
 }
 ```
 

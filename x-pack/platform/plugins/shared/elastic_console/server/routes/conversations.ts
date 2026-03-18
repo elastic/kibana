@@ -167,9 +167,17 @@ export const registerConversationRoutes = ({
         const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
         const storage = createConversationStorage({ esClient, logger });
 
+        const basePath = coreStart.http.basePath.get(request);
+        const space = getSpace(basePath);
+        const user = await getCurrentUser(coreStart, request);
+
         const result = await storage.get({ id: request.params.id });
 
-        if (!result.found) {
+        if (
+          !result.found ||
+          result._source?.space !== space ||
+          result._source?.user_name !== user.username
+        ) {
           return response.notFound();
         }
 
@@ -289,9 +297,17 @@ export const registerConversationRoutes = ({
         const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
         const storage = createConversationStorage({ esClient, logger });
 
+        const basePath = coreStart.http.basePath.get(request);
+        const space = getSpace(basePath);
+        const user = await getCurrentUser(coreStart, request);
+
         const existing = await storage.get({ id: request.params.id });
 
-        if (!existing.found) {
+        if (
+          !existing.found ||
+          existing._source?.space !== space ||
+          existing._source?.user_name !== user.username
+        ) {
           return response.notFound();
         }
 

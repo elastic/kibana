@@ -77,10 +77,11 @@ export const SetupPage: React.FC = () => {
                   },
                 },
                 options: {
-                  baseURL: `${data.kibanaUrl}/api/elastic_console/v1`,
+                  baseURL: `${data.kibanaUrl}/internal/elastic_console/v1`,
                   apiKey: 'ignored',
                   headers: {
                     Authorization: `ApiKey ${data.apiKeyEncoded}`,
+                    'x-elastic-internal-origin': 'kibana',
                     'kbn-xsrf': 'true',
                   },
                 },

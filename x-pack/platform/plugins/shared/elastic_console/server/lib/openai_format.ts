@@ -12,13 +12,11 @@ import {
   type UserMessage,
   type AssistantMessage,
   type ToolMessage,
+  type ChatCompletionChunkEvent,
+  type ChatCompletionTokenCount,
+  type ChatCompleteResponse,
+  type ToolDefinition,
 } from '@kbn/inference-common';
-import type {
-  ChatCompletionChunkEvent,
-  ChatCompletionTokenCount,
-} from '@kbn/inference-common/src/chat_complete';
-import type { ChatCompleteResponse } from '@kbn/inference-common/src/chat_complete';
-import type { ToolDefinition } from '@kbn/inference-common/src/chat_complete';
 
 /**
  * OpenAI message types
@@ -130,13 +128,21 @@ const convertUserMessage = (msg: OpenAiUserMessage): UserMessage => {
 };
 
 const convertAssistantMessage = (msg: OpenAiAssistantMessage): AssistantMessage => {
-  const toolCalls = msg.tool_calls?.map((tc) => ({
-    toolCallId: tc.id,
-    function: {
-      name: tc.function.name,
-      arguments: JSON.parse(tc.function.arguments),
-    },
-  }));
+  const toolCalls = msg.tool_calls?.map((tc) => {
+    let args: Record<string, unknown>;
+    try {
+      args = JSON.parse(tc.function.arguments);
+    } catch {
+      args = {};
+    }
+    return {
+      toolCallId: tc.id,
+      function: {
+        name: tc.function.name,
+        arguments: args,
+      },
+    };
+  });
 
   if (toolCalls && toolCalls.length > 0) {
     return {

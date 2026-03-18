@@ -12,6 +12,7 @@ import type {
   PluginInitializerContext,
   AppMountParameters,
 } from '@kbn/core/public';
+import { ELASTIC_CONSOLE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { ELASTIC_CONSOLE_ENABLED_FLAG } from '../common/feature_flags';
 
 export class ElasticConsolePlugin implements Plugin {
@@ -24,11 +25,15 @@ export class ElasticConsolePlugin implements Plugin {
       visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
-        const isEnabled = coreStart.featureFlags.getBooleanValue(
+        const featureFlagEnabled = coreStart.featureFlags.getBooleanValue(
           ELASTIC_CONSOLE_ENABLED_FLAG,
           false
         );
-        if (!isEnabled) {
+        const advancedSettingEnabled = coreStart.uiSettings.get<boolean>(
+          ELASTIC_CONSOLE_ENABLED_SETTING_ID,
+          false
+        );
+        if (!featureFlagEnabled || !advancedSettingEnabled) {
           const { element } = params;
           element.innerHTML = '<div>Elastic Console is not enabled.</div>';
           return () => {};
