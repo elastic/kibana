@@ -774,7 +774,7 @@ describe('Textbased Data Source', () => {
   });
 
   describe('#isTimeBased', () => {
-    it('should return true if timefield name exists on the dataview', () => {
+    it('should return true if timeField is set on the layer', () => {
       const state = {
         layers: {
           a: {
