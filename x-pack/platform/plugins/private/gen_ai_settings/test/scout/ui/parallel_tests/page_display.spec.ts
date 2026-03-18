@@ -9,25 +9,21 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
-spaceTest.describe(
-  'GenAI Settings - Page Display',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete, ...tags.serverless.observability.complete, ...tags.serverless.search] },
-  () => {
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsFullAIPrivilegesUser();
-      await pageObjects.genAiSettings.navigateTo();
+spaceTest.describe('GenAI Settings - Page Display', { tag: [...tags.deploymentAgnostic] }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsFullAIPrivilegesUser();
+    await pageObjects.genAiSettings.navigateTo();
+  });
+
+  spaceTest('should display correct UI elements', async ({ pageObjects }) => {
+    await spaceTest.step('should display the GenAI Settings page title', async () => {
+      const genAiSettingsPageTitle = pageObjects.genAiSettings.getGenAiSettingsPageTitle();
+      await expect(genAiSettingsPageTitle).toBeVisible();
     });
 
-    spaceTest('should display correct UI elements', async ({ pageObjects }) => {
-      await spaceTest.step('should display the GenAI Settings page title', async () => {
-        const genAiSettingsPageTitle = pageObjects.genAiSettings.getGenAiSettingsPageTitle();
-        await expect(genAiSettingsPageTitle).toBeVisible();
-      });
-
-      await spaceTest.step('should display the Chat Experience field', async () => {
-        const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-        await expect(chatExperienceField).toBeVisible();
-      });
+    await spaceTest.step('should display the Chat Experience field', async () => {
+      const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
+      await expect(chatExperienceField).toBeVisible();
     });
-  }
-);
+  });
+});

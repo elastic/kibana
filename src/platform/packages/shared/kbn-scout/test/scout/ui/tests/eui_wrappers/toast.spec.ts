@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, expect, tags } from '../../../../../src/playwright';
+import { expect } from '@kbn/scout/ui';
+import { test, tags } from '../../../../../src/playwright';
 import { EuiToastWrapper } from '../../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../../fixtures/eui_helpers';
 

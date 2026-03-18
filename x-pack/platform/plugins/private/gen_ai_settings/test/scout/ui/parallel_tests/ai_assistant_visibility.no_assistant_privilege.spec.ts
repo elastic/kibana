@@ -16,7 +16,13 @@ import { AIAssistantType } from '../fixtures/constants';
 
 spaceTest.describe(
   'GenAI Settings - AI Assistant Visibility without AI Assistants Privileges',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete, ...tags.serverless.security.complete] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.security.complete,
+    ],
+  },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
       // Set AI Assistant, because the AI Assistant nav button will be visible for default value

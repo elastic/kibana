@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expect } from '@kbn/scout/api';
 import { apiTest, tags } from '../../../../../src/playwright';
 import { createCasePayload } from '../../../fixtures/constants';
-import { expect } from '../../../../../api';
 
 apiTest.describe(
   'Cases Helpers',
