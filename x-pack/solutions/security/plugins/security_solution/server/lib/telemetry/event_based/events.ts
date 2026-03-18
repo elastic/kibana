@@ -1479,6 +1479,62 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
           description: 'Circuit breaker metrics such as execution time and memory usage.',
         },
       },
+      descriptorVersion: {
+        type: 'integer',
+        _meta: {
+          description: 'Version of the query descriptor that produced this event.',
+        },
+      },
+      status: {
+        type: 'keyword',
+        _meta: {
+          description: "Execution status: 'success', 'failed', or 'skipped'.",
+        },
+      },
+      skipReason: {
+        type: 'keyword',
+        _meta: {
+          optional: true,
+          description: "Reason for skipping: 'integration_not_installed' or 'unknown_version'.",
+        },
+      },
+      integration: {
+        properties: {
+          patterns: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Regex pattern used to match integrations.' },
+            },
+          },
+          matched: {
+            type: 'array',
+            items: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                  _meta: { description: 'Name of the matched integration.' },
+                },
+                version: {
+                  type: 'keyword',
+                  _meta: { description: 'Version of the matched integration.' },
+                },
+              },
+            },
+          },
+          resolvedIndices: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Index patterns resolved from matched integrations.' },
+            },
+          },
+        },
+        _meta: {
+          optional: true,
+          description: 'Integration resolution metadata. Present only for v2 query descriptors.',
+        },
+      },
     },
   };
 
