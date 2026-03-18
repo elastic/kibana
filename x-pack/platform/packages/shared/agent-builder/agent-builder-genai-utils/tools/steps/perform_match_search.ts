@@ -205,8 +205,9 @@ const rerankDocuments = async ({
 
   const idList = docIds.map((id) => `"${escapeEsqlString(id)}"`).join(', ');
   const escapedTerm = escapeEsqlString(term);
+  const fieldPaths = fields.map((f) => f.path);
 
-  const esqlQuery = `FROM ${index} METADATA _id | WHERE _id IN (${idList}) | RERANK "${escapedTerm}" ON ${fields} WITH {"inference_id": "${rerankInferenceID}"} | SORT _score | KEEP _id | LIMIT ${resultSize}`;
+  const esqlQuery = `FROM ${index} METADATA _id | WHERE _id IN (${idList}) | RERANK "${escapedTerm}" ON ${fieldPaths} WITH {"inference_id": "${rerankInferenceID}"} | SORT _score | KEEP _id | LIMIT ${resultSize}`;
 
   logger.info(`RERANK candidate docs query: ${esqlQuery}`);
 
