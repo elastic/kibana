@@ -12,6 +12,7 @@ import type { PaginationFields } from './query_builder_commons';
 import {
   buildExtractionSourceClause,
   buildFieldEvaluations,
+  buildSetFieldsByCondition,
   type PaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   MAIN_ENTITY_ID_FIELD,
@@ -73,6 +74,12 @@ export function buildCcsLogsExtractionEsqlQuery({
   // Special evaluations for entity id
   if (hasFieldEvaluations(entityDefinition)) {
     parts.push(buildFieldEvaluations(entityDefinition));
+  }
+
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+    parts.push(
+      buildSetFieldsByCondition(entityDefinition.whenConditionTrueSetFieldsPreAgg)
+    );
   }
 
   // Builds the id

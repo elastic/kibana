@@ -95,6 +95,13 @@ const identityFieldSchema = z.union([
   singleFieldIdentitySchema,
 ]);
 
+// Schema for "when condition true set fields" (condition + field overrides). Used e.g. for pre-agg overrides. */
+export const setFieldsByConditionSchema = z.object({
+  condition: streamlangConditionSchema,
+  fields: z.record(z.string(), z.string()),
+});
+export type SetFieldsByCondition = z.infer<typeof setFieldsByConditionSchema>;
+
 export const entitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -107,6 +114,8 @@ export const entitySchema = z.object({
   // Optional filter (Condition from @kbn/streamlang) applied in ESQL only, right after the
   // LOOKUP JOIN, to filter rows (e.g. keep already-stored entities or IDP-like events). No DSL equivalent.
   postAggFilter: z.optional(streamlangConditionSchema),
+  // Optional: when the condition is true on source docs, set the given fields (EVAL after field evals, before STATS).
+  whenConditionTrueSetFieldsPreAgg: z.optional(setFieldsByConditionSchema),
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields

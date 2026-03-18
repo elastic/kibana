@@ -6,8 +6,13 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { conditionToESQL } from '@kbn/streamlang';
 import { recentData } from '../../../common/domain/definitions/esql';
-import type { EntityDefinition } from '../../../common/domain/definitions/entity_schema';
+import type {
+  EntityDefinition,
+  SetFieldsByCondition,
+} from '../../../common/domain/definitions/entity_schema';
+import { escapeEsqlStringLiteral } from '../../../common/esql/strings';
 import {
   isSingleFieldIdentity,
   type EntityField,
@@ -162,6 +167,20 @@ export function extractPaginationParams(
 export function buildFieldEvaluations(entityDefinition: EntityDefinition): string {
   const fieldEvaluationsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
   return `| EVAL ${fieldEvaluationsEsql}`;
+}
+
+/**
+ * Builds the ESQL EVAL fragment for "when condition true set fields" (e.g. pre-aggregation overrides).
+ * When condition is true, each field is set to the given value; otherwise the field is unchanged.
+ */
+export function buildSetFieldsByCondition(setFieldsByCondition: SetFieldsByCondition): string {
+  const { condition, fields: overrideFields } = setFieldsByCondition;
+  const conditionEsql = conditionToESQL(condition);
+  const evals = Object.entries(overrideFields).map(([field, value]) => {
+    const escapedValue = escapeEsqlStringLiteral(value);
+    return `${field} = CASE((${conditionEsql}), "${escapedValue}", ${field})`;
+  });
+  return `| EVAL ${evals.join(',\n    ')}`;
 }
 
 export function buildPaginationSection(

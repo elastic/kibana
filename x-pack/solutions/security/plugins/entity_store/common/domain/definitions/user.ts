@@ -6,6 +6,7 @@
  */
 
 import {
+  fieldNotOneOfCondition,
   getCommonFieldDescriptions,
   getEntityFieldsDescriptions,
   isNotEmptyCondition,
@@ -13,6 +14,108 @@ import {
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { recentData } from './esql';
 import { collectValues as collect, newestValue } from './field_retention_operations';
+
+/** User names excluded from local namespace (system/service accounts). */
+const LOCAL_NAMESPACE_EXCLUDED_USER_NAMES = [
+  'root',
+  'bin',
+  'daemon',
+  'sys',
+  'nobody',
+  'jenkins',
+  'ansible',
+  'deploy',
+  'terraform',
+  'gitlab-runner',
+  'postgres',
+  'mysql',
+  'redis',
+  'elasticsearch',
+  'kafka',
+  'admin',
+  'operator',
+  'service',
+] as const;
+
+/** Shared post-LOOKUP keep: entity already in store. */
+const entityIdExistsAfterLookup = { field: 'entity.id', exists: true } as const;
+
+/** IDP: document filter (event.kind not enrichment, at least one of user.email/id/name). Reused in documentsFilter. */
+const idpDocumentFilter = {
+  and: [
+    {
+      or: [
+        { field: 'event.kind', exists: false },
+        { field: 'event.kind', neq: 'enrichment' },
+      ],
+    },
+    {
+      or: [
+        isNotEmptyCondition('user.email'),
+        isNotEmptyCondition('user.id'),
+        isNotEmptyCondition('user.name'),
+      ],
+    },
+  ],
+};
+
+/** IDP: event type on source (asset kind or iam user/creation/deletion/group). Used for pre-agg NOT and for idpPostAggFilter. */
+const idpEventTypeCondition = {
+  or: [
+    { field: 'event.kind', includes: 'asset' },
+    {
+      and: [
+        { field: 'event.category', includes: 'iam' },
+        {
+          or: [
+            { field: 'event.type', includes: 'user' },
+            { field: 'event.type', includes: 'creation' },
+            { field: 'event.type', includes: 'deletion' },
+            { field: 'event.type', includes: 'group' },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+/** IDP: post-LOOKUP keep (asset kind or iam, uses recentData). Shared entity.id is in postAggFilter separately. */
+const idpPostAggFilter: EntityDefinitionWithoutId['postAggFilter'] = {
+  or: [
+    { field: recentData('event.kind'), includes: 'asset' },
+    {
+      and: [
+        { field: recentData('event.category'), includes: 'iam' },
+        {
+          or: [
+            { field: recentData('event.type'), includes: 'user' },
+            { field: recentData('event.type'), includes: 'creation' },
+            { field: recentData('event.type'), includes: 'deletion' },
+            { field: recentData('event.type'), includes: 'group' },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+/** Non-IDP: document filter (user.name + host.id present, user.name not in system list). Reused in documentsFilter and whenConditionTrueSetFieldsPreAgg. */
+const nonIdpDocumentFilter = {
+  and: [
+    isNotEmptyCondition('user.name'),
+    isNotEmptyCondition('host.id'),
+    fieldNotOneOfCondition('user.name', [...LOCAL_NAMESPACE_EXCLUDED_USER_NAMES]),
+  ],
+};
+
+/** Non-IDP: post-LOOKUP keep (user.name + host.id, user.name not in list, uses recentData). */
+const nonIdpPostAggFilter = {
+  and: [
+    isNotEmptyCondition(recentData('user.name')),
+    isNotEmptyCondition(recentData('host.id')),
+    fieldNotOneOfCondition(recentData('user.name'), [...LOCAL_NAMESPACE_EXCLUDED_USER_NAMES]),
+  ],
+};
 
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
@@ -56,68 +159,28 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     ],
     /**
      * UEBA user documents filter (pre-aggregation: which documents enter the pipeline).
+     * event.outcome not failure AND (idpDocumentFilter OR nonIdpDocumentFilter).
      */
     documentsFilter: {
       and: [
-        // exclude failure outcomes
         {
           or: [
             { field: 'event.outcome', exists: false },
             { field: 'event.outcome', neq: 'failure' },
           ],
         },
-
-        // exclude enrichment kind (allow missing event.kind so iam/asset docs without it pass)
-        {
-          or: [
-            { field: 'event.kind', exists: false },
-            { field: 'event.kind', neq: 'enrichment' },
-          ],
-        },
-
-        // contains at least one of the id fields
-        {
-          or: [
-            isNotEmptyCondition('user.email'),
-            isNotEmptyCondition('user.id'),
-            isNotEmptyCondition('user.name'),
-          ],
-        },
+        { or: [idpDocumentFilter, nonIdpDocumentFilter] },
       ],
     },
   },
   entityTypeFallback: 'Identity',
   indexPatterns: [],
-  /**
-   * Post-aggregation filter (after LOOKUP JOIN): keep row if already in entity store or IDP-like.
-   */
-  postAggFilter: {
-    or: [
-      // If entity.id exists after look up join, data is already in the entity store
-      // Meaning an IDP-like event has already been processed.
-      // Any other event after creation can be used as *enrichment* (idp or not).
-      { field: 'entity.id', exists: true },
-
-      // --- The below filters are the definition of an IDP-like events ---
-
-      // or recent data (not stored) is asset kind (use includes to allow multiple values; CCS can ingest multiple values)
-      { field: recentData('event.kind'), includes: 'asset' },
-
-      // or recent data (not stored) is iam category of type user, creation, deletion, or group
-      {
-        and: [
-          { field: recentData('event.category'), includes: 'iam' },
-          {
-            or: [
-              { field: recentData('event.type'), includes: 'user' },
-              { field: recentData('event.type'), includes: 'creation' },
-              { field: recentData('event.type'), includes: 'deletion' },
-              { field: recentData('event.type'), includes: 'group' },
-            ],
-          },
-        ],
-      },
-    ],
+  /** Post-aggregation filter (after LOOKUP JOIN): keep row when entity.id exists (shared) OR IDP OR non-IDP. */
+  postAggFilter: { or: [entityIdExistsAfterLookup, idpPostAggFilter, nonIdpPostAggFilter] },
+  /** Pre-agg: set entity.namespace to "local" only when non-IDP and not IDP event type (on source). */
+  whenConditionTrueSetFieldsPreAgg: {
+    condition: { and: [{ not: idpEventTypeCondition }, nonIdpDocumentFilter] },
+    fields: { 'entity.namespace': 'local' },
   },
   fields: [
     newestValue({ destination: 'entity.name', source: 'user.name' }),

@@ -19,6 +19,7 @@ import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
 import {
   buildExtractionSourceClause,
   buildFieldEvaluations,
+  buildSetFieldsByCondition,
   type PaginationParams,
   type PaginationFields,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
@@ -101,6 +102,12 @@ export function buildLogsExtractionEsqlQuery({
   // Special evaluations for entity id
   if (hasFieldEvaluations(entityDefinition)) {
     parts.push(buildFieldEvaluations(entityDefinition));
+  }
+
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+    parts.push(
+      buildSetFieldsByCondition(entityDefinition.whenConditionTrueSetFieldsPreAgg)
+    );
   }
 
   // Evaluation of the id without type so we can fallback to name
