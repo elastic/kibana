@@ -48,43 +48,31 @@ if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
     --showMultiTrackSummary
 
 else
-  echo '--- Discover Playwright Configs and upload to Buildkite artifacts'
-  # When SCOUT_SELECTIVE_TESTING_ENABLED: affected modules come from git diff (excluding test/scout/.meta),
-  # then @kbn/scout* are removed; discover-playwright-configs keeps only configs for that set and writes
-  # the filtered list to .scout/test_configs/scout_playwright_configs.json (then copied to artifact).
-  # Look for both stateful and serverless tests when run on "main" / PRs to "main", otherwise only stateful tests to be discovered and run
   if [[ "${BUILDKITE_BRANCH:-}" == "main" || "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" == "main" ]]; then
     SCOUT_DISCOVERY_TARGET="local"
   else
     SCOUT_DISCOVERY_TARGET="local-stateful-only"
   fi
 
-  AFFECTED_MODULES_FLAG=""
-  if [[ "${SCOUT_SELECTIVE_TESTING_ENABLED:-}" == "true" && -n "${GITHUB_PR_MERGE_BASE:-}" ]]; then
-    echo '--- Detecting affected modules for selective testing'
+  AFFECTED_MODULES_FILE=""
+  if is_pr_with_label "ci:selective-testing" && [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]]; then
     mkdir -p .scout
     AFFECTED_MODULES_FILE=".scout/affected_modules.json"
     .buildkite/pipeline-utils/affected-packages/list_affected \
       --strategy git --deep --merge-base "$GITHUB_PR_MERGE_BASE" --json \
       --ignore '**/test/scout/.meta/**' \
       > "$AFFECTED_MODULES_FILE"
-    # Temporarily ignore kbn-scout (and kbn-scout-release-testing) in the affected list so that
-    # pipeline only runs scout configs for other affected modules (e.g. SLO plugin and dependents).
-    # TODO: remove this temp exclusion after selective testing is validated.
-    node -e "
-      const f = '$AFFECTED_MODULES_FILE';
-      const data = JSON.parse(require('fs').readFileSync(f, 'utf8'));
-      const list = Array.isArray(data) ? data : [];
-      const filtered = list.filter(id => typeof id === 'string' && !id.startsWith('@kbn/scout'));
-      require('fs').writeFileSync(f, JSON.stringify(filtered));
-    "
-    AFFECTED_MODULES_FLAG="--affected-modules $AFFECTED_MODULES_FILE"
   fi
 
+  echo "--- Discover Playwright Configs and upload to Buildkite artifacts${AFFECTED_MODULES_FILE:+ (selective testing)}"
+  AFFECTED_FLAG=()
+  if [[ -n "$AFFECTED_MODULES_FILE" ]]; then
+    AFFECTED_FLAG=(--affected-modules "$AFFECTED_MODULES_FILE")
+  fi
   node scripts/scout discover-playwright-configs \
     --include-custom-servers \
     --target "$SCOUT_DISCOVERY_TARGET" \
-    $AFFECTED_MODULES_FLAG \
+    "${AFFECTED_FLAG[@]}" \
     --save
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
   buildkite-agent artifact upload "scout_playwright_configs.json"
