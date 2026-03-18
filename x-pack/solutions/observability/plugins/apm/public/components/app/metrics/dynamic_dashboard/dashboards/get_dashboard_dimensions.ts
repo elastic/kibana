@@ -11,7 +11,7 @@ export interface DashboardDimensionProps {
   agentName: string;
   telemetrySdkName?: string;
   telemetrySdkLanguage?: string;
-  agentVersion?: string;
+  runtimeVersion?: string;
 }
 
 export interface DashboardDimensions {
@@ -43,7 +43,7 @@ export const getDashboardDimensions = ({
   agentName,
   telemetrySdkName,
   telemetrySdkLanguage,
-  agentVersion,
+  runtimeVersion,
 }: DashboardDimensionProps): DashboardDimensions | undefined => {
   const dataFormat = getIngestionPath(!!(telemetrySdkName ?? telemetrySdkLanguage));
   const { sdkName, language } = getSdkNameAndLanguage(agentName);
@@ -53,5 +53,5 @@ export const getDashboardDimensions = ({
     return undefined;
   }
 
-  return { dataFormat, sdkName, language: sdkLanguage, version: parseMajorVersion(agentVersion) };
+  return { dataFormat, sdkName, language: sdkLanguage, version: parseMajorVersion(runtimeVersion) };
 };

@@ -116,39 +116,39 @@ describe('getDashboardDimensions', () => {
         agentName: 'opentelemetry/java/elastic',
         telemetrySdkName: 'opentelemetry',
         telemetrySdkLanguage: 'java',
-        agentVersion: '1',
-        expected: { dataFormat: 'otel_native', sdkName: 'edot', language: 'java', version: '1' },
+        runtimeVersion: '17',
+        expected: { dataFormat: 'otel_native', sdkName: 'edot', language: 'java', version: '17' },
       },
       {
         agentName: 'opentelemetry/java/elastic',
         telemetrySdkName: 'opentelemetry',
         telemetrySdkLanguage: 'java',
-        agentVersion: '1.3.0',
-        expected: { dataFormat: 'otel_native', sdkName: 'edot', language: 'java', version: '1' },
+        runtimeVersion: '17.0.1',
+        expected: { dataFormat: 'otel_native', sdkName: 'edot', language: 'java', version: '17' },
       },
       {
         agentName: 'opentelemetry/java/elastic',
         telemetrySdkName: 'opentelemetry',
         telemetrySdkLanguage: 'java',
-        agentVersion: '2.0.1',
-        expected: { dataFormat: 'otel_native', sdkName: 'edot', language: 'java', version: '2' },
+        runtimeVersion: '6.100.6',
+        expected: { dataFormat: 'otel_native', sdkName: 'edot', language: 'java', version: '6' },
       },
       {
         agentName: 'opentelemetry/java/elastic',
         telemetrySdkName: 'opentelemetry',
         telemetrySdkLanguage: 'java',
-        agentVersion: undefined,
+        runtimeVersion: undefined,
         expected: { dataFormat: 'otel_native', sdkName: 'edot', language: 'java' },
       },
     ])(
-      'for agent $agentName with agentVersion $agentVersion extracts major version',
-      ({ agentName, telemetrySdkName, telemetrySdkLanguage, agentVersion, expected }) => {
+      'for agent $agentName with runtimeVersion $runtimeVersion extracts major version',
+      ({ agentName, telemetrySdkName, telemetrySdkLanguage, runtimeVersion, expected }) => {
         expect(
           getDashboardDimensions({
             agentName,
             telemetrySdkName,
             telemetrySdkLanguage,
-            agentVersion,
+            runtimeVersion,
           })
         ).toEqual(expected);
       }
