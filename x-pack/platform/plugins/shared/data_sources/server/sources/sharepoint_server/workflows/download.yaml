@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.sharepoint-server.download'
-description: 'Download SharePoint Server content. Actions and inputs: downloadFile (path, server-relative URL) for text/plain files — binary files (PDF, .docx) go through Elasticsearch attachment ingest pipeline (extracted text in docs[0].doc._source.attachment.content); getSitePageContents (page_id integer) for site page content.'
+description: 'Download SharePoint Server content. REQUIRED: always provide download_action — calling without it will fail. download_action options: "downloadFile" (requires path, server-relative URL) for text/plain files — binary files (PDF, .docx) go through Elasticsearch attachment ingest pipeline (extracted text in docs[0].doc._source.attachment.content); "getSitePageContents" (requires page_id integer) for site page content.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -12,6 +12,7 @@ inputs:
       - "downloadFile"
       - "getSitePageContents"
     required: true
+    description: "Required. Which action to perform: 'downloadFile' to fetch file content by server-relative path; 'getSitePageContents' to fetch a site page by integer ID."
   - name: path
     type: string
     required: false

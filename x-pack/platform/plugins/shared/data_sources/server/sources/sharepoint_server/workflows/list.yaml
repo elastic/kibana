@@ -1,7 +1,8 @@
 version: '1'
 name: 'sources.sharepoint-server.list'
 description: >
-  Browse SharePoint Server resources. Always provide list_action (required) to select what to fetch:
+  Browse SharePoint Server resources. REQUIRED: always provide list_action — calling without it will fail.
+  list_action options:
   "getWeb" — site metadata, no other inputs needed;
   "getLists" — all lists and document libraries, no other inputs needed;
   "getListItems" — items in a named list, requires list_title (exact Title from getLists);
