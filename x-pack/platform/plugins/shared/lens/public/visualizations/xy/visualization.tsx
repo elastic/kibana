@@ -290,15 +290,14 @@ export const getXyVisualization = ({
     const compatibleSeriesType: SeriesType = (currentStackingType?.subtypes[chosenTypeIndex] ||
       seriesType) as SeriesType;
 
-    const switchLayer = (layer: XYLayerConfig): XYLayerConfig =>
-      applySeriesDefaultsIfNeeded(layer, compatibleSeriesType);
-
     return {
       ...state,
       preferredSeriesType: compatibleSeriesType,
       layers: layerId
-        ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
-        : state.layers.map(switchLayer),
+        ? state.layers.map((layer) =>
+            layer.layerId === layerId ? { ...layer, seriesType: compatibleSeriesType } : layer
+          )
+        : state.layers.map((layer) => ({ ...layer, seriesType: compatibleSeriesType })),
     };
   },
 
@@ -1371,9 +1370,11 @@ function getVisualizationInfo(
         });
 
         if (!layer.collapseFn) {
-          const paletteDefinition =
-            paletteService.get(getLayerPaletteName(layer)) ?? paletteService.get('default');
-          palette.push(...paletteDefinition.getCategoricalColors(10, layer.palette?.params));
+          palette.push(
+            ...paletteService
+              .get(layer.palette?.name || 'default')
+              .getCategoricalColors(10, layer.palette?.params)
+          );
         }
       }
     }

@@ -52,7 +52,7 @@ export function getColorAssignments(
   const layersPerPalette: Record<string, XYDataLayerConfig[]> = {};
 
   layers.filter(isDataLayer).forEach((layer) => {
-    const palette = getLayerPaletteName(layer);
+    const palette = layer.palette?.name || 'default';
     if (!layersPerPalette[palette]) {
       layersPerPalette[palette] = [];
     }
@@ -143,9 +143,11 @@ export function getAssignedColorConfig(
   }
   const layerContainsSplits =
     isDataLayer(layer) && !layer.collapseFn && (layer.splitAccessors ?? []).length > 0;
-  const currentPaletteName = getLayerPaletteName(layer);
-  const currentPaletteParams = layer.palette?.params;
-  const totalSeriesCount = colorAssignments[currentPaletteName]?.totalSeriesCount;
+
+  const currentPalette = layer.palette || { type: 'palette', name: 'default' };
+  const currentPaletteName = currentPalette.name;
+  const currentPaletteParams = currentPalette.params;
+  const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
 
   if (layerContainsSplits) {
     return getDisabledConfig(accessor);

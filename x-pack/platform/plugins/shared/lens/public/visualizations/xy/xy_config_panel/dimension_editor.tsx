@@ -190,8 +190,6 @@ export function DataDimensionEditor(
   }
 
   const isHorizontal = isHorizontalChart(state.layers);
-  const swatchPalette =
-    props.palettes.get(getLayerPaletteName(layer)) ?? props.palettes.get(KbnPalette.Default);
   const disabledMessage = Boolean(!layer.collapseFn && (layer.splitAccessors ?? []).length > 0)
     ? i18n.translate('xpack.lens.xyChart.colorPicker.tooltip.disabled', {
         defaultMessage:
@@ -206,7 +204,7 @@ export function DataDimensionEditor(
         overwriteColor={overwriteColor}
         defaultColor={assignedColor}
         disabledMessage={disabledMessage}
-        swatches={swatchPalette.colors(10)}
+        swatches={props.palettes.get(KbnPalette.Default).colors(10)}
         setConfig={setConfig}
       />
 

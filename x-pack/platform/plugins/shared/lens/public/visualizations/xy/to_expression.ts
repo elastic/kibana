@@ -464,9 +464,9 @@ const annotationLayerToExpression = (
  * Line charts use a line-optimized palette for better contrast between overlapping series.
  */
 function getDefaultPalette(seriesType: LensSeriesType): KbnPaletteId {
-  if (isLineSeries(seriesType)) {
-    return KbnPalette.ElasticLineOptimized;
-  }
+  // if (isLineSeries(seriesType)) {
+  //   return KbnPalette.ElasticLineOptimized;
+  // }
   return KbnPalette.Default;
 }
 
