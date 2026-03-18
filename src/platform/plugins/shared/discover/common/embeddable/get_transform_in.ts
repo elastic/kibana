@@ -9,13 +9,13 @@
 
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { extractReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableState,
   StoredSearchEmbeddableState,
 } from './types';
-import { extract } from './search_inject_extract';
 
 export const SAVED_SEARCH_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
@@ -47,22 +47,39 @@ export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['trans
     }
 
     // by value
-    const { state: extractedState, references } = extract({
-      type: SavedSearchType,
-      attributes: storedState.attributes,
+    const tabReferences: SavedObjectReference[] = [];
+    const tabs = storedState.attributes.tabs.map((tab) => {
+      try {
+        const searchSourceValues = parseSearchSourceJSON(
+          tab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
+        const [searchSourceFields, searchSourceReferences] = extractReferences(searchSourceValues);
+        tabReferences.push(...searchSourceReferences);
+        return {
+          ...tab,
+          attributes: {
+            ...tab.attributes,
+            kibanaSavedObjectMeta: {
+              ...tab.attributes.kibanaSavedObjectMeta,
+              searchSourceJSON: JSON.stringify(searchSourceFields),
+            },
+          },
+        };
+      } catch (e) {
+        return tab;
+      }
     });
 
+    const { references = [], ...otherAttrs } = storedState.attributes;
     return {
       state: {
         ...storedState,
         attributes: {
-          ...storedState.attributes,
-          ...extractedState.attributes,
-          // discover session stores references as part of attributes
-          references,
+          ...otherAttrs,
+          tabs,
         },
       },
-      references: [...references, ...drilldownReferences],
+      references: [...references, ...tabReferences, ...drilldownReferences],
     };
   }
   return transformIn;

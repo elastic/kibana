@@ -305,6 +305,184 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.HTTPAuthorizationHeader",
+        "type": "Class",
+        "tags": [],
+        "label": "HTTPAuthorizationHeader",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/http_authentication/http_authorization_header.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.HTTPAuthorizationHeader.scheme",
+            "type": "string",
+            "tags": [],
+            "label": "scheme",
+            "description": [
+              "\nThe authentication scheme. Should be consumed in a case-insensitive manner.\nhttps://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml#authschemes"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/http_authentication/http_authorization_header.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.HTTPAuthorizationHeader.credentials",
+            "type": "string",
+            "tags": [],
+            "label": "credentials",
+            "description": [
+              "\nThe authentication credentials for the scheme."
+            ],
+            "path": "src/core/packages/security/server/src/authentication/http_authentication/http_authorization_header.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.HTTPAuthorizationHeader.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/http_authentication/http_authorization_header.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.HTTPAuthorizationHeader.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "scheme",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/http_authentication/http_authorization_header.ts",
+                "lineNumber": 24,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.HTTPAuthorizationHeader.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "credentials",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/http_authentication/http_authorization_header.ts",
+                "lineNumber": 24,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.HTTPAuthorizationHeader.parseFromRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "parseFromRequest",
+            "description": [
+              "\nParses request's `Authorization` HTTP header if present."
+            ],
+            "signature": [
+              "(request: ",
+              "ScopeableRequest",
+              ", headerName?: string) => ",
+              "HTTPAuthorizationHeader",
+              " | null"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/http_authentication/http_authorization_header.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.HTTPAuthorizationHeader.parseFromRequest.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance to extract the authorization header from."
+                ],
+                "signature": [
+                  "ScopeableRequest"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/http_authentication/http_authorization_header.ts",
+                "lineNumber": 35,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.HTTPAuthorizationHeader.parseFromRequest.$2",
+                "type": "string",
+                "tags": [],
+                "label": "headerName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/http_authentication/http_authorization_header.ts",
+                "lineNumber": 35,
+                "columnNumber": 54,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.HTTPAuthorizationHeader.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/http_authentication/http_authorization_header.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -343,6 +521,52 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.isUiamCredential",
+        "type": "Function",
+        "tags": [],
+        "label": "isUiamCredential",
+        "description": [
+          "\nChecks if the given authorization credentials are UIAM credentials.\n"
+        ],
+        "signature": [
+          "(credential: string | ",
+          "HTTPAuthorizationHeader",
+          ") => boolean"
+        ],
+        "path": "src/core/packages/security/server/src/uiam/utils.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.isUiamCredential.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "credential",
+            "description": [
+              "The HTTP authorization header or access token to check."
+            ],
+            "signature": [
+              "string | ",
+              "HTTPAuthorizationHeader"
+            ],
+            "path": "src/core/packages/security/server/src/uiam/utils.ts",
+            "lineNumber": 20,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if the credentials start with UIAM_CREDENTIALS_PREFIX, false otherwise."
+        ],
         "initialIsOpen": false
       },
       {
@@ -397,7 +621,7 @@
           "NativeAPIKeysType"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-        "lineNumber": 41,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -414,7 +638,7 @@
               " | null"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-            "lineNumber": 42,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -435,7 +659,7 @@
           "NativeAPIKeysWithContextType"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-        "lineNumber": 45,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -452,7 +676,7 @@
               " | null"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-            "lineNumber": 46,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1013,6 +1237,274 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.ConvertUiamAPIKeyResultFailed",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConvertUiamAPIKeyResultFailed",
+        "description": [
+          "\nA failed result from converting an Elasticsearch API key into a UIAM API key."
+        ],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultFailed.status",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"failed\""
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultFailed.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultFailed.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultFailed.resource",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "resource",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultFailed.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.ConvertUiamAPIKeyResultSuccess",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConvertUiamAPIKeyResultSuccess",
+        "description": [
+          "\nA successful result from converting an Elasticsearch API key into a UIAM API key."
+        ],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.status",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"success\""
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.organization_id",
+            "type": "string",
+            "tags": [],
+            "label": "organization_id",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.internal",
+            "type": "boolean",
+            "tags": [],
+            "label": "internal",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.role_assignments",
+            "type": "Object",
+            "tags": [],
+            "label": "role_assignments",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.creation_date",
+            "type": "string",
+            "tags": [],
+            "label": "creation_date",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.expiration_date",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "expiration_date",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.ConvertUiamAPIKeysResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConvertUiamAPIKeysResponse",
+        "description": [
+          "\nResponse from the UIAM convert API keys operation."
+        ],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.ConvertUiamAPIKeysResponse.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              "ConvertUiamAPIKeyResult",
+              "[]"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
         "id": "def-server.CoreAuditService",
         "type": "Interface",
         "tags": [],
@@ -1149,6 +1641,49 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CoreAuthenticationService.getRedactedSessionId",
+            "type": "Function",
+            "tags": [],
+            "label": "getRedactedSessionId",
+            "description": [
+              "\nRetrieve the redacted session ID for the provided request.\nReturns a redacted form of the session ID (e.g. last N characters).\nReturns undefined if no session exists for the request.\n"
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>) => Promise<string | undefined>"
+            ],
+            "path": "src/core/packages/security/server/src/authc.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.CoreAuthenticationService.getRedactedSessionId.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "The request to retrieve the session ID for."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authc.ts",
+                "lineNumber": 34,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
             "id": "def-server.CoreAuthenticationService.apiKeys",
             "type": "Object",
             "tags": [],
@@ -1158,7 +1693,7 @@
               "APIKeysType"
             ],
             "path": "src/core/packages/security/server/src/authc.ts",
-            "lineNumber": 27,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1706,7 +2241,7 @@
           "\nParameters for granting a UIAM API key."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-        "lineNumber": 56,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1721,7 +2256,7 @@
               "\nName for the API key"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 60,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1739,7 +2274,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 65,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1880,7 +2415,7 @@
           "\nParameters for invalidating a UIAM API key."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-        "lineNumber": 71,
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1895,7 +2430,7 @@
               "\nID of the API key to invalidate"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 75,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2715,7 +3250,7 @@
           "\nInterface for managing UIAM-specific API key operations.\nThis interface handles API key grants and invalidations through the UIAM service."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-        "lineNumber": 15,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2741,7 +3276,7 @@
               " | null>"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 20,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2760,7 +3295,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 28,
+                "lineNumber": 27,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2779,7 +3314,7 @@
                   "GrantUiamAPIKeyParams"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 28,
+                "lineNumber": 27,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2811,7 +3346,7 @@
               " | null>"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2830,7 +3365,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 39,
+                "lineNumber": 38,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2849,7 +3384,7 @@
                   "InvalidateUiamAPIKeyParams"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 40,
+                "lineNumber": 39,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2862,46 +3397,46 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-server.UiamAPIKeysType.getScopedClusterClientWithApiKey",
+            "id": "def-server.UiamAPIKeysType.convert",
             "type": "Function",
             "tags": [],
-            "label": "getScopedClusterClientWithApiKey",
+            "label": "convert",
             "description": [
-              "\nCreates a scoped Elasticsearch client authenticated with an API key.\n\nThis method creates a scoped cluster client that authenticates using the provided API key.\nIf the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM\nauthentication headers.\n"
+              "\nConverts Elasticsearch API keys into UIAM API keys.\n"
             ],
             "signature": [
-              "(apiKey: string) => ",
-              "IScopedClusterClient",
-              " | null"
+              "(keys: string[]) => Promise<",
+              "ConvertUiamAPIKeysResponse",
+              " | null>"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 43,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-server.UiamAPIKeysType.getScopedClusterClientWithApiKey.$1",
-                "type": "string",
+                "id": "def-server.UiamAPIKeysType.convert.$1",
+                "type": "Array",
                 "tags": [],
-                "label": "apiKey",
+                "label": "keys",
                 "description": [
-                  "The API key secret."
+                  "The base64-encoded Elasticsearch API key values to convert."
                 ],
                 "signature": [
-                  "string"
+                  "string[]"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 53,
-                "columnNumber": 36,
+                "lineNumber": 48,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "A scoped cluster client configured with API key authentication"
+              "A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled."
             ]
           }
         ],
@@ -2917,7 +3452,7 @@
           "\nPublic UIAM API Keys service exposed through core context to manage\nUIAM-specific API key operations, including granting and invalidating\nAPI keys through the UIAM service."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys_context.ts",
-        "lineNumber": 14,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2941,7 +3476,7 @@
               " | null>"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys_context.ts",
-            "lineNumber": 20,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2959,7 +3494,7 @@
                   "GrantUiamAPIKeyParams"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys_context.ts",
-                "lineNumber": 27,
+                "lineNumber": 30,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2989,7 +3524,7 @@
               " | null>"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys_context.ts",
-            "lineNumber": 29,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3007,7 +3542,7 @@
                   "InvalidateUiamAPIKeyParams"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys_context.ts",
-                "lineNumber": 36,
+                "lineNumber": 39,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3020,46 +3555,46 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-server.UiamAPIKeysWithContextType.getScopedClusterClientWithApiKey",
+            "id": "def-server.UiamAPIKeysWithContextType.convert",
             "type": "Function",
             "tags": [],
-            "label": "getScopedClusterClientWithApiKey",
+            "label": "convert",
             "description": [
-              "\nCreates a scoped Elasticsearch client authenticated with an API key.\n\nThis method creates a scoped cluster client that authenticates using the provided API key.\nIf the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM\nauthentication headers.\n"
+              "\nConverts Elasticsearch API keys into UIAM API keys.\n"
             ],
             "signature": [
-              "(apiKey: string) => ",
-              "IScopedClusterClient",
-              " | null"
+              "(keys: string[]) => Promise<",
+              "ConvertUiamAPIKeysResponse",
+              " | null>"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys_context.ts",
-            "lineNumber": 38,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-server.UiamAPIKeysWithContextType.getScopedClusterClientWithApiKey.$1",
-                "type": "string",
+                "id": "def-server.UiamAPIKeysWithContextType.convert.$1",
+                "type": "Array",
                 "tags": [],
-                "label": "apiKey",
+                "label": "keys",
                 "description": [
-                  "The API key secret."
+                  "The base64-encoded Elasticsearch API key values to convert."
                 ],
                 "signature": [
-                  "string"
+                  "string[]"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys_context.ts",
-                "lineNumber": 48,
-                "columnNumber": 36,
+                "lineNumber": 47,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "A scoped cluster client configured with API key authentication"
+              "A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled."
             ]
           }
         ],
@@ -3457,6 +3992,27 @@
         ],
         "path": "src/core/packages/security/server/src/api_provider.ts",
         "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.ConvertUiamAPIKeyResult",
+        "type": "Type",
+        "tags": [],
+        "label": "ConvertUiamAPIKeyResult",
+        "description": [
+          "\nA single result entry from the convert API keys operation; either success or failure."
+        ],
+        "signature": [
+          "ConvertUiamAPIKeyResultSuccess",
+          " | ",
+          "ConvertUiamAPIKeyResultFailed"
+        ],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+        "lineNumber": 102,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

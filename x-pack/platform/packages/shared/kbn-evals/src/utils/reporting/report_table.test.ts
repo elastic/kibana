@@ -5,62 +5,46 @@
  * 2.0.
  */
 
-import type { DatasetScoreWithStats } from '../evaluation_stats';
+import type { EvaluatorStats } from '../score_repository';
 import type { EvaluatorDisplayGroup, EvaluatorDisplayOptions } from './report_table';
 import { createTable } from './report_table';
 
 describe('report_table', () => {
-  const createMockDatasetScore = (
-    name: string,
-    evaluatorStats: Record<string, { mean: number; count: number }>
-  ): DatasetScoreWithStats => {
-    // Create both evaluatorScores (raw scores) and evaluatorStats (computed stats)
-    const evaluatorScoresMap = new Map<string, number[]>(
-      Object.entries(evaluatorStats).map(([key, stats]) => [
-        key,
-        // Generate some mock scores that would produce the given mean
-        Array(stats.count).fill(stats.mean),
-      ])
-    );
-
-    const evaluatorStatsMap = new Map(
-      Object.entries(evaluatorStats).map(([key, stats]) => [
-        key,
-        {
-          mean: stats.mean,
-          median: stats.mean,
-          stdDev: 0.1,
-          min: stats.mean - 0.1,
-          max: stats.mean + 0.1,
-          count: stats.count,
-          percentage: stats.mean,
-        },
-      ])
-    );
-
-    return {
-      id: `${name}-id`,
-      name,
-      numExamples: 10,
-      evaluatorScores: evaluatorScoresMap,
-      evaluatorStats: evaluatorStatsMap,
-      experimentId: `${name}-experiment`,
-    };
+  /**
+   * Creates mock EvaluatorStats array from a simplified record format.
+   * Each entry in the record becomes an EvaluatorStats object for the given dataset.
+   */
+  const createMockEvaluatorStats = (
+    datasetId: string,
+    datasetName: string,
+    evaluatorData: Record<string, { mean: number; count: number }>
+  ): EvaluatorStats[] => {
+    return Object.entries(evaluatorData).map(([evaluatorName, data]) => ({
+      datasetId,
+      datasetName,
+      evaluatorName,
+      stats: {
+        mean: data.mean,
+        median: data.mean,
+        stdDev: 0.1,
+        min: data.mean - 0.1,
+        max: data.mean + 0.1,
+        count: data.count,
+      },
+    }));
   };
 
   describe('createTable with pattern-based grouping', () => {
     it('should group evaluators using @K patterns', () => {
-      const datasetScores = [
-        createMockDatasetScore('test-dataset', {
-          'Precision@5': { mean: 0.8, count: 10 },
-          'Precision@10': { mean: 0.7, count: 10 },
-          'Recall@5': { mean: 0.6, count: 10 },
-          'Recall@10': { mean: 0.5, count: 10 },
-          'F1@5': { mean: 0.68, count: 10 },
-          'F1@10': { mean: 0.58, count: 10 },
-          Factuality: { mean: 0.9, count: 10 },
-        }),
-      ];
+      const stats = createMockEvaluatorStats('test-dataset-id', 'test-dataset', {
+        'Precision@5': { mean: 0.8, count: 10 },
+        'Precision@10': { mean: 0.7, count: 10 },
+        'Recall@5': { mean: 0.6, count: 10 },
+        'Recall@10': { mean: 0.5, count: 10 },
+        'F1@5': { mean: 0.68, count: 10 },
+        'F1@10': { mean: 0.58, count: 10 },
+        Factuality: { mean: 0.9, count: 10 },
+      });
 
       const evaluatorDisplayGroups: EvaluatorDisplayGroup[] = [
         {
@@ -69,7 +53,7 @@ describe('report_table', () => {
         },
       ];
 
-      const result = createTable(datasetScores, 1, { evaluatorDisplayGroups });
+      const result = createTable(stats, 1, { evaluatorDisplayGroups });
 
       // The table should have the RAG column (grouped)
       expect(result).toContain('RAG');
@@ -85,19 +69,17 @@ describe('report_table', () => {
     });
 
     it('should handle multiple K values for RAG evaluators', () => {
-      const datasetScores = [
-        createMockDatasetScore('test-dataset', {
-          'Precision@5': { mean: 0.8, count: 10 },
-          'Precision@10': { mean: 0.7, count: 10 },
-          'Precision@20': { mean: 0.6, count: 10 },
-          'Recall@5': { mean: 0.6, count: 10 },
-          'Recall@10': { mean: 0.5, count: 10 },
-          'Recall@20': { mean: 0.4, count: 10 },
-          'F1@5': { mean: 0.68, count: 10 },
-          'F1@10': { mean: 0.58, count: 10 },
-          'F1@20': { mean: 0.48, count: 10 },
-        }),
-      ];
+      const stats = createMockEvaluatorStats('test-dataset-id', 'test-dataset', {
+        'Precision@5': { mean: 0.8, count: 10 },
+        'Precision@10': { mean: 0.7, count: 10 },
+        'Precision@20': { mean: 0.6, count: 10 },
+        'Recall@5': { mean: 0.6, count: 10 },
+        'Recall@10': { mean: 0.5, count: 10 },
+        'Recall@20': { mean: 0.4, count: 10 },
+        'F1@5': { mean: 0.68, count: 10 },
+        'F1@10': { mean: 0.58, count: 10 },
+        'F1@20': { mean: 0.48, count: 10 },
+      });
 
       const evaluatorDisplayGroups: EvaluatorDisplayGroup[] = [
         {
@@ -106,7 +88,7 @@ describe('report_table', () => {
         },
       ];
 
-      const result = createTable(datasetScores, 1, { evaluatorDisplayGroups });
+      const result = createTable(stats, 1, { evaluatorDisplayGroups });
 
       // All K values should be in the grouped column
       expect(result).toContain('Precision@5');
@@ -121,12 +103,10 @@ describe('report_table', () => {
     });
 
     it('should not create group when no evaluators match the pattern', () => {
-      const datasetScores = [
-        createMockDatasetScore('test-dataset', {
-          Factuality: { mean: 0.9, count: 10 },
-          Relevance: { mean: 0.85, count: 10 },
-        }),
-      ];
+      const stats = createMockEvaluatorStats('test-dataset-id', 'test-dataset', {
+        Factuality: { mean: 0.9, count: 10 },
+        Relevance: { mean: 0.85, count: 10 },
+      });
 
       const evaluatorDisplayGroups: EvaluatorDisplayGroup[] = [
         {
@@ -135,7 +115,7 @@ describe('report_table', () => {
         },
       ];
 
-      const result = createTable(datasetScores, 1, { evaluatorDisplayGroups });
+      const result = createTable(stats, 1, { evaluatorDisplayGroups });
 
       // RAG column should not appear since no RAG evaluators exist
       expect(result).not.toContain('RAG');
@@ -145,18 +125,16 @@ describe('report_table', () => {
     });
 
     it('should apply display options using patterns', () => {
-      const datasetScores = [
-        createMockDatasetScore('test-dataset', {
-          'Precision@5': { mean: 0.8, count: 10 },
-          'Precision@10': { mean: 0.7, count: 10 },
-        }),
-      ];
+      const stats = createMockEvaluatorStats('test-dataset-id', 'test-dataset', {
+        'Precision@5': { mean: 0.8, count: 10 },
+        'Precision@10': { mean: 0.7, count: 10 },
+      });
 
       const evaluatorDisplayOptions = new Map<string, EvaluatorDisplayOptions>([
         ['Precision@K', { decimalPlaces: 3, statsToInclude: ['mean'] }],
       ]);
 
-      const result = createTable(datasetScores, 1, { evaluatorDisplayOptions });
+      const result = createTable(stats, 1, { evaluatorDisplayOptions });
 
       // The table should be created (basic sanity check)
       expect(result).toContain('Precision@5');
@@ -164,16 +142,14 @@ describe('report_table', () => {
     });
 
     it('should combine pattern groups with exact name groups', () => {
-      const datasetScores = [
-        createMockDatasetScore('test-dataset', {
-          'Precision@5': { mean: 0.8, count: 10 },
-          'Recall@5': { mean: 0.6, count: 10 },
-          'F1@5': { mean: 0.68, count: 10 },
-          InputTokens: { mean: 1000, count: 10 },
-          OutputTokens: { mean: 500, count: 10 },
-          CachedTokens: { mean: 200, count: 10 },
-        }),
-      ];
+      const stats = createMockEvaluatorStats('test-dataset-id', 'test-dataset', {
+        'Precision@5': { mean: 0.8, count: 10 },
+        'Recall@5': { mean: 0.6, count: 10 },
+        'F1@5': { mean: 0.68, count: 10 },
+        InputTokens: { mean: 1000, count: 10 },
+        OutputTokens: { mean: 500, count: 10 },
+        CachedTokens: { mean: 200, count: 10 },
+      });
 
       const evaluatorDisplayGroups: EvaluatorDisplayGroup[] = [
         {
@@ -186,7 +162,7 @@ describe('report_table', () => {
         },
       ];
 
-      const result = createTable(datasetScores, 1, { evaluatorDisplayGroups });
+      const result = createTable(stats, 1, { evaluatorDisplayGroups });
 
       // Both groups should appear
       expect(result).toContain('Tokens');
@@ -205,14 +181,12 @@ describe('report_table', () => {
 
     it('should handle partial pattern matches', () => {
       // When only some RAG evaluators are present
-      const datasetScores = [
-        createMockDatasetScore('test-dataset', {
-          'Precision@5': { mean: 0.8, count: 10 },
-          'Precision@10': { mean: 0.7, count: 10 },
-          // No Recall or F1 evaluators
-          Factuality: { mean: 0.9, count: 10 },
-        }),
-      ];
+      const stats = createMockEvaluatorStats('test-dataset-id', 'test-dataset', {
+        'Precision@5': { mean: 0.8, count: 10 },
+        'Precision@10': { mean: 0.7, count: 10 },
+        // No Recall or F1 evaluators
+        Factuality: { mean: 0.9, count: 10 },
+      });
 
       const evaluatorDisplayGroups: EvaluatorDisplayGroup[] = [
         {
@@ -221,7 +195,7 @@ describe('report_table', () => {
         },
       ];
 
-      const result = createTable(datasetScores, 1, { evaluatorDisplayGroups });
+      const result = createTable(stats, 1, { evaluatorDisplayGroups });
 
       // RAG group should still be created with available evaluators
       expect(result).toContain('RAG');
@@ -233,16 +207,16 @@ describe('report_table', () => {
 
   describe('createTable basic functionality', () => {
     it('should create a table with dataset rows and overall row', () => {
-      const datasetScores = [
-        createMockDatasetScore('dataset-1', {
+      const stats = [
+        ...createMockEvaluatorStats('dataset-1-id', 'dataset-1', {
           Factuality: { mean: 0.9, count: 10 },
         }),
-        createMockDatasetScore('dataset-2', {
+        ...createMockEvaluatorStats('dataset-2-id', 'dataset-2', {
           Factuality: { mean: 0.8, count: 10 },
         }),
       ];
 
-      const result = createTable(datasetScores, 1);
+      const result = createTable(stats, 1);
 
       expect(result).toContain('dataset-1');
       expect(result).toContain('dataset-2');
@@ -250,16 +224,14 @@ describe('report_table', () => {
     });
 
     it('should show repetition info when repetitions > 1', () => {
-      const datasetScores = [
-        createMockDatasetScore('test-dataset', {
-          Factuality: { mean: 0.9, count: 30 },
-        }),
-      ];
+      const stats = createMockEvaluatorStats('test-dataset-id', 'test-dataset', {
+        Factuality: { mean: 0.9, count: 30 },
+      });
 
-      const result = createTable(datasetScores, 3);
+      const result = createTable(stats, 3);
 
-      // Should show "3 x N" format where N is numExamples/repetitions
-      // numExamples is 10 (from mock), so 10/3 ≈ 3.33
+      // Should show "3 x N" format where N is count/repetitions
+      // count is 30, so 30/3 = 10
       expect(result).toContain('3 x');
     });
   });

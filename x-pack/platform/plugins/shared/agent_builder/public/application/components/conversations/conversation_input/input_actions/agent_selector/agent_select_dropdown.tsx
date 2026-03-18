@@ -22,7 +22,6 @@ import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useHasActiveConversation } from '../../../../../hooks/use_conversation';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
-import { RobotIcon } from '../../../../common/icons/robot';
 import {
   getMaxListHeight,
   selectorPopoverPanelStyles,
@@ -66,7 +65,9 @@ const AgentSelectPopoverButton: React.FC<{
   onClick: () => void;
 }> = ({ isPopoverOpen, selectedAgent, onClick }) => {
   const hasActiveConversation = useHasActiveConversation();
-  const iconType = selectedAgent ? () => <AgentAvatar agent={selectedAgent} size="s" /> : RobotIcon;
+  const iconType = selectedAgent
+    ? () => <AgentAvatar agent={selectedAgent} size="s" />
+    : 'productAgent';
   return (
     <InputPopoverButton
       open={isPopoverOpen}

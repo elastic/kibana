@@ -65,7 +65,7 @@ responses:
                   data:
                     esql: "FROM financial_trades | LIMIT 3"
                 - tool_result_id: xTpT
-                  type: tabular_data
+                  type: esql_results
                   data:
                     source: esql
                     query: "FROM financial_trades | LIMIT 3"
@@ -87,7 +87,7 @@ responses:
             value:
               results:
                 - tool_result_id: Voy8
-                  type: tabular_data
+                  type: esql_results
                   data:
                     source: esql
                     query: "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit"
@@ -110,7 +110,7 @@ responses:
                   data:
                     esql: "FROM financial_trades\n| WHERE execution_price > 100\n| LIMIT 100"
                 - tool_result_id: uE8y
-                  type: tabular_data
+                  type: esql_results
                   data:
                     source: esql
                     query: "FROM financial_trades\n| WHERE execution_price > 100\n| LIMIT 100"

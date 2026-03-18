@@ -63,6 +63,8 @@ export class ProfilingPlugin
             })
           : undefined;
 
+        const esCapabilities = coreStart.elasticsearch.getCapabilities();
+
         registerRoutes({
           router,
           logger: this.logger!,
@@ -72,6 +74,7 @@ export class ProfilingPlugin
             config,
             stackVersion,
             telemetryUsageCounter,
+            esCapabilities,
           },
           services: {
             createProfilingEsClient: ({

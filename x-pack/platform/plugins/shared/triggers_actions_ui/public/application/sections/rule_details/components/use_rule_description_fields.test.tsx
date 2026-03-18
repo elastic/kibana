@@ -128,7 +128,8 @@ describe('use_rule_description_fields', () => {
     });
   });
 
-  describe('prebuild fields: query filters', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253540
+  describe.skip('prebuild fields: query filters', () => {
     it('should fetch the index pattern by id', async () => {
       const DATA_VIEW_ID = 'my-data-view-id';
 

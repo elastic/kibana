@@ -17,11 +17,19 @@ import { useUnbackedQueriesCount } from '../../hooks/use_unbacked_queries_count'
 import { FeedbackButton } from '../feedback_button';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { FeaturesTable } from './components/features_table/features_table';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';
+import { SettingsTab } from './components/settings/tab';
 
-const discoveryTabs = ['streams', 'queries', 'insights'] as const;
+const discoveryTabs = [
+  'streams',
+  'knowledge_indicators',
+  'queries',
+  'significant_events',
+  'settings',
+] as const;
 type DiscoveryTab = (typeof discoveryTabs)[number];
 
 function isValidDiscoveryTab(value: string): value is DiscoveryTab {
@@ -75,6 +83,14 @@ export function SignificantEventsDiscoveryPage() {
       isSelected: tab === 'streams',
     },
     {
+      id: 'knowledge_indicators',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTab', {
+        defaultMessage: 'Knowledge Indicators',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'knowledge_indicators' } }),
+      isSelected: tab === 'knowledge_indicators',
+    },
+    {
       id: 'queries',
       label: (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
@@ -94,12 +110,20 @@ export function SignificantEventsDiscoveryPage() {
       isSelected: tab === 'queries',
     },
     {
-      id: 'insights',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.insightsTab', {
-        defaultMessage: 'Insights',
+      id: 'significant_events',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.significantEventsTab', {
+        defaultMessage: 'Significant Events',
       }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'insights' } }),
-      isSelected: tab === 'insights',
+      href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
+      isSelected: tab === 'significant_events',
+    },
+    {
+      id: 'settings',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
+        defaultMessage: 'Settings',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
+      isSelected: tab === 'settings',
     },
   ];
 
@@ -131,8 +155,10 @@ export function SignificantEventsDiscoveryPage() {
       />
       <StreamsAppPageTemplate.Body grow>
         {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
+        {tab === 'knowledge_indicators' && <FeaturesTable />}
         {tab === 'queries' && <QueriesTable />}
-        {tab === 'insights' && <InsightsTab />}
+        {tab === 'significant_events' && <InsightsTab />}
+        {tab === 'settings' && <SettingsTab />}
       </StreamsAppPageTemplate.Body>
     </>
   );

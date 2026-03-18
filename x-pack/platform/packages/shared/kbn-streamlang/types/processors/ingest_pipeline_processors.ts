@@ -20,11 +20,15 @@ import type {
   RemoveProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  RedactProcessor,
   UppercaseProcessor,
   TrimProcessor,
   LowercaseProcessor,
   JoinProcessor,
+  SplitProcessor,
+  SortProcessor,
   ConcatProcessor,
+  NetworkDirectionProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -98,6 +102,12 @@ export type IngestPipelineReplaceProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
+// Redact
+export type IngestPipelineRedactProcessor = RenameFieldsAndRemoveAction<
+  RedactProcessor,
+  { from: 'field'; where: 'if' }
+>;
+
 // Math (uses script processor internally)
 export type IngestPipelineMathProcessor = RenameFieldsAndRemoveAction<
   MathProcessor,
@@ -134,6 +144,24 @@ export type IngestPipelineConcatProcessor = RenameFieldsAndRemoveAction<
   { to: 'field'; where: 'if' }
 >;
 
+// Split
+export type IngestPipelineSplitProcessor = RenameFieldsAndRemoveAction<
+  SplitProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Sort
+export type IngestPipelineSortProcessor = RenameFieldsAndRemoveAction<
+  SortProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Network Direction
+export type IngestPipelineNetworkDirectionProcessor = RenameFieldsAndRemoveAction<
+  NetworkDirectionProcessor,
+  { where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -153,9 +181,13 @@ export type IngestPipelineProcessor =
   | IngestPipelineRemoveByPrefixProcessor
   | IngestPipelineRemoveProcessor
   | IngestPipelineReplaceProcessor
+  | IngestPipelineRedactProcessor
   | IngestPipelineUppercaseProcessor
   | IngestPipelineLowercaseProcessor
   | IngestPipelineTrimProcessor
   | IngestPipelineJoinProcessor
+  | IngestPipelineSplitProcessor
+  | IngestPipelineSortProcessor
   | IngestPipelineConcatProcessor
+  | IngestPipelineNetworkDirectionProcessor
   | IngestPipelineManualIngestPipelineProcessor;

@@ -30,8 +30,8 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): Promise<SecurityWorkflowInsight[]> {
   const currentTime = moment();
-  const { defendInsights, request, endpointMetadataService, esClient } = params;
-  const { insightType, endpointIds, apiConfig } = request.body;
+  const { defendInsights, options, endpointMetadataService, esClient } = params;
+  const { insightType, endpointIds, connectorId, model } = options;
 
   const osEndpointIdsMap = await groupEndpointIdsByOS(endpointIds, endpointMetadataService);
 
@@ -88,7 +88,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
           type: insightType,
           source: {
             type: SourceType.LlmConnector,
-            id: apiConfig.connectorId,
+            id: connectorId ?? '',
             // TODO use actual time range when we add support
             data_range_start: currentTime,
             data_range_end: currentTime.clone().add(24, 'hours'),
@@ -104,7 +104,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
           value: `${filePath}${signatureValue ? ` ${signatureValue}` : ''}`,
           metadata: {
             notes: {
-              llm_model: apiConfig.model ?? '',
+              llm_model: model ?? '',
             },
             display_name: defendInsight.group,
           },

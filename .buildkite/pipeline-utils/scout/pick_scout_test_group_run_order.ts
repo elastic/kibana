@@ -32,6 +32,14 @@ if (process.env.SERVERLESS_TESTS_ONLY) {
   scoutExtraEnv.SERVERLESS_TESTS_ONLY = process.env.SERVERLESS_TESTS_ONLY;
 }
 
+if (process.env.UIAM_DOCKER_IMAGE) {
+  scoutExtraEnv.UIAM_DOCKER_IMAGE = process.env.UIAM_DOCKER_IMAGE;
+}
+
+if (process.env.UIAM_COSMOSDB_DOCKER_IMAGE) {
+  scoutExtraEnv.UIAM_COSMOSDB_DOCKER_IMAGE = process.env.UIAM_COSMOSDB_DOCKER_IMAGE;
+}
+
 export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const bk = new BuildkiteClient();
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
@@ -49,6 +57,13 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     return;
   }
 
+  const SCOUT_CONFIGS_DEPS =
+    process.env.SCOUT_CONFIGS_DEPS !== undefined
+      ? process.env.SCOUT_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ['build_scout_tests'];
+
   const scoutCiRunGroups = modulesWithTests.map((module) => {
     // Check if any config in this module uses parallel workers
     const usesParallelWorkers = module.configs.some((config) => config.usesParallelWorkers);
@@ -61,34 +76,43 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     };
   });
 
+  const steps = [
+    {
+      group: 'Scout Configs',
+      key: 'scout-configs',
+      depends_on: SCOUT_CONFIGS_DEPS,
+      steps: scoutCiRunGroups.map(
+        ({ label, key, group, agents }): BuildkiteStep => ({
+          label,
+          command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
+          timeout_in_minutes: 60,
+          key,
+          agents,
+          env: {
+            SCOUT_CONFIG_GROUP_KEY: key,
+            SCOUT_CONFIG_GROUP_TYPE: group,
+            ...envFromlabels,
+            ...scoutExtraEnv,
+          },
+          retry: {
+            automatic: [
+              { exit_status: '-1', limit: 3 },
+              { exit_status: '*', limit: 1 },
+            ],
+          },
+        })
+      ),
+    },
+  ].flat();
+
+  // Register each Scout child step for cancel-on-gate-failure before uploading
+  // so a concurrent gate failure can cancel or short-circuit them immediately.
+  // We register child step keys (not the group key) because `buildkite-agent step cancel`
+  // does not work on group keys.
+  for (const { key } of scoutCiRunGroups) {
+    bk.setMetadata(`cancel_on_gate_failure:${key}`, 'true');
+  }
+
   // upload the step definitions to Buildkite
-  bk.uploadSteps(
-    [
-      {
-        group: 'Scout Configs',
-        key: 'scout-configs',
-        depends_on: ['build_scout_tests'],
-        steps: scoutCiRunGroups.map(
-          ({ label, key, group, agents }): BuildkiteStep => ({
-            label,
-            command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
-            timeout_in_minutes: 60,
-            agents,
-            env: {
-              SCOUT_CONFIG_GROUP_KEY: key,
-              SCOUT_CONFIG_GROUP_TYPE: group,
-              ...envFromlabels,
-              ...scoutExtraEnv,
-            },
-            retry: {
-              automatic: [
-                { exit_status: '10', limit: 1 },
-                { exit_status: '*', limit: 3 },
-              ],
-            },
-          })
-        ),
-      },
-    ].flat()
-  );
+  bk.uploadSteps(steps);
 }

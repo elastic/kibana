@@ -33,10 +33,6 @@ const defaultFormState: RenameProcessorFormState = {
 
 const fieldOptions: FieldOptions = {
   fieldKey: 'from',
-  fieldHelpText: i18n.translate(
-    'xpack.streams.streamDetailView.managementTab.enrichment.processor.renameFieldHelpText',
-    { defaultMessage: 'The field to be renamed.' }
-  ),
   includeCondition: true,
   includeIgnoreFailures: true,
   includeIgnoreMissing: true,
@@ -49,13 +45,7 @@ const fieldConfigurations: FieldConfiguration[] = [
     required: true,
     label: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.processor.renameTargetFieldLabel',
-      { defaultMessage: 'Target field' }
-    ),
-    helpText: (
-      <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.renameTargetFieldHelpText"
-        defaultMessage="The new name of the field."
-      />
+      { defaultMessage: 'New field name' }
     ),
   },
   {
@@ -90,7 +80,7 @@ export const renameProcessorConfig: ConfigDrivenProcessorConfiguration<
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.renameHelpText"
-        defaultMessage="{renameLink} If the field doesn't exist or the new name is already used, an exception will be thrown."
+        defaultMessage="{renameLink}."
         values={{
           renameLink: (
             <EuiLink
@@ -100,7 +90,7 @@ export const renameProcessorConfig: ConfigDrivenProcessorConfiguration<
               href={docLinks.links.ingest.rename}
             >
               {i18n.translate('xpack.streams.availableProcessors.renameLinkLabel', {
-                defaultMessage: 'Renames an existing field.',
+                defaultMessage: 'Rename an existing field',
               })}
             </EuiLink>
           ),

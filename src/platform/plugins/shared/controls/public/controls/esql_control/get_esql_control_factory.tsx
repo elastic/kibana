@@ -7,21 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   type PublishingSubject,
+  apiHasPinnedPanels,
   initializeStateManager,
-  initializeTitleManager,
-  titleComparators,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
-import type { OptionsListSelection } from '@kbn/controls-schemas';
+import type { OptionsListESQLControlState, OptionsListSelection } from '@kbn/controls-schemas';
 
 import { uiActionsService } from '../../services/kibana_services';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
@@ -30,26 +28,35 @@ import type { OptionsListComponentApi } from '../data_controls/options_list_cont
 import { initializeESQLControlManager, selectionComparators } from './esql_control_manager';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { VariableControlsStrings } from './constants';
+import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 
-export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQLControlApi> => {
+export const getESQLControlFactory = (): EmbeddableFactory<
+  OptionsListESQLControlState,
+  ESQLControlApi
+> => {
   return {
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
-      const titlesManager = initializeTitleManager(state);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const setDataLoading = (loading: boolean | undefined) => dataLoading$.next(loading);
 
       const selections = initializeESQLControlManager(uuid, parentApi, state, setDataLoading);
+      const labelManager = initializeLabelManager(
+        { title: initialState.title, variableName: initialState.variable_name },
+        selections.internalApi,
+        'variableName'
+      );
 
       function serializeState() {
         return {
           ...selections.getLatestState(),
+          ...labelManager.getLatestState(),
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<ESQLControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<OptionsListESQLControlState>({
         uuid,
         parentApi,
         serializeState,
@@ -57,19 +64,20 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         getComparators: () => {
           return {
             ...selectionComparators,
-            ...titleComparators,
+            ...defaultControlLabelComparators,
+            display_settings: 'skip',
           };
         },
         onReset: (lastSaved) => {
           selections.reinitializeState(lastSaved);
-          titlesManager.reinitializeState(lastSaved);
+          labelManager.reinitializeState(lastSaved);
         },
       });
 
       const api = finalizeApi({
-        ...titlesManager.api,
         ...unsavedChangesApi,
         ...selections.api,
+        ...labelManager.api,
         dataLoading$,
         isExpandable: false,
         isCustomizable: false,
@@ -82,29 +90,30 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
          */
         isDuplicable: false,
         isPinnable: true,
-        defaultTitle$: new BehaviorSubject<string | undefined>(state.title),
         isEditingEnabled: () => true,
         getTypeDisplayName: () => VariableControlsStrings.displayName,
         onEdit: async () => {
           const nextState = {
-            ...titlesManager.getLatestState(),
             ...selections.getLatestState(),
+            ...labelManager.getLatestState(),
           };
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value
             : [];
-          const onSaveControl = async (updatedState: ESQLControlState) => {
+          const onSaveControl = async (updatedState: OptionsListESQLControlState) => {
             selections.reinitializeState(updatedState);
-            titlesManager.reinitializeState(updatedState);
+            labelManager.reinitializeState(updatedState);
           };
           try {
-            await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-              queryString: nextState.esqlQuery,
-              variableType: nextState.variableType,
-              controlType: nextState.controlType,
+            await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
+              queryString: nextState.esql_query,
+              variableType: nextState.variable_type,
+              controlType: nextState.control_type,
               esqlVariables: variablesInParent,
               onSaveControl,
+              parentApi,
               initialState: nextState,
+              controlId: uuid,
             });
           } catch (e) {
             // eslint-disable-next-line no-console
@@ -115,17 +124,17 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       });
 
       const componentStaticState = {
-        singleSelect: state.singleSelect ?? true,
+        single_select: state.single_select ?? true,
         exclude: false,
-        existsSelected: false,
+        exists_selected: false,
         requestSize: 0,
         sort: undefined,
-        runPastTimeout: false,
+        run_past_timeout: false,
         invalidSelections: new Set<OptionsListSelection>(),
-        fieldName: state.variableName,
-        useGlobalFilters: false,
-        ignoreValidations: false,
-        dataViewId: '',
+        field_name: state.variable_name,
+        use_global_filters: false,
+        ignore_validations: false,
+        data_view_id: '',
         blockingError: undefined,
         filtersLoading: false,
         appliedFilters: undefined,
@@ -140,6 +149,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       const componentApi: OptionsListComponentApi = {
         ...api,
         ...selections.internalApi,
+        ...labelManager.api,
         isExpandable: false,
         isCustomizable: false,
         isDuplicable: false,
@@ -189,36 +199,47 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         },
         loadMoreSubject: new BehaviorSubject<void>(undefined),
         fieldFormatter: new BehaviorSubject((v: string) => v),
-        allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
         dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
       };
 
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
       return {
         api,
-        Component: () => (
-          <OptionsListControlContext.Provider
-            value={{
-              componentApi,
-              displaySettings: {
-                hideActionBar: false,
-                hideExclude: true,
-                hideExists: true,
-                hideSort: true,
-                placeholder: VariableControlsStrings.emptySelectionPlaceholder,
-              },
-              customStrings: {
-                invalidSelectionsLabel: VariableControlsStrings.getIncompatibleSelectionsLabel(
-                  componentApi.invalidSelections$.value.size
-                ),
-              },
-            }}
-          >
-            <OptionsListControl
-              // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
-              disableMultiValueEmptySelection={true}
-            />
-          </OptionsListControlContext.Provider>
-        ),
+        Component: () => {
+          useEffect(() => {
+            return () => {
+              selections.cleanup();
+              labelManager.cleanup();
+            };
+          }, []);
+
+          return (
+            <OptionsListControlContext.Provider
+              value={{
+                componentApi,
+                displaySettings: {
+                  hide_action_bar: false,
+                  hide_exclude: true,
+                  hide_exists: true,
+                  hide_sort: true,
+                  placeholder: VariableControlsStrings.emptySelectionPlaceholder,
+                },
+                customStrings: {
+                  invalidSelectionsLabel: VariableControlsStrings.getIncompatibleSelectionsLabel(
+                    componentApi.invalidSelections$.value.size
+                  ),
+                },
+              }}
+            >
+              <OptionsListControl
+                // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
+                disableMultiValueEmptySelection={true}
+                isPinned={isPinned}
+              />
+            </OptionsListControlContext.Provider>
+          );
+        },
       };
     },
   };

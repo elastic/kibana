@@ -24,12 +24,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
-  useGetGapAutoFillScheduler,
   useCreateGapAutoFillScheduler,
   useUpdateGapAutoFillScheduler,
 } from '../../api/hooks/use_gap_auto_fill_scheduler';
 import * as i18n from '../../translations';
-import { useGapAutoFillCapabilities } from '../../logic/use_gap_auto_fill_capabilities';
+import { useGapAutoFillSchedulerContext } from '../../context/gap_auto_fill_scheduler_context';
 import { GapAutoFillLogsFlyout } from '../gap_auto_fill_logs';
 
 export interface RuleSettingsModalProps {
@@ -38,9 +37,14 @@ export interface RuleSettingsModalProps {
 }
 
 export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, onClose }) => {
-  const { canEditGapAutoFill, canAccessGapAutoFill } = useGapAutoFillCapabilities();
+  const {
+    canEditGapAutoFill,
+    canAccessGapAutoFill,
+    scheduler: gapAutoFillScheduler,
+    isSchedulerLoading: isLoadingGapAutoFillScheduler,
+  } = useGapAutoFillSchedulerContext();
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(isOpen);
-  const query = useGetGapAutoFillScheduler({ enabled: canAccessGapAutoFill });
   const createMutation = useCreateGapAutoFillScheduler();
   const updateMutation = useUpdateGapAutoFillScheduler();
   const { addSuccess, addError } = useAppToasts();
@@ -48,17 +52,14 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
   const [enabled, setEnabled] = useState<boolean>(false);
   const [isLogsFlyoutOpen, setIsLogsFlyoutOpen] = useState<boolean>(false);
 
-  const gapAutoFillScheduler = query.data;
-
   useEffect(() => {
-    if (isOpen && query.data) {
-      const isEnabled = query.data?.enabled ?? false;
+    if (isOpen && gapAutoFillScheduler) {
+      const isEnabled = gapAutoFillScheduler?.enabled ?? false;
       setEnabled(isEnabled);
     }
-  }, [isOpen, query.data]);
+  }, [isOpen, gapAutoFillScheduler]);
 
   const isSaving = createMutation.isLoading || updateMutation.isLoading;
-  const isLoadingGapAutoFillScheduler = query.isLoading;
 
   const onSave = async () => {
     try {

@@ -418,10 +418,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     onRenderComplete?.();
   }
   const swimlaneStyles = css({
-    '.echLegendListContainer': {
+    '.echLegendGridListContainer': {
       height: '34px !important',
     },
-    '.echLegendList': {
+    '.echLegendGridList': {
       display: 'flex !important',
       justifyContent: 'space-between !important',
       flexWrap: 'nowrap',

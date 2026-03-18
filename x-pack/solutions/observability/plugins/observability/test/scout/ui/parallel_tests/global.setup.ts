@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import {
   createDataView,
   generateLogsData,
@@ -16,7 +16,7 @@ import { GENERATED_METRICS } from '../fixtures/constants';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({
     apiServices,
     log,

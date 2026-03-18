@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isActionBlock, isConditionBlock } from '@kbn/streamlang';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useDiscardConfirm } from '../../../../../hooks/use_discard_confirm';

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import {
   ensureIndexPatternFromExport,
   findImportedSavedObjectId,
@@ -38,7 +39,7 @@ const getPanelDrilldownCounts = (
   return { panelsWithDrilldowns };
 };
 
-spaceTest.describe('Visualize migration smoke (7.12.1)', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Visualize migration smoke (7.12.1)', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);

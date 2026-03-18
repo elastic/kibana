@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import { FeatureClient } from './feature_client';
@@ -21,7 +21,7 @@ export class FeatureService {
     private readonly logger: Logger
   ) {}
 
-  async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<FeatureClient> {
+  async getClient(): Promise<FeatureClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const adapter = new StorageIndexAdapter<FeatureStorageSettings, StoredFeature>(

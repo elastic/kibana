@@ -12,9 +12,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiToolTip,
   EuiLink,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
@@ -33,7 +33,10 @@ import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
-import { removeVersionSuffixFromPolicyId } from '../../../../../../../common/services/version_specific_policies_utils';
+import {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+} from '../../../../../../../common/services/version_specific_policies_utils';
 
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
@@ -111,7 +114,8 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       if (!agent.active) return false;
       if (!agent.policy_id) return true;
 
-      const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
+      const basePolicyId = removeVersionSuffixFromPolicyId(agent.policy_id);
+      const agentPolicy = agentPoliciesIndexedById[basePolicyId];
       const isHosted = agentPolicy?.is_managed === true;
       return !isHosted;
     },
@@ -200,11 +204,22 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       }),
       width: '220px',
       render: (policyId: string, agent: Agent) => {
-        const agentPolicy = agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(policyId)];
+        const basePolicyId = removeVersionSuffixFromPolicyId(policyId);
+        const agentPolicy = agentPoliciesIndexedById[basePolicyId];
+        const isVersionSpecific = hasVersionSuffix(policyId);
 
         return (
           agentPolicy && (
-            <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
+            <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false} css={{ minWidth: 0 }}>
+              <EuiFlexItem grow={true} css={{ minWidth: 0 }}>
+                <AgentPolicySummaryLine
+                  policy={agentPolicy}
+                  agent={agent}
+                  showPolicyId
+                  isVersionSpecific={isVersionSpecific}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )
         );
       },
@@ -233,7 +248,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (metrics: AgentMetrics | undefined, agent: Agent) =>
         formatAgentCPU(
           agent.metrics,
-          agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+          agent.policy_id
+            ? agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(agent.policy_id)]
+            : undefined
         ),
     },
     {
@@ -259,7 +276,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (metrics: AgentMetrics | undefined, agent: Agent) =>
         formatAgentMemory(
           agent.metrics,
-          agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+          agent.policy_id
+            ? agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(agent.policy_id)]
+            : undefined
         ),
     },
     {

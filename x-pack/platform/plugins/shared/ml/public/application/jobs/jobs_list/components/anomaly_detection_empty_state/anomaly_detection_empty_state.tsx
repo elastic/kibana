@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SerializedStyles } from '@emotion/serialize';
-import adImage from './machine_learning_cog.png';
+import adImage from './machine_learning_cog.svg';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';

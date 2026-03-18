@@ -40,6 +40,7 @@ export const SharepointOnline: ConnectorSpec = {
       defaultMessage: 'Kibana Stack Connector for SharePoint Online.',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows'],
   },
 
@@ -405,7 +406,6 @@ export const SharepointOnline: ConnectorSpec = {
           ],
         };
 
-        ctx.log.debug(`SharePoint search: ${JSON.stringify(typedInput.query)}`);
         const response = await ctx.client.post(
           'https://graph.microsoft.com/v1.0/search/query',
           searchRequest

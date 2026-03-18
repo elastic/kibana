@@ -51,6 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
+    beforeEach(async function () {
+      await discover.resetQueryMode();
+    });
+
     it('saves the last URL when in data view mode', async function () {
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { expect as jestExpect } from 'expect';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
@@ -12,6 +15,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
+  const esSupertest = getService('esSupertestWithoutAuth');
   const es = getService('es');
 
   async function createToken() {
@@ -145,6 +149,64 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(500);
         expect(authFlow500ResponseText).to.contain('<h1>Unauthenticated</h1>');
         expect(refresh500Header).to.contain('url=/login');
+      });
+    });
+
+    // These tests verify that appropriate error details are included in the response when access token is rejected due
+    // to expiration or because it is missing from the index. This is important for Kibana to be able to distinguish
+    // between different failure scenarios and react accordingly (e.g. trigger re-authentication).
+    describe('error contracts', () => {
+      it('expired token error should include appropriate `reason`', async () => {
+        const { accessToken } = await createToken();
+
+        // Access token expiration is set to 15s for API integration tests.
+        // Let's wait for 20s to make sure token expires.
+        await setTimeoutAsync(20000);
+
+        const errorResponse = await esSupertest
+          .get('/_security/_authenticate')
+          .set('authorization', `Bearer ${accessToken}`)
+          .expect(401);
+        jestExpect(errorResponse.body).toEqual(
+          jestExpect.objectContaining({
+            error: jestExpect.objectContaining({
+              type: 'security_exception',
+              reason: 'token expired',
+            }),
+            status: 401,
+          })
+        );
+      });
+
+      it('missing token error should include appropriate `additional_unsuccessful_credentials`', async () => {
+        const { accessToken } = await createToken();
+
+        // Make sure newly created token documents are available for search.
+        await es.indices.refresh({ index: '.security-tokens' });
+
+        // Let's delete tokens from `.security` index directly to simulate the case when
+        // Elasticsearch automatically removes access/refresh token document from the index
+        // after some period of time.
+        const esResponse = await es.deleteByQuery({
+          index: '.security-tokens',
+          query: { match: { doc_type: 'token' } },
+          refresh: true,
+        });
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
+
+        const errorResponse = await esSupertest
+          .get('/_security/_authenticate')
+          .set('authorization', `Bearer ${accessToken}`)
+          .expect(401);
+        jestExpect(errorResponse.body).toEqual(
+          jestExpect.objectContaining({
+            error: jestExpect.objectContaining({
+              type: 'security_exception',
+              additional_unsuccessful_credentials: 'oauth2 token: invalid token',
+            }),
+            status: 401,
+          })
+        );
       });
     });
   });

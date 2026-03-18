@@ -42,11 +42,11 @@ export function registerConnectorTypesFromSpecs({
       '@kbn/connector-specs'
     ),
     import(
-      /* webpackChunkName: "singleFileConnectorBundle" */
+      /* webpackChunkName: "responseOpsFormGenerator" */
       '@kbn/response-ops-form-generator'
     ),
     import(
-      /* webpackChunkName: "singleFileConnectorBundle" */
+      /* webpackChunkName: "generateSchema" */
       './generate_schema'
     ),
   ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }]) => {
@@ -70,6 +70,7 @@ const createConnectorTypeFromSpec = (
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
     source: ACTION_TYPE_SOURCES.spec,
+    isExperimental: spec.metadata.isTechnicalPreview,
     selectMessage: spec.metadata.description,
     iconClass: getIcon(spec),
     // Temporary workaround to hide workflows connector when workflows UI setting is disabled.
@@ -79,7 +80,7 @@ const createConnectorTypeFromSpec = (
         spec.metadata.supportedFeatureIds[0] === WorkflowsConnectorFeatureId
       ) {
         // @ts-expect-error upgrade typescript v5.9.3
-        return !ref.uiSettings?.get<boolean>('workflows:ui:enabled') ?? false;
+        return !ref.uiSettings?.get<boolean>('workflows:ui:enabled', false) ?? false;
       }
       return false;
     },

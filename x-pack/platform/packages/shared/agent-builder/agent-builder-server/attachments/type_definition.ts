@@ -31,18 +31,16 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
     context: AttachmentFormatContext
   ) => MaybePromise<AgentFormattedAttachment>;
   /**
-   * Optional hook to resolve additional data on-demand when an attachment is read.
+   * Receives origin (a saved object ID string) and returns resolved content.
+   * Only called once at add time — not on every read.
    *
-   * This is primarily intended for "by-reference" attachment types, where the stored data is a
-   * reference to another entity (e.g. a saved object), and the actual content is resolved at read time.
-   *
-   * The return value is intentionally generic and will be exposed under a `resolved` key by
-   * `attachment_read` (and related server APIs).
+   * When defined, the type supports by-reference creation:
+   * consumer provides origin string → `resolve()` called → content stored as `data`.
    */
   resolve?: (
-    attachment: Attachment<TType, TContent>,
+    origin: string,
     context: AttachmentResolveContext
-  ) => MaybePromise<unknown>;
+  ) => MaybePromise<TContent | undefined>;
   /**
    * should return the list of tools from the registry which should be exposed to the agent
    * when attachments of that type are present in the conversation.
@@ -59,7 +57,7 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    */
   getAgentDescription?: () => string;
   /**
-   * Whether attachments of this type are read-only. Defaults to true.
+   * Whether attachments of this type are read-only. Defaults to false.
    */
   isReadonly?: boolean;
 }

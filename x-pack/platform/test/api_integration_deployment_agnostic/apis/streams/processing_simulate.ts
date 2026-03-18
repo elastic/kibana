@@ -80,12 +80,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await enableStreams(apiClient);
 
       // Create a test document
-      await indexDocument(esClient, 'logs', testDoc);
+      await indexDocument(esClient, 'logs.otel', testDoc);
 
       // Create a forked stream for testing
-      await forkStream(apiClient, 'logs', {
+      await forkStream(apiClient, 'logs.otel', {
         stream: {
-          name: 'logs.test',
+          name: 'logs.otel.test',
         },
         where: {
           field: 'resource.attributes.host.name',
@@ -101,7 +101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Successful simulations', () => {
       it('should simulate additive processing', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [basicGrokProcessor],
           },
@@ -125,7 +125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate with detected fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: { steps: [basicGrokProcessor] },
           documents: [createTestDocument()],
           detected_fields: [
@@ -143,7 +143,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate multiple sequential processors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor,
@@ -177,7 +177,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate partially parsed documents', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor, // This processor will correctly extract fields
@@ -211,7 +211,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return processor metrics', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor, // This processor will correctly extract fields
@@ -255,7 +255,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return accurate rates', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor,
@@ -296,7 +296,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return metrics for skipped documents due to non-hit condition', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -329,7 +329,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should allow overriding fields detected by previous simulation processors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor,
@@ -364,7 +364,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should gracefully return the errors for each partially parsed or failed document', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor, // This processor will correctly extract fields
@@ -392,7 +392,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should gracefully return failed simulation errors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -477,7 +477,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should gracefully return mappings simulation errors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -504,7 +504,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Simulate detected fields mapping issue
         const detectedFieldsFailureResponse = await simulateProcessingForStream(
           apiClient,
-          'logs.test',
+          'logs.otel.test',
           {
             processing: {
               steps: [basicGrokProcessor],
@@ -553,7 +553,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should properly report ignored fields for geo.location in OTEL streams', async () => {
         // logs.test is a wired stream (OTEL stream) created in the parent describe's before hook
         // Test with geo.location field using OTEL semantic conventions (flattened format)
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -668,6 +668,206 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(value).to.have.property('source.geo.location.lon', -74.006);
         expect(value).to.have.property('destination.geo.location.lat', 51.5);
         expect(value).to.have.property('destination.geo.location.lon', -0.125);
+      });
+    });
+
+    describe('Temporary field handling', () => {
+      // Tests for https://github.com/elastic/kibana/issues/248968
+      // Temporary fields that are created and then deleted should NOT appear in detected_fields
+
+      it('should NOT include temporary fields (created then deleted) in detected_fields', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-temp-field',
+                action: 'set' as const,
+                to: 'attributes.temp_field',
+                value: 'temporary_value',
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'remove-temp-field',
+                action: 'remove' as const,
+                from: 'attributes.temp_field',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        const { detected_fields, status, value } = response.body.documents[0];
+        expect(status).to.be('parsed');
+
+        // The temp_field should NOT be in detected_fields since it was deleted
+        const tempFieldDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.temp_field'
+        );
+        expect(tempFieldDetected).to.be(undefined);
+
+        // The final document should NOT have the temp_field
+        expect(value).to.not.have.property('attributes.temp_field');
+      });
+
+      it('should include fields that are created and kept in detected_fields', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-permanent-field',
+                action: 'set' as const,
+                to: 'attributes.permanent_field',
+                value: 'permanent_value',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        const { detected_fields, value } = response.body.documents[0];
+
+        // The permanent_field SHOULD be in detected_fields
+        const permanentFieldDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.permanent_field'
+        );
+        expect(permanentFieldDetected).to.not.be(undefined);
+        expect(permanentFieldDetected!.processor_id).to.be('set-permanent-field');
+
+        // The final document should have the permanent_field
+        expect(value).to.have.property('attributes.permanent_field', 'permanent_value');
+      });
+
+      it('should NOT include fields that are modified then deleted in detected_fields', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-field',
+                action: 'set' as const,
+                to: 'attributes.temp_field',
+                value: 'initial_value',
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'modify-field',
+                action: 'set' as const,
+                to: 'attributes.temp_field',
+                value: 'modified_value',
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'remove-field',
+                action: 'remove' as const,
+                from: 'attributes.temp_field',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        const { detected_fields, value } = response.body.documents[0];
+
+        // The temp_field should NOT be in detected_fields since it was deleted
+        const tempFieldDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.temp_field'
+        );
+        expect(tempFieldDetected).to.be(undefined);
+
+        // The final document should NOT have the temp_field
+        expect(value).to.not.have.property('attributes.temp_field');
+      });
+
+      it('should track per-processor fields even for temporary fields', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-temp-field',
+                action: 'set' as const,
+                to: 'attributes.temp_field',
+                value: 'temporary_value',
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'remove-temp-field',
+                action: 'remove' as const,
+                from: 'attributes.temp_field',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        // Per-processor metrics SHOULD still track that the first processor added the temp field
+        const processorsMetrics = response.body.processors_metrics;
+        const setProcessorMetrics = processorsMetrics['set-temp-field'];
+
+        expect(setProcessorMetrics).to.not.be(undefined);
+        expect(setProcessorMetrics!.detected_fields).to.contain('attributes.temp_field');
+        expect(setProcessorMetrics!.parsed_rate).to.be(1);
+      });
+
+      it('should handle mixed temporary and permanent fields correctly', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-fields',
+                action: 'grok' as const,
+                from: 'body.text',
+                patterns: [
+                  '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{WORD:attributes.temp_level} %{GREEDYDATA:attributes.parsed_message}',
+                ],
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'remove-temp-level',
+                action: 'remove' as const,
+                from: 'attributes.temp_level',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        const { detected_fields, value } = response.body.documents[0];
+
+        // temp_level should NOT be in detected_fields (created then deleted)
+        const tempLevelDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.temp_level'
+        );
+        expect(tempLevelDetected).to.be(undefined);
+
+        // parsed_timestamp and parsed_message SHOULD be in detected_fields (kept)
+        const timestampDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.parsed_timestamp'
+        );
+        const messageDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.parsed_message'
+        );
+        expect(timestampDetected).to.not.be(undefined);
+        expect(messageDetected).to.not.be(undefined);
+
+        // Final document should have permanent fields but not temp_level
+        expect(value).to.have.property('attributes.parsed_timestamp', TEST_TIMESTAMP);
+        expect(value).to.have.property('attributes.parsed_message', 'test');
+        expect(value).to.not.have.property('attributes.temp_level');
       });
     });
   });

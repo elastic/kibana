@@ -18,6 +18,7 @@ interface SearchStepExecutionsParams {
   workflowExecutionId: string;
   additionalQuery?: estypes.QueryDslQueryContainer;
   spaceId: string;
+  sourceExcludes?: string[];
 }
 
 export const searchStepExecutions = async ({
@@ -27,6 +28,7 @@ export const searchStepExecutions = async ({
   workflowExecutionId,
   additionalQuery,
   spaceId,
+  sourceExcludes,
 }: SearchStepExecutionsParams): Promise<EsWorkflowStepExecution[]> => {
   try {
     logger.debug(`Searching workflows in index ${stepsExecutionIndex}`);
@@ -47,6 +49,7 @@ export const searchStepExecutions = async ({
           must: mustQueries,
         },
       },
+      ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
       sort: 'startedAt:desc',
       from: 0,
       size: 1000, // TODO: without it, it returns up to 10 results by default. We should improve this.

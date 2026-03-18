@@ -118,7 +118,8 @@ describe('PackageInstaller', () => {
       expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
       expect(downloadToDiskMock).toHaveBeenCalledWith(
         `${artifactRepositoryUrl}/${artifactName}`,
-        `${artifactsFolder}/${artifactName}`
+        `${artifactsFolder}/${artifactName}`,
+        undefined
       );
 
       expect(openZipArchiveMock).toHaveBeenCalledTimes(1);
@@ -248,6 +249,7 @@ describe('PackageInstaller', () => {
         kibana: ['8.15', '8.16'],
         security: ['8.15', '8.16'],
         elasticsearch: ['8.15'],
+        openapi: [],
       });
 
       productDocClient.getInstallationStatus.mockResolvedValue({
@@ -255,6 +257,10 @@ describe('PackageInstaller', () => {
         security: { status: 'installed', version: '8.16' },
         elasticsearch: { status: 'uninstalled' },
       } as Record<ProductName, ProductInstallState>);
+
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'uninstalled',
+      });
 
       jest.spyOn(packageInstaller, 'installPackage');
 
@@ -338,7 +344,8 @@ describe('PackageInstaller', () => {
       expect(fetchSecurityLabsVersionsMock).toHaveBeenCalledTimes(1);
       expect(downloadToDiskMock).toHaveBeenCalledWith(
         `${artifactRepositoryUrl}/${artifactName}`,
-        `${artifactsFolder}/${artifactName}`
+        `${artifactsFolder}/${artifactName}`,
+        undefined
       );
 
       // Critical: openZipArchive must use the full path returned by downloadToDisk.

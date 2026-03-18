@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormPrepend,
+  EuiFormRow,
+  EuiSuperSelect,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AlertsFilter, AlertsFilterTimeframe, RuleActionFrequency } from '@kbn/alerting-types';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
@@ -212,12 +218,11 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
             {showSelectActionGroup && (
               <EuiSuperSelect
                 prepend={
-                  <EuiFormLabel
+                  <EuiFormPrepend
                     id={`addNewActionConnectorActionGroupLabel-${action.actionTypeId}`}
-                    htmlFor={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
-                  >
-                    {ACTION_GROUP_RUN_WHEN}
-                  </EuiFormLabel>
+                    inputId={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
+                    label={ACTION_GROUP_RUN_WHEN}
+                  />
                 }
                 data-test-subj="ruleActionsSettingsSelectActionGroup"
                 fullWidth

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
 import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import {
   type FeaturesIdentificationTaskParams,
   getFeaturesIdentificationTaskId,
@@ -146,6 +145,36 @@ export const listFeaturesRoute = createServerRoute({
   },
 });
 
+export const listAllFeaturesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_features',
+  options: {
+    access: 'internal',
+    summary: 'Lists all features across streams',
+    description: 'Fetches all features the user has access to',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({ request, getScopedClients, server }): Promise<{ features: Feature[] }> => {
+    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const streams = await streamsClient.listStreams();
+    const streamNames = streams.map((stream) => stream.name);
+
+    const { hits: features } = await featureClient.getAllFeatures(streamNames);
+
+    return {
+      features,
+    };
+  },
+});
+
 export const bulkFeaturesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features/_bulk',
   options: {
@@ -259,12 +288,6 @@ export const featuresTaskRoute = createServerRoute({
     body: taskActionSchema({
       from: dateFromString,
       to: dateFromString,
-      connector_id: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
     }),
   }),
   handler: async ({
@@ -272,7 +295,6 @@ export const featuresTaskRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    logger,
   }): Promise<FeaturesIdentificationTaskResult> => {
     const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
@@ -295,19 +317,11 @@ export const featuresTaskRoute = createServerRoute({
             scheduleConfig: {
               taskType: FEATURES_IDENTIFICATION_TASK_TYPE,
               taskId,
-              params: await (async (): Promise<FeaturesIdentificationTaskParams> => {
-                const connectorId = await resolveConnectorId({
-                  connectorId: body.connector_id,
-                  uiSettingsClient,
-                  logger,
-                });
-                return {
-                  connectorId,
-                  start: body.from.getTime(),
-                  end: body.to.getTime(),
-                  streamName: name,
-                };
-              })(),
+              params: {
+                start: body.from.getTime(),
+                end: body.to.getTime(),
+                streamName: name,
+              },
               request,
             },
           } as const)
@@ -325,6 +339,7 @@ export const featureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
   ...listFeaturesRoute,
+  ...listAllFeaturesRoute,
   ...bulkFeaturesRoute,
   ...featuresStatusRoute,
   ...featuresTaskRoute,

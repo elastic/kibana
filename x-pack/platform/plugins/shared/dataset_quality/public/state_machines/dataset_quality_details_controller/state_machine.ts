@@ -7,8 +7,8 @@
 
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { getDateISORange } from '@kbn/timerange';
-import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { assign, createMachine, raise } from 'xstate';
+import type { ActorRefFrom } from 'xstate';
+import { assign, createMachine, fromPromise, raise } from 'xstate';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { omit } from 'lodash';
 import type {
@@ -29,7 +29,6 @@ import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notificati
 import type {
   DatasetQualityDetailsControllerContext,
   DatasetQualityDetailsControllerEvent,
-  DatasetQualityDetailsControllerTypeState,
 } from './types';
 
 import type { IntegrationType } from '../../../common/data_stream_details';
@@ -53,15 +52,14 @@ import {
 export const createPureDatasetQualityDetailsControllerStateMachine = (
   initialContext: DatasetQualityDetailsControllerContext
 ) =>
-  createMachine<
-    DatasetQualityDetailsControllerContext,
-    DatasetQualityDetailsControllerEvent,
-    DatasetQualityDetailsControllerTypeState
-  >(
+  createMachine(
     {
+      types: {} as {
+        context: DatasetQualityDetailsControllerContext;
+        events: DatasetQualityDetailsControllerEvent;
+      },
       id: 'DatasetQualityDetailsController',
       context: initialContext,
-      predictableActionArguments: true,
       initial: 'initializing',
       states: {
         initializing: {
@@ -73,6 +71,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 fetching: {
                   invoke: {
                     src: 'checkDatasetIsAggregatable',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'done',
                       actions: ['storeDatasetAggregatableStatus'],
@@ -80,7 +79,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     onError: [
                       {
                         target: '#DatasetQualityDetailsController.indexNotFound',
-                        cond: 'isIndexNotFoundError',
+                        guard: 'isIndexNotFoundError',
                       },
                       {
                         target: 'done',
@@ -105,6 +104,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 fetching: {
                   invoke: {
                     src: 'loadDataStreamDetails',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'done',
                       actions: ['storeDataStreamDetails'],
@@ -112,7 +112,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     onError: [
                       {
                         target: '#DatasetQualityDetailsController.indexNotFound',
-                        cond: 'isIndexNotFoundError',
+                        guard: 'isIndexNotFoundError',
                       },
                       {
                         target: 'done',
@@ -146,6 +146,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 fetching: {
                   invoke: {
                     src: 'checkBreakdownFieldIsEcs',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'done',
                       actions: ['storeBreakdownFieldEcsStatus'],
@@ -165,6 +166,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 fetchingDataStreamSettings: {
                   invoke: {
                     src: 'loadDataStreamSettings',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'qualityIssues',
                       actions: ['storeDataStreamSettings'],
@@ -172,7 +174,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     onError: [
                       {
                         target: '#DatasetQualityDetailsController.indexNotFound',
-                        cond: 'isIndexNotFoundError',
+                        guard: 'isIndexNotFoundError',
                       },
                       {
                         target: 'errorFetchingDataStreamSettings',
@@ -191,6 +193,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         fetchingDataStreamDegradedFields: {
                           invoke: {
                             src: 'loadDegradedFields',
+                            input: ({ context }) => context,
                             onDone: {
                               target: 'doneFetchingDegradedFields',
                               actions: ['storeDegradedFields'],
@@ -198,7 +201,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             onError: [
                               {
                                 target: '#DatasetQualityDetailsController.indexNotFound',
-                                cond: 'isIndexNotFoundError',
+                                guard: 'isIndexNotFoundError',
                               },
                               {
                                 target: 'errorFetchingDegradedFields',
@@ -219,7 +222,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                           always: [
                             {
                               target: 'fetchingFailedDocs',
-                              cond: 'canReadFailureStore',
+                              guard: 'canReadFailureStore',
                             },
                             {
                               // If the user does not have permission to read the failure store, we don't need to fetch failed docs
@@ -230,6 +233,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         fetchingFailedDocs: {
                           invoke: {
                             src: 'loadFailedDocsDetails',
+                            input: ({ context }) => context,
                             onDone: {
                               target: 'doneFetchingFailedDocs',
                               actions: ['storeFailedDocsDetails'],
@@ -237,11 +241,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             onError: [
                               {
                                 target: 'notImplemented',
-                                cond: 'checkIfNotImplemented',
+                                guard: 'checkIfNotImplemented',
                               },
                               {
                                 target: '#DatasetQualityDetailsController.indexNotFound',
-                                cond: 'isIndexNotFoundError',
+                                guard: 'isIndexNotFoundError',
                               },
                               {
                                 target: 'errorFetchingFailedDocs',
@@ -304,11 +308,12 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 checkingAndLoadingIntegration: {
                   invoke: {
                     src: 'checkAndLoadIntegration',
+                    input: ({ context }) => context,
                     onDone: [
                       {
                         target: 'loadingIntegrationDashboards',
                         actions: 'storeDataStreamIntegration',
-                        cond: 'isDataStreamIsPartOfIntegration',
+                        guard: 'isDataStreamIsPartOfIntegration',
                       },
                       {
                         actions: 'storeDataStreamIntegration',
@@ -324,6 +329,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 loadingIntegrationDashboards: {
                   invoke: {
                     src: 'loadIntegrationDashboards',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'done',
                       actions: ['storeIntegrationDashboards'],
@@ -331,7 +337,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     onError: [
                       {
                         target: 'unauthorizedToLoadDashboards',
-                        cond: 'checkIfActionForbidden',
+                        guard: 'checkIfActionForbidden',
                       },
                       {
                         target: 'done',
@@ -353,7 +359,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   always: [
                     {
                       target: 'closed',
-                      cond: 'hasNoQualityIssueSelected',
+                      guard: 'hasNoQualityIssueSelected',
                     },
                   ],
                 },
@@ -364,7 +370,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       always: [
                         {
                           target: 'degradedFieldFlyout',
-                          cond: 'isDegradedFieldFlyout',
+                          guard: 'isDegradedFieldFlyout',
                         },
                         {
                           target: 'failedDocsFlyout',
@@ -377,6 +383,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         fetching: {
                           invoke: {
                             src: 'loadfailedDocsErrors',
+                            input: ({ context }) => context,
                             onDone: {
                               target: 'done',
                               actions: ['storeFailedDocsErrors'],
@@ -384,11 +391,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             onError: [
                               {
                                 target: 'unsupported',
-                                cond: 'checkIfNotImplemented',
+                                guard: 'checkIfNotImplemented',
                               },
                               {
                                 target: '#DatasetQualityDetailsController.indexNotFound',
-                                cond: 'isIndexNotFoundError',
+                                guard: 'isIndexNotFoundError',
                               },
                               {
                                 target: 'done',
@@ -416,6 +423,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             fetching: {
                               invoke: {
                                 src: 'loadDegradedFieldValues',
+                                input: ({ context }) => context,
                                 onDone: {
                                   target: 'done',
                                   actions: ['storeDegradedFieldValues'],
@@ -423,7 +431,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                                 onError: [
                                   {
                                     target: '#DatasetQualityDetailsController.indexNotFound',
-                                    cond: 'isIndexNotFoundError',
+                                    guard: 'isIndexNotFoundError',
                                   },
                                   {
                                     target: 'done',
@@ -440,6 +448,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             analyzing: {
                               invoke: {
                                 src: 'analyzeDegradedField',
+                                input: ({ context }) => context,
                                 onDone: {
                                   target: 'analyzed',
                                   actions: ['storeDegradedFieldAnalysis'],
@@ -460,11 +469,12 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             mitigating: {
                               invoke: {
                                 src: 'saveNewFieldLimit',
+                                input: ({ context }) => context,
                                 onDone: [
                                   {
                                     target: 'askingForRollover',
                                     actions: 'storeNewFieldLimitResponse',
-                                    cond: 'hasFailedToUpdateLastBackingIndex',
+                                    guard: 'hasFailedToUpdateLastBackingIndex',
                                   },
                                   {
                                     target: 'success',
@@ -490,6 +500,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             rollingOver: {
                               invoke: {
                                 src: 'rolloverDataStream',
+                                input: ({ context }) => context,
                                 onDone: {
                                   target: 'success',
                                   actions: ['raiseForceTimeRangeRefresh'],
@@ -532,7 +543,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 DEGRADED_FIELDS_LOADED: [
                   {
                     target: '.open',
-                    cond: 'shouldOpenFlyout',
+                    guard: 'shouldOpenFlyout',
                   },
                   {
                     target: '.closed',
@@ -555,6 +566,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 updating: {
                   invoke: {
                     src: 'updateFailureStore',
+                    input: ({ context }) => context,
                     onDone: {
                       target: 'idle',
                       actions: ['notifyUpdateFailureStoreSuccess', 'raiseForceTimeRangeRefresh'],
@@ -576,95 +588,84 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
     },
     {
       actions: {
-        storeDatasetAggregatableStatus: assign(
-          (_context, event: DoneInvokeEvent<NonAggregatableDatasets>) => {
-            return 'data' in event
-              ? {
-                  isNonAggregatable: !event.data.aggregatable,
-                }
-              : {};
-          }
-        ),
-        storeTimeRange: assign((context, event) => {
+        storeDatasetAggregatableStatus: assign(({ event }) => {
+          if (!('output' in event)) return {};
+          const output = event.output as NonAggregatableDatasets;
+          return { isNonAggregatable: !output.aggregatable };
+        }),
+        storeTimeRange: assign(({ context, event }) => {
           return {
             timeRange: 'timeRange' in event ? event.timeRange : context.timeRange,
           };
         }),
-        storeDataStreamDetails: assign((_context, event: DoneInvokeEvent<DataStreamDetails>) => {
-          return 'data' in event
-            ? {
-                dataStreamDetails: event.data,
-              }
-            : {};
+        storeDataStreamDetails: assign(({ event }) => {
+          // Handle XState v5 actor done events (output property)
+          if ('output' in event) {
+            return { dataStreamDetails: event.output as DataStreamDetails };
+          }
+          // Handle UPDATE_FAILURE_STORE event (dataStreamsDetails property)
+          if ('dataStreamsDetails' in event) {
+            return { dataStreamDetails: event.dataStreamsDetails as DataStreamDetails };
+          }
+          return {};
         }),
-        storeQualityIssuesChart: assign((_context, event) => {
+        storeQualityIssuesChart: assign(({ event }) => {
           return 'qualityIssuesChart' in event
             ? { qualityIssuesChart: event.qualityIssuesChart }
             : {};
         }),
-        storeBreakDownField: assign((_context, event) => {
+        storeBreakDownField: assign(({ event }) => {
           return 'breakdownField' in event ? { breakdownField: event.breakdownField } : {};
         }),
-        storeBreakdownFieldEcsStatus: assign((_context, event: DoneInvokeEvent<boolean>) => {
-          return 'data' in event
-            ? {
-                isBreakdownFieldEcs: event.data,
-              }
-            : {};
+        storeBreakdownFieldEcsStatus: assign(({ event }) => {
+          if (!('output' in event)) return {};
+          return { isBreakdownFieldEcs: event.output as boolean };
         }),
-        storeFailedDocsDetails: assign((context, event: DoneInvokeEvent<FailedDocsDetails>) => {
-          return 'data' in event
-            ? {
-                qualityIssues: {
-                  ...context.qualityIssues,
-                  data: [
-                    ...filterIssues(context.qualityIssues.data, 'failed'),
-                    ...mapFailedDocsIssues(event.data),
-                  ],
-                },
-              }
-            : {};
+        storeFailedDocsDetails: assign(({ context, event }) => {
+          if (!('output' in event)) return {};
+          const output = event.output as FailedDocsDetails;
+          return {
+            qualityIssues: {
+              ...context.qualityIssues,
+              data: [
+                ...filterIssues(context.qualityIssues.data, 'failed'),
+                ...mapFailedDocsIssues(output),
+              ],
+            },
+          };
         }),
-        storeFailedDocsErrors: assign(
-          (context, event: DoneInvokeEvent<FailedDocsErrorsResponse>) => {
-            return 'data' in event
-              ? {
-                  failedDocsErrors: {
-                    ...context.failedDocsErrors,
-                    data: event.data.errors,
-                  },
-                }
-              : {};
-          }
-        ),
-        storeDegradedFields: assign((context, event: DoneInvokeEvent<DegradedFieldResponse>) => {
-          return 'data' in event
-            ? {
-                qualityIssues: {
-                  ...context.qualityIssues,
-                  data: [
-                    ...filterIssues(context.qualityIssues.data, 'degraded'),
-                    ...mapDegradedFieldsIssues(event.data?.degradedFields),
-                  ],
-                },
-              }
-            : {};
+        storeFailedDocsErrors: assign(({ context, event }) => {
+          if (!('output' in event)) return {};
+          const output = event.output as FailedDocsErrorsResponse;
+          return {
+            failedDocsErrors: {
+              ...context.failedDocsErrors,
+              data: output.errors,
+            },
+          };
         }),
-        storeDegradedFieldValues: assign((_, event: DoneInvokeEvent<DegradedFieldValues>) => {
-          return 'data' in event
-            ? {
-                degradedFieldValues: event.data,
-              }
-            : {};
+        storeDegradedFields: assign(({ context, event }) => {
+          if (!('output' in event)) return {};
+          const output = event.output as DegradedFieldResponse;
+          return {
+            qualityIssues: {
+              ...context.qualityIssues,
+              data: [
+                ...filterIssues(context.qualityIssues.data, 'degraded'),
+                ...mapDegradedFieldsIssues(output?.degradedFields),
+              ],
+            },
+          };
         }),
-        storeDegradedFieldAnalysis: assign((_, event: DoneInvokeEvent<DegradedFieldAnalysis>) => {
-          return 'data' in event
-            ? {
-                degradedFieldAnalysis: event.data,
-              }
-            : {};
+        storeDegradedFieldValues: assign(({ event }) => {
+          if (!('output' in event)) return {};
+          return { degradedFieldValues: event.output as DegradedFieldValues };
         }),
-        storeQualityIssuesTableOptions: assign((context, event) => {
+        storeDegradedFieldAnalysis: assign(({ event }) => {
+          if (!('output' in event)) return {};
+          return { degradedFieldAnalysis: event.output as DegradedFieldAnalysis };
+        }),
+        storeQualityIssuesTableOptions: assign(({ context, event }) => {
           return 'quality_issues_criteria' in event
             ? {
                 qualityIssues: {
@@ -674,7 +675,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               }
             : {};
         }),
-        storeFailedDocsErrorsTableOptions: assign((context, event) => {
+        storeFailedDocsErrorsTableOptions: assign(({ context, event }) => {
           return 'failed_docs_errors_criteria' in event
             ? {
                 failedDocsErrors: {
@@ -684,7 +685,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               }
             : {};
         }),
-        storeExpandedQualityIssue: assign((_, event) => {
+        storeExpandedQualityIssue: assign(({ event }) => {
           return {
             expandedQualityIssue:
               'qualityIssue' in event
@@ -692,97 +693,83 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 : undefined,
           };
         }),
-        toggleCurrentQualityIssues: assign((context) => {
+        toggleCurrentQualityIssues: assign(({ context }) => {
           return {
             showCurrentQualityIssues: !context.showCurrentQualityIssues,
           };
         }),
-        updateSelectedIssueTypes: assign((_context, event) => {
+        updateSelectedIssueTypes: assign(({ event }) => {
           return {
             selectedIssueTypes: 'selectedIssueTypes' in event ? event.selectedIssueTypes : [],
           };
         }),
-        updateSelectedFields: assign((_context, event) => {
+        updateSelectedFields: assign(({ event }) => {
           return {
             selectedFields: 'selectedFields' in event ? event.selectedFields : [],
           };
         }),
-        raiseDegradedFieldsLoaded: raise('DEGRADED_FIELDS_LOADED'),
-        storeDataStreamSettings: assign((_context, event: DoneInvokeEvent<DataStreamSettings>) => {
-          return 'data' in event
-            ? {
-                dataStreamSettings: event.data,
-              }
-            : {};
+        raiseDegradedFieldsLoaded: raise({ type: 'DEGRADED_FIELDS_LOADED' }),
+        storeDataStreamSettings: assign(({ event }) => {
+          if (!('output' in event)) return {};
+          return { dataStreamSettings: event.output as DataStreamSettings };
         }),
-        storeDataStreamIntegration: assign((context, event: DoneInvokeEvent<IntegrationType>) => {
-          return 'data' in event
-            ? {
-                integration: event.data,
-              }
-            : {};
+        storeDataStreamIntegration: assign(({ event }) => {
+          if (!('output' in event)) return {};
+          return { integration: event.output as IntegrationType };
         }),
-        storeIntegrationDashboards: assign((context, event: DoneInvokeEvent<Dashboard[]>) => {
-          return 'data' in event
-            ? {
-                integrationDashboards: event.data,
-              }
-            : {};
+        storeIntegrationDashboards: assign(({ event }) => {
+          if (!('output' in event)) return {};
+          return { integrationDashboards: event.output as Dashboard[] };
         }),
         handleIndexNotFoundError: assign(() => {
           return {
             isIndexNotFoundError: true,
           };
         }),
-        storeNewFieldLimit: assign((_, event) => {
+        storeNewFieldLimit: assign(({ event }) => {
           return 'newFieldLimit' in event
             ? { fieldLimit: { newFieldLimit: event.newFieldLimit } }
             : {};
         }),
-        storeNewFieldLimitResponse: assign(
-          (context, event: DoneInvokeEvent<UpdateFieldLimitResponse>) => {
-            return 'data' in event
-              ? { fieldLimit: { ...context.fieldLimit, result: event.data, error: false } }
-              : {};
-          }
-        ),
-        storeNewFieldLimitErrorResponse: assign((context) => {
+        storeNewFieldLimitResponse: assign(({ context, event }) => {
+          if (!('output' in event)) return {};
+          const output = event.output as UpdateFieldLimitResponse;
+          return { fieldLimit: { ...context.fieldLimit, result: output, error: false } };
+        }),
+        storeNewFieldLimitErrorResponse: assign(({ context }) => {
           return { fieldLimit: { ...context.fieldLimit, error: true } };
         }),
         resetFieldLimitServerResponse: assign(() => ({
           fieldLimit: undefined,
         })),
-        raiseForceTimeRangeRefresh: raise('UPDATE_TIME_RANGE'),
+        raiseForceTimeRangeRefresh: raise(({ context }) => ({
+          type: 'UPDATE_TIME_RANGE' as const,
+          timeRange: context.timeRange,
+        })),
       },
       guards: {
-        checkIfActionForbidden: (_, event) => {
+        checkIfActionForbidden: ({ event }) => {
+          if (!('error' in event)) return false;
+          const error = event.error as { statusCode?: number };
+          return error?.statusCode === 403;
+        },
+        checkIfNotImplemented: ({ event }) => {
+          if (!('error' in event)) return false;
+          const error = event.error as { statusCode?: number };
+          return error?.statusCode === 501;
+        },
+        isIndexNotFoundError: ({ event }) => {
+          if (!('error' in event)) return false;
+          const error = event.error as {
+            statusCode?: number;
+            originalMessage?: string;
+          };
           return (
-            'data' in event &&
-            typeof event.data === 'object' &&
-            'statusCode' in event.data! &&
-            event.data.statusCode === 403
+            error?.statusCode === 500 &&
+            Boolean(error?.originalMessage?.includes('index_not_found_exception'))
           );
         },
-        checkIfNotImplemented: (_context, event) => {
-          return (
-            'data' in event &&
-            typeof event.data === 'object' &&
-            'statusCode' in event.data! &&
-            event.data.statusCode === 501
-          );
-        },
-        isIndexNotFoundError: (_, event) => {
-          return (
-            ('data' in event &&
-              typeof event.data === 'object' &&
-              'statusCode' in event.data &&
-              event.data.statusCode === 500 &&
-              'originalMessage' in event.data &&
-              (event.data.originalMessage as string)?.includes('index_not_found_exception')) ??
-            false
-          );
-        },
-        shouldOpenFlyout: (context, _event, meta) => {
+        shouldOpenFlyout: ({ context }) => {
           return (
             Boolean(context.expandedQualityIssue) &&
             Boolean(
@@ -792,31 +779,25 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             )
           );
         },
-        isDegradedFieldFlyout: (context) => {
+        isDegradedFieldFlyout: ({ context }) => {
           return Boolean(
             context.expandedQualityIssue && context.expandedQualityIssue.type === 'degraded'
           );
         },
-        hasNoQualityIssueSelected: (context) => {
+        hasNoQualityIssueSelected: ({ context }) => {
           return !Boolean(context.expandedQualityIssue);
         },
-        hasFailedToUpdateLastBackingIndex: (_, event) => {
-          return (
-            'data' in event &&
-            typeof event.data === 'object' &&
-            'isLatestBackingIndexUpdated' in event.data &&
-            !event.data.isLatestBackingIndexUpdated
-          );
+        hasFailedToUpdateLastBackingIndex: ({ event }) => {
+          if (!('output' in event)) return false;
+          const output = event.output as { isLatestBackingIndexUpdated?: boolean };
+          return output?.isLatestBackingIndexUpdated === false;
         },
-        isDataStreamIsPartOfIntegration: (_, event) => {
-          return (
-            'data' in event &&
-            typeof event.data === 'object' &&
-            'isIntegration' in event.data &&
-            event.data.isIntegration
-          );
+        isDataStreamIsPartOfIntegration: ({ event }) => {
+          if (!('output' in event)) return false;
+          const output = event.output as { isIntegration?: boolean };
+          return output?.isIntegration === true;
         },
-        canReadFailureStore: (context) => {
+        canReadFailureStore: ({ context }) => {
           return (
             'dataStreamSettings' in context &&
             Boolean(
@@ -847,198 +828,213 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   streamsRepositoryClient,
   refreshDefinition,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
-  createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
+  createPureDatasetQualityDetailsControllerStateMachine(initialContext).provide({
     actions: {
-      notifyFailedFetchForAggregatableDatasets: (_context, event: DoneInvokeEvent<Error>) =>
-        fetchNonAggregatableDatasetsFailedNotifier(toasts, event.data),
-      notifyFetchDataStreamDetailsFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        fetchDataStreamDetailsFailedNotifier(toasts, event.data),
-      notifyCheckBreakdownFieldIsEcsFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        assertBreakdownFieldEcsFailedNotifier(toasts, event.data),
-      notifyFetchDataStreamSettingsFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        fetchDataStreamSettingsFailedNotifier(toasts, event.data),
-      notifyFetchIntegrationDashboardsFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        fetchIntegrationDashboardsFailedNotifier(toasts, event.data),
-      notifyFetchDatasetIntegrationsFailed: (context, event: DoneInvokeEvent<Error>) => {
-        return fetchDataStreamIntegrationFailedNotifier(toasts, event.data);
+      notifyFailedFetchForAggregatableDatasets: ({ event }) => {
+        if ('error' in event)
+          fetchNonAggregatableDatasetsFailedNotifier(toasts, event.error as Error);
       },
-      notifySaveNewFieldLimitError: (_context, event: DoneInvokeEvent<Error>) =>
-        updateFieldLimitFailedNotifier(toasts, event.data),
-      notifyRolloverDataStreamError: (context, event: DoneInvokeEvent<Error>) =>
-        rolloverDataStreamFailedNotifier(toasts, event.data, context.dataStream),
+      notifyFetchDataStreamDetailsFailed: ({ event }) => {
+        if ('error' in event) fetchDataStreamDetailsFailedNotifier(toasts, event.error as Error);
+      },
+      notifyCheckBreakdownFieldIsEcsFailed: ({ event }) => {
+        if ('error' in event) assertBreakdownFieldEcsFailedNotifier(toasts, event.error as Error);
+      },
+      notifyFetchDataStreamSettingsFailed: ({ event }) => {
+        if ('error' in event) fetchDataStreamSettingsFailedNotifier(toasts, event.error as Error);
+      },
+      notifyFetchIntegrationDashboardsFailed: ({ event }) => {
+        if ('error' in event)
+          fetchIntegrationDashboardsFailedNotifier(toasts, event.error as Error);
+      },
+      notifyFetchDatasetIntegrationsFailed: ({ event }) => {
+        if ('error' in event)
+          fetchDataStreamIntegrationFailedNotifier(toasts, event.error as Error);
+      },
+      notifySaveNewFieldLimitError: ({ event }) => {
+        if ('error' in event) updateFieldLimitFailedNotifier(toasts, event.error as Error);
+      },
+      notifyRolloverDataStreamError: ({ context, event }) => {
+        if ('error' in event)
+          rolloverDataStreamFailedNotifier(toasts, event.error as Error, context.dataStream);
+      },
       notifyUpdateFailureStoreSuccess: () => updateFailureStoreSuccessNotifier(toasts),
-      notifyUpdateFailureStoreFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        updateFailureStoreFailedNotifier(toasts, event.data),
+      notifyUpdateFailureStoreFailed: ({ event }) => {
+        if ('error' in event) updateFailureStoreFailedNotifier(toasts, event.error as Error);
+      },
     },
-    services: {
-      checkDatasetIsAggregatable: (context) => {
-        const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
-
-        return dataStreamDetailsClient.getNonAggregatableDatasets({
-          start,
-          end,
-          dataStream: context.dataStream,
-        });
-      },
-      loadDataStreamDetails: (context) => {
-        const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
-
-        return dataStreamDetailsClient.getDataStreamDetails({
-          dataStream: context.dataStream,
-          start,
-          end,
-        });
-      },
-      checkBreakdownFieldIsEcs: async (context) => {
-        if (context.breakdownField) {
-          const allowedFieldSources = ['ecs', 'metadata'];
-
-          // This timeout is to avoid a runtime error that randomly happens on breakdown field change
-          // TypeError: Cannot read properties of undefined (reading 'timeFieldName')
-          await new Promise((res) => setTimeout(res, 300));
-
-          const client = await plugins.fieldsMetadata.getClient();
-          const { fields } = await client.find({
-            attributes: ['source'],
-            fieldNames: [context.breakdownField],
+    actors: {
+      checkDatasetIsAggregatable: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+          return dataStreamDetailsClient.getNonAggregatableDatasets({
+            start,
+            end,
+            dataStream: context.dataStream,
           });
-
-          const breakdownFieldSource = fields[context.breakdownField]?.source;
-
-          return !!(breakdownFieldSource && allowedFieldSources.includes(breakdownFieldSource));
         }
-
-        return false;
-      },
-      loadFailedDocsDetails: (context) => {
-        const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
-
-        return dataStreamDetailsClient.getFailedDocsDetails({
-          dataStream: context.dataStream,
-          start,
-          end,
-        });
-      },
-      loadDegradedFields: (context) => {
-        const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
-
-        if (!context?.isNonAggregatable) {
-          return dataStreamDetailsClient.getDataStreamDegradedFields({
-            dataStream:
-              context.showCurrentQualityIssues &&
-              'dataStreamSettings' in context &&
-              context.dataStreamSettings &&
-              context.dataStreamSettings.lastBackingIndexName
-                ? context.dataStreamSettings.lastBackingIndexName
-                : context.dataStream,
+      ),
+      loadDataStreamDetails: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+          return dataStreamDetailsClient.getDataStreamDetails({
+            dataStream: context.dataStream,
             start,
             end,
           });
         }
-
-        return Promise.resolve();
-      },
-
-      loadDegradedFieldValues: (context) => {
-        if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
-          return dataStreamDetailsClient.getDataStreamDegradedFieldValues({
+      ),
+      checkBreakdownFieldIsEcs: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          if (context.breakdownField) {
+            const allowedFieldSources = ['ecs', 'metadata'];
+            await new Promise((res) => setTimeout(res, 300));
+            const client = await plugins.fieldsMetadata.getClient();
+            const { fields } = await client.find({
+              attributes: ['source'],
+              fieldNames: [context.breakdownField],
+            });
+            const breakdownFieldSource = fields[context.breakdownField]?.source;
+            return !!(breakdownFieldSource && allowedFieldSources.includes(breakdownFieldSource));
+          }
+          return false;
+        }
+      ),
+      loadFailedDocsDetails: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+          return dataStreamDetailsClient.getFailedDocsDetails({
             dataStream: context.dataStream,
-            degradedField: context.expandedQualityIssue.name,
+            start,
+            end,
           });
         }
-        return Promise.resolve();
-      },
-      analyzeDegradedField: (context) => {
-        if (context?.qualityIssues?.data?.length) {
-          const selectedDegradedField = context.qualityIssues.data.find(
-            (field) => field.name === context.expandedQualityIssue?.name
-          );
-
-          if (selectedDegradedField && selectedDegradedField.type === 'degraded') {
-            return dataStreamDetailsClient.analyzeDegradedField({
-              dataStream: context.dataStream,
-              degradedField: context.expandedQualityIssue?.name!,
-              lastBackingIndex: selectedDegradedField.indexFieldWasLastPresentIn!,
+      ),
+      loadDegradedFields: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+          if (!context?.isNonAggregatable) {
+            return dataStreamDetailsClient.getDataStreamDegradedFields({
+              dataStream:
+                context.showCurrentQualityIssues &&
+                'dataStreamSettings' in context &&
+                context.dataStreamSettings &&
+                context.dataStreamSettings.lastBackingIndexName
+                  ? context.dataStreamSettings.lastBackingIndexName
+                  : context.dataStream,
+              start,
+              end,
             });
           }
+          return undefined;
         }
-        return Promise.resolve();
-      },
-      loadfailedDocsErrors: (context) => {
-        if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
-          const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
-
-          return dataStreamDetailsClient.getFailedDocsErrors({
-            dataStream: context.dataStream,
-            start,
-            end,
-          });
-        }
-        return Promise.resolve();
-      },
-      loadDataStreamSettings: (context) => {
-        return dataStreamDetailsClient.getDataStreamSettings({
-          dataStream: context.dataStream,
-        });
-      },
-      checkAndLoadIntegration: (context) => {
-        return dataStreamDetailsClient.checkAndLoadIntegration({
-          dataStream: context.dataStream,
-        });
-      },
-      loadIntegrationDashboards: (context) => {
-        if ('integration' in context && context.integration && context.integration.integration) {
-          return dataStreamDetailsClient.getIntegrationDashboards({
-            integration: context.integration.integration.name,
-          });
-        }
-
-        return Promise.resolve();
-      },
-      saveNewFieldLimit: (context) => {
-        if ('fieldLimit' in context && context.fieldLimit && context.fieldLimit.newFieldLimit) {
-          return dataStreamDetailsClient.setNewFieldLimit({
-            dataStream: context.dataStream,
-            newFieldLimit: context.fieldLimit.newFieldLimit,
-          });
-        }
-
-        return Promise.resolve();
-      },
-      rolloverDataStream: (context) => {
-        return dataStreamDetailsClient.rolloverDataStream({
-          dataStream: context.dataStream,
-        });
-      },
-      updateFailureStore: async (context) => {
-        if (!('dataStreamDetails' in context) || !context.dataStreamDetails) {
-          return Promise.resolve();
-        }
-
-        if (context.view === 'dataQuality') {
-          const { failureStoreDataQualityConfig } = context.dataStreamDetails;
-          if (!failureStoreDataQualityConfig) {
-            return Promise.resolve();
+      ),
+      loadDegradedFieldValues: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
+            return dataStreamDetailsClient.getDataStreamDegradedFieldValues({
+              dataStream: context.dataStream,
+              degradedField: context.expandedQualityIssue.name,
+            });
           }
-          const { failureStoreEnabled, customRetentionPeriod } = failureStoreDataQualityConfig;
-
-          return dataStreamDetailsClient.updateFailureStore({
+          return undefined;
+        }
+      ),
+      analyzeDegradedField: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          if (context?.qualityIssues?.data?.length) {
+            const selectedDegradedField = context.qualityIssues.data.find(
+              (field) => field.name === context.expandedQualityIssue?.name
+            );
+            if (selectedDegradedField && selectedDegradedField.type === 'degraded') {
+              return dataStreamDetailsClient.analyzeDegradedField({
+                dataStream: context.dataStream,
+                degradedField: context.expandedQualityIssue?.name!,
+                lastBackingIndex: selectedDegradedField.indexFieldWasLastPresentIn!,
+              });
+            }
+          }
+          return undefined;
+        }
+      ),
+      loadfailedDocsErrors: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
+            const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+            return dataStreamDetailsClient.getFailedDocsErrors({
+              dataStream: context.dataStream,
+              start,
+              end,
+            });
+          }
+          return undefined;
+        }
+      ),
+      loadDataStreamSettings: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          return dataStreamDetailsClient.getDataStreamSettings({
             dataStream: context.dataStream,
-            failureStoreEnabled,
-            customRetentionPeriod,
           });
         }
-
-        const { failureStoreStreamConfig } = context.dataStreamDetails;
-        if (!failureStoreStreamConfig || !streamsRepositoryClient || !context.streamDefinition) {
-          return Promise.resolve();
+      ),
+      checkAndLoadIntegration: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          return dataStreamDetailsClient.checkAndLoadIntegration({
+            dataStream: context.dataStream,
+          });
         }
-
-        // For stream views, failureStoreConfig is of type FailureStore
-        // Use streams API for classic/wired streams
-        const result = await streamsRepositoryClient.fetch(
-          'PUT /api/streams/{name}/_ingest 2023-10-31',
-          {
+      ),
+      loadIntegrationDashboards: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          if ('integration' in context && context.integration && context.integration.integration) {
+            return dataStreamDetailsClient.getIntegrationDashboards({
+              integration: context.integration.integration.name,
+            });
+          }
+          return undefined;
+        }
+      ),
+      saveNewFieldLimit: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          if ('fieldLimit' in context && context.fieldLimit && context.fieldLimit.newFieldLimit) {
+            return dataStreamDetailsClient.setNewFieldLimit({
+              dataStream: context.dataStream,
+              newFieldLimit: context.fieldLimit.newFieldLimit,
+            });
+          }
+          return undefined;
+        }
+      ),
+      rolloverDataStream: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          return dataStreamDetailsClient.rolloverDataStream({
+            dataStream: context.dataStream,
+          });
+        }
+      ),
+      updateFailureStore: fromPromise(
+        async ({ input: context }: { input: DatasetQualityDetailsControllerContext }) => {
+          if (!('dataStreamDetails' in context) || !context.dataStreamDetails) {
+            return;
+          }
+          if (context.view === 'dataQuality') {
+            const { failureStoreDataQualityConfig } = context.dataStreamDetails;
+            if (!failureStoreDataQualityConfig) {
+              return;
+            }
+            const { failureStoreEnabled, customRetentionPeriod } = failureStoreDataQualityConfig;
+            await dataStreamDetailsClient.updateFailureStore({
+              dataStream: context.dataStream,
+              failureStoreEnabled,
+              customRetentionPeriod,
+            });
+            return;
+          }
+          const { failureStoreStreamConfig } = context.dataStreamDetails;
+          if (!failureStoreStreamConfig || !streamsRepositoryClient || !context.streamDefinition) {
+            return;
+          }
+          await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
             signal: null,
             params: {
               path: { name: context.dataStream },
@@ -1050,19 +1046,15 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
                 },
               },
             },
+          });
+          if (refreshDefinition) {
+            refreshDefinition();
           }
-        );
-
-        // Refresh the stream definition to get the latest data
-        if (refreshDefinition) {
-          refreshDefinition();
         }
-
-        return result;
-      },
+      ),
     },
   });
 
-export type DatasetQualityDetailsControllerStateService = InterpreterFrom<
-  typeof createDatasetQualityDetailsControllerStateMachine
+export type DatasetQualityDetailsControllerStateService = ActorRefFrom<
+  ReturnType<typeof createDatasetQualityDetailsControllerStateMachine>
 >;

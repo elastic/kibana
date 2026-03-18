@@ -15,7 +15,7 @@ import { getNoValidCallSignatureError } from '../../../commands/definitions/util
 import { Location } from '../../../commands/registry/types';
 import { setTestFunctions } from '../../../commands/definitions/utils/test_functions';
 import { setup } from './helpers';
-import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '../../../commands/definitions/utils/expressions';
+import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '../../../commands/definitions/utils/signatures';
 
 describe('function validation', () => {
   afterEach(() => {
@@ -802,6 +802,12 @@ describe('function validation', () => {
 
       await expectErrors('TS a_index | STATS AGG_FUNCTION(TS_FUNCTION())', []);
       await expectErrors('FROM a_index | STATS AGG_FUNCTION(TS_FUNCTION())', [
+        'Function TS_FUNCTION not allowed in STATS',
+      ]);
+
+      // TIME_SERIES_AGG functions are also allowed at the top level of STATS with TS source
+      await expectErrors('TS a_index | STATS TS_FUNCTION()', []);
+      await expectErrors('FROM a_index | STATS TS_FUNCTION()', [
         'Function TS_FUNCTION not allowed in STATS',
       ]);
     });

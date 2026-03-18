@@ -9,7 +9,7 @@
 export { test, spaceTest } from './src/playwright';
 
 // re-exported test framework from @kbn/scout
-export { expect, lighthouseTest, apiTest, globalSetupHook, tags } from '@kbn/scout';
+export { lighthouseTest, apiTest, globalSetupHook, tags } from '@kbn/scout';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {

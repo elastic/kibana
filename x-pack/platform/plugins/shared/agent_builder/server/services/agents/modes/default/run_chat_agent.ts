@@ -8,20 +8,25 @@
 import { v4 as uuidv4 } from 'uuid';
 import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
 import { Command } from '@langchain/langgraph';
-import { isStreamEvent, type ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
+import {
+  isStreamEvent,
+  reverseMap,
+  type ToolIdMapping,
+} from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
+import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import { createResultTransformer } from '../utils/create_result_transformer';
-import { FILESTORE_ENABLED } from '../../../runner/store';
 import {
   addRoundCompleteEvent,
   extractRound,
   prepareConversation,
+  selectSkills,
   selectTools,
   getPendingRound,
   evictInternalEvents,
@@ -66,6 +71,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     startTime = new Date(),
     configurationOverrides,
+    action,
   },
   context
 ) => {
@@ -81,10 +87,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     promptManager,
     filestore,
     skills,
+    skillsStore,
     toolManager,
+    experimentalFeatures,
   } = context;
 
-  ensureValidInput({ input: nextInput, conversation });
+  ensureValidInput({ input: nextInput, conversation, action });
 
   const pendingRound = getPendingRound(conversation);
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
@@ -97,54 +105,72 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
+
+  const filteredSkills = await selectSkills({ skills, skillsStore, agentConfiguration });
+
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   const manualEvents$ = new Subject<ChatAgentEvent>();
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
+  toolManager.setEventEmitter(eventEmitter);
+
+  // Pass action so regenerate uses the last round's original input instead of request input
   const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
+    action,
   });
+
+  const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
+    request,
+    abortSignal,
+    nextInput: processedConversation.nextInput,
+    agentId,
+  });
+  processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
   const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
     previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
+    filteredSkills,
     skills,
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
     filestore,
     request,
+    experimentalFeatures,
     spaceId: context.spaceId,
     runner: context.runner,
   });
 
+  // First add static tools
   await Promise.all([
     toolManager.addTools({
       type: ToolManagerToolType.executable,
       tools: staticTools,
       logger,
-      eventEmitter,
     }),
     toolManager.addTools({
       type: ToolManagerToolType.browser,
       tools: browserApiTools ?? [],
     }),
-    toolManager.addTools(
-      {
-        type: ToolManagerToolType.executable,
-        tools: dynamicTools,
-        logger,
-        eventEmitter,
-      },
-      {
-        dynamic: true,
-      }
-    ),
   ]);
+
+  // Then add dynamic tools
+  await toolManager.addTools(
+    {
+      type: ToolManagerToolType.executable,
+      tools: dynamicTools,
+      logger,
+    },
+    {
+      dynamic: true,
+    }
+  );
 
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
@@ -152,8 +178,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Create unified result transformer for tool result optimization
   const resultTransformer = createResultTransformer({
     toolRegistry,
+    toolManager,
     filestore,
-    filestoreEnabled: FILESTORE_ENABLED,
+    filestoreEnabled: experimentalFeatures.filestore,
   });
 
   const promptFactory = createPromptFactory({
@@ -164,6 +191,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     resultTransformer,
     outputSchema,
     conversationTimestamp,
+    experimentalFeatures,
   });
 
   const agentGraph = createAgentGraph({
@@ -184,7 +212,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventStream = agentGraph.streamEvents(
     createInitializerCommand({
       conversation: processedConversation,
-      agentBuilderToLangchainIdMap: toolManager.getToolIdMapping(),
+      agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
       cycleLimit,
     }),
     {
@@ -243,7 +271,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
-
   return {
     round,
   };

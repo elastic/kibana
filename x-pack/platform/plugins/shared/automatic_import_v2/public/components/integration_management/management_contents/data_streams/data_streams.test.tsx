@@ -15,6 +15,13 @@ import { useGetIntegrationById } from '../../../../common';
 
 jest.mock('../../../../common', () => ({
   useGetIntegrationById: jest.fn(),
+  useDeleteDataStream: jest.fn(() => ({
+    deleteDataStreamMutation: {
+      mutate: jest.fn(),
+      isLoading: false,
+      variables: undefined,
+    },
+  })),
 }));
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 
@@ -25,6 +32,12 @@ jest.mock('./create_data_stream_flyout', () => ({
         Close
       </button>
     </div>
+  )),
+}));
+
+jest.mock('./data_streams_table/data_steams_table', () => ({
+  DataStreamsTable: jest.fn(({ items }) => (
+    <div data-test-subj="dataStreamsTableMock">{items.length} data streams</div>
   )),
 }));
 

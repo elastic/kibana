@@ -17,10 +17,10 @@ import {
   initializeTimeRangeManager,
   timeRangeComparators,
   useBatchedPublishingSubjects,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap, tap } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { getCount } from './get_count';
 import type { SearchApi, Services, SearchSerializedState } from './types';

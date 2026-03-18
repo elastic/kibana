@@ -10,6 +10,7 @@
 import moment from 'moment-timezone';
 import { DateNanosFormat, analysePatternForFract, formatWithNanos } from './date_nanos_shared';
 import type { FieldFormatsGetConfigFn } from '../types';
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('Date Nanos Format', () => {
   let convert: Function;
@@ -71,9 +72,15 @@ describe('Date Nanos Format', () => {
     });
   });
 
-  test('decoding an undefined or null date should return an empty string', () => {
-    expect(convert(null)).toBe('-');
-    expect(convert(undefined)).toBe('-');
+  test('decoding a missing value', () => {
+    expect(convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
   });
 
   test('should clear the memoization cache after changing the date', () => {
@@ -121,5 +128,18 @@ describe('analysePatternForFract', () => {
       "patternNanos": "",
     }
   `);
+  });
+
+  test('escapes HTML characters in html context via fallback', () => {
+    const dateNanos = new DateNanosFormat(
+      {
+        pattern: 'MMM D, YYYY @ HH:mm:ss.SSS',
+        timezone: 'UTC',
+      },
+      jest.fn()
+    );
+    expect(dateNanos.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
+      '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
+    );
   });
 });

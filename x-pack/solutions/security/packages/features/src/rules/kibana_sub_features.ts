@@ -20,15 +20,9 @@ import {
 
 const TRANSLATIONS = Object.freeze({
   all: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.allPrivilegeName',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.manageExceptions',
     {
-      defaultMessage: 'All',
-    }
-  ),
-  read: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.readPrivilegeName',
-    {
-      defaultMessage: 'Read',
+      defaultMessage: 'Manage Exceptions',
     }
   ),
 });
@@ -37,7 +31,7 @@ export const getExceptionsSubFeature = (): SubFeatureConfig => ({
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.exceptionsSubFeatureName',
     {
-      defaultMessage: 'Manage Exceptions',
+      defaultMessage: 'Exceptions',
     }
   ),
   privilegeGroups: [

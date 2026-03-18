@@ -19,7 +19,7 @@
 | **Detection**   | `get_alerts`, `get_services`                                 |
 | **Scope**       | `get_services`, `get_hosts`, `get_trace_metrics`             |
 | **Timeline**    | `get_trace_metrics` (time series), `run_log_rate_analysis`   |
-| **Correlation** | `get_correlated_logs`, `get_downstream_dependencies`         |
+| **Correlation** | `get_traces`, `get_service_topology`                         |
 | **Root Cause**  | `get_log_groups`, `get_trace_metrics` (grouped by dimension) |
 
 ---
@@ -29,28 +29,21 @@
 ### LLM Optimization
 
 1. **Self-documenting for tool selection** — Tool descriptions should enable LLMs to choose the right tool and use it correctly without external context.
-
 2. **Structured for summarization** — Output should be easy for LLMs to extract insights and present them in natural language to users.
-
 3. **Progressive disclosure** Return high-level summaries first to conserve context window tokens. The agent needs to see the shape of the data and identifying information to decide where to drill down. Tool parameters must be available for deeper investigation when needed.
 
 ### Tool Design
 
-4. **Answer specific questions** — A tool that tries to answer too many questions becomes confusing for the LLM to select. Split complex tools into focused, composable tools.
-
-5. **Minimal required parameters** — Common use cases should require zero or one parameter. Use sensible defaults.
-
-6. **Cross-tool navigation** — Tool output and descriptions should enable the LLM to suggest logical next steps (e.g., after `get_services` finds an unhealthy service, suggest `get_trace_metrics` to drill down).
+1. **Answer specific questions** — A tool that tries to answer too many questions becomes confusing for the LLM to select. Split complex tools into focused, composable tools.
+2. **Minimal required parameters** — Common use cases should require zero or one parameter. Use sensible defaults.
+3. **Cross-tool navigation** — Tool output and descriptions should enable the LLM to suggest logical next steps (e.g., after `get_services` finds an unhealthy service, suggest `get_trace_metrics` to drill down).
 
 ### Data & Implementation
 
-7. **Noise reduction** — Filter out irrelevant data; return only what's useful for incident investigation. Prioritize actionable information.
-
-8. **ECS and OTel compatible** — Tools must work with both Elastic Common Schema and OpenTelemetry data formats.
-
-9. **Guard rails** — Use concurrency limits and result caps to avoid overloading Elasticsearch.
-
-10. **Simple implementation** — Code should be maintainable, easy to read, and avoid unnecessary complexity.
+1. **Noise reduction** — Filter out irrelevant data; return only what's useful for incident investigation. Prioritize actionable information.
+2. **ECS and OTel compatible** — Tools must work with both Elastic Common Schema and OpenTelemetry data formats.
+3. **Guard rails** — Use concurrency limits and result caps to avoid overloading Elasticsearch.
+4. **Simple implementation** — Code should be maintainable, easy to read, and avoid unnecessary complexity.
 
 ---
 
@@ -93,11 +86,10 @@ Tools must work with both ECS (Elastic Common Schema) and OpenTelemetry data. Ob
 ### Key Points
 
 1. **Query ECS fields only** — Aliases handle the mapping automatically. For example, query `message` not `body.text` (though `_source` will still show the original field name).
-
 2. **APM metrics are unchanged** — OTel traces are pre-aggregated into the same APM metric format via:
 
-   - Managed OTLP endpoint (automatic)
-   - Self-managed: [EDOT Collector with Elastic APM Processor](https://www.elastic.co/docs/reference/edot-collector/components/elasticapmprocessor)
+- Managed OTLP endpoint (automatic)
+- Self-managed: [EDOT Collector with Elastic APM Processor](https://www.elastic.co/docs/reference/edot-collector/components/elasticapmprocessor)
 
 3. **Full alias list** — See [ECS to OTel aliases](https://gist.github.com/sorenlouv/5ed2a53c3a43504c0fea7a7a992d18af) for complete mappings extracted from Elasticsearch component templates.
 
@@ -258,10 +250,10 @@ Notes:
 - To continue a conversation, include the `conversation_id` from the previous response
 - For streaming responses (SSE), use the `/api/agent_builder/converse/async` endpoint
 
-### API Integration Tests
+### API _Integration Tests_
 
-The Kibana API test server: http://elastic:changeme@localhost:5620
-The Elasticsearch test server: http://elastic:changeme@localhost:9220
+The Kibana API test server: [http://elastic:changeme@localhost:5620](http://elastic:changeme@localhost:5620)
+The Elasticsearch test server: [http://elastic:changeme@localhost:9220](http://elastic:changeme@localhost:9220)
 
 To run the API tests for a tool:
 
@@ -279,15 +271,183 @@ All new tools **must** be added to the Agent Builder allow list:
 x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts
 ```
 
+### Cleaning Observability Data
+
+Delete all observability data streams (APM, OTel, logs, infrastructure metrics, synthetics) to avoid stale data polluting results:
+
+```bash
+curl -s -X DELETE "http://elastic:changeme@localhost:9200/_data_stream/traces-apm*,metrics-apm*,logs-apm*,metrics-*.otel*,traces-*.otel*,logs-*.otel*,logs-*-*,metrics-system*,metrics-kubernetes*,metrics-docker*,metrics-aws*,synthetics-*-*" | jq .
+```
+
+Verify that all data streams are gone:
+
+```bash
+curl -s "http://elastic:changeme@localhost:9200/_data_stream/*apm*,*otel*,logs-*,metrics-*,synthetics-*" | jq '[.data_streams[] | .name]'
+# Expected: []
+```
+
+### Writing Logs to a File
+
+By default Kibana only logs to the terminal (`console` appender). When Kibana is running in a separate terminal window, a coding agent cannot easily read its output. To work around this, configure Kibana to also write logs to a file.
+
+Add the following to `config/kibana.dev.yml`:
+
+```yaml
+logging.appenders:
+  file:
+    type: rolling-file
+    fileName: /tmp/kibana.log
+    layout:
+      type: pattern
+
+logging.root:
+  level: info
+  appenders: [default, file]
+
+logging.loggers:
+  - name: plugins.observabilityAgentBuilder
+    level: debug
+```
+
+The coding agent can now read Kibana logs from `/tmp/kibana.log`.
+
+### Viewing Traces in Arize Phoenix
+
+Tool executions and agent conversations are traced to [Arize Phoenix](https://oblt-apps.elastic.dev/phoenix-ai/). After each conversation or tool execution, Kibana logs a trace link:
+
+```
+[INFO ][telemetry] View trace at https://oblt-apps.elastic.dev/phoenix-ai/projects/<project-id>/traces/<trace-id>?selected
+```
+
+Extract the trace ID from `/tmp/kibana.log` and fetch it via the REST API:
+
+```bash
+grep "View trace" /tmp/kibana.log | tail -1
+```
+
+```bash
+curl -s 'https://oblt-apps.elastic.dev/phoenix-ai/v1/projects/<project-name>/spans?limit=100' \
+  -H 'Authorization: Bearer <PHOENIX_API_KEY>' \
+  | jq '.data[] | select(.context.trace_id == "<trace-id>") | {name, span_kind, status_code, start_time}'
+```
+
+Replace `<project-name>` with your Phoenix project name (configured in `kibana.dev.yml` under `telemetry.tracing.exporters.phoenix.project_name`). Ask the team for a `PHOENIX_API_KEY` if you don't have one.
+
+See [Phoenix REST API docs](https://arize.com/docs/phoenix/sdk-api-reference/rest-api/api-reference/traces) for the full API reference.
+
 ---
 
-## 8. Pre-Merge Checklist
+## 8. Testing with OpenTelemetry Demo
 
-- [ ] Tool added to `allow_lists.ts`
-- [ ] Works with both ECS and OTel data (where applicable)
-- [ ] Metrics normalized: ms for latency, per-minute for throughput, 0-1 for failure rate
-- [ ] Synthtrace scenario for test data generation
-- [ ] API integration tests covering filters, groupBy dimensions, and edge cases
+The [OpenTelemetry Demo](https://github.com/elastic/opentelemetry-demo) is a microservices application that generates realistic Observability data (traces, logs, metrics) and supports feature flags to simulate various failure scenarios. Use it to validate the Observability Agent and individual tools against real-world-like incidents.
+
+### Starting the OTel Demo
+
+Clone the repo and start the demo, configured to send data to your local Elasticsearch:
+
+```bash
+cd /path/to/opentelemetry-demo
+
+# Create an API key for the demo
+API_KEY=$(curl -s -X POST "http://localhost:9200/_security/api_key" \
+  -u elastic:changeme \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "opentelemetry-demo" }' | jq -r .encoded)
+
+sed -i '' -E "s|^ELASTICSEARCH_ENDPOINT=.*|ELASTICSEARCH_ENDPOINT=\"http://host.docker.internal:9200\"|" .env.override
+sed -i '' -E "s|^ELASTICSEARCH_API_KEY=.*|ELASTICSEARCH_API_KEY=$API_KEY|" .env.override
+
+# Start all services
+make start
+```
+
+This starts ~28 Docker containers. Wait for all containers to be healthy before proceeding. The demo sends data to the local Elasticsearch instance at `localhost:9200`.
+
+### Feature Flags
+
+Feature flags are configured via the `flagd` service. Edit the file:
+
+```
+/path/to/opentelemetry-demo/src/flagd/demo.flagd.json
+```
+
+Flagd watches this file for changes — edits take effect automatically (no restart needed).
+
+To enable a flag, change its `defaultVariant` from `"off"` to `"on"` (or to a specific variant for flags with multiple levels):
+
+```json
+"paymentUnreachable": {
+  "defaultVariant": "on",
+  ...
+}
+```
+
+To disable a flag, set `defaultVariant` back to `"off"`.
+
+Full list of available feature flags: [https://opentelemetry.io/docs/demo/feature-flags/](https://opentelemetry.io/docs/demo/feature-flags/)
+
+### Cleaning Data Between Test Runs
+
+Between test runs, clean all observability data streams — see [Cleaning Observability Data](#cleaning-observability-data) in section 7.
+
+### Wait for Data Accumulation
+
+After enabling feature flags and cleaning data, **wait at least 10 minutes** before running an investigation. This ensures enough metric rollups and trace data have been generated for meaningful analysis.
+
+When running the investigation tool, use a lookback window that matches the wait time:
+
+```bash
+curl -s --max-time 600 -X POST http://localhost:5601/api/agent_builder/tools/_execute \
+  -u elastic:changeme \
+  -H 'kbn-xsrf: true' \
+  -H 'x-elastic-internal-origin: kibana' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "tool_id": "observability.get_log_groups",
+    "tool_params": { "start": "now-10m", "end": "now" }
+  }'
+```
+
+### Full Test Workflow
+
+```
+1. Start OTel demo:
+See "Starting the OTel Demo" above
+
+2. Clean APM data:
+Delete data streams — see above
+
+3. Enable feature flag(s):
+Edit demo.flagd.json
+
+4. Wait 10 minutes:
+`sleep 600`
+
+5. Verify that expected data scenario is available in Elasticsearch
+Example: `curl http://elastic:changeme@localhost:9200/_search`
+
+6. Run investigation:
+Example: `curl ... get_log_groups with start=now-10m`
+
+7. Review results
+8. Review Phoenix Traces (if available)
+9. Disable feature flag(s): Reset defaultVariant to "off"
+10. Repeat from step 2 for next scenario
+```
+
+### Resetting All Feature Flags
+
+After testing, reset all flags to `"off"` by setting each `defaultVariant` back to `"off"` in `demo.flagd.json`. Verify no flags are accidentally left enabled — leftover flags cause confusing results in subsequent tests.
+
+---
+
+## 9. Pre-Merge Checklist
+
+- Tool added to `allow_lists.ts`
+- Works with both ECS and OTel data (where applicable)
+- Metrics normalized: ms for latency, per-minute for throughput, 0-1 for failure rate
+- Synthtrace scenario for test data generation
+- API integration tests covering filters, groupBy dimensions, and edge cases
 
 ---
 

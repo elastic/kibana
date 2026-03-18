@@ -47,6 +47,18 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Blocklist export failed',
     }
   ),
+  pageImportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.blocklist.pageImportSuccessToastTitle',
+    {
+      defaultMessage: 'Blocklist imported successfully',
+    }
+  ),
+  pageImportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.blocklist.pageImportErrorToastTitle',
+    {
+      defaultMessage: 'Blocklist import failed',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.blocklist.showingTotal', {
       defaultMessage:
@@ -118,6 +130,10 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageLabels = {
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.blocklist.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add blocklist entry' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.blocklist.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import blocklist' }
   ),
   searchPlaceholderInfo: i18n.translate('xpack.securitySolution.blocklist.searchPlaceholderInfo', {
     defaultMessage: 'Search on the fields below: name, description, value',

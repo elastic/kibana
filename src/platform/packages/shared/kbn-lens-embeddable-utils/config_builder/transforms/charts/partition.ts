@@ -15,6 +15,7 @@ import {
   type TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
+import type { PaletteOutput } from '@kbn/coloring';
 import type {
   PartitionState,
   PartitionStateESQL,
@@ -54,6 +55,7 @@ import {
   fromColorMappingAPIToLensState,
   fromColorMappingLensStateToAPI,
   fromStaticColorLensStateToAPI,
+  isLegacyColorPalette,
 } from '../coloring';
 
 type PartitionLens = Extract<
@@ -98,6 +100,13 @@ function isAPIMosaicChartLayer(layer: PartitionState): layer is MosaicState {
   return layer.type === 'mosaic';
 }
 
+function getPartitionMetricsAsArray(config: PartitionState) {
+  if (isAPIMosaicChartLayer(config)) {
+    return [config.metric];
+  }
+  return config.metrics;
+}
+
 function isAPITreemapChartLayer(layer: PartitionState): layer is TreemapState {
   return layer.type === 'treemap';
 }
@@ -109,7 +118,8 @@ function buildFormBasedPartitionLayer(layer: unknown) {
   const datasource = generateLayer(DEFAULT_LAYER_ID, layer);
   const newLayer = datasource[DEFAULT_LAYER_ID];
 
-  const metricColumns = layer.metrics?.flatMap(fromMetricAPItoLensState) ?? [];
+  const dslMetricsArray = isAPIMosaicChartLayer(layer) ? [layer.metric] : layer.metrics;
+  const metricColumns = dslMetricsArray.flatMap((col) => fromMetricAPItoLensState(col));
   const metricColumnsWithIds = metricColumns.map((col, index) => ({
     column: col,
     id: getAccessorName('metric', index),
@@ -146,10 +156,10 @@ export function getValueColumns(layer: unknown) {
     return [];
   }
 
-  const esqlMetricColumns =
-    layer.metrics?.map((metric, index) =>
-      getValueColumn(getAccessorName('metric', index), metric.column, 'number')
-    ) ?? [];
+  const esqlMetricsArray = isAPIMosaicChartLayer(layer) ? [layer.metric] : layer.metrics;
+  const esqlMetricColumns = esqlMetricsArray.map((metric, index) =>
+    getValueColumn(getAccessorName('metric', index), metric.column, 'number')
+  );
 
   const esqlBucketColumns =
     layer.group_by?.map((bucket, index) =>
@@ -271,16 +281,21 @@ function getEmptySizeRatioFromDonutHoleOption(
   return { emptySizeRatio: PARTITION_EMPTY_SIZE_RADIUS[partitionEmptySizeRadiusName] };
 }
 
-function hasStaticColorAssignment<T extends PartitionState['metrics'][number]>(
+type PartitionMetricItem =
+  | Exclude<PartitionState, MosaicState>['metrics'][number]
+  | MosaicState['metric'];
+
+function hasStaticColorAssignment<T extends PartitionMetricItem>(
   metric: T
 ): metric is Extract<T, { color: StaticColorType }> {
   return 'color' in metric && metric.color != null && metric.color.type === 'static';
 }
 
 function shouldAllowMultipleMetrics(config: PartitionState): boolean {
+  const metricsArray = getPartitionMetricsAsArray(config);
   return (
-    config.metrics.length > 1 ||
-    (config.metrics.some(hasStaticColorAssignment) &&
+    metricsArray.length > 1 ||
+    (metricsArray.some(hasStaticColorAssignment) &&
       (config.group_by?.filter(groupIsNotCollapsed).length ?? 0) > 1)
   );
 }
@@ -288,19 +303,26 @@ function shouldAllowMultipleMetrics(config: PartitionState): boolean {
 function buildVisualizationState(
   config: PartitionState
 ): PartitionLensWithoutQueryAndFilters['state']['visualization'] {
-  const metrics = config.metrics.map((_, index) => getAccessorName('metric', index));
+  const metrics = getPartitionMetricsAsArray(config).map((_, index) =>
+    getAccessorName('metric', index)
+  );
   const primaryGroups = (config.group_by ?? []).map((_, index) =>
     getAccessorName('group_by', index)
   );
+  const { colorMapping, ...sharedState } = computeSharedPartitionLayerState(config);
+  const isLegacyColor = isLegacyColorPalette(colorMapping);
+
   if (isAPIPieChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColor && { ...colorMapping }), // legacy colors are included outside of the layer
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColor && { ...colorMapping }), // modern colors are included at the layer level
           categoryDisplay: convertAPICategoryDisplayOption(config.label_position),
           ...getEmptySizeRatioFromDonutHoleOption(config.donut_hole),
         },
@@ -311,12 +333,14 @@ function buildVisualizationState(
   if (isAPITreemapChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColor && { ...colorMapping }),
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColor && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -326,12 +350,14 @@ function buildVisualizationState(
   if (isAPIWaffleChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColor && { ...colorMapping }),
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColor && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -341,6 +367,7 @@ function buildVisualizationState(
   if (isAPIMosaicChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColor && { ...colorMapping }),
       layers: [
         {
           metrics,
@@ -351,7 +378,8 @@ function buildVisualizationState(
             ) ?? [],
           // there's no multiple metrics support in mosaic charts
           allowMultipleMetrics: false,
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColor && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -378,7 +406,7 @@ export function fromAPItoLensState(config: PartitionState): PartitionLensWithout
       datasourceStates: layers,
       ...(internalReferences.length ? { internalReferences } : {}),
       visualization: visualizationState,
-      ...(Object.keys(adHocDataViews).length ? { adHocDataViews } : {}),
+      adHocDataViews,
     },
     references,
   };
@@ -467,7 +495,7 @@ function fromLensStateToAPIDataset(
 function fromLensStateToAPIMetrics(
   visualization: LensPartitionVisualizationState,
   layer: DataSourceStateLayer
-): PartitionState['metrics'] {
+): PartitionMetricItem[] {
   const vizLayer = visualization.layers[0];
   const staticColouring = vizLayer.colorsByDimension;
 
@@ -477,7 +505,7 @@ function fromLensStateToAPIMetrics(
         stripUndefined({
           ...getValueApiColumn(id, layer),
           color: staticColouring ? fromStaticColorLensStateToAPI(staticColouring[id]) : undefined,
-        }) as PartitionStateESQL['metrics'][0]
+        }) as PartitionMetricItem
     );
   }
 
@@ -489,7 +517,7 @@ function fromLensStateToAPIMetrics(
       stripUndefined({
         ...operationFromColumn(id, layer),
         color: staticColouring ? fromStaticColorLensStateToAPI(staticColouring[id]) : undefined,
-      }) as PartitionStateNoESQL['metrics'][0]
+      }) as PartitionMetricItem
   );
 }
 
@@ -518,15 +546,17 @@ function convertLensStateToAPIGrouping(
   vizLayer: LensPartitionLayerState,
   layer: DataSourceStateLayer,
   groupByAccessors: string[],
-  groupIndexForColorMapping: number
+  groupIndexForColorMapping: number,
+  legacyPalette?: PaletteOutput
 ) {
-  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping);
+  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping, legacyPalette);
   if (isTextBasedLayer(layer)) {
     return groupByAccessors.map(
       (id, index) =>
         stripUndefined({
           ...getValueApiColumn(id, layer),
           color: index === groupIndexForColorMapping ? colorMapping : undefined,
+          collapse_by: vizLayer.collapseFns?.[id] || undefined, // handle gracefully empty strings
         }) as NonNullable<
           Extract<PartitionStateESQL, 'group_breakdown_by'>['group_breakdown_by']
         >[0]
@@ -553,14 +583,13 @@ function fromLensStateToAPIGroups(
   const vizLayer = visualization.layers[0];
 
   const groupByAccessors = getGroups(vizLayer);
-  const groupIndexForColorMapping = groupByAccessors.findIndex(
-    (id) => vizLayer.collapseFns?.[id] == null
-  );
+  const groupIndexForColorMapping = groupByAccessors.findIndex((id) => !vizLayer.collapseFns?.[id]);
   const groups = convertLensStateToAPIGrouping(
     vizLayer,
     layer,
     groupByAccessors,
-    groupIndexForColorMapping
+    groupIndexForColorMapping,
+    visualization.palette
   );
   return groups?.length ? groups : undefined;
 }
@@ -654,9 +683,13 @@ function buildVisualizationAPI(
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[]
 ): PartitionState {
+  const metricsArray = fromLensStateToAPIMetrics(visualization, layer);
+  const metricsField = isStateMosaicChart(visualization)
+    ? { metric: metricsArray[0] }
+    : { metrics: metricsArray };
   return stripUndefined({
     type: visualization.shape,
-    metrics: fromLensStateToAPIMetrics(visualization, layer),
+    ...metricsField,
     group_by: fromLensStateToAPIGroups(visualization, layer),
     ...fromLensStateToAPISecondaryGroups(visualization, layer),
     ...fromLensStateToAPIDataset(visualization, layer, adHocDataViews, references, adhocReferences),

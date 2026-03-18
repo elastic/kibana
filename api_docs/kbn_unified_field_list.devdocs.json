@@ -2780,7 +2780,7 @@
             "label": "infoIcon",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "lineNumber": 41,
@@ -3197,7 +3197,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list_filters/field_type_filter.tsx",
-                "lineNumber": 88,
+                "lineNumber": 77,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3640,7 +3640,7 @@
             "label": "prepend",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list/field_list.tsx",
             "lineNumber": 28,
@@ -3656,7 +3656,7 @@
             "label": "append",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list/field_list.tsx",
             "lineNumber": 29,
@@ -5089,17 +5089,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
+              "{ readonly getTrigger: (triggerId: string) => ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -5171,7 +5169,7 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               "UiActionsService",
               "; }"
             ],

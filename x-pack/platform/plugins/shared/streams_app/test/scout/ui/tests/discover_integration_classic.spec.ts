@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 import { generateLogsData } from '../fixtures/generators';
 
@@ -13,7 +14,7 @@ const CLASSIC_STREAM_NAME = 'logs-generic-dataset';
 
 test.describe(
   'Discover integration - Classic Stream - Navigate to Stream processing from document flyout',
-  { tag: ['@svlOblt'] },
+  { tag: tags.serverless.observability.complete },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       // Generate logs data for a classic stream

@@ -11,15 +11,7 @@
 export * as cli from './src/cli';
 
 // Test framework
-export {
-  expect,
-  test,
-  spaceTest,
-  lighthouseTest,
-  apiTest,
-  globalSetupHook,
-  tags,
-} from './src/playwright';
+export { test, spaceTest, lighthouseTest, apiTest, globalSetupHook, tags } from './src/playwright';
 
 // Fixtures & configuration
 export {
@@ -61,6 +53,7 @@ export type {
   RequestAuthFixture,
   SamlAuth,
   SynthtraceFixture,
+  SpaceSolutionView,
 } from './src/playwright';
 
 // Service & configuration types

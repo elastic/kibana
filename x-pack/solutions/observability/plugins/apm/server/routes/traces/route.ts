@@ -140,7 +140,11 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     }),
     query: t.intersection([
       rangeRt,
-      t.partial({ maxTraceItems: toNumberRt, serviceName: t.string }),
+      t.partial({
+        maxTraceItems: toNumberRt,
+        serviceName: t.string,
+        entryTransactionId: t.string,
+      }),
     ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
@@ -150,6 +154,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     traceItems: TraceItem[];
     errors: Error[];
     agentMarks: Record<string, number>;
+    entryTransaction?: Transaction;
   }> => {
     const [apmEventClient, logsClient] = await Promise.all([
       getApmEventClient(resources),
@@ -158,24 +163,36 @@ const unifiedTracesByIdRoute = createApmServerRoute({
 
     const { params, config } = resources;
     const { traceId } = params.path;
-    const { start, end, serviceName } = params.query;
+    const { start, end, serviceName, entryTransactionId } = params.query;
 
-    const { traceItems, agentMarks, unifiedTraceErrors } = await getUnifiedTraceItems({
-      apmEventClient,
-      logsClient,
-      traceId,
-      start,
-      end,
-      maxTraceItemsFromUrlParam: params.query.maxTraceItems,
-      config,
-      serviceName,
-    });
+    const [{ traceItems, agentMarks, unifiedTraceErrors }, entryTransaction] = await Promise.all([
+      getUnifiedTraceItems({
+        apmEventClient,
+        logsClient,
+        traceId,
+        start,
+        end,
+        maxTraceItemsFromUrlParam: params.query.maxTraceItems,
+        config,
+        serviceName,
+      }),
+      entryTransactionId
+        ? getTransaction({
+            transactionId: entryTransactionId,
+            traceId,
+            apmEventClient,
+            start,
+            end,
+          })
+        : Promise.resolve(undefined),
+    ]);
 
     return {
       traceItems,
       // For now we, we only return apm errors to show as marks in the waterfall
       errors: unifiedTraceErrors.apmErrors,
       agentMarks,
+      entryTransaction,
     };
   },
 });

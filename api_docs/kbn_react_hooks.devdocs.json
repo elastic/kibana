@@ -166,6 +166,102 @@
       },
       {
         "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useDebouncedValue",
+        "type": "Function",
+        "tags": [],
+        "label": "useDebouncedValue",
+        "description": [
+          "\nReturns a debounced version of the provided value. The returned value only\nupdates after the specified wait period has elapsed since the last change.\n"
+        ],
+        "signature": [
+          "<T>(value: T, wait?: number, options?: ",
+          {
+            "pluginId": "@kbn/react-hooks",
+            "scope": "common",
+            "docId": "kibKbnReactHooksPluginApi",
+            "section": "def-common.UseDebouncedValueOptions",
+            "text": "UseDebouncedValueOptions"
+          },
+          "<T> | undefined) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useDebouncedValue.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "- The value to debounce."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useDebouncedValue.$2",
+            "type": "number",
+            "tags": [],
+            "label": "wait",
+            "description": [
+              "- Milliseconds to delay before updating. Defaults to 300."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useDebouncedValue.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/react-hooks",
+                "scope": "common",
+                "docId": "kibKbnReactHooksPluginApi",
+                "section": "def-common.UseDebouncedValueOptions",
+                "text": "UseDebouncedValueOptions"
+              },
+              "<T> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "The debounced value."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
         "id": "def-common.useDebounceFn",
         "type": "Function",
         "tags": [
@@ -212,9 +308,7 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [
-              "- Optional configuration options for debounce."
-            ],
+            "description": [],
             "signature": [
               "DebounceOptions",
               " | undefined"
@@ -323,9 +417,7 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [
-              "- Optional configuration options for throttle."
-            ],
+            "description": [],
             "signature": [
               "ThrottleOptions",
               " | undefined"
@@ -499,6 +591,87 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.UseDebouncedValueOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseDebouncedValueOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/react-hooks",
+            "scope": "common",
+            "docId": "kibKbnReactHooksPluginApi",
+            "section": "def-common.UseDebouncedValueOptions",
+            "text": "UseDebouncedValueOptions"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.UseDebouncedValueOptions.compare",
+            "type": "Function",
+            "tags": [],
+            "label": "compare",
+            "description": [
+              "\nCustom comparison function. Return `true` when the values should be\nconsidered equal (skip the debounce). Defaults to strict equality (`===`)."
+            ],
+            "signature": [
+              "((a: T, b: T) => boolean) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/react-hooks",
+                "id": "def-common.UseDebouncedValueOptions.compare.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "a",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+                "lineNumber": 21,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/react-hooks",
+                "id": "def-common.UseDebouncedValueOptions.compare.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "b",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+                "lineNumber": 21,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

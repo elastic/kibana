@@ -9,8 +9,9 @@ import type { Logger } from '@kbn/logging';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 
 import { registerExtractEntityTasks } from './extract_entity_task';
+import { registerHistorySnapshotTask } from './history_snapshot_task';
 import type { EntityStoreCoreSetup } from '../types';
-import { ALL_ENTITY_TYPES } from '../domain/definitions/entity_schema';
+import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
 
 export function registerTasks(
   taskManager: TaskManagerSetupContract,
@@ -18,4 +19,5 @@ export function registerTasks(
   core: EntityStoreCoreSetup
 ) {
   registerExtractEntityTasks({ taskManager, logger, entityTypes: ALL_ENTITY_TYPES, core });
+  registerHistorySnapshotTask({ taskManager, logger, core });
 }

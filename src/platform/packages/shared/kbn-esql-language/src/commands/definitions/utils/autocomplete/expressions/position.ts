@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, isFunctionExpression, isInlineCast, isLiteral } from '../../../../../ast/is';
-import { within } from '../../../../../ast/location';
-import type { ESQLSingleAstItem, ESQLFunction } from '../../../../../types';
+import { isColumn, isFunctionExpression, isInlineCast, isLiteral, within } from '@elastic/esql';
+import type { ESQLSingleAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../../../registry/types';
-import { isNullCheckOperator } from './utils';
-import { checkFunctionInvocationComplete } from '../../functions';
+import { getIncompleteOperatorReason, isNullCheckOperator } from './utils';
 import { getExpressionType } from '../../expressions';
 
 export type ExpressionPosition =
@@ -86,9 +84,10 @@ export function getPosition(
     // Binary operators (e.g., "field = |", "field IN |")
     // Check if operator is complete (has both operands)
     if (expressionRoot.subtype === 'binary-expression' && columns) {
-      const { complete } = checkFunctionInvocationComplete(expressionRoot as ESQLFunction, (expr) =>
-        getExpressionType(expr, columns)
-      );
+      const complete =
+        getIncompleteOperatorReason(expressionRoot as ESQLFunction, (expr) =>
+          getExpressionType(expr, columns)
+        ) === undefined;
 
       return complete ? 'after_complete' : 'after_operator';
     }

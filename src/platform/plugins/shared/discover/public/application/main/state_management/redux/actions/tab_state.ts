@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunction } from 'lodash';
+import { isFunction, isEqual } from 'lodash';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
@@ -26,6 +26,8 @@ import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
   type TabActionPayload,
+  transitionedFromEsqlToDataView,
+  transitionedFromDataViewToEsql,
 } from '../internal_state';
 import { selectTab } from '../selectors';
 import { selectTabRuntimeState } from '../runtime_state';
@@ -113,6 +115,37 @@ export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayl
     }
   };
 
+type AttributesPayload = TabActionPayload<{ attributes: Partial<TabState['attributes']> }>;
+
+const mergeAttributes = (
+  currentState: DiscoverInternalState,
+  { tabId, attributes }: AttributesPayload
+) => {
+  const currentAttributes = selectTab(currentState, tabId).attributes;
+  const mergedAttributes = { ...currentAttributes, ...attributes };
+  return {
+    mergedAttributes,
+    hasStateChanges: !isEqual(currentAttributes, mergedAttributes),
+  };
+};
+
+/**
+ * Partially update the tab attributes, merging with existing state
+ */
+export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayload]> = (payload) =>
+  function updateAttributesThunkFn(dispatch, getState) {
+    const { mergedAttributes, hasStateChanges } = mergeAttributes(getState(), payload);
+
+    if (hasStateChanges) {
+      dispatch(
+        internalStateSlice.actions.setAttributes({
+          tabId: payload.tabId,
+          attributes: mergedAttributes,
+        })
+      );
+    }
+  };
+
 /**
  * Partially update the tab global state, merging with existing state and replacing URL history
  */
@@ -159,6 +192,19 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewId: string }>]
 > = ({ tabId, dataViewId }) =>
   function transitionFromESQLToDataViewThunkFn(dispatch) {
+    // Reset the default profile state when transitioning to data view mode
+    dispatch(
+      internalStateSlice.actions.setResetDefaultProfileState({
+        tabId,
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+          hideChart: true,
+        },
+      })
+    );
+
     dispatch(
       updateAppState({
         tabId,
@@ -175,6 +221,8 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
         },
       })
     );
+
+    dispatch(transitionedFromEsqlToDataView({ tabId }));
   };
 
 const clearTimeFieldFromSort = (
@@ -196,11 +244,24 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
   function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+    // Reset the default profile state when transitioning to ES|QL mode
+    dispatch(
+      internalStateSlice.actions.setResetDefaultProfileState({
+        tabId,
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+          hideChart: true,
+        },
+      })
+    );
+
     const currentState = getState();
     const appState = selectTab(currentState, tabId).appState;
     const { query, sort } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
-    const queryString = getInitialESQLQuery(dataView, true, filterQuery);
+    const queryString = getInitialESQLQuery(dataView, filterQuery);
     const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
 
     dispatch(
@@ -220,6 +281,8 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
 
     // clears pinned filters
     dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
+
+    dispatch(transitionedFromDataViewToEsql({ tabId }));
   };
 
 /**
@@ -263,7 +326,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
     getState,
     { searchSessionManager, runtimeStateManager, services }
   ) {
-    const { scopedEbtManager$, stateContainer$ } = selectTabRuntimeState(
+    const { scopedEbtManager$, dataStateContainer$ } = selectTabRuntimeState(
       runtimeStateManager,
       tabId
     );
@@ -284,7 +347,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       addLog('onQuerySubmit triggers data fetching');
-      stateContainer$.getValue()?.dataState.fetch();
+      dataStateContainer$.getValue()?.fetch();
     }
   };
 
@@ -297,8 +360,8 @@ export const fetchData: InternalStateThunkActionCreator<
 > = ({ tabId, initial }) =>
   function fetchDataThunkFn(dispatch, getState, { runtimeStateManager }) {
     addLog('fetchData', { initial });
-    const { stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const dataStateContainer = stateContainer$.getValue()?.dataState;
+    const { dataStateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const dataStateContainer = dataStateContainer$.getValue();
     if (!initial || dataStateContainer?.getInitialFetchStatus() === FetchStatus.LOADING) {
       dataStateContainer?.fetch();
     }

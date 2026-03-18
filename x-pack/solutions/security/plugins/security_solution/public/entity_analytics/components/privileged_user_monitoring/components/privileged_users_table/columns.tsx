@@ -297,13 +297,13 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
   const filters = [
     {
       title: OPEN_IN_ALERTS_TITLE_USERNAME,
-      selectedOptions: [userName],
-      fieldName: 'user.name',
+      selected_options: [userName],
+      field_name: 'user.name',
     },
     {
       title: OPEN_IN_ALERTS_TITLE_STATUS,
-      selectedOptions: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
-      fieldName: 'kibana.alert.workflow_status',
+      selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+      field_name: 'kibana.alert.workflow_status',
     },
   ];
 

@@ -18,7 +18,7 @@ import { createStreamsRepositoryAdminClient } from './helpers/repository_client'
 import { loadDashboards } from './helpers/dashboards';
 
 const TEST_STREAM_NAME = 'logs-test-default';
-const WIRED_STREAM_NAME = 'logs.wiredChild';
+const WIRED_STREAM_NAME = 'logs.otel.wiredChild';
 const TEST_DASHBOARD_ID = '9230e631-1f1a-476d-b613-4b074c6cfdd0';
 
 const oldProcessing = [
@@ -119,7 +119,7 @@ const wiredStreamDefinition = {
     wired: {
       routing: [
         {
-          destination: 'logs.wiredChild.child',
+          destination: 'logs.otel.wiredChild.child',
           if: {
             field: 'resource.attributes.host.name',
             operator: 'eq' as const,
@@ -140,6 +140,7 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
   name: TEST_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
+  query_streams: [],
   ingest: {
     lifecycle: {
       ilm: {
@@ -159,6 +160,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
   name: WIRED_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
+  query_streams: [],
   ingest: {
     lifecycle: {
       ilm: {
@@ -172,7 +174,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
     wired: {
       routing: [
         {
-          destination: 'logs.wiredChild.child',
+          destination: 'logs.otel.wiredChild.child',
           where: {
             field: 'resource.attributes.host.name',
             eq: 'myHost',
@@ -205,7 +207,10 @@ const expectedQueriesResponse = {
     {
       id: '12345',
       title: 'Test',
-      kql: { query: 'atest' },
+      description: '',
+      esql: {
+        query: `FROM ${TEST_STREAM_NAME},${TEST_STREAM_NAME}.* METADATA _id, _source | WHERE KQL("atest")`,
+      },
     },
   ],
 };
@@ -246,7 +251,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           params: {
             path: {
-              streamName: 'logs',
+              streamName: 'logs.otel',
               attachmentType: 'dashboard',
               attachmentId: TEST_DASHBOARD_ID,
             },
@@ -258,7 +263,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           params: {
             path: {
-              streamName: 'logs',
+              streamName: 'logs.otel',
               attachmentType: 'dashboard',
               attachmentId: TEST_DASHBOARD_ID,
             },
@@ -269,19 +274,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await apiClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         params: {
           path: {
-            name: 'logs',
+            name: 'logs.otel',
             queryId: 'test-query-init',
           },
           body: {
             title: 'Init Query',
-            kql: { query: 'test' },
+            esql: { query: 'FROM logs.otel METADATA _id, _source | LIMIT 1' },
           },
         },
       });
       await apiClient.fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
         params: {
           path: {
-            name: 'logs',
+            name: 'logs.otel',
             queryId: 'test-query-init',
           },
         },
@@ -346,7 +351,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const listResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
       expect(listResponse.status).to.eql(200);
-      expectStreams(['logs', TEST_STREAM_NAME], listResponse.body.streams);
+      expectStreams(['logs.otel', 'logs.ecs', TEST_STREAM_NAME], listResponse.body.streams);
 
       const dashboardResponse = await apiClient.fetch(
         'GET /api/streams/{streamName}/attachments 2023-10-31',
@@ -377,7 +382,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const listResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
       expect(listResponse.status).to.eql(200);
-      expectStreams(['logs', TEST_STREAM_NAME], listResponse.body.streams);
+      expectStreams(['logs.otel', 'logs.ecs', TEST_STREAM_NAME], listResponse.body.streams);
 
       const dashboardResponse = await apiClient.fetch(
         'GET /api/streams/{streamName}/attachments 2023-10-31',

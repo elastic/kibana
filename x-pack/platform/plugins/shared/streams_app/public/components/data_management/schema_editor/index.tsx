@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { getRegularEcsField } from '@kbn/streams-schema';
+import { getFormattedError } from '../../../util/errors';
 import { useControls } from './hooks/use_controls';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { SchemaEditorProps, SchemaField } from './types';
@@ -81,7 +82,7 @@ export function SchemaEditor({
         });
         onFieldSelection(selection, false);
       } catch (err) {
-        notifications.toasts.addError(err, {
+        notifications.toasts.addError(getFormattedError(err), {
           title: i18n.translate('xpack.streams.schemaEditor.fetchRecommendationsError', {
             defaultMessage: 'Error fetching field type recommendations',
           }),

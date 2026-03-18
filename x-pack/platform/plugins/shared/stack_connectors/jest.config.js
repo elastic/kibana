@@ -15,4 +15,8 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/shared/stack_connectors/{common,public,server}/**/*.{js,ts,tsx}',
   ],
+  moduleNameMapper: {
+    '^@elastic/eui/es/components/icon/assets/(.*)$':
+      '<rootDir>/x-pack/platform/plugins/shared/stack_connectors/__mocks__/eui_icon_assets.js',
+  },
 };

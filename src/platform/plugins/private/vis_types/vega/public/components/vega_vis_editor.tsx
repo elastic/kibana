@@ -12,7 +12,7 @@ import useMount from 'react-use/lib/useMount';
 import hjson from 'hjson';
 
 import React, { useCallback, useState } from 'react';
-import compactStringify from 'json-stringify-pretty-compact';
+import { prettyCompactStringify } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
@@ -27,7 +27,7 @@ import { VegaActionsMenu } from './vega_actions_menu';
 
 function format(
   value: string,
-  stringify: typeof hjson.stringify | typeof compactStringify,
+  stringify: typeof hjson.stringify | typeof prettyCompactStringify,
   options?: any
 ) {
   try {
@@ -111,7 +111,7 @@ function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParam
   const onChange = useCallback((value: string) => setSpec(value), [setSpec]);
 
   const formatJson = useCallback(() => {
-    const { value, isValid } = format(stateParams.spec, compactStringify);
+    const { value, isValid } = format(stateParams.spec, prettyCompactStringify);
 
     if (isValid) {
       setSpec(value, XJsonLang.ID);

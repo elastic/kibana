@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { RegistryElasticsearch, RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
+import type {
+  DeprecationInfo,
+  RegistryElasticsearch,
+  RegistryPolicyTemplate,
+  RegistryVarsEntry,
+} from './epm';
 
 export interface RegistryVarGroupOption {
   name: string;
@@ -26,6 +31,15 @@ export interface RegistryVarGroup {
   options: RegistryVarGroupOption[];
 }
 
+export interface PackageDependency {
+  package: string;
+  version: string;
+}
+
+export interface PackageRequires {
+  content?: PackageDependency[];
+}
+
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
   format_version?: string;
@@ -37,6 +51,7 @@ export interface PackageSpecManifest {
   source?: {
     license: string;
   };
+  requires?: PackageRequires;
   type?: PackageSpecPackageType;
   release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;
@@ -62,6 +77,7 @@ export interface PackageSpecManifest {
     }>;
     datasets?: DiscoveryDataset[];
   };
+  deprecated?: DeprecationInfo;
 }
 export interface DiscoveryDataset {
   name: string;
@@ -149,6 +165,7 @@ export type PackageSpecCategory =
   | 'workplace_search_content_source';
 
 export interface PackageSpecConditions {
+  deprecated?: DeprecationInfo;
   kibana?: {
     version?: string;
   };

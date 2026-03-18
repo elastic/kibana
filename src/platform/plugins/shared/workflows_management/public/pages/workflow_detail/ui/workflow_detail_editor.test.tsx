@@ -32,6 +32,9 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
 jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
   useWorkflowActions: () => mockUseWorkflowActions(),
 }));
+jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
+  useFetchConnector: () => jest.fn(() => ({ data: undefined, isLoading: false })),
+}));
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useSelector: (selector: any) => mockUseSelector(selector),
@@ -80,7 +83,7 @@ jest.mock('../../../features/run_workflow/ui/test_step_modal', () => ({
     <div data-test-subj="test-step-modal">
       <button
         type="button"
-        data-test-subj="submit-step-run"
+        data-test-subj="workflowSubmitStepRun"
         onClick={() => onSubmit({ stepInputs: {} })}
       >
         {'Submit'}
@@ -250,7 +253,7 @@ describe('WorkflowDetailEditor', () => {
         expect(queryByTestId('test-step-modal')).toBeInTheDocument();
       });
 
-      const submitButton = getByTestId('submit-step-run');
+      const submitButton = getByTestId('workflowSubmitStepRun');
       await act(async () => {
         submitButton.click();
       });

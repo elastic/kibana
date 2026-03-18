@@ -11,6 +11,7 @@
 import { basicsTutorialCommands } from './basics_tutorial';
 import { semanticTutorialCommands } from './semantic_tutorial';
 import { esqlTutorialCommands } from './esql_tutorial';
+import { agentBuilderTutorialCommands } from './agent_builder';
 
 import type { ConsoleTutorial } from './types';
 import { timeSeriesDataStreamTutorialCommands } from './time_series_data_stream_tutorial';
@@ -24,4 +25,5 @@ export const consoleTutorials: ConsoleTutorial = {
   timeSeriesDataStreams: timeSeriesDataStreamTutorialCommands,
   hybridSearch: `# Hybrid Search Tutorial`,
   vectorSearch: `# Vector Search Tutorial`,
+  agentBuilder: agentBuilderTutorialCommands,
 };

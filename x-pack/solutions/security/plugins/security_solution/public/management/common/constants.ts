@@ -30,7 +30,7 @@ export const MANAGEMENT_ROUTING_EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/:tabNam
 export const MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.hostIsolationExceptions})`;
 export const MANAGEMENT_ROUTING_BLOCKLIST_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.blocklist})`;
 export const MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.responseActionsHistory})`;
-export const MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.scriptsLibrary})`;
+export const MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.scriptLibrary})`;
 
 // --[ STORE ]---------------------------------------------------------------------------
 /** The SIEM global store namespace where the management state will be mounted */
@@ -49,11 +49,3 @@ export const MANAGEMENT_DEFAULT_SORT_FIELD = 'created_at';
 // --[ DEFAULTS ]---------------------------------------------------------------------------
 /** The default polling interval for API calls that require a refresh interval */
 export const DEFAULT_POLL_INTERVAL = 10000;
-
-export const SCRIPT_LIBRARY_SORTABLE_FIELDS = Object.freeze([
-  'name',
-  'createdAt',
-  'createdBy',
-  'updatedAt',
-  'updatedBy',
-]);

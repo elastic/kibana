@@ -6,11 +6,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 
 // This role behaves like Fleet > All, Integrations > All
-test.describe('When the user has Editor built-in role', { tag: ['@ess'] }, () => {
+test.describe('When the user has Editor built-in role', { tag: tags.stateful.classic }, () => {
   test('It should not show a callout if fleet server is setup', async ({
     browserAuth,
     pageObjects,

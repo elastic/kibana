@@ -7,16 +7,15 @@
 
 import {
   extractGrokPatternDangerouslySlow,
-  getReviewFields as getGrokReviewFields,
-  getGrokProcessor,
+  assembleGrokProcessor,
   getGrokPattern,
 } from '@kbn/grok-heuristics';
 import {
   extractDissectPattern,
   serializeAST,
-  getReviewFields as getDissectReviewFields,
-  getDissectProcessorWithReview,
+  assembleDissectProcessor,
 } from '@kbn/dissect-heuristics';
+import { tags } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
 import { evaluate } from '../src/evaluate';
 import {
@@ -36,7 +35,7 @@ import {
  * Tests the quality of Grok and Dissect pattern generation using real log samples
  * and comprehensive quality metrics.
  *
- * @tags @ess
+ * @tags @local-stateful-classic @cloud-stateful-classic
  */
 
 evaluate.describe.configure({ timeout: 300_000 });
@@ -49,6 +48,41 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
   evaluate.afterEach(async ({ apiServices }) => {
     await apiServices.streams.disable();
   });
+
+  function parseSSEResponse(data: string): any {
+    const lines = data.split('\n').filter((line) => line.startsWith('data: '));
+    const lastLine = lines[lines.length - 1];
+    return lastLine ? JSON.parse(lastLine.slice(6)) : null;
+  }
+
+  async function callLlmSuggestionApi(
+    kbnClient: KbnClient,
+    connectorId: string,
+    patternType: 'grok' | 'dissect',
+    reviewFields: any,
+    messages: string[]
+  ): Promise<any> {
+    const response = await kbnClient.request({
+      method: 'POST',
+      path: `/internal/streams/logs.otel/processing/_suggestions/${patternType}`,
+      body: {
+        connector_id: connectorId,
+        sample_messages: messages,
+        review_fields: reviewFields,
+      },
+    });
+
+    const data = parseSSEResponse(response.data as string);
+    if (!data) throw new Error('No SSE data in LLM response');
+
+    if (patternType === 'grok') {
+      if (!data.grokProcessor) throw new Error('No grok processor in LLM response');
+      return data.grokProcessor;
+    } else {
+      if (!data.dissectProcessor) throw new Error('No dissect processor in LLM response');
+      return data.dissectProcessor;
+    }
+  }
 
   /**
    * Run pattern extraction and simulation for a single example.
@@ -70,35 +104,50 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     metadata: typeof example.metadata;
   }> {
     const { input, output: expected, metadata } = example;
+    const { sample_messages: messages, field_to_parse: fieldToParse } = input;
 
-    // Step 1: Generate pattern using heuristics
-    const { heuristicPattern, reviewFields, patternNodes, dissectResult } =
-      generateHeuristicPattern(input.sample_messages, patternType);
+    let heuristicPattern: string;
+    let processor: any = null;
 
-    // Step 2: Get LLM suggestions
-    const { processor, suggestedPattern } = await getLlmSuggestions(
-      kbnClient,
-      connector.id,
-      input.sample_messages,
-      reviewFields,
-      patternType,
-      heuristicPattern,
-      patternNodes,
-      dissectResult,
-      input.field_to_parse
-    );
+    try {
+      if (patternType === 'grok') {
+        const patternNodes = extractGrokPatternDangerouslySlow(messages);
+        heuristicPattern = getGrokPattern(patternNodes);
 
-    // Step 3: Simulate processing
+        processor = await assembleGrokProcessor({
+          from: fieldToParse,
+          patternGroups: [{ messages, nodes: patternNodes }],
+          reviewFn: async (reviewFields, msgs) =>
+            callLlmSuggestionApi(kbnClient, connector.id, 'grok', reviewFields, msgs),
+        });
+      } else {
+        const rawPattern = extractDissectPattern(messages);
+        heuristicPattern = serializeAST(rawPattern.ast);
+
+        processor = await assembleDissectProcessor({
+          from: fieldToParse,
+          messages,
+          reviewFn: async (reviewFields, msgs) =>
+            callLlmSuggestionApi(kbnClient, connector.id, 'dissect', reviewFields, msgs),
+        });
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error assembling processor:', error);
+      heuristicPattern = heuristicPattern!;
+    }
+
+    const suggestedPattern = processor?.patterns?.[0] || processor?.pattern || heuristicPattern;
+
     const parsedLogs = await simulateProcessing(
       kbnClient,
-      input.sample_messages,
-      input.field_to_parse,
+      messages,
+      fieldToParse,
       patternType,
       processor,
       suggestedPattern
     );
 
-    // Step 4: Calculate quality metrics
     const metrics = calculateOverallQuality(parsedLogs, expected);
 
     return {
@@ -107,93 +156,6 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
       expected,
       metadata,
     };
-  }
-
-  function generateHeuristicPattern(
-    messages: string[],
-    patternType: 'grok' | 'dissect'
-  ): {
-    heuristicPattern: string;
-    reviewFields: any;
-    patternNodes?: any;
-    dissectResult?: any;
-  } {
-    if (patternType === 'grok') {
-      const patternNodes = extractGrokPatternDangerouslySlow(messages);
-      return {
-        heuristicPattern: getGrokPattern(patternNodes),
-        reviewFields: getGrokReviewFields(patternNodes, 10),
-        patternNodes,
-      };
-    } else {
-      const dissectResult = extractDissectPattern(messages);
-      return {
-        heuristicPattern: serializeAST(dissectResult.ast),
-        reviewFields: getDissectReviewFields(dissectResult, 10),
-        dissectResult,
-      };
-    }
-  }
-
-  async function getLlmSuggestions(
-    kbnClient: KbnClient,
-    connectorId: string,
-    messages: string[],
-    reviewFields: any,
-    patternType: 'grok' | 'dissect',
-    heuristicPattern: string,
-    patternNodes?: any,
-    dissectResult?: any,
-    fieldToParse?: string
-  ): Promise<{ processor: any; suggestedPattern: string }> {
-    try {
-      const response = await kbnClient.request({
-        method: 'POST',
-        path: `/internal/streams/logs/processing/_suggestions/${patternType}`,
-        body: {
-          connector_id: connectorId,
-          sample_messages: messages,
-          review_fields: reviewFields,
-        },
-      });
-
-      const suggestionData = parseSSEResponse(response.data as string);
-      if (!suggestionData) {
-        return { processor: null, suggestedPattern: heuristicPattern };
-      }
-
-      if (patternType === 'grok' && suggestionData.grokProcessor) {
-        const processor = getGrokProcessor(patternNodes, suggestionData.grokProcessor);
-        return {
-          processor,
-          suggestedPattern: processor?.patterns?.[0] || heuristicPattern,
-        };
-      }
-
-      if (patternType === 'dissect' && suggestionData.dissectProcessor) {
-        const processor = getDissectProcessorWithReview(
-          dissectResult,
-          suggestionData.dissectProcessor,
-          fieldToParse!
-        );
-        return {
-          processor,
-          suggestedPattern: processor?.pattern || heuristicPattern,
-        };
-      }
-
-      return { processor: null, suggestedPattern: heuristicPattern };
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error getting LLM suggestions:', error);
-      return { processor: null, suggestedPattern: heuristicPattern };
-    }
-  }
-
-  function parseSSEResponse(data: string): any {
-    const lines = data.split('\n').filter((line) => line.startsWith('data: '));
-    const lastLine = lines[lines.length - 1];
-    return lastLine ? JSON.parse(lastLine.slice(6)) : null;
   }
 
   async function simulateProcessing(
@@ -218,19 +180,19 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
             customIdentifier: 'eval-dissect',
             from: fieldToParse,
             pattern: processor?.pattern || suggestedPattern,
-            append_separator: processor?.processor?.dissect?.append_separator,
+            append_separator: processor?.append_separator,
           };
 
     const documents = messages.map((msg) => ({
       [fieldToParse]: msg,
-      'stream.name': 'logs',
+      'stream.name': 'logs.otel',
       '@timestamp': '2025-01-01',
     }));
 
     try {
       const response = await kbnClient.request({
         method: 'POST',
-        path: `/internal/streams/logs/processing/_simulate`,
+        path: `/internal/streams/logs.otel/processing/_simulate`,
         body: { documents, processing: { steps: [step] } },
       });
 
@@ -412,45 +374,45 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
 
           // Criterion 3: Field naming conventions (OTEL/ECS standards)
           `FIELD NAMING: Field names should follow OpenTelemetry (OTEL) and Elastic Common Schema (ECS) standards.
-           
+
            EXCELLENT naming (standard-compliant):
            - OTEL standard: "severity_text", "trace_id", "span_id", "service.name", "resource.attributes.*"
            - ECS standard: "source.ip", "host.name", "process.pid", "http.response.status_code", "user.name"
            - Combined: "attributes.source.ip", "attributes.http.status_code"
            - Body field: "body.text" (standard for message content)
-           
+
            GOOD naming (semantic but non-standard):
            - Descriptive hierarchical names like "custom.timestamp", "nginx.error.connection_id"
            - Domain-specific names that describe the data
-           
+
            BAD naming (avoid):
            - Numbered fields: "field1", "field2", "f0", "column1"
            - Generic placeholders: "data", "value", "content", "text"
            - Single letters or meaningless abbreviations
-           
+
            The field name should describe what the data represents.`,
 
           // Criterion 4: Value type correctness
           `VALUE QUALITY: Extracted values should match their expected types:
-           
+
            - TIMESTAMP values: Should contain date/time info (digits, separators, timezone)
            - IP values: Should look like IP addresses (e.g., "192.168.1.1" or IPv6)
            - NUMBER values: Should be numeric, not strings with units
            - KEYWORD values: Clean strings without excessive delimiters
-           
+
            ACCEPTABLE: Quoted strings, special chars, brackets if part of original data.
            Example: User-agent "Mozilla/5.0 (Windows NT 6.1)" is correctly extracted.
-           
+
            NOT ACCEPTABLE: Leading/trailing delimiters that should be stripped.
            Example: "[INFO]" when it should be "INFO".`,
 
           // Criterion 5: Field count (using ground truth values)
           `FIELD COUNT: This log format should extract ${minFields}-${maxFields} fields.
-           
+
            - Less than ${minFields} fields: Important data is being missed
            - ${minFields}-${maxFields} fields: Optimal extraction
            - More than ${maxFields} fields: May indicate over-extraction or splitting
-           
+
            Count the actual extracted fields in each example and compare.`,
         ];
 
@@ -493,12 +455,12 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     const label = patternType === 'grok' ? 'Grok' : 'Dissect';
 
     Object.entries(datasets).forEach(([_, dataset]) => {
-      evaluate.describe(`${label}: ${dataset.name}`, { tag: '@ess' }, () => {
+      evaluate.describe(`${label}: ${dataset.name}`, { tag: tags.stateful.classic }, () => {
         dataset.examples.forEach((example, idx) => {
           evaluate(
             `${idx + 1}. ${example.input.stream_name}`,
-            async ({ phoenixClient, kbnClient, connector, evaluators }) => {
-              await phoenixClient.runExperiment(
+            async ({ executorClient, kbnClient, connector, evaluators }) => {
+              await executorClient.runExperiment(
                 {
                   dataset: {
                     name: `${label} - ${example.input.stream_name}`,

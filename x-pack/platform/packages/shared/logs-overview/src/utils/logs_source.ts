@@ -7,7 +7,7 @@
 
 import { type DataViewsContract, type DataView } from '@kbn/data-views-plugin/common';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import { fromPromise } from 'xstate5';
+import { fromPromise } from 'xstate';
 
 export type LogsSourceConfiguration =
   | SharedSettingLogsSourceConfiguration

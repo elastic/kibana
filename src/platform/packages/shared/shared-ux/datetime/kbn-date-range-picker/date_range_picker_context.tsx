@@ -1,0 +1,299 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  type PropsWithChildren,
+  type RefObject,
+  type MutableRefObject,
+} from 'react';
+
+import { useGeneratedHtmlId } from '@elastic/eui';
+
+import type {
+  TimeRangeBounds,
+  TimeRangeBoundsOption,
+  TimeRange,
+  InitialFocus,
+  CalendarOptions,
+} from './types';
+import { DATE_RANGE_INPUT_DELIMITER } from './constants';
+import { textToTimeRange } from './parse';
+import {
+  durationToDisplayShortText,
+  timeRangeToDisplayText,
+  timeRangeToFullFormattedText,
+} from './format';
+import type { DateRangePickerProps, DateRangePickerOnChangeProps } from './date_range_picker';
+import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
+
+// TODO agree on the final list
+const DEFAULT_PRESETS: TimeRangeBoundsOption[] = [{ start: 'now/d', end: 'now/d', label: 'Today' }];
+
+/** Public context value exposed to consumers via `useDateRangePickerContext`. */
+export interface DateRangePickerContextValue {
+  /** Current input text */
+  text: string;
+  /** Whether the current input is invalid */
+  isInvalid: boolean;
+  /** Update the input text */
+  setText: (value: string) => void;
+  /**
+   * Apply the current text (or an explicit range) as the selected time range.
+   * When called with a `TimeRangeBounds`, sets text to that range; otherwise applies current text.
+   * Pass an optional `textOverride` to control the input value instead of generating it from the bounds.
+   * Calls parent `onChange` and exits editing mode.
+   */
+  applyRange: (range?: TimeRangeBounds, textOverride?: string) => void;
+}
+
+/** Internal context value used by sub-components. */
+interface DateRangePickerInternalContextValue extends DateRangePickerContextValue {
+  /** Whether the picker is in editing mode (input focused, panel open) or idle. */
+  isEditing: boolean;
+  /** Toggle editing mode; restores previous text when exiting without applying. */
+  setIsEditing: (value: boolean) => void;
+  /** Whether to use EUI compressed form styling. */
+  compressed: boolean;
+  /** Whether the idle-state control hides its text label. */
+  collapsed: boolean;
+  /** Predefined time range options shown in the Presets section. */
+  presets: TimeRangeBoundsOption[];
+  /** Recently used time ranges shown in the Recent section. */
+  recent: TimeRangeBoundsOption[];
+  /** Human-readable display text for the current time range (shown when idle). */
+  displayText: string;
+  /** Full formatted text including absolute dates, used for tooltips. */
+  displayFullFormattedText: string;
+  /** Short duration label (e.g., "15m"), or `null` if duration cannot be computed. */
+  displayShortDuration: string | null;
+  /** Ref to the text input element for focus management. */
+  inputRef: RefObject<HTMLInputElement>;
+  /** Ref to the trigger button for focus restoration. */
+  buttonRef: RefObject<HTMLButtonElement>;
+  /** Ref to the popover panel for click-outside detection. */
+  panelRef: MutableRefObject<HTMLElement | null>;
+  /** Generated HTML id for the dialog panel, used for ARIA `aria-controls`. */
+  panelId: string;
+  /** Optional initial focus target for the dialog panel. */
+  initialFocus?: InitialFocus;
+  /** Parsed time range derived from the current text input. */
+  timeRange: TimeRange;
+  /** Resolved time window buttons config, or `false` when disabled. */
+  timeWindowButtonsConfig: TimeWindowButtonsConfig | false;
+  /** Called when the user wants to save the current input time range as a preset. */
+  onPresetSave?: (option: TimeRangeBoundsOption) => void;
+  /** Called when the user wants to delete a saved preset. */
+  onPresetDelete?: (option: TimeRangeBoundsOption) => void;
+  /**
+   * Called when the editing input text changes.
+   * @beta
+   */
+  onInputChange?: (value: string) => void;
+  /** Horizontal sizing behavior of the picker. */
+  width: NonNullable<DateRangePickerProps['width']>;
+  /** Whether the picker is disabled. */
+  disabled: boolean;
+  /** Whether a loading spinner is shown inside the form control. */
+  isLoading: boolean;
+  /** Calendar-specific options (e.g. first day of week). */
+  calendarOptions?: CalendarOptions;
+}
+
+const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
+
+/**
+ * Hook to access the DateRangePicker context.
+ * Must be used within a `DateRangePickerProvider`.
+ */
+export function useDateRangePickerContext(): DateRangePickerInternalContextValue {
+  const context = useContext(DateRangePickerContext);
+  if (!context) {
+    throw new Error('useDateRangePickerContext must be used within a DateRangePickerProvider');
+  }
+  return context;
+}
+
+/**
+ * Provider component that owns all DateRangePicker state.
+ */
+export function DateRangePickerProvider({
+  children,
+  value,
+  defaultValue,
+  onChange,
+  dateFormat,
+  isInvalid = false,
+  disabled = false,
+  isLoading = false,
+  compressed = true,
+  collapsed = false,
+  showTimeWindowButtons = false,
+  presets = DEFAULT_PRESETS,
+  recent = [],
+  onPresetSave,
+  onPresetDelete,
+  onInputChange,
+  width = 'auto',
+  calendarOptions,
+}: PropsWithChildren<DateRangePickerProps>) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
+  const panelId = useGeneratedHtmlId({ prefix: 'dateRangePickerPanel' });
+  const lastValidText = useRef('');
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const isEditingRef = useRef(isEditing);
+  isEditingRef.current = isEditing;
+  const [text, setText] = useState<string>(() => value ?? defaultValue ?? '');
+  const timeRange: TimeRange = useMemo(() => textToTimeRange(text), [text]);
+  const displayText = useMemo(
+    () => timeRangeToDisplayText(timeRange, { dateFormat }),
+    [dateFormat, timeRange]
+  );
+  const displayFullFormattedText = useMemo(
+    () => timeRangeToFullFormattedText(timeRange, { dateFormat }),
+    [timeRange, dateFormat]
+  );
+  const duration =
+    timeRange.startDate && timeRange.endDate
+      ? { startDate: timeRange.startDate, endDate: timeRange.endDate }
+      : null;
+  const displayShortDuration = duration
+    ? durationToDisplayShortText(duration.startDate, duration.endDate)
+    : null;
+
+  useEffect(() => {
+    if (typeof value === 'string' && !isEditingRef.current) {
+      setText(value);
+    }
+  }, [value]);
+
+  const timeWindowButtonsConfig: TimeWindowButtonsConfig | false = useMemo(
+    () =>
+      showTimeWindowButtons === false
+        ? false
+        : showTimeWindowButtons === true
+        ? {}
+        : showTimeWindowButtons,
+    [showTimeWindowButtons]
+  );
+
+  const setIsEditingWithRestore = useCallback(
+    (editing: boolean) => {
+      if (editing && text) {
+        lastValidText.current = text;
+      }
+      if (!editing) {
+        if (typeof value === 'string') {
+          setText(value);
+        } else if (lastValidText.current) {
+          setText(lastValidText.current);
+        }
+        lastValidText.current = '';
+      }
+      setIsEditing(editing);
+    },
+    [text, value]
+  );
+
+  /** Apply a range: parse it, call `onChange`, and exit editing mode. */
+  const applyRange = useCallback(
+    (range?: TimeRangeBounds, textOverride?: string) => {
+      let rangeToApply: TimeRange;
+
+      if (range) {
+        const rangeText =
+          textOverride ?? `${range.start} ${DATE_RANGE_INPUT_DELIMITER} ${range.end}`;
+        rangeToApply = textToTimeRange(rangeText);
+        setText(rangeText);
+      } else {
+        rangeToApply = timeRange;
+      }
+
+      onChange({
+        start: rangeToApply.start,
+        end: rangeToApply.end,
+        startDate: rangeToApply.startDate,
+        endDate: rangeToApply.endDate,
+        value: rangeToApply.value,
+        isInvalid: rangeToApply.isInvalid,
+      } satisfies DateRangePickerOnChangeProps);
+      setIsEditing(false);
+    },
+    [onChange, timeRange]
+  );
+
+  const contextValue = useMemo<DateRangePickerInternalContextValue>(
+    () => ({
+      text,
+      isInvalid,
+      setText,
+      applyRange,
+      isEditing,
+      setIsEditing: setIsEditingWithRestore,
+      compressed,
+      collapsed,
+      displayText,
+      displayFullFormattedText,
+      displayShortDuration,
+      inputRef,
+      buttonRef,
+      panelRef,
+      panelId,
+      timeRange,
+      timeWindowButtonsConfig,
+      presets,
+      recent,
+      onPresetSave,
+      onPresetDelete,
+      onInputChange,
+      width,
+      disabled,
+      isLoading,
+      calendarOptions,
+    }),
+    [
+      text,
+      isInvalid,
+      applyRange,
+      isEditing,
+      setIsEditingWithRestore,
+      compressed,
+      collapsed,
+      displayText,
+      displayFullFormattedText,
+      displayShortDuration,
+      panelId,
+      timeRange,
+      timeWindowButtonsConfig,
+      presets,
+      recent,
+      onPresetSave,
+      onPresetDelete,
+      onInputChange,
+      width,
+      disabled,
+      isLoading,
+      calendarOptions,
+    ]
+  );
+
+  return (
+    <DateRangePickerContext.Provider value={contextValue}>
+      {children}
+    </DateRangePickerContext.Provider>
+  );
+}

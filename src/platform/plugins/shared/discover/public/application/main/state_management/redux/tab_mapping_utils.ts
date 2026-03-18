@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -16,6 +18,8 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
+import { parseControlGroupJson } from './utils';
+import { createSearchSource } from '../utils/create_search_source';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
@@ -48,6 +52,13 @@ export const fromSavedObjectTabToTabState = ({
     density: tab.density,
   };
 
+  const globalState = {
+    timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
+    refreshInterval: tab.timeRestore
+      ? tab.refreshInterval
+      : existingTab?.globalState.refreshInterval,
+  };
+
   return {
     ...DEFAULT_TAB_STATE,
     ...existingTab,
@@ -55,69 +66,101 @@ export const fromSavedObjectTabToTabState = ({
     label: tab.label,
     initialInternalState: {
       serializedSearchSource: tab.serializedSearchSource,
-      visContext: tab.visContext,
-      controlGroupJson: tab.controlGroupJson,
     },
     appState,
     previousAppState: existingTab?.appState ?? appState,
-    globalState: {
-      timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
-      refreshInterval: tab.timeRange
-        ? tab.refreshInterval
-        : existingTab?.globalState.refreshInterval,
+    globalState,
+    attributes: {
+      ...DEFAULT_TAB_STATE.attributes,
+      timeRestore: tab.timeRestore ?? false,
+      visContext: tab.visContext,
+      controlGroupState: tab.controlGroupJson
+        ? parseControlGroupJson(tab.controlGroupJson)
+        : undefined,
     },
   };
 };
 
+export const fromSavedObjectTabToSearchSource = async ({
+  tab,
+  services,
+}: {
+  tab: DiscoverSessionTab;
+  services: DiscoverServices;
+}): Promise<ISearchSource> => {
+  return services.data.search.searchSource.create(tab.serializedSearchSource);
+};
+
+/**
+ * @deprecated Prefer using `fromSavedObjectTabToSearchSource` to get only the search source,
+ * or `fromSavedObjectTabToTabState` to get the tab state. This function creates a full
+ * SavedSearch object which is often unnecessary and couples code to the legacy SavedSearch type.
+ */
 export const fromSavedObjectTabToSavedSearch = async ({
   tab,
   discoverSession,
   services,
 }: {
-  discoverSession: DiscoverSession;
+  discoverSession: DiscoverSession | undefined;
   tab: DiscoverSessionTab;
   services: DiscoverServices;
 }): Promise<SavedSearch> => ({
-  id: discoverSession.id,
-  title: discoverSession.title,
-  description: discoverSession.description,
-  tags: discoverSession.tags,
-  managed: discoverSession.managed,
-  references: discoverSession.references,
-  sharingSavedObjectProps: discoverSession.sharingSavedObjectProps,
+  id: discoverSession?.id,
+  title: discoverSession?.title,
+  description: discoverSession?.description,
+  tags: discoverSession?.tags,
+  managed: discoverSession?.managed ?? false,
+  references: discoverSession?.references,
+  sharingSavedObjectProps: discoverSession?.sharingSavedObjectProps,
   sort: tab.sort,
   columns: tab.columns,
   grid: tab.grid,
   hideChart: tab.hideChart,
   isTextBasedQuery: tab.isTextBasedQuery,
   usesAdHocDataView: tab.usesAdHocDataView,
-  searchSource: await services.data.search.searchSource.create(tab.serializedSearchSource),
+  searchSource: await fromSavedObjectTabToSearchSource({ tab, services }),
   viewMode: tab.viewMode,
   hideAggregatedPreview: tab.hideAggregatedPreview,
   rowHeight: tab.rowHeight,
   headerRowHeight: tab.headerRowHeight,
-  timeRestore: tab.timeRestore,
-  timeRange: tab.timeRange,
-  refreshInterval: tab.refreshInterval,
+  timeRestore: tab.timeRestore, // managed via Redux state now
+  timeRange: tab.timeRange, // managed via Redux state now
+  refreshInterval: tab.refreshInterval, // managed via Redux state now
   rowsPerPage: tab.rowsPerPage,
   sampleSize: tab.sampleSize,
   breakdownField: tab.breakdownField,
   chartInterval: tab.chartInterval,
   density: tab.density,
-  visContext: tab.visContext,
-  controlGroupJson: tab.controlGroupJson,
+  visContext: tab.visContext, // managed via Redux state now
+  controlGroupJson: tab.controlGroupJson, // managed via Redux state now
 });
 
 export const fromTabStateToSavedObjectTab = ({
   tab,
-  timeRestore,
+  overridenTimeRestore,
   services,
+  currentDataView,
 }: {
   tab: TabState;
-  timeRestore: boolean;
+  overridenTimeRestore?: boolean;
   services: DiscoverServices;
+  currentDataView: DataView | undefined;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
+  const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
+
+  // Only use createSearchSource when we have an actual DataView object (for initialized tabs)
+  // When currentDataView is undefined, fall back to the existing serialized search source
+  const serializedSearchSource = currentDataView
+    ? createSearchSource({
+        dataView: currentDataView,
+        appState: tab.appState,
+        globalState: tab.globalState,
+        services,
+      }).getSerializedFields()
+    : tab.initialInternalState?.serializedSearchSource ?? {};
+
+  const usesAdHocDataView = isObject(serializedSearchSource.index);
 
   return {
     id: tab.id,
@@ -127,8 +170,8 @@ export const fromTabStateToSavedObjectTab = ({
     grid: tab.appState.grid ?? {},
     hideChart: tab.appState.hideChart ?? false,
     isTextBasedQuery: isOfAggregateQueryType(tab.appState.query),
-    usesAdHocDataView: isObject(tab.initialInternalState?.serializedSearchSource?.index),
-    serializedSearchSource: tab.initialInternalState?.serializedSearchSource ?? {},
+    usesAdHocDataView,
+    serializedSearchSource,
     viewMode: tab.appState.viewMode,
     hideAggregatedPreview: tab.appState.hideAggregatedPreview,
     rowHeight: tab.appState.rowHeight,
@@ -141,20 +184,29 @@ export const fromTabStateToSavedObjectTab = ({
       tab.appState.sampleSize && tab.appState.sampleSize === allowedSampleSize
         ? tab.appState.sampleSize
         : undefined,
-    breakdownField: tab.appState.breakdownField,
+    breakdownField: tab.appState.breakdownField || '',
     chartInterval: tab.appState.interval,
     density: tab.appState.density,
-    visContext: tab.initialInternalState?.visContext,
-    controlGroupJson: tab.initialInternalState?.controlGroupJson,
+    visContext: tab.attributes.visContext,
+    controlGroupJson: tab.attributes.controlGroupState
+      ? JSON.stringify(tab.attributes.controlGroupState)
+      : undefined,
   };
 };
 
+/**
+ * @deprecated Prefer using `fromTabStateToSavedObjectTab` which works directly with TabState.
+ * This function converts from SavedSearch which couples code to the legacy SavedSearch type.
+ */
 export const fromSavedSearchToSavedObjectTab = ({
   tab,
   savedSearch,
   services,
 }: {
-  tab: Pick<TabState, 'id' | 'label'>;
+  tab: Pick<TabState, 'id' | 'label'> & {
+    attributes?: TabState['attributes'];
+    globalState?: TabState['globalState'];
+  };
   savedSearch: SavedSearch;
   services: DiscoverServices;
 }): DiscoverSessionTab => {
@@ -174,9 +226,17 @@ export const fromSavedSearchToSavedObjectTab = ({
     hideAggregatedPreview: savedSearch.hideAggregatedPreview,
     rowHeight: savedSearch.rowHeight,
     headerRowHeight: savedSearch.headerRowHeight,
-    timeRestore: savedSearch.timeRestore,
-    timeRange: savedSearch.timeRange,
-    refreshInterval: savedSearch.refreshInterval,
+    timeRestore: (tab.attributes ? tab.attributes.timeRestore : savedSearch.timeRestore) ?? false,
+    timeRange: tab.attributes
+      ? tab.attributes.timeRestore
+        ? tab.globalState?.timeRange
+        : undefined
+      : savedSearch.timeRange,
+    refreshInterval: tab.attributes
+      ? tab.attributes.timeRestore
+        ? tab.globalState?.refreshInterval
+        : undefined
+      : savedSearch.refreshInterval,
     rowsPerPage: savedSearch.rowsPerPage,
     sampleSize:
       savedSearch.sampleSize && savedSearch.sampleSize === allowedSampleSize
@@ -185,7 +245,11 @@ export const fromSavedSearchToSavedObjectTab = ({
     breakdownField: savedSearch.breakdownField,
     chartInterval: savedSearch.chartInterval,
     density: savedSearch.density,
-    visContext: savedSearch.visContext,
-    controlGroupJson: savedSearch.controlGroupJson,
+    visContext: tab.attributes ? tab.attributes?.visContext : savedSearch.visContext,
+    controlGroupJson: tab.attributes
+      ? tab.attributes?.controlGroupState
+        ? JSON.stringify(tab.attributes.controlGroupState)
+        : undefined
+      : savedSearch.controlGroupJson,
   };
 };

@@ -17,19 +17,21 @@ import {
   isSubQuery,
   mutate,
   synth,
-  type ESQLCommand,
-  type ESQLFunction,
-  type ESQLAstItem,
-  type ESQLColumn,
   isBinaryExpression,
   Walker,
-} from '@kbn/esql-language';
+  isInlineCast,
+} from '@elastic/esql';
 import type {
+  ESQLCommand,
+  ESQLFunction,
+  ESQLAstItem,
+  ESQLColumn,
   BinaryExpressionComparisonOperator,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
   ESQLPostfixUnaryExpression,
-} from '@kbn/esql-language/src/types';
+  ESQLProperNode,
+} from '@elastic/esql/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
@@ -52,6 +54,22 @@ import {
   requiresMatchPhrase,
   isCategorizeFunctionWithFunctionArgument,
 } from './utils';
+
+const hasUnsupportedGroupingFunction = (definition: ESQLProperNode): boolean => {
+  const funcExpr = isFunctionExpression(definition)
+    ? definition
+    : isInlineCast(definition) && isFunctionExpression(definition.value)
+    ? definition.value
+    : null;
+
+  if (!funcExpr) {
+    return false;
+  }
+
+  return (
+    !isSupportedStatsFunction(funcExpr.name) || isCategorizeFunctionWithFunctionArgument(funcExpr)
+  );
+};
 
 type NodeType = 'group' | 'leaf';
 
@@ -141,11 +159,8 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     }
 
     const groupFieldDefinition = getFieldDefinitionFromArg(groupFieldNode.arg);
-    if (
-      isFunctionExpression(groupFieldDefinition) &&
-      (!isSupportedStatsFunction(groupFieldDefinition.name) ||
-        isCategorizeFunctionWithFunctionArgument(groupFieldDefinition))
-    ) {
+
+    if (hasUnsupportedGroupingFunction(groupFieldDefinition)) {
       // if the group field has a grouping function that is not supported,
       // this nullifies the entire query to count as a valid query for the cascade experience
       groupByFields.splice(0, groupByFields.length);

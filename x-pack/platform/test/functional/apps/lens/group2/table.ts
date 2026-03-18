@@ -188,7 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const styleObj = await lens.getDatatableCellStyle(0, 2);
       expect(styleObj['background-color']).to.be('rgb(140, 217, 187)');
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(0, 0, 0)');
+      expect(styleObj.color).to.be('rgb(7, 16, 31)');
     });
 
     it('should open the palette panel to customize the palette look', async () => {
@@ -241,7 +241,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const styleObj = await lens.getDatatableCellStyle(1, 1);
       expect(styleObj['background-color']).to.be('rgb(200, 222, 255)');
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(0, 0, 0)');
+      expect(styleObj.color).to.be('rgb(7, 16, 31)');
       await lens.closePalettePanel();
     });
 

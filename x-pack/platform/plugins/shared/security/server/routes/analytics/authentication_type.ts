@@ -8,11 +8,12 @@
 import { createHash } from 'crypto';
 
 import { schema } from '@kbn/config-schema';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 
 import type { RouteDefinitionParams } from '..';
 import type { AuthenticationTypeAnalyticsEvent } from '../../analytics';
-import { HTTPAuthenticationProvider, HTTPAuthorizationHeader } from '../../authentication';
+import { HTTPAuthenticationProvider } from '../../authentication';
 import { getDetailedErrorMessage, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 

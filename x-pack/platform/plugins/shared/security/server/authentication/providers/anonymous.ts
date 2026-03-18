@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
@@ -13,10 +14,7 @@ import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import {
-  BasicHTTPAuthorizationHeaderCredentials,
-  HTTPAuthorizationHeader,
-} from '../http_authentication';
+import { BasicHTTPAuthorizationHeaderCredentials } from '../http_authentication';
 
 /**
  * Credentials that are based on the username and password.

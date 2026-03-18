@@ -41,6 +41,7 @@ export interface ConversationActions {
     attachments?: AttachmentInput[];
   }) => void;
   removeOptimisticRound: () => void;
+  clearLastRoundResponse: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
   addToolCall: ({ step }: { step: ToolCallStep }) => void;
@@ -156,6 +157,13 @@ const createConversationActions = ({
           draft?.rounds?.pop();
         })
       );
+    },
+    clearLastRoundResponse: () => {
+      setCurrentRound((round) => {
+        round.response.message = '';
+        round.steps = [];
+        round.status = ConversationRoundStatus.inProgress;
+      });
     },
     setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation

@@ -23,14 +23,23 @@ function hasAgentBuilderToolTag(yamlContent: string): boolean {
  * Loads workflow YAML files from a directory and converts them to WorkflowInfo objects.
  *
  * @param config - Workflow configuration containing directory path and template inputs
+ * @param stackConnectorIds - Stack connector IDs to inject into the workflows
  * @returns Array of WorkflowInfo objects
  *
  * @throws Error if the directory doesn't exist or can't be read
  */
-export async function loadWorkflows(config: WorkflowsConfig): Promise<WorkflowInfo[]> {
+export async function loadWorkflows(
+  config: WorkflowsConfig,
+  stackConnectorIds?: Record<string, string>
+): Promise<WorkflowInfo[]> {
   const { directory, templateInputs } = config;
 
   try {
+    const typedTemplateInputs = {
+      ...templateInputs,
+      ...stackConnectorIds,
+    };
+
     const files = await fs.readdir(directory);
 
     // Filter for YAML files
@@ -48,7 +57,12 @@ export async function loadWorkflows(config: WorkflowsConfig): Promise<WorkflowIn
       yamlFiles.map(async (fileName) => {
         const filePath = join(directory, fileName);
         const rawContent = await fs.readFile(filePath, 'utf-8');
-        const content = Mustache.render(rawContent, templateInputs ?? {}, {}, TEMPLATE_DELIMITERS);
+        const content = Mustache.render(
+          rawContent,
+          typedTemplateInputs ?? {},
+          {},
+          TEMPLATE_DELIMITERS
+        );
         const shouldGenerateABTool = hasAgentBuilderToolTag(content);
 
         return {

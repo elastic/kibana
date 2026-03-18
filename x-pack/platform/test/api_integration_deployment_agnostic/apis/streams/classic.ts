@@ -11,7 +11,13 @@ import { OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS } from '@kbn/management-settin
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { deleteStream, fetchDocument, indexDocument, putStream } from './helpers/requests';
+import {
+  deleteStream,
+  fetchDocument,
+  indexDocument,
+  putStream,
+  restoreDataStream,
+} from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -85,6 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
+                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   settings: {},
@@ -136,6 +143,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: TEST_STREAM_NAME,
           description: '',
           updated_at: stream.updated_at,
+          query_streams: [],
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
@@ -215,6 +223,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
+                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
@@ -246,6 +255,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -287,6 +297,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
+                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
@@ -330,6 +341,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: 'Should cause a failure due to invalid ingest pipeline',
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               settings: {},
@@ -376,6 +388,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               settings: {},
@@ -531,6 +544,94 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('Classic stream name validation', () => {
+      const validClassicStreamBody = {
+        ...emptyAssets,
+        stream: {
+          description: '',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            classic: {},
+            failure_store: { inherit: {} },
+          },
+        },
+      };
+
+      it('fails to create a classic stream with uppercase characters in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-UpperCase-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain uppercase characters.'
+        );
+      });
+
+      it('fails to create a classic stream with spaces in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with space-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain spaces.'
+        );
+      });
+
+      it('fails to create a classic stream with asterisk in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with*asterisk-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "*".'
+        );
+      });
+
+      it('fails to create a classic stream with angle brackets in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with<brackets>-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "<".'
+        );
+      });
+
+      it('fails to create a classic stream with question mark in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with?question-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "?".'
+        );
+      });
+
+      it('fails to create a classic stream with pipe in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with|pipe-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "|".'
+        );
+      });
+    });
+
     describe('Classic streams sharing template/pipeline', () => {
       const TEMPLATE_NAME = 'my-shared-template';
       const FIRST_STREAM_NAME = 'mytest-first';
@@ -618,7 +719,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
         expect(pipeline._meta?.managed_by).to.eql('streams');
-        expect(pipeline.processors?.[0].pipeline?.name).to.eql('mytest-first@stream.processing');
+        expect(pipeline?.processors?.[0]?.pipeline?.name).to.eql('mytest-first@stream.processing');
       });
 
       it('Executes processing using the newly created ingest pipeline', async () => {
@@ -673,7 +774,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: `${TEMPLATE_NAME}-pipeline`,
         });
         const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
-        expect(pipeline.processors?.map((processor) => processor.pipeline?.name)).to.eql([
+        expect(pipeline.processors?.map((proc) => proc?.pipeline?.name)).to.eql([
           'mytest-first@stream.processing',
           'mytest-second@stream.processing',
         ]);
@@ -698,7 +799,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: `${TEMPLATE_NAME}-pipeline`,
         });
         const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
-        expect(pipeline.processors?.[0].pipeline?.name).to.eql('mytest-second@stream.processing');
+
+        expect(pipeline?.processors?.[0]?.pipeline?.name).to.eql('mytest-second@stream.processing');
       });
 
       it('clears the pipeline when processing is removed from the second stream', async () => {
@@ -992,7 +1094,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(Streams.ClassicStream.Definition.is(classicStream!.stream)).to.be(true);
       });
 
+      it('should allow restoring the backing data stream', async () => {
+        // Restore the backing data stream
+        const response = await restoreDataStream(apiClient, ORPHANED_STREAM_NAME);
+        expect(response).to.have.property('acknowledged', true);
+
+        // Verify the data stream was recreated
+        const dsResponse = await esClient.indices.getDataStream({ name: ORPHANED_STREAM_NAME });
+        expect(dsResponse.data_streams).to.have.length(1);
+        expect(dsResponse.data_streams[0].name).to.be(ORPHANED_STREAM_NAME);
+
+        // Verify data_stream_exists is now true
+        const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
+          },
+        });
+        expect(getResponse.status).to.eql(200);
+        expect(getResponse.body).to.have.property('data_stream_exists', true);
+      });
+
       it('should allow deleting', async () => {
+        // First delete the data stream again to test orphaned delete
+        await esClient.indices.deleteDataStream({
+          name: ORPHANED_STREAM_NAME,
+        });
+
         const response = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
           params: {
             path: {

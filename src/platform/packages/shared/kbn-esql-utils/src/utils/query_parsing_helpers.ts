@@ -15,9 +15,8 @@ import {
   WrappingPrettyPrinter,
   BasicPrettyPrinter,
   isStringLiteral,
-  esqlCommandRegistry,
-  TRANSFORMATIONAL_COMMANDS,
-} from '@kbn/esql-language';
+} from '@elastic/esql';
+import { CommandNames, esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '@kbn/esql-language';
 
 import type {
   ESQLSource,
@@ -27,7 +26,7 @@ import type {
   ESQLInlineCast,
   ESQLCommandOption,
   ESQLAstForkCommand,
-} from '@kbn/esql-language';
+} from '@elastic/esql/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
@@ -273,9 +272,17 @@ export const getKqlSearchQueries = (esql: string) => {
     .filter((query) => query !== '');
 };
 
-export const prettifyQuery = (src: string): string => {
+/**
+ * Prettifies an ES|QL query with configurable line wrapping.
+ * @param src - The raw ES|QL query string
+ * @param lineWidth - Optional line width in characters; when provided, output is wrapped to fit. Otherwise uses the library default (80).
+ */
+export const prettifyQuery = (src: string, lineWidth?: number): string => {
   const { root } = Parser.parse(src, { withFormatting: true });
-  return WrappingPrettyPrinter.print(root, { multiline: true });
+  return WrappingPrettyPrinter.print(root, {
+    multiline: true,
+    ...(lineWidth !== undefined && { wrap: lineWidth }),
+  });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
@@ -598,58 +605,6 @@ export const missingSortBeforeLimit = (esql: string): boolean => {
   }
   return false;
 };
-
-/**
- * Checks if the ESQL query contains a timeseries bucket aggregation.
- * @param esql: string - The ESQL query string
- * @param columns: DatatableColumn[] - The columns of the datatable
- * @returns true if the query contains a timeseries bucket aggregation, false otherwise
- */
-export function hasDateBreakdown(esql: string, columns: DatatableColumn[] = []): boolean {
-  const { root } = Parser.parse(esql);
-
-  const normalize = (name: string) => name.toLowerCase().replace(/\s+/g, '');
-  const dateColumnNames = new Set(
-    columns.filter((col) => col.meta.type === 'date').map((col) => normalize(col.name))
-  );
-  if (dateColumnNames.size === 0) {
-    return false;
-  }
-
-  const commands = Walker.commands(root);
-  if (!commands.some((cmd) => cmd.name === 'ts')) {
-    return false;
-  }
-
-  const statsCommands = commands.filter((cmd) => cmd.name === 'stats');
-  if (statsCommands.length === 0) {
-    return false;
-  }
-
-  const statsByCommands = Walker.matchAll(statsCommands, { type: 'option', name: 'by' });
-  if (statsByCommands.length === 0) {
-    return false;
-  }
-
-  const lastByCommand = statsByCommands[statsByCommands.length - 1];
-
-  let foundDateField = false;
-  walk(lastByCommand, {
-    visitColumn: (node) => {
-      if (!foundDateField && dateColumnNames.has(normalize(node.name))) {
-        foundDateField = true;
-      }
-    },
-    visitFunction: (node) => {
-      if (!foundDateField && dateColumnNames.has(normalize(node.text))) {
-        foundDateField = true;
-      }
-    },
-  });
-
-  return foundDateField;
-}
-
 /**
  * Checks if the ESQL query contains only source commands (e.g., FROM, TS).
  * If the query contains PROMQL command, we will exclude it from this check.
@@ -663,5 +618,19 @@ export const hasOnlySourceCommand = (query: string): boolean => {
     root.commands.length > 0 &&
     root.commands.every(({ name }) => name !== 'promql') &&
     root.commands.every((command) => sourceCommands.includes(command.name))
+  );
+};
+
+/**
+ * Determines if an ES|QL query contains the METRICS_INFO or TS_INFO commands.
+ *
+ * @param esql - The ES|QL query string to analyze
+ * @returns true if the query contains the METRICS_INFO or TS_INFO commands, false otherwise
+ */
+export const hasTimeseriesInfoCommand = (esql?: string): boolean => {
+  if (!esql) return false;
+  const { root } = Parser.parse(esql);
+  return root.commands.some(
+    ({ name }) => name === CommandNames.METRICS_INFO || name === CommandNames.TS_INFO
   );
 };

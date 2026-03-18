@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolSelection } from '@kbn/agent-builder-common';
+import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
 import type {
   ToolProvider,
@@ -14,20 +14,23 @@ import type {
   ScopedRunner,
   BuiltinToolDefinition,
 } from '@kbn/agent-builder-server';
-import type { AgentConfiguration } from '@kbn/agent-builder-common';
+import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
+import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
-import { getStoreTools, FILESTORE_ENABLED } from '../../../runner/store';
+import { getStoreTools } from '../../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export const selectTools = async ({
   conversation,
   previousDynamicToolIds,
+  filteredSkills,
   skills,
   request,
   toolProvider,
@@ -36,9 +39,11 @@ export const selectTools = async ({
   filestore,
   spaceId,
   runner,
+  experimentalFeatures,
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
+  filteredSkills: InternalSkillDefinition[];
   skills: SkillsService;
   request: KibanaRequest;
   toolProvider: ToolProvider;
@@ -47,6 +52,7 @@ export const selectTools = async ({
   agentConfiguration: AgentConfiguration;
   spaceId: string;
   runner: ScopedRunner;
+  experimentalFeatures: ExperimentalFeatures;
 }) => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
@@ -70,13 +76,20 @@ export const selectTools = async ({
     runner,
   });
 
-  // create tools for filesystem
-  const fsTools = getStoreTools({ filestore });
-  const convertedFsTools = fsTools.map((tool) => builtinToolToExecutable({ tool, runner }));
+  // create tools for filesystem (only if feature is enabled)
+  const filestoreTools = experimentalFeatures.filestore
+    ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
+    : [];
 
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
-    selection: [attachmentToolSelection, ...agentConfiguration.tools],
+    selection: [
+      attachmentToolSelection,
+      ...agentConfiguration.tools,
+      ...(agentConfiguration.enable_elastic_capabilities
+        ? [{ tool_ids: defaultAgentToolIds }]
+        : []),
+    ],
     toolProvider,
     request,
   });
@@ -85,7 +98,7 @@ export const selectTools = async ({
     ...versionedAttachmentBoundTools,
     ...versionedAttachmentTools,
     ...staticRegistryTools,
-    ...(FILESTORE_ENABLED ? convertedFsTools : []),
+    ...filestoreTools,
   ];
 
   const dedupedStaticTools = new Map<string, ExecutableTool>();
@@ -103,8 +116,7 @@ export const selectTools = async ({
 
   const dynamicInlineTools = (
     await Promise.all(
-      skills
-        .list()
+      filteredSkills
         .filter((skill) => skill.getInlineTools !== undefined)
         .map((skill) => skill.getInlineTools!())
     )
@@ -160,6 +172,7 @@ const builtinToolToExecutable = ({
     configuration: {},
     readonly: true,
     getSchema: () => tool.schema,
+    summarizeToolReturn: tool.summarizeToolReturn,
     execute: async (params) => {
       return runner.runInternalTool({
         ...params,

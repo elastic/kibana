@@ -72,7 +72,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/management/public/types.ts",
-                "lineNumber": 78,
+                "lineNumber": 92,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false
@@ -373,13 +373,55 @@
     "interfaces": [
       {
         "parentPluginId": "management",
+        "id": "def-public.AutoOpsStatusResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "AutoOpsStatusResult",
+        "description": [],
+        "path": "src/platform/plugins/shared/management/public/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "management",
+            "id": "def-public.AutoOpsStatusResult.isCloudConnectAutoopsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudConnectAutoopsEnabled",
+            "description": [],
+            "path": "src/platform/plugins/shared/management/public/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "management",
+            "id": "def-public.AutoOpsStatusResult.isLoading",
+            "type": "boolean",
+            "tags": [],
+            "label": "isLoading",
+            "description": [],
+            "path": "src/platform/plugins/shared/management/public/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "management",
         "id": "def-public.DefinedSections",
         "type": "Interface",
         "tags": [],
         "label": "DefinedSections",
         "description": [],
         "path": "src/platform/plugins/shared/management/public/types.ts",
-        "lineNumber": 30,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -401,7 +443,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 31,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -423,7 +465,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 32,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -445,7 +487,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 33,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -467,7 +509,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 34,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -489,7 +531,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 35,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -511,7 +553,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 36,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -533,7 +575,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 37,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -555,7 +597,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -571,7 +613,7 @@
         "label": "ManagementAppMountParams",
         "description": [],
         "path": "src/platform/plugins/shared/management/public/types.ts",
-        "lineNumber": 80,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -584,7 +626,7 @@
             "label": "basePath",
             "description": [],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 81,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -600,7 +642,7 @@
               "HTMLElement"
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -618,7 +660,7 @@
               "[]) => void"
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -635,7 +677,7 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/management/public/types.ts",
-                "lineNumber": 83,
+                "lineNumber": 97,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -656,7 +698,7 @@
               "<unknown>"
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -672,7 +714,7 @@
               "ThemeServiceSetup"
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 85,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -693,7 +735,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
-            "lineNumber": 86,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -777,7 +819,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/management/public/types.ts",
-                "lineNumber": 78,
+                "lineNumber": 92,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false
@@ -821,6 +863,32 @@
     "misc": [
       {
         "parentPluginId": "management",
+        "id": "def-public.AutoOpsStatusHook",
+        "type": "Type",
+        "tags": [],
+        "label": "AutoOpsStatusHook",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "management",
+            "scope": "public",
+            "docId": "kibManagementPluginApi",
+            "section": "def-public.AutoOpsStatusResult",
+            "text": "AutoOpsStatusResult"
+          }
+        ],
+        "path": "src/platform/plugins/shared/management/public/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "management",
         "id": "def-public.MANAGEMENT_APP_ID",
         "type": "string",
         "tags": [],
@@ -846,7 +914,7 @@
       "label": "ManagementSetup",
       "description": [],
       "path": "src/platform/plugins/shared/management/public/types.ts",
-      "lineNumber": 25,
+      "lineNumber": 34,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -862,7 +930,7 @@
             "SectionsServiceSetup"
           ],
           "path": "src/platform/plugins/shared/management/public/types.ts",
-          "lineNumber": 26,
+          "lineNumber": 35,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -887,10 +955,62 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/management/public/types.ts",
-          "lineNumber": 27,
+          "lineNumber": 36,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "management",
+          "id": "def-public.ManagementSetup.registerAutoOpsStatusHook",
+          "type": "Function",
+          "tags": [],
+          "label": "registerAutoOpsStatusHook",
+          "description": [
+            "\nRegisters a hook that returns the AutoOps status.\nUsed by the cloud_connect plugin to provide connection status to the management landing page."
+          ],
+          "signature": [
+            "(hook: ",
+            {
+              "pluginId": "management",
+              "scope": "public",
+              "docId": "kibManagementPluginApi",
+              "section": "def-public.AutoOpsStatusHook",
+              "text": "AutoOpsStatusHook"
+            },
+            ") => void"
+          ],
+          "path": "src/platform/plugins/shared/management/public/types.ts",
+          "lineNumber": 37,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "management",
+              "id": "def-public.ManagementSetup.registerAutoOpsStatusHook.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "hook",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "management",
+                  "scope": "public",
+                  "docId": "kibManagementPluginApi",
+                  "section": "def-public.AutoOpsStatusHook",
+                  "text": "AutoOpsStatusHook"
+                }
+              ],
+              "path": "src/platform/plugins/shared/management/public/types.ts",
+              "lineNumber": 41,
+              "columnNumber": 31,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -904,7 +1024,7 @@
       "label": "ManagementStart",
       "description": [],
       "path": "src/platform/plugins/shared/management/public/types.ts",
-      "lineNumber": 41,
+      "lineNumber": 55,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -922,7 +1042,7 @@
             ") => void"
           ],
           "path": "src/platform/plugins/shared/management/public/types.ts",
-          "lineNumber": 42,
+          "lineNumber": 56,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -938,7 +1058,7 @@
                 "NavigationCardsSubject"
               ],
               "path": "src/platform/plugins/shared/management/public/types.ts",
-              "lineNumber": 42,
+              "lineNumber": 56,
               "columnNumber": 26,
               "deprecated": false,
               "trackAdoption": false,

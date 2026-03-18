@@ -263,8 +263,22 @@ export class SplunkXmlDashboardParser extends XmlParser implements SplunkXmlDash
       };
     }
 
-    return {
-      isSupported: true,
-    };
+    // Check if rootTag has an attribute `version=1.1`
+    const versionMatch = xmlContent.match(/<\s*([a-zA-Z0-9_:]+)\s*.*version=['"]?1\.1['"]?/);
+    if (!versionMatch) {
+      return {
+        isSupported: false,
+        reason: `Unsupported version. Only version 1.1 is supported.`,
+      };
+    }
+
+    // Ensure it's a dashboard with rows
+    const hasRows = xmlContent.includes('<row');
+    return hasRows
+      ? { isSupported: true }
+      : {
+          isSupported: false,
+          reason: 'No <row> elements found in the provided Dashboard XML.',
+        };
   }
 }

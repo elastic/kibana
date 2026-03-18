@@ -7,73 +7,77 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, expect } from '../../../../../src/playwright';
+import { test, expect, tags } from '../../../../../src/playwright';
 import { EuiDataGridWrapper } from '../../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../../fixtures/eui_helpers';
 
 // Failing: See https://github.com/elastic/kibana/issues/242430
-test.describe.skip('EUI testing wrapper: EuiDataGrid', { tag: ['@svlSecurity', '@ess'] }, () => {
-  test(`data grid, run`, async ({ page, log }) => {
-    const selector = {
-      locator: '.euiDataGrid',
-    };
-    await navigateToEuiTestPage(page, 'docs/components/data-grid/#core-concepts', log);
+test.describe.skip(
+  'EUI testing wrapper: EuiDataGrid',
+  { tag: [...tags.serverless.security.complete, ...tags.stateful.classic] },
+  () => {
+    test(`data grid, run`, async ({ page, log }) => {
+      const selector = {
+        locator: '.euiDataGrid',
+      };
+      await navigateToEuiTestPage(page, 'docs/components/data-grid/#core-concepts', log);
 
-    await test.step('should return column names', async () => {
-      const dataGrid = new EuiDataGridWrapper(page, selector);
-      expect(await dataGrid.getColumnsNames()).toStrictEqual([
-        'Name',
-        'Email address',
-        'Location',
-        'Account',
-        'Date',
-        'Amount',
-        'Phone',
-        'Version',
-      ]);
-    });
+      await test.step('should return column names', async () => {
+        const dataGrid = new EuiDataGridWrapper(page, selector);
+        expect(await dataGrid.getColumnsNames()).toStrictEqual([
+          'Name',
+          'Email address',
+          'Location',
+          'Account',
+          'Date',
+          'Amount',
+          'Phone',
+          'Version',
+        ]);
+      });
 
-    await test.step('should return rows count', async () => {
-      const dataGrid = new EuiDataGridWrapper(page, selector);
-      expect(await dataGrid.getRowsCount()).toBe(10);
-    });
+      await test.step('should return rows count', async () => {
+        const dataGrid = new EuiDataGridWrapper(page, selector);
+        expect(await dataGrid.getRowsCount()).toBe(10);
+      });
 
-    await test.step('should open context menu and hide column', async () => {
-      const dataGrid = new EuiDataGridWrapper(page, selector);
-      await dataGrid.doActionOnColumn('Location', 'Hide column');
-      expect(await dataGrid.getColumnsNames()).toStrictEqual([
-        'Name',
-        'Email address',
-        'Account',
-        'Date',
-        'Amount',
-        'Phone',
-        'Version',
-      ]);
-    });
+      await test.step('should open context menu and hide column', async () => {
+        const dataGrid = new EuiDataGridWrapper(page, selector);
+        await dataGrid.doActionOnColumn('Location', 'Hide column');
+        expect(await dataGrid.getColumnsNames()).toStrictEqual([
+          'Name',
+          'Email address',
+          'Account',
+          'Date',
+          'Amount',
+          'Phone',
+          'Version',
+        ]);
+      });
 
-    await test.step('should open/close full screen mode', async () => {
-      const dataGrid = new EuiDataGridWrapper(page, selector);
-      await dataGrid.openFullScreenMode();
-      expect(await dataGrid.getColumnsNames()).toStrictEqual([
-        'Name',
-        'Email address',
-        'Account',
-        'Date',
-        'Amount',
-        'Phone',
-        'Version',
-      ]);
-      await dataGrid.closeFullScreenMode();
-    });
+      await test.step('should open/close full screen mode', async () => {
+        const dataGrid = new EuiDataGridWrapper(page, selector);
+        await dataGrid.openFullScreenMode();
+        expect(await dataGrid.getColumnsNames()).toStrictEqual([
+          'Name',
+          'Email address',
+          'Account',
+          'Date',
+          'Amount',
+          'Phone',
+          'Version',
+        ]);
+        await dataGrid.closeFullScreenMode();
+      });
 
-    await test.step('should expand the cell', async () => {
-      const dataGrid = new EuiDataGridWrapper(page, selector);
-      await dataGrid.expandCell(3, 2);
-      await expect(
-        page.testSubj.locator('euiDataGridExpansionPopover'),
-        'Expansion popover should be visible'
-      ).toBeVisible();
+      await test.step('should expand the cell', async () => {
+        const dataGrid = new EuiDataGridWrapper(page, selector);
+        await dataGrid.expandCell(3, 2);
+        await expect(
+          page.testSubj.locator('euiDataGridExpansionPopover'),
+          'Expansion popover should be visible'
+        ).toBeVisible();
+      });
     });
-  });
-});
+  }
+);
