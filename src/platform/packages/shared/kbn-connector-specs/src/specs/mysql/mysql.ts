@@ -86,9 +86,9 @@ export const MysqlConnector: ConnectorSpec = {
         label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.label', {
           defaultMessage: 'Port',
         }),
-        placeholder: '3306',
+        placeholder: '8080',
         helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.helpText', {
-          defaultMessage: 'The port number for the MySQL HTTP proxy (default: 3306)',
+          defaultMessage: 'The port number for the MySQL HTTP proxy (default: 8080)',
         }),
       }),
     database: z

@@ -24,7 +24,7 @@ Host
 :   The hostname, IP address, or URL of the MySQL HTTP proxy (e.g., `https://your-mysql-proxy.example.com`, `192.168.1.1`, `localhost`).
 
 Port
-:   The port number for the MySQL server (default: 3306).
+:   The port number for the MySQL HTTP proxy (default: 8080).
 
 Database
 :   The name of the default database to query.
