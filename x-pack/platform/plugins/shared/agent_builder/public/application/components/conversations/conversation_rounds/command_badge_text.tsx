@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { deserializeCommandBadge } from '../conversation_input/message_editor/command_badge';
+import { getCommandDefinition } from '../conversation_input/message_editor/command_menu';
 
 interface CommandBadgeTextProps {
   text: string;
@@ -42,7 +43,8 @@ export const CommandBadgeText: React.FC<CommandBadgeTextProps> = ({ text }) => {
         }
         return (
           <span key={index} css={badgeStyle}>
-            /{segment.data.label}
+            {getCommandDefinition(segment.data.commandId)?.sequence ?? ''}
+            {segment.data.label}
           </span>
         );
       })}

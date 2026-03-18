@@ -10,6 +10,7 @@ import {
   COMMAND_ID_ATTRIBUTE,
   COMMAND_METADATA_ATTRIBUTE,
 } from './attributes';
+import { getCommandDefinition } from '../command_menu/command_definitions';
 import type { CommandBadgeData } from './types';
 
 /**
@@ -22,7 +23,8 @@ export const createCommandBadgeElement = (data: CommandBadgeData): HTMLSpanEleme
   span.setAttribute(COMMAND_ID_ATTRIBUTE, data.commandId);
   span.setAttribute(COMMAND_METADATA_ATTRIBUTE, JSON.stringify({ id: data.id, ...data.metadata }));
 
-  span.textContent = data.label;
+  const sequence = getCommandDefinition(data.commandId)?.sequence ?? '';
+  span.textContent = `${sequence}${data.label}`;
   return span;
 };
 

@@ -203,7 +203,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
           // If no badges, let the browser handle copy natively
         }}
         onCut={(event) => {
-          // Same logic as copy except it deleted the selection afterwards
+          // Same logic as copy except it deletes the selection afterwards
           const range = getSelectionRange();
           if (!range) {
             return;

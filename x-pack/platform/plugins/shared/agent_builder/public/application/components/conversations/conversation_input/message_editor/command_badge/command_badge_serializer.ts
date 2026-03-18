@@ -34,7 +34,7 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
     return '';
   }
   const { scheme } = commandDefinition;
-  const label = element.textContent ?? '';
+  const displayText = element.textContent ?? '';
 
   const metadataRaw = element.getAttribute(COMMAND_METADATA_ATTRIBUTE);
   let id = '';
@@ -65,16 +65,16 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
     }
   }
 
-  return `[/${label}](${scheme}://${id}${queryString})`;
+  return `[${displayText}](${scheme}://${id}${queryString})`;
 };
 
-// Matches serialized badge markdown-links: [/label](scheme://id) or [/label](scheme://id?key=value)
+// Matches serialized badge markdown-links: [displayText](scheme://id) or [displayText](scheme://id?key=value)
 // Example: [/Summarize](skill://skill-1)
-//   Group 1: label         → "Summarize"
+//   Group 1: display text  → "/Summarize"
 //   Group 2: scheme        → "skill"
 //   Group 3: id (path)     → "skill-1"
 //   Group 4: query string  → optional
-const BADGE_PATTERN = /\[\/([^\]]+)\]\((\w+):\/\/([^?)]+)(?:\?([^)]*))?\)/g;
+const BADGE_PATTERN = /\[([^\]]+)\]\((\w+):\/\/([^?)]+)(?:\?([^)]*))?\)/g;
 
 /**
  * Parses text containing serialized badge markdown-links into segments.
@@ -92,11 +92,15 @@ export const deserializeCommandBadge = (text: string): ContentSegment[] => {
       segments.push({ type: 'text', value: text.slice(lastIndex, match.index) });
     }
 
-    const [_, label, scheme, path, queryString] = match;
+    const [_, displayText, scheme, path, queryString] = match;
     const commandDefinition = getCommandDefinitionByScheme(scheme);
-    const commandId = commandDefinition?.id;
 
-    if (commandId) {
+    if (commandDefinition) {
+      const { id: commandId, sequence } = commandDefinition;
+      const label = displayText.startsWith(sequence)
+        ? displayText.slice(sequence.length)
+        : displayText;
+
       const metadata: CommandBadgeData['metadata'] = {};
       if (queryString) {
         const params = new URLSearchParams(queryString);

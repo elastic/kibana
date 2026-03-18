@@ -70,7 +70,7 @@ describe('createBadgeElement', () => {
     expect(parsed).toEqual({ id: 'skill-1' });
   });
 
-  it('sets text content to label', () => {
+  it('sets text content to command sequence followed by label', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Skill,
       label: 'Summarize',
@@ -78,7 +78,7 @@ describe('createBadgeElement', () => {
       metadata: {},
     });
 
-    expect(badge.textContent).toBe('Summarize');
+    expect(badge.textContent).toBe('/Summarize');
   });
 
   it('handles multiple metadata entries', () => {
