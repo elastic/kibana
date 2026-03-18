@@ -14,7 +14,6 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { act } from 'react-dom/test-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
-import type { KqlPluginStart } from '@kbn/kql/public';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions, { getNoDataBehaviorValue } from './custom_threshold_rule_expression';
@@ -66,7 +65,6 @@ describe('Expression', () => {
     const wrapper = mountWithIntl(
       <QueryClientProvider client={queryClient}>
         <Expressions
-          kql={{} as KqlPluginStart}
           ruleInterval="1m"
           ruleThrottle="1m"
           alertNotifyWhen="onThrottleInterval"
