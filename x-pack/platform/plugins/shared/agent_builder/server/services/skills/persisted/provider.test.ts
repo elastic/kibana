@@ -23,12 +23,14 @@ const createMockPersistedSkill = (
   tool_ids: ['tool-a'],
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-02T00:00:00.000Z',
+  referenced_content_count: 0,
   ...overrides,
 });
 
 const createMockClient = (): jest.Mocked<SkillClient> => ({
   has: jest.fn(),
   get: jest.fn(),
+  bulkGet: jest.fn(),
   list: jest.fn(),
   create: jest.fn(),
   bulkCreate: jest.fn(),
@@ -127,6 +129,22 @@ describe('createPersistedSkillProvider', () => {
       const result = await provider.list();
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('list with summaryOnly', () => {
+    it('forwards options to skillClient.list', async () => {
+      mockClient.list.mockResolvedValue([
+        createMockPersistedSkill({ id: 'skill-1', content: '', referenced_content_count: 2 }),
+      ]);
+      const provider = createProvider();
+
+      const result = await provider.list({ summaryOnly: true });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('skill-1');
+      expect(result[0].referencedContentCount).toBe(2);
+      expect(mockClient.list).toHaveBeenCalledWith({ summaryOnly: true });
     });
   });
 

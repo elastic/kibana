@@ -9,6 +9,7 @@
     "server/**/*",
     "scripts/**/*",
     "test/scout/**/*",
+    "test/scout_security_attacks_alignment/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -276,6 +277,7 @@
     "@kbn/as-code-filters-transforms",
     "@kbn/cps-utils",
     "@kbn/cps",
+    "@kbn/esql-language",
     "@kbn/workflows-ui",
     "@kbn/workflows-management-plugin",
     "@kbn/workflows",

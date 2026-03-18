@@ -294,14 +294,13 @@ For each step in workflow definition:
 
 ### 4. Error Handling
 
-```
-If step fails:
-  1. Log error details
-  2. Check step-level retry configuration
-  3. Retry step or fail workflow
-  4. Update execution status
-  5. Emit error events
-```
+Errors are captured at step boundaries, propagated through the scope stack, and handled by on-failure nodes (retry, fallback, continue) in order. Retry supports fixed delay or exponential backoff with optional jitter.
+
+- **Retry:** condition-based retries with configurable attempts and delay (fixed or exponential).
+- **Fallback:** alternative steps when the primary step fails (after retries exhausted if retry is configured).
+- **Continue:** condition-based continuation despite step failure.
+
+See [On-Failure Configuration](server/step/on_failure/README.md) for recovery patterns, which errors to retry, and graceful degradation (fallback + continue).
 
 ---
 
@@ -678,11 +677,17 @@ The plugin can be configured via `kibana.yml`:
 workflowsExecutionEngine:
   # Enable/disable the plugin
   enabled: true
-  
+
+  # Event-driven execution
+  eventDriven:
+    # When false, event-triggered runs are skipped at execution time (no scheduling).
+    enabled: true
+    # When false, trigger subscriptions are not resolved and events are not written to the trigger-events data stream
+    logEvents: true
+
   # Enable console logging for debugging
   logging:
     console: false
-  
   # Configure allowed hosts for HTTP steps
   http:
     allowedHosts: ['*']  # Use specific hosts in production
