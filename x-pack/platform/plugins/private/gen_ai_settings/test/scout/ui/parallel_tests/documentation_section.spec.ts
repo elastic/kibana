@@ -13,7 +13,13 @@ import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Documentation Section',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete, ...tags.serverless.security.complete] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.security.complete,
+    ],
+  },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsFullAIPrivilegesUser();
