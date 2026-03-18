@@ -40,6 +40,5 @@
     "@kbn/security-plugin-types-common",
     "@kbn/securitysolution-utils",
     "@kbn/maintenance-windows-plugin",
-    "@kbn/controls-constants"
   ]
 }
