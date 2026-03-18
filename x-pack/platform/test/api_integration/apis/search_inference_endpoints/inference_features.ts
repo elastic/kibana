@@ -13,7 +13,7 @@ import { ALL_ROLES } from './common/roles';
 import { createUsersAndRoles, deleteUsersAndRoles } from './common/helpers';
 
 const API_PATH = '/internal/search_inference_endpoints/features';
-const API_VERSION = '1' as const;
+const API_VERSION = '1';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).toBeDefined();
         expect(Array.isArray(body.features)).toBe(true);
-        expect(body.features.length).toBeGreaterThanOrEqual(2);
+        expect(body.features).toHaveLength(2);
 
         const root = body.features.find(
           (f: { featureId: string }) => f.featureId === 'test_feature_root'
@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(Array.isArray(body.features)).toBe(true);
-        expect(body.features.length).toBeGreaterThanOrEqual(2);
+        expect(body.features).toHaveLength(2);
       });
     });
 

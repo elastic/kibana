@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).toBeDefined();
         expect(Array.isArray(body.features)).toBe(true);
-        expect(body.features.length).toBeGreaterThanOrEqual(2);
+        expect(body.features).toHaveLength(2);
 
         const root = body.features.find(
           (f: { featureId: string }) => f.featureId === 'test_feature_root'
