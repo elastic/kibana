@@ -88,7 +88,7 @@ export function FilterListButton({ onChange, filters }: Props) {
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={Object.keys(filters).length}
