@@ -269,7 +269,7 @@ describe('buildDatasourceStates', () => {
                     "fieldName": "test",
                   },
                 ],
-                "index": "test-no_time_field",
+                "index": "test-ef03ee470d96c0a475dca463e351acd1ad966fa7997b95884750639034d53f21",
                 "query": Object {
                   "esql": "from test | limit 10",
                 },
