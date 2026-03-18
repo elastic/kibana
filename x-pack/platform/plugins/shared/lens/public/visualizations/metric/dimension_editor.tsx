@@ -31,6 +31,7 @@ import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   VisualizationDimensionEditorProps,
   MetricVisualizationState,
@@ -142,7 +143,7 @@ interface TrendPalette {
   // select id
   id: string;
   // original ref to the palette
-  paletteId: string;
+  paletteId: KbnPaletteId;
   name: string;
   reversed?: boolean;
   colors: [string, string, string];
@@ -158,7 +159,7 @@ function useTrendPalettes(): { defaultPalette: TrendPalette; allPalettes: TrendP
   const palettes = useKbnPalettes();
   const computedPalettes = useMemo(() => {
     const defaultKbnPalette = palettes.get(KbnPalette.CompareTo);
-    const trendPalettes = new Set<string>([KbnPalette.Complementary, KbnPalette.Temperature]);
+    const trendPalettes = new Set<KbnPaletteId>([KbnPalette.Complementary, KbnPalette.Temperature]);
     const defaultPalette = {
       id: defaultKbnPalette.id,
       paletteId: defaultKbnPalette.id,
