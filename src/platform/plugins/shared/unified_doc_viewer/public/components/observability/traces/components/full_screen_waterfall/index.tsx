@@ -33,7 +33,8 @@ export interface FullScreenWaterfallProps {
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
   serviceName?: string;
-  scrollToSpanId?: string;
+  highlightedSpanId?: string;
+  scrollToHighlightedOnMount?: boolean;
   docId: string | null;
   docIndex?: string;
   activeFlyoutType: DocumentType | null;
@@ -51,7 +52,8 @@ export const FullScreenWaterfall = ({
   rangeTo,
   dataView,
   serviceName,
-  scrollToSpanId,
+  highlightedSpanId: initialHighlightedSpanId,
+  scrollToHighlightedOnMount,
   docId,
   docIndex,
   activeFlyoutType,
@@ -136,7 +138,9 @@ export const FullScreenWaterfall = ({
   // TODO: Remove this deferred-mount workaround once EUI exposes a prop to
   // disable the flyout open animation at mount time.
   // Tracking issue: https://github.com/elastic/kibana/issues/256531
-  const [highlightedSpanId, setHighlightedSpanId] = useState<string | undefined>(scrollToSpanId);
+  const [highlightedSpanId, setHighlightedSpanId] = useState<string | undefined>(
+    initialHighlightedSpanId
+  );
 
   const [isWaterfallReady, setIsWaterfallReady] = useState(Boolean(skipOpenAnimation));
 
@@ -216,7 +220,7 @@ export const FullScreenWaterfall = ({
               rangeTo={rangeTo}
               serviceName={serviceName}
               highlightedSpanId={highlightedSpanId}
-              scrollToHighlightedOnMount={scrollToSpanId != null}
+              scrollToHighlightedOnMount={scrollToHighlightedOnMount}
               scrollStrategy="parent"
               onNodeClick={(nodeSpanId) => {
                 setHighlightedSpanId(nodeSpanId);

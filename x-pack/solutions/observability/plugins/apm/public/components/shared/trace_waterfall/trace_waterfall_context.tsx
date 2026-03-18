@@ -53,6 +53,7 @@ export interface TraceWaterfallContextProps {
   showLegend: boolean;
   serviceName?: string;
   message?: string;
+  marks: Array<AgentMark | ErrorMark>;
   errorMarks: ErrorMark[];
   agentMarks: AgentMark[];
   scrollElement?: Element;
@@ -80,6 +81,7 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   colorBy: WaterfallLegendType.ServiceName,
   showLegend: false,
   serviceName: '',
+  marks: [],
   errorMarks: [],
   agentMarks: [],
   scrollElement: undefined,
@@ -259,6 +261,7 @@ export function TraceWaterfallContextProvider({
         showLegend,
         serviceName,
         message,
+        marks: [...getAgentMarks(agentMarks), ...errorMarks],
         errorMarks,
         agentMarks: getAgentMarks(agentMarks),
         scrollElement,

@@ -125,19 +125,14 @@ function TraceWaterfallComponent() {
     colorBy,
     showLegend,
     serviceName,
-    errorMarks,
     showAccordion,
     isAccordionOpen,
     toggleAllAccordions,
-    agentMarks,
+    marks,
     showCriticalPath,
     setShowCriticalPath,
     showCriticalPathControl,
   } = useTraceWaterfallContext();
-
-  const marks = useMemo(() => {
-    return [...agentMarks, ...errorMarks];
-  }, [agentMarks, errorMarks]);
 
   const stickyTop = isEmbeddable
     ? '0px'
@@ -248,12 +243,9 @@ function TraceTree() {
     scrollStrategy = 'window',
     duration,
     margin: { left, right },
-    agentMarks,
-    errorMarks,
+    marks,
     scrollToHighlightedOnMount,
   } = useTraceWaterfallContext();
-
-  const marks = useMemo(() => [...agentMarks, ...errorMarks], [agentMarks, errorMarks]);
 
   const listRef = useRef<List>(null);
 
