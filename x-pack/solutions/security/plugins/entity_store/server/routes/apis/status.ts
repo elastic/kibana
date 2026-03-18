@@ -13,7 +13,7 @@ import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/types';
-import type { LogExtractionConfig } from '../../domain/definitions/saved_objects';
+import type { LogExtractionConfig } from '../../domain/saved_objects';
 import { ENTITY_STORE_STATUS } from '../../domain/constants';
 
 /**
@@ -96,7 +96,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
       wrapMiddlewares(
         async (ctx, req, res): Promise<IKibanaResponse<EntityStoreStatusResponseBody>> => {
           const entityStoreCtx = await ctx.entityStore;
-          const { logger, assetManager } = entityStoreCtx;
+          const { logger, assetManagerClient: assetManager } = entityStoreCtx;
           logger.debug('Status API invoked');
           const withComponents = req.query.include_components;
           const { status, engines, ...rest } = await assetManager.getStatus(withComponents);

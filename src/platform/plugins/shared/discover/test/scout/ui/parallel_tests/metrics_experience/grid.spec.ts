@@ -82,9 +82,32 @@ spaceTest.describe(
       const { metricsExperience, datePicker } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
 
-      await datePicker.setCommonlyUsedTime('Last_30 days');
+      await datePicker.setAbsoluteRange({
+        from: 'Jan 1, 2025 @ 00:00:00.000',
+        to: 'Jun 30, 2025 @ 23:59:59.000',
+      });
 
       await expect(metricsExperience.grid).toBeVisible();
+    });
+
+    spaceTest('should show chart actions menu on metric card', async ({ pageObjects, page }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      const { metricsExperience } = pageObjects;
+      await expect(metricsExperience.grid).toBeVisible();
+
+      const cardIndex = 0;
+
+      await spaceTest.step('context menu shows View details and Copy to dashboard', async () => {
+        await metricsExperience.openCardContextMenu(cardIndex);
+        await expect(metricsExperience.chartActions.viewDetails).toBeVisible();
+        await expect(metricsExperience.chartActions.copyToDashboard).toBeVisible();
+      });
+
+      await spaceTest.step('hover bar shows Explore action', async () => {
+        await page.keyboard.press('Escape');
+        await metricsExperience.getCardByIndex(cardIndex).hover();
+        await expect(metricsExperience.getQuickActionsForCard(cardIndex).explore).toBeVisible();
+      });
     });
   }
 );

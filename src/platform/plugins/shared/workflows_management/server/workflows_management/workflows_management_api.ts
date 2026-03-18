@@ -26,7 +26,6 @@ import type {
 } from '@kbn/workflows';
 import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import type { TriggerType } from '@kbn/workflows/spec/schema/triggers/trigger_schema';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
@@ -34,6 +33,7 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { z } from '@kbn/zod/v4';
+import type { ChildWorkflowExecutionItem } from './lib/get_child_workflow_executions';
 import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
@@ -123,6 +123,17 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflows(params, spaceId);
   }
 
+  /**
+   * Returns all enabled workflows in the space that are subscribed to the given trigger type.
+   * Used by the event-driven handler to resolve which workflows to run when an event is emitted.
+   */
+  public async getWorkflowsSubscribedToTrigger(
+    triggerId: string,
+    spaceId: string
+  ): Promise<WorkflowDetailDto[]> {
+    return this.workflowsService.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
+  }
+
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
     return this.workflowsService.getWorkflow(id, spaceId);
   }
@@ -199,14 +210,20 @@ export class WorkflowsManagementApi {
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
     inputs: Record<string, any>,
-    request: KibanaRequest
+    request: KibanaRequest,
+    triggeredBy?: string,
+    metadata?: Record<string, unknown>
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
-    const context = {
+    const context: Record<string, unknown> = {
       event,
       spaceId,
       inputs: manualInputs,
+      triggeredBy,
     };
+    if (metadata) {
+      context.metadata = metadata;
+    }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       workflow,
@@ -220,8 +237,8 @@ export class WorkflowsManagementApi {
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
     inputs: Record<string, any>,
-    triggeredBy: TriggerType,
-    request: KibanaRequest
+    request: KibanaRequest,
+    triggeredBy: string
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
     const context = {
@@ -345,6 +362,13 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId, options);
   }
 
+  public async getChildWorkflowExecutions(
+    parentExecutionId: string,
+    spaceId: string
+  ): Promise<ChildWorkflowExecutionItem[]> {
+    return this.workflowsService.getChildWorkflowExecutions(parentExecutionId, spaceId);
+  }
+
   public async getWorkflowExecutionLogs(params: {
     executionId: string;
     spaceId: string;
@@ -409,6 +433,16 @@ export class WorkflowsManagementApi {
   ): Promise<void> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
+  }
+
+  public async resumeWorkflowExecution(
+    executionId: string,
+    spaceId: string,
+    input: Record<string, unknown>,
+    request: KibanaRequest
+  ): Promise<void> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
   }
 
   public async getWorkflowStats(spaceId: string) {

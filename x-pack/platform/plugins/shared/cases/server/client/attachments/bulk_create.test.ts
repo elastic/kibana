@@ -20,11 +20,6 @@ import {
   createUserActionServiceMock,
 } from '../../services/mocks';
 import { commentAttachmentType } from '../../attachment_framework/attachments';
-import { getCaseOwner } from './utils';
-
-jest.mock('./utils', () => ({
-  getCaseOwner: jest.fn(),
-}));
 
 describe('bulkCreate', () => {
   const caseId = 'test-case';
@@ -40,7 +35,6 @@ describe('bulkCreate', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(getCaseOwner).mockResolvedValue(SECURITY_SOLUTION_OWNER);
   });
 
   it('throws with excess fields', async () => {
@@ -157,15 +151,14 @@ describe('bulkCreate', () => {
     });
 
     const unifiedAttachments = [
-      { type: 'comment' as const, data: { content: 'first' } },
-      { type: 'comment' as const, data: { content: 'second' } },
+      { type: 'comment' as const, data: { content: 'first' }, owner: SECURITY_SOLUTION_OWNER },
+      { type: 'comment' as const, data: { content: 'second' }, owner: SECURITY_SOLUTION_OWNER },
     ];
 
     await expect(
       bulkCreate({ attachments: unifiedAttachments, caseId }, clientArgs)
     ).resolves.toBeDefined();
 
-    expect(getCaseOwner).toHaveBeenCalledWith(caseId, clientArgs);
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({
         entities: expect.arrayContaining([

@@ -63,6 +63,7 @@ export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimati
 export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:experimentalFeatures';
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
+export const AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID = 'agentBuilder:connectorsEnabled';
 
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
@@ -150,6 +151,8 @@ export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streams
 export const OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS = 'observability:streamsEnableQueryStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
 export const OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS = 'observability:streamsEnableAttachments';
+export const OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS =
+  'observability:streamsEnableWiredStreamViews';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

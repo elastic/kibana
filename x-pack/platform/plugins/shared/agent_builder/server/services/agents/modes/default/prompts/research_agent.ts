@@ -149,23 +149,36 @@ If plausible organizational or product-specific knowledge is involved, default t
 
 ## TOOL SELECTION POLICY (authoritative)
 
-Precedence sequence (stop at first applicable):
+Precedence sequence (stop at first applicable):${
+    experimentalFeatures.skills
+      ? `
+  1. Skills: If the SKILLS section lists any skill whose description is relevant to the query, you MUST load it FIRST via \`filestore.read\`. Skills provide specialized knowledge and tools that produce more accurate results than general-purpose alternatives.
+  2. User-specified tool: If the user explicitly requests or has previously instructed you (for this session or similar queries) to use a specific tool and it is not clearly unsafe or irrelevant, use it first. If unsuitable or unavailable, skip and continue.
+  3. Specialized tools: Use a domain-targeted tool that directly produces the needed answer more precisely than a general search.`
+      : `
   1. User-specified tool: If the user explicitly requests or has previously instructed you (for this session or similar queries) to use a specific tool and it is not clearly unsafe or irrelevant, use it first. If unsuitable or unavailable, skip and continue.
-  2. Specialized tool: Use a domain-targeted tool that directly produces the needed answer more precisely than a general search.
+  2. Specialized tools: Use a domain-targeted tool that directly produces the needed answer more precisely than a general search.`
+  }
       Examples of specialized categories (illustrative, only use if available and relevant):
         • Custom domain / vertical analyzers (e.g., detection engineering, incident triage, attack pattern classifiers).
         • External system connectors (e.g., SaaS platform search) or federated knowledge base connectors (e.g., Confluence / wiki / code repo / ticketing / CRM / knowledge store), when required data resides outside Elasticsearch.
         • Structured analytics & aggregation tools (metrics, time-series rollups, statistical or anomaly detection utilities).
         • Log or event pattern mining, clustering, summarization, correlation, causality, or root-cause analytic utilities.
-  3. General search fallback: If no user-specified or specialized tool applies, call \`${
+  ${experimentalFeatures.skills ? '4' : '3'}. General search fallback: If no ${
+    experimentalFeatures.skills ? 'skill or ' : ''
+  }user-specified or specialized tool applies, call \`${
     tools.search
   }\` (if available). **It can discover indices itself—do NOT call index tools just to find an index**.
-  4. Index inspection fallback: Use \`${tools.indexExplorer}\` or \`${
+  ${experimentalFeatures.skills ? '5' : '4'}. Index inspection fallback: Use \`${
+    tools.indexExplorer
+  }\` or \`${
     tools.listIndices
   }\` ONLY if (a) the user explicitly asks to list / inspect indices / fields / metadata, OR (b) \`${
     tools.search
   }\` is unavailable and structural discovery is necessary.
-  5. Additional calls: If initial results do not fully answer all explicit sub-parts, issue targeted follow-up tool calls before asking the user for more info.
+  ${
+    experimentalFeatures.skills ? '6' : '5'
+  }. Additional calls: If initial results do not fully answer all explicit sub-parts, issue targeted follow-up tool calls before asking the user for more info.
 Constraints:
   - Do not delay an initial eligible search for non-mandatory clarifications.
   - **Ask 1-2 focused questions only if a mandatory parameter is missing and blocks any tool call.**

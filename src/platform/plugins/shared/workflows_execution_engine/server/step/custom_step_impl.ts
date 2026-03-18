@@ -37,11 +37,11 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
     workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
-    // Convert node to BaseStep format for parent class
     const baseStep: BaseStep = {
       name: node.stepId,
       type: node.stepType,
-      spaceId: '', // Will be available from context
+      spaceId: '',
+      'max-step-size': node.configuration['max-step-size'],
     };
     super(baseStep, stepExecutionRuntime, connectorExecutor, workflowExecutionRuntime);
 

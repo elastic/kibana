@@ -165,22 +165,24 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   );
   const { augmentedColumnHeaders } = useTimelineColumns(columns);
 
-  const [queryLoadingState, { events, totalCount, loadNextBatch, refreshedAt, refetch }] =
-    useTimelineEvents({
-      endDate: '',
-      id: `pinned-${timelineId}`,
-      indexNames: selectedPatterns,
-      dataViewId: dataViewId ?? '',
-      fields: timelineQueryFields,
-      limit: itemsPerPage,
-      filterQuery,
-      runtimeMappings,
-      skip: filterQuery === '',
-      startDate: '',
-      sort: timelineQuerySortField,
-      timerangeKind: undefined,
-      dateRangeField: experimentalDataView?.getTimeField()?.name ?? '@timestamp',
-    });
+  const [
+    queryLoadingState,
+    { events, rawEvents, totalCount, loadNextBatch, refreshedAt, refetch },
+  ] = useTimelineEvents({
+    endDate: '',
+    id: `pinned-${timelineId}`,
+    indexNames: selectedPatterns,
+    dataViewId: dataViewId ?? '',
+    fields: timelineQueryFields,
+    limit: itemsPerPage,
+    filterQuery,
+    runtimeMappings,
+    skip: filterQuery === '',
+    startDate: '',
+    sort: timelineQuerySortField,
+    timerangeKind: undefined,
+    dateRangeField: experimentalDataView?.getTimeField()?.name ?? '@timestamp',
+  });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
 
@@ -248,6 +250,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     timelineId,
     refetch,
     events,
+    rawEvents,
     eventIdToNoteIds,
     onToggleShowNotes,
   });

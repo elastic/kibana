@@ -25,11 +25,13 @@ export type FixtureMap = Record<string, TypeVersionFixtures>;
 
 export interface TaskContext {
   gitRev: string;
+  serverlessGitRev?: string;
   esServer?: TestElasticsearchUtils;
   kibanaServer?: Root;
   registeredTypes?: SavedObjectsType<any>[];
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   from?: MigrationSnapshot;
+  serverlessFrom?: MigrationSnapshot;
   to?: MigrationSnapshot;
   updatedTypes: SavedObjectsType<any>[];
   currentRemovedTypes: string[];

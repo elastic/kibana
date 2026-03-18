@@ -24,7 +24,7 @@ import {
   getFilterOperator,
   getFilterValue,
   isArrayOperator,
-  isCondition,
+  isConditionStrict,
   type OperatorKeys,
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
@@ -68,7 +68,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
   } = props;
   const { core } = useKibana();
 
-  const isInvalidCondition = !isCondition(props.condition);
+  const isInvalidCondition = !isConditionStrict(props.condition);
 
   const condition = alwaysToEmptyEquals(props.condition);
 
@@ -193,7 +193,10 @@ export function ConditionEditor(props: ConditionEditorProps) {
       return;
     }
     try {
-      const parsed = yaml.parse(currentValue) as Condition;
+      const parsed = yaml.parse(currentValue);
+      if (!isConditionStrict(parsed)) {
+        return;
+      }
       debouncedEmitConditionChange.cancel();
       handleConditionChange(parsed);
     } catch (error: unknown) {
@@ -276,7 +279,12 @@ export function ConditionEditor(props: ConditionEditorProps) {
             syntaxEditorValueRef.current = value;
             setSyntaxEditorValue(value);
             try {
-              const parsed = yaml.parse(value) as Condition;
+              const parsed = yaml.parse(value);
+              if (!isConditionStrict(parsed)) {
+                reportValidityChange(false);
+                debouncedEmitConditionChange.cancel();
+                return;
+              }
               reportValidityChange(true);
               debouncedEmitConditionChange(parsed);
             } catch (error: unknown) {

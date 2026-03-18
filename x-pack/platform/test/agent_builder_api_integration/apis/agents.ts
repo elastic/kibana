@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { agentBuilderDefaultAgentId, AgentVisibility } from '@kbn/agent-builder-common';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -110,6 +111,25 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'kibana')
           .send(agentWithInvalidTools)
           .expect(400);
+      });
+
+      it('should default visibility to public and include created_by metadata', async () => {
+        const agentId = `visibility-default-agent-${Date.now()}`;
+        const response = await supertest
+          .post('/api/agent_builder/agents')
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            ...mockAgent,
+            id: agentId,
+          })
+          .expect(200);
+
+        expect(response.body).to.have.property('visibility', AgentVisibility.Public);
+        expect(response.body).to.have.property('created_by');
+        expect(response.body.created_by).to.have.property('username');
+        expect(typeof response.body.created_by.username).to.be('string');
+
+        createdAgentIds.push(agentId);
       });
     });
 
@@ -250,6 +270,65 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'kibana')
           .send({ name: 'Updated name' })
           .expect(404);
+      });
+    });
+
+    describe('Visibility API (experimental features enabled)', function () {
+      this.tags(['skipServerless']);
+
+      it('should allow creating an agent with explicit private visibility', async () => {
+        const agentId = `visibility-private-agent-${Date.now()}`;
+        const response = await supertest
+          .post('/api/agent_builder/agents')
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            ...mockAgent,
+            id: agentId,
+            visibility: AgentVisibility.Private,
+          })
+          .expect(200);
+
+        expect(response.body).to.have.property('id', agentId);
+        expect(response.body).to.have.property('visibility', AgentVisibility.Private);
+
+        createdAgentIds.push(agentId);
+      });
+
+      it('should update visibility explicitly', async () => {
+        const agentId = `visibility-update-agent-${Date.now()}`;
+
+        await supertest
+          .post('/api/agent_builder/agents')
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            ...mockAgent,
+            id: agentId,
+          })
+          .expect(200);
+
+        createdAgentIds.push(agentId);
+
+        const response = await supertest
+          .put(`/api/agent_builder/agents/${agentId}`)
+          .set('kbn-xsrf', 'kibana')
+          .send({ visibility: AgentVisibility.Shared })
+          .expect(200);
+
+        expect(response.body).to.have.property('id', agentId);
+        expect(response.body).to.have.property('visibility', AgentVisibility.Shared);
+      });
+
+      it('should reject visibility change for the default agent (returns 404)', async () => {
+        await supertest.get(`/api/agent_builder/agents/${agentBuilderDefaultAgentId}`).expect(200);
+
+        const response = await supertest
+          .put(`/api/agent_builder/agents/${agentBuilderDefaultAgentId}`)
+          .set('kbn-xsrf', 'kibana')
+          .send({ visibility: AgentVisibility.Private })
+          .expect(404);
+
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.contain('not found');
       });
     });
 

@@ -18,6 +18,7 @@ import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
+import { wrapTaskRun } from '../telemetry/traces';
 
 function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
@@ -126,13 +127,23 @@ export function registerExtractEntityTasks({
           timeout: config.timeout,
           createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
             run: () =>
-              runTask({
-                taskInstance,
-                abortController,
-                logger: logger.get(taskInstance.id),
-                core,
-                entityType: type,
-                fakeRequest,
+              wrapTaskRun({
+                spanName: 'entityStore.task.extract_entity.run',
+                namespace: taskInstance.state.namespace,
+                attributes: {
+                  'entity_store.task.id': taskInstance.id,
+                  'entity_store.task.type': taskType,
+                  'entity_store.entity.type': type,
+                },
+                run: () =>
+                  runTask({
+                    taskInstance,
+                    abortController,
+                    logger: logger.get(taskInstance.id),
+                    core,
+                    entityType: type,
+                    fakeRequest,
+                  }),
               }),
           }),
         },
@@ -192,5 +203,5 @@ export async function stopExtractEntityTask({
 }): Promise<void> {
   const taskId = getExtractEntityTaskId(type, namespace);
   await taskManager.removeIfExists(taskId);
-  logger.debug(`removed task: ${taskId}`);
+  logger.debug(`removed extract entity task: ${taskId}`);
 }
