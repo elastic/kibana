@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../src/evaluate';
-import { padJobIds, lmdJobIds } from '../src/ml_helpers';
+import { lmdJobIds, padJobIds } from '../src/ml_helpers';
 
 /**
  * Multi-skill routing prompts (P-MS1, P-MS2, and new cross-domain prompts).
@@ -53,12 +53,9 @@ evaluate.describe(
                   },
                   {
                     id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: [
-                      'security.entity_analytics.asset_criticality',
-                      'security.search_entities',
-                    ],
+                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
                     criteria: [
-                      'The response uses entity analytics (risk score, asset criticality, or search entities) to identify or enrich privileged users.',
+                      'The response uses entity analytics (risk score or asset criticality) to identify or enrich privileged users.',
                     ],
                   },
                 ],
@@ -86,10 +83,7 @@ evaluate.describe(
                   },
                   {
                     id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: [
-                      'security.entity_analytics.asset_criticality',
-                      'security.search_entities',
-                    ],
+                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
                     criteria: [
                       'The response uses entity analytics to identify or rank privileged accounts by risk or criticality.',
                     ],
@@ -110,7 +104,6 @@ evaluate.describe(
                 toolCalls: [
                   {
                     id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.search_entities'],
                     criteria: [
                       'The response uses entity analytics risk scoring to identify or filter high-risk users.',
                     ],
@@ -137,14 +130,12 @@ evaluate.describe(
                 toolCalls: [
                   {
                     id: 'security.entity_analytics.asset_criticality',
-                    acceptableAlternativeToolIds: ['security.search_entities'],
                     criteria: [
                       'The response uses asset criticality to identify business-critical assets.',
                     ],
                   },
                   {
                     id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.search_entities'],
                     criteria: [
                       'The response uses risk scoring to detect risk score increases or changes over time.',
                     ],

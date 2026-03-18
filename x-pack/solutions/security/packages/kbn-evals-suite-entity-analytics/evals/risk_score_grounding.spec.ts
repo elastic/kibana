@@ -122,7 +122,6 @@ evaluate.describe(
                 toolCalls: [
                   {
                     id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.search_entities'],
                   },
                 ],
               },
@@ -141,7 +140,6 @@ evaluate.describe(
                 toolCalls: [
                   {
                     id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.search_entities'],
                     criteria: ['The tool query filters by or references user "eval-alice".'],
                   },
                 ],
@@ -161,7 +159,6 @@ evaluate.describe(
                 toolCalls: [
                   {
                     id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.search_entities'],
                     criteria: ['The tool query filters by or references user "eval-bob".'],
                   },
                 ],
@@ -181,7 +178,6 @@ evaluate.describe(
                 toolCalls: [
                   {
                     id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.search_entities'],
                     criteria: ['The tool query filters by or references user "eval-carol".'],
                   },
                 ],
@@ -201,7 +197,6 @@ evaluate.describe(
                 toolCalls: [
                   {
                     id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.search_entities'],
                     criteria: [
                       'The tool query filters by Critical risk level or sorts by risk score descending.',
                     ],
@@ -224,7 +219,6 @@ evaluate.describe(
                 toolCalls: [
                   {
                     id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.search_entities'],
                   },
                 ],
               },
