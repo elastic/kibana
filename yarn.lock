@@ -8217,6 +8217,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-oauth-hooks@link:x-pack/platform/packages/shared/response-ops/oauth-hooks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-ops-recurring-schedule-form@link:x-pack/platform/packages/shared/response-ops/recurring-schedule-form":
   version "0.0.0"
   uid ""
