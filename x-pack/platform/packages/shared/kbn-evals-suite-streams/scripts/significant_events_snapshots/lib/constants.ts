@@ -6,6 +6,8 @@
  */
 
 export const GCS_BUCKET = 'significant-events-datasets';
+export const OTEL_DEMO_NAMESPACE = 'otel-demo';
+export const OTEL_DEMO_GCS_BASE_PATH_PREFIX = OTEL_DEMO_NAMESPACE;
 
 // Wait times
 export const BASELINE_WAIT_MS = 3 * 60 * 1000;

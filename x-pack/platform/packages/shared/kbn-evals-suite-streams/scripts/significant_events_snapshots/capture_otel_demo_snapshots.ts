@@ -68,41 +68,12 @@ run(
       );
     }
 
-    // Validate --baseline-wait
-    let baselineWaitMs = BASELINE_WAIT_MS;
-    if (flags['baseline-wait'] !== undefined) {
-      const rawBaselineWait = String(flags['baseline-wait']);
-      if (rawBaselineWait.includes('.')) {
-        throw new Error(
-          `--baseline-wait must be a whole number of minutes (no decimals). Got: "${rawBaselineWait}"`
-        );
-      }
-      const parsedBaselineWait = parseInt(rawBaselineWait, 10);
-      if (isNaN(parsedBaselineWait)) {
-        throw new Error(
-          `--baseline-wait must be a whole number of minutes. Got: "${rawBaselineWait}"`
-        );
-      }
-      baselineWaitMs = parsedBaselineWait * 60_000;
-    }
-
-    // Validate --failure-wait
-    let failureWaitMs = FAILURE_WAIT_MS;
-    if (flags['failure-wait'] !== undefined) {
-      const rawFailureWait = String(flags['failure-wait']);
-      if (rawFailureWait.includes('.')) {
-        throw new Error(
-          `--failure-wait must be a whole number of minutes (no decimals). Got: "${rawFailureWait}"`
-        );
-      }
-      const parsedFailureWait = parseInt(rawFailureWait, 10);
-      if (isNaN(parsedFailureWait)) {
-        throw new Error(
-          `--failure-wait must be a whole number of minutes. Got: "${rawFailureWait}"`
-        );
-      }
-      failureWaitMs = parsedFailureWait * 60_000;
-    }
+    const baselineWaitMs = parseDurationFlag(
+      flags['baseline-wait'],
+      'baseline-wait',
+      BASELINE_WAIT_MS
+    );
+    const failureWaitMs = parseDurationFlag(flags['failure-wait'], 'failure-wait', FAILURE_WAIT_MS);
 
     const allScenarios = getDemoScenarios(demoType as DemoType);
     if (allScenarios.length === 0) {
@@ -121,7 +92,7 @@ run(
       );
     }
 
-    const basePath = generateGcsBasePath({ runId });
+    const basePath = generateGcsBasePath({ runId, appNamespace: demoType });
     log.info(`Creating ${selectedScenarios.length} snapshot(s) → GCS ${GCS_BUCKET}/${basePath}`);
     log.info(`Run ID: ${runId}`);
     log.info(`Demo app: ${demoType}`);
@@ -143,7 +114,7 @@ run(
 
     log.info('');
     log.info('Registering GCS snapshot repository...');
-    await registerGcsRepository(esClient, log, runId);
+    await registerGcsRepository(esClient, log, runId, demoType);
 
     for (const scenario of selectedScenarios) {
       await processScenario(
@@ -224,8 +195,8 @@ run(
         --scenario         Process only specific scenario(s) - can be repeated. Omit for all.
         --dry-run          Print what would happen without executing
         --demo-app         Demo app to use (default: otel-demo). Must be a registered demo type.
-        --baseline-wait    Minutes to wait for baseline traffic (whole number, default: 3)
-        --failure-wait     Minutes to wait after applying failure scenario (whole number, default: 5)
+        --baseline-wait    Duration to wait for baseline traffic, e.g. 3m, 90s, 1h (default: 3m)
+        --failure-wait     Duration to wait after applying failure scenario, e.g. 15m, 300s (default: 5m)
         --es-url           Elasticsearch URL (default: from kibana.dev.yml)
         --kibana-url       Kibana URL (default: from kibana.dev.yml, with basePath)
         --es-username      ES username (default: from kibana.dev.yml)
@@ -298,6 +269,27 @@ async function processScenario(
 
   log.info(`Scenario "${scenario.id}" — done`);
 }
+
+const DURATION_RE = /^(\d+)(s|m|h|d)$/;
+
+const parseDurationFlag = (
+  raw: string | string[] | boolean | undefined,
+  flagName: string,
+  defaultMs: number
+): number => {
+  if (!raw) return defaultMs;
+
+  const value = String(raw);
+
+  const match = value.match(DURATION_RE);
+  if (!match) {
+    throw new Error(`--${flagName} must be a duration like "3m", "90s", "1h". Got: "${value}"`);
+  }
+
+  const amount = Number(match[1]);
+  const unit = match[2] as moment.unitOfTime.DurationConstructor;
+  return moment.duration(amount, unit).asMilliseconds();
+};
 
 async function ensureLogsDataStream(esClient: Client, log: ToolingLog): Promise<void> {
   try {
