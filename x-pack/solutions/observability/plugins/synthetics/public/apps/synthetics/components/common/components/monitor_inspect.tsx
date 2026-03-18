@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiBasicTable,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlyout,
   EuiButton,
@@ -38,7 +39,8 @@ import type {
   MonitorInspectResponse,
   PackagePolicyLink,
 } from '../../../state/monitor_management/api';
-import { inspectMonitorAPI } from '../../../state/monitor_management/api';
+import { inspectMonitorAPI, updateMonitorAPI } from '../../../state/monitor_management/api';
+import { kibanaService } from '../../../../../utils/kibana_service';
 
 interface InspectorProps {
   isValid: boolean;
@@ -59,6 +61,7 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
   };
 
   const [isInspecting, setIsInspecting] = useState(false);
+  const [migrateCount, setMigrateCount] = useState(0);
   const onButtonClick = () => {
     setIsInspecting(() => !isInspecting);
     setIsFlyoutVisible(() => !isFlyoutVisible);
@@ -74,7 +77,7 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
     // FIXME: Dario couldn't find a solution for monitorFields
     // which is not memoized downstream
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInspecting, hideParams]);
+  }, [isInspecting, hideParams, migrateCount]);
 
   let flyout;
 
@@ -119,12 +122,14 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
                 {formatContent(data.result, asJson)}
               </EuiCodeBlock>
               {data.decodedCode && <MonitorCode code={data.decodedCode} />}
-              {isEditFlow && data.packagePolicyLinks.length > 0 && (
+              {isEditFlow && (data.packagePolicyLinks.length > 0 || data.hasMissingReferences) && (
                 <>
                   <EuiHorizontalRule />
                   <PackagePolicyLinksTable
                     links={data.packagePolicyLinks}
                     hasMissingReferences={data.hasMissingReferences}
+                    monitorFields={monitorFields}
+                    onMigrateSuccess={() => setMigrateCount((c) => c + 1)}
                   />
                 </>
               )}
@@ -169,11 +174,34 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
 const PackagePolicyLinksTable = ({
   links,
   hasMissingReferences,
+  monitorFields,
+  onMigrateSuccess,
 }: {
   links: PackagePolicyLink[];
   hasMissingReferences: boolean;
+  monitorFields: SyntheticsMonitor;
+  onMigrateSuccess: () => void;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
+  const [isMigrating, setIsMigrating] = useState(false);
+
+  const handleMigrate = async () => {
+    const monitorId = monitorFields.config_id;
+    if (!monitorId) return;
+    setIsMigrating(true);
+    try {
+      await updateMonitorAPI({ monitor: monitorFields, id: monitorId });
+      kibanaService.toasts.addSuccess({
+        title: MIGRATE_SUCCESS_LABEL,
+        toastLifeTimeMs: 3000,
+      });
+      onMigrateSuccess();
+    } catch (err) {
+      kibanaService.toasts.addError(err, { title: MIGRATE_FAILURE_LABEL });
+    } finally {
+      setIsMigrating(false);
+    }
+  };
 
   const columns: Array<EuiBasicTableColumn<PackagePolicyLink>> = [
     {
@@ -227,16 +255,27 @@ const PackagePolicyLinksTable = ({
             data-test-subj="syntheticsPackagePolicyMissingReferencesCallout"
           >
             <p>{MISSING_REFERENCES_DESCRIPTION}</p>
+            <EuiButtonEmpty
+              size="s"
+              color="warning"
+              isLoading={isMigrating}
+              onClick={handleMigrate}
+              data-test-subj="syntheticsPackagePolicyMigrateButton"
+            >
+              {MIGRATE_LABEL}
+            </EuiButtonEmpty>
           </EuiCallOut>
           <EuiSpacer size="s" />
         </>
       )}
-      <EuiBasicTable
-        tableCaption={LINKED_POLICIES_LABEL}
-        items={links}
-        columns={columns}
-        data-test-subj="syntheticsPackagePolicyLinksTable"
-      />
+      {links.length > 0 && (
+        <EuiBasicTable
+          tableCaption={LINKED_POLICIES_LABEL}
+          items={links}
+          columns={columns}
+          data-test-subj="syntheticsPackagePolicyLinksTable"
+        />
+      )}
     </>
   );
 };
@@ -347,4 +386,18 @@ const MISSING_REFERENCES_DESCRIPTION = i18n.translate(
     defaultMessage:
       'This monitor has private locations but no saved references to package policies. Save the monitor to populate the references.',
   }
+);
+
+const MIGRATE_LABEL = i18n.translate('xpack.synthetics.monitorInspect.migrateLabel', {
+  defaultMessage: 'Migrate now',
+});
+
+const MIGRATE_SUCCESS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorInspect.migrateSuccessLabel',
+  { defaultMessage: 'Monitor policies migrated successfully' }
+);
+
+const MIGRATE_FAILURE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorInspect.migrateFailureLabel',
+  { defaultMessage: 'Failed to migrate monitor policies' }
 );

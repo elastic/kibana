@@ -185,6 +185,7 @@ export const buildPackagePolicyLinks = async ({
 
     if (!hasReference) {
       hasMissingReferences = true;
+      continue;
     }
 
     links.push({

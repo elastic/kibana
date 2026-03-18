@@ -73,7 +73,7 @@ describe('buildPackagePolicyLinks', () => {
     ]);
   });
 
-  it('sets hasMissingReferences when references are empty', async () => {
+  it('sets hasMissingReferences and returns no links when references are empty', async () => {
     const result = await buildPackagePolicyLinks({
       monitorId: 'monitor-1',
       monitorPrivateLocations: [{ id: 'loc-1', label: 'My Location' }],
@@ -83,8 +83,7 @@ describe('buildPackagePolicyLinks', () => {
     });
 
     expect(result.hasMissingReferences).toBe(true);
-    expect(result.packagePolicyLinks).toHaveLength(1);
-    expect(result.packagePolicyLinks[0].packagePolicyId).toBe('monitor-1-loc-1');
+    expect(result.packagePolicyLinks).toHaveLength(0);
   });
 
   it('handles multiple private locations with partial references', async () => {
@@ -105,18 +104,13 @@ describe('buildPackagePolicyLinks', () => {
     });
 
     expect(result.hasMissingReferences).toBe(true);
-    expect(result.packagePolicyLinks).toHaveLength(2);
+    // Only loc-1 has a reference; loc-2 is missing so it's excluded from links
+    expect(result.packagePolicyLinks).toHaveLength(1);
     expect(result.packagePolicyLinks[0]).toEqual({
       locationId: 'loc-1',
       locationLabel: 'Location 1',
       agentPolicyId: 'ap-1',
       packagePolicyId: 'monitor-1-loc-1',
-    });
-    expect(result.packagePolicyLinks[1]).toEqual({
-      locationId: 'loc-2',
-      locationLabel: 'Location 2',
-      agentPolicyId: 'ap-2',
-      packagePolicyId: 'monitor-1-loc-2',
     });
   });
 
@@ -168,8 +162,7 @@ describe('buildPackagePolicyLinks', () => {
     });
 
     expect(result.hasMissingReferences).toBe(true);
-    expect(result.packagePolicyLinks).toHaveLength(1);
-    expect(result.packagePolicyLinks[0].packagePolicyId).toBe('monitor-1-loc-1');
+    expect(result.packagePolicyLinks).toHaveLength(0);
   });
 
   it('handles saved object with no references field', async () => {
@@ -186,7 +179,7 @@ describe('buildPackagePolicyLinks', () => {
     });
 
     expect(result.hasMissingReferences).toBe(true);
-    expect(result.packagePolicyLinks).toHaveLength(1);
+    expect(result.packagePolicyLinks).toHaveLength(0);
   });
 
   it('uses the provided getPolicyId function', async () => {
