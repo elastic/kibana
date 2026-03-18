@@ -450,6 +450,10 @@ export class RulesPage {
    * Saves the rule by clicking save and confirming
    */
   async saveRule() {
+    await expect(this.page.locator('.euiGlobalToastListItem')).toHaveCount(0, {
+      timeout: BIGGER_TIMEOUT,
+    });
+
     // Scroll the save button into view to ensure it's accessible
     await this.ruleSaveButton.scrollIntoViewIfNeeded();
 
