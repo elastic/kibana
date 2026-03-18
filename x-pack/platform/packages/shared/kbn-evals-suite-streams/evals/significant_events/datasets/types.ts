@@ -7,7 +7,7 @@
 
 import type { EvaluationCriterion } from '@kbn/evals';
 import type { GcsConfig } from '../../../src/data_generators/replay';
-import type { ValidFeatureType } from '../../../src/evaluators/feature_extraction_evaluators';
+import type { ValidKIType } from '../../../src/evaluators/ki_extraction_evaluators';
 
 interface ScenarioMetadata {
   difficulty: 'easy' | 'medium' | 'hard';
@@ -22,7 +22,7 @@ export interface SnapshotSourceOverride {
   };
 }
 
-export interface QueryGenerationScenario {
+export interface RuleGenerationScenario {
   input: {
     scenario_id: string;
     stream_name: string;
@@ -38,7 +38,7 @@ export interface QueryGenerationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
-export interface FeatureExtractionScenario {
+export interface KIExtractionScenario {
   input: {
     scenario_id: string;
     log_query_filter?: Record<string, unknown>;
@@ -47,7 +47,7 @@ export interface FeatureExtractionScenario {
     criteria: EvaluationCriterion[];
     min_features?: number;
     max_features?: number;
-    required_types?: ValidFeatureType[];
+    required_types?: ValidKIType[];
     expected_ground_truth: string;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
@@ -56,7 +56,7 @@ export interface FeatureExtractionScenario {
 
 /**
  * A dataset provider supplies snapshot source defaults and evaluation criteria
- * for both query generation and feature extraction evals.
+ * for both rule generation and KI extraction evals.
  *
  * To add a new dataset:
  * 1. Create a file in this directory (e.g. `my_app.ts`, similar to otel_demo)
@@ -68,6 +68,6 @@ export interface DatasetConfig {
   id: string;
   description: string;
   gcs: GcsConfig;
-  queryGeneration: QueryGenerationScenario[];
-  featureExtraction: FeatureExtractionScenario[];
+  ruleGeneration: RuleGenerationScenario[];
+  kiExtraction: KIExtractionScenario[];
 }
