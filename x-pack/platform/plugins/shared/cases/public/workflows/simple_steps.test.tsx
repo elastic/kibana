@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import { setSeverityStepDefinition } from './set_severity';
-import { setStatusStepDefinition } from './set_status';
-import { closeCaseStepDefinition } from './close_case';
-import { deleteCasesStepDefinition } from './delete_cases';
-import { assignCaseStepDefinition } from './assign_case';
-import { unassignCaseStepDefinition } from './unassign_case';
-import { addAlertsStepDefinition } from './add_alerts';
-import { addEventsStepDefinition } from './add_events';
-import { findSimilarCasesStepDefinition } from './find_similar_cases';
-import { setDescriptionStepDefinition } from './set_description';
-import { setTitleStepDefinition } from './set_title';
-import { addObservablesStepDefinition } from './add_observables';
-import { addTagsStepDefinition } from './add_tags';
-import { setCategoryStepDefinition } from './set_category';
+import {
+  addAlertsStepDefinition,
+  addCommentStepDefinition,
+  addEventsStepDefinition,
+  addObservablesStepDefinition,
+  addTagsStepDefinition,
+  assignCaseStepDefinition,
+  closeCaseStepDefinition,
+  deleteCasesStepDefinition,
+  findSimilarCasesStepDefinition,
+  findCasesStepDefinition,
+  setCategoryStepDefinition,
+  setDescriptionStepDefinition,
+  setSeverityStepDefinition,
+  setStatusStepDefinition,
+  setTitleStepDefinition,
+  unassignCaseStepDefinition,
+} from './simple_steps';
 
 describe('new cases public step definitions', () => {
   const steps = [
+    addCommentStepDefinition,
     setSeverityStepDefinition,
     setStatusStepDefinition,
     closeCaseStepDefinition,
@@ -31,6 +36,7 @@ describe('new cases public step definitions', () => {
     addAlertsStepDefinition,
     addEventsStepDefinition,
     findSimilarCasesStepDefinition,
+    findCasesStepDefinition,
     setDescriptionStepDefinition,
     setTitleStepDefinition,
     addObservablesStepDefinition,

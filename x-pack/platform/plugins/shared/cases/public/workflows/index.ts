@@ -16,7 +16,7 @@ export function registerCasesSteps(
   }
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./get_case').then((m) => m.getCaseStepDefinition)
+    import('./simple_steps').then((m) => m.getCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
@@ -24,15 +24,15 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./update_case').then((m) => m.updateCaseStepDefinition)
+    import('./simple_steps').then((m) => m.updateCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./add_comment').then((m) => m.addCommentStepDefinition)
+    import('./simple_steps').then((m) => m.addCommentStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./update_cases').then((m) => m.updateCasesStepDefinition)
+    import('./simple_steps').then((m) => m.updateCasesStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
@@ -40,63 +40,63 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./find_cases').then((m) => m.findCasesStepDefinition)
+    import('./simple_steps').then((m) => m.findCasesStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./set_severity').then((m) => m.setSeverityStepDefinition)
+    import('./simple_steps').then((m) => m.setSeverityStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./set_status').then((m) => m.setStatusStepDefinition)
+    import('./simple_steps').then((m) => m.setStatusStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./close_case').then((m) => m.closeCaseStepDefinition)
+    import('./simple_steps').then((m) => m.closeCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./delete_cases').then((m) => m.deleteCasesStepDefinition)
+    import('./simple_steps').then((m) => m.deleteCasesStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./assign_case').then((m) => m.assignCaseStepDefinition)
+    import('./simple_steps').then((m) => m.assignCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./unassign_case').then((m) => m.unassignCaseStepDefinition)
+    import('./simple_steps').then((m) => m.unassignCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./add_alerts').then((m) => m.addAlertsStepDefinition)
+    import('./simple_steps').then((m) => m.addAlertsStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./add_events').then((m) => m.addEventsStepDefinition)
+    import('./simple_steps').then((m) => m.addEventsStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./find_similar_cases').then((m) => m.findSimilarCasesStepDefinition)
+    import('./simple_steps').then((m) => m.findSimilarCasesStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./set_description').then((m) => m.setDescriptionStepDefinition)
+    import('./simple_steps').then((m) => m.setDescriptionStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./set_title').then((m) => m.setTitleStepDefinition)
+    import('./simple_steps').then((m) => m.setTitleStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./add_observables').then((m) => m.addObservablesStepDefinition)
+    import('./simple_steps').then((m) => m.addObservablesStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./add_tags').then((m) => m.addTagsStepDefinition)
+    import('./simple_steps').then((m) => m.addTagsStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./set_category').then((m) => m.setCategoryStepDefinition)
+    import('./simple_steps').then((m) => m.setCategoryStepDefinition)
   );
 
   // Leaving this in for now. We need to get support for reflective value lookup first.

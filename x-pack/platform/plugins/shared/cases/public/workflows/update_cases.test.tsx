@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { updateCasesStepDefinition } from './update_cases';
+import { updateCasesStepDefinition } from './simple_steps';
 
 describe('createUpdateCasesStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
