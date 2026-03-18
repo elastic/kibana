@@ -10,7 +10,10 @@ import type { SortProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
-apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOblt'] }, () => {
+apiTest.describe(
+  'Cross-compatibility - Sort Processor',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
   // *** Compatible Cases ***
   apiTest(
     'should correctly sort an array in ascending order (default)',
