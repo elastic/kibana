@@ -66,7 +66,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }
-        return res.badRequest({ body: e.output.payload });
+        return res.badRequest({ body: { message: e.message, attributes: e.output.payload } });
       }
     }
   );

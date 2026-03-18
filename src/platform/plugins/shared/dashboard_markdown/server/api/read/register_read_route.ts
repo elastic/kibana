@@ -68,7 +68,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
           return res.forbidden();
         }
 
-        return res.badRequest({ body: e.message });
+        return res.badRequest({ body: { message: e.message } });
       }
     }
   );

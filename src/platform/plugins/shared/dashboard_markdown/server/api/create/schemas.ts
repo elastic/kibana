@@ -15,7 +15,14 @@ export const createRequestParamsSchema = schema.maybe(
   schema.object(
     {
       id: schema.maybe(
-        schema.string({ meta: { description: 'A unique identifier for the markdown panel.' } })
+        schema.string({
+          meta: { description: 'A unique identifier for the markdown panel.' },
+          validate: (value) => {
+            if (value && !/^[a-z0-9\-\_]+$/.test(value)) {
+              return 'ID must contain only letters, numbers, hyphens, and underscores';
+            }
+          },
+        })
       ),
     },
     { unknowns: 'forbid' }
