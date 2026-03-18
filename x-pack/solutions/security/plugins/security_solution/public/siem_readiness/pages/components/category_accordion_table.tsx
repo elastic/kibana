@@ -341,7 +341,7 @@ export const CategoryAccordionTable = <T extends Record<string, unknown>>({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     isClearable
-                    style={{ width: `calc(${euiTheme.size.base} * 20)` }}
+                    style={{ width: '320px' }}
                   />
                 </EuiFlexItem>
                 {filterOptions.length > 0 && (

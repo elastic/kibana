@@ -104,18 +104,17 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     return result;
   }, [categoriesData?.mainCategoriesMap, retentionData?.items, activeCategories]);
 
-  // Compute total matched items ignoring activeCategories filter (for hasData prop)
-  const totalMatchedItems = useMemo(() => {
-    let count = 0;
+  // Check if any matched items exist ignoring activeCategories filter (for hasUnfilteredData prop)
+  const hasUnfilteredData = useMemo(() => {
     for (const category of categoriesData?.mainCategoriesMap ?? []) {
       for (const retention of retentionData?.items ?? []) {
         const hasMatch = category.indices.some((idx) =>
           idx.indexName.includes(retention.indexName)
         );
-        if (hasMatch) count++;
+        if (hasMatch) return true;
       }
     }
-    return count;
+    return false;
   }, [categoriesData?.mainCategoriesMap, retentionData?.items]);
 
   // Count non-compliant items (deduplicated by indexName)
@@ -484,8 +483,8 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         defaultSortDirection="asc"
         itemName="data streams / indices"
         storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
-        isFilterActive={activeCategories.length < CATEGORY_ORDER.length && totalMatchedItems > 0}
-        hasUnfilteredData={totalMatchedItems > 0}
+        isFilterActive={activeCategories.length < CATEGORY_ORDER.length && hasUnfilteredData}
+        hasUnfilteredData={hasUnfilteredData}
       />
     </>
   );

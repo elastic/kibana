@@ -126,16 +126,13 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     return result;
   }, [pipelinesData, indexToCategoryMap, activeCategories]);
 
-  // Compute total matched pipelines ignoring activeCategories filter (for hasData prop)
-  const totalMatchedPipelines = useMemo(() => {
-    if (!pipelinesData?.length) return 0;
+  // Check if any matched pipelines exist ignoring activeCategories filter (for hasUnfilteredData prop)
+  const hasUnfilteredData = useMemo(() => {
+    if (!pipelinesData?.length) return false;
 
-    let count = 0;
-    pipelinesData.forEach((pipeline) => {
-      const hasCategory = pipeline.indices.some((indexName) => indexToCategoryMap.has(indexName));
-      if (hasCategory) count++;
-    });
-    return count;
+    return pipelinesData.some((pipeline) =>
+      pipeline.indices.some((indexName) => indexToCategoryMap.has(indexName))
+    );
   }, [pipelinesData, indexToCategoryMap]);
 
   // Check if any pipeline has failures
@@ -439,10 +436,8 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         defaultSortField="docsCount"
         defaultSortDirection="desc"
         storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
-        isFilterActive={
-          activeCategories.length < CATEGORY_ORDER.length && totalMatchedPipelines > 0
-        }
-        hasUnfilteredData={totalMatchedPipelines > 0}
+        isFilterActive={activeCategories.length < CATEGORY_ORDER.length && hasUnfilteredData}
+        hasUnfilteredData={hasUnfilteredData}
       />
     </>
   );
