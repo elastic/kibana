@@ -16,11 +16,13 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   GRAPH_PREVIEW_TEST_ID,
-  SESSION_PREVIEW_TEST_ID,
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
 } from './test_ids';
-import { ANALYZER_PREVIEW_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
+import {
+  ANALYZER_PREVIEW_TEST_ID,
+  SESSION_PREVIEW_TEST_ID,
+} from '../../../../flyout_v2/document/components/test_ids';
 import { VisualizationsSection } from './visualizations_section';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
@@ -33,6 +35,7 @@ import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
 
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -44,6 +47,7 @@ const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree 
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+jest.mock('../../shared/hooks/use_navigate_to_session_view');
 
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -98,6 +102,9 @@ describe('<VisualizationsSection />', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
 
   beforeEach(() => {
+    (useNavigateToSessionView as jest.Mock).mockReturnValue({
+      navigateToSessionView: jest.fn(),
+    });
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({

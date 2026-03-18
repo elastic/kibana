@@ -2202,7 +2202,7 @@ paths:
                   description: Optional custom ID for the attachment.
                   type: string
                 origin:
-                  description: Origin string (e.g. saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
+                  description: Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
                   type: string
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
