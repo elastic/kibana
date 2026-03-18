@@ -6,8 +6,45 @@
  */
 
 import { matchCommand } from './command_matcher';
+import { sortedCommandDefinitions } from './command_definitions';
+import { CommandId } from './types';
+import type { CommandDefinition } from './types';
 
 describe('matchCommand', () => {
+  describe('multiple command sequences', () => {
+    const originalDefinitions = [...sortedCommandDefinitions];
+
+    beforeAll(() => {
+      const mockAttachment: CommandDefinition = {
+        id: CommandId.Attachment,
+        scheme: 'attachment',
+        sequence: '@',
+        name: 'Attachment',
+        menuComponent: null as unknown as CommandDefinition['menuComponent'],
+      };
+      sortedCommandDefinitions.push(mockAttachment);
+    });
+
+    afterAll(() => {
+      sortedCommandDefinitions.length = 0;
+      sortedCommandDefinitions.push(...originalDefinitions);
+    });
+
+    it('matches the command sequence closest to the cursor', () => {
+      const result = matchCommand('@foo /bar');
+      expect(result.isActive).toBe(true);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Skill);
+      expect(result.activeCommand?.query).toBe('bar');
+    });
+
+    it('matches earlier sequence when it is closest to cursor', () => {
+      const result = matchCommand('/foo @bar');
+      expect(result.isActive).toBe(true);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Attachment);
+      expect(result.activeCommand?.query).toBe('bar');
+    });
+  });
+
   describe('single-character commands', () => {
     it('matches "/" at start of input', () => {
       const result = matchCommand('/');

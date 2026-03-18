@@ -27,14 +27,14 @@ const INACTIVE_RESULT: CommandMatchResult = {
 
 /**
  * Given the text preceding the cursor, checks if any registered command
- * is active. Returns the first (longest) matching command.
+ * is active. Returns the command whose sequence appears closest to the cursor.
  *
- * The algorithm scans backward from the cursor position to find the nearest
- * command sequence. For each registered command (sorted longest-first), it:
- * 1. Finds the last occurrence of the sequence in the text
- * 2. Checks that the sequence starts at a word boundary
+ * The algorithm checks every registered command, finds the last word-boundary
+ * occurrence of each sequence, and picks the one nearest to the cursor position.
  */
 export const matchCommand = (textBeforeCursor: string): CommandMatchResult => {
+  let best: ActiveCommand | null = null;
+
   for (const command of sortedCommandDefinitions) {
     const { sequence } = command;
     const lastIndex = textBeforeCursor.lastIndexOf(sequence);
@@ -47,18 +47,17 @@ export const matchCommand = (textBeforeCursor: string): CommandMatchResult => {
       continue;
     }
 
-    const afterCommand = textBeforeCursor.substring(lastIndex + sequence.length);
+    if (best === null || lastIndex > best.commandStartOffset) {
+      best = {
+        command,
+        commandStartOffset: lastIndex,
+        query: textBeforeCursor.substring(lastIndex + sequence.length),
+      };
+    }
+  }
 
-    const activeCommand: ActiveCommand = {
-      command,
-      commandStartOffset: lastIndex,
-      query: afterCommand,
-    };
-
-    return {
-      isActive: true,
-      activeCommand,
-    };
+  if (best) {
+    return { isActive: true, activeCommand: best };
   }
 
   return INACTIVE_RESULT;
