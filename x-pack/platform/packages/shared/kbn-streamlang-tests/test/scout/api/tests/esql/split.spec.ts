@@ -182,77 +182,76 @@ apiTest.describe.skip(
       expect(esqlResult.documents[0]).toStrictEqual(
         expect.objectContaining({ status: 'doc1', tags: ['foo', 'bar', 'baz'] })
       );
-    }
-  );
+    });
 
-  apiTest('should handle ignore_missing: true', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-split-ignore-missing';
+    apiTest('should handle ignore_missing: true', async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-split-ignore-missing';
 
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'split',
-          from: 'tags',
-          separator: ',',
-          ignore_missing: true,
-        } as SplitProcessor,
-      ],
-    };
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'split',
+            from: 'tags',
+            separator: ',',
+            ignore_missing: true,
+          } as SplitProcessor,
+        ],
+      };
 
-    const { query } = transpile(streamlangDSL);
+      const { query } = transpile(streamlangDSL);
 
-    const docWithField = { tags: 'foo,bar,baz', status: 'doc1' };
-    const docWithoutField = { status: 'doc2' }; // Should pass through
-    const docs = [docWithField, docWithoutField];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
+      const docWithField = { tags: 'foo,bar,baz', status: 'doc1' };
+      const docWithoutField = { status: 'doc2' }; // Should pass through
+      const docs = [docWithField, docWithoutField];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
 
-    // Both documents should be present
-    expect(esqlResult.documents).toHaveLength(2);
-    const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
-    const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
-    expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
-    expect(doc2).toStrictEqual(expect.objectContaining({ tags: null }));
-  });
+      // Both documents should be present
+      expect(esqlResult.documents).toHaveLength(2);
+      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+      expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
+      expect(doc2).toStrictEqual(expect.objectContaining({ tags: null }));
+    });
 
-  apiTest('should split field conditionally with EVAL CASE', async ({ testBed, esql }) => {
-    const indexName = 'stream-e2e-test-split-conditional';
+    apiTest('should split field conditionally with EVAL CASE', async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-split-conditional';
 
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'split',
-          from: 'tags',
-          separator: ',',
-          where: {
-            field: 'event.kind',
-            eq: 'test',
-          },
-        } as SplitProcessor,
-      ],
-    };
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'split',
+            from: 'tags',
+            separator: ',',
+            where: {
+              field: 'event.kind',
+              eq: 'test',
+            },
+          } as SplitProcessor,
+        ],
+      };
 
-    const { query } = transpile(streamlangDSL);
+      const { query } = transpile(streamlangDSL);
 
-    const docs = [
-      { tags: 'foo,bar,baz', event: { kind: 'test' }, status: 'doc1' },
-      { tags: 'one,two,three', event: { kind: 'production' }, status: 'doc2' },
-    ];
-    await testBed.ingest(indexName, docs);
-    const esqlResult = await esql.queryOnIndex(indexName, query);
+      const docs = [
+        { tags: 'foo,bar,baz', event: { kind: 'test' }, status: 'doc1' },
+        { tags: 'one,two,three', event: { kind: 'production' }, status: 'doc2' },
+      ];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
 
-    expect(esqlResult.documents).toHaveLength(2);
+      expect(esqlResult.documents).toHaveLength(2);
 
-    // First doc should have tags split (where condition matched)
-    const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
-    expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
-    expect(doc1?.['event.kind']).toBe('test');
+      // First doc should have tags split (where condition matched)
+      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+      expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
+      expect(doc1?.['event.kind']).toBe('test');
 
-    // Second doc should keep original tags (where condition not matched)
-    const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
-    expect(doc2).toStrictEqual(expect.objectContaining({ tags: 'one,two,three' }));
-    expect(doc2?.['event.kind']).toBe('production');
-  });
+      // Second doc should keep original tags (where condition not matched)
+      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+      expect(doc2).toStrictEqual(expect.objectContaining({ tags: 'one,two,three' }));
+      expect(doc2?.['event.kind']).toBe('production');
+    });
 
     apiTest('should split field conditionally with EVAL CASE', async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-split-conditional';
