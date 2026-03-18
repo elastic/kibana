@@ -14,6 +14,7 @@ import {
   EuiResizableContainer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   RULES_TABLE_FILTERS_MAIN_PANEL_MIN_HEIGHT_PX,
@@ -38,6 +39,7 @@ export interface RulesTableFiltersLayoutProps {
 
 export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
   function RulesTableFiltersLayout({ sidebarContent, children, onClearFilters }) {
+    const { euiTheme } = useEuiTheme();
     const [sidebarWidthPercent, setSidebarWidthPercent] = useState(
       RULES_TABLE_FILTERS_SIDEBAR_DEFAULT_WIDTH_PERCENT
     );
@@ -56,7 +58,11 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
         direction="horizontal"
         onPanelWidthChange={onPanelWidthChange}
         data-test-subj="rulesTableFiltersLayout"
-        style={{ padding: 0, height: '100%' }}
+        style={{
+          padding: 0,
+          height: '100%',
+          boxShadow: `0 -1px 0 0 ${euiTheme.border.color}`,
+        }}
       >
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
