@@ -379,52 +379,23 @@ describe('<GraphPreviewContainer />', () => {
     });
   });
 
-  it('should not render when graph data is not available', async () => {
+  it('should not render when graph data is not available', () => {
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
       data: undefined,
     });
 
-    const timestamp = new Date().toISOString();
-
     (useGraphPreview as jest.Mock).mockReturnValue({
-      timestamp,
+      timestamp: new Date().toISOString(),
       eventIds: [],
       shouldShowGraph: false,
       isAlert: true,
     });
 
-    const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
+    const { container } = renderGraphPreview();
 
-    // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
-    expect(
-      await findByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(
-      queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).not.toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(mockUseFetchGraphData).toHaveBeenCalled();
-    expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
-      req: {
-        query: {
-          originEventIds: [],
-          start: `${timestamp}||-30m`,
-          end: `${timestamp}||+30m`,
-        },
-      },
-      options: {
-        enabled: false,
-        refetchOnWindowFocus: false,
-      },
-    });
-
+    expect(container).toBeEmptyDOMElement();
     expect(uiMetricServiceMock.trackUiMetric).not.toHaveBeenCalled();
   });
 
