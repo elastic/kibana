@@ -231,6 +231,7 @@ function FieldListItemComponent(
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
+            wrap
             css={[
               styles.content,
               !hasChildFields &&
@@ -267,7 +268,7 @@ function FieldListItemComponent(
 
             {isMultiField && (
               <EuiFlexItem grow={false}>
-                <EuiIcon color="subdued" type="documents" />
+                <EuiIcon color="subdued" type="documents" aria-hidden="true" />
               </EuiFlexItem>
             )}
 
