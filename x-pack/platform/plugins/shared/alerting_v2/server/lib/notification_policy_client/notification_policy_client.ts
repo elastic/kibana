@@ -212,7 +212,7 @@ export class NotificationPolicyClient {
       });
     } catch (e) {
       // If update fails we explicitly mark the new API key for invalidation
-      this.markApiKeysForInvalidation(nextAttrs.auth?.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(
           `Notification policy with id "${params.options.id}" has already been updated by another user`
@@ -357,6 +357,7 @@ export class NotificationPolicyClient {
       createdAt: 'createdAt',
       createdBy: 'createdBy',
       updatedAt: 'updatedAt',
+      updatedBy: 'updatedBy',
     };
 
     return sortFieldMap[sortField];
@@ -390,6 +391,7 @@ export class NotificationPolicyClient {
         );
       const auth = doc.attributes?.auth;
       if (!auth?.apiKey) return null;
+
       return {
         apiKey: auth.apiKey,
         createdByUser: auth.createdByUser,

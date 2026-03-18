@@ -14,9 +14,6 @@ export const notificationPolicyDestinationSchema = schema.oneOf([
   }),
 ]);
 
-/**
- * Attributes for the notification policy saved object.
- */
 export const notificationPolicySavedObjectAttributesSchema = schema.object({
   name: schema.string(),
   description: schema.string(),

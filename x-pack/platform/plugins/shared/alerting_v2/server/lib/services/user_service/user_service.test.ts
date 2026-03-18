@@ -27,10 +27,27 @@ describe('UserService', () => {
     });
   });
 
+  it('returns the current user profile username when user profile service is available', async () => {
+    const { userService, userProfile } = createUserService();
+
+    await expect(userService.getCurrentUserProfileUsername()).resolves.toBe('elastic');
+
+    expect(userProfile.getCurrent).toHaveBeenCalledWith({
+      request: expect.anything(),
+    });
+  });
+
   it('returns null when the profile is not found', async () => {
     const { userService, userProfile } = createUserService();
     userProfile.getCurrent.mockResolvedValue(null);
 
     await expect(userService.getCurrentUserProfileUid()).resolves.toBeNull();
+  });
+
+  it('returns null username when the profile is not found', async () => {
+    const { userService, userProfile } = createUserService();
+    userProfile.getCurrent.mockResolvedValue(null);
+
+    await expect(userService.getCurrentUserProfileUsername()).resolves.toBeNull();
   });
 });

@@ -26,4 +26,9 @@ export class UserService implements UserServiceContract {
     const profile = await this.userProfile.getCurrent({ request: this.request });
     return profile?.uid ?? null;
   }
+
+  public async getCurrentUserProfileUsername(): Promise<string | null> {
+    const profile = await this.userProfile.getCurrent({ request: this.request });
+    return profile?.user.username ?? null;
+  }
 }
