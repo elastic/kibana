@@ -20,6 +20,10 @@ import type { estypes } from '@elastic/elasticsearch';
 
 jest.mock('./use_action_results');
 jest.mock('../common/lib/kibana');
+jest.mock('../common/experimental_features_context', () => ({
+  ...jest.requireActual('../common/experimental_features_context'),
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useActionResultsMock = useActionResultsHook.useActionResults as jest.MockedFunction<
@@ -1014,6 +1018,38 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       await waitFor(() => {
         expect(screen.getByText('error')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Switch component pattern', () => {
+    it('should render legacy table when feature flag is disabled', () => {
+      const mockAgents = ['agent-1'];
+      const mockEdges = mockAgents.map((id) => createMockEdge(id, true));
+
+      useActionResultsMock.mockReturnValue({
+        data: {
+          edges: mockEdges,
+          aggregations: {
+            totalRowCount: 10,
+            totalResponded: 1,
+            successful: 1,
+            failed: 0,
+            pending: 0,
+          },
+          inspect: { dsl: [] },
+        },
+        isLoading: false,
+        isFetching: false,
+      } as never);
+
+      mockHttpPost.mockResolvedValue({ agents: [] });
+
+      const { container } = renderWithContext(
+        <ActionResultsSummary actionId="test-action" agentIds={mockAgents} />
+      );
+
+      // Legacy EuiBasicTable should be rendered
+      expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
     });
   });
 });
