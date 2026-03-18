@@ -11,6 +11,7 @@ import { isEqual } from 'lodash';
 import { Document, isMap, isPair, isScalar, isSeq, parseDocument, stringify } from 'yaml';
 import type { Node, YAMLMap, YAMLSeq } from 'yaml';
 import { getStepNode } from '../../../common/lib/yaml/get_step_node';
+import { WORKFLOW_DEFINITION_KEYS_ORDER } from '../../../common/lib/yaml/stringify_workflow_definition';
 
 interface StepDefinition {
   name: string;
@@ -30,17 +31,7 @@ interface EditResult {
   error?: string;
 }
 
-const ROOT_PROPERTY_ORDER = [
-  'version',
-  'name',
-  'description',
-  'enabled',
-  'tags',
-  'consts',
-  'triggers',
-  'inputs',
-  'steps',
-];
+const ROOT_PROPERTY_ORDER: readonly string[] = WORKFLOW_DEFINITION_KEYS_ORDER;
 
 const parseForEditing = (yaml: string): { doc: Document; error?: string } => {
   const doc = parseDocument(yaml);
