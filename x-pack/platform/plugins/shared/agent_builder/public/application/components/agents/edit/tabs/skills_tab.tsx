@@ -25,8 +25,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { PublicSkillDefinition, SkillSelection } from '@kbn/agent-builder-common';
-import { hasSkillSelectionWildcard, getExplicitSkillIds } from '@kbn/agent-builder-common';
+import type { PublicSkillSummary } from '@kbn/agent-builder-common';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -38,7 +37,7 @@ import { appPaths } from '../../../../utils/app_paths';
 
 interface SkillsTabProps {
   control: Control<AgentFormData>;
-  skills: PublicSkillDefinition[];
+  skills: PublicSkillSummary[];
   isLoading: boolean;
   isFormDisabled: boolean;
 }
@@ -56,13 +55,13 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
     <>
       <EuiSpacer size="l" />
       <Controller
-        name="configuration.skills"
+        name="configuration.skill_ids"
         control={control}
         render={({ field }) => (
           <SkillsSelection
             skills={skills}
             skillsLoading={isLoading}
-            selectedSkills={field.value ?? [{ skill_ids: ['*'] }]}
+            selectedSkills={field.value}
             onSkillsChange={field.onChange}
             disabled={isFormDisabled}
             showActiveOnly={showActiveOnly || isFormDisabled}
@@ -75,10 +74,10 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
 };
 
 interface SkillsSelectionProps {
-  skills: PublicSkillDefinition[];
+  skills: PublicSkillSummary[];
   skillsLoading: boolean;
-  selectedSkills: SkillSelection[];
-  onSkillsChange: (skills: SkillSelection[]) => void;
+  selectedSkills: string[] | undefined;
+  onSkillsChange: (skills: string[]) => void;
   disabled?: boolean;
   showActiveOnly: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
@@ -97,30 +96,18 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const isAllBuiltinSelected = hasSkillSelectionWildcard(selectedSkills);
-  const explicitSelectedIds = useMemo(
-    () => new Set(getExplicitSkillIds(selectedSkills)),
-    [selectedSkills]
-  );
+  const selectedIdSet = useMemo(() => new Set(selectedSkills ?? []), [selectedSkills]);
 
   const isSkillActive = useCallback(
-    (skill: PublicSkillDefinition) => {
-      if (isAllBuiltinSelected && skill.readonly) {
-        return true;
-      }
-      return explicitSelectedIds.has(skill.id);
-    },
-    [isAllBuiltinSelected, explicitSelectedIds]
+    (skill: PublicSkillSummary) => selectedIdSet.has(skill.id),
+    [selectedIdSet]
   );
 
   const displaySkills = useMemo(() => {
-    let result = skills;
-
     if (showActiveOnly) {
-      result = skills.filter((skill) => isSkillActive(skill));
+      return skills.filter((skill) => isSkillActive(skill));
     }
-
-    return result;
+    return skills;
   }, [skills, showActiveOnly, isSkillActive]);
 
   const filteredSkills = useMemo(() => {
@@ -139,30 +126,14 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
 
   const handleToggleSkill = useCallback(
     (skillId: string) => {
-      const skill = skills.find((s) => s.id === skillId);
-      if (!skill) return;
-
-      if (isAllBuiltinSelected && skill.readonly) {
-        const builtinIds = skills.filter((s) => s.readonly && s.id !== skillId).map((s) => s.id);
-        const explicitIds = getExplicitSkillIds(selectedSkills);
-        onSkillsChange([{ skill_ids: [...builtinIds, ...explicitIds] }]);
-      } else if (explicitSelectedIds.has(skillId)) {
-        const newExplicitIds = getExplicitSkillIds(selectedSkills).filter((id) => id !== skillId);
-        if (isAllBuiltinSelected) {
-          onSkillsChange([{ skill_ids: ['*', ...newExplicitIds] }]);
-        } else {
-          onSkillsChange(newExplicitIds.length > 0 ? [{ skill_ids: newExplicitIds }] : []);
-        }
+      const currentIds = selectedSkills ?? [];
+      if (currentIds.includes(skillId)) {
+        onSkillsChange(currentIds.filter((id) => id !== skillId));
       } else {
-        const currentExplicitIds = getExplicitSkillIds(selectedSkills);
-        if (isAllBuiltinSelected) {
-          onSkillsChange([{ skill_ids: ['*', ...currentExplicitIds, skillId] }]);
-        } else {
-          onSkillsChange([{ skill_ids: [...currentExplicitIds, skillId] }]);
-        }
+        onSkillsChange([...currentIds, skillId]);
       }
     },
-    [isAllBuiltinSelected, explicitSelectedIds, selectedSkills, skills, onSkillsChange]
+    [selectedSkills, onSkillsChange]
   );
 
   const handleSearchChange = useCallback((query: string) => {
@@ -171,7 +142,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   }, []);
 
   const handleTableChange = useCallback(
-    ({ page }: CriteriaWithPagination<PublicSkillDefinition>) => {
+    ({ page }: CriteriaWithPagination<PublicSkillSummary>) => {
       if (page) {
         setPageIndex(page.index);
         if (page.size !== pageSize) {
@@ -338,7 +309,7 @@ const ActiveSkillsStatus: React.FC<{ activeSkillsCount: number; totalSkills: num
   );
 };
 
-const SkillDetailsColumn: React.FC<{ skill: PublicSkillDefinition }> = ({ skill }) => {
+const SkillDetailsColumn: React.FC<{ skill: PublicSkillSummary }> = ({ skill }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
@@ -358,12 +329,12 @@ const SkillDetailsColumn: React.FC<{ skill: PublicSkillDefinition }> = ({ skill 
 };
 
 const createCheckboxColumn = (
-  isSkillActive: (skill: PublicSkillDefinition) => boolean,
+  isSkillActive: (skill: PublicSkillSummary) => boolean,
   onToggle: (skillId: string) => void,
   disabled: boolean
 ) => ({
   width: '40px',
-  render: (skill: PublicSkillDefinition) => (
+  render: (skill: PublicSkillSummary) => (
     <EuiCheckbox
       id={`skill-${skill.id}`}
       checked={isSkillActive(skill)}
@@ -375,9 +346,9 @@ const createCheckboxColumn = (
 
 const createSkillDetailsColumn = () => ({
   name: labels.skills.skillIdLabel,
-  sortable: (item: PublicSkillDefinition) => item.id,
+  sortable: (item: PublicSkillSummary) => item.id,
   width: '60%',
-  render: (item: PublicSkillDefinition) => <SkillDetailsColumn skill={item} />,
+  render: (item: PublicSkillSummary) => <SkillDetailsColumn skill={item} />,
 });
 
 const createTypeColumn = () => ({
