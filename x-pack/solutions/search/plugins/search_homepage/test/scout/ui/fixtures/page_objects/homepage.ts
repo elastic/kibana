@@ -114,6 +114,10 @@ export class Homepage {
     return this.page.testSubj.locator('endpointValueField');
   }
 
+  async getKibanaVersionBadge() {
+    return this.page.testSubj.locator('homepage-kibana-version');
+  }
+
   // Body Links methods
   async getBodyLinks() {
     return this.page.testSubj.locator('searchHomepageBodyLinkLink');

@@ -79,6 +79,11 @@ test.describe('Getting Started - Admin', { tag: ['@ess', '@svlSearch'] }, () => 
       await expect(timeSeriesAnalysisButton).toBeVisible();
     });
 
+    await test.step('renders kibana version badge', async () => {
+      const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
+      await expect(versionBadge).toBeVisible();
+    });
+
     await test.step('renders footer links with correct hrefs', async () => {
       const searchLabsLink = await pageObjects.gettingStarted.getFooterLink('SearchLabs');
       await expect(searchLabsLink).toHaveAttribute('href', /search-labs/);
@@ -90,6 +95,15 @@ test.describe('Getting Started - Admin', { tag: ['@ess', '@svlSearch'] }, () => 
       await expect(docsLink).toHaveAttribute('href', /docs\/solutions\/search\/get-started/);
     });
   });
+
+  test(
+    'should show Changelog label in Kibana version  on serverless',
+    { tag: ['@svlSearch'] },
+    async ({ pageObjects }) => {
+      const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
+      await expect(versionBadge).toContainText('Changelog');
+    }
+  );
 
   test('Add data button navigates to correct pages', async ({ pageObjects, page }) => {
     await test.step('navigates to upload file page', async () => {

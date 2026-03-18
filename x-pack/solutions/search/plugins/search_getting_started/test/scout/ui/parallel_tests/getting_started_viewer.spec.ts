@@ -18,6 +18,20 @@ test.describe(
       await pageObjects.gettingStarted.goto();
     });
 
+    test('should display kibana version badge', async ({ pageObjects }) => {
+      const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
+      await expect(versionBadge).toBeVisible();
+    });
+
+    test(
+      'should show Changelog label in Kibana version on serverless',
+      { tag: [...tags.serverless.search] },
+      async ({ pageObjects }) => {
+        const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
+        await expect(versionBadge).toContainText('Changelog');
+      }
+    );
+
     test('verifies viewer has limited access to API keys functionality', async ({
       pageObjects,
     }) => {

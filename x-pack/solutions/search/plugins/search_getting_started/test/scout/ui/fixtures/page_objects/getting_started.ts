@@ -40,6 +40,10 @@ export class GettingStarted {
     await this.page.testSubj.locator('skipAndGoHomeBtn').click();
   }
 
+  async getKibanaVersionBadge() {
+    return this.page.testSubj.locator('homepage-kibana-version');
+  }
+
   async getEndpointValueField() {
     return this.page.testSubj.locator('endpointValueField');
   }

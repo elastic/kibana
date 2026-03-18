@@ -73,6 +73,21 @@ test.describe(
       await expect(apiKeysButton).toBeDisabled();
     });
 
+    // === Kibana Version Badge Tests ===
+    test('should display kibana version badge', async ({ pageObjects }) => {
+      const versionBadge = await pageObjects.homepage.getKibanaVersionBadge();
+      await expect(versionBadge).toBeVisible();
+    });
+
+    test(
+      'should show Changelog label in kibana version on serverless',
+      { tag: [...tags.serverless.search] },
+      async ({ pageObjects }) => {
+        const versionBadge = await pageObjects.homepage.getKibanaVersionBadge();
+        await expect(versionBadge).toContainText('Changelog');
+      }
+    );
+
     // === Embedded Console Tests ===
     test('should have embedded dev console that can be toggled', async ({ pageObjects }) => {
       await pageObjects.homepage.expectEmbeddedConsoleControlBarExists();
