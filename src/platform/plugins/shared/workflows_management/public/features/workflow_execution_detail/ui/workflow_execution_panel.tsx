@@ -38,6 +38,7 @@ import {
   setTestStepModalOpenStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { getTestRunTooltipContent } from '../../../shared/ui/workflow_action_buttons/get_workflow_tooltip_content';
+import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {
@@ -62,6 +63,8 @@ export interface WorkflowExecutionPanelProps {
   selectedId: string | null;
   showBackButton?: boolean;
   onClose: () => void;
+  childExecutionsMap?: ChildWorkflowExecutionsMap;
+  isLoadingChildExecutions?: boolean;
 }
 export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
   ({
@@ -72,6 +75,8 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     onStepExecutionClick,
     selectedId: selectedStepExecutionId,
     onClose,
+    childExecutionsMap,
+    isLoadingChildExecutions,
   }) => {
     const styles = useMemoCss(componentStyles);
     const showCancelButton = useMemo<boolean>(
@@ -125,6 +130,8 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               error={error}
               onStepExecutionClick={onStepExecutionClick}
               selectedId={selectedStepExecutionId ?? null}
+              childExecutionsMap={childExecutionsMap}
+              isLoadingChildExecutions={isLoadingChildExecutions}
             />
           </EuiPanel>
         </EuiFlexItem>
