@@ -176,6 +176,14 @@ export class ObservabilityOnboardingPlugin
       },
     };
 
+    const KubernetesFlow = dynamic(async () => {
+      const [{ createIngestFlowComponent }, { KubernetesPanel }] = await Promise.all([
+        import('./ingest_hub/render_ingest_flow'),
+        import('./application/quickstart_flows/kubernetes'),
+      ]);
+      return { default: createIngestFlowComponent(deps, KubernetesPanel) };
+    });
+
     plugins.ingestHub.registerIngestFlow({
       id: 'kubernetes',
       title: i18n.translate('xpack.observability_onboarding.ingestHub.kubernetes.title', {
@@ -189,14 +197,7 @@ export class ObservabilityOnboardingPlugin
       category: i18n.translate('xpack.observability_onboarding.ingestHub.category.containers', {
         defaultMessage: 'Containers',
       }),
-      component: dynamic(() =>
-        Promise.all([
-          import('./ingest_hub/render_ingest_flow'),
-          import('./application/quickstart_flows/kubernetes'),
-        ]).then(([{ createIngestFlowComponent }, { KubernetesPanel }]) => ({
-          default: createIngestFlowComponent(deps, KubernetesPanel),
-        }))
-      ),
+      component: KubernetesFlow,
     });
   }
 }
