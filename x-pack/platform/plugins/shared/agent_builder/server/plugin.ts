@@ -183,6 +183,8 @@ export class AgentBuilderPlugin
     });
     smlTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
+    });
+
     // Register connector lifecycle listener to auto-create workflows/tools
     // when connectors with workflow definitions are created.
     // The handler checks the connectors-enabled feature flag and workflows
