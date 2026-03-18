@@ -102,8 +102,14 @@ evaluate.describe(
   () => {
     let triageAgentId: string | undefined;
 
+    const requireAgentId = (): string => {
+      if (!triageAgentId) {
+        throw new Error('triageAgentId not set — beforeAll likely failed');
+      }
+      return triageAgentId;
+    };
+
     evaluate.beforeAll(async ({ fetch, log, connector }) => {
-      // Verify that the triage skills exist (they should be pre-imported)
       for (const skillId of TRIAGE_SKILL_IDS) {
         try {
           await fetch(`${SKILLS_API_BASE_PATH}/${encodeURIComponent(skillId)}`, {
@@ -115,28 +121,34 @@ evaluate.describe(
         }
       }
 
-      // Create a dedicated eval agent with the triage skills attached
       const connectorHash = createHash('sha256').update(connector.id).digest('hex').slice(0, 8);
       const ts = Date.now().toString(36);
       const agentId = `eval_triage_${connectorHash}_${ts}`;
 
-      await fetch(AGENTS_API_BASE_PATH, {
-        method: 'POST',
-        version: '2023-10-31',
-        body: JSON.stringify({
-          id: agentId,
-          name: 'Eval: Agentic Alert Triage',
-          description: 'Evaluation agent for triage skill migration testing.',
-          configuration: {
-            enable_elastic_capabilities: true,
-            skill_ids: TRIAGE_SKILL_IDS,
-            tools: [],
-          },
-        }),
-      });
+      try {
+        await fetch(AGENTS_API_BASE_PATH, {
+          method: 'POST',
+          version: '2023-10-31',
+          body: JSON.stringify({
+            id: agentId,
+            name: 'Eval: Agentic Alert Triage',
+            description: 'Evaluation agent for triage skill migration testing.',
+            configuration: {
+              enable_elastic_capabilities: true,
+              skill_ids: TRIAGE_SKILL_IDS,
+              tools: [],
+            },
+          }),
+        });
 
-      triageAgentId = agentId;
-      log.info(`Created eval agent: ${agentId}`);
+        triageAgentId = agentId;
+        log.info(`Created eval agent: ${agentId}`);
+      } catch (e) {
+        log.error(
+          `Failed to create eval agent: ${e instanceof Error ? e.message : String(e)}`
+        );
+        throw e;
+      }
     });
 
     evaluate.afterAll(async ({ fetch, log }) => {
@@ -160,9 +172,7 @@ evaluate.describe(
     evaluate(
       'L1 investigation produces structured Markdown with verdict',
       async ({ evaluateDataset }) => {
-        if (!triageAgentId) {
-          throw new Error('Expected triageAgentId to be set in beforeAll');
-        }
+        const agentId = requireAgentId();
 
         await evaluateDataset({
           dataset: {
@@ -178,9 +188,7 @@ evaluate.describe(
                   expected:
                     'A Markdown investigation report containing Verdict, Assessment, and Summary fields, followed by evidence and timeline sections.',
                 },
-                metadata: {
-                  agentId: triageAgentId,
-                },
+                metadata: { agentId },
               },
             ],
           },
@@ -188,68 +196,64 @@ evaluate.describe(
       }
     );
 
-    evaluate('L1 triage classifies benign alert correctly', async ({ evaluateDataset }) => {
-      if (!triageAgentId) {
-        throw new Error('Expected triageAgentId to be set in beforeAll');
+    evaluate(
+      'L1 triage classifies benign alert correctly',
+      async ({ evaluateDataset }) => {
+        const agentId = requireAgentId();
+
+        await evaluateDataset({
+          dataset: {
+            name: 'agentic-triage: l1-triage-benign',
+            description:
+              'Validates that the agent classifies a clearly benign alert as benign with high confidence.',
+            examples: [
+              {
+                input: {
+                  question: `Classify this alert based on the L1 investigation findings.\n\n=== L1 INVESTIGATION FINDINGS ===\n${MOCK_BENIGN_INVESTIGATION}\n\n=== ALERT CONTEXT ===\n${MOCK_ALERT_CONTEXT}`,
+                },
+                output: {
+                  expected:
+                    'JSON output with assessment "benign" and confidence "high", since the investigation clearly concludes this is a false positive from IT automation.',
+                },
+                metadata: { agentId },
+              },
+            ],
+          },
+        });
       }
+    );
 
-      await evaluateDataset({
-        dataset: {
-          name: 'agentic-triage: l1-triage-benign',
-          description:
-            'Validates that the agent classifies a clearly benign alert as benign with high confidence.',
-          examples: [
-            {
-              input: {
-                question: `Classify this alert based on the L1 investigation findings.\n\n=== L1 INVESTIGATION FINDINGS ===\n${MOCK_BENIGN_INVESTIGATION}\n\n=== ALERT CONTEXT ===\n${MOCK_ALERT_CONTEXT}`,
-              },
-              output: {
-                expected:
-                  'JSON output with assessment "benign" and confidence "high", since the investigation clearly concludes this is a false positive from IT automation.',
-              },
-              metadata: {
-                agentId: triageAgentId,
-              },
-            },
-          ],
-        },
-      });
-    });
+    evaluate(
+      'L1 triage classifies suspicious alert correctly',
+      async ({ evaluateDataset }) => {
+        const agentId = requireAgentId();
 
-    evaluate('L1 triage classifies suspicious alert correctly', async ({ evaluateDataset }) => {
-      if (!triageAgentId) {
-        throw new Error('Expected triageAgentId to be set in beforeAll');
+        await evaluateDataset({
+          dataset: {
+            name: 'agentic-triage: l1-triage-suspicious',
+            description:
+              'Validates that the agent classifies a suspicious alert as suspicious or malicious.',
+            examples: [
+              {
+                input: {
+                  question: `Classify this alert based on the L1 investigation findings.\n\n=== L1 INVESTIGATION FINDINGS ===\n${MOCK_SUSPICIOUS_INVESTIGATION}\n\n=== ALERT CONTEXT ===\n${MOCK_ALERT_CONTEXT}`,
+                },
+                output: {
+                  expected:
+                    'JSON output with assessment "suspicious" or "malicious" since the investigation shows obfuscated osascript with curl to known C2, multi-country logins, and correlated alerts.',
+                },
+                metadata: { agentId },
+              },
+            ],
+          },
+        });
       }
-
-      await evaluateDataset({
-        dataset: {
-          name: 'agentic-triage: l1-triage-suspicious',
-          description:
-            'Validates that the agent classifies a suspicious alert as suspicious or malicious.',
-          examples: [
-            {
-              input: {
-                question: `Classify this alert based on the L1 investigation findings.\n\n=== L1 INVESTIGATION FINDINGS ===\n${MOCK_SUSPICIOUS_INVESTIGATION}\n\n=== ALERT CONTEXT ===\n${MOCK_ALERT_CONTEXT}`,
-              },
-              output: {
-                expected:
-                  'JSON output with assessment "suspicious" or "malicious" since the investigation shows obfuscated osascript with curl to known C2, multi-country logins, and correlated alerts.',
-              },
-              metadata: {
-                agentId: triageAgentId,
-              },
-            },
-          ],
-        },
-      });
-    });
+    );
 
     evaluate(
       'Orchestrator produces full triage report with all sections',
       async ({ evaluateDataset }) => {
-        if (!triageAgentId) {
-          throw new Error('Expected triageAgentId to be set in beforeAll');
-        }
+        const agentId = requireAgentId();
 
         await evaluateDataset({
           dataset: {
@@ -265,9 +269,7 @@ evaluate.describe(
                   expected:
                     'A structured Markdown report containing L1 Investigation with Verdict/Assessment/Summary, L1 Triage JSON with assessment/confidence/reasoning, L2 Findings with domain-specific analysis, and L3 Review with final assessment.',
                 },
-                metadata: {
-                  agentId: triageAgentId,
-                },
+                metadata: { agentId },
               },
             ],
           },
@@ -278,9 +280,7 @@ evaluate.describe(
     evaluate(
       'Orchestrator handles benign alert with appropriate assessment',
       async ({ evaluateDataset }) => {
-        if (!triageAgentId) {
-          throw new Error('Expected triageAgentId to be set in beforeAll');
-        }
+        const agentId = requireAgentId();
 
         await evaluateDataset({
           dataset: {
@@ -296,9 +296,7 @@ evaluate.describe(
                   expected:
                     'Report concludes benign/false positive with high confidence. The triage JSON should show assessment "benign". The review should recommend closing the alert.',
                 },
-                metadata: {
-                  agentId: triageAgentId,
-                },
+                metadata: { agentId },
               },
             ],
           },

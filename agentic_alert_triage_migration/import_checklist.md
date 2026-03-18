@@ -85,9 +85,7 @@ Use `agentic-alert-triage.flagged.yaml` for a single workflow that supports both
 - `consts.use_orchestrator: "true"` — runs the Phase 1 orchestrator skill path
 - `consts.use_orchestrator: "false"` — runs the original L2/L3 multi-agent path
 
-The flagged workflow keeps original L2/L3 agent IDs in the `else` branch.
-To fully migrate the L2/L3 path to user skills, update those consts to the
-corresponding `agentic-alert-triage-l2-*` and `agentic-alert-triage-l3-review` IDs.
+The flagged workflow uses the migrated skill IDs for both the orchestrator path and the L2/L3 fallback path.
 
 ## 6) E2E testing (EDOT only)
 
