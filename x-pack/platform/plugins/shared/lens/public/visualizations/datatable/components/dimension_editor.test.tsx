@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import type { KbnPaletteId } from '@kbn/palettes';
 import { act, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -251,7 +252,7 @@ describe('data table dimension editor', () => {
   });
 
   it('should not set colorMapping or palette if color mode is changed to "text"', async () => {
-    const paletteId = 'non-default';
+    const paletteId = 'non-default' as KbnPaletteId;
     state.columns = [
       {
         columnId: 'foo',

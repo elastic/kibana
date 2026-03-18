@@ -21,17 +21,12 @@ export const lensGetRequestParamsSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const lensGetResponseBodySchema = schema.object(
-  {
-    id: lensResponseItemSchema.getPropSchemas().id,
-    data: lensResponseItemSchema.getPropSchemas().data,
-    meta: schema.object(
-      {
-        ...lensCMGetResultSchema.getPropSchemas().meta.getPropSchemas(), // include CM meta data
-        ...lensResponseItemSchema.getPropSchemas().meta.getPropSchemas(),
-      },
-      { unknowns: 'forbid' }
-    ),
-  },
-  { unknowns: 'forbid' }
-);
+export const lensGetResponseBodySchema = lensResponseItemSchema.extends({
+  meta: schema.object(
+    {
+      ...lensCMGetResultSchema.getPropSchemas().meta.getPropSchemas(), // include CM meta data
+      ...lensResponseItemSchema.getPropSchemas().meta.getPropSchemas(),
+    },
+    { unknowns: 'forbid' }
+  ),
+});
