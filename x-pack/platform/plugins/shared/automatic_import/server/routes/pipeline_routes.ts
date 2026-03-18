@@ -44,25 +44,15 @@ export function registerPipelineRoutes(router: IRouter<AutomaticImportRouteHandl
       withAvailability(
         async (context, req, res): Promise<IKibanaResponse<CheckPipelineResponse>> => {
           const { rawSamples, pipeline } = req.body;
-          const [services, { logger }] = await Promise.all([
-            context.resolve(['core']),
-            context.automaticImport,
-          ]);
+          const services = await context.resolve(['core']);
           const { client } = services.core.elasticsearch;
           try {
             const { errors, pipelineResults } = await testPipeline(rawSamples, pipeline, client);
             if (errors?.length) {
               return res.badRequest({ body: JSON.stringify(errors) });
             }
-            const pipelinePayload = { results: { docs: pipelineResults } };
-            const parsedPipelineResult = CheckPipelineResponse.safeParse(pipelinePayload);
-            if (!parsedPipelineResult.success) {
-              logger.warn(
-                `Check pipeline response validation warning: ${parsedPipelineResult.error.message}`
-              );
-            }
             return res.ok({
-              body: parsedPipelineResult.success ? parsedPipelineResult.data : pipelinePayload,
+              body: CheckPipelineResponse.parse({ results: { docs: pipelineResults } }),
             });
           } catch (err) {
             try {
