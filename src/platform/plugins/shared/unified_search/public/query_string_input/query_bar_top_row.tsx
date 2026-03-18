@@ -170,7 +170,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
-  filters: Filter[];
+  filters?: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
@@ -884,7 +884,8 @@ export const QueryBarTopRow = React.memo(
 
     function renderAddButton() {
       return (
-        Boolean(props.showAddFilter) && (
+        Boolean(props.showAddFilter) &&
+        props.filters && (
           <EuiFlexItem grow={false}>
             <AddFilterPopover
               indexPatterns={props.indexPatterns}
@@ -918,7 +919,7 @@ export const QueryBarTopRow = React.memo(
                 attached={renderFilterMenuOnly()}
                 size="s"
               />
-              {Boolean(props.showAddFilter && props.filters.length) && (
+              {Boolean(props.showAddFilter && props.filters?.length) && (
                 <FilterButtonGroup items={[renderFilterBarToggleButton()]} size="s" />
               )}
             </EuiFlexGroup>
