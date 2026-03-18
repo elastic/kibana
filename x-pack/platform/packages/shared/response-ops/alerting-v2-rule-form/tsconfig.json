@@ -39,7 +39,7 @@
     "@kbn/react-hooks",
     "@kbn/field-types",
     "@kbn/lens-plugin",
-    "@kbn/unified-histogram",
+    "@kbn/visualization-utils",
     "@kbn/expressions-plugin"
   ]
 }

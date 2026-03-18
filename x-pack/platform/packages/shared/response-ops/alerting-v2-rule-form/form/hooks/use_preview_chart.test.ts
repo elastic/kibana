@@ -9,16 +9,6 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { createFormWrapper, createMockServices } from '../../test_utils';
 import { usePreviewChart } from './use_preview_chart';
 
-const mockUpdate = jest.fn();
-const mockLensVisServiceInstance = {
-  update: mockUpdate,
-  state$: { next: jest.fn(), getValue: jest.fn() },
-};
-
-jest.mock('@kbn/unified-histogram', () => ({
-  LensVisService: jest.fn().mockImplementation(() => mockLensVisServiceInstance),
-}));
-
 const mockGetESQLAdHocDataview = jest.fn();
 jest.mock('@kbn/esql-utils', () => ({
   getESQLAdHocDataview: (...args: unknown[]) => mockGetESQLAdHocDataview(...args),
@@ -39,6 +29,10 @@ const mockLensAttributes = {
   },
   references: [],
 };
+
+jest.mock('@kbn/visualization-utils', () => ({
+  getLensAttributesFromSuggestion: jest.fn().mockReturnValue(mockLensAttributes),
+}));
 
 const mockDataView = {
   id: 'test-id',
@@ -67,20 +61,27 @@ const defaultParams = {
 const MOCK_NOW = new Date('2026-03-11T12:00:00.000Z').getTime();
 
 describe('usePreviewChart', () => {
+  let mockSuggestions: jest.Mock;
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(Date, 'now').mockReturnValue(MOCK_NOW);
 
     mockGetESQLAdHocDataview.mockResolvedValue(mockDataView);
-    mockUpdate.mockReturnValue({
-      status: 'completed',
-      currentSuggestionContext: { suggestion: {}, type: 'histogramForESQL' },
-      visContext: {
-        attributes: mockLensAttributes,
-        requestData: {},
-        suggestionType: 'histogramForESQL',
+
+    // Get the suggestions mock from the lens plugin mock
+    mockSuggestions = jest.fn().mockReturnValue([
+      {
+        title: 'Bar chart',
+        score: 0.9,
+        visualizationId: 'lnsXY',
+        visualizationState: { layers: [] },
+        datasourceState: { layers: {} },
+        datasourceId: 'textBased',
+        columns: 2,
+        changeType: 'initial',
       },
-    });
+    ]);
   });
 
   afterEach(() => {
@@ -88,7 +89,12 @@ describe('usePreviewChart', () => {
   });
 
   it('builds Lens attributes when all inputs are valid', async () => {
-    const wrapper = createFormWrapper(defaultFormValues);
+    const services = createMockServices();
+    // Override stateHelperApi to use our controlled suggestions mock
+    (services.lens.stateHelperApi as jest.Mock).mockResolvedValue({
+      suggestions: mockSuggestions,
+    });
+    const wrapper = createFormWrapper(defaultFormValues, services);
 
     const { result } = renderHook(() => usePreviewChart(defaultParams), { wrapper });
 
@@ -102,6 +108,9 @@ describe('usePreviewChart', () => {
 
   it('creates an ad-hoc DataView from the query', async () => {
     const services = createMockServices();
+    (services.lens.stateHelperApi as jest.Mock).mockResolvedValue({
+      suggestions: mockSuggestions,
+    });
     const wrapper = createFormWrapper(defaultFormValues, services);
 
     renderHook(() => usePreviewChart(defaultParams), { wrapper });
@@ -116,26 +125,37 @@ describe('usePreviewChart', () => {
     });
   });
 
-  it('calls LensVisService.update with the correct query params', async () => {
-    const wrapper = createFormWrapper(defaultFormValues);
+  it('calls lens.stateHelperApi().suggestions with the correct context, dataView, excludedVisualizations, and preferredChartType', async () => {
+    const services = createMockServices();
+    (services.lens.stateHelperApi as jest.Mock).mockResolvedValue({
+      suggestions: mockSuggestions,
+    });
+    const wrapper = createFormWrapper(defaultFormValues, services);
 
     renderHook(() => usePreviewChart(defaultParams), { wrapper });
 
     await waitFor(() => {
-      expect(mockUpdate).toHaveBeenCalled();
+      expect(mockSuggestions).toHaveBeenCalled();
     });
 
-    const updateArgs = mockUpdate.mock.calls[0][0];
-    expect(updateArgs.queryParams.query).toEqual({ esql: 'FROM logs-*' });
-    expect(updateArgs.queryParams.isPlainRecord).toBe(true);
-    expect(updateArgs.queryParams.filters).toEqual([]);
-    expect(updateArgs.queryParams.dataView).toBe(mockDataView);
-    expect(updateArgs.externalVisContext).toBeUndefined();
-    expect(updateArgs.breakdownField).toBeUndefined();
+    const [context, dataView, excludedVisualizations, preferredChartType] =
+      mockSuggestions.mock.calls[0];
+    expect(context.query).toEqual({ esql: 'FROM logs-*' });
+    expect(context.fieldName).toBe('');
+    expect(context.dataViewSpec).toBeDefined();
+    expect(dataView).toBe(mockDataView);
+    // Datatable should be excluded so we get a chart, not a table
+    expect(excludedVisualizations).toContain('lnsDatatable');
+    // Should prefer bar chart type
+    expect(preferredChartType).toBe('Bar');
   });
 
-  it('passes esqlColumns to LensVisService as DatatableColumns', async () => {
-    const wrapper = createFormWrapper(defaultFormValues);
+  it('passes esqlColumns as DatatableColumns to the suggestions context', async () => {
+    const services = createMockServices();
+    (services.lens.stateHelperApi as jest.Mock).mockResolvedValue({
+      suggestions: mockSuggestions,
+    });
+    const wrapper = createFormWrapper(defaultFormValues, services);
     const esqlColumns = [
       { id: 'host.name', displayAsText: 'host.name', esType: 'keyword' },
       { id: 'count', displayAsText: 'count', esType: 'long' },
@@ -144,13 +164,13 @@ describe('usePreviewChart', () => {
     renderHook(() => usePreviewChart({ ...defaultParams, esqlColumns }), { wrapper });
 
     await waitFor(() => {
-      expect(mockUpdate).toHaveBeenCalled();
+      expect(mockSuggestions).toHaveBeenCalled();
     });
 
-    const updateArgs = mockUpdate.mock.calls[0][0];
+    const [context] = mockSuggestions.mock.calls[0];
     // ES types are mapped to Kibana DatatableColumnType:
     // 'keyword' → 'string', 'long' → 'number'
-    expect(updateArgs.queryParams.columns).toEqual([
+    expect(context.textBasedColumns).toEqual([
       { id: 'host.name', name: 'host.name', meta: { type: 'string', esType: 'keyword' } },
       { id: 'count', name: 'count', meta: { type: 'number', esType: 'long' } },
     ]);
@@ -168,7 +188,7 @@ describe('usePreviewChart', () => {
     });
 
     expect(result.current.lensAttributes).toBeUndefined();
-    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockSuggestions).not.toHaveBeenCalled();
   });
 
   it('returns undefined attributes when query is only whitespace', async () => {
@@ -183,7 +203,7 @@ describe('usePreviewChart', () => {
     });
 
     expect(result.current.lensAttributes).toBeUndefined();
-    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockSuggestions).not.toHaveBeenCalled();
   });
 
   it('returns undefined attributes when timeField is empty', async () => {
@@ -198,7 +218,7 @@ describe('usePreviewChart', () => {
     });
 
     expect(result.current.lensAttributes).toBeUndefined();
-    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockSuggestions).not.toHaveBeenCalled();
   });
 
   it('returns undefined attributes when lookback is empty', async () => {
@@ -213,7 +233,7 @@ describe('usePreviewChart', () => {
     });
 
     expect(result.current.lensAttributes).toBeUndefined();
-    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockSuggestions).not.toHaveBeenCalled();
   });
 
   it('does not build when enabled is false', async () => {
@@ -228,13 +248,17 @@ describe('usePreviewChart', () => {
     });
 
     expect(result.current.lensAttributes).toBeUndefined();
-    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockSuggestions).not.toHaveBeenCalled();
   });
 
-  it('sets hasError when LensVisService initialization fails', async () => {
+  it('sets hasError when DataView creation fails', async () => {
     mockGetESQLAdHocDataview.mockRejectedValue(new Error('DataView creation failed'));
 
-    const wrapper = createFormWrapper(defaultFormValues);
+    const services = createMockServices();
+    (services.lens.stateHelperApi as jest.Mock).mockResolvedValue({
+      suggestions: mockSuggestions,
+    });
+    const wrapper = createFormWrapper(defaultFormValues, services);
 
     const { result } = renderHook(() => usePreviewChart(defaultParams), { wrapper });
 
@@ -246,14 +270,12 @@ describe('usePreviewChart', () => {
     expect(result.current.lensAttributes).toBeUndefined();
   });
 
-  it('handles LensVisService returning no suggestion gracefully', async () => {
-    mockUpdate.mockReturnValue({
-      status: 'completed',
-      currentSuggestionContext: { suggestion: undefined, type: 'unsupported' },
-      visContext: undefined,
+  it('handles no suggestions gracefully (returns undefined lensAttributes)', async () => {
+    const services = createMockServices();
+    (services.lens.stateHelperApi as jest.Mock).mockResolvedValue({
+      suggestions: jest.fn().mockReturnValue([]),
     });
-
-    const wrapper = createFormWrapper(defaultFormValues);
+    const wrapper = createFormWrapper(defaultFormValues, services);
 
     const { result } = renderHook(() => usePreviewChart(defaultParams), { wrapper });
 
@@ -265,8 +287,113 @@ describe('usePreviewChart', () => {
     expect(result.current.hasError).toBe(false);
   });
 
+  it('filters out table suggestions even if they slip through', async () => {
+    const services = createMockServices();
+    const mockSuggestionsWithTable = jest.fn().mockReturnValue([
+      {
+        title: 'Table',
+        score: 0.9,
+        visualizationId: 'lnsDatatable',
+        visualizationState: {},
+        datasourceState: { layers: {} },
+        datasourceId: 'textBased',
+        columns: 2,
+        changeType: 'initial',
+      },
+      {
+        title: 'Bar chart',
+        score: 0.8,
+        visualizationId: 'lnsXY',
+        visualizationState: { layers: [] },
+        datasourceState: { layers: {} },
+        datasourceId: 'textBased',
+        columns: 2,
+        changeType: 'initial',
+      },
+    ]);
+    (services.lens.stateHelperApi as jest.Mock).mockResolvedValue({
+      suggestions: mockSuggestionsWithTable,
+    });
+    const wrapper = createFormWrapper(defaultFormValues, services);
+
+    const { result } = renderHook(() => usePreviewChart(defaultParams), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Should use the bar chart, not the table
+    expect(result.current.lensAttributes).toBeDefined();
+    expect(result.current.lensAttributes?.visualizationType).toBe('lnsXY');
+    expect(result.current.hasError).toBe(false);
+  });
+
+  it('returns undefined when only table suggestions are available', async () => {
+    const services = createMockServices();
+    const mockSuggestionsOnlyTable = jest.fn().mockReturnValue([
+      {
+        title: 'Table',
+        score: 0.9,
+        visualizationId: 'lnsDatatable',
+        visualizationState: {},
+        datasourceState: { layers: {} },
+        datasourceId: 'textBased',
+        columns: 2,
+        changeType: 'initial',
+      },
+    ]);
+    (services.lens.stateHelperApi as jest.Mock).mockResolvedValue({
+      suggestions: mockSuggestionsOnlyTable,
+    });
+    const wrapper = createFormWrapper(defaultFormValues, services);
+
+    const { result } = renderHook(() => usePreviewChart(defaultParams), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Should return undefined since we can't make a chart suggestion
+    expect(result.current.lensAttributes).toBeUndefined();
+    expect(result.current.hasError).toBe(false);
+  });
+
+  it('returns undefined when suggestion has no visualizationId', async () => {
+    const services = createMockServices();
+    const mockSuggestionsInvalid = jest.fn().mockReturnValue([
+      {
+        title: 'Invalid suggestion',
+        score: 0.9,
+        // Missing visualizationId
+        visualizationState: {},
+        datasourceState: { layers: {} },
+        datasourceId: 'textBased',
+        columns: 2,
+        changeType: 'initial',
+      },
+    ]);
+    (services.lens.stateHelperApi as jest.Mock).mockResolvedValue({
+      suggestions: mockSuggestionsInvalid,
+    });
+    const wrapper = createFormWrapper(defaultFormValues, services);
+
+    const { result } = renderHook(() => usePreviewChart(defaultParams), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Should return undefined since suggestion is invalid
+    expect(result.current.lensAttributes).toBeUndefined();
+    expect(result.current.hasError).toBe(false);
+  });
+
   it('returns undefined attributes for syntactically invalid ES|QL', async () => {
-    const wrapper = createFormWrapper(defaultFormValues);
+    const services = createMockServices();
+    (services.lens.stateHelperApi as jest.Mock).mockResolvedValue({
+      suggestions: mockSuggestions,
+    });
+    const wrapper = createFormWrapper(defaultFormValues, services);
 
     const { result } = renderHook(
       () => usePreviewChart({ ...defaultParams, query: 'NOT VALID ESQL |||' }),
@@ -278,7 +405,7 @@ describe('usePreviewChart', () => {
     });
 
     expect(result.current.lensAttributes).toBeUndefined();
-    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockSuggestions).not.toHaveBeenCalled();
   });
 
   describe('time range', () => {

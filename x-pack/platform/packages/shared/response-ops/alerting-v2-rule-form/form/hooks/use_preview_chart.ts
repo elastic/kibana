@@ -12,8 +12,7 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { LensVisService } from '@kbn/unified-histogram';
-import type { LensVisQueryParams } from '@kbn/unified-histogram';
+import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
 import { useRuleFormServices } from '../contexts';
 import { parseDuration } from '../utils';
 import type { PreviewColumn } from './use_preview';
@@ -39,7 +38,7 @@ export interface UsePreviewChartParams {
   timeField: string;
   /** The lookback duration string (e.g. '5m', '1h') */
   lookback: string;
-  /** ES|QL columns from the preview query result (used for STATS query suggestions) */
+  /** ES|QL columns from the preview query result (used for suggestions) */
   esqlColumns?: PreviewColumn[];
   /** Whether the chart is enabled (defaults to true) */
   enabled?: boolean;
@@ -47,7 +46,7 @@ export interface UsePreviewChartParams {
 
 /**
  * Converts PreviewColumn[] (EuiDataGrid format) to DatatableColumn[]
- * (Expressions format) for use with LensVisService.
+ * (Expressions format) for use with the Lens suggestions API.
  *
  * ES types (e.g. 'keyword', 'long') must be mapped to Kibana
  * DatatableColumnType values (e.g. 'string', 'number') for Lens
@@ -72,12 +71,14 @@ const columnsToKey = (columns: PreviewColumn[]): string =>
   columns.map((c) => `${c.id}:${c.esType}`).join(',');
 
 /**
- * Hook that builds Lens embeddable attributes for a preview chart using the
- * same `LensVisService` from `@kbn/unified-histogram` that Discover uses.
+ * Hook that builds Lens embeddable attributes for a preview chart using
+ * the Lens plugin's public `stateHelperApi().suggestions` API directly,
+ * together with `getLensAttributesFromSuggestion` to convert the top
+ * suggestion into renderable Lens attributes.
  *
- * For non-STATS queries, it builds a time histogram (count over time with
- * BUCKET). For STATS queries, it delegates to the Lens suggestions API to
- * pick an appropriate chart type from the aggregated columns.
+ * For STATS queries (transformational commands), Lens suggestions will
+ * auto-detect the most appropriate chart type from the aggregated columns.
+ * For plain queries, Lens generates a time histogram suggestion.
  *
  * Uses the same debounce timing as `usePreview` to keep the chart and grid
  * visually in sync.
@@ -89,7 +90,7 @@ export const usePreviewChart = ({
   esqlColumns = [],
   enabled = true,
 }: UsePreviewChartParams): UsePreviewChartResult => {
-  const { data, dataViews, lens } = useRuleFormServices();
+  const { dataViews, lens } = useRuleFormServices();
 
   const debouncedQuery = useDebouncedValue(query, DEBOUNCE_WAIT);
 
@@ -116,18 +117,11 @@ export const usePreviewChart = ({
     }
   }, [lookback]);
 
-  // Keep timeRange in a ref for the same reason
-  const timeRangeRef = useRef(timeRange);
-  timeRangeRef.current = timeRange;
-
   const [lensAttributes, setLensAttributes] = useState<
     TypedLensByValueInput['attributes'] | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-
-  // Cache the LensVisService instance across renders
-  const lensVisServiceRef = useRef<LensVisService | null>(null);
 
   useEffect(() => {
     const hasValidInputs =
@@ -156,22 +150,14 @@ export const usePreviewChart = ({
 
     const run = async () => {
       try {
-        // Initialize or reuse LensVisService
-        if (!lensVisServiceRef.current) {
-          const apiHelper = await lens.stateHelperApi();
-          lensVisServiceRef.current = new LensVisService({
-            services: { data },
-            lensSuggestionsApi: apiHelper.suggestions,
-          });
-        }
+        // Resolve the Lens suggestions API from the public start contract
+        const { suggestions } = await lens.stateHelperApi();
 
         if (cancelled) return;
 
         // Create an ad-hoc DataView from the query's index pattern.
         // We must NOT skip field fetching: the Lens suggestions API needs
         // the DataView's field list (via toSpec()) to generate valid suggestions.
-        // We don't pass http, so time-field auto-detection is skipped —
-        // we set the time field manually from the form below.
         const adHocDataView = await getESQLAdHocDataview({
           dataViewsService: dataViews,
           query: debouncedQuery!,
@@ -182,29 +168,46 @@ export const usePreviewChart = ({
         // Set the time field to the user-configured value
         adHocDataView.timeFieldName = timeField;
 
-        const queryParams: LensVisQueryParams = {
-          dataView: adHocDataView,
+        // Build the context object that the Lens suggestions API expects for
+        // ES|QL queries. This is the same shape used internally by Unified Histogram.
+        const context = {
+          dataViewSpec: adHocDataView.toSpec(),
+          fieldName: '',
+          textBasedColumns: datatableColumnsRef.current,
           query: { esql: debouncedQuery! },
-          filters: [],
-          isPlainRecord: true,
-          columns: datatableColumnsRef.current,
-          timeRange: timeRangeRef.current,
         };
 
-        const result = lensVisServiceRef.current.update({
-          externalVisContext: undefined,
-          queryParams,
-          timeInterval: undefined,
-          breakdownField: undefined,
-          table: undefined,
-        });
+        // Get suggestions, preferring bar charts and excluding tables
+        // We filter out tables manually as well since excludedVisualizations
+        // might return empty array if table was the primary suggestion
+        const allSuggestions =
+          suggestions(
+            context,
+            adHocDataView,
+            ['lnsDatatable'],
+            ChartType.Bar // Prefer bar chart type
+          ) ?? [];
+
+        // Filter out any table suggestions that might have slipped through
+        // Only accept chart visualizations (not tables)
+        const chartSuggestions = allSuggestions.filter(
+          (s) => s.visualizationId && s.visualizationId !== 'lnsDatatable'
+        );
+        const topSuggestion = chartSuggestions[0];
 
         if (!cancelled) {
-          if (result.visContext?.attributes) {
-            setLensAttributes(result.visContext.attributes);
+          if (topSuggestion) {
+            const attributes = getLensAttributesFromSuggestion({
+              filters: [],
+              query: { esql: debouncedQuery! },
+              suggestion: topSuggestion,
+              dataView: adHocDataView,
+            });
+            setLensAttributes(attributes as TypedLensByValueInput['attributes']);
             setHasError(false);
           } else {
-            // No suggestion available (e.g. unsupported query)
+            // No valid chart suggestion available — return null to indicate
+            // we cannot generate a visualization for this query
             setLensAttributes(undefined);
             setHasError(false);
           }
@@ -227,9 +230,9 @@ export const usePreviewChart = ({
       cancelled = true;
     };
     // columnsKey is a stable string derived from esqlColumns content.
-    // timeRange and datatableColumns are read from refs to avoid
-    // re-triggering the effect on every object reference change.
-  }, [enabled, debouncedQuery, timeField, lookback, columnsKey, data, dataViews, lens]);
+    // datatableColumns is read from a ref to avoid re-triggering the effect
+    // on every object reference change.
+  }, [enabled, debouncedQuery, timeField, lookback, columnsKey, dataViews, lens]);
 
   // True while the debounce timer is pending
   const isDebouncing = query !== debouncedQuery;
