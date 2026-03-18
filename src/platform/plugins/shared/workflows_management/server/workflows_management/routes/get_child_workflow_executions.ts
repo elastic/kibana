@@ -40,6 +40,15 @@ export function registerGetChildWorkflowExecutionsRoute({
           body: childExecutions,
         });
       } catch (error) {
+        const statusCode =
+          error instanceof Error &&
+          'meta' in error &&
+          typeof (error as { meta?: { statusCode?: number } }).meta?.statusCode === 'number'
+            ? (error as { meta: { statusCode: number } }).meta.statusCode
+            : undefined;
+        if (statusCode === 404) {
+          return response.notFound();
+        }
         return handleRouteError(response, error);
       }
     })

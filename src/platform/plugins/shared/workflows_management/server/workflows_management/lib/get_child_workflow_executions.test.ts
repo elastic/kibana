@@ -73,17 +73,17 @@ describe('getChildWorkflowExecutions', () => {
     jest.clearAllMocks();
   });
 
-  it('should return empty array when parent execution is not found (404)', async () => {
+  it('should throw when parent execution is not found (404)', async () => {
     const notFoundError = new Error('Not found');
     Object.assign(notFoundError, { meta: { statusCode: 404 } });
     mockEsClient.get.mockRejectedValue(notFoundError);
 
-    const result = await getChildWorkflowExecutions({
-      ...baseParams,
-      esClient: mockEsClient,
-    });
-
-    expect(result).toEqual([]);
+    await expect(
+      getChildWorkflowExecutions({
+        ...baseParams,
+        esClient: mockEsClient,
+      })
+    ).rejects.toThrow('Not found');
   });
 
   it('should return empty array when spaceId does not match', async () => {

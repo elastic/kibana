@@ -91,6 +91,23 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/childExecutions', ()
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: [] });
     });
 
+    it('should return 404 when parent execution is not found', async () => {
+      const notFoundError = new Error('Not found');
+      Object.assign(notFoundError, { meta: { statusCode: 404 } });
+      workflowsApi.getChildWorkflowExecutions = jest.fn().mockRejectedValue(notFoundError);
+
+      const mockRequest = {
+        params: { workflowExecutionId: 'parent-exec-1' },
+        headers: {},
+        url: { pathname: '/api/workflowExecutions/parent-exec-1/childExecutions' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler({}, mockRequest, mockResponse);
+
+      expect(mockResponse.notFound).toHaveBeenCalled();
+    });
+
     it('should handle API errors gracefully', async () => {
       workflowsApi.getChildWorkflowExecutions = jest
         .fn()

@@ -105,24 +105,12 @@ export const getChildWorkflowExecutions = async ({
   parentExecutionId,
   spaceId,
 }: GetChildWorkflowExecutionsParams): Promise<ChildWorkflowExecutionItem[]> => {
-  let parentDoc: EsWorkflowExecution | undefined;
-  try {
-    const response = await esClient.get<EsWorkflowExecution>({
-      index: workflowExecutionIndex,
-      id: parentExecutionId,
-      _source_includes: PARENT_SOURCE_INCLUDES,
-    });
-    parentDoc = response._source ?? undefined;
-  } catch (error: unknown) {
-    if (
-      error instanceof Error &&
-      'meta' in error &&
-      (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
-    ) {
-      return [];
-    }
-    throw error;
-  }
+  const response = await esClient.get<EsWorkflowExecution>({
+    index: workflowExecutionIndex,
+    id: parentExecutionId,
+    _source_includes: PARENT_SOURCE_INCLUDES,
+  });
+  const parentDoc = response._source ?? undefined;
 
   if (!parentDoc || parentDoc.spaceId !== spaceId) {
     return [];
