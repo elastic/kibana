@@ -464,7 +464,11 @@ describe('loader', () => {
       expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'FROM logs-*',
-          options: { skipFetchFields: true, id: 'dv1' },
+          options: {
+            skipFetchFields: true,
+            id: 'dv1',
+            createNewInstanceEvenIfCachedOneAvailable: true,
+          },
           http: mockHttp,
         })
       );
