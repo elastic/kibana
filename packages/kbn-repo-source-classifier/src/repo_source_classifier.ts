@@ -17,7 +17,7 @@ import { RepoPath } from './repo_path';
 import { inferGroupAttrsFromPath } from './group';
 
 const STATIC_EXTS = new Set(
-  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl|xml'
+  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl|xml|yaml|yml'
     .split('|')
     .map((e) => `.${e}`)
 );
