@@ -76,7 +76,7 @@ When NOT to use:
 
 After reviewing topology results, consider:
 - Use \`observability.get_trace_metrics\` with timeseries to check latency/error trends over time
-- Use \`observability.get_correlated_logs\` to find error patterns in failing dependencies`,
+- Use \`observability.get_traces\` to find error patterns in failing dependencies`,
     schema: getServiceTopologyToolSchema,
     tags: ['observability', 'apm', 'service-map', 'topology'],
     availability: {
