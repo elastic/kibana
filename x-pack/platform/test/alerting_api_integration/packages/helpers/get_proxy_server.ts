@@ -5,13 +5,32 @@
  * 2.0.
  */
 
+import http from 'http';
 import httpProxy from 'http-proxy';
+
+function getProxyBasicAuthFromServerArgs(
+  kbnTestServerConfig: string[]
+): { user: string; password: string } | undefined {
+  const userLine = kbnTestServerConfig.find((val: string) =>
+    val.startsWith('--xpack.actions.proxyUser=')
+  );
+  const passLine = kbnTestServerConfig.find((val: string) =>
+    val.startsWith('--xpack.actions.proxyPassword=')
+  );
+  if (!userLine || !passLine) {
+    return undefined;
+  }
+  return {
+    user: userLine.replace('--xpack.actions.proxyUser=', ''),
+    password: passLine.replace('--xpack.actions.proxyPassword=', ''),
+  };
+}
 
 export const getHttpProxyServer = async (
   targetUrl: string,
-  kbnTestServerConfig: any,
+  kbnTestServerConfig: string[],
   onProxyResHandler: (proxyRes?: unknown, req?: unknown, res?: unknown) => void
-): Promise<httpProxy> => {
+): Promise<http.Server | ReturnType<typeof httpProxy.createProxyServer>> => {
   const proxyServer = httpProxy.createProxyServer({
     target: targetUrl,
     secure: false,
@@ -22,8 +41,6 @@ export const getHttpProxyServer = async (
     onProxyResHandler(proxyRes, req, res);
   });
 
-  // http-proxy doesn't propagate client disconnects to the target server.
-  // Tear down the proxied request when the client disconnects early (e.g. when the request is aborted).
   proxyServer.on('proxyReq', (proxyReq, req, res) => {
     res.on('close', () => {
       if (!res.writableFinished) {
@@ -33,15 +50,38 @@ export const getHttpProxyServer = async (
   });
 
   const proxyPort = getProxyPort(kbnTestServerConfig);
+  const basicAuth = getProxyBasicAuthFromServerArgs(kbnTestServerConfig);
+
+  if (basicAuth) {
+    const expectedAuth = `Basic ${Buffer.from(
+      `${basicAuth.user}:${basicAuth.password}`,
+      'utf8'
+    ).toString('base64')}`;
+    const server = http.createServer((req, res) => {
+      if (req.headers['proxy-authorization'] !== expectedAuth) {
+        res.writeHead(407, { 'Proxy-Authenticate': 'Basic realm="proxy"' });
+        res.end();
+        return;
+      }
+      proxyServer.web(req, res);
+    });
+    server.listen(proxyPort);
+    return server;
+  }
+
   proxyServer.listen(proxyPort);
 
   return proxyServer;
 };
 
-export const getProxyPort = (kbnTestServerConfig: any): number => {
+export const getProxyPort = (kbnTestServerConfig: string[]): number => {
   const proxyUrl = kbnTestServerConfig
     .find((val: string) => val.startsWith('--xpack.actions.proxyUrl='))
-    .replace('--xpack.actions.proxyUrl=', '');
+    ?.replace('--xpack.actions.proxyUrl=', '');
+
+  if (!proxyUrl) {
+    throw new Error('Expected --xpack.actions.proxyUrl= in kbn test server args');
+  }
 
   const urlObject = new URL(proxyUrl);
   return Number(urlObject.port);

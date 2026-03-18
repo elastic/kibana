@@ -232,7 +232,9 @@ kibana_vars=(
     xpack.actions.proxyBypassHosts
     xpack.actions.proxyHeaders
     xpack.actions.proxyOnlyHosts
+    xpack.actions.proxyPassword
     xpack.actions.proxyUrl
+    xpack.actions.proxyUser
     xpack.actions.responseTimeout
     xpack.actions.ssl.proxyVerificationMode
     xpack.actions.ssl.verificationMode

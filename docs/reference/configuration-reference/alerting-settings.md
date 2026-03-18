@@ -220,7 +220,7 @@ $$$action-config-email-domain-allowlist$$$
 
     If your proxy is using the https protocol (vs the http protocol), the setting `xpack.actions.ssl.proxyVerificationMode: none` will likely be needed, unless your proxy’s certificates are signed using a publicly available certificate authority.
 
-    There is currently no support for using basic authentication with a proxy (authentication for the proxy itself, not the URL being requested through the proxy).
+    You can supply proxy credentials in the URL (`http://user:password@proxy-host:8080`) or use [`xpack.actions.proxyUser`](#action-config-proxy-user) and [`xpack.actions.proxyPassword`](#action-config-proxy-password). If the URL already includes a username and password, those take precedence over the separate settings.
 
     Data type: `string`
 
@@ -229,6 +229,20 @@ $$$action-config-email-domain-allowlist$$$
     ```sh
     curl --verbose --proxytunnel --proxy http://localhost:8080 <EXAMPLE_URL>
     ```
+
+$$$action-config-proxy-user$$$
+
+`xpack.actions.proxyUser` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+:   Username for HTTP basic authentication with the proxy when [`xpack.actions.proxyUrl`](#action-settings) is set. Use with `xpack.actions.proxyPassword`. Ignored if the proxy URL already includes credentials. Store the password in the [Kibana keystore](docs-content://deploy-manage/security/secure-settings.md) when possible.
+
+    Data type: `string`
+
+$$$action-config-proxy-password$$$
+
+`xpack.actions.proxyPassword` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
+:   Password for HTTP basic authentication with the proxy when [`xpack.actions.proxyUrl`](#action-settings) is set. Use with `xpack.actions.proxyUser`.
+
+    Data type: `string`
 
 `xpack.actions.proxyBypassHosts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 :   Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.

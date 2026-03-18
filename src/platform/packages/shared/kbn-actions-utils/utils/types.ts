@@ -54,4 +54,7 @@ export interface ProxySettings {
   proxyOnlyHosts: Set<string> | undefined;
   proxyHeaders?: Record<string, string>;
   proxySSLSettings: SSLSettings;
+  /** When set with proxyPassword, used for proxy HTTP basic auth if proxyUrl has no credentials. */
+  proxyUser?: string;
+  proxyPassword?: string;
 }

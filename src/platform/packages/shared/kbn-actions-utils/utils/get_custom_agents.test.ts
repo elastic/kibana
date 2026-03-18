@@ -330,6 +330,47 @@ describe('getCustomAgents', () => {
     expect(httpsAgent?.options.rejectUnauthorized).toBeTruthy();
   });
 
+  test('applies proxyUser and proxyPassword when proxy URL has no credentials', () => {
+    const proxySettings = {
+      proxyUrl: 'https://someproxyhost:8080',
+      proxyUser: 'cfgUser',
+      proxyPassword: 'cfgPass:with:colons',
+      proxySSLSettings: {
+        verificationMode: 'none',
+      },
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    } as ProxySettings;
+    const { httpsAgent } = getCustomAgents({
+      logger,
+      proxySettings,
+      sslSettings: defaultSSLSettings,
+      url: targetUrl,
+    });
+    expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
+    expect((httpsAgent as any).proxy.auth).toBe('cfgUser:cfgPass:with:colons');
+  });
+
+  test('URL-embedded proxy credentials override proxyUser and proxyPassword', () => {
+    const proxySettings = {
+      proxyUrl: 'https://urlUser:urlPass@someproxyhost:8080',
+      proxyUser: 'cfgUser',
+      proxyPassword: 'cfgPass',
+      proxySSLSettings: {
+        verificationMode: 'none',
+      },
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    } as ProxySettings;
+    const { httpsAgent } = getCustomAgents({
+      logger,
+      proxySettings,
+      sslSettings: defaultSSLSettings,
+      url: targetUrl,
+    });
+    expect((httpsAgent as any).proxy.auth).toBe('urlUser:urlPass');
+  });
+
   test('handles overriding global verificationMode "full" with a proxy', () => {
     const sslSettings = {
       verificationMode: 'full',
