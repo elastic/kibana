@@ -19,38 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import { createMcpClientFromAxios } from '../../lib/mcp/create_mcp_client_from_axios';
+import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import { withMcpClient } from '../../lib/mcp/with_mcp_client';
 
-const MCP_CLIENT_VERSION = '1.0.0';
-
-/**
- * Lifecycle helper: creates an MCP client from the connector's Axios instance,
- * connects, runs the callback, and disconnects. Every action call gets a fresh
- * MCP session (connect-per-action pattern).
- */
-const withMcpClient = async <T>(
-  ctx: ActionContext,
-  fn: (mcp: ReturnType<typeof createMcpClientFromAxios>) => Promise<T>
-): Promise<T> => {
-  const serverUrl = (ctx.config?.serverUrl as string) ?? '';
-  if (!serverUrl) {
-    throw new Error('config.serverUrl is required');
-  }
-  const mcpClient = createMcpClientFromAxios({
-    logger: ctx.log,
-    axiosInstance: ctx.client,
-    url: serverUrl,
-    name: `kibana-github-mcp-${serverUrl}`,
-    version: MCP_CLIENT_VERSION,
-  });
-  try {
-    await mcpClient.connect();
-    return await fn(mcpClient);
-  } finally {
-    await mcpClient.disconnect();
-  }
-};
+const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
 
 export const GithubConnector: ConnectorSpec = {
   metadata: {
@@ -69,11 +41,12 @@ export const GithubConnector: ConnectorSpec = {
   },
 
   schema: z.object({
-    serverUrl: z
-      .string()
-      .url()
-      .default('https://api.githubcopilot.com/mcp/')
+    serverUrl: UISchemas.url()
+      .default(GITHUB_MCP_SERVER_URL)
+      .describe('GitHub MCP Server URL')
       .meta({
+        widget: 'text',
+        placeholder: 'https://api.githubcopilot.com/mcp/',
         label: i18n.translate('core.kibanaConnectorSpecs.githubMcp.config.serverUrl.label', {
           defaultMessage: 'MCP Server URL',
         }),
