@@ -317,8 +317,11 @@ export class IndexActionsContextMenu extends Component {
       isPopoverOpen: false,
       renderConfirmModal: false,
     });
-    func();
-    this.props.resetSelection && this.props.resetSelection();
+    Promise.resolve()
+      .then(() => func())
+      .finally(() => {
+        this.props.resetSelection && this.props.resetSelection();
+      });
   };
 
   closePopover = () => {
@@ -612,6 +615,9 @@ export class IndexActionsContextMenu extends Component {
           : null}
         <EuiPopover
           id="contextMenuIndices"
+          aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.popoverAriaLabel', {
+            defaultMessage: 'Index actions menu',
+          })}
           button={button}
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}
