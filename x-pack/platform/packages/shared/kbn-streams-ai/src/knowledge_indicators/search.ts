@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { clamp, compact, intersection, trim, uniq } from 'lodash';
 import type { Feature, QueryLink } from '@kbn/streams-schema';
 import type {
   KnowledgeIndicator,
@@ -14,6 +15,16 @@ import type {
 import { featureToKnowledgeIndicatorFeature, queryLinkToKnowledgeIndicatorQuery } from './mappers';
 
 export const DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT = 50;
+
+function byKindThenScore(a: KnowledgeIndicator, b: KnowledgeIndicator): number {
+  if (a.kind !== b.kind) return a.kind === 'feature' ? -1 : 1;
+  if (a.kind === 'feature' && b.kind === 'feature') {
+    const d = (b.feature.confidence ?? 0) - (a.feature.confidence ?? 0);
+    return d !== 0 ? d : a.feature.id.localeCompare(b.feature.id);
+  }
+  const d = (b.query.severity_score ?? -1) - (a.query.severity_score ?? -1);
+  return d !== 0 ? d : a.query.id.localeCompare(b.query.id);
+}
 
 export async function searchKnowledgeIndicators({
   getStreamNames,
@@ -28,101 +39,50 @@ export async function searchKnowledgeIndicators({
     options: { min_confidence?: number; limit?: number }
   ): Promise<Feature[]>;
   getQueries(streamNames: string[], search_text?: string): Promise<QueryLink[]>;
-  /**
-   * Optional callback invoked when feature retrieval fails for a stream.
-   * This is intentionally side-effecty and internal-only (used for debug/telemetry),
-   * and does not change the tool output schema.
-   */
   onFeatureFetchError?: (streamName: string, error: unknown) => void;
   params: SearchKnowledgeIndicatorsInput;
 }): Promise<SearchKnowledgeIndicatorsOutput> {
-  const normalizedSearchText =
-    typeof params.search_text === 'string' && params.search_text.trim().length > 0
-      ? params.search_text.trim()
+  // Step 1: Normalize params
+  const searchText =
+    typeof params.search_text === 'string' && trim(params.search_text)
+      ? trim(params.search_text)
       : undefined;
-
-  const normalizedLimit =
-    typeof params.limit === 'number' && Number.isFinite(params.limit) && params.limit > 0
+  const limit =
+    typeof params.limit === 'number' && params.limit > 0
       ? Math.floor(params.limit)
       : DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT;
+  const minConf =
+    typeof params.min_confidence === 'number' ? clamp(params.min_confidence, 0, 100) : undefined;
+  const kinds = Array.isArray(params.kind) && params.kind.length > 0 ? params.kind : null;
+  const includeFeatures = !kinds || kinds.includes('feature');
+  const includeQueries = !kinds || kinds.includes('query');
 
-  const normalizedMinConfidence =
-    typeof params.min_confidence === 'number' &&
-    Number.isFinite(params.min_confidence) &&
-    params.min_confidence >= 0 &&
-    params.min_confidence <= 100
-      ? params.min_confidence
-      : undefined;
+  // Step 2: Resolve stream names (requested ∩ accessible)
+  const accessible = await getStreamNames();
+  const streams = params.stream_names?.length
+    ? intersection(uniq(params.stream_names), accessible)
+    : accessible;
+  const streamNames = compact(streams.filter((s) => typeof s === 'string' && s.length > 0));
 
-  const kindFilter = Array.isArray(params.kind) && params.kind.length > 0 ? params.kind : undefined;
-  const includeFeatures = !kindFilter || kindFilter.includes('feature');
-  const includeQueries = !kindFilter || kindFilter.includes('query');
-
-  const accessibleStreamNames = await getStreamNames();
-  const accessibleStreamNameSet = new Set(accessibleStreamNames);
-
-  const requestedStreamNames =
-    Array.isArray(params.stream_names) && params.stream_names.length > 0
-      ? [...new Set(params.stream_names)].filter((name) => accessibleStreamNameSet.has(name))
-      : accessibleStreamNames;
-
-  const streamNames = requestedStreamNames.filter(
-    (name) => typeof name === 'string' && name.length > 0
-  );
-
-  const knowledgeIndicators: KnowledgeIndicator[] = [];
-
+  // Step 3: Fetch features (allSettled, best-effort)
+  const features: KnowledgeIndicator[] = [];
   if (includeFeatures) {
-    const perStreamFeatureResults = await Promise.allSettled(
-      streamNames.map((streamName) =>
-        getFeatures(streamName, { min_confidence: normalizedMinConfidence, limit: normalizedLimit })
-      )
+    const settled = await Promise.allSettled(
+      streamNames.map((n) => getFeatures(n, { min_confidence: minConf, limit }))
     );
-
-    perStreamFeatureResults.forEach((result, index) => {
-      const streamName = streamNames[index];
-      if (result.status === 'rejected') {
-        onFeatureFetchError?.(streamName, result.reason);
-        return;
-      }
-
-      for (const feature of result.value) {
-        knowledgeIndicators.push(featureToKnowledgeIndicatorFeature(feature));
-      }
+    settled.forEach((r, i) => {
+      if (r.status === 'rejected') onFeatureFetchError?.(streamNames[i], r.reason);
+      else r.value.forEach((f) => features.push(featureToKnowledgeIndicatorFeature(f)));
     });
   }
 
-  if (includeQueries) {
-    const queryLinks = await getQueries(streamNames, normalizedSearchText);
-    for (const link of queryLinks) {
-      knowledgeIndicators.push(queryLinkToKnowledgeIndicatorQuery(link));
-    }
-  }
+  // Step 4: Fetch queries
+  const queries: KnowledgeIndicator[] = includeQueries
+    ? (await getQueries(streamNames, searchText)).map(queryLinkToKnowledgeIndicatorQuery)
+    : [];
 
-  // Keep output stable and deterministic for callers/tests.
-  const sorted = knowledgeIndicators.sort((a, b) => {
-    if (a.kind !== b.kind) {
-      return a.kind === 'feature' ? -1 : 1;
-    }
+  // Step 5: Sort and limit
+  const sorted = [...features, ...queries].sort(byKindThenScore);
 
-    if (a.kind === 'feature' && b.kind === 'feature') {
-      const confidenceDiff = b.feature.confidence - a.feature.confidence;
-      if (confidenceDiff !== 0) return confidenceDiff;
-      return a.feature.id.localeCompare(b.feature.id);
-    }
-
-    if (a.kind === 'query' && b.kind === 'query') {
-      const aScore = a.query.severity_score ?? -1;
-      const bScore = b.query.severity_score ?? -1;
-      const scoreDiff = bScore - aScore;
-      if (scoreDiff !== 0) return scoreDiff;
-      return a.query.id.localeCompare(b.query.id);
-    }
-
-    return 0;
-  });
-
-  return {
-    knowledge_indicators: sorted.slice(0, normalizedLimit),
-  };
+  return { knowledge_indicators: sorted.slice(0, limit) };
 }
