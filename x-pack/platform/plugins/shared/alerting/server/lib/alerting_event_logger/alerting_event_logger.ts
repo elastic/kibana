@@ -803,8 +803,11 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
           alert_counts: omitBy(
             {
               ...event.kibana?.alert?.rule?.execution?.metrics?.alert_counts,
-              candidates: consumerMetrics.candidate_alerts_count,
-              suppressed: consumerMetrics.suppressed_alerts,
+              // "candidates" and "suppressed" fields have mappings added
+              // uncomment the two following lines after https://github.com/elastic/kibana/pull/257203
+              // is merged
+              // candidates: consumerMetrics.candidate_alerts_count,
+              // suppressed: consumerMetrics.suppressed_alerts,
             },
             isUndefined
           ),
