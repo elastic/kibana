@@ -796,6 +796,7 @@ describe('Textbased Data Source', () => {
             ],
             query: { esql: 'FROM foo' },
             index: '1',
+            timeField: '@timestamp',
           },
         },
       } as unknown as TextBasedPrivateState;
@@ -805,7 +806,7 @@ describe('Textbased Data Source', () => {
         })
       ).toEqual(true);
     });
-    it('should return false if timefield name not exists on the selected dataview', () => {
+    it('should return false if timeField is not set on the layer', () => {
       const state = {
         layers: {
           a: {
