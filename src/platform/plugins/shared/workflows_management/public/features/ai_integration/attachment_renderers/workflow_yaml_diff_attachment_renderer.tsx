@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, transparentize } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { diffLines } from 'diff';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -268,7 +268,7 @@ const DiffInlineContent: React.FC<{
   attachment: WorkflowYamlDiffAttachment;
 }> = ({ attachment }) => {
   const styles = useMemoCss(componentStyles);
-  const { beforeYaml, afterYaml, name } = attachment.data;
+  const { beforeYaml, afterYaml } = attachment.data;
 
   if (beforeYaml === afterYaml) {
     return (
@@ -280,36 +280,7 @@ const DiffInlineContent: React.FC<{
     );
   }
 
-  return (
-    <div>
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        responsive={false}
-        css={styles.header}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            {name && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <strong>{name}</strong>
-                </EuiText>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('workflowsManagement.attachmentRenderers.diff.proposedChanges', {
-                  defaultMessage: 'Proposed changes',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <MonacoDiffViewer beforeYaml={beforeYaml} afterYaml={afterYaml} />
-    </div>
-  );
+  return <MonacoDiffViewer beforeYaml={beforeYaml} afterYaml={afterYaml} />;
 };
 
 const componentStyles = {
