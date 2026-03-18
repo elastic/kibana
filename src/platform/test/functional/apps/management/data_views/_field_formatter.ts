@@ -505,7 +505,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.KEYWORD,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
-            expectFormattedValue: '',
+            expectFormattedValue: '(null)',
             beforeSave: async () => {
               await testSubjects.click('staticLookupEditorAddEntry');
               await testSubjects.setValue('~staticLookupEditorKey', 'look me up');
@@ -559,7 +559,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.BOOLEAN,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
-            expectFormattedValue: '',
+            expectFormattedValue: '(null)',
             beforeSave: async () => {
               await testSubjects.click('staticLookupEditorAddEntry');
               await testSubjects.setValue('~staticLookupEditorKey', 'true');
