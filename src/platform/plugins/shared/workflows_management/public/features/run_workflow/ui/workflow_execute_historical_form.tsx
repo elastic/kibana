@@ -24,7 +24,6 @@ import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import type { z } from '@kbn/zod/v4';
 import { InputValidationCallout } from './input_validation_callout';
 import { TRIGGER_TABS_LABELS } from './translations';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
@@ -129,11 +128,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
         try {
           const res = inputsValidator.safeParse(JSON.parse(value));
           if (!res.success) {
-            setErrors(
-              res.error.issues
-                .map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
-                .join(', ')
-            );
+            setErrors(res.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', '));
           } else {
             setErrors(null);
           }

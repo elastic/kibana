@@ -57,10 +57,10 @@ export const WorkflowExecuteManualForm = ({
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
   const inputsValidator = useMemo(() => buildFieldsZodValidator(inputs), [inputs]);
 
-  // Set defaults if value is empty or only contains empty object
   useEffect(() => {
     setValue(JSON.stringify(getDefaultWorkflowInput(inputs), null, 2));
-  }, [setValue, inputs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Validate inputs on initial load and when definition changes
   useEffect(() => {
