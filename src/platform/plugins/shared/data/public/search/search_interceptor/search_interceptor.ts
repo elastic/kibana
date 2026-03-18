@@ -118,7 +118,9 @@ export class SearchInterceptor {
     MAX_CACHE_ITEMS,
     MAX_CACHE_SIZE_MB
   );
-  private cachedProtocol?: string;
+  private protocolSupportsMultiplexing: boolean = false;
+  private recentSearchRequests: Map<string, PerformanceResourceTiming> = new Map();
+  private performanceObserver?: PerformanceObserver;
 
   /**
    * Observable that emits when the number of pending requests changes.
@@ -165,30 +167,25 @@ export class SearchInterceptor {
       })
     );
 
-    // Detect HTTP protocol as soon as possible
-    this.detectProtocol();
-  }
-
-  /**
-   * Detects the HTTP protocol (HTTP/1.1 or HTTP/2) using the Performance API
-   * and caches the result for later use.
-   * @internal
-   */
-  private async detectProtocol() {
+    // Increase performance buffer size to capture more entries
     try {
-      const response = await this.deps.http.get('/internal/data/_status', {
-        version: '1',
-        asResponse: true,
+      performance.setResourceTimingBufferSize(500);
+    } catch (e) {
+      // Silently fail - not critical
+    }
+
+    // Set up PerformanceObserver to capture search requests as they happen
+    try {
+      this.performanceObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries() as PerformanceResourceTiming[];
+        entries.forEach((entry) => {
+          if (entry.name.includes('/internal/search/')) {
+            this.protocolSupportsMultiplexing = ['h2', 'h3'].includes(entry.nextHopProtocol);
+            this.performanceObserver?.disconnect(); // We only need to detect this once, so we can disconnect the observer after the first match
+          }
+        });
       });
-      const url = response.response?.url;
-      if (url) {
-        const entries = performance.getEntriesByName(url);
-        const entry = entries[entries.length - 1] as PerformanceResourceTiming | undefined;
-        if (entry?.nextHopProtocol) {
-          this.cachedProtocol = entry.nextHopProtocol;
-          console.log('Detected HTTP protocol:', this.cachedProtocol);
-        }
-      }
+      this.performanceObserver.observe({ entryTypes: ['resource'] });
     } catch (e) {
       // Silently fail - protocol detection is not critical
     }
@@ -197,14 +194,10 @@ export class SearchInterceptor {
   public stop() {
     this.responseCache.clear();
     this.uiSettingsSubs.forEach((s) => s.unsubscribe());
-  }
-
-  /**
-   * Returns the detected HTTP protocol (e.g., 'h2' for HTTP/2, 'http/1.1' for HTTP/1.1).
-   * Returns undefined if protocol detection hasn't completed or failed.
-   */
-  public getProtocol(): string | undefined {
-    return this.cachedProtocol;
+    if (this.performanceObserver) {
+      this.performanceObserver.disconnect();
+    }
+    this.recentSearchRequests.clear();
   }
 
   /*
