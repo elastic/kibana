@@ -9,11 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { AiButton, type AiButtonProps } from '@kbn/shared-ux-ai-components';
 
-export function RegenerateResponseButton(
-  props: Omit<AiButtonProps, 'onClick'> & { onClick: () => void }
-) {
+export function RegenerateResponseButton(props: AiButtonProps) {
   return (
-    <AiButton iconType="sparkles" size="s" variant="empty" onClick={props.onClick}>
+    <AiButton {...props} iconType="sparkles" size="s" variant="empty">
       {i18n.translate('xpack.observabilityAiAssistant.regenerateResponseButtonLabel', {
         defaultMessage: 'Regenerate',
       })}
