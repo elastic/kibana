@@ -6,7 +6,8 @@
  */
 
 import * as uuid from 'uuid';
-import { isUndefined, omitBy, set } from 'lodash';
+import { isUndefined, omitBy } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { IEvent, IEventLogger, InternalFields } from '@kbn/event-log-plugin/server';
 import { millisToNanos, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
