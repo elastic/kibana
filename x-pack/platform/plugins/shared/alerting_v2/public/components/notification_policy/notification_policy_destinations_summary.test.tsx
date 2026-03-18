@@ -85,12 +85,12 @@ describe('NotificationPolicyDestinationsSummary', () => {
 
     const resolvedWorkflowText = await screen.findByText('Workflow One');
     const resolvedWorkflowLink = resolvedWorkflowText.closest('a');
-    expect(resolvedWorkflowLink?.href).toBe('/app/workflows/workflow-1');
+    expect(resolvedWorkflowLink?.href).toBe('http://localhost/app/workflows/workflow-1');
     expect(resolvedWorkflowLink?.target).toBe('_blank');
 
     const fallbackWorkflowText = screen.getByText('workflow-2');
     const fallbackWorkflowLink = fallbackWorkflowText.closest('a');
-    expect(fallbackWorkflowLink?.href).toBe('/app/workflows/workflow-2');
+    expect(fallbackWorkflowLink?.href).toBe('http://localhost/app/workflows/workflow-2');
     expect(fallbackWorkflowLink?.target).toBe('_blank');
 
     expect(mockUseFetchWorkflow).toHaveBeenCalledWith('workflow-1', true);
