@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  describe.only('@ess actions migrations', () => {
+  describe('@ess actions migrations', () => {
     // This test suite is not meant to test a specific route, but to test the legacy action migration
     // code that lives in multiple routes. This test loads an es_archive containing rules
     // created in 7.15 with legacy actions.
