@@ -57,8 +57,8 @@ export const PlanActionItemDisplay: React.FC<PlanActionItemDisplayProps> = ({
       : ''}
     &:hover {
       background-color: ${isFailed
-      ? `${euiTheme.colors.backgroundFilledDanger}20`
-      : euiTheme.colors.backgroundBaseSubdued};
+        ? `${euiTheme.colors.backgroundFilledDanger}20`
+        : euiTheme.colors.backgroundBaseSubdued};
     }
   `;
 
@@ -116,30 +116,30 @@ export const PlanActionItemDisplay: React.FC<PlanActionItemDisplayProps> = ({
         <EuiText size="s">{renderDescription()}</EuiText>
         {((item.related_skills && item.related_skills.length > 0) ||
           (item.related_tools && item.related_tools.length > 0)) && (
-            <EuiFlexGroup
-              gutterSize="xs"
-              wrap
-              responsive={false}
-              css={css`
+          <EuiFlexGroup
+            gutterSize="xs"
+            wrap
+            responsive={false}
+            css={css`
               margin-top: ${euiTheme.size.xs};
             `}
-            >
-              {item.related_skills?.map((skill) => (
-                <EuiFlexItem grow={false} key={`skill-${skill}`}>
-                  <EuiBadge color="hollow" iconType="sparkles">
-                    {skill}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ))}
-              {item.related_tools?.map((tool) => (
-                <EuiFlexItem grow={false} key={`tool-${tool}`}>
-                  <EuiBadge color="hollow" iconType="wrench">
-                    {tool}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          )}
+          >
+            {item.related_skills?.map((skill) => (
+              <EuiFlexItem grow={false} key={`skill-${skill}`}>
+                <EuiBadge color="hollow" iconType="sparkles">
+                  {skill}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+            {item.related_tools?.map((tool) => (
+              <EuiFlexItem grow={false} key={`tool-${tool}`}>
+                <EuiBadge color="hollow" iconType="wrench">
+                  {tool}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -36,12 +36,12 @@ import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_swi
 
 export class AgentBuilderPlugin
   implements
-  Plugin<
-    AgentBuilderPluginSetup,
-    AgentBuilderPluginStart,
-    AgentBuilderSetupDependencies,
-    AgentBuilderStartDependencies
-  >
+    Plugin<
+      AgentBuilderPluginSetup,
+      AgentBuilderPluginStart,
+      AgentBuilderSetupDependencies,
+      AgentBuilderStartDependencies
+    >
 {
   private logger: Logger;
   private config: AgentBuilderConfig;
@@ -223,5 +223,5 @@ export class AgentBuilderPlugin
     };
   }
 
-  stop() { }
+  stop() {}
 }
