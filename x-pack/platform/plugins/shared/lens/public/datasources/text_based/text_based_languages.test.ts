@@ -834,7 +834,6 @@ describe('Textbased Data Source', () => {
       expect(
         TextBasedDatasource.isTimeBased(state, {
           ...indexPatterns,
-          '1': { ...indexPatterns['1'], timeFieldName: undefined },
         })
       ).toEqual(false);
     });
