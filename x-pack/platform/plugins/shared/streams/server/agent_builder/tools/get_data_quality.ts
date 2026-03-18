@@ -71,7 +71,6 @@ export const createGetDataQualityTool = ({
       const esClient = scopedClusterClient.asCurrentUser;
 
       const definition = await streamsClient.getStream(name);
-      const isIngestStream = Streams.ingest.all.Definition.is(definition);
 
       const startMs = dateMath.parse(start)?.valueOf() ?? Date.now() - 24 * 60 * 60 * 1000;
       const endMs = dateMath.parse(end, { roundUp: true })?.valueOf() ?? Date.now();
@@ -96,22 +95,12 @@ export const createGetDataQualityTool = ({
       const degradedCount = degradedResults.find((s) => s.stream === name)?.count ?? 0;
       const failedCount = failedResults.find((s) => s.stream === name)?.count ?? 0;
 
-      const degradedPct = totalCount > 0 ? (degradedCount / totalCount) * 100 : 0;
-      const allAttempted = totalCount + failedCount;
-      const failedPct = allAttempted > 0 ? (failedCount / allAttempted) * 100 : 0;
-      const qualityScore = Math.max(0, Math.round(100 - degradedPct - failedPct));
-
-      let failureStoreStatus = 'not_applicable';
-      if (isIngestStream) {
-        const failureStore = (definition as Streams.ingest.all.Definition).ingest.failure_store;
-        if ('enabled' in failureStore) {
-          failureStoreStatus = 'enabled';
-        } else if ('disabled' in failureStore) {
-          failureStoreStatus = 'disabled';
-        } else if ('inherit' in failureStore) {
-          failureStoreStatus = 'inherited';
-        }
-      }
+      const { degradedPct, failedPct, qualityScore } = computeQualityMetrics({
+        totalCount,
+        degradedCount,
+        failedCount,
+      });
+      const failureStoreStatus = detectFailureStoreStatus(definition);
 
       return {
         results: [
@@ -149,3 +138,30 @@ export const createGetDataQualityTool = ({
     }
   },
 });
+
+export const computeQualityMetrics = ({
+  totalCount,
+  degradedCount,
+  failedCount,
+}: {
+  totalCount: number;
+  degradedCount: number;
+  failedCount: number;
+}): { degradedPct: number; failedPct: number; qualityScore: number } => {
+  const degradedPct = totalCount > 0 ? (degradedCount / totalCount) * 100 : 0;
+  const allAttempted = totalCount + failedCount;
+  const failedPct = allAttempted > 0 ? (failedCount / allAttempted) * 100 : 0;
+  const qualityScore = Math.max(0, Math.round(100 - degradedPct - failedPct));
+  return { degradedPct, failedPct, qualityScore };
+};
+
+export const detectFailureStoreStatus = (definition: Streams.all.Definition): string => {
+  if (!Streams.ingest.all.Definition.is(definition)) {
+    return 'not_applicable';
+  }
+  const failureStore = definition.ingest.failure_store;
+  if ('enabled' in failureStore) return 'enabled';
+  if ('disabled' in failureStore) return 'disabled';
+  if ('inherit' in failureStore) return 'inherited';
+  return 'not_applicable';
+};

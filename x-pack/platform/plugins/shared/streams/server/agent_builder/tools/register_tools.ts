@@ -13,6 +13,7 @@ import { createGetSchemaTool } from './get_schema';
 import { createGetDataQualityTool } from './get_data_quality';
 import { createGetLifecycleStatsTool } from './get_lifecycle_stats';
 import { createQueryDocumentsTool } from './query_documents';
+import { createGetFailedDocumentsTool } from './get_failed_documents';
 
 export {
   STREAMS_TOOL_IDS,
@@ -22,6 +23,7 @@ export {
   STREAMS_GET_DATA_QUALITY_TOOL_ID,
   STREAMS_GET_LIFECYCLE_STATS_TOOL_ID,
   STREAMS_QUERY_DOCUMENTS_TOOL_ID,
+  STREAMS_GET_FAILED_DOCUMENTS_TOOL_ID,
 } from './tool_ids';
 
 export const registerStreamsTools = ({
@@ -38,6 +40,7 @@ export const registerStreamsTools = ({
     createGetDataQualityTool({ getScopedClients }),
     createGetLifecycleStatsTool({ getScopedClients }),
     createQueryDocumentsTool({ getScopedClients }),
+    createGetFailedDocumentsTool({ getScopedClients }),
   ];
 
   for (const tool of streamsTools) {

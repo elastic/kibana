@@ -13,6 +13,7 @@ export const STREAMS_GET_SCHEMA_TOOL_ID = `${internalNamespaces.streams}.get_sch
 export const STREAMS_GET_DATA_QUALITY_TOOL_ID = `${internalNamespaces.streams}.get_data_quality`;
 export const STREAMS_GET_LIFECYCLE_STATS_TOOL_ID = `${internalNamespaces.streams}.get_lifecycle_stats`;
 export const STREAMS_QUERY_DOCUMENTS_TOOL_ID = `${internalNamespaces.streams}.query_documents`;
+export const STREAMS_GET_FAILED_DOCUMENTS_TOOL_ID = `${internalNamespaces.streams}.get_failed_documents`;
 
 export const STREAMS_TOOL_IDS = [
   STREAMS_LIST_STREAMS_TOOL_ID,
@@ -21,4 +22,5 @@ export const STREAMS_TOOL_IDS = [
   STREAMS_GET_DATA_QUALITY_TOOL_ID,
   STREAMS_GET_LIFECYCLE_STATS_TOOL_ID,
   STREAMS_QUERY_DOCUMENTS_TOOL_ID,
+  STREAMS_GET_FAILED_DOCUMENTS_TOOL_ID,
 ] as const;

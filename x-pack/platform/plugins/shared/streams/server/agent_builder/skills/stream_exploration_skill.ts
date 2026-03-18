@@ -15,6 +15,7 @@ import {
   STREAMS_GET_DATA_QUALITY_TOOL_ID as GET_DATA_QUALITY,
   STREAMS_GET_LIFECYCLE_STATS_TOOL_ID as GET_LIFECYCLE_STATS,
   STREAMS_QUERY_DOCUMENTS_TOOL_ID as QUERY_DOCUMENTS,
+  STREAMS_GET_FAILED_DOCUMENTS_TOOL_ID as GET_FAILED_DOCUMENTS,
 } from '../tools/register_tools';
 
 export const streamExplorationSkill = defineSkillType({
@@ -41,6 +42,7 @@ export const streamExplorationSkill = defineSkillType({
     - "how much storage?" / "retention" / "lifecycle" / "disk usage" → ${GET_LIFECYCLE_STATS}
     - "show me documents" / "what does the data look like?" / "recent events" → ${QUERY_DOCUMENTS}
     - "how many?" / "top values" / "count by" / any aggregation on stream data → ${QUERY_DOCUMENTS}
+    - "why are documents failing?" / "show me failed documents" / "failure store" / "ingestion errors" → ${GET_FAILED_DOCUMENTS}
 
     Rules:
     - Always use ${QUERY_DOCUMENTS} to query or aggregate stream data. Do NOT use platform.core.search for streams — it uses ES|QL which does not support unmapped fields.
@@ -97,6 +99,11 @@ export const streamExplorationSkill = defineSkillType({
     Field lists: "field.name: type" format, grouped by source (own vs inherited).
     Data quality: concise summary line (e.g. "Quality: 95/100 — 3.2% degraded, 1.8% failed").
     Retention: single summary line (e.g. "Retention: ILM policy 'hot-warm-30d', 45.2 GB, 12.3M docs").
+
+    Failed documents:
+    - Show the error type breakdown first (e.g. "mapper_exception — 42 docs, illegal_argument_exception — 8 docs")
+    - Then show each sample document with its error type, error message, and a few key fields from the original document
+    - Group samples by error type when multiple types are present
     </response_formatting>
 
     <context_tracking>

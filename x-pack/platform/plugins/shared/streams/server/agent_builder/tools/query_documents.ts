@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getFlattenedObject } from '@kbn/std';
 import { Streams } from '@kbn/streams-schema';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../routes/types';
 import {
@@ -68,17 +68,7 @@ export const createQueryDocumentsTool = ({
       const esClient = scopedClusterClient.asCurrentUser;
 
       const definition = await streamsClient.getStream(name);
-
-      const definitionFieldTypes = new Map<string, string>();
-      if (Streams.WiredStream.Definition.is(definition)) {
-        for (const [fn, fd] of Object.entries(definition.ingest.wired.fields)) {
-          if (fd.type) definitionFieldTypes.set(fn, fd.type);
-        }
-      } else if (Streams.ClassicStream.Definition.is(definition)) {
-        for (const [fn, fd] of Object.entries(definition.ingest.classic.field_overrides || {})) {
-          if (fd.type) definitionFieldTypes.set(fn, fd.type);
-        }
-      }
+      const definitionFieldTypes = getDefinitionFieldTypes(definition);
 
       const [fieldCapsResponse, sampleDocs, model] = await Promise.all([
         esClient.fieldCaps({ index: name, fields: ['*'], ignore_unavailable: true }),
@@ -91,89 +81,21 @@ export const createQueryDocumentsTool = ({
         modelProvider.getDefaultModel(),
       ]);
 
-      /*
-       * Field discovery and capability classification
-       *
-       * We combine two sources to build a complete picture of available fields:
-       *
-       * 1. field_caps API — returns fields that are actually indexed (have mappings).
-       *    Each field includes `aggregatable` and `searchable` flags which determine
-       *    what ES DSL constructs can use it.
-       *
-       * 2. Sample documents (_source) — captures fields that exist in stored source
-       *    but are NOT indexed. This happens in logsdb mode when the dynamic field
-       *    limit is exceeded (`ignore_dynamic_beyond_limit: true`), which is common
-       *    for OTel streams with high-cardinality attribute keys. These fields appear
-       *    in returned documents but cannot be queried, aggregated, or sorted.
-       *
-       * Fields are classified into three capability tiers:
-       *
-       *   aggregatable — indexed and supports queries, aggregations, and sorting.
-       *                   Most keyword, numeric, and date fields fall here.
-       *
-       *   not aggregatable — indexed and searchable (e.g. text fields) but cannot
-       *                      be used in aggregations or sorting without a .keyword
-       *                      sub-field.
-       *
-       *   source-only — NOT indexed. Present only in document _source. Cannot be
-       *                 used in queries, aggregations, or sorting at all. The NL
-       *                 translation LLM is instructed to fall back to returning
-       *                 documents and emit a _warning when the user asks to
-       *                 aggregate on such a field.
-       */
-      type FieldCapability = 'aggregatable' | 'not aggregatable' | 'source-only';
-      const fieldEntries: Array<{ name: string; type: string; capability: FieldCapability }> = [];
-      const knownFields = new Set<string>();
+      const fieldEntries = classifyFields({
+        fieldCapsFields: fieldCapsResponse.fields,
+        sampleHits: sampleDocs.hits.hits,
+        definitionFieldTypes,
+      });
 
-      for (const [fieldName, caps] of Object.entries(fieldCapsResponse.fields)) {
-        const capEntries = Object.values(caps);
-        if (capEntries.length === 0) continue;
-        const firstCap = capEntries[0];
-        if (firstCap.metadata_field) continue;
-
-        const type = definitionFieldTypes.get(fieldName) ?? firstCap.type ?? Object.keys(caps)[0];
-        const capability: FieldCapability = firstCap.aggregatable
-          ? 'aggregatable'
-          : 'not aggregatable';
-        fieldEntries.push({ name: fieldName, type, capability });
-        knownFields.add(fieldName);
-      }
-
-      for (const hit of sampleDocs.hits.hits) {
-        if (!hit._source) continue;
-        for (const field of Object.keys(
-          getFlattenedObject(hit._source as Record<string, unknown>)
-        )) {
-          if (!knownFields.has(field)) {
-            fieldEntries.push({ name: field, type: 'unmapped', capability: 'source-only' });
-            knownFields.add(field);
-          }
-        }
-      }
-
-      const sortedEntries = fieldEntries.sort((a, b) => a.name.localeCompare(b.name));
-      const truncatedEntries = sortedEntries.slice(0, MAX_FIELDS_FOR_PROMPT);
-      let availableFields = truncatedEntries
-        .map((f) => `${f.name} (${f.type}, ${f.capability})`)
-        .join(', ');
-      if (availableFields.length > MAX_FIELDS_PROMPT_CHARS) {
-        availableFields = `${availableFields.slice(0, MAX_FIELDS_PROMPT_CHARS)}…`;
-      }
-      if (truncatedEntries.length < sortedEntries.length) {
-        const omitted = sortedEntries.length - truncatedEntries.length;
-        availableFields += ` (${omitted} more fields omitted)`;
-      }
+      const availableFields = buildAvailableFieldsPrompt(fieldEntries);
 
       const translated = await translateNlToEsDsl({
         nlQuery,
         inferenceClient: model.inferenceClient,
         availableFields,
       });
-      const requestedSize = Math.max(0, translated.size ?? DEFAULT_SIZE);
-      const cappedSize =
-        translated.aggs && translated.size === undefined
-          ? 0
-          : Math.min(requestedSize, MAX_DOCUMENTS);
+
+      const { requestedSize, cappedSize } = computeSearchSize(translated);
 
       const searchParams: SearchRequest = {
         index: name,
@@ -189,38 +111,9 @@ export const createQueryDocumentsTool = ({
 
       const response = await esClient.search(searchParams);
 
-      const documents = response.hits.hits.map((hit) => {
-        const flat = getFlattenedObject(hit._source as Record<string, unknown>);
-        const truncated: Record<string, unknown> = {};
-
-        for (const [key, value] of Object.entries(flat)) {
-          if (typeof value === 'string' && value.length > MAX_STRING_LENGTH) {
-            truncated[key] = `${value.slice(0, MAX_STRING_LENGTH)}...`;
-          } else {
-            truncated[key] = value;
-          }
-        }
-
-        return truncated;
-      });
-
-      let oldestReturnedTimestampMs: number | null = null;
-      let newestReturnedTimestampMs: number | null = null;
-
-      for (const doc of documents) {
-        const ts = doc['@timestamp'];
-        if (ts) {
-          const ms = typeof ts === 'number' ? ts : new Date(ts as string).getTime();
-          if (!Number.isNaN(ms)) {
-            if (oldestReturnedTimestampMs === null || ms < oldestReturnedTimestampMs) {
-              oldestReturnedTimestampMs = ms;
-            }
-            if (newestReturnedTimestampMs === null || ms > newestReturnedTimestampMs) {
-              newestReturnedTimestampMs = ms;
-            }
-          }
-        }
-      }
+      const documents = flattenAndTruncateDocs(response.hits.hits);
+      const { oldest: oldestReturnedTimestampMs, newest: newestReturnedTimestampMs } =
+        computeTimestampRange(documents);
 
       const totalHits =
         typeof response.hits.total === 'number'
@@ -244,14 +137,12 @@ export const createQueryDocumentsTool = ({
 
       if (response.aggregations) {
         data.aggregations = response.aggregations;
-
-        const allBucketsEmpty = Object.values(response.aggregations).every((agg) => {
-          const buckets = (agg as { buckets?: unknown[] }).buckets;
-          return Array.isArray(buckets) ? buckets.length === 0 : false;
-        });
-        if (allBucketsEmpty && totalHits > 0) {
-          data.aggregation_note =
-            'All aggregations returned empty results. The field(s) may exist in the mapping but have no values in the data.';
+        const aggNote = detectEmptyAggregations(
+          response.aggregations as Record<string, unknown>,
+          totalHits
+        );
+        if (aggNote) {
+          data.aggregation_note = aggNote;
         }
       }
 
@@ -285,3 +176,146 @@ export const createQueryDocumentsTool = ({
     }
   },
 });
+
+export type FieldCapability = 'aggregatable' | 'not aggregatable' | 'source-only';
+
+export interface FieldEntry {
+  name: string;
+  type: string;
+  capability: FieldCapability;
+}
+
+export const getDefinitionFieldTypes = (
+  definition: Streams.all.Definition
+): Map<string, string> => {
+  const map = new Map<string, string>();
+  if (Streams.WiredStream.Definition.is(definition)) {
+    for (const [fn, fd] of Object.entries(definition.ingest.wired.fields)) {
+      if (fd.type) map.set(fn, fd.type);
+    }
+  } else if (Streams.ClassicStream.Definition.is(definition)) {
+    for (const [fn, fd] of Object.entries(definition.ingest.classic.field_overrides || {})) {
+      if (fd.type) map.set(fn, fd.type);
+    }
+  }
+  return map;
+};
+
+export const classifyFields = ({
+  fieldCapsFields,
+  sampleHits,
+  definitionFieldTypes,
+}: {
+  fieldCapsFields: Record<
+    string,
+    Record<string, { type?: string; aggregatable?: boolean; metadata_field?: boolean }>
+  >;
+  sampleHits: Array<SearchHit<unknown>>;
+  definitionFieldTypes: Map<string, string>;
+}): FieldEntry[] => {
+  const fieldEntries: FieldEntry[] = [];
+  const knownFields = new Set<string>();
+
+  for (const [fieldName, caps] of Object.entries(fieldCapsFields)) {
+    const capEntries = Object.values(caps);
+    if (capEntries.length === 0) continue;
+    const firstCap = capEntries[0];
+    if (firstCap.metadata_field) continue;
+
+    const type = definitionFieldTypes.get(fieldName) ?? firstCap.type ?? Object.keys(caps)[0];
+    const capability: FieldCapability = firstCap.aggregatable ? 'aggregatable' : 'not aggregatable';
+    fieldEntries.push({ name: fieldName, type, capability });
+    knownFields.add(fieldName);
+  }
+
+  for (const hit of sampleHits) {
+    if (!hit._source) continue;
+    for (const field of Object.keys(getFlattenedObject(hit._source as Record<string, unknown>))) {
+      if (!knownFields.has(field)) {
+        fieldEntries.push({ name: field, type: 'unmapped', capability: 'source-only' });
+        knownFields.add(field);
+      }
+    }
+  }
+
+  return fieldEntries;
+};
+
+export const buildAvailableFieldsPrompt = (
+  fieldEntries: FieldEntry[],
+  maxFields = MAX_FIELDS_FOR_PROMPT,
+  maxChars = MAX_FIELDS_PROMPT_CHARS
+): string => {
+  const sortedEntries = [...fieldEntries].sort((a, b) => a.name.localeCompare(b.name));
+  const truncatedEntries = sortedEntries.slice(0, maxFields);
+  let result = truncatedEntries.map((f) => `${f.name} (${f.type}, ${f.capability})`).join(', ');
+  if (result.length > maxChars) {
+    result = `${result.slice(0, maxChars)}…`;
+  }
+  if (truncatedEntries.length < sortedEntries.length) {
+    const omitted = sortedEntries.length - truncatedEntries.length;
+    result += ` (${omitted} more fields omitted)`;
+  }
+  return result;
+};
+
+export const computeSearchSize = (translated: {
+  aggs?: unknown;
+  size?: number;
+}): { requestedSize: number; cappedSize: number } => {
+  const requestedSize = Math.max(0, translated.size ?? DEFAULT_SIZE);
+  const cappedSize =
+    translated.aggs && translated.size === undefined ? 0 : Math.min(requestedSize, MAX_DOCUMENTS);
+  return { requestedSize, cappedSize };
+};
+
+export const flattenAndTruncateDocs = (
+  hits: Array<SearchHit<unknown>>,
+  maxStringLength = MAX_STRING_LENGTH
+): Array<Record<string, unknown>> => {
+  return hits.map((hit) => {
+    const flat = getFlattenedObject((hit._source ?? {}) as Record<string, unknown>);
+    const truncated: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(flat)) {
+      if (typeof value === 'string' && value.length > maxStringLength) {
+        truncated[key] = `${value.slice(0, maxStringLength)}...`;
+      } else {
+        truncated[key] = value;
+      }
+    }
+    return truncated;
+  });
+};
+
+export const computeTimestampRange = (
+  documents: Array<Record<string, unknown>>
+): { oldest: number | null; newest: number | null } => {
+  let oldest: number | null = null;
+  let newest: number | null = null;
+
+  for (const doc of documents) {
+    const ts = doc['@timestamp'];
+    if (ts) {
+      const ms = typeof ts === 'number' ? ts : new Date(ts as string).getTime();
+      if (!Number.isNaN(ms)) {
+        if (oldest === null || ms < oldest) oldest = ms;
+        if (newest === null || ms > newest) newest = ms;
+      }
+    }
+  }
+  return { oldest, newest };
+};
+
+export const detectEmptyAggregations = (
+  aggregations: Record<string, unknown>,
+  totalHits: number
+): string | undefined => {
+  const allBucketsEmpty = Object.values(aggregations).every((agg) => {
+    const buckets = (agg as { buckets?: unknown[] }).buckets;
+    return Array.isArray(buckets) ? buckets.length === 0 : false;
+  });
+  if (allBucketsEmpty && totalHits > 0) {
+    return 'All aggregations returned empty results. The field(s) may exist in the mapping but have no values in the data.';
+  }
+  return undefined;
+};

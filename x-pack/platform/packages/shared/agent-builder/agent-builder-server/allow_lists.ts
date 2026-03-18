@@ -49,6 +49,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.get_data_quality`,
   `${internalNamespaces.streams}.get_lifecycle_stats`,
   `${internalNamespaces.streams}.query_documents`,
+  `${internalNamespaces.streams}.get_failed_documents`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,

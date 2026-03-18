@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { Streams, isIlmLifecycle, isDslLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
+import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../routes/types';
 import {
@@ -73,18 +74,7 @@ export const createGetLifecycleStatsTool = ({
       const dataStream = await streamsClient.getDataStream(name);
       const lifecycle = await getEffectiveLifecycle({ definition, streamsClient, dataStream });
 
-      const retentionInfo: Record<string, unknown> = {};
-      if (isIlmLifecycle(lifecycle)) {
-        retentionInfo.type = 'ilm';
-        retentionInfo.policy_name = lifecycle.ilm.policy;
-      } else if (isDslLifecycle(lifecycle)) {
-        retentionInfo.type = 'dsl';
-        retentionInfo.data_retention = lifecycle.dsl.data_retention ?? 'indefinite';
-      } else if (isInheritLifecycle(lifecycle)) {
-        retentionInfo.type = 'inherited';
-      } else {
-        retentionInfo.type = 'unknown';
-      }
+      const retentionInfo = buildRetentionInfo(lifecycle);
 
       const statsResponse = await esClient.indices.stats({
         index: dataStream.name,
@@ -147,7 +137,25 @@ export const createGetLifecycleStatsTool = ({
   },
 });
 
-const formatBytes = (bytes: number): string => {
+export const buildRetentionInfo = (
+  lifecycle: IngestStreamEffectiveLifecycle
+): Record<string, unknown> => {
+  const info: Record<string, unknown> = {};
+  if (isIlmLifecycle(lifecycle)) {
+    info.type = 'ilm';
+    info.policy_name = lifecycle.ilm.policy;
+  } else if (isDslLifecycle(lifecycle)) {
+    info.type = 'dsl';
+    info.data_retention = lifecycle.dsl.data_retention ?? 'indefinite';
+  } else if (isInheritLifecycle(lifecycle)) {
+    info.type = 'inherited';
+  } else {
+    info.type = 'unknown';
+  }
+  return info;
+};
+
+export const formatBytes = (bytes: number): string => {
   if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
