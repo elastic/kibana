@@ -15,7 +15,7 @@ import {
   DEFAULT_PROFILE_STATE_FIELDS,
   type DefaultProfileStateField,
   type DefaultProfileStateFields,
-} from '../redux/types';
+} from '../redux';
 import {
   getDefaultProfileState,
   getFieldsToReset,

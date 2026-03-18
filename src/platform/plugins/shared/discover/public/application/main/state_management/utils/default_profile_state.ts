@@ -10,16 +10,17 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { pick, uniqBy } from 'lodash';
-import type { DiscoverAppState, DefaultProfileStateField } from '../redux';
 import {
+  type DiscoverAppState,
   DEFAULT_PROFILE_STATE_FIELDS,
+  type DefaultProfileStateField,
   type DefaultProfileStateFields,
   type ProfileStateSnapshot,
-} from '../redux/types';
+  type TabState,
+} from '../redux';
 import type { DefaultAppStateColumn, ScopedProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
 import type { DataDocumentsMsg } from '../discover_data_state_container';
-import type { TabState } from '../redux';
 
 export const getDefaultProfileState = ({
   scopedProfilesManager,

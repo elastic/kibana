@@ -20,8 +20,7 @@ import {
   initializeDataStateInDiscoverStateMock,
 } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
-import { internalStateActions, selectTabRuntimeState } from './redux';
-import { getCurrentProfileId } from './redux/actions/tab_state';
+import { getCurrentProfileId, internalStateActions, selectTabRuntimeState } from './redux';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),

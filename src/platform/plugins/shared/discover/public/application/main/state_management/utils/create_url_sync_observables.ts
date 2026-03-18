@@ -12,10 +12,14 @@ import { isEqual } from 'lodash';
 import { type GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { type INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
-import type { InternalStateDependencies } from '../redux/internal_state';
-import { selectTab, selectTabAppState } from '../redux/selectors';
-import { internalStateActions } from '../redux';
-import type { DiscoverAppState, DiscoverInternalState } from '../redux/types';
+import {
+  internalStateActions,
+  selectTab,
+  selectTabAppState,
+  type DiscoverAppState,
+  type DiscoverInternalState,
+  type InternalStateDependencies,
+} from '../redux';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
 
 /**
