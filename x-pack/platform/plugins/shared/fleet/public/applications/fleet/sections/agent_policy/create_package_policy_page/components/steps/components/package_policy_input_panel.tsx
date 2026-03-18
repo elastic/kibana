@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, Fragment, memo, useMemo, useCallback, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -148,10 +148,14 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       onSelectionsChange: (update) => updatePackagePolicyInput(update),
     });
     const yaml = useYaml();
-    // Showing streams toggle state (set when yaml loads so we can validate)
+    // Showing streams toggle state (initialized once when yaml loads so we can validate)
     const [isShowingStreams, setIsShowingStreams] = useState<boolean>(false);
+    const isShowingStreamsInitialized = useRef(false);
     useEffect(() => {
-      if (yaml) {
+      // Only initialize once — we must not re-evaluate after the user fills in required
+      // fields, or the streams section would collapse as each field becomes valid.
+      if (yaml && !isShowingStreamsInitialized.current) {
+        isShowingStreamsInitialized.current = true;
         setIsShowingStreams(
           shouldShowStreamsByDefault(
             yaml.parse,
