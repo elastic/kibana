@@ -133,7 +133,7 @@
           "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-        "lineNumber": 42,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -146,7 +146,7 @@
             "label": "{\n  stream,\n  esClient,\n  start,\n  end,\n  getFeatures,\n  inferenceClient,\n  signal,\n  systemPrompt,\n  logger,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -165,7 +165,7 @@
                   ".Definition"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1169,7 +1169,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 58,
+                "lineNumber": 59,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1182,7 +1182,7 @@
                 "label": "start",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 59,
+                "lineNumber": 60,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1195,7 +1195,7 @@
                 "label": "end",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 60,
+                "lineNumber": 61,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1211,7 +1211,7 @@
                   "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<z.infer<any>[]>"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 61,
+                "lineNumber": 62,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1224,7 +1224,7 @@
                     "label": "params",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                    "lineNumber": 61,
+                    "lineNumber": 62,
                     "columnNumber": 24,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1240,7 +1240,7 @@
                           "string[] | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                        "lineNumber": 62,
+                        "lineNumber": 63,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false
@@ -1256,7 +1256,7 @@
                           "number | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                        "lineNumber": 63,
+                        "lineNumber": 64,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false
@@ -1272,7 +1272,7 @@
                           "number | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                        "lineNumber": 64,
+                        "lineNumber": 65,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false
@@ -1299,7 +1299,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 66,
+                "lineNumber": 67,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1315,7 +1315,7 @@
                   "AbortSignal"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 67,
+                "lineNumber": 68,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1337,7 +1337,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 68,
+                "lineNumber": 69,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1350,7 +1350,7 @@
                 "label": "systemPrompt",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 69,
+                "lineNumber": 70,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

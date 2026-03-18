@@ -413,7 +413,7 @@ export const PhaseSyncing: Story = {
                 selectPhase(phase);
               }}
               renderButton={(buttonProps) => (
-                <EuiButton {...buttonProps} size="s" iconType="arrowDown" iconSide="right">
+                <EuiButton {...buttonProps} size="s" iconType="chevronSingleDown" iconSide="right">
                   Add phase & open flyout
                 </EuiButton>
               )}
