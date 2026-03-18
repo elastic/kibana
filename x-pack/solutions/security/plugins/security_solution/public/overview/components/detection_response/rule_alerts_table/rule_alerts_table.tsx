@@ -23,7 +23,6 @@ import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { SECURITY_CELL_ACTIONS_ALERTS_COUNT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../../data_view_manager/constants';
-
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { HeaderSection } from '../../../../common/components/header_section';
 

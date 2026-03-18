@@ -8,11 +8,7 @@
  */
 
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
-import type {
-  ControlWidth,
-  OptionsListControlState,
-  PinnedControlState,
-} from '@kbn/controls-schemas';
+import type { OptionsListControlState, PinnedControlState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import type { FilterControlConfig } from './types';
 
@@ -68,10 +64,10 @@ export const TEST_IDS = {
   },
 };
 
-export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Pick<PinnedControlState, 'width' | 'grow'> &
-  Pick<OptionsListControlState, 'display_settings'> = {
+export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<PinnedControlState> &
+  Partial<OptionsListControlState> = {
   display_settings: { hide_exclude: true, hide_sort: true, placeholder: '' },
-  width: 'small' as ControlWidth,
+  width: 'small',
   grow: true,
 };
 

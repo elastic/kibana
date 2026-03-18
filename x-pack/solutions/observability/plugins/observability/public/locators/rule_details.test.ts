@@ -75,8 +75,14 @@ describe('RuleDetailsLocator', () => {
           hide_exists: true,
         },
       },
-      { title: 'Group', field_name: 'kibana.alert.group.value' },
-      { title: 'Tags', field_name: 'tags' },
+      {
+        title: 'Group',
+        field_name: 'kibana.alert.group.value',
+      },
+      {
+        title: 'Tags',
+        field_name: 'tags',
+      },
     ];
     const location = await locator.getLocation({
       ruleId: mockedRuleId,

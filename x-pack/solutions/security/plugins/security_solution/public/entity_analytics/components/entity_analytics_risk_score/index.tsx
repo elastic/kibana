@@ -8,7 +8,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
