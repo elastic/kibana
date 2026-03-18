@@ -202,6 +202,10 @@ export function buildCellActions(
     onFilter,
   });
 
+  const showReverseCategorize =
+    field.esTypes?.includes('text') === true &&
+    uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD');
+
   return [
     ...(shouldShowFilters
       ? [
@@ -225,7 +229,7 @@ export function buildCellActions(
         toastNotifications,
         valueToStringConverter
       ),
-    ...(uiActions && field.esTypes?.includes('text')
+    ...(showReverseCategorize
       ? [
           (cellActionProps: EuiDataGridColumnCellActionProps) =>
             ReverseCategorizeBtn({
