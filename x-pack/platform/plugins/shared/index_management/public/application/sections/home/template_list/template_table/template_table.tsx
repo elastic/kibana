@@ -253,7 +253,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       ) : undefined,
     toolsRight: [
       <EuiButton
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="createTemplateButton"
         key="createTemplateButton"
         fill
