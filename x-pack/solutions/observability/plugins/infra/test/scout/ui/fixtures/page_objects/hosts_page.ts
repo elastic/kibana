@@ -11,14 +11,27 @@ import { EXTENDED_TIMEOUT } from '../constants';
 export class HostsPage {
   public readonly tableLoaded: Locator;
   public readonly tableRows: Locator;
+  public readonly searchBar: Locator;
+  public readonly logsTab: Locator;
+  public readonly logsSearchBar: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.tableLoaded = this.page.getByTestId('hostsView-table-loaded');
     this.tableRows = this.page.getByTestId('hostsView-tableRow');
+    this.searchBar = this.page.getByTestId('queryInput');
+    this.logsTab = this.page.getByTestId('hostsView-tabs-logs');
+    this.logsSearchBar = this.page.getByTestId('hostsView-logs-text-field-search');
   }
 
   private async waitForTableToLoad() {
     await this.tableLoaded.waitFor({ timeout: EXTENDED_TIMEOUT });
+  }
+
+  public async filterByQueryBar(query: string) {
+    await this.searchBar.clear();
+    await this.searchBar.fill(query);
+    await this.searchBar.press('Enter');
+    await this.waitForTableToLoad();
   }
 
   public async goToPage({ from, to }: { from: string; to: string }) {
