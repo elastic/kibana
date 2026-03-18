@@ -150,10 +150,10 @@ export class CRUDClient {
 
   // updateEntity takes a single entity patch and applies it to an existing
   // entity in LATEST index. The patch has to contain either:
-  // 1. a valid ID and non-identifying data: provided ID will be used
-  // 2. a valid ID and matching identifying data: provided ID will be validated
-  // and used if correct
-  // 3. no ID and identifying data: ID will be generated
+  // 1. ID only - a valid ID and non-identifying data - provided ID will be used
+  // 2. ID and Identity - a valid ID and matching identifying data - provided
+  // ID will be validated and used if correct
+  // 3. Identity only - no ID and identifying data - ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     const generatedId = getEuidFromObject(entityType, doc);
     const flatDoc = getFlattenedObject(doc);
