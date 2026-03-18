@@ -112,5 +112,6 @@
     "@kbn/es-query",
     "@kbn/shared-ux-ai-components",
     "@kbn/fs",
+    "@kbn/react-hooks",
   ]
 }
