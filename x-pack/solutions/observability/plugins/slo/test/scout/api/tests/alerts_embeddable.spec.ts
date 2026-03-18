@@ -180,15 +180,15 @@ apiTest.describe(
     );
 
     apiTest(
-      'rejects invalid alerts panel config when slo_instance_id is missing from a slos item',
+      'defaults slo_instance_id to * when omitted from a slos item',
       async ({ apiClient }) => {
-        const dashboardTitle = `Invalid Alerts Instance ${Date.now()}`;
-        const invalidPanel = {
+        const dashboardTitle = `Alerts Default Instance ${Date.now()}`;
+        const panel = {
           type: SLO_ALERTS_EMBEDDABLE_ID,
           grid: { x: 0, y: 0, w: 12, h: 8 },
           config: {
             slos: [{ slo_id: sloId }],
-            title: 'Invalid Alerts',
+            title: 'Default Instance Alerts',
           },
         };
 
@@ -199,14 +199,16 @@ apiTest.describe(
           },
           body: {
             title: dashboardTitle,
-            panels: [invalidPanel],
+            panels: [panel],
           },
           responseType: 'json',
         });
 
-        expect([400, 422]).toContain(response.statusCode);
-        expect(response.body).toBeDefined();
-        expect(response.body.message ?? response.body.error).toBeDefined();
+        expect(response).toHaveStatusCode(200);
+        const createdPanel = response.body.data.panels[0];
+        expect(createdPanel.config.slos).toHaveLength(1);
+        expect(createdPanel.config.slos[0].slo_id).toBe(sloId);
+        expect(createdPanel.config.slos[0].slo_instance_id).toBe('*');
       }
     );
   }
