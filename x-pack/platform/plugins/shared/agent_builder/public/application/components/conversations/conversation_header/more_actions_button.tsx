@@ -18,7 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  DATA_SOURCES_ENABLED_SETTING_ID,
+  AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { DATA_SOURCES_APP_ID } from '@kbn/deeplinks-data-sources';
 import { css } from '@emotion/react';
 import { useIsAgentReadOnly } from '../../../hooks/agents/use_is_agent_read_only';
@@ -77,6 +80,9 @@ const fullscreenLabels = {
   }),
   plugins: i18n.translate('xpack.agentBuilder.conversationActions.plugins', {
     defaultMessage: 'View all plugins',
+  }),
+  connectors: i18n.translate('xpack.agentBuilder.conversationActions.connectors', {
+    defaultMessage: 'View all connectors',
   }),
   sources: i18n.translate('xpack.agentBuilder.conversationActions.sources', {
     defaultMessage: 'View all sources',
@@ -141,6 +147,10 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const isDataSourcesEnabled = uiSettings.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID, false);
+  const isABConnectorsEnabled = uiSettings.get<boolean>(
+    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
+    false
+  );
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -217,7 +227,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     />,
     <EuiContextMenuItem
       key="agents"
-      icon={<EuiIcon type="productAgent" />}
+      icon={<EuiIcon type="productAgent" aria-hidden={true} />}
       onClick={closePopover}
       href={createAgentBuilderUrl(appPaths.agents.list)}
       data-test-subj="agentBuilderActionsAgents"
@@ -252,6 +262,19 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
             data-test-subj="agentBuilderActionsPlugins"
           >
             {fullscreenLabels.plugins}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    ...(isABConnectorsEnabled
+      ? [
+          <EuiContextMenuItem
+            key="connectors"
+            icon="plugs"
+            onClick={closePopover}
+            href={createAgentBuilderUrl(appPaths.connectors.list)}
+            data-test-subj="agentBuilderActionsConnectors"
+          >
+            {fullscreenLabels.connectors}
           </EuiContextMenuItem>,
         ]
       : []),
