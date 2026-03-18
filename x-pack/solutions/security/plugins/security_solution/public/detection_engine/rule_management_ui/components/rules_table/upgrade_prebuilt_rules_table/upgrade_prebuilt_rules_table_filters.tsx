@@ -17,7 +17,7 @@ import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_ta
 import { RuleCustomizationFilterPopover } from './upgrade_rule_customization_filter_popover';
 
 /**
- * Search bar only for the Upgrade Prebuilt Rules table. Renders at the top of the layout.
+ * Search bar for the Upgrade Prebuilt Rules table. Renders at the top of the layout.
  */
 export const UpgradePrebuiltRulesTableSearchBar = React.memo(
   function UpgradePrebuiltRulesTableSearchBar() {
@@ -49,7 +49,7 @@ export const UpgradePrebuiltRulesTableSearchBar = React.memo(
 UpgradePrebuiltRulesTableSearchBar.displayName = 'UpgradePrebuiltRulesTableSearchBar';
 
 /**
- * Sidebar content: tags and customization status filters for the Upgrade Prebuilt Rules table.
+ * Sidebar filter for the Upgrade Prebuilt Rules table.
  */
 export const UpgradePrebuiltRulesTableFiltersSidebarContent = React.memo(
   function UpgradePrebuiltRulesTableFiltersSidebarContent() {

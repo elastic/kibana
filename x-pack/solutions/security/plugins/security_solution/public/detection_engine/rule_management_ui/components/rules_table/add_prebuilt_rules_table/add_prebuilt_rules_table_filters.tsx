@@ -14,7 +14,7 @@ import { RuleSearchField } from '../rules_table_filters/rule_search_field';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 
 /**
- * Search bar only for the Add Prebuilt Rules table. Renders at the top of the layout.
+ * Search bar for the Add Prebuilt Rules table. Renders at the top of the layout.
  */
 export const AddPrebuiltRulesTableSearchBar = React.memo(function AddPrebuiltRulesTableSearchBar() {
   const {
@@ -44,7 +44,7 @@ export const AddPrebuiltRulesTableSearchBar = React.memo(function AddPrebuiltRul
 AddPrebuiltRulesTableSearchBar.displayName = 'AddPrebuiltRulesTableSearchBar';
 
 /**
- * Sidebar content: tags filter for the Add Prebuilt Rules table.
+ * Sidebar filter for the Add Prebuilt Rules table.
  */
 export const AddPrebuiltRulesTableFiltersSidebarContent = React.memo(
   function AddPrebuiltRulesTableFiltersSidebarContent() {

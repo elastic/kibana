@@ -26,7 +26,7 @@ interface RulesTableFiltersProps {
 }
 
 /**
- * Search bar only for the rules table. Renders at the top of the layout.
+ * Search bar for the Rules table. Renders at the top of the layout.
  */
 export const RulesTableSearchBar = React.memo(function RulesTableSearchBar() {
   const { startTransaction } = useStartTransaction();
@@ -49,7 +49,7 @@ export const RulesTableSearchBar = React.memo(function RulesTableSearchBar() {
 RulesTableSearchBar.displayName = 'RulesTableSearchBar';
 
 /**
- * Sidebar content: all filters except search, stacked vertically for the rules table.
+ * Sidebar filter for the Rules table.
  */
 export const RulesTableFiltersSidebarContent = React.memo<RulesTableFiltersProps>(
   function RulesTableFiltersSidebarContent({ selectedTab }) {
