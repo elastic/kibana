@@ -23,6 +23,7 @@ import { mockCustomizationContext } from '../../../../customizations/__mocks__/c
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createTabsStorageManager } from '../tabs_storage_manager';
 import { DiscoverSearchSessionManager } from '../discover_search_session';
+import { getCurrentProfileId } from './actions/tab_state';
 
 describe('InternalStateStore', () => {
   const services = createDiscoverServicesMock();
@@ -113,9 +114,7 @@ describe('InternalStateStore', () => {
   it('should preserve snapshotsByProfileId when updating reset state', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
-      .scopedProfilesManager$.getValue()
-      .getContexts().dataSourceContext.profileId;
+    const profileId = getCurrentProfileId(runtimeStateManager, tabId);
 
     await store.dispatch(
       internalStateActions.setAppState({
@@ -127,7 +126,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    const prevResetId = selectTab(store.getState(), tabId).defaultProfileState.resetId;
+    const prevDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
 
     store.dispatch(
       internalStateActions.setProfileStateFieldsToReset({
@@ -136,25 +135,25 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), tabId).defaultProfileState).toEqual({
-      resetId: expect.any(String),
-      fieldsToReset: 'all',
-      snapshotsByProfileId: {
-        [profileId]: {
-          columns: ['field1'],
-          rowHeight: 3,
-        },
-      },
+    const nextDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
+
+    expect(nextDefaultProfileState.fieldsToReset).toBe('all');
+    expect(typeof nextDefaultProfileState.resetId).toBe('string');
+    expect(nextDefaultProfileState.resetId).not.toBe('');
+    expect(nextDefaultProfileState.resetId).not.toBe(prevDefaultProfileState.resetId);
+    expect(nextDefaultProfileState.snapshotsByProfileId).toBe(
+      prevDefaultProfileState.snapshotsByProfileId
+    );
+    expect(nextDefaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+      columns: ['field1'],
+      rowHeight: 3,
     });
-    expect(selectTab(store.getState(), tabId).defaultProfileState.resetId).not.toBe(prevResetId);
   });
 
   it('should only update snapshotsByProfileId', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
-      .scopedProfilesManager$.getValue()
-      .getContexts().dataSourceContext.profileId;
+    const profileId = getCurrentProfileId(runtimeStateManager, tabId);
 
     store.dispatch(
       internalStateActions.setProfileStateFieldsToReset({
@@ -174,22 +173,19 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), tabId).defaultProfileState).toEqual({
-      ...prevDefaultProfileState,
-      snapshotsByProfileId: {
-        [profileId]: {
-          columns: ['field1'],
-        },
-      },
+    const nextDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
+
+    expect(nextDefaultProfileState.fieldsToReset).toEqual(prevDefaultProfileState.fieldsToReset);
+    expect(nextDefaultProfileState.resetId).toBe(prevDefaultProfileState.resetId);
+    expect(nextDefaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+      columns: ['field1'],
     });
   });
 
   it('should only apply changed app state fields to snapshotsByProfileId', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
-      .scopedProfilesManager$.getValue()
-      .getContexts().dataSourceContext.profileId;
+    const profileId = getCurrentProfileId(runtimeStateManager, tabId);
 
     await store.dispatch(
       internalStateActions.setAppState({
@@ -225,9 +221,7 @@ describe('InternalStateStore', () => {
   it('should not update snapshotsByProfileId for system-triggered app state changes', async () => {
     const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
-      .scopedProfilesManager$.getValue()
-      .getContexts().dataSourceContext.profileId;
+    const profileId = getCurrentProfileId(runtimeStateManager, tabId);
 
     store.dispatch(
       internalStateActions.setAppState({
