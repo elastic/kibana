@@ -9,7 +9,7 @@ inputs:
   - name: sql
     type: string
     required: true
-    description: 'Read-only SQL SELECT query to execute (e.g. SELECT id, name FROM users WHERE status = "active" LIMIT 20). Only SELECT statements are permitted.'
+    description: 'Read-only SQL SELECT query to execute (for example, SELECT id, name FROM users WHERE status = "active" LIMIT 20). Only SELECT statements are permitted.'
   - name: maxRows
     type: number
     required: false

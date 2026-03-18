@@ -9,7 +9,7 @@ inputs:
   - name: table
     type: string
     required: true
-    description: 'Name of the table to search (e.g. "users", "products"). Use list_tables to discover available tables.'
+    description: 'Name of the table to search (for example, "users", "products"). Use list_tables to discover available tables.'
   - name: searchTerm
     type: string
     required: true
@@ -17,7 +17,7 @@ inputs:
   - name: columns
     type: array
     required: true
-    description: 'Column names to search in (e.g. ["name", "email", "notes"]). At least one column is required. Use describe_table to discover available columns.'
+    description: 'Column names to search in (for example, ["name", "email", "notes"]). At least one column is required. Use describe_table to discover available columns.'
   - name: maxRows
     type: number
     required: false

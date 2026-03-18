@@ -22,7 +22,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 MySQL connectors have the following configuration properties:
 
 Host
-:   The hostname, IP address, or URL of the MySQL HTTP proxy (e.g., `https://your-mysql-proxy.example.com`, `192.168.1.1`, `localhost`).
+:   The hostname, IP address, or URL of the MySQL HTTP proxy (for example, `https://your-mysql-proxy.example.com`, `192.168.1.1`, `localhost`).
 
 Port
 :   The port number for the MySQL HTTP proxy (default: 8080).

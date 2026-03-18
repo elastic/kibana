@@ -9,7 +9,7 @@ inputs:
   - name: table
     type: string
     required: true
-    description: 'Name of the table to describe (e.g. "users", "orders"). Use list_tables to discover available tables.'
+    description: 'Name of the table to describe (for example, "users", "orders"). Use list_tables to discover available tables.'
   - name: database
     type: string
     required: false
