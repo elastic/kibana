@@ -10,7 +10,7 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.ts'));
-  const fixturePlugin = resolve(__dirname, './fixture_plugin');
+  const fixturePlugin = resolve(__dirname, '../../plugins/search_inference_endpoints_fixture');
 
   return {
     ...baseIntegrationTestsConfig.getAll(),

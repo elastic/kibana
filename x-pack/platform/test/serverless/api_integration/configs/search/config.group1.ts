@@ -11,7 +11,7 @@ import { createTestConfig } from '../../config.base';
 
 const inferenceEndpointsFixturePlugin = resolve(
   __dirname,
-  '../../../../api_integration/apis/search_inference_endpoints/fixture_plugin'
+  '../../../../api_integration/plugins/search_inference_endpoints_fixture'
 );
 
 export default createTestConfig({
