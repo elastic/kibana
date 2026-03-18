@@ -81,7 +81,7 @@ describe('InternalStateStore', () => {
         },
       },
     };
-    await store.dispatch(internalStateActions.openInNewTab(params));
+    store.dispatch(internalStateActions.openInNewTab(params));
     const tabsState = store.getState().tabs;
     expect(tabsState.allIds).toHaveLength(2);
     expect(tabsState.unsafeCurrentId).not.toBe(initialTabId);
@@ -116,7 +116,7 @@ describe('InternalStateStore', () => {
     const tabId = store.getState().tabs.unsafeCurrentId;
     const profileId = getCurrentProfileId(runtimeStateManager, tabId);
 
-    await store.dispatch(
+    store.dispatch(
       internalStateActions.setAppState({
         tabId,
         appState: {
@@ -164,7 +164,7 @@ describe('InternalStateStore', () => {
 
     const prevDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
 
-    await store.dispatch(
+    store.dispatch(
       internalStateActions.setAppState({
         tabId,
         appState: {
@@ -187,7 +187,7 @@ describe('InternalStateStore', () => {
     const tabId = store.getState().tabs.unsafeCurrentId;
     const profileId = getCurrentProfileId(runtimeStateManager, tabId);
 
-    await store.dispatch(
+    store.dispatch(
       internalStateActions.setAppState({
         tabId,
         appState: {
@@ -198,7 +198,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    await store.dispatch(
+    store.dispatch(
       internalStateActions.setAppState({
         tabId,
         appState: {
@@ -380,7 +380,7 @@ describe('InternalStateStore', () => {
       })
     );
 
-    await store.dispatch(
+    store.dispatch(
       internalStateActions.openInNewTab({
         tabLabel: 'Second tab',
       })

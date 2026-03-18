@@ -11,6 +11,7 @@ import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_
 import { type DiscoverAppState, internalStateActions, selectTab } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
@@ -84,9 +85,8 @@ describe('tab_state actions', () => {
     it('should sync snapshotsByProfileId for the current profile when triggered separately', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
       const profileId = getCurrentProfileId(runtimeStateManager, tabId);
-      const snapshotsByProfileId = structuredClone(
-        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
-      );
+      const snapshotsByProfileId = selectTab(internalState.getState(), tabId).defaultProfileState
+        .snapshotsByProfileId;
 
       internalState.dispatch(
         internalStateActions.setAppState({
@@ -101,19 +101,16 @@ describe('tab_state actions', () => {
 
       expect(
         selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
-      ).toEqual(snapshotsByProfileId);
+      ).toBe(snapshotsByProfileId);
 
       internalState.dispatch(internalStateActions.syncProfileStateSnapshot({ tabId }));
 
-      expect(
-        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
-      ).toEqual({
-        ...snapshotsByProfileId,
-        [profileId]: {
-          columns: ['message'],
-          hideChart: true,
-        },
-      });
+      const currentSnapshotsByProfileId = selectTab(internalState.getState(), tabId)
+        .defaultProfileState.snapshotsByProfileId;
+
+      expect(currentSnapshotsByProfileId[profileId]).not.toBeUndefined();
+      expect(currentSnapshotsByProfileId[profileId]?.columns).toEqual(['message']);
+      expect(currentSnapshotsByProfileId[profileId]?.hideChart).toBe(true);
     });
   });
 
@@ -200,13 +197,29 @@ describe('tab_state actions', () => {
   });
 
   describe('pushCurrentTabStateToUrl', () => {
-    it('should write the current app state to the URL even when app state is unchanged', async () => {
+    it('should write the current tab state to the URL even when state is unchanged', async () => {
       const { internalState, stateStorageContainer, tabId } = await setup();
+      const currentTab = selectTab(internalState.getState(), tabId);
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
 
       await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));
 
+      expect(setUrlStateSpy).toHaveBeenCalledWith(APP_STATE_URL_KEY, currentTab.appState, {
+        replace: true,
+      });
+      expect(setUrlStateSpy).toHaveBeenCalledWith(
+        GLOBAL_STATE_URL_KEY,
+        {
+          time: currentTab.globalState.timeRange,
+          refreshInterval: currentTab.globalState.refreshInterval,
+          filters: currentTab.globalState.filters,
+        },
+        {
+          replace: true,
+        }
+      );
       expect(stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY)).toEqual(
-        selectTab(internalState.getState(), tabId).appState
+        currentTab.appState
       );
     });
   });

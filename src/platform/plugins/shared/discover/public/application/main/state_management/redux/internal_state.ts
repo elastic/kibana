@@ -352,9 +352,7 @@ export const internalStateSlice = createSlice({
 
     setProfileStateFieldsToReset: {
       prepare: (
-        payload: TabActionPayload<{
-          fieldsToReset: TabState['defaultProfileState']['fieldsToReset'];
-        }>
+        payload: TabActionPayload<Pick<TabState['defaultProfileState'], 'fieldsToReset'>>
       ) => ({
         payload: {
           ...payload,
