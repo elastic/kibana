@@ -416,7 +416,7 @@ describe('getNormalizedDataStreams', () => {
     expect(useApmVar?.default).toEqual(true);
   });
 
-  it('should return valid data stream with default type when dynamic_signal_types true and type omitted', () => {
+  it('should return data stream with undefined type when dynamic_signal_types true and type omitted', () => {
     const result = getNormalizedDataStreams({
       ...integrationPkg,
       type: 'input',
@@ -433,7 +433,7 @@ describe('getNormalizedDataStreams', () => {
       ] as any,
     });
     expect(result).toHaveLength(1);
-    expect(result[0].type).toEqual('logs');
+    expect(result[0].type).toBeUndefined();
     expect(result[0].streams).toHaveLength(1);
     const useApmVar = result[0].streams![0].vars?.find((v) => v.name === 'use_apm');
     expect(useApmVar).toBeDefined();

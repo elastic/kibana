@@ -28,7 +28,9 @@ import {
   PackagePolicyOutputError,
   PackagePolicyContentPackageError,
   CustomPackagePolicyNotAllowedForAgentlessError,
+  PackagePolicyValidationError,
 } from '../../errors';
+import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 import { licenseService } from '../license';
 import { outputService } from '../output';
 
@@ -55,11 +57,27 @@ export const mapPackagePolicySavedObjectToPackagePolicy = ({
 export async function preflightCheckPackagePolicy(
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy | NewPackagePolicy,
-  packageInfo?: Pick<PackageInfo, 'type'>
+  packageInfo?: PackageInfo
 ) {
   // Package policies cannot be created for content type packages
   if (packageInfo?.type === 'content') {
     throw new PackagePolicyContentPackageError('Cannot create policy for content only packages');
+  }
+
+  // Guard: streams without data_stream.type are only valid for dynamic_signal_types packages
+  if (packageInfo) {
+    const isDynamic = hasDynamicSignalTypes(packageInfo);
+    if (!isDynamic) {
+      for (const input of packagePolicy.inputs) {
+        for (const stream of input.streams ?? []) {
+          if (!stream.data_stream?.type) {
+            throw new PackagePolicyValidationError(
+              `[data_stream.type]: required for stream in package "${packageInfo.name}"`
+            );
+          }
+        }
+      }
+    }
   }
 
   // If package policy has multiple agent policies IDs, or no agent policies (orphaned integration policy)

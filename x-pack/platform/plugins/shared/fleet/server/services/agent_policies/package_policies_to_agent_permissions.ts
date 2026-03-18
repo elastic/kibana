@@ -133,22 +133,22 @@ export function storedPackagePoliciesToAgentPermissions(
       case 'endpoint':
         // - Endpoint doesn't store the `data_stream` metadata in
         // `packagePolicy.inputs`, so we will use _all_ data_streams from the
-        // package.
-        dataStreamsForPermissions = dataStreams;
+        // package. These packages always have typed data streams.
+        dataStreamsForPermissions = dataStreams as unknown as DataStreamMeta[];
         break;
 
       case 'apm':
         // - APM doesn't store the `data_stream` metadata in
         //   `packagePolicy.inputs`, so we will use _all_ data_streams from
-        //   the package.
-        dataStreamsForPermissions = dataStreams;
+        //   the package. These packages always have typed data streams.
+        dataStreamsForPermissions = dataStreams as unknown as DataStreamMeta[];
         break;
 
       case 'osquery_manager':
         // - Osquery manager doesn't store the `data_stream` metadata in
         //   `packagePolicy.inputs`, so we will use _all_ data_streams from
-        //   the package.
-        dataStreamsForPermissions = dataStreams;
+        //   the package. These packages always have typed data streams.
+        dataStreamsForPermissions = dataStreams as unknown as DataStreamMeta[];
         break;
 
       default:
@@ -201,6 +201,13 @@ export function storedPackagePoliciesToAgentPermissions(
                 .forEach((stream) => {
                   if (!('data_stream' in stream)) {
                     return;
+                  }
+
+                  if (!stream.data_stream.type) {
+                    // Should never happen for non-dynamic packages if preflightCheckPackagePolicy ran
+                    throw new PackagePolicyRequestError(
+                      `[data_stream.type]: unexpected undefined stream type for non-dynamic package "${pkg.name}"`
+                    );
                   }
 
                   const ds: DataStreamMeta = {

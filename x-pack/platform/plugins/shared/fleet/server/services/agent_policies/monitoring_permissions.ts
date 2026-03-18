@@ -16,6 +16,7 @@ import type { FullAgentPolicyOutputPermissions } from '../../../common/types';
 import { FLEET_ELASTIC_AGENT_PACKAGE } from '../../../common';
 import { dataTypes } from '../../../common/constants';
 
+import type { DataStreamMeta } from './package_policies_to_agent_permissions';
 import { getDataStreamPrivileges } from './package_policies_to_agent_permissions';
 
 function buildDefault(
@@ -87,6 +88,9 @@ export async function getMonitoringPermissions(
     _elastic_agent_monitoring: {
       indices: pkg.data_streams
         .map((ds) => {
+          if (!ds.type) {
+            return;
+          }
           if (ds.type === dataTypes.Logs && !enabled.logs) {
             return;
           }
@@ -96,7 +100,7 @@ export async function getMonitoringPermissions(
           if (ds.type === dataTypes.Traces && !enabled.traces) {
             return;
           }
-          return getDataStreamPrivileges(ds, namespace);
+          return getDataStreamPrivileges(ds as DataStreamMeta, namespace);
         })
         .filter(
           (

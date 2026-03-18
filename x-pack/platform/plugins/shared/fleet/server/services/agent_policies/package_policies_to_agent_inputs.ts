@@ -35,6 +35,7 @@ import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '..
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
 import { FleetError } from '../../errors';
+import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -88,6 +89,24 @@ export const storedPackagePolicyToAgentInputs = (
       package_policy_id: packagePolicy.id,
       ...getFullInputStreams(input),
     };
+
+    // Guard: undefined data_stream.type is only valid for dynamic_signal_types packages
+    if (fullInput.streams) {
+      for (const stream of fullInput.streams) {
+        if (stream.data_stream?.type === undefined) {
+          if (hasDynamicSignalTypes(packageInfo)) {
+            // For dynamic packages, type is determined at runtime — strip the undefined key
+            const { type: _type, ...restDataStream } = stream.data_stream ?? {};
+            stream.data_stream = restDataStream as FullAgentPolicyInputStream['data_stream'];
+          } else {
+            // Should never reach here if preflightCheckPackagePolicy ran, but throw defensively
+            throw new FleetError(
+              `[data_stream.type]: unexpected undefined stream type for non-dynamic package`
+            );
+          }
+        }
+      }
+    }
 
     if (addFields && !GLOBAL_DATA_TAG_EXCLUDED_INPUTS.has(fullInput.type)) {
       fullInput.processors = [addFields];

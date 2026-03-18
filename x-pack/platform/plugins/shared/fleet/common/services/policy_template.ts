@@ -123,7 +123,7 @@ export const getNormalizedDataStreams = (
     }
 
     const dataStream: RegistryDataStream = {
-      type: dataStreamType || policyTemplate.type || 'logs',
+      type: dataStreamType || policyTemplate.type,
       dataset,
       title: policyTemplate.title + ' Dataset',
       release: packageInfo.release || 'ga',

@@ -605,7 +605,7 @@ function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | 
 
   if (excludeDataStreamTypes.length > 0) {
     filteredDataStreams = packageInfo.data_streams?.filter(
-      (dataStream) => !excludeDataStreamTypes.includes(dataStream.type)
+      (dataStream) => !dataStream.type || !excludeDataStreamTypes.includes(dataStream.type)
     );
     // filter out matching types e.g. nginx/metrics
     filteredPolicyTemplates = packageInfo.policy_templates?.reduce(

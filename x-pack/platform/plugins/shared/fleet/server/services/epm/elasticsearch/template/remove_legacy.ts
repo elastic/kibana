@@ -17,7 +17,9 @@ import { getRegistryDataStreamAssetBaseName } from '../../../../../common/servic
 const LEGACY_TEMPLATE_SUFFIXES = ['@mappings', '@settings'];
 
 const getComponentTemplateWithSuffix = (dataStream: RegistryDataStream, suffix: string) => {
-  const baseName = getRegistryDataStreamAssetBaseName(dataStream);
+  const baseName = getRegistryDataStreamAssetBaseName(
+    dataStream as { dataset: string; type: string; hidden?: boolean }
+  );
 
   return baseName + suffix;
 };

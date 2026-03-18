@@ -53,7 +53,7 @@ export const findDataStreamsFromDifferentPackages = async (
 ) => {
   const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName, dataStreamType);
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
-    type: dataStream.type,
+    type: dataStream.type!, // always defined: callers pass explicit dataStreamType for dynamic packages
     dataset: datasetName,
   });
   return { dataStream, existingDataStreams };
@@ -176,7 +176,7 @@ async function installAssetsForDataStreamType(opts: {
       // defined by the package will not have been applied which could lead
       // to unforeseen circumstances, so force flag must be used.
       const streamIndexPattern = dataStreamService.streamPartsToIndexPattern({
-        type: dataStream.type,
+        type: dataStream.type!, // always defined when called via installAssetsForDataStreamType
         dataset: datasetName,
       });
 
@@ -199,7 +199,7 @@ async function installAssetsForDataStreamType(opts: {
   }
 
   const existingIndexTemplate = await dataStreamService.getMatchingIndexTemplate(esClient, {
-    type: dataStream.type,
+    type: dataStream.type!, // always defined when called via installAssetsForDataStreamType
     dataset: datasetName,
   });
 

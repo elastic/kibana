@@ -449,7 +449,7 @@ export enum RegistryDataStreamKeys {
 
 export interface RegistryDataStream {
   [key: string]: any;
-  [RegistryDataStreamKeys.type]: string;
+  [RegistryDataStreamKeys.type]?: string;
   [RegistryDataStreamKeys.ilm_policy]?: string;
   [RegistryDataStreamKeys.hidden]?: boolean;
   [RegistryDataStreamKeys.dataset]: string;

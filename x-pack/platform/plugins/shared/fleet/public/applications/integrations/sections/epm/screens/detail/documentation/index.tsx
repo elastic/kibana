@@ -116,7 +116,7 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
 
 type RegistryInputWithStreams = RegistryInput & {
   key: string;
-  streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }>;
+  streams: Array<RegistryStream & { data_stream: { type?: string; dataset: string } }>;
 };
 
 const StreamsSection: React.FunctionComponent<{

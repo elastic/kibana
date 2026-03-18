@@ -148,10 +148,12 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     const { exists: indexTemplateExists, isLoading: isLoadingIndexTemplate } =
       useIndexTemplateExists(
-        getRegistryDataStreamAssetBaseName({
-          dataset: customDatasetVarValue || packageInputStream.data_stream.dataset,
-          type: packageInputStream.data_stream.type,
-        }),
+        packageInputStream.data_stream.type
+          ? getRegistryDataStreamAssetBaseName({
+              dataset: customDatasetVarValue || packageInputStream.data_stream.dataset,
+              type: packageInputStream.data_stream.type,
+            })
+          : '',
         isPackagePolicyEdit
       );
 
@@ -553,24 +555,36 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                           </EuiFlexItem>
                         );
                       })}
-                      {isPackagePolicyEdit && showPipelinesAndMappings && (
-                        <>
-                          <EuiFlexItem>
-                            <PackagePolicyEditorDatastreamPipelines
-                              packageInputStream={packagePolicyInputStream}
-                              packageInfo={packageInfo}
-                              customDataset={customDatasetVarValue}
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <PackagePolicyEditorDatastreamMappings
-                              packageInputStream={packagePolicyInputStream}
-                              packageInfo={packageInfo}
-                              customDataset={customDatasetVarValue}
-                            />
-                          </EuiFlexItem>
-                        </>
-                      )}
+                      {isPackagePolicyEdit &&
+                        showPipelinesAndMappings &&
+                        packagePolicyInputStream.data_stream.type && (
+                          <>
+                            <EuiFlexItem>
+                              <PackagePolicyEditorDatastreamPipelines
+                                packageInputStream={
+                                  packagePolicyInputStream as {
+                                    id?: string;
+                                    data_stream: { dataset: string; type: string };
+                                  }
+                                }
+                                packageInfo={packageInfo}
+                                customDataset={customDatasetVarValue}
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <PackagePolicyEditorDatastreamMappings
+                                packageInputStream={
+                                  packagePolicyInputStream as {
+                                    id?: string;
+                                    data_stream: { dataset: string; type: string };
+                                  }
+                                }
+                                packageInfo={packageInfo}
+                                customDataset={customDatasetVarValue}
+                              />
+                            </EuiFlexItem>
+                          </>
+                        )}
                     </>
                   ) : null}
                 </Fragment>

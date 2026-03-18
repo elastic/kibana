@@ -170,7 +170,9 @@ export const mapToCard = ({
   }
 
   if ('data_streams' in item && Array.isArray(item.data_streams)) {
-    const types = [...new Set(item.data_streams.map((ds) => ds.type))];
+    const types = [
+      ...new Set(item.data_streams.map((ds) => ds.type).filter((t): t is string => !!t)),
+    ];
     if (types.length > 0) {
       cardResult.signalTypes = types;
     }
