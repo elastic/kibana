@@ -1,0 +1,982 @@
+# Agentic Alert Triage — Feature-Flagged
+# Set consts.use_orchestrator to "true" for Phase 1 orchestrator skill, "false" for original L2/L3 agents.
+name: Agentic Alert Triage (Feature Flagged)
+version: "1"
+enabled: true
+description: >
+  Alert-triggered workflow with a feature flag (use_orchestrator).
+  When "true": enrichment → L1 → case → single orchestrator skill report.
+  When "false": enrichment → L1 → case → individual L2 domain agents → L3 review.
+
+tags:
+  - security
+  - triage
+  - detection
+
+consts:
+  space_id: "infosec-detections"
+  signals_index: ".siem-signals-infosec-detections"
+  use_orchestrator: "true"
+  l1_agent_id: "agentic-alert-triage-l1-investigation"
+  l2_threshold_agent_id: "agentic-alert-triage-threshold-context"
+  orchestrator_agent_id: "agentic-alert-triage-orchestrator"
+  l2_macos_agent_id: "l2_macos_forensics_agent"
+  l2_windows_agent_id: "l2_windows_forensics_agent"
+  l2_linux_agent_id: "l2_linux_forensics_agent"
+  l2_aws_agent_id: "l2_aws_cloudtrail_agent"
+  l2_okta_agent_id: "l2_okta_agent"
+  l2_azure_agent_id: "l2_azure_agent"
+  l2_gcp_agent_id: "l2_gcp_agent"
+  l2_cloud_forensics_agent_id: "l2_cloud_forensics_agent"
+  l2_source_ip_agent_id: "l2_source_ip_agent"
+  l3_agent_id: "l3_review_agent"
+
+triggers:
+  - type: alert
+
+steps:
+  # --- Phase 1a: Endpoint branch - Jamf/workstation owner lookup ---
+  - name: enrich_if_endpoint
+    type: if
+    condition: "event.alerts[0].agent.type: endpoint"
+    steps:
+      - name: workstation_lookup_macos
+        type: if
+        condition: "event.alerts[0].host.os.type: macos"
+        steps:
+          - name: jamf_workstation_lookup
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_data_warehouse:asset_infrastructure_workstations*
+                | WHERE host.id == "{{ event.alerts[0].host.id }}" AND @timestamp > NOW() - 24h
+                | KEEP user.email, asset.type, asset.name, host.id, host.os.name, host.os.version, jamf.jamf_details.general.lastContactTime, lastSyncDateTime
+                | LIMIT 10
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+        else:
+          - name: workstation_lookup
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_data_warehouse:asset_infrastructure_workstations*
+                | WHERE asset.name == "{{ event.alerts[0].host.name }}" AND @timestamp > NOW() - 24h
+                | KEEP user.email, asset.type, asset.name, host.id, host.os.name, host.os.version, lastSyncDateTime
+                | LIMIT 10
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+
+      - name: host_alerts_24h
+        type: elasticsearch.esql.query
+        with:
+          query: |
+            FROM .siem-signals-infosec-detections
+            | WHERE host.id == "{{ event.alerts[0].host.id }}" AND @timestamp > NOW() - 24h
+            | STATS alert_count = COUNT(*), process_names = VALUES(process.name) BY kibana.alert.rule.name, kibana.alert.severity
+            | SORT alert_count DESC
+        on-failure:
+          continue: true
+          retry:
+            max-attempts: 2
+            delay: 2s
+
+  # --- Phase 1b: User email branch - Okta stats and user asset lookup ---
+  - name: enrich_if_user_email
+    type: if
+    condition: "event.alerts[0].user.email:* or event.alerts[0].agent.type: endpoint"
+    steps:
+      - name: okta_login_stats_24h
+        type: elasticsearch.esql.query
+        with:
+          query: |
+            FROM infosec_zocalo:logs-okta*
+            | WHERE @timestamp >= NOW() - 24h AND user.email == "{{ event.alerts[0].user.email | default: steps.jamf_workstation_lookup.output.values[0][0] | default: steps.workstation_lookup.output.values[0][0] }}"
+            | STATS login_count = COUNT(*), distinct_ips = COUNT_DISTINCT(source.ip), distinct_sessions = COUNT_DISTINCT(okta.authentication_context.root_session_id), target_apps = VALUES(okta.target_app.display_name), geo_countries = VALUES(source.geo.country_name), source_orgs = VALUES(source.as.organization.name) BY user.email
+            | LIMIT 10
+        on-failure:
+          continue: true
+          retry:
+            max-attempts: 2
+            delay: 2s
+
+      - name: user_asset_inventory
+        type: elasticsearch.esql.query
+        with:
+          query: |
+            FROM infosec_data_warehouse:asset_entities_users_combined
+            | WHERE user.email == "{{ event.alerts[0].user.email | default: steps.jamf_workstation_lookup.output.values[0][0] | default: steps.workstation_lookup.output.values[0][0] }}" AND @timestamp > NOW() - 24h
+            | KEEP user.email, okta.profile.firstName, okta.profile.lastName, okta.profile.title, okta.profile.manager_name, okta.profile.location, okta.status, workday_enrichment.workday.Cost_Center
+            | LIMIT 5
+        on-failure:
+          continue: true
+          retry:
+            max-attempts: 2
+            delay: 2s
+
+  # --- Phase 1c: Source IP branch ---
+  - name: enrich_if_source_ip
+    type: if
+    condition: "event.alerts[0].source.ip:*"
+    steps:
+      - name: ip_admin_activity
+        type: elasticsearch.esql.query
+        with:
+          query: |
+            FROM infosec_zocalo:adminconsole-auditlogs-*
+            | WHERE @timestamp > NOW() - 24h AND client.address == "{{ event.alerts[0].source.ip }}"
+            | KEEP @timestamp, admin.id, client.address, url.original, http.request.method
+            | LIMIT 20
+        on-failure:
+          continue: true
+          retry:
+            max-attempts: 2
+            delay: 2s
+
+  # --- Phase 1d: Correlated alerts (72h) ---
+  - name: correlated_alerts_72h
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM .siem-signals-infosec-detections
+        | WHERE @timestamp > NOW() - 72h
+          AND ({% if event.alerts[0].user.email %}user.email == "{{ event.alerts[0].user.email }}"{% else %}false{% endif %}
+               OR {% if event.alerts[0].host.id %}host.id == "{{ event.alerts[0].host.id }}"{% else %}false{% endif %}
+               OR {% if event.alerts[0].source.ip %}source.ip == "{{ event.alerts[0].source.ip }}"{% else %}false{% endif %})
+        | STATS alert_count = COUNT(*), process_names = VALUES(process.name) BY kibana.alert.rule.name, kibana.alert.severity
+        | SORT alert_count DESC
+    on-failure:
+      continue: true
+      retry:
+        max-attempts: 2
+        delay: 2s
+
+  # --- Phase 1e: L1 Threshold context (only for threshold rules) ---
+  - name: l1_if_threshold
+    type: if
+    condition: "event.alerts[0].kibana.alert.rule.type: threshold"
+    steps:
+      - name: l1_threshold_context
+        type: ai.agent
+        with:
+          agent_id: "{{ consts.l2_threshold_agent_id }}"
+          message: |
+            You are the L1 threshold context agent. This is a threshold rule. Gather the related alerts that contributed to this threshold. Return ONLY key information for each alert so it can be used for enrichment and investigation. Do NOT return full alert bodies.
+
+            Signals index: {{ consts.signals_index }}
+            Rule name: {{ event.alerts[0].rule.name }}
+            Alert @timestamp (end of window): {{ event.alerts[0]['@timestamp'] }}
+            threshold_result: {{ event.alerts[0].kibana.alert.threshold_result | json }}
+
+            Use platform.core.execute_esql once. Build WHERE from threshold_result.terms and time window. KEEP only: kibana.alert.rule.name, kibana.alert.uuid, source.ip, user.email, host.id, host.name, agent.id, process.name, kibana.alert.severity, @timestamp. LIMIT 100. Format as a compact table or list (alert name, alert ID, enrichment fields). No prose beyond a one-line header.
+        on-failure:
+          continue: true
+          retry:
+            max-attempts: 2
+            delay: 5s
+
+  # --- Phase 2a: L1 Investigation ---
+  - name: l1_investigation
+    type: ai.agent
+    with:
+      agent_id: "{{ consts.l1_agent_id }}"
+      message: |
+        Investigate this security alert. You have pre-enriched context below. Use your tools ONLY to fill gaps — do not re-query data already provided. Focus on retrieving the full alert document for fields like process.command_line, process.args, file.path, event.original, and validating any suspicious observables. Return your investigation summary in Markdown.
+
+        === ALERT CONTEXT ===
+        Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}
+        Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }}
+        Time: {{ event.alerts[0]["@timestamp"] }}
+        Agent type: {{ event.alerts[0].agent.type }} | Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+        User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+        Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+
+        === RULE DETAILS ===
+        Description: {{ event.alerts[0].kibana.alert.rule.description }}
+        Alert reason: {{ event.alerts[0].kibana.alert.reason }}
+        Known false positives: {{ event.alerts[0].kibana.alert.rule.parameters.false_positives | json }}
+
+        === WORKSTATION OWNER ===
+        {% if steps.jamf_workstation_lookup.output.values %}
+        {{ steps.jamf_workstation_lookup.output.values | json }}
+        {% elsif steps.workstation_lookup.output.values %}
+        {{ steps.workstation_lookup.output.values | json }}
+        {% else %}
+        N/A (not endpoint alert or no data)
+        {% endif %}
+
+        === HOST ALERTS LAST 24H ===
+        {% if steps.host_alerts_24h.output.values %}
+        {{ steps.host_alerts_24h.output.values | json }}
+        {% else %}
+        N/A
+        {% endif %}
+
+        === OKTA STATS (24h) ===
+        {% if steps.okta_login_stats_24h.output.values %}
+        {{ steps.okta_login_stats_24h.output.values | json }}
+        {% else %}
+        N/A
+        {% endif %}
+
+        === USER ASSET INVENTORY ===
+        {% if steps.user_asset_inventory.output.values %}
+        {{ steps.user_asset_inventory.output.values | json }}
+        {% else %}
+        N/A
+        {% endif %}
+
+        === ADMIN ACTIVITY FROM SOURCE IP ===
+        {% if steps.ip_admin_activity.output.values %}
+        {{ steps.ip_admin_activity.output.values | json }}
+        {% else %}
+        N/A
+        {% endif %}
+
+        === CORRELATED ALERTS (72h) ===
+        {% if steps.correlated_alerts_72h.output.values %}
+        {{ steps.correlated_alerts_72h.output.values | json }}
+        {% else %}
+        No correlated alerts
+        {% endif %}
+
+        === THRESHOLD RELATED ALERTS (key info only – if threshold rule) ===
+        {% if steps.l1_threshold_context.output %}
+        {{ steps.l1_threshold_context.output }}
+        {% else %}
+        N/A (not a threshold rule)
+        {% endif %}
+    on-failure:
+      retry:
+        max-attempts: 2
+        delay: 5s
+      continue: true
+
+  # --- Phase 2b: L1 Assessment (structured output) ---
+  - name: l1_triage
+    type: ai.prompt
+    with:
+      prompt: |
+        You are performing L1 triage on a security alert. An investigation agent has already reviewed the alert using tools and produced findings. Review the investigation and all enriched context below, then classify the alert.
+
+        **Important:** If the L1 investigation findings clearly state that the alert is benign, a false positive, or recommend closing as such, you MUST output assessment **benign** with confidence **high** unless you have strong contradictory evidence. Do not override a clear benign/false-positive assessment from the investigation with suspicious.
+
+        === L1 INVESTIGATION FINDINGS ===
+        {{ steps.l1_investigation.output.message | default: steps.l1_investigation.output.response.message | default: 'Investigation agent did not return findings. Classify based on enriched context only.' }}
+
+        === ALERT CONTEXT ===
+        Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}
+        Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }}
+        Time: {{ event.alerts[0]["@timestamp"] }}
+        Agent type: {{ event.alerts[0].agent.type }} | Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+        User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+        Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+
+        === RULE DETAILS ===
+        Description: {{ event.alerts[0].kibana.alert.rule.description }}
+        Alert reason: {{ event.alerts[0].kibana.alert.reason }}
+        Known false positives: {{ event.alerts[0].kibana.alert.rule.parameters.false_positives | json }}
+
+        === ENRICHMENT DATA ===
+        {% if steps.jamf_workstation_lookup.output.values %}Workstation owner: {{ steps.jamf_workstation_lookup.output.values | json }}
+        {% elsif steps.workstation_lookup.output.values %}Workstation owner: {{ steps.workstation_lookup.output.values | json }}
+        {% endif %}
+        {% if steps.host_alerts_24h.output.values %}Host alerts 24h: {{ steps.host_alerts_24h.output.values | json }}
+        {% endif %}
+        {% if steps.okta_login_stats_24h.output.values %}Okta stats 24h: {{ steps.okta_login_stats_24h.output.values | json }}
+        {% endif %}
+        {% if steps.user_asset_inventory.output.values %}User inventory: {{ steps.user_asset_inventory.output.values | json }}
+        {% endif %}
+        {% if steps.ip_admin_activity.output.values %}Admin activity from source IP: {{ steps.ip_admin_activity.output.values | json }}
+        {% endif %}
+        {% if steps.correlated_alerts_72h.output.values %}Correlated alerts 72h: {{ steps.correlated_alerts_72h.output.values | json }}
+        {% endif %}
+
+        Classify as malicious, suspicious, or benign with high or medium confidence. Base your assessment on the investigation findings AND enriched data. When the investigation clearly concludes benign/false positive, you must classify benign with high confidence. When in doubt otherwise, choose suspicious. For benign, you must have high confidence.
+      outputSchema:
+        type: object
+        properties:
+          assessment:
+            type: string
+            enum: [malicious, suspicious, benign]
+          confidence:
+            type: string
+            enum: [high, medium]
+          reasoning:
+            type: string
+        required:
+          - assessment
+          - confidence
+          - reasoning
+      temperature: 0.3
+    on-failure:
+      retry:
+        max-attempts: 2
+        delay: 5s
+      continue: true
+
+  # --- Phase 3: Auto-close if benign + high confidence ---
+  - name: check_benign_high_confidence
+    type: if
+    condition: "steps.l1_triage.output.content.assessment: 'benign' and steps.l1_triage.output.content.confidence: 'high'"
+    steps:
+      - name: close_alert
+        type: kibana.request
+        with:
+          use_server_info: true
+          fetcher:
+            skip_ssl_verification: true
+          method: POST
+          path: "/s/{{ consts.space_id }}/api/detection_engine/signals/status"
+          body:
+            signal_ids:
+              - "{{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}"
+            status: closed
+        on-failure:
+          retry:
+            max-attempts: 2
+            delay: 2s
+          continue: true
+    else:
+      # --- Phase 4: Create case, attach alert, add enrichment comment ---
+      - name: create_case
+        type: kibana.request
+        with:
+          use_server_info: true
+          fetcher:
+            skip_ssl_verification: true
+          method: POST
+          path: "/s/{{ consts.space_id }}/api/cases"
+          body:
+            title: 'Agentic Triage: {{ event.alerts[0].kibana.alert.rule.name }}'
+            description: "Alert triage case created by Agentic Alert Triage workflow. Alert ID {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}."
+            tags:
+              - TEST
+              - agentic-triage
+            severity: "high"
+            settings:
+              syncAlerts: true
+            owner: "securitySolution"
+            connector:
+              id: "none"
+              name: "none"
+              type: ".none"
+              fields: null
+        on-failure:
+          retry:
+            max-attempts: 2
+            delay: 2s
+          continue: true
+
+      - name: update_case_enable_extract_observables
+        type: kibana.request
+        with:
+          use_server_info: true
+          fetcher:
+            skip_ssl_verification: true
+          method: PATCH
+          path: "/s/{{ consts.space_id }}/api/cases"
+          body:
+            cases:
+              - id: "{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}"
+                version: "{{ steps.create_case.output.data.version | default: steps.create_case.output.version }}"
+                settings:
+                  syncAlerts: true
+                  extractObservables: true
+        on-failure:
+          retry:
+            max-attempts: 2
+            delay: 2s
+          continue: true
+
+      - name: attach_alert_to_case
+        type: kibana.request
+        with:
+          use_server_info: true
+          fetcher:
+            skip_ssl_verification: true
+          method: POST
+          path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+          body:
+            type: "alert"
+            alertId: "{{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}"
+            index: "{{ consts.signals_index }}"
+            rule:
+              id: "{{ event.alerts[0].kibana.alert.rule.uuid | default: event.alerts[0].rule.id }}"
+              name: "{{ event.alerts[0].rule.name }}"
+            owner: "securitySolution"
+        on-failure:
+          retry:
+            max-attempts: 2
+            delay: 2s
+          continue: true
+
+      - name: add_enrichment_comment
+        type: kibana.request
+        with:
+          use_server_info: true
+          fetcher:
+            skip_ssl_verification: true
+          method: POST
+          path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+          body:
+            type: "user"
+            comment: |
+              ## Enrichment and L1 Triage
+
+              ### L1 Assessment
+              **Verdict:** {% if steps.l1_triage.output.content.assessment == "benign" %}False Positive{% else %}True Positive{% endif %}
+              **Assessment:** {{ steps.l1_triage.output.content.assessment | default: steps.l1_triage.output.assessment }}
+              **Summary:** {{ steps.l1_triage.output.content.reasoning | default: steps.l1_triage.output.reasoning | default: "No summary" | truncate: 300 }}
+
+              ### L1 Investigation Findings
+              {{ steps.l1_investigation.output }}
+
+              ### Workstation / Jamf
+              {% if steps.jamf_workstation_lookup.output.values %}{{ steps.jamf_workstation_lookup.output.values | json }}{% elsif steps.workstation_lookup.output.values %}{{ steps.workstation_lookup.output.values | json }}{% else %}N/A{% endif %}
+
+              ### Host Alerts 24h
+              {% if steps.host_alerts_24h.output.values %}{{ steps.host_alerts_24h.output.values | json }}{% else %}N/A{% endif %}
+
+              ### Okta Stats 24h
+              {% if steps.okta_login_stats_24h.output.values %}{{ steps.okta_login_stats_24h.output.values | json }}{% else %}N/A{% endif %}
+
+              ### User Asset Inventory
+              {% if steps.user_asset_inventory.output.values %}{{ steps.user_asset_inventory.output.values | json }}{% else %}N/A{% endif %}
+
+              ### Admin Activity (Source IP)
+              {% if steps.ip_admin_activity.output.values %}{{ steps.ip_admin_activity.output.values | json }}{% else %}N/A{% endif %}
+
+              ### Correlated Alerts 72h
+              {% if steps.correlated_alerts_72h.output.values %}{{ steps.correlated_alerts_72h.output.values | json }}{% else %}N/A{% endif %}
+            owner: "securitySolution"
+        on-failure:
+          retry:
+            max-attempts: 2
+            delay: 2s
+          continue: true
+
+      # --- Phase 5a: Add threshold context to case ---
+      - name: add_threshold_enrichment_comment
+        type: kibana.request
+        with:
+          use_server_info: true
+          fetcher:
+            skip_ssl_verification: true
+          method: POST
+          path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+          body:
+            type: "user"
+            comment: |
+              ## Threshold – related alerts (key info)
+
+              {{ steps.l1_threshold_context.output | default: 'N/A (not a threshold rule)' }}
+            owner: "securitySolution"
+        on-failure:
+          continue: true
+          retry:
+            max-attempts: 2
+            delay: 2s
+
+      # --- Phase 5b: Choose triage mode based on feature flag ---
+      - name: choose_triage_mode
+        type: if
+        condition: "consts.use_orchestrator == 'true'"
+        steps:
+          # --- Orchestrator path (Phase 1 skill) ---
+          - name: run_orchestrator
+            type: ai.agent
+            with:
+              agent_id: "{{ consts.orchestrator_agent_id }}"
+              message: |
+                Orchestrate the full triage in one run. Use the enrichment already gathered; do not re-query data that is present.
+
+                Case ID: {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}
+                Signals index: {{ consts.signals_index }}
+
+                === ALERT CONTEXT ===
+                Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}
+                Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }}
+                Time: {{ event.alerts[0]["@timestamp"] }}
+                Agent type: {{ event.alerts[0].agent.type }} | Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+                User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+                Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+
+                === L1 INVESTIGATION FINDINGS ===
+                {{ steps.l1_investigation.output }}
+
+                === L1 TRIAGE JSON ===
+                {{ steps.l1_triage.output.content | default: steps.l1_triage.output }}
+
+                === ENRICHMENT DATA ===
+                {% if steps.jamf_workstation_lookup.output.values %}Workstation owner: {{ steps.jamf_workstation_lookup.output.values | json }}
+                {% elsif steps.workstation_lookup.output.values %}Workstation owner: {{ steps.workstation_lookup.output.values | json }}
+                {% endif %}
+                {% if steps.host_alerts_24h.output.values %}Host alerts 24h: {{ steps.host_alerts_24h.output.values | json }}
+                {% endif %}
+                {% if steps.okta_login_stats_24h.output.values %}Okta stats 24h: {{ steps.okta_login_stats_24h.output.values | json }}
+                {% endif %}
+                {% if steps.user_asset_inventory.output.values %}User inventory: {{ steps.user_asset_inventory.output.values | json }}
+                {% endif %}
+                {% if steps.ip_admin_activity.output.values %}Admin activity from source IP: {{ steps.ip_admin_activity.output.values | json }}
+                {% endif %}
+                {% if steps.correlated_alerts_72h.output.values %}Correlated alerts 72h: {{ steps.correlated_alerts_72h.output.values | json }}
+                {% endif %}
+                {% if steps.l1_threshold_context.output %}Threshold context: {{ steps.l1_threshold_context.output }}
+                {% endif %}
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 5s
+
+          - name: add_orchestrator_comment
+            type: kibana.request
+            with:
+              use_server_info: true
+              fetcher:
+                skip_ssl_verification: true
+              method: POST
+              path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+              body:
+                type: "user"
+                comment: |
+                  ## Orchestrated Triage Report
+
+                  {{ steps.run_orchestrator.output }}
+                owner: "securitySolution"
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: 2s
+              continue: true
+
+          - name: console_triage_summary
+            type: console
+            with:
+              message: >
+                Triage complete (orchestrator). Case {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}.
+                L1: {{ steps.l1_triage.output }}.
+                Orchestrator: {{ steps.run_orchestrator.output }}.
+                Alert: {{ event.alerts[0].rule.name }}.
+
+        else:
+          # --- Original L2/L3 multi-agent path ---
+          - name: fetch_alert
+            type: elasticsearch.search
+            with:
+              index: "{{ consts.signals_index }}"
+              size: 1
+              query:
+                term:
+                  _id: "{{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}"
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+
+          # --- L2 MacOS (endpoint + macos) ---
+          - name: l2_if_macos
+            type: if
+            condition: "event.alerts[0].agent.type: endpoint and event.alerts[0].host.os.type: macos"
+            steps:
+              - name: l2_macos_forensics
+                type: ai.agent
+                with:
+                  agent_id: "{{ consts.l2_macos_agent_id }}"
+                  message: |
+                    You are performing L2 MacOS forensics. Use the platform.core.cases tool to get case comments and alerts. Use alerts.get-alert-by-id (and endpoint.process_entity_id when relevant) to fetch full alert details only when needed. Keep context small; do not load entire large documents. Return your forensic findings in Markdown.
+
+                    === ALERT CONTEXT (use tools for full document) ===
+                    Case ID: {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}
+                    Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }} | Index: {{ consts.signals_index }}
+                    Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }} | Time: {{ event.alerts[0]["@timestamp"] }}
+                    Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+                    User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+                    Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 5s
+
+              - name: add_l2_macos_comment
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+                  body:
+                    type: "user"
+                    comment: "## L2 MacOS Forensics\n\n{{ steps.l2_macos_forensics.output }}"
+                    owner: "securitySolution"
+                on-failure:
+                  continue: true
+
+          # --- L2 Windows (endpoint + windows) ---
+          - name: l2_if_windows
+            type: if
+            condition: "event.alerts[0].agent.type: endpoint and event.alerts[0].host.os.type: windows"
+            steps:
+              - name: l2_windows_forensics
+                type: ai.agent
+                with:
+                  agent_id: "{{ consts.l2_windows_agent_id }}"
+                  message: |
+                    You are performing L2 Windows forensics. Use the platform.core.cases tool to get case comments and alerts. Use alerts.get-alert-by-id (and endpoint.process_entity_id when relevant) to fetch full alert details only when needed. Keep context small; do not load entire large documents. Return your forensic findings in Markdown.
+
+                    === ALERT CONTEXT (use tools for full document) ===
+                    Case ID: {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}
+                    Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }} | Index: {{ consts.signals_index }}
+                    Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }} | Time: {{ event.alerts[0]["@timestamp"] }}
+                    Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+                    User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+                    Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 5s
+
+              - name: add_l2_windows_comment
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+                  body:
+                    type: "user"
+                    comment: "## L2 Windows Forensics\n\n{{ steps.l2_windows_forensics.output }}"
+                    owner: "securitySolution"
+                on-failure:
+                  continue: true
+
+          # --- L2 Linux (endpoint + linux) ---
+          - name: l2_if_linux
+            type: if
+            condition: "event.alerts[0].agent.type: endpoint and event.alerts[0].host.os.type: linux"
+            steps:
+              - name: l2_linux_forensics
+                type: ai.agent
+                with:
+                  agent_id: "{{ consts.l2_linux_agent_id }}"
+                  message: |
+                    You are performing L2 Linux forensics. Use the platform.core.cases tool to get case comments and alerts. Use alerts.get-alert-by-id (and endpoint.process_entity_id when relevant) to fetch full alert details only when needed. Keep context small; do not load entire large documents. Return your forensic findings in Markdown.
+
+                    === ALERT CONTEXT (use tools for full document) ===
+                    Case ID: {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}
+                    Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }} | Index: {{ consts.signals_index }}
+                    Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }} | Time: {{ event.alerts[0]["@timestamp"] }}
+                    Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+                    User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+                    Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 5s
+
+              - name: add_l2_linux_comment
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+                  body:
+                    type: "user"
+                    comment: "## L2 Linux Forensics\n\n{{ steps.l2_linux_forensics.output }}"
+                    owner: "securitySolution"
+                on-failure:
+                  continue: true
+
+          # --- L2 AWS (event.dataset contains aws) ---
+          - name: l2_if_aws
+            type: if
+            condition: "event.alerts[0].event.dataset: *aws*"
+            steps:
+              - name: l2_aws_cloudtrail
+                type: ai.agent
+                with:
+                  agent_id: "{{ consts.l2_aws_agent_id }}"
+                  message: |
+                    You are performing L2 AWS CloudTrail triage. Use the platform.core.cases tool to get case comments and alerts. Use alerts.get-alert-by-id to fetch full alert details only when needed. Keep context small; do not load entire large documents. Return your findings in Markdown.
+
+                    === ALERT CONTEXT (use tools for full document) ===
+                    Case ID: {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}
+                    Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }} | Index: {{ consts.signals_index }}
+                    Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }} | Time: {{ event.alerts[0]["@timestamp"] }}
+                    Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+                    User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+                    Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 5s
+
+              - name: add_l2_aws_comment
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+                  body:
+                    type: "user"
+                    comment: "## L2 AWS CloudTrail\n\n{{ steps.l2_aws_cloudtrail.output }}"
+                    owner: "securitySolution"
+                on-failure:
+                  continue: true
+
+          # --- L2 Okta (event.dataset contains okta) ---
+          - name: l2_if_okta
+            type: if
+            condition: "event.alerts[0].event.dataset: *okta*"
+            steps:
+              - name: l2_okta
+                type: ai.agent
+                with:
+                  agent_id: "{{ consts.l2_okta_agent_id }}"
+                  message: |
+                    You are performing L2 Okta triage. Use the platform.core.cases tool to get case comments and alerts. Use alerts.get-alert-by-id to fetch full alert details only when needed. Keep context small; do not load entire large documents. Return your findings in Markdown.
+
+                    === ALERT CONTEXT (use tools for full document) ===
+                    Case ID: {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}
+                    Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }} | Index: {{ consts.signals_index }}
+                    Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }} | Time: {{ event.alerts[0]["@timestamp"] }}
+                    Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+                    User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+                    Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 5s
+
+              - name: add_l2_okta_comment
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+                  body:
+                    type: "user"
+                    comment: "## L2 Okta\n\n{{ steps.l2_okta.output }}"
+                    owner: "securitySolution"
+                on-failure:
+                  continue: true
+
+          # --- L2 Azure (event.dataset contains azure) ---
+          - name: l2_if_azure
+            type: if
+            condition: "event.alerts[0].event.dataset: *azure*"
+            steps:
+              - name: l2_azure
+                type: ai.agent
+                with:
+                  agent_id: "{{ consts.l2_azure_agent_id }}"
+                  message: |
+                    You are performing L2 Azure triage. Use the platform.core.cases tool to get case comments and alerts. Use alerts.get-alert-by-id to fetch full alert details only when needed. Keep context small; do not load entire large documents. Return your findings in Markdown.
+
+                    === ALERT CONTEXT (use tools for full document) ===
+                    Case ID: {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}
+                    Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }} | Index: {{ consts.signals_index }}
+                    Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }} | Time: {{ event.alerts[0]["@timestamp"] }}
+                    Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+                    User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+                    Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 5s
+
+              - name: add_l2_azure_comment
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+                  body:
+                    type: "user"
+                    comment: "## L2 Azure\n\n{{ steps.l2_azure.output }}"
+                    owner: "securitySolution"
+                on-failure:
+                  continue: true
+
+          # --- L2 GCP (event.dataset contains gcp) ---
+          - name: l2_if_gcp
+            type: if
+            condition: "event.alerts[0].event.dataset: *gcp*"
+            steps:
+              - name: l2_gcp
+                type: ai.agent
+                with:
+                  agent_id: "{{ consts.l2_gcp_agent_id }}"
+                  message: |
+                    You are performing L2 GCP triage. Use the platform.core.cases tool to get case comments and alerts. Use alerts.get-alert-by-id to fetch full alert details only when needed. Keep context small; do not load entire large documents. Return your findings in Markdown.
+
+                    === ALERT CONTEXT (use tools for full document) ===
+                    Case ID: {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}
+                    Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }} | Index: {{ consts.signals_index }}
+                    Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }} | Time: {{ event.alerts[0]["@timestamp"] }}
+                    Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+                    User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+                    Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 5s
+
+              - name: add_l2_gcp_comment
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+                  body:
+                    type: "user"
+                    comment: "## L2 GCP\n\n{{ steps.l2_gcp.output }}"
+                    owner: "securitySolution"
+                on-failure:
+                  continue: true
+
+          # --- L2 Cloud Forensics (event.dataset aws/azure/gcp) ---
+          - name: l2_if_cloud_forensics
+            type: if
+            condition: "event.alerts[0].event.dataset: *aws* or event.alerts[0].event.dataset: *azure* or event.alerts[0].event.dataset: *gcp*"
+            steps:
+              - name: l2_cloud_forensics
+                type: ai.agent
+                with:
+                  agent_id: "{{ consts.l2_cloud_forensics_agent_id }}"
+                  message: |
+                    You are performing cross-cloud forensic triage (AWS/Azure/GCP). Use the platform.core.cases tool to get case comments and alerts. Use alerts.get-alert-by-id to fetch full alert details only when needed. Keep context small; do not load entire large documents. Return your findings in Markdown.
+
+                    === ALERT CONTEXT (use tools for full document) ===
+                    Case ID: {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}
+                    Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }} | Index: {{ consts.signals_index }}
+                    Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }} | Time: {{ event.alerts[0]["@timestamp"] }}
+                    Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+                    User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+                    Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 5s
+
+              - name: add_l2_cloud_forensics_comment
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+                  body:
+                    type: "user"
+                    comment: "## L2 Cloud Forensics\n\n{{ steps.l2_cloud_forensics.output }}"
+                    owner: "securitySolution"
+                on-failure:
+                  continue: true
+
+          # --- L2 Source IP (event.dataset google_workspace/o365/salesforce/github) ---
+          - name: l2_if_source_ip
+            type: if
+            condition: "event.alerts[0].event.dataset: *google_workspace* or event.alerts[0].event.dataset: *o365* or event.alerts[0].event.dataset: *salesforce* or event.alerts[0].event.dataset: *github*"
+            steps:
+              - name: l2_source_ip
+                type: ai.agent
+                with:
+                  agent_id: "{{ consts.l2_source_ip_agent_id }}"
+                  message: |
+                    You are performing L2 Source IP investigation. Use the platform.core.cases tool to get case comments and alerts. Use alerts.get-alert-by-id to fetch full alert details only when needed. Keep context small; do not load entire large documents. Return your findings in Markdown.
+
+                    === ALERT CONTEXT (use tools for full document) ===
+                    Case ID: {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}
+                    Alert ID: {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }} | Index: {{ consts.signals_index }}
+                    Rule: {{ event.alerts[0].rule.name }} | Severity: {{ event.alerts[0].severity }} | Time: {{ event.alerts[0]["@timestamp"] }}
+                    Host: {{ event.alerts[0].host.name }} ({{ event.alerts[0].host.id }}) | OS: {{ event.alerts[0].host.os.type }}
+                    User: {{ event.alerts[0].user.email }} ({{ event.alerts[0].user.name }}) | Source IP: {{ event.alerts[0].source.ip }}
+                    Process: {{ event.alerts[0].process.name }} | SHA256: {{ event.alerts[0].process.hash.sha256 }}
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 5s
+
+              - name: add_l2_source_ip_comment
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+                  body:
+                    type: "user"
+                    comment: "## L2 Source IP\n\n{{ steps.l2_source_ip.output }}"
+                    owner: "securitySolution"
+                on-failure:
+                  continue: true
+
+          # --- Phase 6: L3 — run L3 agent (reads case via tool), add report ---
+          - name: l3_review
+            type: ai.agent
+            with:
+              agent_id: "{{ consts.l3_agent_id }}"
+              message: |
+                You are the L3 reviewer. Use the platform.core.cases tool to retrieve comments and alerts from case ID {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}. Keep context small: summarize or extract key points from long comments; do not load entire huge comment bodies to stay under token limits. Produce your single investigation report in Markdown. Include CEBA (Cross Entity Behavior Analytics). Use this order: 1) Final assessment (Malicious/Suspicious/Benign, High/Medium confidence); 2) Reasoning; 3) CEBA Analysis (paragraph, table, ASCII diagram, optional Mermaid); 4) Recommended actions; 5) Timeline summary. Do not invent entities or events.
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: 5s
+              continue: true
+
+          - name: add_l3_report_comment
+            type: kibana.request
+            with:
+              use_server_info: true
+              fetcher:
+                skip_ssl_verification: true
+              method: POST
+              path: "/s/{{ consts.space_id }}/api/cases/{{ steps.create_case.output.data.id | default: steps.create_case.output.id }}/comments"
+              body:
+                type: "user"
+                comment: "## L3 Review – Final Report\n\n{{ steps.l3_review.output }}"
+                owner: "securitySolution"
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: 2s
+              continue: true
+
+          - name: console_triage_summary_legacy
+            type: console
+            with:
+              message: >
+                Triage complete (L2/L3). Case {{ steps.create_case.output.data.id | default: steps.create_case.output.id }}.
+                L1: {{ steps.l1_triage.output }}.
+                L3: {{ steps.l3_review.output }}.
+                Alert: {{ event.alerts[0].rule.name }}.

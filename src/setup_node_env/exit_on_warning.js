@@ -107,6 +107,11 @@ var IGNORE_WARNINGS = [
     messageContains:
       'Keys with collection values will be stringified due to JS Object restrictions',
   },
+  // Playwright workers set FORCE_COLOR while NO_COLOR may also be set
+  {
+    name: 'Warning',
+    messageContains: "'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set",
+  },
 ];
 
 if (process.noProcessWarnings !== true) {

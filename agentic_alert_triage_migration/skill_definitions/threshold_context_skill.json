@@ -1,0 +1,9 @@
+{
+  "id": "agentic-alert-triage-threshold-context",
+  "name": "Agentic Alert Triage - Threshold Context",
+  "description": "For threshold rules, fetch related alerts via one ES|QL query and return a compact key-info list.",
+  "content": "Role: L1 threshold context. Runs before L1 investigation when the alert is a threshold rule.\\nInput: signals index, rule name, alert @timestamp, threshold_result (terms + from).\\nProcess:\\n- Build ONE ES|QL query against the signals index.\\n- WHERE @timestamp between threshold_result.from and alert @timestamp.\\n- For each term in threshold_result.terms, add AND term.field == term.value.\\n- KEEP only: kibana.alert.rule.name, kibana.alert.uuid, source.ip, user.email, host.id, host.name, agent.id, process.name, kibana.alert.severity, @timestamp.\\n- LIMIT 100. Do not use STATS.\\nOutput:\\n- One-line header: \"Related alerts that contributed to this threshold (key info only):\"\\n- Then a compact list or table, one line per alert, each line <= 120 chars.\\n- If terms are missing, return: \"No threshold terms; cannot gather related alerts.\"",
+  "tool_ids": [
+    "platform.core.execute_esql"
+  ]
+}

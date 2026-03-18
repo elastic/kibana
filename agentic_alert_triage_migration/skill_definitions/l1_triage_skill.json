@@ -1,0 +1,13 @@
+{
+  "id": "agentic-alert-triage-l1-triage",
+  "name": "Agentic Alert Triage - L1 Triage",
+  "description": "Classify the alert based on L1 investigation + enrichment; output strict JSON for assessment and confidence.",
+  "content": "Role: L1 triage classifier.\\nInput: L1 investigation findings + enrichment context.\\nRules:\\n- If investigation clearly concludes benign/false positive, output assessment benign with confidence high.\\n- Otherwise choose malicious or suspicious based on evidence; when in doubt, choose suspicious.\\nOutput (STRICT JSON ONLY):\\n{\\n  \\\"assessment\\\": \\\"malicious\\\" | \\\"suspicious\\\" | \\\"benign\\\",\\n  \\\"confidence\\\": \\\"high\\\" | \\\"medium\\\",\\n  \\\"reasoning\\\": \\\"2-3 sentence explanation\\\"\\n}\\nNo extra text or Markdown.",
+  "tool_ids": [
+    "platform.core.execute_esql",
+    "platform.core.search",
+    "security.alerts",
+    "platform.core.cases",
+    "platform.core.get_document_by_id"
+  ]
+}
