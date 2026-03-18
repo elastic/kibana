@@ -226,7 +226,14 @@ export const FullScreenWaterfall = ({
                 setHighlightedSpanId(nodeSpanId);
                 onNodeClick(nodeSpanId);
               }}
-              onErrorClick={onErrorClick}
+              onErrorClick={(params) => {
+                if (params.errorCount > 1) {
+                  setHighlightedSpanId(params.docId);
+                } else {
+                  setHighlightedSpanId(undefined);
+                }
+                onErrorClick(params);
+              }}
             />
           </div>
         ) : (
