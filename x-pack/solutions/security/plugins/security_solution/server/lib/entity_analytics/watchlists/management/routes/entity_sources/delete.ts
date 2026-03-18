@@ -61,20 +61,7 @@ export const deleteEntitySourceRoute = (
             esClient: core.elasticsearch.client.asCurrentUser,
           });
           await watchlistClient.removeEntitySourceReference(request.params.watchlist_id, source);
-
           await client.delete(request.params.id);
-
-          const core = await context.core;
-          const watchlistClient = new WatchlistConfigClient({
-            logger,
-            namespace: secSol.getSpaceId(),
-            soClient: getRequestSavedObjectClient(core),
-            esClient: core.elasticsearch.client.asCurrentUser,
-          });
-          await watchlistClient.removeEntitySourceReference(
-            request.params.watchlist_id,
-            request.params.id
-          );
 
           return response.ok({ body: { acknowledged: true } });
         } catch (e) {

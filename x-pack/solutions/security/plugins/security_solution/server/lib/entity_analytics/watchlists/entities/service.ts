@@ -7,10 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { Entity as EntityStoreEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import { EntityType } from '../../../../../common/entity_analytics/types';
-import type { EntityStoreDataClient } from '../../entity_store/entity_store_data_client';
 import { getIndexForWatchlist } from './utils';
 import type { WatchlistEntityDoc } from './types';
 
@@ -42,13 +42,11 @@ const getEntityType = (record: EntityStoreEntity): EntityType => {
 
 interface WatchlistEntitiesServiceDeps {
   esClient: ElasticsearchClient;
-  entityStoreDataClient?: Pick<EntityStoreDataClient, 'searchEntities'>;
   namespace: string;
 }
 
 export const createWatchlistEntitiesService = ({
   esClient,
-  entityStoreDataClient,
   namespace,
 }: WatchlistEntitiesServiceDeps) => {
   const list = async (
@@ -73,23 +71,21 @@ export const createWatchlistEntitiesService = ({
   };
 
   const listEntityStoreEntities = async (): Promise<EntityStoreEntityIdsByType> => {
-    if (!entityStoreDataClient) {
-      throw new Error('Entity Store data client is required to list entity store entities');
-    }
-
-    const { records } = await entityStoreDataClient.searchEntities({
-      entityTypes: Object.values(EntityType),
-      filterQuery: JSON.stringify({ match_all: {} }),
-      page: DEFAULT_ENTITY_STORE_PAGE,
-      perPage: DEFAULT_ENTITY_STORE_PER_PAGE,
-      sortField: DEFAULT_ENTITY_STORE_SORT_FIELD,
-      sortOrder: DEFAULT_ENTITY_STORE_SORT_ORDER,
+    const response = await esClient.search<EntityStoreEntity>({
+      index: getLatestEntitiesIndexName(namespace),
+      query: {
+        term: {
+          'entity.namespace': 'okta',
+        },
+      },
     });
 
     const entityIdsByType = createEmptyEntityStoreEntityIdsByType();
 
-    for (const record of records) {
-      if (record.entity?.id) {
+    for (const hit of response.hits.hits) {
+      const record = hit._source;
+
+      if (record?.entity?.id) {
         const entityType = getEntityType(record);
         entityIdsByType[entityType].push(record.entity.id);
       }

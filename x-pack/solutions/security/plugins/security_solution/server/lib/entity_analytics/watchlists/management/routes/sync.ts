@@ -47,7 +47,6 @@ export const syncWatchlistRoute = (router: EntityAnalyticsRoutesDeps['router'], 
 
           const entitySourcesService = createEntitySourcesService({
             esClient: core.elasticsearch.client.asCurrentUser,
-            entityStoreDataClient: secSol.getEntityStoreDataClient(),
             soClient: getRequestSavedObjectClient(core),
             logger,
             namespace: secSol.getSpaceId(),

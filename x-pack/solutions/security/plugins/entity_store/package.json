@@ -7,6 +7,9 @@
   "types": "common/index.ts",
   "exports": {
     ".": "./common/index.ts",
-    "./public": "./public/index.ts"
+    "./common": "./common/index.ts",
+    "./common/euid_helpers": "./common/euid_helpers.ts",
+    "./public": "./public/index.ts",
+    "./server": "./server/index.ts"
   }
 }

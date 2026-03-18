@@ -9,18 +9,21 @@ import { createWatchlistEntitiesService } from './service';
 
 describe('Watchlist entities service', () => {
   it('groups entity store ids by entity type and removes duplicates', async () => {
-    const service = createWatchlistEntitiesService({
-      esClient: { search: jest.fn() } as never,
-      entityStoreDataClient: {
-        searchEntities: jest.fn().mockResolvedValue({
-          records: [
-            { entity: { id: 'user:jdoe', type: 'user' } },
-            { entity: { id: 'host:server-1', type: 'host' } },
-            { entity: { id: 'service:api', EngineMetadata: { Type: 'service' } } },
-            { entity: { id: 'user:jdoe', type: 'user' } },
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            { _source: { entity: { id: 'user:jdoe', type: 'user' } } },
+            { _source: { entity: { id: 'host:server-1', type: 'host' } } },
+            { _source: { entity: { id: 'service:api', EngineMetadata: { Type: 'service' } } } },
+            { _source: { entity: { id: 'user:jdoe', type: 'user' } } },
           ],
-        }),
-      } as never,
+        },
+      }),
+    };
+
+    const service = createWatchlistEntitiesService({
+      esClient: esClient as never,
       namespace: 'default',
     });
 
@@ -30,5 +33,7 @@ describe('Watchlist entities service', () => {
       service: ['service:api'],
       generic: [],
     });
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
   });
 });

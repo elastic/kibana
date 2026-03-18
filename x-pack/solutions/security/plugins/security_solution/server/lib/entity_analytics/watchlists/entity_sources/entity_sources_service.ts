@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { EntityStoreDataClient } from '../../entity_store/entity_store_data_client';
 import { MonitoringEntitySourceDescriptorClient } from '../../privilege_monitoring/saved_objects';
 import { WatchlistConfigClient } from '../management/watchlist_config';
 import { createWatchlistEntitiesService } from '../entities/service';
@@ -17,13 +16,11 @@ export type EntitySourcesService = ReturnType<typeof createEntitySourcesService>
 
 export const createEntitySourcesService = ({
   esClient,
-  entityStoreDataClient,
   soClient,
   logger,
   namespace,
 }: {
   esClient: ElasticsearchClient;
-  entityStoreDataClient: Pick<EntityStoreDataClient, 'searchEntities'>;
   soClient: SavedObjectsClientContract;
   logger: Logger;
   namespace: string;
@@ -32,7 +29,6 @@ export const createEntitySourcesService = ({
   const descriptorClient = new MonitoringEntitySourceDescriptorClient({ soClient, namespace });
   const watchlistEntitiesService = createWatchlistEntitiesService({
     esClient,
-    entityStoreDataClient,
     namespace,
   });
 
