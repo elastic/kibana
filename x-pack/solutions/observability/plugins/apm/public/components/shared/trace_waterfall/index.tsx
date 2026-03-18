@@ -150,7 +150,6 @@ function TraceWaterfallComponent() {
       css={css`
         flex: 1;
         min-height: 0;
-        position: relative;
       `}
     >
       {showCriticalPathControl && (
@@ -174,8 +173,7 @@ function TraceWaterfallComponent() {
             direction="column"
             gutterSize="m"
             css={css`
-              flex-shrink: 0;
-              flex-grow: 0;
+              flex: none;
               position: sticky;
               top: ${stickyTop};
               z-index: ${euiTheme.levels.menu};
@@ -325,7 +323,11 @@ function TraceTree() {
 
   if (scrollStrategy === 'window') {
     return (
-      <div style={{ position: 'relative' }}>
+      <div
+        css={css`
+          position: relative;
+        `}
+      >
         {verticalLines}
         <WindowScroller
           scrollElement={document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined}
@@ -357,7 +359,12 @@ function TraceTree() {
   }
 
   return (
-    <div style={{ position: 'relative', height: '100%' }}>
+    <div
+      css={css`
+        position: relative;
+        height: 100%;
+      `}
+    >
       {verticalLines}
       <AutoSizer>
         {({ width, height }) => (

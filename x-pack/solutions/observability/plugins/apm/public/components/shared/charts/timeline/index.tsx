@@ -80,11 +80,11 @@ export function VerticalLinesContainer({ xMax, xMin, margins, marks, height }: T
         return (
           <div
             style={{
-              width: '100%',
-              height: height != null ? height : '100%',
+              height: height ?? '100%',
               position: 'absolute',
               top: 0,
               left: 0,
+              right: 0,
             }}
             ref={resizeRef}
           >
