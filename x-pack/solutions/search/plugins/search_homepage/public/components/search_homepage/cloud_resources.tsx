@@ -159,7 +159,7 @@ export const CloudResources = () => {
     {
       icon: (assetBasePath: string) => `${assetBasePath}/search_serverless.svg`,
       title: i18n.translate('xpack.searchHomepage.cloudResources.elasticCloud.title', {
-        defaultMessage: 'Try manage Elastic',
+        defaultMessage: 'Try managed Elastic',
       }),
       description: i18n.translate('xpack.searchHomepage.cloudResources.elasticCloud.description', {
         defaultMessage:
