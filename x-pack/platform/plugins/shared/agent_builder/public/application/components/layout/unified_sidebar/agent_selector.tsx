@@ -22,6 +22,9 @@ const labels = {
   selectAgent: i18n.translate('xpack.agentBuilder.sidebar.agentSelector.selectAgent', {
     defaultMessage: 'Select agent',
   }),
+  deletedAgent: i18n.translate('xpack.agentBuilder.sidebar.agentSelector.deletedAgent', {
+    defaultMessage: '(Deleted agent)',
+  }),
 };
 
 interface AgentSelectorProps {
@@ -48,6 +51,15 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ agentId, getNaviga
     text: agent.name,
   }));
 
+  const isAgentKnown = agents.some((agent) => agent.id === agentId);
+
+  // When viewing a conversation for a deleted agent, prepend a disabled placeholder
+  // so the select doesn't silently show the first valid agent as the selected value.
+  const options =
+    !isLoading && !isAgentKnown
+      ? [{ value: agentId, text: labels.deletedAgent, disabled: true }, ...agentOptions]
+      : agentOptions;
+
   return (
     <EuiFlexItem grow={false}>
       <EuiText size="xs" color="subdued">
@@ -58,7 +70,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ agentId, getNaviga
       ) : (
         <EuiSelect
           compressed
-          options={agentOptions}
+          options={options}
           value={agentId}
           onChange={handleAgentChange}
           aria-label={labels.selectAgent}

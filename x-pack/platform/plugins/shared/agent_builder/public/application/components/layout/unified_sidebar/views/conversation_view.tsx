@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom-v5-compat';
 import { useLocation } from 'react-router-dom';
 
@@ -15,6 +15,10 @@ import { i18n } from '@kbn/i18n';
 
 import { appPaths } from '../../../../utils/app_paths';
 import { getAgentIdFromPath, getConversationIdFromPath } from '../../../../route_config';
+import { useNavigation } from '../../../../hooks/use_navigation';
+import { useValidateAgentId } from '../../../../hooks/agents/use_validate_agent_id';
+import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
+import { useLastAgentId } from '../../../../hooks/use_last_agent_id';
 import { AgentSelector } from '../agent_selector';
 import { SidebarConversationList } from './sidebar_conversation_list';
 
@@ -53,6 +57,14 @@ export const ConversationSidebarView: React.FC = () => {
   const agentId = getAgentIdFromPath(pathname) ?? 'elastic-ai-agent';
   const conversationId = getConversationIdFromPath(pathname);
   const { euiTheme } = useEuiTheme();
+  const { navigateToAgentBuilderUrl } = useNavigation();
+  const validateAgentId = useValidateAgentId();
+  const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
+  const lastAgentId = useLastAgentId();
+  const getNavigationPath = useCallback(
+    (newAgentId: string) => appPaths.agent.root({ agentId: newAgentId }),
+    []
+  );
 
   const headerStyles = css`
     padding: ${euiTheme.size.base};
@@ -80,10 +92,31 @@ export const ConversationSidebarView: React.FC = () => {
     font-weight: ${euiTheme.font.weight.semiBold};
   `;
 
-  const getNavigationPath = useCallback(
-    (newAgentId: string) => appPaths.agent.root({ agentId: newAgentId }),
-    []
-  );
+  useEffect(() => {
+    // Once agents have loaded, redirect to the last valid agent if the current agent ID
+    // is not recognised — but only when there is no conversation ID in the URL (new
+    // conversation route). Existing conversations for a deleted agent are intentionally
+    // shown read-only with the input disabled.
+
+    // We also check that lastAgentId itself is valid before redirecting: if local storage
+    // holds a stale/invalid ID too, navigating to it would trigger this effect again and
+    // cause an infinite redirect loop.
+    if (
+      isAgentsFetched &&
+      !conversationId &&
+      !validateAgentId(agentId) &&
+      validateAgentId(lastAgentId)
+    ) {
+      navigateToAgentBuilderUrl(appPaths.agent.root({ agentId: lastAgentId }));
+    }
+  }, [
+    isAgentsFetched,
+    conversationId,
+    agentId,
+    lastAgentId,
+    validateAgentId,
+    navigateToAgentBuilderUrl,
+  ]);
 
   return (
     <div css={containerStyles}>

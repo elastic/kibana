@@ -14,6 +14,8 @@ import { css } from '@emotion/react';
 
 import { storageKeys } from '../../../storage_keys';
 import { getSidebarViewForRoute, getAgentIdFromPath } from '../../../route_config';
+import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { ConversationSidebarView } from './views/conversation_view';
 import { AgentSettingsSidebarView } from './views/agent_settings_view';
 import { ManageSidebarView } from './views/manage_view';
@@ -25,12 +27,15 @@ export const UnifiedSidebar: React.FC = () => {
   const sidebarView = getSidebarViewForRoute(location.pathname);
   const agentIdFromPath = getAgentIdFromPath(location.pathname);
   const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.agentId);
+  const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
+  const validateAgentId = useValidateAgentId();
 
   useEffect(() => {
-    if (agentIdFromPath) {
+    // Wait for agents to load before validating — prevents falsely skipping valid IDs during initial load
+    if (isAgentsFetched && agentIdFromPath && validateAgentId(agentIdFromPath)) {
       setStoredAgentId(agentIdFromPath);
     }
-  }, [agentIdFromPath, setStoredAgentId]);
+  }, [isAgentsFetched, agentIdFromPath, validateAgentId, setStoredAgentId]);
 
   const sidebarStyles = css`
     width: ${SIDEBAR_WIDTH}px;
