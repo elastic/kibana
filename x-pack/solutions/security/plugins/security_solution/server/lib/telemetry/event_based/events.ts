@@ -1495,7 +1495,8 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
         type: 'keyword',
         _meta: {
           optional: true,
-          description: "Reason for skipping: 'integration_not_installed' or 'unknown_version'.",
+          description:
+            "Reason for skipping: 'datastreams_not_matched', 'integration_not_installed' or 'unknown_version'.",
         },
       },
       integration: {

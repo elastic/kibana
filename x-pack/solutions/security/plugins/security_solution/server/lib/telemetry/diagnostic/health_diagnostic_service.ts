@@ -117,6 +117,9 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     const statistics: HealthDiagnosticQueryStats[] = [];
 
     for (const resolvedQuery of resolved) {
+      this.logger.trace('About to execute health diagnostic query', {
+        name: resolvedQuery.query.name,
+      } as LogMeta);
       let stats: HealthDiagnosticQueryStats;
 
       if (resolvedQuery.kind === 'skipped') {
@@ -124,6 +127,11 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       } else {
         stats = await this.executeQuery(resolvedQuery);
       }
+
+      this.logger.debug('Query executed. Sending query stats EBT', {
+        queryName: resolvedQuery.query.name,
+        traceId: stats.traceId,
+      } as LogMeta);
 
       this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT, stats);
       statistics.push(stats);

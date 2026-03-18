@@ -131,7 +131,7 @@ describe('IntegrationResolverImpl', () => {
         expect(results).toHaveLength(1);
         expect(results[0].kind).toBe('skipped');
         if (results[0].kind !== 'skipped') throw new Error('type guard');
-        expect(results[0].reason).toBe('integration_not_installed');
+        expect(results[0].reason).toBe('datastreams_not_matched');
       });
 
       it('supports regex patterns in datastreamTypes', async () => {
@@ -189,6 +189,8 @@ describe('IntegrationResolverImpl', () => {
         );
         expect(endpointResult?.kind).toBe('executable');
         expect(fleetResult?.kind).toBe('skipped');
+        if (fleetResult?.kind !== 'skipped') throw new Error('type guard');
+        expect(fleetResult.reason).toBe('datastreams_not_matched');
       });
 
       it('matches multiple types with a regex alternation pattern', async () => {

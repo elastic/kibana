@@ -85,7 +85,7 @@ export class IntegrationResolverImpl implements IntegrationResolver {
           integration: pkg.name,
           typePatterns,
         } as LogMeta);
-        return { kind: 'skipped', query, reason: 'integration_not_installed' } as SkippedQuery;
+        return { kind: 'skipped', query, reason: 'datastreams_not_matched' } as SkippedQuery;
       }
 
       const indices = dataStreams.map((ds) => `${ds.type}-${ds.dataset}-*`);

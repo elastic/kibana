@@ -20,6 +20,7 @@ import type { TelemetryConfigProvider } from '../../../../../common/telemetry_co
 
 export const createMockLogger = (): jest.Mocked<Logger> =>
   ({
+    trace: jest.fn(),
     debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),

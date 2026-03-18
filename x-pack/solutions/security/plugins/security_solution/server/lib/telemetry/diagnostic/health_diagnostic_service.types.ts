@@ -153,7 +153,7 @@ export type ExecutableQuery =
 export interface SkippedQuery {
   kind: 'skipped';
   query: HealthDiagnosticQuery;
-  reason: 'integration_not_installed' | 'unknown_version';
+  reason: 'datastreams_not_matched' | 'integration_not_installed' | 'unknown_version';
 }
 
 export type ResolvedQuery = ExecutableQuery | SkippedQuery;
@@ -181,7 +181,7 @@ export interface HealthDiagnosticQueryStats {
   // new fields
   descriptorVersion: number;
   status: 'success' | 'failed' | 'skipped';
-  skipReason?: 'integration_not_installed' | 'unknown_version';
+  skipReason?: 'datastreams_not_matched' | 'integration_not_installed' | 'unknown_version';
   integration?: IntegrationResolution;
 }
 
