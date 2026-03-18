@@ -44,15 +44,15 @@ interface OsConfigValidationResult extends ValidationState {
   arguments: ValidationState;
 }
 
+export type RunScriptOsTypeConfigUpdates = ValidationState & {
+  updatedConfig: EndpointRunScriptActionRequestParams;
+};
+
 export interface RunScriptOsTypeConfigProps {
   'data-test-subj'?: string;
   platform: SupportedHostOsType;
   config: EndpointRunScriptActionRequestParams;
-  onChange: (
-    updates: ValidationState & {
-      updatedConfig: EndpointRunScriptActionRequestParams;
-    }
-  ) => void;
+  onChange: (updates: RunScriptOsTypeConfigUpdates) => void;
   /** If `true` (default) each field will include a label */
   showFieldLabels?: boolean;
 }

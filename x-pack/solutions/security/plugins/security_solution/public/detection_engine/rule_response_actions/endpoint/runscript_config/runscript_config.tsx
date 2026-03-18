@@ -9,7 +9,11 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { FieldConfig, FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiTitle, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { RunScriptOsTypeConfig } from './runscript_os_type_config';
+import {
+  type RunScriptOsTypeConfigProps,
+  type RunScriptOsTypeConfigUpdates,
+  RunScriptOsTypeConfig,
+} from './runscript_os_type_config';
 import type { ValidationState } from './types';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
 import type { AutomatedRunScriptConfig } from '../../../../../common/endpoint/types';
@@ -157,6 +161,52 @@ const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProp
     [field.path, fieldOnChange]
   );
 
+  const osTypeOnChangeHandler: Record<SupportedHostOsType, RunScriptOsTypeConfigProps['onChange']> =
+    useMemo(() => {
+      const handleOsConfigChange = (
+        osType: SupportedHostOsType,
+        { updatedConfig, isValid, errors }: RunScriptOsTypeConfigUpdates
+      ) => {
+        const updatedValidationState: RunscriptOsValidationState = {
+          ...osValidationState,
+          [osType]: { isValid, errors },
+        };
+
+        setOsValidationState(updatedValidationState);
+        onChange({
+          isValid: Object.values(updatedValidationState).every(
+            ({ isValid: isOsValueValid }) => isOsValueValid
+          ),
+          errors: Object.entries(updatedValidationState).reduce(
+            (acc, [platform, osValidationResult]) => {
+              if (!osValidationResult.isValid) {
+                acc.push(
+                  ...(osValidationResult.errors ?? []).map(
+                    (errorMessage) =>
+                      `${OS_TITLES[platform as keyof typeof OS_TITLES]}: ${errorMessage}`
+                  )
+                );
+              }
+
+              return acc;
+            },
+            [] as string[]
+          ),
+        });
+        emitUseFieldChange({
+          ...value,
+          [osType]: updatedConfig,
+        });
+      };
+
+      return {
+        linux: (updates: RunScriptOsTypeConfigUpdates) => handleOsConfigChange('linux', updates),
+        macos: (updates: RunScriptOsTypeConfigUpdates) => handleOsConfigChange('macos', updates),
+        windows: (updates: RunScriptOsTypeConfigUpdates) =>
+          handleOsConfigChange('windows', updates),
+      };
+    }, [emitUseFieldChange, onChange, osValidationState, value]);
+
   useEffect(() => {
     if (!valueIsRunScriptConfig) {
       emitUseFieldChange(getDefaultRunScriptConfiguration());
@@ -198,40 +248,7 @@ const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProp
                     showFieldLabels={index === 0}
                     config={value[osType]}
                     data-test-subj={getTestId(osType)}
-                    onChange={({ updatedConfig, isValid, errors }) => {
-                      const updatedValidationState: RunscriptOsValidationState = {
-                        ...osValidationState,
-                        [osType]: { isValid, errors },
-                      };
-
-                      setOsValidationState(updatedValidationState);
-                      onChange({
-                        isValid: Object.values(updatedValidationState).every(
-                          ({ isValid: isOsValueValid }) => isOsValueValid
-                        ),
-                        errors: Object.entries(updatedValidationState).reduce(
-                          (acc, [platform, osValidationResult]) => {
-                            if (!osValidationResult.isValid) {
-                              acc.push(
-                                ...(osValidationResult.errors ?? []).map(
-                                  (errorMessage) =>
-                                    `${
-                                      OS_TITLES[platform as keyof typeof OS_TITLES]
-                                    }: ${errorMessage}`
-                                )
-                              );
-                            }
-
-                            return acc;
-                          },
-                          [] as string[]
-                        ),
-                      });
-                      emitUseFieldChange({
-                        ...value,
-                        [osType]: updatedConfig,
-                      });
-                    }}
+                    onChange={osTypeOnChangeHandler[osType]}
                   />
                 </div>
               );
