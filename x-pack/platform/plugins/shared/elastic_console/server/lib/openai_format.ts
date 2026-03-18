@@ -155,7 +155,14 @@ const convertAssistantMessage = (msg: OpenAiAssistantMessage): AssistantMessage 
 const convertToolMessage = (msg: OpenAiToolMessage): ToolMessage => {
   let toolResponse: string | Record<string, unknown>;
   try {
-    toolResponse = JSON.parse(msg.content);
+    const parsed = JSON.parse(msg.content);
+    // Only use parsed result if it's a plain object — the inference API
+    // accepts string or Record<string, unknown> but not arrays, numbers, etc.
+    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+      toolResponse = parsed;
+    } else {
+      toolResponse = msg.content;
+    }
   } catch {
     toolResponse = msg.content;
   }
