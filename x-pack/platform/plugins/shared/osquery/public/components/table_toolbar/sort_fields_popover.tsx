@@ -100,6 +100,7 @@ const SortFieldsPopoverComponent: React.FC<SortFieldsPopoverProps> = ({
 
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
+  const panelProps = useMemo(() => ({ 'data-test-subj': `${dataTestSubj}-popover` }), [dataTestSubj]);
 
   const selectedDirectionId = `${SORT_DIRECTION_PREFIX}-${sortDirection}`;
 
@@ -122,7 +123,7 @@ const SortFieldsPopoverComponent: React.FC<SortFieldsPopoverProps> = ({
       closePopover={closePopover}
       panelPaddingSize="none"
       repositionOnScroll
-      panelProps={{ 'data-test-subj': `${dataTestSubj}-popover` }}
+      panelProps={panelProps}
     >
       <div style={POPOVER_CONTENT_STYLE}>
         <EuiPopoverTitle paddingSize="s">

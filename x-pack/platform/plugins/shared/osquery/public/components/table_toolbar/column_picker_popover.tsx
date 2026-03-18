@@ -57,6 +57,7 @@ const ColumnPickerPopoverComponent: React.FC<ColumnPickerPopoverProps> = ({
 
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
+  const panelProps = useMemo(() => ({ 'data-test-subj': `${dataTestSubj}-popover` }), [dataTestSubj]);
 
   const buttonLabel = i18n.translate('xpack.osquery.tableToolbar.columnsCountLabel', {
     defaultMessage: 'Columns: {count}',
@@ -82,7 +83,7 @@ const ColumnPickerPopoverComponent: React.FC<ColumnPickerPopoverProps> = ({
       closePopover={closePopover}
       panelPaddingSize="none"
       repositionOnScroll
-      panelProps={{ 'data-test-subj': `${dataTestSubj}-popover` }}
+      panelProps={panelProps}
     >
       <EuiSelectable aria-label={COLUMNS_LABEL} options={selectableOptions} onChange={handleChange}>
         {(list) => (

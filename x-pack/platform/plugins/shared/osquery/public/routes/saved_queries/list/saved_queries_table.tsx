@@ -63,7 +63,7 @@ const COLUMN_CONFIGS = [
   {
     id: 'updated_at',
     label: i18n.translate('xpack.osquery.savedQueries.table.updatedAtColumnTitle', {
-      defaultMessage: 'Last updated',
+      defaultMessage: 'Last updated at',
     }),
   },
 ];
@@ -78,7 +78,7 @@ const SORT_FIELDS = [
   {
     id: 'updated_at',
     label: i18n.translate('xpack.osquery.savedQueries.sort.updatedAtLabel', {
-      defaultMessage: 'Last updated',
+      defaultMessage: 'Last updated at',
     }),
   },
 ];
@@ -301,7 +301,7 @@ const SavedQueriesTableComponent = () => {
       cols.push({
         field: 'updated_at',
         name: i18n.translate('xpack.osquery.savedQueries.table.updatedAtColumnTitle', {
-          defaultMessage: 'Last updated',
+          defaultMessage: 'Last updated at',
         }),
         sortable: true,
         render: renderUpdatedAt,

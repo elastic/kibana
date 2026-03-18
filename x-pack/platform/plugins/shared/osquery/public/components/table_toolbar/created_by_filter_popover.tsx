@@ -90,6 +90,7 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
 
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
+  const panelProps = useMemo(() => ({ 'data-test-subj': `${dataTestSubj}-popover` }), [dataTestSubj]);
 
   const searchProps = useMemo(
     () => ({
@@ -119,7 +120,7 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
       closePopover={closePopover}
       panelPaddingSize="none"
       repositionOnScroll
-      panelProps={{ 'data-test-subj': `${dataTestSubj}-popover` }}
+      panelProps={panelProps}
     >
       <EuiSelectable
         searchable

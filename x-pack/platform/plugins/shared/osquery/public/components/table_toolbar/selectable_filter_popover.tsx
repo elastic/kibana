@@ -57,6 +57,10 @@ const SelectableFilterPopoverComponent: React.FC<SelectableFilterPopoverProps> =
 
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
+  const panelProps = useMemo(
+    () => (dataTestSubj ? { 'data-test-subj': `${dataTestSubj}-popover` } : undefined),
+    [dataTestSubj]
+  );
 
   const activeCount = selectedKeys.length;
 
@@ -82,7 +86,7 @@ const SelectableFilterPopoverComponent: React.FC<SelectableFilterPopoverProps> =
       closePopover={closePopover}
       panelPaddingSize="none"
       repositionOnScroll
-      panelProps={dataTestSubj ? { 'data-test-subj': `${dataTestSubj}-popover` } : undefined}
+      panelProps={panelProps}
     >
       <EuiSelectable aria-label={label} options={selectableOptions} onChange={handleChange}>
         {(list) => <div style={POPOVER_CONTENT_STYLE}>{list}</div>}
