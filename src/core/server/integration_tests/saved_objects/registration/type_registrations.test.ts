@@ -173,6 +173,7 @@ const previouslyRegisteredTypes = [
   'timelion-sheet',
   'tsvb-validation-telemetry',
   'threshold-explorer-view',
+  'uiam_api_keys_provisioning_status',
   'ui-counter',
   'ui-metric',
   'upgrade-assistant-ml-upgrade-operation',
@@ -188,6 +189,7 @@ const previouslyRegisteredTypes = [
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
+  'streams-significant-events-settings',
 ].sort();
 
 describe('SO type registrations', () => {

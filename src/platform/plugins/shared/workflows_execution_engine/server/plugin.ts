@@ -185,6 +185,8 @@ export class WorkflowsExecutionEnginePlugin
                 dependencies,
                 workflowsExecutionEngine,
                 meteringService: this.meteringService,
+                isEventDrivenExecutionEnabled:
+                  workflowsExecutionEngine.isEventDrivenExecutionEnabled,
               });
             },
             cancel: async () => {
@@ -533,6 +535,7 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
+      const metadata = context.metadata as Record<string, unknown> | undefined;
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId,
@@ -545,6 +548,7 @@ export class WorkflowsExecutionEnginePlugin
         createdAt: workflowCreatedAt.toISOString(),
         executedBy,
         triggeredBy,
+        ...(metadata ? { metadata } : {}),
       };
 
       const concurrencyGroupKey = this.getConcurrencyGroupKey(
@@ -843,10 +847,20 @@ export class WorkflowsExecutionEnginePlugin
       scheduleWorkflow,
       cancelWorkflowExecution,
       resumeWorkflowExecution,
+      isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
+      isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),
     };
   }
 
   public stop() {}
+
+  private isEventDrivenExecutionEnabled(): boolean {
+    return this.config?.eventDriven?.enabled ?? true;
+  }
+
+  private isLogTriggerEventsEnabled(): boolean {
+    return this.config?.eventDriven?.logEvents ?? true;
+  }
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {
