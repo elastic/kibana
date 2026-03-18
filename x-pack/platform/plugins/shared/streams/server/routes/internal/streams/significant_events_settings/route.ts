@@ -39,7 +39,7 @@ export const getSignificantEventsSettingsRoute = createServerRoute({
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     const settings = await modelSettingsClient.getSettings();
-    const indexPatternsResolved = await getConfiguredIndexPatterns(modelSettingsClient);
+    const indexPatternsResolved = await getConfiguredIndexPatterns(settings);
     return { ...settings, indexPatternsResolved };
   },
 });

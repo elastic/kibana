@@ -5,25 +5,43 @@
  * 2.0.
  */
 
-import type { ModelSettingsConfigClient } from '../../saved_objects/significant_events/model_settings_config_client';
+import type {
+  ModelSettingsConfigClient,
+  ModelSettings,
+} from '../../saved_objects/significant_events/model_settings_config_client';
 
 const DEFAULT_INDEX_PATTERNS = 'logs*';
 
 /**
- * Gets the configured index patterns for significant events discovery.
- * Falls back to the default pattern if not configured.
+ * Resolves index patterns from the given settings string.
+ * Falls back to the default pattern if not configured or if the string is empty/whitespace.
  */
-export async function getConfiguredIndexPatterns(
-  modelSettingsClient: ModelSettingsConfigClient
-): Promise<string[]> {
-  const settings = await modelSettingsClient.getSettings();
-  const configuredPatterns = settings.indexPatterns || DEFAULT_INDEX_PATTERNS;
+export function resolveIndexPatterns(indexPatternsString: string | undefined): string[] {
+  const configuredPatterns = indexPatternsString || DEFAULT_INDEX_PATTERNS;
 
   // Split by comma and trim whitespace
-  return configuredPatterns
+  const normalizedPatterns = configuredPatterns
     .split(',')
     .map((pattern) => pattern.trim())
     .filter((pattern) => pattern.length > 0);
+
+  return normalizedPatterns.length > 0 ? normalizedPatterns : getDefaultIndexPatterns();
+}
+
+/**
+ * Gets the configured index patterns for significant events discovery.
+ * Accepts either pre-fetched settings or a client to fetch them.
+ * Falls back to the default pattern if not configured.
+ */
+export async function getConfiguredIndexPatterns(
+  modelSettingsClientOrSettings: ModelSettingsConfigClient | ModelSettings
+): Promise<string[]> {
+  const settings =
+    'getSettings' in modelSettingsClientOrSettings
+      ? await modelSettingsClientOrSettings.getSettings()
+      : modelSettingsClientOrSettings;
+
+  return resolveIndexPatterns(settings.indexPatterns);
 }
 
 /**
@@ -45,4 +63,4 @@ export function getDefaultIndexPatterns(): string[] {
   return DEFAULT_INDEX_PATTERNS.split(',').map((pattern) => pattern.trim());
 }
 
-export { streamMatchesIndexPatterns } from '../../../../common/stream_matches_index_patterns';
+export { streamMatchesIndexPatterns } from '@kbn/streams-schema';

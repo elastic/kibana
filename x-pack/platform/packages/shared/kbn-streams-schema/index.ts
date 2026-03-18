@@ -243,3 +243,5 @@ export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
+
+export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';

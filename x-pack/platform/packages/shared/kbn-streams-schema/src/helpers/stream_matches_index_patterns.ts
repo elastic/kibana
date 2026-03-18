@@ -12,10 +12,9 @@
 export function streamMatchesIndexPatterns(streamName: string, indexPatterns: string[]): boolean {
   return indexPatterns.some((pattern) => {
     // Convert glob pattern to regex
-    // Escape special regex characters first, then convert glob wildcards
+    // Escape all special regex characters first, then convert glob wildcards
     const regexPattern = pattern
-      .replace(/\\/g, '\\\\') // Escape backslashes first
-      .replace(/\./g, '\\.') // Escape literal dots
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&') // Escape all regex metacharacters
       .replace(/\*/g, '.*') // Convert * to .*
       .replace(/\?/g, '.'); // Convert ? to .
 

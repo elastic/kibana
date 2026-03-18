@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { streamMatchesIndexPatterns } from '@kbn/streams-plugin/common';
+import { streamMatchesIndexPatterns } from '@kbn/streams-schema';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 import { useKibana } from './use_kibana';
 
