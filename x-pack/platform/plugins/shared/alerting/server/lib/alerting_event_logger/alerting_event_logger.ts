@@ -691,7 +691,8 @@ export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
     }
   }
 
-  if (revision) {
+  // revision is a non-negative integer. We'd like to capture 0 as well.
+  if (revision !== undefined) {
     event.kibana = event.kibana || {};
     event.kibana.alert = event.kibana.alert || {};
     event.kibana.alert.rule = event.kibana.alert.rule || {};
@@ -808,10 +809,6 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
 
   if (consumerContext?.ruleUuid) {
     set(event, 'rule.uuid', consumerContext.ruleUuid);
-  }
-
-  if (consumerContext?.ruleRevision !== undefined) {
-    set(event, 'kibana.alert.rule.revision', consumerContext.ruleRevision);
   }
 
   if (backfill) {

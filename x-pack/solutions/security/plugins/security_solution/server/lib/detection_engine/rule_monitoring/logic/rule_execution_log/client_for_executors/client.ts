@@ -54,7 +54,6 @@ export function createRuleExecutionLogClientForExecutors(
 
   ruleMonitoringService.setContext({
     ruleUuid: ruleUuid,
-    ruleRevision: ruleRevision,
   });
 
   // Buffers the execution related data

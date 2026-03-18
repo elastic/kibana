@@ -466,7 +466,6 @@ export interface ConsumerExecutionMetrics {
 
 export interface ConsumerRuleExecutionContext {
   ruleUuid: string;
-  ruleRevision: number;
 }
 
 export interface PublicRuleMonitoringService {
