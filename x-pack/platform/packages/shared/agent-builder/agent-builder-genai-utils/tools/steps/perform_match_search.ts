@@ -39,7 +39,7 @@ const rerankInferenceID = '.jina-reranker-v3';
 // When true, perform RERANK on the documents that were returned via the RRF retriever.
 const rerankCandidateDocs = true;
 // When true, perform an additional rerank operation on the generated snippets for each document.
-const rerankSnippets = true;
+const rerankSnippets = false;
 
 // Number of candidate documents to retrieve for doc reranking
 const rankWindowSize = 20;
@@ -203,13 +203,10 @@ const rerankDocuments = async ({
   logger.info(`rerankDocuments called with ${docIds.length} docs, resultSize=${resultSize}`);
   if (docIds.length === 0) return [];
 
-  const fieldPaths = fields.map((f) => f.path);
-  const mvAppendExpr = buildMvAppendExpr(fieldPaths);
-
   const idList = docIds.map((id) => `"${escapeEsqlString(id)}"`).join(', ');
   const escapedTerm = escapeEsqlString(term);
 
-  const esqlQuery = `FROM ${index} METADATA _id | WHERE _id IN (${idList}) | EVAL rerank_input = MV_CONCAT(MV_DEDUPE(${mvAppendExpr}), " ") | RERANK "${escapedTerm}" ON rerank_input WITH {"inference_id": "${rerankInferenceID}"} | KEEP _id | LIMIT ${resultSize}`;
+  const esqlQuery = `FROM ${index} METADATA _id | WHERE _id IN (${idList}) | RERANK "${escapedTerm}" ON ${fields} WITH {"inference_id": "${rerankInferenceID}"} | SORT _score | KEEP _id | LIMIT ${resultSize}`;
 
   logger.info(`RERANK candidate docs query: ${esqlQuery}`);
 

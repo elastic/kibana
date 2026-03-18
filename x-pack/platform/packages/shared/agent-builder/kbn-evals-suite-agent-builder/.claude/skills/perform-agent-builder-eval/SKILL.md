@@ -1,16 +1,17 @@
 ---
 name: perform-agent-builder-eval
-description: Orchestrate agent-builder evaluation runs — init ES/Kibana/EDOT stack, run evaluations, and stop services.
-allowed-tools: Bash, Read
-argument-hint: [init|run|stop]
+description: Orchestrate agent-builder evaluation runs — init ES/Kibana/EDOT stack, run evaluations, sweep parameter variants, and stop services.
+allowed-tools: Bash, Read, Edit
+argument-hint: [init|run|sweep|stop]
 ---
 
 # Perform Agent Builder Evaluation
 
-This skill manages the lifecycle of running agent-builder evaluations. It accepts `$ARGUMENTS` as one of: `init`, `run`, or `stop`.
+This skill manages the lifecycle of running agent-builder evaluations. It accepts `$ARGUMENTS` as one of: `init`, `run`, `sweep`, or `stop`.
 
 - **`init`** — Launch ES, Kibana, EDOT, and Phoenix; restore snapshot data
 - **`run`** — Select parameters and execute evaluation jobs (requires `init` to have been run first)
+- **`sweep`** — Run evaluations across multiple values of a code parameter, with automatic file edits and Kibana reload between variants
 - **`stop`** — Kill background ES, Kibana, and EDOT processes
 
 ---
@@ -41,7 +42,7 @@ vault token lookup -format=json 2>/dev/null | grep -q '"id"'
 ```
 
 - **If valid**: tell the user Vault token is OK and continue.
-- **If invalid or expired**: tell the user to authenticate with `vault login --method oidc` (and connect to VPN if needed). Wait for them to confirm, then re-check.
+- **If invalid or expired**: tell the user to authenticate with `vault login --method oidc`. VPN is not required. Wait for them to confirm, then re-check.
 
 #### 1c: Detect Kibana
 
@@ -228,19 +229,22 @@ If no connectors are found, tell the user to configure connectors in `config/kib
 
 ### Step 3: Collect Parameters
 
-Use a single `AskUserQuestion` call with **3 questions**:
+Use `AskUserQuestion` with **2 questions**:
 
 1. **Judge** (header: "Judge"): "Which connector should be used as the evaluation judge (EVALUATION_CONNECTOR_ID)?"
    - Options: one per discovered connector, using `id (name)` as the label.
 2. **Model** (header: "Model"): "Which model should be evaluated (--project)?"
    - Options: one per discovered connector, using `id (name)` as the label.
-3. **Datasets** (header: "Datasets", **multiSelect: true**): "Which datasets should be evaluated in parallel?"
-   - Options:
-     - `agent-builder: text-retrieval: wix-qa`
-     - `agent-builder: text-retrieval: elastic-qa`
-     - `agent-builder: text-retrieval: quick-tester`
 
-Then use a second `AskUserQuestion` to ask how many iterations:
+Then use a second `AskUserQuestion` (free-text via "Other") to ask for datasets:
+
+> Which datasets should be evaluated in parallel? Enter dataset names separated by commas.
+>
+> Common datasets: `agent-builder: text-retrieval: wix-qa`, `agent-builder: text-retrieval: elastic-qa`, `agent-builder: text-retrieval: quick-tester`
+
+The user may enter any dataset name — do not restrict to the examples above.
+
+Then use a third `AskUserQuestion` to ask how many iterations:
 
 > How many iterations should each dataset be run? Each iteration produces a separate run ID.
 
@@ -293,6 +297,173 @@ After all iterations complete (or after an error), display a summary table:
 > | elastic-qa | 2      | `jkl012` |
 
 If any runs failed, add a note below the table listing which dataset/iteration failed and the error message.
+
+---
+
+## Action: `sweep`
+
+Run evaluations across named variant sets, where each variant can change one or more parameters across one or more files. The skill applies all edits for a variant, waits for Kibana to reload, runs evaluations, then moves to the next variant. Requires the stack to already be running (via `init`).
+
+### Step 1: Verify Stack is Running
+
+Same check as `run` Step 1 — verify ES and Kibana are reachable. If not, tell the user to run `init` first.
+
+### Step 2: Discover Connectors
+
+Same as `run` Step 2 — read `config/kibana.dev.yml` and parse preconfigured connectors.
+
+### Step 3: Collect Sweep Parameters
+
+Use `AskUserQuestion` with **2 questions**:
+
+1. **Judge** (header: "Judge"): "Which connector should be used as the evaluation judge?"
+   - Options: one per discovered connector, using `id (name)` as the label.
+2. **Model** (header: "Model"): "Which model should be evaluated?"
+   - Options: one per discovered connector, using `id (name)` as the label.
+
+Then use a second `AskUserQuestion` (free-text via "Other") to ask for datasets:
+
+> Which datasets should be evaluated in parallel? Enter dataset names separated by commas.
+>
+> Common datasets: `agent-builder: text-retrieval: wix-qa`, `agent-builder: text-retrieval: elastic-qa`, `agent-builder: text-retrieval: quick-tester`
+
+The user may enter any dataset name — do not restrict to the examples above.
+
+Then use a third `AskUserQuestion` to ask how many iterations:
+
+> How many iterations per variant? Each iteration produces a separate run ID.
+
+Options:
+- **1** — Single run per variant per dataset
+- **2** — Two runs per variant per dataset
+- **3** — Three runs per variant per dataset
+
+### Step 4: Collect Variant Definitions
+
+Use `AskUserQuestion` (free-text via "Other") to ask:
+
+> Define your variants. Two formats are supported:
+>
+> **Format A — Cartesian product (shorthand):**
+> List parameters with multiple values separated by commas. All combinations are generated automatically.
+> ```
+> file.ts#param1=val1,val2 x file.ts#param2=valA,valB
+> ```
+> This produces 4 variants: `(val1, valA)`, `(val1, valB)`, `(val2, valA)`, `(val2, valB)`.
+> Variant names are auto-generated from the values (e.g., `val1-valA`).
+>
+> **Format B — Named variant sets (explicit):**
+> Define each variant explicitly, one per line:
+> ```
+> variant-name: file.ts#param1=value, file.ts#param2=value
+> ```
+>
+> Examples:
+> ```
+> perform_match_search.ts#rerankInferenceID='.jina-v3','.jina-v2-base-multilingual' x perform_match_search.ts#rankWindowSize=20,30,40
+> ```
+> or:
+> ```
+> jina-v3-ws20: perform_match_search.ts#rerankInferenceID='.jina-v3', perform_match_search.ts#rankWindowSize=20
+> jina-v2-ws40: perform_match_search.ts#rerankInferenceID='.jina-v2-base-multilingual', perform_match_search.ts#rankWindowSize=40
+> ```
+
+**Parsing rules:**
+
+- **Format A** (detected by the presence of ` x ` between parameter groups):
+  1. Split on ` x ` to get parameter groups.
+  2. Each group is `file.ts#paramName=val1,val2,...` — split values on commas.
+  3. Compute the cartesian product of all groups.
+  4. Auto-generate variant names by joining the short values with `-` (e.g., `.jina-v3-20`, `.jina-v2-base-multilingual-40`). Use the last path segment of the value for readability (e.g., `jina-v3` instead of `.jina-reranker-v3`).
+
+- **Format B** (detected by `variant-name:` prefix on lines):
+  1. Each line defines one variant.
+  2. Parse `name: file#param=value, file#param=value`.
+
+For each file path: resolve to an absolute path. If the user gives a filename without a full path, search for it under the repo root.
+
+### Step 5: Read Files and Record Original Values
+
+For each unique file referenced across all variants:
+1. Read the file.
+2. For each parameter referenced in that file, find the line where it is defined (e.g., `const rankWindowSize = 40;`).
+3. Record the **exact line content** and the **current value**.
+
+These original values are used to restore the files at the end.
+
+### Step 6: Confirm the Plan
+
+Present the full plan to the user before starting:
+
+> **Sweep plan:**
+>
+> | Variant | Changes |
+> |---------|---------|
+> | baseline | `rankWindowSize=40`, `rerankInferenceID='.jina-reranker-v2-base-multilingual'` |
+> | jina-v2-ws20 | `rankWindowSize=20`, `rerankInferenceID='.jina-reranker-v2-base-multilingual'` |
+> | cohere-ws40 | `rankWindowSize=40`, `rerankInferenceID='.cohere-rerank-v3'` |
+> | cohere-ws80 | `rankWindowSize=80`, `rerankInferenceID='.cohere-rerank-v3'` |
+>
+> - Datasets: wix-qa, elastic-qa
+> - Iterations per variant: 2
+> - Total eval jobs: 4 variants x 2 datasets x 2 iterations = 16
+>
+> Proceed?
+
+Options:
+- **Yes** — Start the sweep
+- **No** — Abort
+
+### Step 7: Execute Sweep
+
+For each variant in order:
+
+1. **Apply all parameter changes** for this variant using the `Edit` tool. For each `{file, parameter, value}` in the variant, edit the line to set the new value. Track the current line content for each parameter so subsequent edits find the right text.
+
+2. **Wait for Kibana to reload.** Poll until Kibana is available:
+   ```bash
+   MAX_RETRIES=24; COUNT=0; until curl -s -o /dev/null -w "%{http_code}" http://localhost:5601/api/status 2>/dev/null | grep -qE "^(200|401)"; do COUNT=$((COUNT+1)); if [ "$COUNT" -ge "$MAX_RETRIES" ]; then echo "ERROR: Kibana did not become available after reload"; exit 1; fi; sleep 5; done
+   ```
+   This polls every 5 seconds for up to 2 minutes.
+
+3. **Run evaluations** for this variant — same as `run` Step 4 (launch all datasets in parallel for N iterations, extract run IDs). Record each run ID tagged with the variant name.
+
+4. If any job **failed**: record the error, display all collected results so far, and **stop** — do not proceed to the next variant. Still restore original values (Step 8).
+
+5. Tell the user which variant completed and move to the next.
+
+### Step 8: Restore Original Values
+
+After all variants are done (or after an error), restore **every parameter** in **every file** to its original value from Step 5 using the `Edit` tool. Wait for Kibana to reload.
+
+This ensures the working tree is left in its original state regardless of whether the sweep completed or was interrupted by an error.
+
+### Step 9: Display Results
+
+Display a summary table with the variant column:
+
+> **Sweep complete!**
+>
+> | Variant      | Dataset    | Iteration | Run ID   |
+> |--------------|------------|-----------|----------|
+> | baseline     | wix-qa     | 1         | `abc123` |
+> | baseline     | wix-qa     | 2         | `def456` |
+> | baseline     | elastic-qa | 1         | `ghi789` |
+> | baseline     | elastic-qa | 2         | `jkl012` |
+> | jina-v2-ws20 | wix-qa     | 1         | `mno345` |
+> | jina-v2-ws20 | wix-qa     | 2         | `pqr678` |
+> | jina-v2-ws20 | elastic-qa | 1         | `stu901` |
+> | jina-v2-ws20 | elastic-qa | 2         | `vwx234` |
+> | cohere-ws40  | wix-qa     | 1         | `yza567` |
+> | cohere-ws40  | wix-qa     | 2         | `bcd890` |
+> | cohere-ws40  | elastic-qa | 1         | `efg123` |
+> | cohere-ws40  | elastic-qa | 2         | `hij456` |
+> | cohere-ws80  | wix-qa     | 1         | `klm789` |
+> | cohere-ws80  | wix-qa     | 2         | `nop012` |
+> | cohere-ws80  | elastic-qa | 1         | `qrs345` |
+> | cohere-ws80  | elastic-qa | 2         | `tuv678` |
+
+If any runs failed, add a note below the table listing which variant/dataset/iteration failed and the error message.
 
 ---
 
