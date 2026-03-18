@@ -37,7 +37,7 @@ const waitForTableToLoad = () => {
 describe(
   'Entities table',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

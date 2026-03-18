@@ -23,7 +23,7 @@ import { WATCHLIST_FILTER_COMBO_BOX } from '../../../screens/entity_analytics/wa
 describe(
   'Entity Analytics page',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
@@ -42,7 +42,7 @@ describe(
     beforeEach(() => {
       login();
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
-      cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_HOME_PAGE_URL);
+      cy.url().should('include', ENTITY_ANALYTICS_HOME_PAGE_URL);
     });
 
     after(() => {
@@ -50,53 +50,53 @@ describe(
     });
 
     it('renders page as expected', () => {
-      cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
+      cy.get(PAGE_TITLE).should('exist');
       cy.get('h1').contains('Entity Analytics').should('be.visible');
     });
 
     it('renders KQL search bar', () => {
-      cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
-      cy.get('[data-test-subj="globalQueryBar"]', { timeout: 30000 }).should('be.visible');
+      cy.get(PAGE_TITLE).should('exist');
+      cy.get('[data-test-subj="globalQueryBar"]').should('be.visible');
     });
 
     it('renders combined risk donut chart', () => {
-      cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
-      cy.get(COMBINED_RISK_DONUT_CHART, { timeout: 30000 }).should('be.visible');
+      cy.get(PAGE_TITLE).should('exist');
+      cy.get(COMBINED_RISK_DONUT_CHART).should('be.visible');
     });
 
     it('renders anomalies placeholder panel', () => {
-      cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
-      cy.get(ANOMALIES_PLACEHOLDER_PANEL, { timeout: 30000 }).should('be.visible');
+      cy.get(PAGE_TITLE).should('exist');
+      cy.get(ANOMALIES_PLACEHOLDER_PANEL).should('be.visible');
       cy.get(ANOMALIES_PLACEHOLDER_PANEL).contains('Recent anomalies');
     });
 
     it('renders entities table', () => {
-      cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
-      cy.get(ENTITIES_TABLE_GRID, { timeout: 30000 }).should('exist');
+      cy.get(PAGE_TITLE).should('exist');
+      cy.get(ENTITIES_TABLE_GRID).should('exist');
     });
 
     it('navigate to privileged user monitoring page on selecting privileged users watchlist', () => {
-      cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
+      cy.get(PAGE_TITLE).should('exist');
 
       cy.get(WATCHLIST_FILTER_COMBO_BOX).should('exist');
       const comboBoxInput = `${WATCHLIST_FILTER_COMBO_BOX} input`;
       cy.get(comboBoxInput).first().click();
       cy.get(comboBoxInput).first().type('Privileged users{downArrow}{enter}');
 
-      cy.url({ timeout: 6000 }).should('include', ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
+      cy.url().should('include', ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
       cy.url().should('include', '/entity_analytics_privileged_user_monitoring');
     });
 
     it('displays timeline action icons in the data grid', () => {
-      cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
-      cy.get(ENTITIES_TABLE_GRID, { timeout: 30000 }).should('exist');
+      cy.get(PAGE_TITLE).should('exist');
+      cy.get(ENTITIES_TABLE_GRID).should('exist');
 
       cy.get(TIMELINE_ACTION).should('have.length.at.least', 1);
     });
 
     it('can interact with timeline action icon', () => {
-      cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
-      cy.get(ENTITIES_TABLE_GRID, { timeout: 30000 }).should('exist');
+      cy.get(PAGE_TITLE).should('exist');
+      cy.get(ENTITIES_TABLE_GRID).should('exist');
 
       cy.get(TIMELINE_ACTION).first().should('be.visible');
       cy.get(TIMELINE_ACTION).first().click();
