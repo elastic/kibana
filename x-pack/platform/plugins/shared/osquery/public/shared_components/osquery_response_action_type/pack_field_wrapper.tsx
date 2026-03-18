@@ -59,7 +59,7 @@ export const PackFieldWrapper = ({
       {submitButtonContent}
       <EuiSpacer />
 
-      {liveQueryDetails?.queries?.length || selectedPackData?.queries?.length ? (
+      {(actionId && aliveQueryDetails?.queries?.length) || selectedPackData?.queries?.length ? (
         <EuiFlexItem>
           <PackQueriesStatusTable
             actionId={actionId}
