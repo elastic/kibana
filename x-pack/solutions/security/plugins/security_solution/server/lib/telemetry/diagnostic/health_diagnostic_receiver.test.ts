@@ -35,14 +35,14 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
   const mkExecV2 = (
     type: QueryType,
     overrides: Partial<HealthDiagnosticQueryV2> = {},
-    resolvedIndices = ['logs-endpoint.events.process-default']
+    indices = ['logs-endpoint.events.process-default']
   ) => ({
     kind: 'executable' as const,
     query: createMockQueryV2(type, overrides),
     resolution: {
-      patterns: ['endpoint'],
-      matched: [{ name: 'endpoint', version: '8.14.2' }],
-      resolvedIndices,
+      name: 'endpoint',
+      version: '8.14.2',
+      indices,
     },
   });
 

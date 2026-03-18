@@ -257,7 +257,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         ExecutableQuery,
         { resolution: IntegrationResolution }
       >;
-      baseIndices = v2Query.resolution.resolvedIndices;
+      baseIndices = v2Query.resolution.indices;
       this.logger.debug('Using resolved indices from v2 query', {
         queryName: query.name,
         count: baseIndices.length,
@@ -338,6 +338,6 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
       return [executableQuery.query.index];
     }
     const v2 = executableQuery as Extract<ExecutableQuery, { resolution: IntegrationResolution }>;
-    return v2.resolution.resolvedIndices;
+    return v2.resolution.indices;
   }
 }
