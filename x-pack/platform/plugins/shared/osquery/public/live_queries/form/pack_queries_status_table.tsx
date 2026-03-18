@@ -378,7 +378,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     () =>
       scheduleId && executionCount != null ? <EuiText size="s">{executionCount}</EuiText> : null,
     [scheduleId, executionCount]
-      scheduleId && executionCount != null ? <EuiText size="s">{executionCount}</EuiText> : null,
   );
 
   const renderTagsColumn = useCallback(
