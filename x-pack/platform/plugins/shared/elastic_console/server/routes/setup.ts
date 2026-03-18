@@ -52,19 +52,19 @@ export const registerSetupRoute = ({
           `${apiKeyResponse.id}:${apiKeyResponse.api_key}`
         ).toString('base64');
 
-        // Resolve URLs
+        // Resolve externally-reachable URLs.
+        // On Cloud (including serverless projects), cloud plugin and server.publicBaseUrl
+        // are the authoritative sources. The local fallbacks only apply during development.
         const elasticsearchUrl =
           cloud?.elasticsearchUrl ||
           coreStart.elasticsearch.publicBaseUrl ||
           'http://localhost:9200';
 
+        const { protocol, hostname, port } = coreSetup.http.getServerInfo();
         const kibanaUrl =
+          coreStart.http.basePath.publicBaseUrl ||
           cloud?.kibanaUrl ||
-          coreSetup.http.getServerInfo().protocol +
-            '://' +
-            coreSetup.http.getServerInfo().hostname +
-            ':' +
-            coreSetup.http.getServerInfo().port;
+          `${protocol}://${hostname}:${port}`;
 
         return response.ok({
           body: {
