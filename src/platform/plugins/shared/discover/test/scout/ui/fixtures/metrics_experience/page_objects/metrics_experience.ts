@@ -117,12 +117,47 @@ export class MetricsExperiencePage {
   /**
    * Waits for the embeddable panel inside a card to signal that rendering is
    * complete via the `data-render-complete="true"` attribute set by Lens.
+   *
+   * Uses polling to verify the attribute stays `"true"` for a minimum
+   * duration, guarding against transient flips that can occur when Lens
+   * re-renders (e.g. after a brush or filter action). This mirrors the
+   * approach used by `DiscoverApp.waitForDocTableRendered`.
    */
   public async waitForCardRenderComplete(index: number): Promise<void> {
     const panel = this.getCardByIndex(index).locator(
-      '[data-test-subj="embeddablePanel"][data-render-complete="true"]'
+      '[data-test-subj="embeddablePanel"]'
     );
     await expect(panel).toBeVisible();
+
+    const minDurationMs = 2_000;
+    const pollIntervalMs = 100;
+    const totalTimeoutMs = 30_000;
+
+    let stableSince: number | null = null;
+
+    await expect
+      .poll(
+        async () => {
+          const attr = await panel.getAttribute('data-render-complete');
+          const now = Date.now();
+
+          if (attr === 'true') {
+            if (!stableSince) {
+              stableSince = now;
+            }
+            return now - stableSince >= minDurationMs;
+          }
+          // Reset if it flips away from 'true'
+          stableSince = null;
+          return false;
+        },
+        {
+          message: `data-render-complete on card ${index} did not stay 'true' for ${minDurationMs}ms`,
+          timeout: totalTimeoutMs,
+          intervals: [pollIntervalMs],
+        }
+      )
+      .toBe(true);
   }
 
   /**
