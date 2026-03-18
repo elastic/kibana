@@ -167,6 +167,7 @@ const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanel
     },
     '1': {
       ...DEFAULT_PINNED_CONTROL_STATE,
+      selectedOptions: [],
       type: 'optionsListControl',
       order: 1,
       displaySettings: {
@@ -184,6 +185,7 @@ const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanel
     },
     '2': {
       ...DEFAULT_PINNED_CONTROL_STATE,
+      selectedOptions: [],
       type: 'optionsListControl',
       order: 2,
       displaySettings: {
@@ -201,6 +203,7 @@ const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanel
     },
     '3': {
       ...DEFAULT_PINNED_CONTROL_STATE,
+      selectedOptions: [],
       type: 'optionsListControl',
       order: 3,
       displaySettings: {

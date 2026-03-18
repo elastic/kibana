@@ -76,14 +76,12 @@ export const OptionsListPopoverSortingButton = ({
 
   const [sort, field] = useBatchedPublishingSubjects(...conditionalApiSubjects);
 
-  const selectedSort = useMemo(() => sort, [sort]);
-
   const [sortByOptions, setSortByOptions] = useState<SortByItem[]>(() => {
     return getCompatibleSortingTypes(field?.type).map((key) => {
       return {
         onFocusBadge: false,
         data: { sortBy: key },
-        checked: key === selectedSort?.by ? 'on' : undefined,
+        checked: key === sort?.by ? 'on' : undefined,
         'data-test-subj': `optionsList__sortBy_${key}`,
         label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(field?.type),
       } as SortByItem;
@@ -98,12 +96,12 @@ export const OptionsListPopoverSortingButton = ({
       if (selectedOption) {
         componentApi.setSort({
           ...DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
-          ...selectedSort,
+          ...sort,
           by: selectedOption.data.sortBy,
         });
       }
     },
-    [selectedSort, componentApi]
+    [sort, componentApi]
   );
 
   const SortButton = () => (
@@ -111,7 +109,7 @@ export const OptionsListPopoverSortingButton = ({
       size="xs"
       display="empty"
       color="text"
-      iconType={selectedSort?.direction === 'asc' ? 'sortAscending' : 'sortDescending'}
+      iconType={sort?.direction === 'asc' ? 'sortAscending' : 'sortDescending'}
       isDisabled={showOnlySelected}
       className="optionsList__sortButton"
       data-test-subj="optionsListControl__sortingOptionsButton"
@@ -149,15 +147,13 @@ export const OptionsListPopoverSortingButton = ({
                 isIconOnly
                 buttonSize="compressed"
                 options={sortOrderOptions}
-                idSelected={
-                  selectedSort?.direction ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort.direction
-                }
+                idSelected={sort?.direction ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort.direction}
                 legend={OptionsListStrings.editorAndPopover.getSortDirectionLegend()}
                 onChange={(value) => {
                   if (!isDSLOptionsListApi(componentApi)) return;
                   componentApi.setSort({
                     ...DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
-                    ...selectedSort,
+                    ...sort,
                     direction: value as Direction,
                   });
                 }}

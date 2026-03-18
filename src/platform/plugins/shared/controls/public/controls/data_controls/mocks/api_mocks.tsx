@@ -37,7 +37,7 @@ export const getOptionsListContextMock = () => {
   const field$ = new BehaviorSubject<DataViewField | undefined>({
     type: 'string',
   } as DataViewField);
-  const sort$ = new BehaviorSubject<OptionsListSortingType | undefined>(undefined);
+  const sort$ = new BehaviorSubject<OptionsListSortingType>(DEFAULT_DSL_OPTIONS_LIST_STATE.sort);
   return {
     componentApi: {
       ...editorStateManager.api,
@@ -48,7 +48,7 @@ export const getOptionsListContextMock = () => {
       field$,
       fieldName$,
       sort$,
-      setSort: (next: OptionsListSortingType | undefined) => {
+      setSort: (next: OptionsListSortingType) => {
         sort$.next(next);
       },
       parentApi: {},
