@@ -66,7 +66,8 @@
     "@kbn/eval-kql",
     "@kbn/react-query",
     "@kbn/es-query",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/core-security-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }
