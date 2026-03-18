@@ -7,17 +7,11 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../common/doc_links';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { useKibana } from '../../hooks/use_kibana';
@@ -28,20 +22,12 @@ import { SearchHomepageBody } from './search_homepage_body';
 
 export const SearchHomepagePage = () => {
   const {
-    services: {
-      console: consolePlugin,
-      history,
-      searchNavigation,
-      cloud,
-      kibanaBuildDate,
-      kibanaVersion,
-    },
+    services: { console: consolePlugin, history, searchNavigation, cloud, kibanaVersion },
   } = useKibana();
 
   const { isTrial } = useGetLicenseInfo();
   const { user } = useAuthenticatedUser();
 
-  console.log(cloud?.isServerlessEnabled, cloud?.isCloudEnabled);
   useEffect(() => {
     if (searchNavigation) {
       searchNavigation.breadcrumbs.setSearchBreadCrumbs([
@@ -105,27 +91,27 @@ export const SearchHomepagePage = () => {
         </EuiFlexGroup>
 
         <EuiHorizontalRule margin="s" />
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup>
           <BasicMetricBadges />
-          <EuiFlexItem>
-            <EuiButton data-test-subj="homepage-kibana-version" color="text" size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.searchHomepage.versionTextLabel"
-                  defaultMessage="{version}"
-                  values={{
-                    version:
-                      !cloud?.isServerlessEnabled && !cloud?.isCloudEnabled
-                        ? `Version ${kibanaVersion}`
-                        : `${new Date(kibanaBuildDate).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })}`,
-                  }}
-                />
-              </p>
-            </EuiButton>
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              data-test-subj="homepage-kibana-version"
+              color="text"
+              external
+              href={
+                !cloud?.isServerlessEnabled
+                  ? docLinks.hostedCloudReleaseNotes
+                  : docLinks.serverlessReleaseNotes
+              }
+            >
+              <FormattedMessage
+                id="xpack.searchHomepage.versionTextLabel"
+                defaultMessage="{version}"
+                values={{
+                  version: !cloud?.isServerlessEnabled ? `v${kibanaVersion}` : 'Changelog',
+                }}
+              />
+            </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>

@@ -36,12 +36,10 @@ const appInfo: SearchHomepageAppInfo = {
 export class SearchHomepagePlugin
   implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
 {
-  private readonly kibanaBuildDate: Date;
   private readonly kibanaVersion: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
-    this.kibanaBuildDate = this.initializerContext.env.packageInfo.buildDate;
   }
 
   public setup(
@@ -51,8 +49,8 @@ export class SearchHomepagePlugin
     const result: SearchHomepagePluginSetup = {
       app: appInfo,
     };
-    const kibanaBuildDate = this.kibanaBuildDate;
-    const kibanaVersion = this.kibanaVersion
+
+    const kibanaVersion = this.kibanaVersion;
 
     core.application.register({
       id: PLUGIN_ID,
@@ -69,7 +67,7 @@ export class SearchHomepagePlugin
           history,
         };
 
-        return renderApp(coreStart, startDeps, element, queryClient, kibanaBuildDate, kibanaVersion);
+        return renderApp(coreStart, startDeps, element, queryClient, kibanaVersion);
       },
       order: 0,
       visibleIn: ['globalSearch', 'sideNav'],
