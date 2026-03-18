@@ -50,7 +50,7 @@ All routes are internal Kibana APIs. Clients must include:
 | Header | Required | Description |
 |--------|----------|-------------|
 | `Authorization` | Yes | `ApiKey <base64-encoded-key>` or Kibana session cookie |
-| `x-elastic-internal-origin` | Yes | Any non-empty value (e.g. `kibana`). Identifies the request as an internal API call. |
+| `x-elastic-internal-origin` | Yes | Must be `kibana`. Identifies the request as an internal API call. |
 | `kbn-xsrf` | POST/PUT only | Any non-empty value (e.g. `true`). Required for non-GET requests. |
 | `x-connector-id` | No | Override the connector ID to use for chat completions |
 
@@ -233,7 +233,7 @@ console.log(response.choices[0].message.content);
 
 ### Claude Code / other agents
 
-Set the base URL to `https://my-kibana:5601/internal/elastic_console/v1` and use the API key from the setup endpoint. Include `x-elastic-internal-origin: kibana` and `kbn-xsrf: true` headers in all requests.
+Set the base URL to `https://my-kibana:5601/internal/elastic_console/v1` and use the API key from the setup endpoint. Include `x-elastic-internal-origin: kibana` in all requests, and include `kbn-xsrf: true` for non-GET requests.
 
 ## Development
 

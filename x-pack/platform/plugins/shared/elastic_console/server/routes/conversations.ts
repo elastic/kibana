@@ -21,10 +21,10 @@ const serializeConversationRounds = (
   rounds: Array<Record<string, unknown>>
 ): Array<Record<string, unknown>> => {
   return rounds.map((round) => {
-    const steps = round.steps as Array<Record<string, unknown>> | undefined;
-    if (!steps) {
+    if (!Array.isArray(round.steps)) {
       return round;
     }
+    const steps = round.steps as Array<Record<string, unknown>>;
     return {
       ...round,
       steps: steps.map((step) => {
@@ -42,7 +42,7 @@ const serializeConversationRounds = (
 };
 
 const getSpace = (basePath: string): string => {
-  const spaceMatch = basePath.match(/^\/s\/([^/]+)/);
+  const spaceMatch = basePath.match(/(?:^|\/)s\/([^/]+)/);
   return spaceMatch ? spaceMatch[1] : 'default';
 };
 
