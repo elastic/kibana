@@ -57,7 +57,9 @@ export class IngestHubPlugin implements Plugin<IngestHubSetup, IngestHubStart> {
         }
 
         ReactDOM.render(
-          <IngestHubApp coreStart={coreStart} ingestFlows={this.ingestFlows} />,
+          coreStart.rendering.addContext(
+            <IngestHubApp coreStart={coreStart} ingestFlows={this.ingestFlows} />
+          ),
           element
         );
         return () => ReactDOM.unmountComponentAtNode(element);

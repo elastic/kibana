@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -25,37 +25,20 @@ interface IngestFlowFlyoutProps {
   onClose: () => void;
 }
 
+const LoadingSpinner: React.FC = () => (
+  <EuiFlexGroup justifyContent="center" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="l" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 export const IngestFlowFlyout: React.FC<IngestFlowFlyoutProps> = ({ flow, onClose }) => {
-  const [mountElement, setMountElement] = useState<HTMLDivElement | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'ingestFlowFlyout' });
-
-  const mountCallbackRef = useCallback((node: HTMLDivElement | null) => {
-    setMountElement(node);
-  }, []);
-
-  useEffect(() => {
-    if (!mountElement) {
-      return;
-    }
-
-    let unmount: (() => void) | null = null;
-    let cancelled = false;
-
-    flow.mount({ element: mountElement, flowId: flow.id, onClose }).then((unmountFn) => {
-      if (cancelled) {
-        unmountFn();
-      } else {
-        unmount = unmountFn;
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      cancelled = true;
-      unmount?.();
-    };
-  }, [mountElement, flow, onClose]);
+  const LazyContent = useMemo(
+    () => React.lazy(async () => ({ default: await flow.getComponent() })),
+    [flow]
+  );
 
   return (
     <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId} ownFocus>
@@ -75,14 +58,9 @@ export const IngestFlowFlyout: React.FC<IngestFlowFlyoutProps> = ({ flow, onClos
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {isLoading && (
-          <EuiFlexGroup justifyContent="center" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        <div ref={mountCallbackRef} />
+        <Suspense fallback={<LoadingSpinner />}>
+          <LazyContent />
+        </Suspense>
       </EuiFlyoutBody>
     </EuiFlyout>
   );

@@ -5,13 +5,8 @@
  * 2.0.
  */
 
+import type { ComponentType } from 'react';
 import type { IconType } from '@elastic/eui';
-
-export interface IngestFlowMountParams {
-  element: HTMLElement;
-  flowId: string;
-  onClose: () => void;
-}
 
 export interface IngestFlowRegistration {
   id: string;
@@ -20,7 +15,7 @@ export interface IngestFlowRegistration {
   icon: IconType;
   category: string;
   order?: number;
-  mount: (params: IngestFlowMountParams) => Promise<() => void>;
+  getComponent: () => Promise<ComponentType>;
 }
 
 export type IngestHubSetup = Record<string, never>;

@@ -31,7 +31,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
-import type { IngestHubStart, IngestFlowMountParams } from '@kbn/ingest-hub-plugin/public';
+import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
@@ -180,9 +180,12 @@ export class ObservabilityOnboardingPlugin
       description: 'Monitor your Kubernetes cluster with Elastic Agent',
       icon: 'logoKubernetes',
       category: 'Containers',
-      mount: async ({ element }: IngestFlowMountParams) => {
-        const { mountKubernetesFlow } = await import('./ingest_hub/render_ingest_flow');
-        return mountKubernetesFlow(element, deps);
+      getComponent: async () => {
+        const [{ createIngestFlowComponent }, { KubernetesPanel }] = await Promise.all([
+          import('./ingest_hub/render_ingest_flow'),
+          import('./application/quickstart_flows/kubernetes'),
+        ]);
+        return createIngestFlowComponent(deps, KubernetesPanel);
       },
     });
   }

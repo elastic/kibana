@@ -9,12 +9,7 @@ import type { PluginInitializer } from '@kbn/core/public';
 import { IngestHubPlugin } from './plugin';
 import type { IngestHubSetup, IngestHubStart } from './types';
 
-export type {
-  IngestHubSetup,
-  IngestHubStart,
-  IngestFlowRegistration,
-  IngestFlowMountParams,
-} from './types';
+export type { IngestHubSetup, IngestHubStart, IngestFlowRegistration } from './types';
 
 export { IngestFlowSteps } from './components/ingest_flow_steps';
 export type { IngestFlowStep } from './components/ingest_flow_steps';

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { createMemoryHistory } from 'history';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -23,19 +22,10 @@ export interface IngestFlowDeps {
   context: AppContext;
 }
 
-export const mountKubernetesFlow = async (
-  element: HTMLElement,
-  deps: IngestFlowDeps
-): Promise<() => void> => {
-  const { KubernetesPanel } = await import('../application/quickstart_flows/kubernetes');
-  return renderIngestFlow(element, deps, <KubernetesPanel />);
-};
-
-export const renderIngestFlow = (
-  element: HTMLElement,
+export const createIngestFlowComponent = (
   deps: IngestFlowDeps,
-  content: React.ReactNode
-): (() => void) => {
+  Content: React.ComponentType
+): React.FC => {
   createCallApi(deps.core);
 
   const services: ObservabilityOnboardingAppServices = {
@@ -45,18 +35,13 @@ export const renderIngestFlow = (
     context: deps.context,
   };
 
-  ReactDOM.render(
-    deps.core.rendering.addContext(
-      <KibanaContextProvider services={services}>
-        <Router history={createMemoryHistory()}>
-          <PerformanceContextProvider>
-            <>{content}</>
-          </PerformanceContextProvider>
-        </Router>
-      </KibanaContextProvider>
-    ),
-    element
+  return () => (
+    <KibanaContextProvider services={services}>
+      <Router history={createMemoryHistory()}>
+        <PerformanceContextProvider>
+          <Content />
+        </PerformanceContextProvider>
+      </Router>
+    </KibanaContextProvider>
   );
-
-  return () => ReactDOM.unmountComponentAtNode(element);
 };
