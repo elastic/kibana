@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { buildCompositeAggQueryBase, buildBucketUserFilter, buildAccessEsqlQuery } from './shared_query_utils';
+import {
+  buildCompositeAggQueryBase,
+  buildBucketUserFilter,
+  buildAccessEsqlQuery,
+} from './shared_query_utils';
 import { COMPOSITE_PAGE_SIZE, LOOKBACK_WINDOW } from '../constants';
 import type { CompositeAfterKey, CompositeBucket } from '../types';
 

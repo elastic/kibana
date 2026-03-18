@@ -19,10 +19,25 @@ describe('System Security buildEsqlQuery', () => {
     );
   });
 
-  it('filters for Interactive and RemoteInteractive logon types', () => {
-    expect(buildEsqlQuery('default')).toContain(
-      'winlog.logon.type IN ("Interactive", "RemoteInteractive")'
-    );
+  it('filters for event.code 4624 and 4648', () => {
+    const query = buildEsqlQuery('default');
+    expect(query).toContain('event.code IN ("4624", "4648")');
+  });
+
+  it('filters for Interactive, RemoteInteractive, and CachedInteractive logon types', () => {
+    const query = buildEsqlQuery('default');
+    expect(query).toContain('"Interactive"');
+    expect(query).toContain('"RemoteInteractive"');
+    expect(query).toContain('"CachedInteractive"');
+  });
+
+  it('excludes service and system accounts', () => {
+    const query = buildEsqlQuery('default');
+    expect(query).toContain('NOT user.name IN (');
+    expect(query).toContain('"SYSTEM"');
+    expect(query).toContain('"LOCAL SERVICE"');
+    expect(query).toContain('"NETWORK SERVICE"');
+    expect(query).toContain('"ANONYMOUS LOGON"');
   });
 
   it('does not filter on event.module or event.category', () => {

@@ -10,11 +10,15 @@ import { buildCompositeAggQueryBase } from '../shared_query_utils';
 
 export { buildBucketUserFilter } from '../shared_query_utils';
 
+const EXCLUDED_USERNAMES = ['SYSTEM', 'LOCAL SERVICE', 'NETWORK SERVICE', 'ANONYMOUS LOGON'];
+
 export const buildCompositeAggQuery = (afterKey?: CompositeAfterKey) =>
   buildCompositeAggQueryBase(
     [
       { terms: { 'event.action': ['logged-in', 'logged-in-explicit'] } },
-      { terms: { 'winlog.logon.type': ['Interactive', 'RemoteInteractive'] } },
+      { terms: { 'event.code': ['4624', '4648'] } },
+      { terms: { 'winlog.logon.type': ['Interactive', 'RemoteInteractive', 'CachedInteractive'] } },
+      { bool: { must_not: [{ terms: { 'user.name': EXCLUDED_USERNAMES } }] } },
     ],
     afterKey
   );

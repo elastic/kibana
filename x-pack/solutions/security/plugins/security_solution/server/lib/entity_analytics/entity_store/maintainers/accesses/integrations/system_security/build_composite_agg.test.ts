@@ -15,10 +15,35 @@ describe('System Security buildCompositeAggQuery', () => {
     });
   });
 
-  it('filters for Interactive and RemoteInteractive logon types', () => {
+  it('filters for event.code 4624 and 4648', () => {
     const query = buildCompositeAggQuery();
     expect(query.query.bool.filter).toContainEqual({
-      terms: { 'winlog.logon.type': ['Interactive', 'RemoteInteractive'] },
+      terms: { 'event.code': ['4624', '4648'] },
+    });
+  });
+
+  it('filters for Interactive, RemoteInteractive, and CachedInteractive logon types', () => {
+    const query = buildCompositeAggQuery();
+    expect(query.query.bool.filter).toContainEqual({
+      terms: {
+        'winlog.logon.type': ['Interactive', 'RemoteInteractive', 'CachedInteractive'],
+      },
+    });
+  });
+
+  it('excludes service and system accounts', () => {
+    const query = buildCompositeAggQuery();
+    const exclusionFilter = query.query.bool.filter.find(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (f: any) => f.bool?.must_not
+    );
+    expect(exclusionFilter).toBeDefined();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mustNot = (exclusionFilter as any).bool.must_not;
+    expect(mustNot).toContainEqual({
+      terms: {
+        'user.name': ['SYSTEM', 'LOCAL SERVICE', 'NETWORK SERVICE', 'ANONYMOUS LOGON'],
+      },
     });
   });
 

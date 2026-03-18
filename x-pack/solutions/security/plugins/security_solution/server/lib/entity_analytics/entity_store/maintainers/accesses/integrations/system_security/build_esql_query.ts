@@ -12,6 +12,8 @@ export function buildEsqlQuery(namespace: string): string {
   return buildAccessEsqlQuery(
     getIndexPattern(namespace),
     `event.action IN ("logged-in", "logged-in-explicit")
-    AND winlog.logon.type IN ("Interactive", "RemoteInteractive")`
+    AND event.code IN ("4624", "4648")
+    AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")
+    AND NOT user.name IN ("SYSTEM", "LOCAL SERVICE", "NETWORK SERVICE", "ANONYMOUS LOGON")`
   );
 }
