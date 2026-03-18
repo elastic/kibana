@@ -74,32 +74,6 @@ uiSettings.overrides.defaultRoute: /app/elasticsearch
 # Specify in telemetry the project type
 telemetry.labels.serverless: search
 
-# Alerts and LLM config
-xpack.actions.enabledActionTypes:
-  [
-    '.email',
-    '.index',
-    '.slack',
-    '.slack_api',
-    '.jira',
-    '.jira-cloud',
-    '.webhook',
-    '.teams',
-    '.gen-ai',
-    '.bedrock',
-    '.gemini',
-    '.inference',
-    '.mcp',
-    '.notion',
-    '.github',
-    '.google_drive',
-    '.google_calendar',
-    '.sharepoint-online',
-    '.http',
-    '.http-system',
-    '.workflows',
-  ]
-
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'
 

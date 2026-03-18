@@ -325,4 +325,49 @@ steps:
       expect(result.workflowGraph).toBeDefined();
     });
   });
+
+  describe('JSON Schema outputs', () => {
+    it('should preserve outputs in JSON Schema format from performComputation', () => {
+      const yaml = `name: New workflow
+enabled: true
+description: This is a new workflow
+triggers:
+  - type: alert
+
+inputs:
+  - name: message
+    type: string
+    default: "hello world"
+
+outputs: 
+  required:
+    - b
+  properties:
+    a:
+      type: string
+      default: "aaaa"
+    b:
+      type: number
+
+steps:
+  - name: hello_world_step
+    type: console
+    with:
+      message: "{{ event.alerts[0] | json: 2 }}"
+
+  - name: return
+    type: workflow.output
+    with:
+      a: {}`;
+
+      const result = performComputation(yaml);
+
+      expect(result.workflowDefinition).toBeDefined();
+      expect(result.workflowDefinition?.outputs).toBeDefined();
+
+      const outputs = result.workflowDefinition?.outputs as Record<string, unknown>;
+      expect(outputs?.properties).toBeDefined();
+      expect(outputs?.required).toEqual(['b']);
+    });
+  });
 });

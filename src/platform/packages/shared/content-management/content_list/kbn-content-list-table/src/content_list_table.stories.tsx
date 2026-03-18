@@ -209,7 +209,7 @@ const StateDiagnosticPanel = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
               onClick={() => setIsOpen(!isOpen)}
               aria-label={isOpen ? 'Collapse diagnostic panel' : 'Expand diagnostic panel'}
               size="s"

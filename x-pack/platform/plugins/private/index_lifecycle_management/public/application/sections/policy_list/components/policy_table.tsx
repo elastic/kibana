@@ -266,7 +266,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
             { defaultMessage: 'Add policy to index template' }
           ),
           type: 'icon',
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
           onClick: (policy) =>
             setListAction({ selectedPolicy: policy, actionType: 'addIndexTemplate' }),
           'data-test-subj': 'addPolicyToTemplate',
