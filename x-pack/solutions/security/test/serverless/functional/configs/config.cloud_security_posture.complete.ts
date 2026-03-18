@@ -30,9 +30,8 @@ export default createTestConfig({
   testFiles: [
     require.resolve('../test_suites/ftr/cloud_security_posture/compliance_dashboard'),
     require.resolve('../test_suites/ftr/cloud_security_posture/csp_integrations_form.essentials'),
-    // TODO: re-enable once entity store v2 indices are supported by editor/viewer roles in Serverless
-    // require.resolve('../test_suites/ftr/cloud_security_posture/graph_alerts_flyout'),
-    // require.resolve('../test_suites/ftr/cloud_security_posture/graph_events_flyout'),
+    require.resolve('../test_suites/ftr/cloud_security_posture/graph_alerts_flyout'),
+    require.resolve('../test_suites/ftr/cloud_security_posture/graph_events_flyout'),
   ],
   enableFleetDockerRegistry: false,
 });
