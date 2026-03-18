@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiFlexGroup, EuiLink, EuiCopy, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexItem, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import React from 'react';
 
 interface SearchHomepageVersionBadgeProps {
@@ -28,22 +27,6 @@ export const SearchHomepageVersionBadge: React.FC<SearchHomepageVersionBadgeProp
         >
           {kibanaVersion}
         </EuiLink>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiCopy textToCopy={kibanaVersion}>
-          {(copy) => (
-            <EuiButtonIcon
-              aria-label={i18n.translate('xpack.searchHomepage.versionCopyButton', {
-                defaultMessage: 'Copy version to clipboard',
-              })}
-              data-test-subj="homepage-copy-version"
-              iconType="copyClipboard"
-              color="text"
-              size="xs"
-              onClick={copy}
-            />
-          )}
-        </EuiCopy>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
