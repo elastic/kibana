@@ -65,7 +65,8 @@ describe.skip(
     const rule = getEsqlRule();
     const expectedNumberOfRules = 1;
 
-    describe('creation', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/257364
+    describe.skip('creation', () => {
       beforeEach(() => {
         deleteAlertsAndRules();
         login();
