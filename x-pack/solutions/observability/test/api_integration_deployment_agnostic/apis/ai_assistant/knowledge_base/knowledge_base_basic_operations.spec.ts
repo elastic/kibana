@@ -150,7 +150,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(entries.length).to.eql(0);
       });
 
-      it('returns 500 on delete not found', async () => {
+      it('returns 404 on delete not found', async () => {
         const entryId = 'my-doc-id-1';
         const { status } = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
@@ -158,7 +158,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             path: { entryId },
           },
         });
-        expect(status).to.be(500);
+        expect(status).to.be(404);
       });
     });
 
@@ -315,22 +315,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(spaceBEntries[1].title).to.equal('Entry in Space B by Admin 4');
       });
 
-      it('should allow a user who is not the owner of the entries to access entries relevant to their namespace', async () => {
-        // User (editor) in space B should only see entries in space B
+      it('should only return public entries for a user who is not the owner, within their namespace', async () => {
+        // User (editor) in space B should only see public entries in space B
         const spaceBEntries = await getEntries({
           user: 'editor',
           spaceId: SPACE_B_ID,
         });
 
-        expect(spaceBEntries.length).to.be(2);
+        expect(spaceBEntries.length).to.be(1);
 
         expect(spaceBEntries[0].id).to.equal('my-doc-3');
         expect(spaceBEntries[0].public).to.be(true);
         expect(spaceBEntries[0].title).to.equal('Entry in Space B by Admin 3');
-
-        expect(spaceBEntries[1].id).to.equal('my-doc-4');
-        expect(spaceBEntries[1].public).to.be(false);
-        expect(spaceBEntries[1].title).to.equal('Entry in Space B by Admin 4');
       });
     });
 

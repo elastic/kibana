@@ -857,11 +857,16 @@ export class ObservabilityAIAssistantClient {
       sortBy,
       sortDirection,
       namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
     });
   };
 
   deleteKnowledgeBaseEntry = async (id: string) => {
-    return this.dependencies.knowledgeBaseService.deleteEntry({ id });
+    return this.dependencies.knowledgeBaseService.deleteEntry({
+      id,
+      user: this.dependencies.user,
+      namespace: this.dependencies.namespace,
+    });
   };
 
   getKnowledgeBaseUserInstructions = async () => {

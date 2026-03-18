@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { serverUnavailable } from '@hapi/boom';
+import { forbidden, notFound, serverUnavailable } from '@hapi/boom';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
@@ -326,11 +326,13 @@ export class KnowledgeBaseService {
     sortBy,
     sortDirection,
     namespace,
+    user,
   }: {
     query?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
     namespace: string;
+    user?: KnowledgeBaseEntry['user'];
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return { entries: [] };
@@ -354,8 +356,8 @@ export class KnowledgeBaseService {
                   must_not: { term: { type: KnowledgeBaseType.UserInstruction } },
                 },
               },
-              // filter by space
-              ...getSpaceQuery({ namespace }),
+              // filter by space and user ownership
+              ...getAccessQuery({ user, namespace }),
             ],
           },
         },
@@ -484,6 +486,26 @@ export class KnowledgeBaseService {
       return;
     }
 
+    if (id) {
+      const existing = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
+        index: resourceNames.writeIndexAlias.kb,
+        query: { ids: { values: [id] } },
+        size: 1,
+        _source: ['user'],
+      });
+
+      const existingDoc = existing.hits.hits[0];
+      if (existingDoc) {
+        const existingUser = existingDoc._source?.user;
+        const isOwner =
+          user &&
+          (existingUser?.id ? existingUser.id === user.id : existingUser?.name === user.name);
+        if (!isOwner) {
+          throw forbidden('Not authorized to modify this knowledge base entry');
+        }
+      }
+    }
+
     try {
       const indexResult = await this.dependencies.esClient.asInternalUser.index<
         Omit<KnowledgeBaseEntry, 'id'> & { namespace: string }
@@ -587,15 +609,33 @@ export class KnowledgeBaseService {
     }
   };
 
-  deleteEntry = async ({ id }: { id: string }): Promise<void> => {
+  deleteEntry = async ({
+    id,
+    user,
+    namespace,
+  }: {
+    id: string;
+    user?: { name: string; id?: string };
+    namespace: string;
+  }): Promise<void> => {
     try {
-      await this.dependencies.esClient.asInternalUser.delete({
+      const result = await this.dependencies.esClient.asInternalUser.deleteByQuery({
         index: resourceNames.writeIndexAlias.kb,
-        id,
-        refresh: 'wait_for',
+        query: {
+          bool: {
+            filter: [
+              { ids: { values: [id] } },
+              { bool: { should: getUserAccessFilters(user), minimum_should_match: 1 } },
+              ...getSpaceQuery({ namespace }),
+            ],
+          },
+        },
+        refresh: true,
       });
 
-      return Promise.resolve();
+      if ((result.deleted ?? 0) === 0) {
+        throw notFound('Knowledge base entry not found or you do not have permission to delete it');
+      }
     } catch (error) {
       if (isInferenceEndpointMissingOrUnavailable(error)) {
         throwKnowledgeBaseNotReady(error);
