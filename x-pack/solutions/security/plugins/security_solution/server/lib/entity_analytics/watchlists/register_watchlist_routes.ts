@@ -8,14 +8,18 @@
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import {
   createWatchlistRoute,
+  deleteWatchlistRoute,
   getWatchlistRoute,
   listWatchlistsRoute,
   updateWatchlistRoute,
 } from './management/routes';
+import { registerEntitySourceRoutes } from './management/routes/entity_sources';
 
 export const registerWatchlistRoutes = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
   createWatchlistRoute(router, logger);
+  deleteWatchlistRoute(router, logger);
   getWatchlistRoute(router, logger);
   listWatchlistsRoute(router, logger);
   updateWatchlistRoute(router, logger);
+  registerEntitySourceRoutes(router, logger);
 };
