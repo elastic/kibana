@@ -265,21 +265,30 @@ const UnifiedHistoryTableComponent = () => {
     const errors = row.errorCount ?? 0;
     const pending = Math.max(0, row.agentCount - success - errors);
 
+    const badges = [
+      ...(success > 0
+        ? [<EuiBadge color="success">{`  ${success}  `}</EuiBadge>]
+        : []),
+      ...(errors > 0
+        ? [<EuiBadge color="danger">{`  ${errors}  `}</EuiBadge>]
+        : []),
+      ...(pending > 0
+        ? [<EuiBadge color="hollow">{`  ${pending}  `}</EuiBadge>]
+        : []),
+    ];
+
     return (
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="success">{success}</EuiBadge>
-        </EuiFlexItem>
-        {errors > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="danger">{errors}</EuiBadge>
-          </EuiFlexItem>
-        )}
-        {pending > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{pending}</EuiBadge>
-          </EuiFlexItem>
-        )}
+        {badges.map((badge, idx) => (
+          <React.Fragment key={idx}>
+            {idx > 0 && (
+              <EuiFlexItem grow={false}>
+                <span css={{ color: '#D3DAE6' }}>/</span>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>{badge}</EuiFlexItem>
+          </React.Fragment>
+        ))}
       </EuiFlexGroup>
     );
   }, []);
