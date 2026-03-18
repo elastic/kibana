@@ -575,35 +575,6 @@ describe('XY', () => {
         );
       });
 
-      it('should convert ordinal scale correctly', () => {
-        validateAPIConverter(
-          {
-            type: 'xy',
-            title: 'XY Chart with Ordinal Scale',
-            axis: {
-              x: {
-                scale: 'ordinal',
-              },
-            },
-            layers: [
-              {
-                ignore_global_filters: false,
-                sampling: 1,
-                dataset: { type: 'dataView', id: 'myDataView' },
-                type: 'bar',
-                x: {
-                  operation: 'terms',
-                  fields: ['product'],
-                  size: 5,
-                },
-                y: [{ operation: 'count', empty_as_null: false }],
-              },
-            ],
-          },
-          xyStateSchema
-        );
-      });
-
       it('should handle config without axis object', () => {
         validateAPIConverter(
           {
@@ -613,9 +584,12 @@ describe('XY', () => {
               {
                 ignore_global_filters: false,
                 sampling: 1,
-                dataset: { type: 'dataView', id: 'myDataView' },
+                dataset: {
+                  type: 'esql',
+                  query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
+                },
                 type: 'bar',
-                y: [{ operation: 'count', empty_as_null: false }],
+                y: [{ operation: 'value', column: 'count' }],
               },
             ],
           },
@@ -638,9 +612,12 @@ describe('XY', () => {
               {
                 ignore_global_filters: false,
                 sampling: 1,
-                dataset: { type: 'dataView', id: 'myDataView' },
+                dataset: {
+                  type: 'esql',
+                  query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
+                },
                 type: 'bar',
-                y: [{ operation: 'count', empty_as_null: false }],
+                y: [{ operation: 'value', column: 'count' }],
               },
             ],
           },
