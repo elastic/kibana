@@ -20,14 +20,12 @@ const FilterBarContext = createContext<{
   onToggleCollapse: () => void;
   expandablePillsId: string;
   numActiveFilters: number;
-  numFilters: number;
 }>({
   isCollapsible: false,
   isCollapsed: false,
   onToggleCollapse: () => {},
   expandablePillsId: '',
   numActiveFilters: 0,
-  numFilters: 0,
 });
 
 export const FilterBarContextProvider: React.FC<
@@ -79,7 +77,6 @@ export const FilterBarContextProvider: React.FC<
         onToggleCollapse,
         expandablePillsId,
         numActiveFilters,
-        numFilters,
       }}
     >
       {children}

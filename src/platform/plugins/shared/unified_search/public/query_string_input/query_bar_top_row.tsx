@@ -918,7 +918,7 @@ export const QueryBarTopRow = React.memo(
                 attached={renderFilterMenuOnly()}
                 size="s"
               />
-              {Boolean(props.showAddFilter) && (
+              {Boolean(props.showAddFilter && props.filters.length) && (
                 <FilterButtonGroup items={[renderFilterBarToggleButton()]} size="s" />
               )}
             </EuiFlexGroup>

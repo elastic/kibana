@@ -36,7 +36,7 @@ const expandLabel = i18n.translate(
 );
 
 export const FilterBarToggleButton: React.FC<{}> = () => {
-  const { isCollapsed, onToggleCollapse, expandablePillsId, numActiveFilters, numFilters } =
+  const { isCollapsed, onToggleCollapse, expandablePillsId, numActiveFilters } =
     useFilterBarContext();
   const themeContext = useEuiTheme();
   const styles = toggleStyles(themeContext);
@@ -50,7 +50,6 @@ export const FilterBarToggleButton: React.FC<{}> = () => {
     onToggleCollapse();
   }, [onToggleCollapse]);
 
-  if (numFilters === 0) return null;
   return (
     <EuiToolTip content={isCollapsed ? expandLabel : collapseLabel} disableScreenReaderOutput>
       <EuiButtonEmpty
