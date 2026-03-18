@@ -253,7 +253,7 @@ function convertAxisSettingsToAPIFormat(
 ): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
 
-  let xAxisScale = 'ordinal';
+  let xAxisScale: string | undefined;
   const firstLayer = config.layers[0];
   const dataSourceLayer = layers[firstLayer.layerId];
   if (isTextBasedLayer(dataSourceLayer) && isLensStateDataLayer(firstLayer)) {
@@ -262,6 +262,8 @@ function convertAxisSettingsToAPIFormat(
       xAxisScale = 'temporal';
     } else if (xColumn?.meta?.type === 'number') {
       xAxisScale = 'linear';
+    } else {
+      xAxisScale = 'ordinal';
     }
   }
 

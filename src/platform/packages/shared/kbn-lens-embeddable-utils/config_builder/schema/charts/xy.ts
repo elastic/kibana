@@ -231,7 +231,10 @@ const decorationsSchema = schema.object(
 
 const xScaleSchema = schema.maybe(
   schema.oneOf([schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')], {
-    meta: { description: 'X-axis scale type' },
+    meta: {
+      description:
+        'X-axis scale type. Only used in ES|QL charts. Data view based charts fall back to the X operation type.',
+    },
   })
 );
 
