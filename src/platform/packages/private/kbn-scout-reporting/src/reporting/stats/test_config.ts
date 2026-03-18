@@ -22,14 +22,14 @@ export const ScoutTestConfigStatsEntrySchema = z.object({
   test_target: ScoutTestTargetSchema.transform(
     (data) => new ScoutTestTarget(data.location, data.arch, data.domain)
   ),
-  runCount: z.int(),
+  runCount: z.number().int(),
   runtime: z.object({
-    avg: z.int(),
-    median: z.int(),
-    pc95th: z.int(),
-    pc99th: z.int(),
-    max: z.int(),
-    estimate: z.int(),
+    avg: z.number().int(),
+    median: z.number().int(),
+    pc95th: z.number().int(),
+    pc99th: z.number().int(),
+    max: z.number().int(),
+    estimate: z.number().int(),
   }),
 });
 
@@ -37,7 +37,7 @@ export type ScoutTestConfigStatsEntry = z.infer<typeof ScoutTestConfigStatsEntry
 
 export const ScoutTestConfigStatsDataSchema = z.object({
   lastUpdated: z.coerce.date(),
-  lookbackDays: z.int().min(1).max(7),
+  lookbackDays: z.number().int().min(1).max(7),
   buildkite: z.object({
     branch: z.optional(z.string()),
     pipeline: z.optional(
