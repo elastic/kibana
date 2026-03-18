@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { spaceTest } from '../fixtures';
+import { tags } from '@kbn/scout';
 
 spaceTest.describe(
   'GenAI Settings - Agent Mode Complete Flow',
-  {
-    tag: [
-      ...tags.stateful.classic,
-      ...tags.serverless.observability.complete,
-      ...tags.serverless.security.complete,
-    ],
-  },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsFullAIPrivilegesUser();

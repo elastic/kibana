@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
+import { tags } from '@kbn/scout-oblt';
 import {
   setupWiredStreamsOnce,
   setupWiredStreamsBeforeEach,

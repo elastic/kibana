@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { NetworkDirectionProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
+import { tags } from '@kbn/scout';
 
 apiTest.describe(
   'Cross-compatibility - Network Direction Processor',

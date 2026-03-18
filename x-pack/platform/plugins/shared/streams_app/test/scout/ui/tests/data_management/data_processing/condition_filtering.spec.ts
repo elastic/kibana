@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
+import { tags } from '@kbn/scout';
 
 test.describe(
   'Stream data processing - condition filtering and match rate',

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { NetworkDirectionProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
+import { tags } from '@kbn/scout';
 
 apiTest.describe(
   'Streamlang to ES|QL - Network Direction Processor',
