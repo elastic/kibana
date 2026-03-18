@@ -48,7 +48,9 @@ const formDeserializer = (data: InferenceEndpoint) => {
       ...restConfig,
       providerConfig: {
         ...restProviderConfig,
-        ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+        ...(typeof maxAllocations === 'number'
+          ? { max_number_of_allocations: maxAllocations }
+          : {}),
       },
       taskTypeConfig: {
         ...(taskTypeConfig ?? {}),
@@ -77,7 +79,7 @@ export const formSerializer = (formData: InferenceEndpoint) => {
         ...restConfig,
         providerConfig: {
           ...restProviderConfig,
-          ...(maxAllocations
+          ...(typeof maxAllocations === 'number'
             ? {
                 adaptive_allocations: {
                   enabled: true,
