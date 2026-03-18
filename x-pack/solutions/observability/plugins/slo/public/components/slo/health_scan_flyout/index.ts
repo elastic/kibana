@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const ENTRY_LEADER_ENTITY_ID = 'process.entry_leader.entity_id';
-export const ENTRY_LEADER_START = 'process.entry_leader.start';
-export const ANCESTOR_INDEX = 'kibana.alert.ancestors.index';
+export { HealthScanFlyout } from './health_scan_flyout';
