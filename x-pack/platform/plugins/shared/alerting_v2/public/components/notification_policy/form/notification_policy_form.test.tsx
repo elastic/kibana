@@ -14,6 +14,13 @@ import { DEFAULT_FORM_STATE } from './constants';
 import { NotificationPolicyForm } from './notification_policy_form';
 import type { NotificationPolicyFormState } from './types';
 
+jest.mock('../../../hooks/use_fetch_workflows', () => ({
+  useFetchWorkflows: () => ({
+    data: { results: [], total: 0, page: 1, size: 100 },
+    isLoading: false,
+  }),
+}));
+
 const renderForm = (defaultValues: NotificationPolicyFormState = DEFAULT_FORM_STATE) => {
   const TestComponent = () => {
     const methods = useForm<NotificationPolicyFormState>({

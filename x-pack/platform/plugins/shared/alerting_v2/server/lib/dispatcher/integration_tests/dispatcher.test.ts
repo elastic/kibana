@@ -696,6 +696,7 @@ async function seedRulesAndPolicies(
   const policyAttrs: NotificationPolicySavedObjectAttributes = {
     name: 'Test Policy',
     description: 'Test notification policy',
+    enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'test-workflow' }],
     auth: {
       apiKey: 'test-api-key',

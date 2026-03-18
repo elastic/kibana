@@ -130,7 +130,7 @@ describe('RulesClient', () => {
         expect.objectContaining({
           metadata: expect.objectContaining({ name: 'rule-1' }),
           enabled: true,
-          createdBy: 'elastic_profile_uid',
+          createdBy: 'elastic',
         }),
         { id: 'rule-id-1', overwrite: false }
       );
@@ -149,8 +149,8 @@ describe('RulesClient', () => {
           id: 'rule-id-1',
           metadata: expect.objectContaining({ name: 'rule-1' }),
           enabled: true,
-          createdBy: 'elastic_profile_uid',
-          updatedBy: 'elastic_profile_uid',
+          createdBy: 'elastic',
+          updatedBy: 'elastic',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
@@ -194,6 +194,40 @@ describe('RulesClient', () => {
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
       });
+    });
+
+    it('creates a rule with description and includes it in the response', async () => {
+      const client = createClient();
+      const soAttrsWithDesc = createRuleSoAttributes({
+        metadata: { name: 'rule-with-desc', description: 'My description' },
+      });
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'rule-id-desc',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: soAttrsWithDesc,
+        references: [],
+      });
+
+      const res = await client.createRule({
+        data: {
+          ...baseCreateData,
+          metadata: { name: 'rule-with-desc', description: 'My description' },
+        },
+        options: { id: 'rule-id-desc' },
+      });
+
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            name: 'rule-with-desc',
+            description: 'My description',
+          }),
+        }),
+        { id: 'rule-id-desc', overwrite: false }
+      );
+
+      expect(res.metadata.description).toBe('My description');
     });
 
     it('throws 400 when ES|QL is invalid', async () => {
@@ -259,6 +293,34 @@ describe('RulesClient', () => {
         }),
         { version: 'WzEsMV0=' }
       );
+    });
+
+    it('updates the description of a rule', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: baseSoAttrs,
+        version: 'WzEsMV0=',
+        id: 'rule-id-desc-update',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      const res = await client.updateRule({
+        id: 'rule-id-desc-update',
+        data: { metadata: { description: 'New description' } },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-desc-update',
+        expect.objectContaining({
+          metadata: expect.objectContaining({ description: 'New description' }),
+        }),
+        { version: 'WzEsMV0=' }
+      );
+
+      expect(res.metadata.description).toBe('New description');
     });
 
     it('throws 409 conflict when version is stale', async () => {
@@ -386,6 +448,25 @@ describe('RulesClient', () => {
           schedule: expect.objectContaining({ every: '1m' }),
         })
       );
+    });
+
+    it('returns description in the rule response when present', async () => {
+      const client = createClient();
+      const soAttrsWithDesc = createRuleSoAttributes({
+        metadata: { name: 'rule-with-desc', description: 'Fetched description' },
+      });
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: soAttrsWithDesc,
+        version: 'WzEsMV0=',
+        id: 'rule-id-get-desc',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      const res = await client.getRule({ id: 'rule-id-get-desc' });
+
+      expect(res.metadata.description).toBe('Fetched description');
     });
 
     it('throws 404 when rule is not found', async () => {

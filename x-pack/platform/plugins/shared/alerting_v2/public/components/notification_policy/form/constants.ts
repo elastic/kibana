@@ -8,12 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { NotificationPolicyFormState } from './types';
 
-export const WORKFLOW_OPTIONS = [
-  { value: 'workflow-1', label: 'Slack notification workflow' },
-  { value: 'workflow-2', label: 'PagerDuty escalation workflow' },
-  { value: 'workflow-3', label: 'Email digest workflow' },
-];
-
 export const FREQUENCY_OPTIONS = [
   {
     value: 'immediate',
@@ -36,7 +30,6 @@ export const DEFAULT_FORM_STATE: NotificationPolicyFormState = {
   description: '',
   matcher: '',
   groupBy: [],
-  ruleLabels: [],
   frequency: { type: 'immediate' },
-  destinations: [{ type: 'workflow', id: 'workflow-1' }],
+  destinations: [],
 };

@@ -62,7 +62,7 @@ export class RulesApi {
   }
 
   public async deleteRule(id: string) {
-    await this.http.delete(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`);
+    return this.http.delete<RuleResponse>(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`);
   }
 
   public async bulkDeleteRules(params: BulkOperationParams) {

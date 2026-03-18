@@ -13,11 +13,20 @@ import { MemoryRouter } from 'react-router-dom';
 import { RulesListPage } from './rules_list_page';
 
 const mockNavigateToUrl = jest.fn();
+const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
+  const path = options?.path ?? '';
+  return `/app/${appId}${path}`;
+});
+const mockSetBreadcrumbs = jest.fn();
+const mockDocTitleChange = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl };
+      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+    }
+    if (token === 'chrome') {
+      return { setBreadcrumbs: mockSetBreadcrumbs, docTitle: { change: mockDocTitleChange } };
     }
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
@@ -61,7 +70,7 @@ const mockRules = [
     id: 'rule-1',
     kind: 'alert',
     enabled: true,
-    metadata: { name: 'Rule One', labels: ['prod'] },
+    metadata: { name: 'Rule One', description: 'Monitors log errors', labels: ['prod'] },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
@@ -132,6 +141,34 @@ describe('RulesListPage', () => {
     expect(screen.getByText('Rule Two')).toBeInTheDocument();
   });
 
+  it('renders description under the rule name when present', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByText('Monitors log errors')).toBeInTheDocument();
+  });
+
+  it('does not render description when not present', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    // Rule Two has no description — should only show the name
+    const ruleTwoName = screen.getByText('Rule Two');
+    expect(ruleTwoName.closest('div')?.querySelectorAll('.euiText--extraSmall')).toHaveLength(0);
+  });
+
   it('renders the Source column with extracted data source', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },
@@ -198,9 +235,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('createRuleButton'));
-
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+    expect(screen.getByTestId('createRuleButton')).toHaveAttribute(
+      'href',
       '/app/management/insightsAndAlerting/alerting_v2/create'
     );
   });

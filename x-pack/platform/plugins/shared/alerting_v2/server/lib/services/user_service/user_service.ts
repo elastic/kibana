@@ -12,6 +12,7 @@ import { CoreStart, Request } from '@kbn/core-di-server';
 
 export interface UserServiceContract {
   getCurrentUserProfileUid(): Promise<string | null>;
+  getCurrentUsername(): Promise<string | null>;
 }
 
 @injectable()
@@ -25,5 +26,10 @@ export class UserService implements UserServiceContract {
   public async getCurrentUserProfileUid(): Promise<string | null> {
     const profile = await this.userProfile.getCurrent({ request: this.request });
     return profile?.uid ?? null;
+  }
+
+  public async getCurrentUsername(): Promise<string | null> {
+    const profile = await this.userProfile.getCurrent({ request: this.request });
+    return profile?.user.username ?? null;
   }
 }

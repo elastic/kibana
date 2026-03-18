@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
 import { RulesListTableContainer } from './rules_list_table_container';
 
@@ -20,6 +21,8 @@ const DEFAULT_PER_PAGE = 20;
 export const RulesListPage = () => {
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
+
+  useBreadcrumbs('rules_list');
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -43,7 +46,7 @@ export const RulesListPage = () => {
         rightSideItems={[
           <EuiButton
             key="create-rule"
-            onClick={() => navigateToUrl(basePath.prepend(paths.ruleCreate))}
+            href={basePath.prepend(paths.ruleCreate)}
             data-test-subj="createRuleButton"
           >
             <FormattedMessage

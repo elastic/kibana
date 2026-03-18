@@ -18,6 +18,7 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
           metadata: {
             properties: {
               name: { type: 'text' },
+              description: { type: 'text' },
               owner: { type: 'keyword' },
               labels: { type: 'keyword' },
             },

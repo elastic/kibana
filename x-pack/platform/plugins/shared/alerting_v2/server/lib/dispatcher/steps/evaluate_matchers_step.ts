@@ -45,14 +45,15 @@ export function evaluateMatchers(
     if (!rule) continue;
 
     for (const policy of allPolicies) {
-      if (!matchesRuleLabels(policy, rule)) continue;
+      if (!policy.enabled) continue;
+      if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
 
       if (!policy.matcher) {
         matched.push({ episode, policy });
         continue;
       }
 
-      const isMatch = evaluateKql(policy.matcher, episode);
+      const isMatch = evaluateKql(policy.matcher, { ...episode, rule });
       if (isMatch) {
         matched.push({ episode, policy });
       }
@@ -60,9 +61,4 @@ export function evaluateMatchers(
   }
 
   return matched;
-}
-
-function matchesRuleLabels(policy: NotificationPolicy, rule: Rule): boolean {
-  if (policy.ruleLabels.length === 0) return true;
-  return policy.ruleLabels.some((label) => rule.labels.includes(label));
 }
