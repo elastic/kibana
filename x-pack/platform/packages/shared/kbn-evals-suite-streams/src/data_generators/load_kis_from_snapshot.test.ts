@@ -6,10 +6,12 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import {
   GCS_BUCKET,
   OTEL_DEMO_GCS_BASE_PATH_PREFIX,
 } from '../../scripts/significant_events_snapshots/lib/constants';
+import type { GcsConfig } from './snapshot_run_config';
 
 const mockCreateGcsRepository = jest.fn(() => ({ mocked: true }));
 const mockRestoreSnapshot = jest.fn();
@@ -19,25 +21,29 @@ jest.mock('@kbn/es-snapshot-loader', () => ({
   restoreSnapshot: mockRestoreSnapshot,
 }));
 
-describe('load_features_from_snapshot', () => {
-  const log = {
+describe('load_kis_from_snapshot', () => {
+  interface EsClientMock {
+    indices: {
+      delete: jest.MockedFunction<Client['indices']['delete']>;
+    };
+    search: jest.MockedFunction<Client['search']>;
+  }
+
+  const log: jest.Mocked<Pick<ToolingLog, 'info' | 'debug' | 'warning' | 'error'>> = {
     info: jest.fn(),
     debug: jest.fn(),
     warning: jest.fn(),
     error: jest.fn(),
-  } as any;
+  };
 
-  const gcs = { bucket: GCS_BUCKET, basePathPrefix: OTEL_DEMO_GCS_BASE_PATH_PREFIX };
+  const gcs: GcsConfig = { bucket: GCS_BUCKET, basePathPrefix: OTEL_DEMO_GCS_BASE_PATH_PREFIX };
 
-  const makeEsClient = (): Client =>
-    ({
-      indices: {
-        delete: jest.fn().mockResolvedValue({}),
-      },
-      search: jest.fn().mockResolvedValue({
-        hits: { hits: [] },
-      }),
-    } as any);
+  const makeEsClient = (): EsClientMock => ({
+    indices: {
+      delete: jest.fn(),
+    },
+    search: jest.fn(),
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -54,20 +60,23 @@ describe('load_features_from_snapshot', () => {
     });
 
     const esClient = makeEsClient();
-    const { loadFeaturesFromSnapshot } = await import('./load_features_from_snapshot');
-    const features = await loadFeaturesFromSnapshot(
-      esClient,
-      log,
+    const { loadKIsFromSnapshot } = await import('./load_kis_from_snapshot');
+    esClient.indices.delete.mockResolvedValue({} as never);
+    esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+
+    const kis = await loadKIsFromSnapshot(
+      esClient as unknown as Client,
+      log as unknown as ToolingLog,
       'payment-unreachable',
       gcs,
       'logs'
     );
 
-    expect(features).toEqual([]);
+    expect(kis).toEqual([]);
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
-  it('restores into temp index and returns matching Feature docs', async () => {
+  it('restores into temp index and returns matching KI docs', async () => {
     mockRestoreSnapshot.mockResolvedValue({
       success: true,
       snapshotName: 'payment-unreachable',
@@ -76,27 +85,26 @@ describe('load_features_from_snapshot', () => {
     });
 
     const esClient = makeEsClient();
-    (esClient.search as any).mockResolvedValue({
+    esClient.indices.delete.mockResolvedValue({} as never);
+    esClient.search.mockResolvedValue({
       hits: {
         hits: [
           { _source: { uuid: 'u1', id: 'f1', stream_name: 'logs', type: 'entity' } },
           { _source: { uuid: 'u2', id: 'f2', stream_name: 'logs', type: 'dependency' } },
         ],
       },
-    });
+    } as never);
 
-    const { loadFeaturesFromSnapshot, FEATURES_TEMP_INDEX } = await import(
-      './load_features_from_snapshot'
-    );
-    const features = await loadFeaturesFromSnapshot(
-      esClient,
-      log,
+    const { loadKIsFromSnapshot, KIS_TEMP_INDEX } = await import('./load_kis_from_snapshot');
+    const kis = await loadKIsFromSnapshot(
+      esClient as unknown as Client,
+      log as unknown as ToolingLog,
       'payment-unreachable',
       gcs,
       'logs'
     );
 
-    expect(features).toHaveLength(2);
+    expect(kis).toHaveLength(2);
 
     expect(mockCreateGcsRepository).toHaveBeenCalledWith({
       bucket: GCS_BUCKET,
@@ -107,7 +115,7 @@ describe('load_features_from_snapshot', () => {
       expect.objectContaining({
         snapshotName: 'payment-unreachable',
         renamePattern: '(.+)',
-        renameReplacement: FEATURES_TEMP_INDEX,
+        renameReplacement: KIS_TEMP_INDEX,
         allowNoMatches: true,
       })
     );
@@ -122,34 +130,47 @@ describe('load_features_from_snapshot', () => {
     });
 
     const esClient = makeEsClient();
-    const { loadFeaturesFromSnapshot } = await import('./load_features_from_snapshot');
+    const { loadKIsFromSnapshot } = await import('./load_kis_from_snapshot');
+    esClient.indices.delete.mockResolvedValue({} as never);
+    esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
 
     await expect(
-      loadFeaturesFromSnapshot(esClient, log, 'healthy-baseline', gcs, 'logs')
+      loadKIsFromSnapshot(
+        esClient as unknown as Client,
+        log as unknown as ToolingLog,
+        'healthy-baseline',
+        gcs,
+        'logs'
+      )
     ).rejects.toThrow(/did not produce expected temp index/i);
   });
 
   it('cleans up the temp index at the end even if search throws', async () => {
-    const { loadFeaturesFromSnapshot, FEATURES_TEMP_INDEX } = await import(
-      './load_features_from_snapshot'
-    );
+    const { loadKIsFromSnapshot, KIS_TEMP_INDEX } = await import('./load_kis_from_snapshot');
     mockRestoreSnapshot.mockResolvedValue({
       success: true,
       snapshotName: 'payment-unreachable',
-      restoredIndices: [FEATURES_TEMP_INDEX],
+      restoredIndices: [KIS_TEMP_INDEX],
       errors: [],
     });
 
     const esClient = makeEsClient();
-    (esClient.search as any).mockRejectedValue(new Error('boom'));
+    esClient.indices.delete.mockResolvedValue({} as never);
+    esClient.search.mockRejectedValue(new Error('boom'));
 
     await expect(
-      loadFeaturesFromSnapshot(esClient, log, 'payment-unreachable', gcs, 'logs')
+      loadKIsFromSnapshot(
+        esClient as unknown as Client,
+        log as unknown as ToolingLog,
+        'payment-unreachable',
+        gcs,
+        'logs'
+      )
     ).rejects.toThrow('boom');
 
-    expect((esClient.indices.delete as any).mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(esClient.indices.delete.mock.calls.length).toBeGreaterThanOrEqual(2);
     expect(esClient.indices.delete).toHaveBeenCalledWith({
-      index: FEATURES_TEMP_INDEX,
+      index: KIS_TEMP_INDEX,
       ignore_unavailable: true,
     });
   });
