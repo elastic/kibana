@@ -298,8 +298,8 @@ Method:
  * ids don't share the same fingerprint (type + subtype + properties).
  * Score = 1 - (missed_duplicates / unique_by_id).
  */
-export const kiDuplicationEvaluator = {
-  name: 'ki_duplication',
+export const kiFeatureDuplicationEvaluator = {
+  name: 'ki_feature_duplication',
   kind: 'CODE' as const,
   evaluate: async ({ output }: { output: { runs?: Array<{ features: BaseFeature[] }> } }) => {
     const allKIs = output.runs?.flatMap((run) => run.features) || [];

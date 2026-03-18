@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SignificantEventType } from '@kbn/streams-ai/src/significant_events/types';
-import { createRuleGenerationEvaluators } from './rule_generation_evaluators';
+import { createKIQueryGenerationEvaluators } from './ki_query_generation_evaluators';
 
 const createEsClient = (
   responses: Record<string, { values?: unknown[][]; error?: Error }>
@@ -27,16 +27,16 @@ const createEsClient = (
     },
   } as unknown as ElasticsearchClient);
 
-const getRuleGenerationCodeEvaluator = (esClient: ElasticsearchClient) =>
-  createRuleGenerationEvaluators(esClient).find(
-    (evaluator) => evaluator.name === 'rule_generation_code_evaluator'
+const getKIQueryGenerationCodeEvaluator = (esClient: ElasticsearchClient) =>
+  createKIQueryGenerationEvaluators(esClient).find(
+    (evaluator) => evaluator.name === 'ki_query_generation_code_evaluator'
   )!;
 
-describe('rule generation code evaluator', () => {
-  it('scores full credit when generated rules satisfy all rule generation checks', async () => {
+describe('KI query generation code evaluator', () => {
+  it('scores full credit when generated queries satisfy all KI query generation checks', async () => {
     const firstQuery = 'FROM logs | WHERE message LIKE "*timeout*"';
     const secondQuery = 'FROM logs | WHERE message LIKE "*charge*"';
-    const evaluator = getRuleGenerationCodeEvaluator(
+    const evaluator = getKIQueryGenerationCodeEvaluator(
       createEsClient({
         [firstQuery]: { values: [[1]] },
         [secondQuery]: { values: [[1]] },
@@ -84,7 +84,7 @@ describe('rule generation code evaluator', () => {
 
   it('scores softly when rules miss expected categories, substrings, severity bounds, and evidence', async () => {
     const query = 'FROM logs | WHERE message LIKE "*alpha*"';
-    const evaluator = getRuleGenerationCodeEvaluator(
+    const evaluator = getKIQueryGenerationCodeEvaluator(
       createEsClient({
         [query]: { values: [] },
       })
