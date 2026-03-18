@@ -76,7 +76,7 @@ describe('searchKnowledgeIndicators', () => {
     const res = await searchKnowledgeIndicators({
       params: { kind: ['query'] },
       getStreamNames: async () => ['logs.test'],
-      getFeatures: getFeatures as any,
+      getFeatures,
       getQueries,
     });
 
@@ -93,7 +93,7 @@ describe('searchKnowledgeIndicators', () => {
       params: { kind: ['feature'] },
       getStreamNames: async () => ['logs.test'],
       getFeatures,
-      getQueries: getQueries as any,
+      getQueries,
     });
 
     expect(getQueries).not.toHaveBeenCalled();
