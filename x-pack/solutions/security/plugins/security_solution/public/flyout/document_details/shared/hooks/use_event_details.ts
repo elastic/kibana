@@ -115,6 +115,7 @@ export const useEventDetails = ({
       eventId: eventId ?? '',
       runtimeMappings,
       skip: !eventId,
+      indexPattern: dataView,
     });
   const { getFieldsData } = useGetFieldsData({ fieldsData: searchHit?.fields });
 

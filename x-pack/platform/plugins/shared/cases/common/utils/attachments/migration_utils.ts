@@ -6,11 +6,12 @@
  */
 
 import {
+  COMMENT_ATTACHMENT_TYPE,
+  EVENT_ATTACHMENT_TYPE,
   LEGACY_TO_UNIFIED_MAP,
   MIGRATED_ATTACHMENT_TYPES,
   UNIFIED_TO_LEGACY_MAP,
 } from '../../constants/attachments';
-import { AttachmentType } from '../../types/domain';
 
 export const isMigratedAttachmentType = (type?: string): boolean => {
   if (typeof type !== 'string') {
@@ -31,4 +32,7 @@ export const toUnifiedAttachmentType = (type: string): string => {
 };
 
 export const isCommentAttachmentType = (type?: string): boolean =>
-  toLegacyAttachmentType(type) === AttachmentType.user;
+  typeof type === 'string' && toUnifiedAttachmentType(type) === COMMENT_ATTACHMENT_TYPE;
+
+export const isEventAttachmentType = (type?: string): boolean =>
+  typeof type === 'string' && toUnifiedAttachmentType(type) === EVENT_ATTACHMENT_TYPE;

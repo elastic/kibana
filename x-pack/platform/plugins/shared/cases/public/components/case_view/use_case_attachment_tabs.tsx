@@ -19,7 +19,11 @@ import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { AttachmentType } from '../../../common/types/domain';
-import { isLegacyAttachmentRequest } from '../../../common/utils/attachments/v1_type_guards';
+import { EVENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  isLegacyAttachmentRequest,
+  isUnifiedReferenceAttachmentRequest,
+} from '../../../common/utils/attachments';
 
 const FilesBadge = ({
   activeTab,
@@ -200,7 +204,9 @@ export const useCaseAttachmentTabs = ({
   activeTab: CASE_VIEW_PAGE_TABS;
   searchTerm?: string;
 }): UseCaseAttachmentTabsReturnValue => {
-  const { features } = useCasesContext();
+  const { features, unifiedAttachmentTypeRegistry } = useCasesContext();
+  const isEventsTabEnabled =
+    features.events.enabled && unifiedAttachmentTypeRegistry.has(EVENT_ATTACHMENT_TYPE);
   const { euiTheme } = useEuiTheme();
   const { data: fileStatsData, isLoading: isLoadingFiles } = useGetCaseFileStats({
     caseId: caseData.id,
@@ -228,19 +234,17 @@ export const useCaseAttachmentTabs = ({
             ? acc.totalAlerts + comment.alertId.length
             : acc.totalAlerts + 1;
         } else if (
-          isLegacyAttachmentRequest(comment) &&
-          comment.type === AttachmentType.event &&
-          features.events.enabled
+          isUnifiedReferenceAttachmentRequest(comment) &&
+          comment.type === EVENT_ATTACHMENT_TYPE &&
+          isEventsTabEnabled
         ) {
-          acc.totalEvents = Array.isArray(comment.eventId)
-            ? acc.totalEvents + comment.eventId.length
-            : acc.totalEvents + 1;
+          acc.totalEvents = acc.totalEvents + 1;
         }
         return acc;
       },
       { totalEvents: 0, totalAlerts: 0 }
     );
-  }, [searchTerm, features, caseData]);
+  }, [searchTerm, features, caseData, isEventsTabEnabled]);
 
   const totalAttachments =
     stats.totalAlerts +
@@ -266,7 +270,7 @@ export const useCaseAttachmentTabs = ({
             },
           ]
         : []),
-      ...(features.events.enabled
+      ...(isEventsTabEnabled
         ? [
             {
               id: CASE_VIEW_PAGE_TABS.EVENTS,
@@ -318,7 +322,7 @@ export const useCaseAttachmentTabs = ({
       euiTheme,
       features.alerts.enabled,
       features.alerts.isExperimental,
-      features.events.enabled,
+      isEventsTabEnabled,
       fileStatsData,
       isLoadingFiles,
       isLoadingObservables,

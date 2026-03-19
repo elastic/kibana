@@ -21,7 +21,6 @@ import { createActionAttachmentUserActionBuilder } from '../../attachments/host_
 import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
-import { createEventAttachmentUserActionBuilder } from '../../attachments/event/event';
 import {
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
@@ -35,6 +34,7 @@ interface DeleteLabelTitle {
   caseData: UserActionBuilderArgs['caseData'];
   externalReferenceAttachmentTypeRegistry: UserActionBuilderArgs['externalReferenceAttachmentTypeRegistry'];
   persistableStateAttachmentTypeRegistry: UserActionBuilderArgs['persistableStateAttachmentTypeRegistry'];
+  unifiedAttachmentTypeRegistry: UserActionBuilderArgs['unifiedAttachmentTypeRegistry'];
 }
 
 const getDeleteLabelTitle = ({
@@ -42,6 +42,7 @@ const getDeleteLabelTitle = ({
   caseData,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
 }: DeleteLabelTitle) => {
   const { comment } = userAction.payload;
   if (isLegacyAttachmentRequest(comment)) {
@@ -75,6 +76,30 @@ const getDeleteLabelTitle = ({
         }),
       });
     }
+  }
+
+  const unifiedType = toUnifiedAttachmentType(comment.type);
+  if (unifiedAttachmentTypeRegistry.has(unifiedType)) {
+    return getDeleteLabelFromRegistry({
+      caseData,
+      registry: unifiedAttachmentTypeRegistry,
+      getId: () => unifiedType,
+      getAttachmentProps: () => {
+        if (isLegacyAttachmentRequest(comment) && comment.type === AttachmentType.event) {
+          const totalEvents = Array.isArray(comment.eventId) ? comment.eventId.length : 1;
+          const eventId = Array.isArray(comment.eventId) ? comment.eventId[0] : comment.eventId;
+          const index = Array.isArray(comment.index) ? comment.index[0] : comment.index;
+
+          return {
+            attachmentId: eventId ?? '',
+            metadata: index != null ? { index } : undefined,
+            eventCount: totalEvents,
+          };
+        }
+
+        return {};
+      },
+    });
   }
 
   return `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
@@ -119,6 +144,7 @@ const getDeleteCommentUserAction = ({
   caseData,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
   handleOutlineComment,
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
@@ -128,6 +154,7 @@ const getDeleteCommentUserAction = ({
   | 'userProfiles'
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
+  | 'unifiedAttachmentTypeRegistry'
   | 'caseData'
 >): EuiCommentProps[] => {
   const label = getDeleteLabelTitle({
@@ -135,6 +162,7 @@ const getDeleteCommentUserAction = ({
     caseData,
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
   });
 
   const commonBuilder = createCommonUpdateUserActionBuilder({
@@ -193,18 +221,6 @@ const getCreateCommentUserAction = ({
 
         return alertBuilder.build();
 
-      case AttachmentType.event:
-        const eventBuilder = createEventAttachmentUserActionBuilder({
-          userProfiles,
-          attachment,
-          userAction,
-          onShowAlertDetails,
-          handleDeleteComment,
-          loadingCommentIds,
-        });
-
-        return eventBuilder.build();
-
       case AttachmentType.actions:
         const actionBuilder = createActionAttachmentUserActionBuilder({
           userProfiles,
@@ -261,6 +277,7 @@ const getCreateCommentUserAction = ({
       loadingCommentIds,
       appId,
       euiTheme,
+      onShowAlertDetails,
     });
 
     return unifiedBuilder.build();
@@ -304,6 +321,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         userProfiles,
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
       });
     }
 

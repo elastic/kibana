@@ -116,15 +116,18 @@ import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 export const resolveCase = async ({
   caseId,
   signal,
+  mode = 'legacy',
 }: {
   caseId: string;
   signal?: AbortSignal;
+  /** Attachment format. Use 'unified' when rendering case view (EventTabContent, etc.). */
+  mode?: 'legacy' | 'unified';
 }): Promise<ResolvedCase> => {
   const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
     `${getCaseDetailsUrl(caseId)}/resolve`,
     {
       method: 'GET',
-      query: { includeComments: true },
+      query: { includeComments: true, mode },
       signal,
     }
   );

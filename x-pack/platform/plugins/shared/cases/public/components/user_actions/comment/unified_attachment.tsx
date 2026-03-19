@@ -8,6 +8,7 @@
 import type { UnifiedAttachment } from '../../../../common/types/domain';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import { EVENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import { toUnifiedAttachmentType } from '../../../../common/utils/attachments';
 import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
 
@@ -23,6 +24,7 @@ type BuilderArgs = Pick<
   | 'loadingCommentIds'
   | 'appId'
   | 'euiTheme'
+  | 'onShowAlertDetails'
 > & {
   attachment: SnakeToCamelCase<UnifiedAttachment>;
   isLoading: boolean;
@@ -41,6 +43,7 @@ export const createUnifiedAttachmentUserActionBuilder = ({
   loadingCommentIds,
   appId,
   euiTheme,
+  onShowAlertDetails,
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return createRegisteredAttachmentUserActionBuilder({
     userAction,
@@ -51,19 +54,31 @@ export const createUnifiedAttachmentUserActionBuilder = ({
     handleDeleteComment,
     isLoading,
     getId: () => toUnifiedAttachmentType(attachment.type),
-    getAttachmentViewProps: () => ({
-      data: attachment.data,
-      metadata: attachment.metadata,
-      createdBy: attachment.createdBy,
-      version: attachment.version,
-      caseData: { id: caseData.id, title: caseData.title },
-      rowContext: {
-        manageMarkdownEditIds,
-        selectedOutlineCommentId,
-        loadingCommentIds,
-        appId,
-        euiTheme,
-      },
-    }),
+    getAttachmentViewProps: () => {
+      const baseProps = {
+        data: attachment.data,
+        metadata: attachment.metadata,
+        createdBy: attachment.createdBy,
+        version: attachment.version,
+        caseData: { id: caseData.id, title: caseData.title },
+        rowContext: {
+          manageMarkdownEditIds,
+          selectedOutlineCommentId,
+          loadingCommentIds,
+          appId,
+          euiTheme,
+        },
+      };
+      if ('attachmentId' in attachment && attachment.attachmentId != null) {
+        const resolvedType = toUnifiedAttachmentType(attachment.type);
+        return {
+          ...baseProps,
+          attachmentId: attachment.attachmentId as string,
+          // Event attachments use the flyout hook directly in Security Solution; only pass for non-event types (e.g. alerts)
+          ...(resolvedType !== EVENT_ATTACHMENT_TYPE && { onShowEventDetails: onShowAlertDetails }),
+        };
+      }
+      return baseProps;
+    },
   });
 };

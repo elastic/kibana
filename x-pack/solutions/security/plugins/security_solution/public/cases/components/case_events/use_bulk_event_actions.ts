@@ -7,24 +7,37 @@
 
 import { useCallback, useMemo } from 'react';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { AttachmentType } from '@kbn/cases-plugin/common';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { useCasesContext } from '@kbn/cases-plugin/public';
 import { APP_ID } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import type { CustomBulkAction } from '../../../../common/types';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 
 /**
- * Utility function converting multiple timeline items into single attachment (when attaching multiple timeline items to a case)
+ * Converts timeline items to event attachments.
+ * - Flag OFF: one attachment with eventId/index arrays (legacy, grouped user action)
+ * - Flag ON: one attachment per event (individual IDs for snapshot linking)
  */
-const timelineItemsToCaseEventAttachment = (
-  timelineItems: TimelineItem[]
-): CaseAttachmentWithoutOwner => {
-  return {
-    type: AttachmentType.event,
-    eventId: timelineItems.map((item) => item._id).filter(Boolean),
-    index: timelineItems.map((item) => item._index).filter(Boolean),
-  } as CaseAttachmentWithoutOwner;
+const timelineItemsToCaseEventAttachments = (
+  timelineItems: TimelineItem[],
+  eventsEnabled: boolean
+): CaseAttachmentsWithoutOwner => {
+  if (!eventsEnabled) {
+    return [
+      {
+        type: AttachmentType.event,
+        eventId: timelineItems.map((item) => item._id ?? ''),
+        index: timelineItems.map((item) => item._index ?? ''),
+      },
+    ];
+  }
+  return timelineItems.map((item) => ({
+    type: 'securityEvent',
+    attachmentId: item._id ?? '',
+    metadata: { index: item._index ?? '' },
+  }));
 };
 
 /**
@@ -38,6 +51,7 @@ export const useBulkAddEventsToCaseActions = ({
   const {
     services: { cases: casesService },
   } = useKibana();
+  const { features } = useCasesContext();
 
   const userCasesPermissions = useMemo(() => {
     return casesService?.helpers.canUseCases([APP_ID]);
@@ -75,7 +89,7 @@ export const useBulkAddEventsToCaseActions = ({
             disabledLabel: ADD_TO_NEW_CASE,
             onClick: (events: TimelineItem[] = []) =>
               createCaseFlyout.open({
-                attachments: [timelineItemsToCaseEventAttachment(events)],
+                attachments: timelineItemsToCaseEventAttachments(events, features.events.enabled),
                 observables: getObservables(events),
               }),
           },
@@ -87,9 +101,8 @@ export const useBulkAddEventsToCaseActions = ({
             'data-test-subj': 'attach-existing-case',
             onClick: (events: TimelineItem[] = []) =>
               selectCaseModal.open({
-                getAttachments: (): CaseAttachmentWithoutOwner[] => [
-                  timelineItemsToCaseEventAttachment(events),
-                ],
+                getAttachments: () =>
+                  timelineItemsToCaseEventAttachments(events, features.events.enabled),
                 getObservables: () => getObservables(events),
               }),
           },
@@ -102,5 +115,6 @@ export const useBulkAddEventsToCaseActions = ({
     userCasesPermissions?.create,
     userCasesPermissions?.read,
     getObservables,
+    features.events.enabled,
   ]);
 };

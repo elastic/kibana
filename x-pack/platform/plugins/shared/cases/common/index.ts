@@ -58,6 +58,8 @@ export {
   CREATE_COMMENT_CAPABILITY,
   CASES_REOPEN_CAPABILITY,
   ASSIGN_CASE_CAPABILITY,
+  COMMENT_ATTACHMENT_TYPE,
+  EVENT_ATTACHMENT_TYPE,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';
@@ -67,5 +69,7 @@ export { createUICapabilities, type CasesUiCapabilities } from './utils/capabili
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
 export type { SingleCaseMetricsResponse, CasesMetricsResponse } from './types/api';
+
+export { CASE_VIEW_PAGE_TABS } from './types';
 
 export { getSavedObjectsTypes } from './utils/saved_object_types';

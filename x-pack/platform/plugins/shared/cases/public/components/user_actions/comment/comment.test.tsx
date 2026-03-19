@@ -43,6 +43,11 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
 
+const mockOpenFlyout = jest.fn();
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+}));
+
 const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const navigateToCaseView = jest.fn();
@@ -579,7 +584,7 @@ describe('createCommentUserActionBuilder', () => {
 
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('single-event-user-action-event-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('single-event-user-action-event-id-1')).toHaveTextContent(
         'added an event'
       );
 
@@ -609,11 +614,21 @@ describe('createCommentUserActionBuilder', () => {
 
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('comment-action-show-event-event-action-id')).toBeInTheDocument();
-      await userEvent.click(screen.getByTestId('comment-action-show-event-event-action-id'));
+      expect(screen.getByTestId('comment-action-show-event-event-comment-id')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('comment-action-show-event-event-comment-id'));
 
       await waitFor(() => {
-        expect(builderArgs.onShowAlertDetails).toHaveBeenCalledWith('event-id-1', 'event-index-1');
+        // Events use the flyout hook directly in Security Solution (not onShowAlertDetails from cases)
+        expect(mockOpenFlyout).toHaveBeenCalledWith({
+          right: {
+            id: 'document-details-right',
+            params: {
+              id: 'event-id-1',
+              indexName: 'event-index-1',
+              scopeId: 'timeline-case',
+            },
+          },
+        });
       });
     });
   });

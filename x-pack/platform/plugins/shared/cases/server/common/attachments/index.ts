@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  EVENT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import type {
   AttachmentPersistedAttributes,
@@ -13,6 +16,7 @@ import type {
 } from '../types/attachments_v2';
 import { passThroughTransformer, type AttachmentTypeTransformer } from './base';
 import { commentAttachmentTransformer } from './comment';
+import { eventAttachmentTransformer } from './event';
 
 export { getCommentContentFromUnifiedPayload, commentAttachmentTransformer } from './comment';
 export {
@@ -48,6 +52,9 @@ export function getAttachmentTypeTransformers(
 
   if (normalizedType === COMMENT_ATTACHMENT_TYPE) {
     return commentAttachmentTransformer;
+  }
+  if (normalizedType === EVENT_ATTACHMENT_TYPE) {
+    return eventAttachmentTransformer;
   }
   return passThroughTransformer;
 }

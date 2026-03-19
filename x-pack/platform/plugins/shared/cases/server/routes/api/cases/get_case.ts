@@ -70,6 +70,13 @@ export const resolveCaseRoute = createCasesRoute({
        * @deprecated since version 8.1.0
        */
       includeComments: schema.boolean({ defaultValue: true, meta: { deprecated: true } }),
+      /**
+       * Attachment format: 'legacy' (eventId/index) or 'unified' (attachmentId/metadata).
+       * Defaults to 'legacy'. Pass 'unified' when rendering case view (e.g. EventTabContent).
+       */
+      mode: schema.oneOf([schema.literal('legacy'), schema.literal('unified')], {
+        defaultValue: 'legacy',
+      }),
     }),
   },
   handler: async ({ context, request, response }) => {
@@ -81,6 +88,7 @@ export const resolveCaseRoute = createCasesRoute({
       const res: caseApiV1.CaseResolveResponse = await casesClient.cases.resolve({
         id,
         includeComments: request.query.includeComments,
+        mode: request.query.mode,
       });
 
       return response.ok({

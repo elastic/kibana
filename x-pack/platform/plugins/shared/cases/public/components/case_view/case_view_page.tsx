@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EVENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useUrlParams } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -23,7 +24,6 @@ import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 import { CaseViewSimilarCases } from './components/case_view_similar_cases';
-import { CaseViewEvents } from './components/case_view_events';
 import { CaseViewAttachments } from './components/case_view_attachments';
 import { filterCaseAttachmentsBySearchTerm } from './components/helpers';
 
@@ -52,9 +52,10 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     useFetchAlertData,
     onAlertsTableLoaded,
     renderAlertsTable,
-    renderEventsTable,
   }) => {
-    const { features } = useCasesContext();
+    const { features, unifiedAttachmentTypeRegistry } = useCasesContext();
+    const isEventsTabEnabled =
+      features.events.enabled && unifiedAttachmentTypeRegistry.has(EVENT_ATTACHMENT_TYPE);
     const { urlParams } = useUrlParams();
     const refreshCaseViewPage = useRefreshCaseViewPage();
 
@@ -71,6 +72,16 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       () => filterCaseAttachmentsBySearchTerm(caseData, searchTerm),
       [caseData, searchTerm]
     );
+
+    const EventAttachmentTab = useMemo(() => {
+      if (!isEventsTabEnabled) {
+        return undefined;
+      }
+
+      return unifiedAttachmentTypeRegistry
+        .get(EVENT_ATTACHMENT_TYPE)
+        .getAttachmentTabViewObject?.({ caseData: caseWithFilteredAttachments }).children;
+    }, [caseWithFilteredAttachments, isEventsTabEnabled, unifiedAttachmentTypeRegistry]);
 
     useCasesTitleBreadcrumbs(caseData.title);
 
@@ -163,12 +174,11 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                     onAlertsTableLoaded={onAlertsTableLoaded}
                   />
                 )}
-                {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.events.enabled && (
-                  <CaseViewEvents
-                    caseData={caseWithFilteredAttachments}
-                    renderEventsTable={renderEventsTable}
-                  />
-                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS &&
+                  isEventsTabEnabled &&
+                  EventAttachmentTab && (
+                    <EventAttachmentTab caseData={caseWithFilteredAttachments} />
+                  )}
                 {activeTabId === CASE_VIEW_PAGE_TABS.FILES && (
                   <CaseViewFiles caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
                 )}

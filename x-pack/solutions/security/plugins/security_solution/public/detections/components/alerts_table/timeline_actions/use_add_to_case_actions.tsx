@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { AttachmentType, EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { APP_ID } from '../../../../../common';
@@ -44,9 +44,9 @@ export const useAddToCaseActions = ({
       return ecsData?._id
         ? [
             {
-              eventId: ecsData?._id ?? '',
-              index: ecsData?._index ?? '',
-              type: AttachmentType.event,
+              type: EVENT_ATTACHMENT_TYPE,
+              attachmentId: ecsData._id ?? '',
+              metadata: { index: ecsData._index ?? '' },
             },
           ]
         : [];

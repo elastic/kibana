@@ -18,6 +18,16 @@ import { allCasesPermissions } from '../../../../cases_test_utils';
 
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock('@kbn/cases-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/cases-plugin/public');
+  return {
+    ...actual,
+    useCasesContext: () => ({
+      features: { events: { enabled: true } },
+    }),
+  };
+});
+
 const refetch = jest.fn();
 const submit = jest.fn();
 const open = jest.fn().mockImplementation(() => {

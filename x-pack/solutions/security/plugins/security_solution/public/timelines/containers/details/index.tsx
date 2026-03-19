@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/timelines-plugin/common';
 import { EntityType } from '@kbn/timelines-plugin/common';
@@ -35,6 +36,11 @@ export interface UseTimelineEventsDetailsProps {
   eventId: string;
   runtimeMappings: TimelineEventsDetailsRequestOptionsInput['runtimeMappings'];
   skip: boolean;
+  /**
+   * Optional data view to pass to search options. When the search fails, the error handler
+   * may access indexPattern.fields; passing this prevents "Cannot read properties of undefined (reading 'fields')".
+   */
+  indexPattern?: DataView;
 }
 
 export const useTimelineEventsDetails = ({
@@ -43,6 +49,7 @@ export const useTimelineEventsDetails = ({
   eventId,
   runtimeMappings,
   skip,
+  indexPattern,
 }: UseTimelineEventsDetailsProps): [
   boolean,
   EventsArgs['detailsData'],
@@ -83,6 +90,7 @@ export const useTimelineEventsDetails = ({
             {
               strategy: 'timelineSearchStrategy',
               abortSignal: abortCtrl.current.signal,
+              ...(indexPattern && { indexPattern }),
             }
           )
           .subscribe({
@@ -109,7 +117,7 @@ export const useTimelineEventsDetails = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, skip]
+    [data.search, addError, skip, indexPattern]
   );
 
   useEffect(() => {

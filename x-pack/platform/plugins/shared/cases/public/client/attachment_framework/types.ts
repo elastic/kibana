@@ -51,9 +51,23 @@ export interface AttachmentViewObject<Props = {}> {
   css?: EuiCommentProps['css'];
 }
 
+export interface AttachmentTabViewObject<Props = {}> {
+  children?: React.ComponentType<Props>;
+}
+
 export interface CommonAttachmentViewProps {
+  /** Saved object id of the comment/attachment. Use for UI state (loading, selection, delete). */
+  savedObjectId: string;
+  /**
+   * For reference attachments (events, alerts): external entity id (event id, alert id).
+   * For value attachments (comments): same as savedObjectId (legacy).
+   */
   attachmentId: string;
   caseData: Pick<CaseUI, 'id' | 'title'>;
+}
+
+export interface CommonAttachmentTabViewProps {
+  caseData: CaseUI;
 }
 
 export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {
@@ -100,6 +114,9 @@ export interface AttachmentType<Props> {
   displayName: string;
   getAttachmentViewObject: (props: Props) => AttachmentViewObject<Props>;
   getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
+  getAttachmentTabViewObject?: (
+    props: CommonAttachmentTabViewProps
+  ) => AttachmentTabViewObject<CommonAttachmentTabViewProps>;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;

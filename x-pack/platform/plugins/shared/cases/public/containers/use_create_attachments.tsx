@@ -22,13 +22,16 @@ export const useCreateAttachments = () => {
   const { showErrorToast } = useCasesToast();
 
   return useMutation(
-    (request: PostComment) => {
-      const attachments = request.attachments.map((attachment) => ({
+    async (request: PostComment) => {
+      const attachmentsWithOwner = request.attachments.map((attachment) => ({
         ...attachment,
         owner: request.caseOwner,
       }));
 
-      return createAttachments({ attachments, caseId: request.caseId });
+      return createAttachments({
+        attachments: attachmentsWithOwner,
+        caseId: request.caseId,
+      });
     },
     {
       mutationKey: casesMutationsKeys.bulkCreateAttachments,

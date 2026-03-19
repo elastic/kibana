@@ -43,6 +43,18 @@ jest.mock('../../../common/lib/kibana', () => ({
   }),
 }));
 
+const mockUseCasesContext = jest.fn(() => ({
+  features: { events: { enabled: true } },
+}));
+
+jest.mock('@kbn/cases-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/cases-plugin/public');
+  return {
+    ...actual,
+    useCasesContext: () => mockUseCasesContext(),
+  };
+});
+
 describe('useBulkAddEventsToCaseActions', () => {
   const clearSelection = jest.fn();
 
@@ -71,7 +83,10 @@ describe('useBulkAddEventsToCaseActions', () => {
       result.current[0].onClick(events);
     });
     expect(mockOpenNewCase).toHaveBeenCalledWith({
-      attachments: [{ type: 'event', eventId: ['1', '2'], index: ['foo', 'bar'] }],
+      attachments: [
+        { type: 'securityEvent', attachmentId: '1', metadata: { index: 'foo' } },
+        { type: 'securityEvent', attachmentId: '2', metadata: { index: 'bar' } },
+      ],
       observables: mockObservable,
     });
   });
@@ -89,8 +104,29 @@ describe('useBulkAddEventsToCaseActions', () => {
     });
     expect(mockOpenExistingCase).toHaveBeenCalled();
     const mappedEvents = mockOpenExistingCase.mock.lastCall[0].getAttachments();
-    expect(mappedEvents[0].eventId).toEqual(['1', '2']);
+    expect(mappedEvents).toEqual([
+      { type: 'securityEvent', attachmentId: '1', metadata: { index: 'foo' } },
+      { type: 'securityEvent', attachmentId: '2', metadata: { index: 'bar' } },
+    ]);
     expect(mockOpenExistingCase.mock.lastCall[0].getObservables()).toEqual(mockObservable);
+  });
+
+  it('uses legacy array format when features.events.enabled is false', () => {
+    mockUseCasesContext.mockReturnValueOnce({ features: { events: { enabled: false } } });
+    const { result } = renderHook(() => useBulkAddEventsToCaseActions({ clearSelection }), {
+      wrapper: TestProviders,
+    });
+    const events = [
+      { _id: '1', _index: 'foo' },
+      { _id: '2', _index: 'bar' },
+    ] as unknown as TimelineItem[];
+    act(() => {
+      result.current[0].onClick(events);
+    });
+    expect(mockOpenNewCase).toHaveBeenCalledWith({
+      attachments: [{ type: 'event', eventId: ['1', '2'], index: ['foo', 'bar'] }],
+      observables: mockObservable,
+    });
   });
 
   it('returns empty array if permissions are missing', () => {

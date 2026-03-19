@@ -29,6 +29,7 @@ import type {
   AttachmentMode,
   AttachmentTotals,
   DocumentAttachmentAttributes,
+  User,
 } from '../../../../common/types/domain';
 import { AttachmentType, DocumentAttachmentAttributesRt } from '../../../../common/types/domain';
 import type {
@@ -219,6 +220,7 @@ export class AttachmentGetter {
 
   /**
    * Retrieves all the documents attached to a case.
+   * When attachments are enabled and filtering by event type, includes both legacy and unified SO types.
    */
   public async getAllDocumentsAttachedToCase({
     caseId,
@@ -251,6 +253,70 @@ export class AttachmentGetter {
       let result: Array<SavedObject<DocumentAttachmentAttributes>> = [];
       for await (const userActionSavedObject of finder.find()) {
         result = result.concat(AttachmentGetter.decodeDocuments(userActionSavedObject));
+      }
+
+      if (
+        this.context.config.attachments?.enabled &&
+        attachmentTypes.includes(AttachmentType.event)
+      ) {
+        const unifiedEventsFilter = buildFilter({
+          filters: ['event'],
+          field: 'type',
+          operator: 'or',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+        });
+
+        const unifiedCombinedFilter = combineFilters([unifiedEventsFilter, filter]);
+
+        const unifiedFinder =
+          this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<UnifiedAttachmentAttributes>(
+            {
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+              sortField: 'created_at',
+              sortOrder: 'asc',
+              filter: unifiedCombinedFilter,
+              perPage: MAX_DOCS_PER_PAGE,
+            }
+          );
+
+        for await (const response of unifiedFinder.find()) {
+          const transformed = response.saved_objects
+            .filter(
+              (so) =>
+                so.attributes.type === 'event' &&
+                'attachmentId' in so.attributes &&
+                typeof so.attributes.attachmentId === 'string'
+            )
+            .map((so) => {
+              const attrs = so.attributes as {
+                type: string;
+                attachmentId: string;
+                metadata?: { index?: string };
+                owner: string;
+                created_at: string;
+                created_by: User;
+                pushed_at: string | null;
+                pushed_by: User | null;
+                updated_at: string | null;
+                updated_by: User | null;
+              };
+              const documentAttrs: DocumentAttachmentAttributes = {
+                type: AttachmentType.event,
+                eventId: attrs.attachmentId,
+                index: attrs.metadata?.index ?? '',
+                owner: attrs.owner,
+                created_at: attrs.created_at,
+                created_by: attrs.created_by,
+                pushed_at: attrs.pushed_at,
+                pushed_by: attrs.pushed_by,
+                updated_at: attrs.updated_at,
+                updated_by: attrs.updated_by,
+              };
+              return Object.assign(so, { attributes: documentAttrs });
+            });
+          result = result.concat(transformed);
+        }
       }
 
       return result;
@@ -310,6 +376,7 @@ export class AttachmentGetter {
 
   /**
    * Retrieves all the events attached to a case.
+   * When attachments are enabled, queries both legacy (cases-comments) and unified (cases-attachments) SO types.
    */
   public async getAllEventIds({ caseId }: { caseId: string }): Promise<Set<string>> {
     try {
@@ -321,7 +388,10 @@ export class AttachmentGetter {
         type: CASE_COMMENT_SAVED_OBJECT,
       });
 
-      const res = await this.context.unsecuredSavedObjectsClient.find<unknown, EventIdsAggsResult>({
+      const legacyRes = await this.context.unsecuredSavedObjectsClient.find<
+        unknown,
+        EventIdsAggsResult
+      >({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
         sortField: 'created_at',
@@ -338,8 +408,48 @@ export class AttachmentGetter {
         },
       });
 
-      const eventIds = res.aggregations?.eventIds.buckets.map((bucket) => bucket.key) ?? [];
-      return new Set(eventIds);
+      const eventIds = new Set<string>(
+        legacyRes.aggregations?.eventIds.buckets.map((bucket) => bucket.key) ?? []
+      );
+
+      if (this.context.config.attachments?.enabled) {
+        const unifiedEventsFilter = buildFilter({
+          filters: ['event'],
+          field: 'type',
+          operator: 'or',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+        });
+
+        interface UnifiedEventIdsAggsResult {
+          eventIds: { buckets: Array<{ key: string }> };
+        }
+
+        const unifiedRes = await this.context.unsecuredSavedObjectsClient.find<
+          unknown,
+          UnifiedEventIdsAggsResult
+        >({
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          sortField: 'created_at',
+          sortOrder: 'asc',
+          filter: unifiedEventsFilter,
+          perPage: 0,
+          aggs: {
+            eventIds: {
+              terms: {
+                field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
+                size: MAX_ALERTS_PER_CASE,
+              },
+            },
+          },
+        });
+
+        const unifiedEventIds =
+          unifiedRes.aggregations?.eventIds.buckets.map((bucket) => bucket.key) ?? [];
+        unifiedEventIds.forEach((id) => eventIds.add(id));
+      }
+
+      return eventIds;
     } catch (error) {
       this.context.log.error(`Error on GET all event ids for case id ${caseId}: ${error}`);
       throw error;

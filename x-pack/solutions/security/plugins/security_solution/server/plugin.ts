@@ -62,6 +62,7 @@ import {
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
+import { getEventAttachmentType } from './cases/attachments/event';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -427,6 +428,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.cases.attachmentFramework.registerExternalReference({
       id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
     });
+    plugins.cases.attachmentFramework.registerUnified(getEventAttachmentType());
 
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;

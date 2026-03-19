@@ -10,6 +10,14 @@ import { limitedStringSchema, mimeTypeString } from '../../../schema';
 import { jsonValueRt } from '../../../api';
 import { UserRt } from '../user/v1';
 import { MAX_FILENAME_LENGTH } from '../../../constants';
+import {
+  LEGACY_ATTACHMENT_ACTIONS,
+  LEGACY_ATTACHMENT_ALERT,
+  LEGACY_ATTACHMENT_EVENT,
+  LEGACY_ATTACHMENT_EXTERNAL_REFERENCE,
+  LEGACY_ATTACHMENT_PERSISTABLE_STATE,
+  LEGACY_ATTACHMENT_USER,
+} from '../../../constants/attachments';
 
 /**
  * Files
@@ -44,16 +52,19 @@ export const FileAttachmentMetadataPayloadRt = rt.strict({
 
 /**
  * User comment
+ * Uses constants from attachments to maintain single source of truth.
  */
 
-export enum AttachmentType {
-  actions = 'actions',
-  alert = 'alert',
-  event = 'event',
-  externalReference = 'externalReference',
-  persistableState = 'persistableState',
-  user = 'user',
-}
+export const AttachmentType = {
+  actions: LEGACY_ATTACHMENT_ACTIONS,
+  alert: LEGACY_ATTACHMENT_ALERT,
+  event: LEGACY_ATTACHMENT_EVENT,
+  externalReference: LEGACY_ATTACHMENT_EXTERNAL_REFERENCE,
+  persistableState: LEGACY_ATTACHMENT_PERSISTABLE_STATE,
+  user: LEGACY_ATTACHMENT_USER,
+} as const;
+
+export type AttachmentType = (typeof AttachmentType)[keyof typeof AttachmentType];
 
 export const UserCommentAttachmentPayloadRt = rt.strict({
   comment: rt.string,

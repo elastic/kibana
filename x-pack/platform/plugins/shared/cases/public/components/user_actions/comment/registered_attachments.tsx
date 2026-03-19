@@ -124,12 +124,51 @@ export const createRegisteredAttachmentUserActionBuilder = <
       ];
     }
 
-    const attachmentType = registry.get(attachmentTypeId);
+    let attachmentType;
+    try {
+      attachmentType = registry.get(attachmentTypeId);
+    } catch {
+      return [
+        {
+          username: (
+            <HoverableUserWithAvatarResolver
+              user={attachment.createdBy}
+              userProfiles={userProfiles}
+            />
+          ),
+          event: (
+            <>
+              {`${DEFAULT_EVENT_ATTACHMENT_TITLE} `}
+              <EuiCode>{attachmentTypeId}</EuiCode>
+            </>
+          ),
+          className: `comment-${attachment.type}-not-found`,
+          'data-test-subj': `comment-${attachment.type}-not-found`,
+          timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
+          children: (
+            <EuiCallOut
+              announceOnMount={false}
+              title={ATTACHMENT_NOT_REGISTERED_ERROR}
+              color="danger"
+              iconType="warning"
+            />
+          ),
+        },
+      ];
+    }
 
+    const viewProps = getAttachmentViewProps();
+    const savedObjectId = attachment.id;
     const props = {
-      ...getAttachmentViewProps(),
-      attachmentId: attachment.id,
+      ...viewProps,
+      savedObjectId,
       caseData: { id: caseData.id, title: caseData.title },
+      // For unified reference attachments (events, alerts), attachmentId = external ref (event/alert id).
+      // For value attachments (comments), attachmentId = saved object id (legacy; use savedObjectId).
+      attachmentId:
+        'attachmentId' in viewProps && typeof viewProps.attachmentId === 'string'
+          ? viewProps.attachmentId
+          : savedObjectId,
     };
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject(props);

@@ -6,6 +6,7 @@
  */
 
 import { AttachmentType } from '../../../../common/types/domain';
+import { EVENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import type { AttachmentUI } from '../../../containers/types';
 import type {
   CaseUI,
@@ -49,6 +50,16 @@ const isEventAttachment = (comment: AttachmentUIV2): comment is EventAttachmentU
   return comment.type === AttachmentType.event && `eventId` in comment;
 };
 
+const isUnifiedEventAttachment = (
+  comment: AttachmentUIV2
+): comment is AttachmentUIV2 & { attachmentId: string } => {
+  return (
+    comment.type === EVENT_ATTACHMENT_TYPE &&
+    'attachmentId' in comment &&
+    typeof comment.attachmentId === 'string'
+  );
+};
+
 const filterEventCommentByIds = (
   comment: EventAttachmentUI,
   searchTerm: string
@@ -62,6 +73,17 @@ const filterEventCommentByIds = (
     ...comment,
     eventId: filteredIds,
   };
+};
+
+const filterUnifiedEventCommentById = (
+  comment: AttachmentUIV2 & { attachmentId: string },
+  searchTerm: string
+): (AttachmentUIV2 & { attachmentId: string }) | null => {
+  if (!comment.attachmentId.includes(searchTerm)) {
+    return null;
+  }
+
+  return comment;
 };
 
 export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: string): CaseUI => {
@@ -78,6 +100,9 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
         }
         if (isEventAttachment(comment)) {
           return filterEventCommentByIds(comment, searchTerm);
+        }
+        if (isUnifiedEventAttachment(comment)) {
+          return filterUnifiedEventCommentById(comment, searchTerm);
         }
         return comment;
       })
