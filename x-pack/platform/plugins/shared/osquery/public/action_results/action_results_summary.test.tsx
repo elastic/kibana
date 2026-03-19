@@ -16,6 +16,7 @@ import { ThemeProvider } from '@emotion/react';
 import { ActionResultsSummary } from './action_results_summary';
 import * as useActionResultsHook from './use_action_results';
 import { useKibana } from '../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import type { estypes } from '@elastic/elasticsearch';
 
 jest.mock('./use_action_results');
@@ -24,6 +25,16 @@ jest.mock('../common/experimental_features_context', () => ({
   ...jest.requireActual('../common/experimental_features_context'),
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
+jest.mock('./unified_action_results_summary', () => ({
+  UnifiedActionResultsSummary: () => (
+    <div data-test-subj="unifiedActionResultsSummary">Unified Table</div>
+  ),
+}));
+
+const useIsExperimentalFeatureEnabledMock =
+  useIsExperimentalFeatureEnabled as jest.MockedFunction<
+    typeof useIsExperimentalFeatureEnabled
+  >;
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useActionResultsMock = useActionResultsHook.useActionResults as jest.MockedFunction<
@@ -1022,7 +1033,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
   });
 
   describe('Switch component pattern', () => {
-    it('should render legacy table when feature flag is disabled', () => {
+    const setupMockData = () => {
       const mockAgents = ['agent-1'];
       const mockEdges = mockAgents.map((id) => createMockEdge(id, true));
 
@@ -1044,12 +1055,62 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
 
       mockHttpPost.mockResolvedValue({ agents: [] });
 
+      return mockAgents;
+    };
+
+    it('should render legacy table when feature flag is disabled', () => {
+      const mockAgents = setupMockData();
+
       const { container } = renderWithContext(
         <ActionResultsSummary actionId="test-action" agentIds={mockAgents} />
       );
 
-      // Legacy EuiBasicTable should be rendered
       expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedActionResultsSummary')).not.toBeInTheDocument();
+    });
+
+    it('should render unified table when feature flag is enabled and uiActions available', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+
+      // Provide uiActions in the Kibana services mock
+      useKibanaMock.mockReturnValue({
+        services: {
+          http: { post: mockHttpPost },
+          application: mockApplication,
+          notifications: mockNotifications,
+          uiActions: { getTriggerCompatibleActions: jest.fn() },
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+
+      const mockAgents = setupMockData();
+
+      renderWithContext(
+        <ActionResultsSummary actionId="test-action" agentIds={mockAgents} />
+      );
+
+      expect(screen.getByTestId('unifiedActionResultsSummary')).toBeInTheDocument();
+    });
+
+    it('should fall back to legacy table when feature flag is enabled but uiActions is unavailable', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+
+      // uiActions not provided
+      useKibanaMock.mockReturnValue({
+        services: {
+          http: { post: mockHttpPost },
+          application: mockApplication,
+          notifications: mockNotifications,
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+
+      const mockAgents = setupMockData();
+
+      const { container } = renderWithContext(
+        <ActionResultsSummary actionId="test-action" agentIds={mockAgents} />
+      );
+
+      expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedActionResultsSummary')).not.toBeInTheDocument();
     });
   });
 });
