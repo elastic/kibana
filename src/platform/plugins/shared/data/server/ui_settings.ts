@@ -492,6 +492,17 @@ export function getUiSettings(
             })
           ),
     },
+    [UI_SETTINGS.TIMEPICKER_USE_LEGACY_TIME_PICKER]: {
+      name: i18n.translate('data.advancedSettings.timepicker.useLegacyTimePickerTitle', {
+        defaultMessage: 'Legacy time picker',
+      }),
+      value: false,
+      // TODO improve wording, specify in which parts of Kibana this new time picker is used
+      description: i18n.translate('data.advancedSettings.timepicker.useLegacyTimePickerText', {
+        defaultMessage: 'Use the legacy time picker instead of the new date range picker.',
+      }),
+      schema: schema.boolean(),
+    },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {
         defaultMessage: 'Pin filters by default',
