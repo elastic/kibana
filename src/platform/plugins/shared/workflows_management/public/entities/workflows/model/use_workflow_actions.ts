@@ -16,7 +16,10 @@ import type {
   WorkflowListDto,
 } from '@kbn/workflows';
 import { useRunWorkflow } from '@kbn/workflows-ui';
-import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
+import type {
+  WorkflowStepTriggerTab,
+  WorkflowTriggerTab,
+} from '../../../features/run_workflow/ui/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
@@ -261,20 +264,32 @@ export function useWorkflowActions() {
     },
   });
 
-  const runIndividualStep = useMutation<RunWorkflowResponseDto, HttpError, RunStepCommand>({
+  const runIndividualStep = useMutation<
+    RunWorkflowResponseDto,
+    HttpError,
+    RunStepCommand & { triggerTab?: WorkflowStepTriggerTab }
+  >({
     mutationKey: ['POST', 'workflows', 'stepId', 'run'],
-    mutationFn: ({ stepId, contextOverride, workflowYaml, workflowId }) => {
+    mutationFn: ({ stepId, contextOverride, workflowYaml, workflowId, executionContext }) => {
       return http.post(`/api/workflows/testStep`, {
-        body: JSON.stringify({ stepId, contextOverride, workflowYaml, workflowId }),
+        body: JSON.stringify({
+          stepId,
+          contextOverride,
+          workflowYaml,
+          workflowId,
+          executionContext,
+        }),
       });
     },
     onSuccess: ({ workflowExecutionId }, variables) => {
       // Report telemetry for successful step test run
+      console.log('variables.triggerTab', variables.triggerTab);
       telemetry.reportWorkflowStepTestRunInitiated({
         workflowYaml: variables.workflowYaml,
         stepId: variables.stepId,
         origin: 'workflow_detail',
         error: undefined,
+        triggerTab: variables.triggerTab,
       });
 
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
@@ -287,6 +302,7 @@ export function useWorkflowActions() {
         stepId: variables.stepId,
         origin: 'workflow_detail',
         error: errorObj,
+        triggerTab: variables.triggerTab,
       });
     },
   });

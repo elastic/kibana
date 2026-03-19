@@ -76,6 +76,7 @@ describe('POST /api/workflows/testStep', () => {
         mockRequest.body.workflowYaml,
         mockRequest.body.stepId,
         mockRequest.body.workflowId,
+        undefined,
         mockRequest.body.contextOverride,
         'default',
         mockRequest
@@ -113,6 +114,37 @@ describe('POST /api/workflows/testStep', () => {
       });
     });
 
+    it('should pass executionContext to api.testStep when provided', async () => {
+      const mockExecutionId = 'test-step-execution-ctx';
+      const executionContext = { inputs: { foo: 'bar' }, event: { type: 'test' } };
+
+      workflowsApi.testStep = jest.fn().mockResolvedValue(mockExecutionId);
+
+      const mockRequest = {
+        body: {
+          workflowYaml: 'name: Test Workflow\nsteps: []',
+          stepId: 'step1',
+          contextOverride: { param1: 'value1' },
+          executionContext,
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/testStep' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler({}, mockRequest, mockResponse);
+
+      expect(workflowsApi.testStep).toHaveBeenCalledWith(
+        mockRequest.body.workflowYaml,
+        mockRequest.body.stepId,
+        undefined,
+        executionContext,
+        mockRequest.body.contextOverride,
+        'default',
+        mockRequest
+      );
+    });
+
     it('should work with different space contexts', async () => {
       const mockExecutionId = 'test-step-execution-456';
 
@@ -140,6 +172,7 @@ describe('POST /api/workflows/testStep', () => {
         mockRequest.body.workflowYaml,
         mockRequest.body.stepId,
         mockRequest.body.workflowId,
+        undefined,
         mockRequest.body.contextOverride,
         'custom-space',
         mockRequest

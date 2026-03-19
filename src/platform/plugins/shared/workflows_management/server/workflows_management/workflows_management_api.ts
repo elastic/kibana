@@ -327,6 +327,7 @@ export class WorkflowsManagementApi {
     workflowYaml: string,
     stepId: string,
     workflowId: string | undefined,
+    executionContext: Record<string, unknown> | undefined,
     contextOverride: Record<string, any>,
     spaceId: string,
     request: KibanaRequest
@@ -352,6 +353,7 @@ export class WorkflowsManagementApi {
         spaceId,
       },
       stepId,
+      executionContext,
       contextOverride,
       request
     );

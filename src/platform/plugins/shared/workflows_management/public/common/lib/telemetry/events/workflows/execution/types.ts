@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowTriggerTab } from '../../../../../../features/run_workflow/ui/types';
+import type {
+  WorkflowStepTriggerTab,
+  WorkflowTriggerTab,
+} from '../../../../../../features/run_workflow/ui/types';
 import type { BaseResultActionParams, WorkflowEditorType } from '../types';
 
 export enum WorkflowExecutionEventTypes {
@@ -85,6 +88,10 @@ export interface ReportWorkflowStepTestRunInitiatedActionParams extends BaseResu
    * Editor context if step test was initiated from workflow detail page
    */
   editorType?: WorkflowEditorType;
+  /**
+   * The trigger tab selected in the Test Workflow modal
+   */
+  triggerTab?: WorkflowStepTriggerTab;
 }
 
 /**

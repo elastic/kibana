@@ -24,6 +24,7 @@ export function registerPostTestStepRoute({ router, api, logger, spaces }: Route
         body: schema.object({
           stepId: schema.string(),
           workflowId: schema.maybe(schema.string()),
+          executionContext: schema.maybe(schema.recordOf(schema.string(), schema.any())),
           contextOverride: schema.recordOf(schema.string(), schema.any()),
           workflowYaml: schema.string(),
         }),
@@ -37,6 +38,7 @@ export function registerPostTestStepRoute({ router, api, logger, spaces }: Route
           request.body.workflowYaml,
           request.body.stepId,
           request.body.workflowId,
+          request.body.executionContext,
           request.body.contextOverride,
           spaceId,
           request

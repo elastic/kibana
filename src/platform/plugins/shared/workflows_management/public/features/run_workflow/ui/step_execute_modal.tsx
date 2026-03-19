@@ -27,22 +27,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
+import { ENABLED_STEP_TRIGGER_TABS } from './constants';
 import { NOT_READY_SENTINEL, StepExecuteHistoricalForm } from './step_execute_historical_form';
 import { StepExecuteManualForm } from './step_execute_manual_form';
+import type { WorkflowStepTriggerTab } from './types';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { useWorkflowsMonacoTheme } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
-const STEP_INPUT_TABS = ['manual', 'historical'] as const;
-type StepInputTab = (typeof STEP_INPUT_TABS)[number];
-
-const STEP_TAB_LABELS: Record<StepInputTab, string> = {
+const STEP_TAB_LABELS: Record<WorkflowStepTriggerTab, string> = {
   manual: i18n.translate('workflows.testStepModal.manualTab', { defaultMessage: 'Manual' }),
   historical: i18n.translate('workflows.testStepModal.historicalTab', {
     defaultMessage: 'Historical',
   }),
 };
 
-const STEP_TAB_DESCRIPTIONS: Record<StepInputTab, string> = {
+const STEP_TAB_DESCRIPTIONS: Record<WorkflowStepTriggerTab, string> = {
   manual: i18n.translate('workflows.testStepModal.manualTabDescription', {
     defaultMessage: 'Provide custom JSON data manually',
   }),
@@ -53,11 +52,14 @@ const STEP_TAB_DESCRIPTIONS: Record<StepInputTab, string> = {
 
 export interface StepExecuteModalProps {
   initialcontextOverride: ContextOverrideData;
-  onSubmit?: (params: { stepInputs: Record<string, unknown> }) => void;
+  onSubmit?: (params: {
+    stepInputs: Record<string, unknown>;
+    executionContext?: Record<string, unknown>;
+    triggerTab: WorkflowStepTriggerTab;
+  }) => void;
   onClose: () => void;
   initialStepExecutionId?: string;
   initialWorkflowRunId?: string;
-  initialTab?: StepInputTab;
   stepId: string;
   workflowGraph?: WorkflowGraph;
 }
@@ -69,7 +71,6 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
     onSubmit,
     initialStepExecutionId,
     initialWorkflowRunId,
-    initialTab,
     stepId,
     workflowGraph,
   }) => {
@@ -79,12 +80,13 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
       () => initialcontextOverride.stepContext ?? {},
       [initialcontextOverride.stepContext]
     );
-    const [selectedTab, setSelectedTab] = useState<StepInputTab>(
-      initialTab ?? (initialStepExecutionId ? 'historical' : 'manual')
+    const [selectedTab, setSelectedTab] = useState<WorkflowStepTriggerTab>(
+      initialStepExecutionId ? 'historical' : 'manual'
     );
-    const [inputsJson, setInputsJson] = React.useState<string>(
+    const [inputsJson, setInputsJson] = useState<string>(
       JSON.stringify(stepContextOverride, null, 2)
     );
+    const [executionContext, setExecutionContext] = useState<Record<string, unknown> | undefined>();
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
     const [executionInputWarnings, setExecutionInputWarnings] = useState<string | null>(null);
 
@@ -131,7 +133,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
     }, []);
 
     const handleChangeTab = useCallback(
-      (tab: StepInputTab) => {
+      (tab: WorkflowStepTriggerTab) => {
         setInputsJson(JSON.stringify(stepContextOverride, null, 2));
         setExecutionInputErrors(null);
         setSelectedTab(tab);
@@ -141,9 +143,13 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
 
     const handleSubmit = useCallback(() => {
       if (onSubmit) {
-        onSubmit({ stepInputs: JSON.parse(inputsJson) });
+        onSubmit({
+          stepInputs: JSON.parse(inputsJson),
+          executionContext,
+          triggerTab: selectedTab,
+        });
       }
-    }, [onSubmit, inputsJson]);
+    }, [onSubmit, inputsJson, executionContext, selectedTab]);
 
     const isSubmitDisabled =
       (selectedTab === 'historical' && executionInputErrors !== null) ||
@@ -187,7 +193,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
               `}
             >
               <EuiFlexGroup direction="row" gutterSize="m">
-                {STEP_INPUT_TABS.map((tab) => (
+                {ENABLED_STEP_TRIGGER_TABS.map((tab) => (
                   <EuiFlexItem key={tab}>
                     <EuiButton
                       color={selectedTab === tab ? 'primary' : 'text'}
@@ -250,6 +256,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
                 <StepExecuteHistoricalForm
                   value={inputsJson}
                   setValue={handleInputChange}
+                  setExecutionContext={setExecutionContext}
                   warnings={executionInputWarnings}
                   errors={executionInputErrors}
                   setErrors={setExecutionInputErrors}
