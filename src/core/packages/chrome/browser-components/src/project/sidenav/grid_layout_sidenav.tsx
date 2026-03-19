@@ -7,26 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { css, Global } from '@emotion/react';
-import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import { useSideNavCollapsed } from '@kbn/core-chrome-browser-hooks';
+import { useSideNavCollapsed, useSidebarWidth } from '@kbn/core-chrome-browser-hooks';
 import { Navigation } from './navigation';
+import { useAutoCollapse } from './use_auto_collapse';
 
 export const GridLayoutProjectSideNav = () => {
   const chrome = useChromeService();
   const { isCollapsed, setIsCollapsed: onToggleCollapsed } = useSideNavCollapsed();
   const setWidth = useCallback((width: number) => chrome.sideNav.setWidth(width), [chrome]);
-  const responsive = useMemo(
-    () => ({
-      mode: 'containerWidth' as const,
-      getContainer: () => document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID),
-      collapseAtWidth: 1000,
-      expandAtWidth: 1100,
-    }),
-    []
-  );
+  const sidebarWidth = useSidebarWidth();
+  const isAutoCollapsed = useAutoCollapse(sidebarWidth);
 
   return (
     <>
@@ -38,10 +31,12 @@ export const GridLayoutProjectSideNav = () => {
         `}
       />
       <Navigation
-        isCollapsed={isCollapsed}
-        responsive={responsive}
+        isCollapsed={isCollapsed || isAutoCollapsed}
         setWidth={setWidth}
-        onToggleCollapsed={onToggleCollapsed}
+        // Hide the toggle button when the viewport forces collapse — the user
+        // cannot override it, so showing an unresponsive "expand" button would
+        // be confusing. Navigation omits the button when this prop is undefined.
+        onToggleCollapsed={isAutoCollapsed ? undefined : onToggleCollapsed}
       />
     </>
   );

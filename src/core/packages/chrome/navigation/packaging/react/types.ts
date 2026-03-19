@@ -101,16 +101,6 @@ export interface SideNavLogo {
 }
 
 /**
- * Responsive collapse configuration for the navigation component.
- */
-export interface ResponsiveNavigationConfig {
-  mode?: 'euiBreakpoints' | 'containerWidth';
-  getContainer?: () => HTMLElement | null;
-  collapseAtWidth?: number;
-  expandAtWidth?: number;
-}
-
-/**
  * Props accepted by the `OneNavigation` component.
  */
 export interface NavigationProps {
@@ -118,8 +108,6 @@ export interface NavigationProps {
   activeItemId?: string;
   /** Whether the navigation is collapsed. */
   isCollapsed: boolean;
-  /** Optional responsive collapse configuration. */
-  responsive?: ResponsiveNavigationConfig;
   /** The navigation structure containing primary, secondary, and footer items. */
   items: NavigationStructure;
   /** The logo object containing the route ID, href, label, and type. */
@@ -128,8 +116,8 @@ export interface NavigationProps {
   setWidth: (width: number) => void;
   /** Callback fired when a navigation item is clicked. */
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
-  /** Callback fired when the collapse button is toggled. */
-  onToggleCollapsed: (isCollapsed: boolean) => void;
+  /** Callback fired when the collapse button is toggled. Omit to hide the toggle button. */
+  onToggleCollapsed?: (isCollapsed: boolean) => void;
   /** Content to display inside the side panel footer. */
   sidePanelFooter?: ReactNode;
   /** Optional `data-test-subj` attribute for testing purposes. */

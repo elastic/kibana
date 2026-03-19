@@ -24,7 +24,7 @@ import { SideNav } from './side_nav';
 import { SideNavCollapseButton } from './collapse_button';
 import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
-import { useForcedCollapse, type ResponsiveNavigationConfig } from '../hooks/use_forced_collapse';
+import { useForcedCollapse } from '../hooks/use_forced_collapse';
 import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
@@ -43,10 +43,6 @@ export interface NavigationProps {
    * Whether the navigation is collapsed. This can be controlled by the parent component.
    */
   isCollapsed: boolean;
-  /**
-   * Optional responsive collapse configuration.
-   */
-  responsive?: ResponsiveNavigationConfig;
   /**
    * The navigation structure containing primary, secondary, and footer items.
    */
@@ -69,7 +65,7 @@ export interface NavigationProps {
    * The collapsed state's source of truth lives in chrome_service.tsx as a BehaviorSubject
    * that is persisted to localStorage. External consumers rely on this state.
    */
-  onToggleCollapsed: (isCollapsed: boolean) => void;
+  onToggleCollapsed?: (isCollapsed: boolean) => void;
   /**
    * (optional) Content to display inside the side panel footer.
    */
@@ -83,7 +79,6 @@ export interface NavigationProps {
 export const Navigation = ({
   activeItemId,
   isCollapsed: isCollapsedProp,
-  responsive,
   items,
   logo,
   onItemClick,
@@ -92,7 +87,7 @@ export const Navigation = ({
   sidePanelFooter,
   ...rest
 }: NavigationProps) => {
-  const forcedCollapsed = useForcedCollapse(responsive);
+  const forcedCollapsed = useForcedCollapse();
   const isCollapsed = forcedCollapsed || isCollapsedProp;
   const popoverItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverItem`;
   const popoverFooterItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverFooterItem`;
