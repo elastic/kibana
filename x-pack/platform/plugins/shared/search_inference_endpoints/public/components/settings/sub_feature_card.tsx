@@ -21,7 +21,6 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
-  EuiTextTruncate,
   EuiTitle,
   EuiToolTip,
   euiDragDropReorder,
@@ -36,6 +35,7 @@ import { getModelId } from '../../utils/get_model_id';
 import type { InferenceFeatureConfig } from './feature_metadata';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
+import { css } from '@emotion/react';
 
 const COLLAPSED_COUNT = 1;
 
@@ -127,27 +127,16 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     [endpointIds, onEndpointsChange]
   );
 
-  const removeButton = (endpointId: string, index: number) => (
-    <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        iconType="cross"
-        aria-label={i18n.translate('xpack.searchInferenceEndpoints.settings.removeModel', {
-          defaultMessage: 'Remove model',
-        })}
-        size="s"
-        color="text"
-        onClick={() => handleRemove(index)}
-        isDisabled={endpointIds.length <= 1}
-        data-test-subj={`remove-endpoint-${endpointId}`}
-      />
-    </EuiFlexItem>
-  );
-
   return (
     <>
-      <EuiFlexGroup responsive={false} data-test-subj={`subFeatureCard-${featureId}`}>
-        <EuiFlexItem grow={3}>
-          <EuiTitle size="xs">
+      <EuiFlexGroup
+        data-test-subj={`subFeatureCard-${featureId}`}
+        gutterSize="l"
+        alignItems="baseline"
+        wrap
+      >
+        <EuiFlexItem css={css`min-inline-size: min(20rem, 50%);`}>
+          <EuiTitle size="s">
             <h4>{feature.featureName}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
@@ -164,7 +153,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
           )}
         </EuiFlexItem>
 
-        <EuiFlexItem grow={4}>
+        <EuiFlexItem css={css`min-inline-size: min(20rem, 50%);`}>
           <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
             <EuiText size="xs" color="subdued">
               <strong>{translations.SETTINGS_ASSIGNED_MODELS}</strong>
@@ -188,7 +177,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                             paddingSize="s"
                             data-test-subj={`endpoint-row-${endpointId}`}
                           >
-                            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                            <EuiFlexGroup alignItems="center" gutterSize="s">
                               <EuiFlexItem grow={false}>
                                 <EuiPanel
                                   color="transparent"
@@ -215,11 +204,9 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                   content={endpointId}
                                   position="top"
                                 >
-                                  <EuiText size="s" tabIndex={0}>
-                                    <EuiTextTruncate
-                                      text={endpointDisplayMap.get(endpointId)?.label ?? endpointId}
-                                    />
-                                  </EuiText>
+                                  <EuiText size="s" tabIndex={0} css={css`overflow: hidden; text-overflow: ellipsis; white-space: nowrap;`}>
+                                    <span>{endpointDisplayMap.get(endpointId)?.label ?? endpointId}</span>
+                                  </EuiText> 
                                 </EuiToolTip>
                               </EuiFlexItem>
                               {index === 0 && (
@@ -229,7 +216,19 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                   </EuiBadge>
                                 </EuiFlexItem>
                               )}
-                              {removeButton(endpointId, index)}
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonIcon
+                                  iconType="cross"
+                                  aria-label={i18n.translate('xpack.searchInferenceEndpoints.settings.removeModel', {
+                                    defaultMessage: 'Remove model',
+                                  })}
+                                  size="s"
+                                  color="text"
+                                  onClick={() => handleRemove(index)}
+                                  isDisabled={endpointIds.length <= 1}
+                                  data-test-subj={`remove-endpoint-${endpointId}`}
+                                />
+                              </EuiFlexItem>
                             </EuiFlexGroup>
                           </EuiSplitPanel.Inner>
                           {index !== visibleEndpoints.length - 1 && (
@@ -244,7 +243,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             </EuiDragDropContext>
 
             <EuiSpacer size="xs" />
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
               {hasOverflow && !isExpanded && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
