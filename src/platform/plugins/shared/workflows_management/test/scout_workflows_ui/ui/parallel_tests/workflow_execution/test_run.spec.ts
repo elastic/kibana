@@ -118,12 +118,11 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     await pageObjects.workflowEditor.setYamlEditorValue(getWorkflowWithLoopYaml(workflowName));
 
     // Navigate to the step and click the inline "run step" button.
-    // navigateToYamlLine waits for the run-step button to appear, which
+    // navigateToYamlLine waits for the step actions container to appear, which
     // confirms the debounced YAML computation has completed.
-    await pageObjects.workflowEditor.setCursorToText('name: hello_world_step');
-    await page.testSubj.click('workflowRunStep');
+    await pageObjects.workflowEditor.openStepRunModal('test_console_step');
 
-    // Set custom context in the test step modal and execute§
+    // Set custom context in the test step modal and execute
     await pageObjects.workflowEditor.setTestStepInputs({
       execution: { isTestRun: false },
       foreach: { item: { '@timestamp': 'now' } },
@@ -132,9 +131,8 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
 
     await pageObjects.workflowExecution.waitForExecutionView();
 
-    // Only one hello_world_step should run (not 4 from the loop)
     const helloWorldSteps = pageObjects.workflowExecution.executionPanel.getByRole('button', {
-      name: 'hello_world_step',
+      name: 'test_console_step',
     });
     await expect(helloWorldSteps).toHaveCount(1);
 
