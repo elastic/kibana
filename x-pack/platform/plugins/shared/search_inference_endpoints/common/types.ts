@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+
 export enum APIRoutes {
   GET_INFERENCE_ENDPOINTS = '/internal/inference_endpoints/endpoints',
   INFERENCE_ENDPOINT = '/internal/inference_endpoint/endpoints/{type}/{id}',
@@ -55,3 +57,34 @@ export interface InferenceFeatureResponse {
   maxNumberOfEndpoints?: number;
   recommendedEndpoints: string[];
 }
+
+export type InferenceEndpointWithMetadata = InferenceAPIConfigResponse & {
+  metadata: {
+    heuristics?: {
+      properties?: string[];
+      status?: string;
+      release_date?: string;
+      end_of_life_date?: string;
+    } & Record<string, unknown>;
+    display?: {
+      name?: string;
+      model_creator?: string;
+    } & Record<string, unknown>;
+  } & Record<string, unknown>;
+};
+
+export type InferenceEndpointWithDisplayNameMetadata = InferenceEndpointWithMetadata & {
+  metadata: {
+    display: {
+      name: string;
+    };
+  };
+};
+
+export type InferenceEndpointWithDisplayCreatorMetadata = InferenceEndpointWithMetadata & {
+  metadata: {
+    display: {
+      model_creator: string;
+    };
+  };
+};
