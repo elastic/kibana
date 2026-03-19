@@ -82,7 +82,9 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
 
     return allCreators
       .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-      .map((username) => toSelectableOption(username, selectedSet.has(username), usernameToProfile));
+      .map((username) =>
+        toSelectableOption(username, selectedSet.has(username), usernameToProfile)
+      );
   }, [creators, selectedCreators, usernameToProfile]);
 
   const handleChange = useCallback(
