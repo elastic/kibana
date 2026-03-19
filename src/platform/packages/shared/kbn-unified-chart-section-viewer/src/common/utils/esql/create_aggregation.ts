@@ -8,10 +8,9 @@
  */
 
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
-import { Parser, BasicPrettyPrinter, isCommand, isFunctionExpression } from '@elastic/esql';
+import { esql, synth, BasicPrettyPrinter, isCommand, isFunctionExpression } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import { replaceParameters } from '@kbn/esql-composer';
 import { isLegacyHistogram } from '../legacy_histogram';
 
 type Params = Record<string, string | number | boolean | null>;
@@ -38,7 +37,7 @@ function getFunctionNodeFromAst(ast: ESQLAstQueryExpression) {
  * Takes an ES|QL function string with placeholders and a parameters object,
  * and returns the function string with the placeholders substituted and correctly escaped.
  *
- * This function works by using the `@kbn/esql-composer` to build a temporary query,
+ * This function works by using the `@elastic/esql` composer to build a temporary query,
  * which handles the AST substitution and escaping internally.
  *
  * @param functionString An ES|QL function string with placeholders (e.g., "AVG(??metricField)").
@@ -47,23 +46,40 @@ function getFunctionNodeFromAst(ast: ESQLAstQueryExpression) {
  */
 export function replaceFunctionParams(functionString: string, params: Params): string {
   try {
-    // 1. To parse the function string fragment, wrap it in a minimal, valid query.
-    const tempQuery = `TS metrics-* | STATS ${functionString}`;
-    const { root: ast } = Parser.parse(tempQuery);
+    // 1. Build a temporary query using the esql composer, substituting column-name
+    //    placeholders (??name) with properly escaped column references via synth.col.
+    let resolvedFunctionString = functionString;
+    for (const [key, value] of Object.entries(params)) {
+      if (value == null) continue;
+      const strValue = String(value);
+      const doubleParamPattern = `??${key}`;
+      const singleParamPattern = `?${key}`;
 
-    // 2. Use the exported `replaceParameters` function to perform the substitution.
-    replaceParameters(ast, params);
+      if (resolvedFunctionString.includes(doubleParamPattern)) {
+        // ?? placeholders represent column/field names - use synth.col for proper escaping
+        const columnParts = strValue.split('.');
+        const columnNode = synth.col(columnParts);
+        const columnStr = BasicPrettyPrinter.print(columnNode);
+        resolvedFunctionString = resolvedFunctionString.replace(doubleParamPattern, columnStr);
+      } else if (resolvedFunctionString.includes(singleParamPattern)) {
+        // ? placeholders represent literal values - quote strings
+        const quotedValue = typeof value === 'string' ? `"${value}"` : strValue;
+        resolvedFunctionString = resolvedFunctionString.replace(singleParamPattern, quotedValue);
+      }
+    }
 
-    // 3. Extract the modified function node from the temporary AST.
-    const functionNode = getFunctionNodeFromAst(ast);
+    // 2. Build a temporary query to parse and pretty-print the resolved function.
+    const tempQuery = `TS metrics-* | STATS ${resolvedFunctionString}`;
+    const query = esql(tempQuery);
+    const functionNode = getFunctionNodeFromAst(query.ast);
 
     if (functionNode) {
-      // 4. Print only the function node back to a string.
+      // 3. Print only the function node back to a string.
       return BasicPrettyPrinter.print(functionNode).trim();
     }
 
     // Fallback if the AST structure isn't what we expect.
-    return functionString;
+    return resolvedFunctionString;
   } catch (e) {
     // If parsing or any other step fails, return the original string as a safe fallback.
     return functionString;
