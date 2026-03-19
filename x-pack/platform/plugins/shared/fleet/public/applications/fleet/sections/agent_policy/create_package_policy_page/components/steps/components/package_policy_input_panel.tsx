@@ -76,6 +76,32 @@ export const shouldShowStreamsByDefault = (
   );
 };
 
+export const MigrationTooltip = ({
+  migrateFrom,
+  isStream = false,
+}: {
+  migrateFrom: string;
+  isStream?: boolean;
+}) => (
+  <EuiFlexItem grow={false}>
+    <EuiIconTip
+      type="info"
+      color="subdued"
+      content={i18n.translate(
+        isStream
+          ? 'xpack.fleet.createPackagePolicy.stepConfigure.streamMigratedTooltip'
+          : 'xpack.fleet.createPackagePolicy.stepConfigure.inputMigratedTooltip',
+        {
+          defaultMessage: isStream
+            ? 'This data stream was automatically migrated from {migrateFrom}.'
+            : 'This input was automatically migrated from {migrateFrom}.',
+          values: { migrateFrom },
+        }
+      )}
+    />
+  </EuiFlexItem>
+);
+
 export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInfo: PackageInfo;
@@ -265,19 +291,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       return null;
     }
     const migrationTooltip = isUpgrade && packagePolicyInput.migrate_from && !isDeprecatedInput && (
-      <EuiFlexItem grow={false}>
-        <EuiIconTip
-          type="info"
-          color="subdued"
-          content={i18n.translate(
-            'xpack.fleet.createPackagePolicy.stepConfigure.inputMigratedTooltip',
-            {
-              defaultMessage: 'This input was automatically migrated from {migrateFrom}.',
-              values: { migrateFrom: packagePolicyInput.migrate_from },
-            }
-          )}
-        />
-      </EuiFlexItem>
+      <MigrationTooltip migrateFrom={packagePolicyInput.migrate_from} />
     );
 
     return (

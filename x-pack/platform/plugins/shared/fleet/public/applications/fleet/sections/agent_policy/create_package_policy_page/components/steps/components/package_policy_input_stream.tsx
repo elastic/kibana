@@ -67,6 +67,7 @@ import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
 import { VarGroupSelector } from './var_group_selector';
+import { MigrationTooltip } from './package_policy_input_panel';
 
 const ScrollAnchor = styled.div`
   display: none;
@@ -310,22 +311,14 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             </span>
                           </EuiFlexItem>
                         )}
-                        {isUpgrade && packagePolicyInputStream.migrate_from && (
-                          <EuiFlexItem grow={false}>
-                            <EuiIconTip
-                              type="info"
-                              color="subdued"
-                              content={i18n.translate(
-                                'xpack.fleet.createPackagePolicy.stepConfigure.streamMigratedTooltip',
-                                {
-                                  defaultMessage:
-                                    'This data stream was automatically migrated from {migrateFrom}.',
-                                  values: { migrateFrom: packagePolicyInputStream.migrate_from },
-                                }
-                              )}
+                        {isUpgrade &&
+                          packagePolicyInputStream.migrate_from &&
+                          !showStreamDeprecationIcon && (
+                            <MigrationTooltip
+                              migrateFrom={packagePolicyInputStream.migrate_from}
+                              isStream
                             />
-                          </EuiFlexItem>
-                        )}
+                          )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   )}
