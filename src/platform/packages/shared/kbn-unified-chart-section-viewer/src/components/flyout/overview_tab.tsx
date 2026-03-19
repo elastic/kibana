@@ -42,11 +42,6 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
 
-  const unitLabel = useMemo(
-    () => getUnitLabel({ unit: metricItem.units?.[0] ?? undefined }),
-    [metricItem.units]
-  );
-
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
     if (!metricItem.dimensionFields || metricItem.dimensionFields.length === 0) {
@@ -100,28 +95,44 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
         i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
           defaultMessage: 'Field type',
         }),
-        <div>
-          <EuiBadge>{metricItem.fieldTypes?.[0] ?? ''}</EuiBadge>
-        </div>
+        <EuiFlexGroup wrap gutterSize="xs" responsive={false}>
+          {metricItem.fieldTypes?.map((fieldType) => (
+            <EuiFlexItem grow={false} key={fieldType}>
+              <EuiBadge>{fieldType}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       ),
-      ...(unitLabel
+      ...(metricItem.units?.length
         ? [
             createDescriptionListItem(
               i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
                 defaultMessage: 'Metric unit',
               }),
-              <EuiBadge>{unitLabel}</EuiBadge>,
+              <EuiFlexGroup wrap gutterSize="xs" responsive={false}>
+                {metricItem.units.map((unit, index) => (
+                  <EuiFlexItem grow={false} key={`${unit}-${index}`}>
+                    <EuiBadge>{unit != null ? getUnitLabel({ unit }) : 'null'}</EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>,
               'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
             ),
           ]
         : []),
-      ...(metricItem.metricTypes?.[0]
+      ...(metricItem.metricTypes?.length
         ? [
             createDescriptionListItem(
               i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
                 defaultMessage: 'Metric type',
               }),
-              <MetricTypeBadge instrument={metricItem.metricTypes?.[0]} />,
+              <EuiFlexGroup wrap gutterSize="xs" responsive={false}>
+                {metricItem.metricTypes.map((metricType) => (
+                  <EuiFlexItem grow={false} key={metricType}>
+                    <MetricTypeBadge instrument={metricType} />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>,
               'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
             ),
           ]
@@ -131,7 +142,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
       metricItem.dataStream,
       metricItem.fieldTypes,
       metricItem.metricTypes,
-      unitLabel,
+      metricItem.units,
       createDescriptionListItem,
     ]
   );
@@ -148,7 +159,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
       paginatedDimensions.map((dimension: Dimension) => {
         return {
           'data-test-subj': `metricsExperienceFlyoutOverviewTabDimensionItem-${dimension.name}`,
-          label: <FieldNameWithIcon name={dimension.name} />,
+          label: <FieldNameWithIcon name={dimension.name} type={dimension.type} />,
         };
       }),
     [paginatedDimensions]

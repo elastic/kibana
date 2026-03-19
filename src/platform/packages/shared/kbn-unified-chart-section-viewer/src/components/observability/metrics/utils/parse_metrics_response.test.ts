@@ -170,6 +170,21 @@ describe('parseMetricsResponse', () => {
     });
   });
 
+  it('preserves null unit elements in the units array', () => {
+    const response: MetricsESQLResponse[] = [
+      {
+        metric_name: 'my.metric',
+        data_stream: 'my-index',
+        unit: [null, 'ms'],
+        metric_type: 'gauge',
+        field_type: ES_FIELD_TYPES.DOUBLE,
+        dimension_fields: [],
+      },
+    ];
+    const result = parseMetricsResponse(response);
+    expect(result.metricItems[0].units).toEqual([null, 'ms']);
+  });
+
   it('returns allDimensions as union of all dimension_fields across rows with no duplicates', () => {
     const response: MetricsESQLResponse[] = [
       {

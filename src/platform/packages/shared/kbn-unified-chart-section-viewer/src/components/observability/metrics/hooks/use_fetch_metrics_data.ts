@@ -17,6 +17,7 @@ import type {
   ParsedMetricsResult,
   MetricsInfoResponse,
 } from '../../../../types';
+import { enrichDimensions } from '../utils/enrich_dimensions';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsResponse } from '../utils/parse_metrics_response';
 import { getEsqlQuery } from '../utils/get_esql_query';
@@ -66,15 +67,20 @@ export function useFetchMetricsData({
       });
 
       const parsed = parseMetricsResponse(result);
+      const getFieldType = (name: string) => fetchParams.dataView?.getFieldByName(name)?.type;
 
-      return {
-        metricItems: [...(parsed?.metricItems ?? [])].sort((a, b) =>
-          a.metricName.localeCompare(b.metricName)
-        ),
-        allDimensions: [...(parsed?.allDimensions ?? [])].sort((a, b) =>
-          a.name.localeCompare(b.name)
-        ),
-      };
+      const metricItems = [...(parsed?.metricItems ?? [])]
+        .sort((a, b) => a.metricName.localeCompare(b.metricName))
+        .map((item) => ({
+          ...item,
+          dimensionFields: enrichDimensions(item.dimensionFields, getFieldType),
+        }));
+
+      const allDimensions = enrichDimensions([...(parsed?.allDimensions ?? [])], getFieldType).sort(
+        (a, b) => a.name.localeCompare(b.name)
+      );
+
+      return { metricItems, allDimensions };
     },
     [
       metricsInfoQuery,

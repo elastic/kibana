@@ -238,6 +238,42 @@ describe('Metric Flyout Overview Tab', () => {
     });
   });
 
+  describe('multiple values display', () => {
+    it('renders multiple field types as badges', () => {
+      const metricItem = createMockMetric({
+        fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
+      });
+      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(getByText('double')).toBeInTheDocument();
+      expect(getByText('long')).toBeInTheDocument();
+    });
+
+    it('renders multiple units as badges', () => {
+      const metricItem = createMockMetric({ units: ['ms', 'bytes'] });
+      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(getByText('Milliseconds')).toBeInTheDocument();
+      expect(getByText('Bytes')).toBeInTheDocument();
+    });
+
+    it('renders null unit elements as null badges', () => {
+      const metricItem = createMockMetric({ units: [null, 'ms'] });
+      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(getByText('null')).toBeInTheDocument();
+      expect(getByText('Milliseconds')).toBeInTheDocument();
+    });
+
+    it('renders multiple metric types as badges', () => {
+      const metricItem = createMockMetric({ metricTypes: ['counter', 'gauge'] });
+      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
+
+      expect(getByText('counter')).toBeInTheDocument();
+      expect(getByText('gauge')).toBeInTheDocument();
+    });
+  });
+
   describe('description display', () => {
     it('renders description when present', () => {
       const metricItem = createMockMetric();
