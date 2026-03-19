@@ -18,6 +18,26 @@ export type SavedObjectStatus =
   | { status: 'loading' }
   | { status: 'resolved'; exists: boolean };
 
+// TODO: this feels very iffy, but it fixes the following flow as in edit in Dashboard, maybe we should rethink the flow?
+// 1. Open a canvas dshboard view and save the dashboard
+// 2. Go to Dashboard listing page and remove the dashboard you’ve created
+// 3. Open the Canvas again -> Edit in Dashboards
+// 4. You’re taken to the new dashboard page, but the origin is still set on the id of the removed dashboard - that’s ok, you can still edit
+// 5. Click on save in dashboard app — it will not work because we check on save if origin === previousId to not override other dashboard - this fixes it
+const getValidAttachmentOrigin = async (
+  origin: string | undefined,
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>,
+  updateOrigin: (origin: string) => Promise<unknown>
+) => {
+  if (!origin) return undefined;
+  const exists = await checkSavedDashboardExist(origin);
+  if (!exists) {
+    await updateOrigin('');
+    return undefined;
+  }
+  return origin;
+};
+
 interface UseRegisterActionButtonsParams {
   dashboardApi: DashboardApi | undefined;
   registerActionButtons: (buttons: ActionButton[]) => void;
@@ -64,16 +84,11 @@ export const useRegisterActionButtons = ({
         }),
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          const dashboardHasBeenDeleted =
-            attachmentOriginRef.current &&
-            (await checkSavedDashboardExist(attachmentOriginRef.current)) === false;
-          if (dashboardHasBeenDeleted) {
-            await updateOrigin('');
-          }
-          const existingAttachmentOrigin =
-            attachmentOriginRef.current && !dashboardHasBeenDeleted
-              ? attachmentOriginRef.current
-              : undefined;
+          const existingAttachmentOrigin = await getValidAttachmentOrigin(
+            attachmentOriginRef.current,
+            checkSavedDashboardExist,
+            updateOrigin
+          );
           await locator.navigate({
             ...dashboardStateRef.current,
             dashboardId: existingAttachmentOrigin,
@@ -94,16 +109,11 @@ export const useRegisterActionButtons = ({
       icon: 'save',
       type: ActionButtonType.PRIMARY,
       handler: async () => {
-        const dashboardHasBeenDeleted =
-          attachmentOriginRef.current &&
-          (await checkSavedDashboardExist(attachmentOriginRef.current)) === false;
-        if (dashboardHasBeenDeleted) {
-          await updateOrigin('');
-        }
-        const existingAttachmentOrigin =
-          attachmentOriginRef.current && !dashboardHasBeenDeleted
-            ? attachmentOriginRef.current
-            : undefined;
+        const existingAttachmentOrigin = await getValidAttachmentOrigin(
+          attachmentOriginRef.current,
+          checkSavedDashboardExist,
+          updateOrigin
+        );
         if (existingAttachmentOrigin) {
           await dashboardApi.runQuickSave();
           return;
