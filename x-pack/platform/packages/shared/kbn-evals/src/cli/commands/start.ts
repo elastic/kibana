@@ -19,7 +19,7 @@ import {
   isTTY,
   getAllAvailableConnectors,
   readLocalEsUrl,
-  SCOUT_EVALS_ARGS,
+  scoutEvalsArgs,
 } from '../prompts';
 import {
   isServiceRunning,
@@ -251,6 +251,9 @@ export const startCmd: Command<void> = {
       log.info(`Models:    all (from KIBANA_TESTING_AI_CONNECTORS)`);
     }
     log.info(`Server:    ${skipServer ? 'skip (using existing)' : 'managed'}`);
+    if (suite?.serverConfigSet) {
+      log.info(`Config:    ${suite.serverConfigSet}`);
+    }
     log.info('');
 
     const rerunArgs: string[] = [];
@@ -311,17 +314,16 @@ export const startCmd: Command<void> = {
       }
 
       // --- Step 2: Scout server ---
+      const serverConfigSet = suite?.serverConfigSet ?? 'evals_tracing';
       const scoutAlive = isServiceRunning(repoRoot, 'scout');
-      const scoutStale = scoutAlive && isScoutStale(repoRoot);
+      const staleCheck = scoutAlive ? isScoutStale(repoRoot, serverConfigSet) : { stale: false };
 
-      if (scoutStale) {
-        log.warning(
-          '[2/4] Scout connectors are stale (KIBANA_TESTING_AI_CONNECTORS changed). Restarting...'
-        );
+      if (staleCheck.stale) {
+        log.warning(`[2/4] Scout server is stale (${staleCheck.reason}). Restarting...`);
         await stopService(repoRoot, 'scout', log);
       }
 
-      if (scoutAlive && !scoutStale) {
+      if (scoutAlive && !staleCheck.stale) {
         log.info('[2/4] Scout server already running -- reusing');
       } else {
         const scoutConfigPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
@@ -329,10 +331,20 @@ export const startCmd: Command<void> = {
           Fs.unlinkSync(scoutConfigPath);
         }
 
-        log.info('[2/4] Starting Scout server (backgrounded, stateful/classic, evals_tracing)...');
-        startService(repoRoot, 'scout', 'node', ['scripts/scout.js', ...SCOUT_EVALS_ARGS], log, {
-          connectorsHash: connectorsHash(),
-        });
+        log.info(
+          `[2/4] Starting Scout server (backgrounded, stateful/classic, ${serverConfigSet})...`
+        );
+        startService(
+          repoRoot,
+          'scout',
+          'node',
+          ['scripts/scout.js', ...scoutEvalsArgs(serverConfigSet)],
+          log,
+          {
+            connectorsHash: connectorsHash(),
+            serverConfigSet,
+          }
+        );
 
         const stopTail = tailLog(repoRoot, 'scout', log, { fromStart: true });
         log.info('[2/4] Waiting for ES + Kibana to be ready...');

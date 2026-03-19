@@ -55,9 +55,6 @@ export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
     };
   }
 
-  // TODO: remove this once all pinned panel types are registered
-  const mappedPinnedPanels = (pinned_panels ?? []).filter((panel) => isMappedPanelType(panel));
-
   const mappedPanels = (panels ?? [])
     .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel))
     .map((panel) => {
@@ -69,10 +66,13 @@ export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
       };
     });
 
+  const mappedPinnedPanels = (pinned_panels ?? []).filter(isMappedPanelType);
+
   return {
     data: {
       ...rest,
       panels: mappedPanels,
+      ...(pinned_panels && { pinned_panels: mappedPinnedPanels }),
     } as DashboardState,
     warnings,
   };
