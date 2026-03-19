@@ -51,13 +51,13 @@ export const markdownClient = {
     return result;
   },
   search: async (searchQuery: MarkdownSearchRequestQuery) => {
-    const { search, ...query } = searchQuery;
-    return await coreServices.http.post<MarkdownSearchResponseBody>(`${MARKDOWN_API_PATH}/search`, {
+    const { query, ...params } = searchQuery;
+    return await coreServices.http.post<MarkdownSearchResponseBody>(`${MARKDOWN_API_PATH}`, {
       version: MARKDOWN_API_VERSION,
-      body: JSON.stringify({
-        ...query,
-        search: search ? `${search}*` : undefined,
-      }),
+      query: {
+        ...params,
+        ...(query ? { query: `${query}*` } : {}),
+      },
     });
   },
   update: async (id: string, markdownState: MarkdownAttributes) => {
