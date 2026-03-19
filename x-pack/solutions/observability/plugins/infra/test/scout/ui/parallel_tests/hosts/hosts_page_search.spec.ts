@@ -72,9 +72,9 @@ test.describe(
       await test.step('verify all hosts are visible before filtering', async () => {
         await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
         await expect(
-          page.getByTestId('embeddablePanelHoverActions-CPUUsage').getByRole('progressbar', {
-            name: 'Loading',
-          })
+          page
+            .getByTestId('infraAssetDetailsKPIcpuUsage')
+            .getByRole('progressbar', { name: 'Loading' })
         ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
       });
 
@@ -102,9 +102,9 @@ test.describe(
       await test.step('verify all hosts are visible before filtering', async () => {
         await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
         await expect(
-          page.getByTestId('embeddablePanelHoverActions-CPUUsage').getByRole('progressbar', {
-            name: 'Loading',
-          })
+          page
+            .getByTestId('infraAssetDetailsKPIcpuUsage')
+            .getByRole('progressbar', { name: 'Loading' })
         ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
       });
 
