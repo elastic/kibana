@@ -354,22 +354,24 @@ export class Plugin
         async mount(params: ManagementAppMountParams) {
           const [coreStart] = (await core.getStartServices()) as [CoreStart, PluginsStart, unknown];
 
-          const currentLocation = params.history.location;
-          const search = currentLocation.search;
-
-          const [, page, id] = currentLocation.pathname.split('/');
+          const { pathname, search, hash } = params.history.location;
+          const [, page, id, ...rest] = pathname.split('/');
+          const tail = rest.length ? `/${rest.join('/')}` : '';
 
           switch (page) {
             case 'rule':
               await coreStart.application.navigateToApp('rules', {
-                path: getRulesAppDetailsRoute(id),
+                path: `${getRulesAppDetailsRoute(id)}${tail}${search}${hash}`,
                 replace: true,
               });
               break;
             default:
               await coreStart.application.navigateToApp('rules', {
-                path: currentLocation.pathname + search,
+                path: `${pathname}${search}${hash}`,
                 replace: true,
+              });
+              break;
+          }
               });
               break;
           }
