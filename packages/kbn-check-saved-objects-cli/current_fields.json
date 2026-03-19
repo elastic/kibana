@@ -980,6 +980,11 @@
   "monitoring-telemetry": [
     "reportedClusterUuids"
   ],
+  "oauth_state": [
+    "connectorId",
+    "expiresAt",
+    "state"
+  ],
   "observability-onboarding-state": [
     "progress",
     "state",
@@ -1374,6 +1379,13 @@
   "ui-metric": [
     "count"
   ],
+  "uiam_api_keys_provisioning_status": [
+    "@timestamp",
+    "entityId",
+    "entityType",
+    "message",
+    "status"
+  ],
   "upgrade-assistant-ml-upgrade-operation": [
     "snapshotId"
   ],
@@ -1399,6 +1411,11 @@
   ],
   "usage-counters": [
     "domainId"
+  ],
+  "user_connector_token": [
+    "connectorId",
+    "credentialType",
+    "profileUid"
   ],
   "visualization": [
     "description",
