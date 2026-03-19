@@ -50,11 +50,11 @@ All persisted documents follow the same schema (see below).
 
 ### Event IDs
 
-It is recommended to let the package manage the `event.id` generation instead of passing your own values. Internally the package will generate ULIDs which create monotonically increasing ids for events that occur within this same millisecond.
+It is recommended to let the package manage the `event.id` generation instead of passing your own values. Internally the package will generate UUID v7 identifiers, which are monotonically increasing within the same millisecond.
 
 Sometimes, two change history events get generated next to each other at same time (in the same request), like `rule_install` and `rule_enable` when user presses a button to "Install and enable" a detection rule.
 
-We use the `event.id` as a tie-breaker when sorting these, so ULIDs allow us to return change events though `getHistory()` in a deterministic order.
+We use the `event.id` as a tie-breaker when sorting these, so UUID v7 allows us to return change events through `getHistory()` in a deterministic order.
 
 ## API
 

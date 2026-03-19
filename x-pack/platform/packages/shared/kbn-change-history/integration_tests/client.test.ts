@@ -187,28 +187,67 @@ describe('ChangeHistoryClient', () => {
     });
 
     it('should log multiple changes and return them via getHistory with correct count and ordering', async () => {
+      const timestamp = new Date(Date.now() - 1).toISOString();
       const changes: ObjectChange[] = [
-        { objectType: 'rule', objectId: 'id-a', after: { name: 'Rule A' }, sequence: 1 },
-        { objectType: 'rule', objectId: 'id-b', after: { name: 'Rule B' }, sequence: 1 },
-        { objectType: 'rule', objectId: 'id-a', after: { name: 'Rule A updated' }, sequence: 2 },
+        { objectType: 'rule', objectId: 'id-a', after: { name: 'Rule A update 1' } },
+        { objectType: 'rule', objectId: 'id-c', after: { name: 'Rule C update 3' } },
+        { objectType: 'rule', objectId: 'id-b', after: { name: 'Rule B update 3' }, sequence: 3 }, // <-- higher sequence, happened later
+        { objectType: 'rule', objectId: 'id-a', after: { name: 'Rule A update 2' } },
       ];
       await client.logBulk(changes, { ...defaultLogOpts, spaceId: 'default' });
+      const changes2: ObjectChange[] = [
+        { objectType: 'rule', objectId: 'id-a', after: { name: 'Rule A update 3' } },
+        { objectType: 'rule', objectId: 'id-c', after: { name: 'Rule C update 1' }, timestamp }, // <-- older timestamp, happened first
+        { objectType: 'rule', objectId: 'id-b', after: { name: 'Rule B update 1' }, sequence: 1 },
+        { objectType: 'rule', objectId: 'id-b', after: { name: 'Rule B update 2' }, sequence: 2 },
+        { objectType: 'rule', objectId: 'id-c', after: { name: 'Rule C update 2' }, timestamp }, // <-- older timestamp, happened first
+        { objectType: 'rule', objectId: 'id-c', after: { name: 'Rule C update 4' } },
+      ];
+      await client.logBulk(changes2, { ...defaultLogOpts, spaceId: 'default' });
 
+      // Check Rule A
       const resultA = await client.getHistory(KIBANA_SPACE, 'rule', 'id-a');
-      expect(resultA.total).toBe(2);
-      expect(resultA.items.length).toBe(2);
-      expect((resultA.items[0] as ChangeHistoryDocument).object.snapshot).toEqual({
-        name: 'Rule A updated',
-      });
-      expect((resultA.items[1] as ChangeHistoryDocument).object.snapshot).toEqual({
-        name: 'Rule A',
-      });
+      expect(resultA.total).toBe(3);
+      const snapshotsA = resultA.items.map((i) => i.object.snapshot);
+      expect(snapshotsA).toEqual([
+        { name: 'Rule A update 3' },
+        { name: 'Rule A update 2' },
+        { name: 'Rule A update 1' },
+      ]);
 
+      // Check Rule B
       const resultB = await client.getHistory(KIBANA_SPACE, 'rule', 'id-b');
-      expect(resultB.total).toBe(1);
-      expect((resultB.items[0] as ChangeHistoryDocument).object.snapshot).toEqual({
-        name: 'Rule B',
-      });
+      expect(resultB.total).toBe(3);
+      const snapshotsB = resultB.items.map((i) => i.object.snapshot);
+      expect(snapshotsB).toEqual([
+        { name: 'Rule B update 3' },
+        { name: 'Rule B update 2' },
+        { name: 'Rule B update 1' },
+      ]);
+
+      // Check Rule C
+      const resultC = await client.getHistory(KIBANA_SPACE, 'rule', 'id-c');
+      expect(resultC.total).toBe(4);
+      const snapshotsC = resultC.items.map((i) => i.object.snapshot);
+      expect(snapshotsC).toEqual([
+        { name: 'Rule C update 4' },
+        { name: 'Rule C update 3' },
+        { name: 'Rule C update 2' },
+        { name: 'Rule C update 1' },
+      ]);
+
+      // Check decreasing Event Ids
+      // (reverse order in the output)
+      const eventIds = resultA.items.map((i) => i.event.id);
+      expect(eventIds).toEqual(eventIds.slice().sort().reverse());
+
+      // Check decreasing sequence
+      const sequence = resultB.items.map((i) => i.object.sequence);
+      expect(sequence).toEqual(sequence.slice().sort().reverse());
+
+      // Check decreasing timestamps
+      const timestamps = resultC.items.map((i) => i['@timestamp']);
+      expect(timestamps).toEqual(timestamps.slice().sort().reverse());
     });
 
     it('should not throw on partial success when some bulk items fail', async () => {
@@ -223,7 +262,13 @@ describe('ChangeHistoryClient', () => {
           id: 'duplicate-event-id',
           objectType: 'rule',
           objectId: 'rule-id',
-          after: { name: 'Duplicate Event Rule' },
+          after: { name: 'Duplicate Event ID' },
+        },
+        {
+          id: 'duplicate-event-id',
+          objectType: 'rule',
+          objectId: 'rule-id',
+          after: { name: 'Another Duplicate Event ID' },
         },
         {
           id: 'valid-event-id',

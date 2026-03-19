@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { monotonicFactory } from 'ulid';
+import { v7 as uuidv7 } from 'uuid';
 import type {
   QueryDslQueryContainer,
   SearchTotalHits,
@@ -33,8 +33,6 @@ import type {
 import { sha256, defaultDiffCalculation, maskSensitiveFields } from './utils';
 
 export { DATA_STREAM_NAME } from './constants';
-
-const ulid = monotonicFactory();
 
 type ChangeHistoryDataStreamClient = DataStreamClient<
   typeof changeHistoryMappings.v1,
@@ -72,14 +70,16 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     logger: Logger;
     kibanaVersion: string;
   }) {
-    if (module.includes(SEPARATOR_CHAR))
+    if (module.includes(SEPARATOR_CHAR)) {
       throw new Error(
         `Invalid module "${module}". Should not include separator [${SEPARATOR_CHAR}]`
       );
-    if (dataset.includes(SEPARATOR_CHAR))
+    }
+    if (dataset.includes(SEPARATOR_CHAR)) {
       throw new Error(
         `Invalid dataset "${dataset}". Should not include separator [${SEPARATOR_CHAR}]`
       );
+    }
     this.module = module;
     this.dataset = dataset;
     this.kibanaVersion = kibanaVersion;
@@ -188,8 +188,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       const { event, metadata, tags } = opts.data ?? {};
       const created = new Date().toISOString();
       // `eventId` should be scoped by module and dataset so two features do not clash on the same `event.id`
-      // If not provided, fallback to `ulid()` to make 'same millisecond' event order deterministic (helps with integration tests)
-      const eventId = id ? `${module}${SEPARATOR_CHAR}${dataset}${SEPARATOR_CHAR}${id}` : ulid();
+      // If not provided, fallback to uuid v7 to make 'same millisecond' event order deterministic (helps with integration tests)
+      const eventId = id ? `${module}${SEPARATOR_CHAR}${dataset}${SEPARATOR_CHAR}${id}` : uuidv7();
       const document: ChangeHistoryDocument = {
         '@timestamp': new Date(timestamp || created).toISOString(),
         ecs: { version: ECS_VERSION },
