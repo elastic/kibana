@@ -55,18 +55,21 @@ The evaluation suite will automatically enable the Agent Builder feature if it's
 
 ### Start Scout Server
 
-Start Scout server:
+Start Scout server for v1 evals:
 
 ```bash
-node scripts/scout.js start-server --stateful --config-dir security_entity_analytics
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_entity_analytics
 ```
 
-<!-- 
-The `security_entity_analytics` configuration extends the default `--stateful` config and enables the `securitySolution.naturalLanguageThreatHunting.enabled` feature flag at the server level, which is useful for running evaluation tests that require this feature to be enabled. -->
+For v2 evals (Entity Store V2):
+
+```bash
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_entity_analytics_v2
+```
 
 ### Run Evaluations
 
-Run the evaluations:
+Run v1 evaluations:
 
 ```bash
 # Run all SIEM Entity Analytics skills evaluations
@@ -84,8 +87,18 @@ node scripts/playwright test --config x-pack/solutions/security/packages/kbn-eva
 # Run with LLM-as-a-judge for consistent evaluation results
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts
 
-# Export result to Phoenix 
+# Export result to Phoenix
 PHOENIX_BASE_URL=http://localhost:6006 KBN_EVALS_EXECUTOR=phoenix node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts  --project="my-connector"
+```
+
+Run v2 evaluations:
+
+```bash
+# Run all Entity Store V2 evaluations
+node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.v2.config.ts
+
+# Run with specific connector
+node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.v2.config.ts --project="my-connector"
 ```
 
 ## Coverage Matrix

@@ -64,6 +64,20 @@ function findToolCallSteps(toolId: string, steps: Step[]): Step[] {
 }
 
 /**
+ * Extracts all unique tool IDs that were called during the conversation.
+ */
+function getCalledToolIds(steps: Step[]): string[] {
+  return [
+    ...new Set(
+      steps
+        .filter((step) => (step as { type?: string }).type === 'tool_call')
+        .map((step) => (step as { tool_id?: string }).tool_id)
+        .filter((id): id is string => id !== undefined)
+    ),
+  ];
+}
+
+/**
  * Evaluates a tool call assertion with its specific criteria.
  * @param toolCallAssertion - The tool call assertion to evaluate
  * @param steps - The conversation steps to search for tool calls
@@ -92,10 +106,15 @@ const evaluateToolCallAssertion = async (
   const toolWasCalled = primaryToolWasCalled || alternativeToolCalled;
 
   if (!toolWasCalled) {
+    const calledTools = getCalledToolIds(steps);
+    const calledToolsSummary =
+      calledTools.length > 0
+        ? ` Tools actually called: [${calledTools.join(', ')}].`
+        : ' No tools were called during the conversation.';
     return {
       score: 0,
       label: 'FAIL',
-      explanation: `Tool "${toolCallAssertion.id}" was not called during the conversation.`,
+      explanation: `Tool "${toolCallAssertion.id}" was not called.${calledToolsSummary}`,
     };
   }
 
