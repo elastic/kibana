@@ -30,17 +30,17 @@ export const TRIGGER_TABS_DESCRIPTIONS: Record<WorkflowTriggerTab, string> = {
   manual: i18n.translate(
     'plugins.workflowsManagement.workflowsExecution.manualTriggerDescription',
     {
-      defaultMessage: 'Provide custom JSON data manually.',
+      defaultMessage: 'Provide custom JSON data manually',
     }
   ),
   index: i18n.translate('plugins.workflowsManagement.workflowsExecution.indexTriggerDescription', {
-    defaultMessage: 'Choose a document from Elasticsearch.',
+    defaultMessage: 'Choose a document from Elasticsearch',
   }),
   alert: i18n.translate('plugins.workflowsManagement.workflowsExecution.alertTriggerDescription', {
-    defaultMessage: 'Choose an existing alert directly.',
+    defaultMessage: 'Choose an existing alert directly',
   }),
   historical: i18n.translate(
     'plugins.workflowsManagement.workflowsExecution.historicalTriggerDescription',
-    { defaultMessage: 'Reuse input data from previous executions.' }
+    { defaultMessage: 'Reuse input data from previous executions' }
   ),
 };
