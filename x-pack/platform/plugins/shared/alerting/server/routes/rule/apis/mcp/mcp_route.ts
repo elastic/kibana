@@ -74,48 +74,61 @@ export const mcpRoute = ({ router, ruleTypeRegistry, logger: loggerOpt }: RouteO
         transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
         server = new McpServer({ name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION });
 
-        server.tool(
+        server.registerTool(
           'list_rule_types',
-          'List all available alerting rule types with their IDs, names, producers, and license requirements. Call this first to discover what rules can be created.',
-          {},
+          {
+            description:
+              'List all available alerting rule types with their IDs, names, producers, and license requirements. Call this first to discover what rules can be created.',
+            inputSchema: {},
+          },
           () => listRuleTypesTool(ruleTypes)
         );
 
-        server.tool(
+        server.registerTool(
           'get_rule_type_params_schema',
-          'Get the params schema for a specific rule type. Use this after selecting a rule type to understand what parameters are required. The schema describes each field the user must provide.',
-          { rule_type_id: z.string().describe('The rule type ID from list_rule_types') },
+          {
+            description:
+              'Get the params schema for a specific rule type. Use this after selecting a rule type to understand what parameters are required. The schema describes each field the user must provide.',
+            inputSchema: {
+              rule_type_id: z.string().describe('The rule type ID from list_rule_types'),
+            },
+          },
           ({ rule_type_id }) => getRuleTypeParamsSchemaTool(rule_type_id, ruleTypeRegistry)
         );
 
-        server.tool(
+        server.registerTool(
           'create_rule',
-          'Create an alerting rule. Call list_rule_types and get_rule_type_params_schema first to collect all required information from the user before calling this.',
           {
-            name: z.string().describe('A descriptive name for the rule'),
-            rule_type_id: z.string().describe('The rule type ID from list_rule_types'),
-            consumer: z
-              .string()
-              .describe(
-                'The consumer/owner of the rule (e.g. "alerts", "stackAlerts", "infrastructure", "logs", "apm")'
-              ),
-            schedule_interval: z
-              .string()
-              .describe('How often to run the rule, e.g. "1m", "5m", "1h"'),
-            params: z
-              .string()
-              .describe(
-                'JSON string of rule-type-specific parameters. Use get_rule_type_params_schema to learn what fields are needed, then collect them from the user one by one.'
-              ),
-            tags: z.string().optional().describe('Optional comma-separated list of tags'),
+            description:
+              'Create an alerting rule. Call list_rule_types and get_rule_type_params_schema first to collect all required information from the user before calling this.',
+            inputSchema: {
+              name: z.string().describe('A descriptive name for the rule'),
+              rule_type_id: z.string().describe('The rule type ID from list_rule_types'),
+              consumer: z
+                .string()
+                .describe(
+                  'The consumer/owner of the rule (e.g. "alerts", "stackAlerts", "infrastructure", "logs", "apm")'
+                ),
+              schedule_interval: z
+                .string()
+                .describe('How often to run the rule, e.g. "1m", "5m", "1h"'),
+              params: z
+                .string()
+                .describe(
+                  'JSON string of rule-type-specific parameters. Use get_rule_type_params_schema to learn what fields are needed, then collect them from the user one by one.'
+                ),
+              tags: z.string().optional().describe('Optional comma-separated list of tags'),
+            },
           },
           (args) => createRuleTool(args, rulesClient)
         );
 
-        server.tool(
+        server.registerTool(
           'get_rule',
-          'Get an alerting rule by ID to verify it was created correctly.',
-          { id: z.string().describe('The rule ID returned by create_rule') },
+          {
+            description: 'Get an alerting rule by ID to verify it was created correctly.',
+            inputSchema: { id: z.string().describe('The rule ID returned by create_rule') },
+          },
           ({ id }) => getRuleTool(id, rulesClient)
         );
 
