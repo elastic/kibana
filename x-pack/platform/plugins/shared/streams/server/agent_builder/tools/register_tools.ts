@@ -6,8 +6,9 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { StreamsPluginSetupDependencies, StreamsServer } from '../types';
-import type { GetScopedClients } from '../routes/types';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
+import type { StreamsServer } from '../../types';
+import type { GetScopedClients } from '../../routes/types';
 import {
   createSearchKnowledgeIndicatorsTool,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
@@ -16,25 +17,29 @@ import {
 export { STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID };
 
 export function registerAgentBuilderTools({
-  plugins,
+  agentBuilder,
   getScopedClients,
   server,
   logger,
 }: {
-  plugins: StreamsPluginSetupDependencies;
+  agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
 }): void {
-  if (!plugins.agentBuilder) {
+  if (!agentBuilder) {
     return;
   }
 
-  plugins.agentBuilder.tools.register(
+  const streamsTools = [
     createSearchKnowledgeIndicatorsTool({
       getScopedClients,
       server,
       logger: logger.get('search_knowledge_indicators_tool'),
-    })
-  );
+    }),
+  ];
+
+  for (const tool of streamsTools) {
+    agentBuilder.tools.register(tool);
+  }
 }

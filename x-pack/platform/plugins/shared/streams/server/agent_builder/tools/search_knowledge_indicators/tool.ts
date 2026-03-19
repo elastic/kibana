@@ -15,9 +15,9 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import dedent from 'dedent';
-import type { StreamsServer } from '../../types';
-import type { GetScopedClients } from '../../routes/types';
-import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
+import type { StreamsServer } from '../../../types';
+import type { GetScopedClients } from '../../../routes/types';
+import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { searchKnowledgeIndicatorsToolHandler } from './handler';
 
 export const STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID =

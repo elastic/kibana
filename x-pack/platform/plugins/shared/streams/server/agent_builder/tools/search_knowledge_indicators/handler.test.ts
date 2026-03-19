@@ -7,9 +7,9 @@
 
 import type { Feature, StreamQuery, Streams } from '@kbn/streams-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { FeatureClient } from '../../lib/streams/feature/feature_client';
-import type { QueryClient } from '../../lib/streams/assets/query/query_client';
-import type { StreamsClient } from '../../lib/streams/client';
+import type { FeatureClient } from '../../../lib/streams/feature/feature_client';
+import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
+import type { StreamsClient } from '../../../lib/streams/client';
 import { searchKnowledgeIndicatorsToolHandler } from './handler';
 
 function makeFeature(overrides: Partial<Feature> = {}): Feature {

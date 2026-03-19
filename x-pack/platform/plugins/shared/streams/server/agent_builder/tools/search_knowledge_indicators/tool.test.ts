@@ -8,13 +8,13 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { StreamsServer } from '../../types';
-import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
+import type { StreamsServer } from '../../../types';
+import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import {
   createSearchKnowledgeIndicatorsTool,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
 } from './tool';
-import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
+import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 
 jest.mock('../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),

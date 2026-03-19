@@ -11,9 +11,9 @@ import type {
   SearchKnowledgeIndicatorsOutput,
 } from '@kbn/streams-ai';
 import type { Logger } from '@kbn/core/server';
-import type { FeatureClient } from '../../lib/streams/feature/feature_client';
-import type { QueryClient } from '../../lib/streams/assets/query/query_client';
-import type { StreamsClient } from '../../lib/streams/client';
+import type { FeatureClient } from '../../../lib/streams/feature/feature_client';
+import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
+import type { StreamsClient } from '../../../lib/streams/client';
 
 export async function searchKnowledgeIndicatorsToolHandler({
   streamsClient,
