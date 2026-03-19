@@ -337,4 +337,133 @@ describe('getContextSchemaForPath', () => {
       ['first-step', 'second-step', 'if-split'].sort()
     );
   });
+
+  it('should return context for switch step expression field', () => {
+    const definitionWithSwitch = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      inputs: {
+        provider: { type: 'string' as const },
+      },
+      consts: {},
+      steps: [
+        {
+          name: 'check',
+          type: 'console',
+          with: { message: 'Check status' },
+        },
+        {
+          name: 'switch-step',
+          type: 'switch' as const,
+          expression: '{{ inputs.provider }}',
+          cases: [
+            {
+              match: 'aws',
+              steps: [{ name: 'aws-step', type: 'console', with: { message: 'AWS' } }],
+            },
+          ],
+        },
+      ],
+    } as unknown as WorkflowYaml;
+    const workflowGraphWithSwitch = WorkflowGraph.fromWorkflowDefinition(definitionWithSwitch);
+    const context = getContextSchemaForPath(definitionWithSwitch, workflowGraphWithSwitch, [
+      'steps',
+      1,
+      'expression',
+    ]);
+
+    expect((context.shape as any).inputs).toBeDefined();
+    expect((context.shape as any).steps).toBeDefined();
+    expect(Object.keys((context.shape as any).steps.shape).sort()).toEqual(['check'].sort());
+  });
+
+  it('should return context for step inside switch case', () => {
+    const definitionWithSwitch = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      consts: {},
+      steps: [
+        {
+          name: 'before-switch',
+          type: 'console',
+          with: { message: 'Before' },
+        },
+        {
+          name: 'switch-step',
+          type: 'switch' as const,
+          expression: '{{ steps.before_switch.output }}',
+          cases: [
+            {
+              match: 'ok',
+              steps: [
+                {
+                  name: 'case-step',
+                  type: 'console',
+                  with: { message: 'In case' },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as unknown as WorkflowYaml;
+    const workflowGraphWithSwitch = WorkflowGraph.fromWorkflowDefinition(definitionWithSwitch);
+    const context = getContextSchemaForPath(definitionWithSwitch, workflowGraphWithSwitch, [
+      'steps',
+      1,
+      'cases',
+      0,
+      'steps',
+      0,
+      'with',
+      'message',
+    ]);
+
+    expect((context.shape as any).steps).toBeDefined();
+    expect(Object.keys((context.shape as any).steps.shape).sort()).toEqual(
+      ['before-switch', 'switch-step'].sort()
+    );
+  });
+
+  it('should return context for switch step as first step', () => {
+    const definitionWithSwitchFirst = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      inputs: {
+        provider: { type: 'string' as const },
+      },
+      consts: {},
+      steps: [
+        {
+          name: 'switch-step',
+          type: 'switch' as const,
+          expression: '{{ inputs.provider }}',
+          cases: [
+            {
+              match: 'a',
+              steps: [{ name: 'case-a', type: 'console', with: { message: 'A' } }],
+            },
+          ],
+        },
+      ],
+    } as unknown as WorkflowYaml;
+    const workflowGraphWithSwitch = WorkflowGraph.fromWorkflowDefinition(definitionWithSwitchFirst);
+    const context = getContextSchemaForPath(definitionWithSwitchFirst, workflowGraphWithSwitch, [
+      'steps',
+      0,
+      'expression',
+    ]);
+
+    expect((context.shape as any).inputs).toBeDefined();
+    expect((context.shape as any).steps).toBeDefined();
+    expect((context.shape as any).consts).toBeDefined();
+    expect((context.shape as any).variables).toBeDefined();
+    expect(Object.keys((context.shape as any).steps.shape)).toEqual([]);
+  });
 });

@@ -57,6 +57,10 @@ export const predefinedStepTypes = [
     displayName: 'While',
   },
   {
+    actionTypeId: 'switch',
+    displayName: 'Switch',
+  },
+  {
     actionTypeId: 'parallel',
     displayName: 'Parallel',
   },

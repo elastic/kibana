@@ -492,6 +492,54 @@ export const getWhileStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+export const SwitchCaseSchema = z.object({
+  match: z.union([z.string(), z.number(), z.boolean()]),
+  steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when this case matches'),
+});
+export type SwitchCase = z.infer<typeof SwitchCaseSchema>;
+
+export const SwitchStepConfigSchema = z.object({
+  expression: z
+    .string()
+    .describe(
+      'Liquid expression evaluated and compared to each case match, e.g. "{{ steps.check.output.status }}"'
+    ),
+  cases: z
+    .array(SwitchCaseSchema)
+    .min(1)
+    .describe('Ordered list of match-to-steps mappings. First matching case is executed'),
+  default: z.array(BaseStepSchema).optional().describe('Steps to execute when no case matches'),
+});
+
+export const SwitchStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('switch')
+    .describe(
+      'Multi-way branching. Evaluates expression and runs the steps of the first case whose match equals the expression'
+    ),
+  ...SwitchStepConfigSchema.shape,
+  ...StepWithIfConditionSchema.shape,
+  ...TimeoutPropSchema.shape,
+});
+export type SwitchStep = z.infer<typeof SwitchStepSchema>;
+
+export const getSwitchStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = SwitchStepSchema.extend({
+    cases: z.array(
+      SwitchCaseSchema.extend({
+        steps: z.array(stepSchema).min(1),
+      })
+    ),
+    default: z.array(stepSchema).optional(),
+  });
+
+  if (loose) {
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
+
 export const IfStepConfigSchema = z.object({
   condition: z
     .string()
@@ -723,6 +771,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     WhileStepSchema,
     IfStepSchema,
+    SwitchStepSchema,
     WaitStepSchema,
     WaitForInputStepSchema,
     DataSetStepSchema,
@@ -750,6 +799,7 @@ export type LoopStepType = (typeof LoopStepTypes)[number];
 export const BuiltInStepTypes = [
   ...LoopStepTypes,
   IfStepSchema.shape.type.value,
+  SwitchStepSchema.shape.type.value,
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
