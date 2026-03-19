@@ -55,18 +55,8 @@ export const GoogleDriveConnector: ConnectorSpec = {
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
-
   auth: {
-    types: [
-      'bearer',
-      {
-        type: 'ears',
-        defaults: {
-          provider: 'google',
-          scope: 'profile,email,https://www.googleapis.com/auth/drive.readonly',
-        },
-      },
-    ],
+    types: ['bearer'],
     headers: {
       Accept: 'application/json',
     },
