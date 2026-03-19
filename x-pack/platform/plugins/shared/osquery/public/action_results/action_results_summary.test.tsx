@@ -31,10 +31,9 @@ jest.mock('./unified_action_results_summary', () => ({
   ),
 }));
 
-const useIsExperimentalFeatureEnabledMock =
-  useIsExperimentalFeatureEnabled as jest.MockedFunction<
-    typeof useIsExperimentalFeatureEnabled
-  >;
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.MockedFunction<
+  typeof useIsExperimentalFeatureEnabled
+>;
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useActionResultsMock = useActionResultsHook.useActionResults as jest.MockedFunction<
@@ -1084,9 +1083,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
 
       const mockAgents = setupMockData();
 
-      renderWithContext(
-        <ActionResultsSummary actionId="test-action" agentIds={mockAgents} />
-      );
+      renderWithContext(<ActionResultsSummary actionId="test-action" agentIds={mockAgents} />);
 
       expect(screen.getByTestId('unifiedActionResultsSummary')).toBeInTheDocument();
     });
