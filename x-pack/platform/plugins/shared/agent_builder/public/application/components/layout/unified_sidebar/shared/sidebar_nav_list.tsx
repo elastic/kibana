@@ -66,7 +66,9 @@ export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive 
     color: ${euiTheme.colors.textParagraph};
 
     &:hover {
-      text-decoration: underline;
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+      color: ${euiTheme.colors.textPrimary};
+      text-decoration: none;
     }
   `;
 

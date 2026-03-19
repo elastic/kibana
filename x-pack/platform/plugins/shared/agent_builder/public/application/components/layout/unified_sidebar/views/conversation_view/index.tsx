@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { EuiHorizontalRule, EuiFlexItem, useEuiTheme, EuiFlexGroup } from '@elastic/eui';
@@ -34,6 +34,8 @@ const containerStyles = css`
   width: 100%;
 `;
 
+const HEADER_HEIGHT = 66;
+
 export const ConversationSidebarView: React.FC = () => {
   const { pathname } = useLocation();
   const agentId = getAgentIdFromPath(pathname) ?? agentBuilderDefaultAgentId;
@@ -44,10 +46,10 @@ export const ConversationSidebarView: React.FC = () => {
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const lastAgentId = useLastAgentId();
 
-  // TODO: add header height
+  // 66px is the height of the header
   const scrollableStyles = css`
     position: absolute;
-    top: ${200}px;
+    top: ${HEADER_HEIGHT}px;
     bottom: ${FOOTER_HEIGHT}px;
     padding: ${euiTheme.size.base};
     left: 0;
@@ -106,9 +108,9 @@ export const ConversationSidebarView: React.FC = () => {
     <div css={containerStyles}>
       <CustomizeLink />
       {/* Scrollable conversation list */}
-      {/* <div css={scrollableStyles}>
+      <div css={scrollableStyles}>
         <ConversationList agentId={agentId} currentConversationId={conversationId} />
-      </div> */}
+      </div>
 
       <ConversationFooter />
     </div>

@@ -43,7 +43,9 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     color: ${euiTheme.colors.textParagraph};
     font-size: ${euiTheme.font.scale.s}${euiTheme.font.defaultUnits};
     &:hover {
-      text-decoration: underline;
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+      color: ${euiTheme.colors.textPrimary};
+      text-decoration: none;
     }
   `;
 
