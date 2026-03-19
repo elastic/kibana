@@ -15,6 +15,8 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import type useLatest from 'react-use/lib/useLatest';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UpdateESQLQueryFn } from '../../context_awareness';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
@@ -25,7 +27,8 @@ import {
   CascadedDocumentsProvider,
 } from '../../application/main/components/layout/cascaded_documents';
 
-export interface DiscoverGridProps extends UnifiedDataTableProps {
+export interface DiscoverGridProps extends Omit<UnifiedDataTableProps, 'expandedDoc'> {
+  latestExpandedDoc?: ReturnType<typeof useLatest<DataTableRecord | undefined>>;
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
   onUpdateESQLQuery?: UpdateESQLQueryFn;
@@ -45,7 +48,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     onFullScreenChange,
     ...props
   }) => {
-    const { dataView, setExpandedDoc, renderDocumentView } = props;
+    const { dataView, setExpandedDoc, renderDocumentViewFlyout: renderDocumentView } = props;
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
       return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });

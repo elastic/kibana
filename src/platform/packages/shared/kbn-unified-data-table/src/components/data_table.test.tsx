@@ -810,7 +810,7 @@ describe('UnifiedDataTable', () => {
             flattened: { test: jest.fn() },
           },
           setExpandedDoc: jest.fn(),
-          renderDocumentView: jest.fn(),
+          renderDocumentViewFlyout: jest.fn(),
           externalControlColumns: [testLeadingControlColumn],
           rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
         });
@@ -844,7 +844,7 @@ describe('UnifiedDataTable', () => {
             flattened: { test: jest.fn() },
           },
           setExpandedDoc: jest.fn(),
-          renderDocumentView: jest.fn(),
+          renderDocumentViewFlyout: jest.fn(),
           externalControlColumns: [testLeadingControlColumn],
           trailingControlColumns: testTrailingControlColumns,
         });
@@ -873,7 +873,7 @@ describe('UnifiedDataTable', () => {
             flattened: { test: jest.fn() },
           },
           setExpandedDoc: jest.fn(),
-          renderDocumentView: jest.fn(),
+          renderDocumentViewFlyout: jest.fn(),
           externalControlColumns: [testLeadingControlColumn],
         });
 
@@ -907,7 +907,7 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         setExpandedDoc: setExpandedDocMock,
         columnsMeta: columnsMetaOverride,
-        renderDocumentView: renderDocumentViewMock,
+        renderDocumentViewFlyout: renderDocumentViewMock,
         externalControlColumns: [testLeadingControlColumn],
       });
 
@@ -1014,7 +1014,7 @@ describe('UnifiedDataTable', () => {
             flattened: { test: jest.fn() },
           },
           setExpandedDoc: jest.fn(),
-          renderDocumentView: jest.fn(),
+          renderDocumentViewFlyout: jest.fn(),
           componentsTourSteps: { expandButton: 'test-expand' },
         });
 
