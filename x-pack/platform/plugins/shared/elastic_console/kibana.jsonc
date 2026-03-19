@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/elastic-console-plugin",
-  "owner": "@elastic/obs-ai-assistant",
+  "owner": "@elastic/obs-onboarding-team",
   "group": "platform",
   "visibility": "shared",
   "plugin": {

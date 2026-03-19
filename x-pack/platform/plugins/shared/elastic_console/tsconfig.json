@@ -27,6 +27,7 @@
     "@kbn/agent-builder-common",
     "@kbn/dashboard-agent-common",
     "@kbn/lens-embeddable-utils",
-    "@kbn/core-feature-flags-server"
+    "@kbn/core-feature-flags-server",
+    "@kbn/logging"
   ]
 }
