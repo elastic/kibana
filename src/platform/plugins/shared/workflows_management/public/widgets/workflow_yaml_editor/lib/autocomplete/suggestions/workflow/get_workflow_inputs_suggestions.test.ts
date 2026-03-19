@@ -9,6 +9,7 @@
 
 import YAML from 'yaml';
 import { getWorkflowInputsSuggestions } from './get_workflow_inputs_suggestions';
+import { INPUT_STRING_PLACEHOLDER } from '../../../../../../../common/consts/placeholders';
 import type { WorkflowsResponse } from '../../../../../../entities/workflows/model/types';
 import type { StepPropInfo } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
@@ -177,7 +178,7 @@ describe('getWorkflowInputsSuggestions', () => {
   it('includes placeholder values in insertText', async () => {
     const result = await getWorkflowInputsSuggestions(makeContext());
     const messageSuggestion = result!.find((s) => s.label === 'message');
-    expect(messageSuggestion?.insertText).toBe('message: "string"');
+    expect(messageSuggestion?.insertText).toBe(`message: "${INPUT_STRING_PLACEHOLDER}"`);
 
     const retriesSuggestion = result!.find((s) => s.label === 'retries');
     expect(retriesSuggestion?.insertText).toBe('retries: 0');
