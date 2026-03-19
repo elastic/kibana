@@ -19,7 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('Browser apps', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/258554
+  describe.skip('Browser apps', () => {
     let logs: Ecs[];
     let discoverSessionFirstTabId = '';
     const retry = getService('retry');
