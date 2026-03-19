@@ -236,6 +236,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
         }
       : {}),
     ...(esRule.nextRun ? { nextRun: new Date(esRule.nextRun) } : {}),
+    ...(esRule.lastEnabledAt ? { lastEnabledAt: new Date(esRule.lastEnabledAt) } : {}),
     revision: esRule.revision,
     running: esRule.running,
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),

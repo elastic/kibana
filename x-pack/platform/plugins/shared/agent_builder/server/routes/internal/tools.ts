@@ -9,7 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ListToolsResponse } from '@kbn/mcp-client';
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import {
+  type ActionTypeExecutorResult,
+  AgentBuilderConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import { isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -453,11 +456,16 @@ export function registerInternalToolsRoutes({
     wrapHandler(async (ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();
       const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
-      const allConnectors = await actionsClient.getAll();
+      const [allConnectors, compatibleTypes] = await Promise.all([
+        actionsClient.getAll(),
+        actionsClient.listTypes({ featureId: AgentBuilderConnectorFeatureId }),
+      ]);
 
+      const compatibleTypeIds = new Set(compatibleTypes.map((t) => t.id));
       const { type } = request.query;
 
       const connectors: ConnectorItem[] = allConnectors
+        .filter((connector) => compatibleTypeIds.has(connector.actionTypeId))
         .filter((connector) => (type ? connector.actionTypeId === type : true))
         .map(toConnectorItem);
 

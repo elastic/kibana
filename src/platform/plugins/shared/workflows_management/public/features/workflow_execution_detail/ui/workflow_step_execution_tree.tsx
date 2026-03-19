@@ -38,13 +38,14 @@ import type {
 } from '@kbn/workflows';
 import { isDangerousStatus, isInProgressStatus, isTerminalStatus } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
-import { buildStepExecutionsTree } from './build_step_executions_tree';
+import { buildStepExecutionsTree, injectChildWorkflowSteps } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 const TRIGGER_BOLT_ICON_SVG =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="%23535966" d="M7.04 13.274a.5.5 0 1 0 .892.453l3.014-5.931a.5.5 0 0 0-.445-.727H5.316L8.03 1.727a.5.5 0 1 0-.892-.453L4.055 7.343a.5.5 0 0 0 .446.726h5.185L7.04 13.274Z"/></svg>';
@@ -64,8 +65,9 @@ function convertTreeToEuiTreeViewItems(
     const stepId = stepExecution?.stepId ?? item.stepId;
     const stepType = stepExecution?.stepType ?? item.stepType;
 
-    // Check if this is a skeleton step (not yet received from server)
-    const isSkeletonStep = stepExecution?.id?.startsWith('skeleton-') ?? false;
+    // Check if this is a skeleton step (not yet received from server) or a loading placeholder
+    const isSkeletonStep =
+      (stepExecution?.id?.startsWith('skeleton-') ?? false) || stepType === '__loading';
 
     const selectStepExecution: React.MouseEventHandler = (e) => {
       // Prevent the click event from bubbling up to the tree view item so that the tree view item is not expanded/collapsed when selected
@@ -152,6 +154,8 @@ export interface WorkflowStepExecutionTreeProps {
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
   selectedId: string | null;
+  childExecutionsMap?: ChildWorkflowExecutionsMap;
+  isLoadingChildExecutions?: boolean;
 }
 
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 's' };
@@ -162,6 +166,8 @@ export const WorkflowStepExecutionTree = ({
   definition,
   onStepExecutionClick,
   selectedId,
+  childExecutionsMap,
+  isLoadingChildExecutions,
 }: WorkflowStepExecutionTreeProps) => {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
@@ -245,11 +251,21 @@ export const WorkflowStepExecutionTree = ({
         );
     }
 
-    const stepExecutionsTree = buildStepExecutionsTree(
+    let stepExecutionsTree = buildStepExecutionsTree(
       Array.from(stepExecutionMap.values()),
       execution.context,
       execution.status
     );
+
+    const { tree: treeWithChildren, childStepExecutions } = injectChildWorkflowSteps(
+      stepExecutionsTree,
+      childExecutionsMap ?? new Map(),
+      isLoadingChildExecutions ?? false
+    );
+    stepExecutionsTree = treeWithChildren;
+    for (const childStep of childStepExecutions) {
+      stepExecutionMap.set(childStep.id, childStep);
+    }
 
     const overviewPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__overview');
     if (overviewPseudoStep) {
