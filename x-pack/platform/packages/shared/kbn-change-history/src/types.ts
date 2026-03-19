@@ -132,7 +132,7 @@ export interface LogChangeHistoryOptions {
   ignoreFields?: ChangeHistoryIgnoreFields;
   /** List of sensitive fields to mask in the saved change history (secret keys, PII etc) */
   maskFields?: ChangeHistoryDataMaskingFields;
-  /** Optional indicator to force an ES refresh after changes (affects perfomance) */
+  /** Optional indicator to force an ES refresh after changes (affects performance) */
   refresh?: Refresh;
 }
 

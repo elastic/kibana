@@ -29,10 +29,11 @@ export const sha256 = (text: string) => crypto.createHash('sha256').update(text)
  *   const b = { user: { email: 'bobby@example.com' }, status: 'inactive' };
  *   const ignoreFields = { status: true };
  *   const result = defaultDiffCalculation({ a, b, ignoreFields });
+ *   console.log(result);
  *   // {
  *   //  stats: { total: 1, additions: 0, deletions: 0, updates: 1 },
  *   //  ignored: ['status'],
- *   //  changes: ['user.email'],
+ *   //  fields: ['user.email'],
  *   //  before: { user: { email: 'bob@example.com' } },
  *   //  after: { user: { email: 'bobby@example.com' } }
  *   // }
@@ -125,10 +126,10 @@ export function defaultDiffCalculation(opts: ChangeHistoryDiffOptions): ChangeHi
  * @returns The masked keys and the snapshot with the masked fields.
  * @example
  *   const snapshot = { user: { email: 'bob@example.com' } };
- *   const maskFields = { user: true };
+ *   const maskFields = { user: { email: true } };
  *   const result = maskSensitiveFields(snapshot, maskFields);
  *   // {
- *   //  maskedKeys: ['user.email'],
+ *   //  fields: ['user.email'],
  *   //  snapshot: { user: { email: '****************1af4e7be90' } }
  *   // }
  */

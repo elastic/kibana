@@ -9,7 +9,8 @@ import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
 
 /**
  * Elasticsearch mappings for change history documents.
- * Uses flattened type for variable structure fields (oldvalues, snapshot, metadata).
+ * Uses unmapped fields for variable structures (`object.snapshot`, `object.diff.before`)
+ * and flattened type for `metadata`.
  * For field reference @see [README.md]
  */
 export const changeHistoryMappings = {

@@ -159,8 +159,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @param opts.data - Optional data to merge into the change history document.
    * @param opts.ignoreFields - Optional fields to ignore in the diff calculation.
    * @param opts.maskFields - Optional "sensitive data" fields to mask instead of store in plain form.
-   * @param opts.diffDocCalculation - Optional function to calculate the diff between the current and next state of the object.
-   * @param opts.refresh - Optional indicator to force an ES refresh after changes (affects perfomance)
+   * @param opts.refresh - Optional indicator to force an ES refresh after changes (affects performance)
    * @returns A promise that resolves when the bulk change is logged.
    * @throws An error if the data stream is not initialized, or if an error occurs while logging the change.
    */
