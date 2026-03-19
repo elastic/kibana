@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import type { NetworkDirectionProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -45,9 +46,9 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-e2e-test-network-direction-basic', query);
 
         expect(ingestResult).toHaveLength(1);
-        expect(ingestResult[0]?.network.direction).toBe('inbound');
+        expect(asDoc(asDoc(ingestResult[0])?.network)?.direction).toBe('inbound');
         expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
+        expect(asDoc(esqlResult.documents[0])?.['network.direction']).toBe('inbound');
       }
     );
 
@@ -82,9 +83,9 @@ apiTest.describe(
         );
 
         expect(ingestResult).toHaveLength(1);
-        expect(ingestResult[0]?.test_network_direction).toBe('inbound');
+        expect(asDoc(ingestResult[0])?.test_network_direction).toBe('inbound');
         expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documents[0]?.test_network_direction).toBe('inbound');
+        expect(asDoc(esqlResult.documents[0])?.test_network_direction).toBe('inbound');
       }
     );
 
@@ -129,9 +130,9 @@ apiTest.describe(
         );
 
         expect(ingestResult).toHaveLength(1);
-        expect(ingestResult[0]?.network.direction).toBe('inbound');
+        expect(asDoc(asDoc(ingestResult[0])?.network)?.direction).toBe('inbound');
         expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
+        expect(asDoc(esqlResult.documents[0])?.['network.direction']).toBe('inbound');
       }
     );
 
@@ -170,11 +171,11 @@ apiTest.describe(
         );
 
         expect(ingestResult).toHaveLength(2);
-        expect(ingestResult[0]?.network.direction).toBe('inbound');
-        expect(ingestResult[1]?.network?.direction).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[0])?.network)?.direction).toBe('inbound');
+        expect(asDoc(asDoc(ingestResult[1])?.network)?.direction).toBeUndefined();
         expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
-        expect(esqlResult.documents[1]?.['network.direction']).toBeNull();
+        expect(asDoc(esqlResult.documents[0])?.['network.direction']).toBe('inbound');
+        expect(asDoc(esqlResult.documents[1])?.['network.direction']).toBeNull();
       }
     );
 
@@ -215,11 +216,11 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-e2e-test-network-direction-where', query);
 
         expect(ingestResult).toHaveLength(2);
-        expect(ingestResult[0]?.network.direction).toBe('inbound');
-        expect(ingestResult[1]?.network?.direction).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[0])?.network)?.direction).toBe('inbound');
+        expect(asDoc(asDoc(ingestResult[1])?.network)?.direction).toBeUndefined();
         expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
-        expect(esqlResult.documents[1]?.['network.direction']).toBeNull();
+        expect(asDoc(esqlResult.documents[0])?.['network.direction']).toBe('inbound');
+        expect(asDoc(esqlResult.documents[1])?.['network.direction']).toBeNull();
       }
     );
   }
