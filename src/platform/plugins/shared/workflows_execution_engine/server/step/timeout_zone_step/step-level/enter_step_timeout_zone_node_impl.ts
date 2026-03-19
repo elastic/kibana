@@ -28,8 +28,13 @@ export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, Monitor
 
   public monitor(monitoredContext: StepExecutionRuntime): void {
     const timeoutMs = parseDuration(this.node.timeout);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const stepExecution = this.stepExecutionRuntime.stepExecution!;
+
+    const stepExecution = this.stepExecutionRuntime.stepExecution;
+
+    if (!stepExecution) {
+      throw new Error(`Step execution for step ${this.node.stepId} not found`);
+    }
+
     const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
     const currentTimeMs = new Date().getTime();
     const currentStepDuration = currentTimeMs - whenStepStartedTime;

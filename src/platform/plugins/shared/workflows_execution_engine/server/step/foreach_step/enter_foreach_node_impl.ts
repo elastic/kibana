@@ -74,9 +74,15 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   }
 
   private advanceIteration(): void {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const foreachState = this.stepExecutionRuntime.getCurrentStepState()!;
-    const index = foreachState.index + 1;
+    const foreachState = this.stepExecutionRuntime.getCurrentStepState();
+
+    if (!foreachState) {
+      throw new Error(`Foreach state for step ${this.node.stepId} not found`);
+    }
+
+    const currentIndex = foreachState.index as number;
+
+    const index = currentIndex + 1;
 
     // Only persist index and total — no need to store the full items array.
     this.stepExecutionRuntime.setCurrentStepState({ index, total: foreachState.total });

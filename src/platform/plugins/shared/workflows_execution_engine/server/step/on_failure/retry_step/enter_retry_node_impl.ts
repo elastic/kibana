@@ -45,7 +45,13 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       return;
     }
 
-    const attempt = this.stepExecutionRuntime.getCurrentStepState()?.attempt ?? 0;
+    const steoState = this.stepExecutionRuntime.getCurrentStepState();
+
+    if (!steoState) {
+      throw new Error(`Retry state for step ${this.node.stepId} not found`);
+    }
+
+    const attempt = (steoState.attempt as number) ?? 0;
 
     if (attempt < this.node.configuration['max-attempts']) {
       // If the retry attempt is within the allowed limit, re-enter the retry step
@@ -89,9 +95,14 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
-    const attempt = retryState.attempt + 1;
+    const retryState = this.stepExecutionRuntime.getCurrentStepState();
+
+    if (!retryState) {
+      throw new Error(`Retry state for step ${this.node.stepId} not found`);
+    }
+
+    const currentAttempt = retryState.attempt as number;
+    const attempt = currentAttempt + 1;
     this.workflowLogger.logDebug(`Retrying "${this.node.stepId}" step. (attempt ${attempt}).`);
     this.stepExecutionRuntime.setCurrentStepState({ ...retryState, attempt });
     this.workflowRuntime.enterScope(`${attempt + 1}-attempt`);

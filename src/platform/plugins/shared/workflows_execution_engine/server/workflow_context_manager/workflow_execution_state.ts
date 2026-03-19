@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -172,12 +169,13 @@ export class WorkflowExecutionState {
   }
 
   private updateStep(step: Partial<EsWorkflowStepExecution>) {
-    const existingStep = this.stepExecutions.get(step.id!);
+    const stepId = step.id as string; // the existence of step id is guaranteed by the caller
+    const existingStep = this.stepExecutions.get(stepId);
     const updatedStep = {
       ...existingStep,
       ...step,
     } as EsWorkflowStepExecution;
-    this.stepExecutions.set(step.id!, updatedStep);
+    this.stepExecutions.set(stepId, updatedStep);
     // Accumulate changes for the next flush — merge with any pending changes
     // ES partial update (doc_as_upsert) preserves fields not included in the update
     this.stepDocumentsChanges.set(step.id as string, {
@@ -189,10 +187,14 @@ export class WorkflowExecutionState {
   private buildStepIdExecutionIdIndex(): void {
     this.stepIdExecutionIdIndex.clear();
     for (const step of this.stepExecutions.values()) {
-      if (!this.stepIdExecutionIdIndex.has(step.stepId)) {
-        this.stepIdExecutionIdIndex.set(step.stepId, []);
+      let idsList = this.stepIdExecutionIdIndex.get(step.stepId);
+
+      if (!idsList) {
+        idsList = [];
+        this.stepIdExecutionIdIndex.set(step.stepId, idsList);
       }
-      this.stepIdExecutionIdIndex.get(step.stepId)!.push(step.id);
+
+      idsList.push(step.id);
     }
 
     for (const [stepId, stepExecutionIds] of this.stepIdExecutionIdIndex.entries()) {

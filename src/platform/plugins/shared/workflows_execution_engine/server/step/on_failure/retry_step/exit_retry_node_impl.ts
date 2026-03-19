@@ -22,13 +22,15 @@ export class ExitRetryNodeImpl implements NodeImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    // Exit whole retry step scope
     this.stepExecutionRuntime.finishStep();
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
-    this.workflowLogger.logDebug(
-      `Exiting retry step ${this.node.stepId} after ${retryState.attempt} attempts.`
-    );
+    const retryState = this.stepExecutionRuntime.getCurrentStepState();
+
+    if (retryState) {
+      this.workflowLogger.logDebug(
+        `Exiting retry step ${this.node.stepId} after ${retryState.attempt} attempts.`
+      );
+    }
+
     this.stepExecutionRuntime.setCurrentStepState(undefined);
     this.workflowRuntime.navigateToNextNode();
   }
