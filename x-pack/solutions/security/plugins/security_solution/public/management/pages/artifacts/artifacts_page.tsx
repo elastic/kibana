@@ -9,9 +9,9 @@ import React, { memo, useMemo } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
+import { AdministrationListPage } from '../../components/administration_list_page';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { AdministrationSubTab } from '../../types';
@@ -34,16 +34,21 @@ import {
   TRUSTED_APPS_TAB,
   TRUSTED_DEVICES_TAB,
   EVENT_FILTERS_TAB,
+  HOST_ISOLATION_EXCEPTIONS_TAB,
+  BLOCKLIST_TAB,
 } from '../../common/translations';
 
-const HOST_ISOLATION_EXCEPTIONS_TAB = i18n.translate(
-  'xpack.securitySolution.artifacts.tabs.hostIsolationExceptions',
-  { defaultMessage: 'Host isolation exceptions' }
-);
-
-const BLOCKLIST_TAB = i18n.translate('xpack.securitySolution.artifacts.tabs.blocklist', {
-  defaultMessage: 'Blocklist',
+const ARTIFACTS_PAGE_TITLE = i18n.translate('xpack.securitySolution.artifacts.pageTitle', {
+  defaultMessage: 'Artifacts',
 });
+
+const ARTIFACTS_PAGE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.artifacts.pageDescription',
+  {
+    defaultMessage:
+      'Manage the rules, exceptions, and trust settings that control how endpoints are protected and respond to activity.',
+  }
+);
 
 const ARTIFACT_SUB_TABS: AdministrationSubTab[] = [
   AdministrationSubTab.endpointExceptions,
@@ -185,7 +190,12 @@ export const ArtifactsPage = memo(() => {
   const pageName = getSecurityPageNameForTab(activeTab);
 
   return (
-    <TrackApplicationView viewId={pageName}>
+    <AdministrationListPage
+      data-test-subj="artifactsPage"
+      title={ARTIFACTS_PAGE_TITLE}
+      subtitle={ARTIFACTS_PAGE_DESCRIPTION}
+      hasBottomBorder={false}
+    >
       <EuiTabs>
         {visibleTabs.map((tab, index) => (
           <EuiTab
@@ -207,7 +217,7 @@ export const ArtifactsPage = memo(() => {
       )}
       {activeTab === AdministrationSubTab.blocklist && <Blocklist />}
       <SpyRoute pageName={pageName} />
-    </TrackApplicationView>
+    </AdministrationListPage>
   );
 });
 

@@ -239,9 +239,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
           await toasts.dismiss();
 
-          // Title is shown after adding an item
-          expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
-
           // Checks if fleet artifact has been updated correctly
           await checkFleetArtifacts(
             testData.fleetArtifact.identifier,
@@ -274,9 +271,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
 
           await toasts.dismiss();
-
-          // Title still shown after editing an item
-          expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
 
           // Checks if fleet artifact has been updated correctly
           await checkFleetArtifacts(

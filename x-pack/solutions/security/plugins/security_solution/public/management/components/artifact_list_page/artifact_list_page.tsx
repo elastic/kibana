@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EuiButton, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { useLocation } from 'react-router-dom';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
@@ -318,47 +318,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     return (
       <AdministrationListPage
         headerBackComponent={backButtonHeaderComponent}
-        hideHeader={!doesDataExist}
+        hideHeader={true}
         title={labels.pageTitle}
         subtitle={description}
-        actions={
-          <EuiFlexGroup alignItems="center">
-            {allowCardCreateAction && (
-              <EuiButton
-                fill
-                iconType="plusInCircle"
-                isDisabled={isFlyoutOpened}
-                onClick={handleOpenCreateFlyoutClick}
-                data-test-subj={getTestId('pageAddButton')}
-              >
-                {labels.pageAddButtonTitle}
-              </EuiButton>
-            )}
-
-            {areEndpointExceptionsMovedUnderManagementFFEnabled && (
-              <HeaderMenu
-                iconType="boxesHorizontal"
-                dataTestSubj={getTestId('exportImportMenu')}
-                actions={[
-                  {
-                    key: 'ImportButton',
-                    icon: 'importAction',
-                    label: labels.pageImportButtonTitle,
-                    onClick: handleImport,
-                    disabled: !allowCardCreateAction,
-                  },
-                  {
-                    key: 'ExportButton',
-                    icon: 'exportAction',
-                    label: labels.pageExportButtonTitle,
-                    onClick: handleExport,
-                  },
-                ]}
-                disableActions={isLoading}
-              />
-            )}
-          </EuiFlexGroup>
-        }
         data-test-subj={getTestId('container')}
       >
         <AutoDownload
@@ -417,13 +379,55 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           />
         ) : (
           <>
-            <SearchExceptions
-              defaultValue={filter}
-              onSearch={handleOnSearch}
-              placeholder={labels.searchPlaceholderInfo}
-              hasPolicyFilter
-              defaultIncludedPolicies={includedPolicies}
-            />
+            <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={true}>
+                <SearchExceptions
+                  defaultValue={filter}
+                  onSearch={handleOnSearch}
+                  placeholder={labels.searchPlaceholderInfo}
+                  hasPolicyFilter
+                  defaultIncludedPolicies={includedPolicies}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  {allowCardCreateAction && (
+                    <EuiButton
+                      fill
+                      iconType="plusInCircle"
+                      isDisabled={isFlyoutOpened}
+                      onClick={handleOpenCreateFlyoutClick}
+                      data-test-subj={getTestId('pageAddButton')}
+                    >
+                      {labels.pageAddButtonTitle}
+                    </EuiButton>
+                  )}
+
+                  {areEndpointExceptionsMovedUnderManagementFFEnabled && (
+                    <HeaderMenu
+                      iconType="boxesHorizontal"
+                      dataTestSubj={getTestId('exportImportMenu')}
+                      actions={[
+                        {
+                          key: 'ImportButton',
+                          icon: 'importAction',
+                          label: labels.pageImportButtonTitle,
+                          onClick: handleImport,
+                          disabled: !allowCardCreateAction,
+                        },
+                        {
+                          key: 'ExportButton',
+                          icon: 'exportAction',
+                          label: labels.pageExportButtonTitle,
+                          onClick: handleExport,
+                        },
+                      ]}
+                      disableActions={isLoading}
+                    />
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
             <EuiSpacer size="m" />
 
