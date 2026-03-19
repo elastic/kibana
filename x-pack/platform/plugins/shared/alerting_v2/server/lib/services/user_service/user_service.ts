@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { inject, injectable } from 'inversify';
 import { CoreStart, Request } from '@kbn/core-di-server';
 
@@ -20,16 +21,28 @@ export class UserService implements UserServiceContract {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(CoreStart('userProfile'))
-    private readonly userProfile: UserProfileServiceStart
+    private readonly userProfile: UserProfileServiceStart,
+    @inject(CoreStart('security'))
+    private readonly security: SecurityServiceStart
   ) {}
 
   public async getCurrentUserProfileUid(): Promise<string | null> {
-    const profile = await this.userProfile.getCurrent({ request: this.request });
-    return profile?.uid ?? null;
+    try {
+      const profile = await this.userProfile.getCurrent({ request: this.request });
+      return profile?.uid ?? null;
+    } catch {
+      return null;
+    }
   }
 
   public async getCurrentUsername(): Promise<string | null> {
-    const profile = await this.userProfile.getCurrent({ request: this.request });
-    return profile?.user.username ?? null;
+    try {
+      const profile = await this.userProfile.getCurrent({ request: this.request });
+      return profile?.user.username ?? null;
+    } catch {
+      // User profile may not be available (e.g. API key auth from agent builder).
+      // Fall back to the security service which works with all authentication types.
+      return this.security.authc.getCurrentUser(this.request)?.username ?? null;
+    }
   }
 }

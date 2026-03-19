@@ -8,6 +8,7 @@
 import type { UserProfileWithSecurity } from '@kbn/core-user-profile-common';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { UserService } from './user_service';
 
@@ -26,15 +27,18 @@ const mockProfile: UserProfileWithSecurity = {
 export function createUserService(): {
   userService: UserService;
   userProfile: jest.Mocked<UserProfileServiceStart>;
+  security: ReturnType<typeof securityServiceMock.createStart>;
 } {
   const request = httpServerMock.createKibanaRequest();
   const userProfile = userProfileServiceMock.createStart();
+  const security = securityServiceMock.createStart();
 
   userProfile.getCurrent.mockResolvedValue(createUserProfile());
 
   return {
-    userService: new UserService(request, userProfile),
+    userService: new UserService(request, userProfile, security),
     userProfile,
+    security,
   };
 }
 

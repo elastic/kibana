@@ -73,6 +73,7 @@ export {
   type ResourceListResult,
   type EsqlResults,
   type VisualizationResult,
+  type RuleConfigResult,
   type OtherResult,
   type FileReferenceResult,
   isErrorResult,
@@ -82,12 +83,15 @@ export {
   isResourceResult,
   isResourceListResult,
   isVisualizationResult,
+  isRuleConfigResult,
   isFileReferenceResult,
 } from './tool_result';
 export { type BrowserApiToolMetadata } from './browser_tool_metadata';
 export {
   visualizationElement,
   dashboardElement,
+  ruleConfigElement,
   type DashboardElementAttributes,
   type VisualizationElementAttributes,
+  type RuleConfigElementAttributes,
 } from './custom_rendering';

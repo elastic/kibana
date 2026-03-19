@@ -20,7 +20,7 @@
       "encryptedSavedObjects",
       "workflowsManagement"
     ],
-    "optionalPlugins": ["management"],
+    "optionalPlugins": ["management", "agentBuilder"],
     "requiredBundles": ["alerting"],
     "extraPublicDirs": []
   }

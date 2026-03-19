@@ -29,6 +29,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import {
   visualizationElement,
+  ruleConfigElement,
   renderAttachmentElement,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
@@ -37,6 +38,8 @@ import {
   Cursor,
   esqlLanguagePlugin,
   createVisualizationRenderer,
+  ruleConfigTagParser,
+  createRuleConfigRenderer,
   loadingCursorPlugin,
   visualizationTagParser,
   renderAttachmentTagParser,
@@ -181,6 +184,10 @@ export function ChatMessageText({
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
+      [ruleConfigElement.tagName]: createRuleConfigRenderer({
+        stepsFromCurrentRound,
+        stepsFromPrevRounds,
+      }),
       [renderAttachmentElement.tagName]: createRenderAttachmentRenderer({
         conversationAttachments,
         attachmentRefs,
@@ -195,6 +202,7 @@ export function ChatMessageText({
         loadingCursorPlugin,
         esqlLanguagePlugin,
         visualizationTagParser,
+        ruleConfigTagParser,
         renderAttachmentTagParser,
         ...parsingPlugins,
       ],

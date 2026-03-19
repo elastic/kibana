@@ -15,6 +15,7 @@ export enum ToolResultType {
   dashboard = 'dashboard',
   query = 'query',
   visualization = 'visualization',
+  ruleConfig = 'rule_config',
   other = 'other',
   error = 'error',
   fileReference = 'file_reference',
@@ -27,6 +28,7 @@ interface ToolResultTypeDataMap {
   [ToolResultType.dashboard]: DashboardResultData;
   [ToolResultType.query]: QueryResultData;
   [ToolResultType.visualization]: VisualizationResultData;
+  [ToolResultType.ruleConfig]: RuleConfigResultData;
   [ToolResultType.error]: ErrorResultData;
   [ToolResultType.fileReference]: FileReferenceResultData;
   [ToolResultType.other]: OtherResultData;
@@ -133,6 +135,25 @@ export interface VisualizationResultData {
 
 export type VisualizationResult = ToolResultMixin<ToolResultType.visualization>;
 
+// rule config
+
+export interface RuleConfigResultData {
+  id: string;
+  name: string;
+  kind: string;
+  enabled: boolean;
+  query: string;
+  schedule: string;
+  lookback?: string;
+  grouping?: string[];
+  description?: string;
+  owner?: string;
+  labels?: string[];
+  ruleUrl: string;
+}
+
+export type RuleConfigResult = ToolResultMixin<ToolResultType.ruleConfig>;
+
 // other
 
 export type OtherResultData<T extends Object = Object> = T;
@@ -195,4 +216,8 @@ export const isFileReferenceResult = (result: ToolResult): result is FileReferen
 
 export const isVisualizationResult = (result: ToolResult): result is VisualizationResult => {
   return result.type === ToolResultType.visualization;
+};
+
+export const isRuleConfigResult = (result: ToolResult): result is RuleConfigResult => {
+  return result.type === ToolResultType.ruleConfig;
 };

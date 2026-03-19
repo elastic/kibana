@@ -33,4 +33,42 @@ describe('UserService', () => {
 
     await expect(userService.getCurrentUserProfileUid()).resolves.toBeNull();
   });
+
+  it('returns null for profile uid when user profile service throws', async () => {
+    const { userService, userProfile } = createUserService();
+    userProfile.getCurrent.mockRejectedValue(new Error('not authenticated'));
+
+    await expect(userService.getCurrentUserProfileUid()).resolves.toBeNull();
+  });
+
+  it('returns the username from the user profile', async () => {
+    const { userService } = createUserService();
+
+    await expect(userService.getCurrentUsername()).resolves.toBe('elastic');
+  });
+
+  it('falls back to security authc when user profile throws', async () => {
+    const { userService, userProfile, security } = createUserService();
+    userProfile.getCurrent.mockRejectedValue(new Error('not authenticated'));
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'agent-user',
+      roles: [],
+      enabled: true,
+      authentication_realm: { name: 'api_key', type: 'api_key' },
+      lookup_realm: { name: 'api_key', type: 'api_key' },
+      authentication_provider: { name: 'api_key', type: 'api_key' },
+      authentication_type: 'api_key',
+      elastic_cloud_user: false,
+    });
+
+    await expect(userService.getCurrentUsername()).resolves.toBe('agent-user');
+  });
+
+  it('returns null when both user profile and security authc fail', async () => {
+    const { userService, userProfile, security } = createUserService();
+    userProfile.getCurrent.mockRejectedValue(new Error('not authenticated'));
+    security.authc.getCurrentUser.mockReturnValue(null);
+
+    await expect(userService.getCurrentUsername()).resolves.toBeNull();
+  });
 });

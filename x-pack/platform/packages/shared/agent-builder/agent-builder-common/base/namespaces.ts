@@ -12,6 +12,7 @@
 export const internalNamespaces = {
   platformCore: 'platform.core',
   platformDashboard: 'platform.dashboard',
+  alertingV2: 'platform.alerting_v2',
   filestore: 'filestore',
   attachments: 'attachments',
   observability: 'observability',
@@ -24,6 +25,7 @@ export const internalNamespaces = {
  */
 export const protectedNamespaces: string[] = [
   internalNamespaces.platformCore,
+  internalNamespaces.alertingV2,
   internalNamespaces.attachments,
   internalNamespaces.filestore,
   internalNamespaces.observability,

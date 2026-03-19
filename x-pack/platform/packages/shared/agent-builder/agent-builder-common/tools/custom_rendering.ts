@@ -31,6 +31,17 @@ export const dashboardElement = {
   },
 };
 
+export interface RuleConfigElementAttributes {
+  toolResultId?: string;
+}
+
+export const ruleConfigElement = {
+  tagName: 'rule_config',
+  attributes: {
+    toolResultId: 'tool-result-id',
+  },
+};
+
 export interface RenderAttachmentElementAttributes {
   attachmentId?: string;
   version?: number | string;

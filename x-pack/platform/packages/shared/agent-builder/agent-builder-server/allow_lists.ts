@@ -49,6 +49,18 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.list_workflows`,
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
+
+  // Alerting V2
+  `${internalNamespaces.alertingV2}.list_rules`,
+  `${internalNamespaces.alertingV2}.get_rule`,
+  `${internalNamespaces.alertingV2}.create_rule`,
+  `${internalNamespaces.alertingV2}.update_rule`,
+  `${internalNamespaces.alertingV2}.toggle_rule`,
+  `${internalNamespaces.alertingV2}.bulk_manage_rules`,
+  `${internalNamespaces.alertingV2}.query_alert_events`,
+  `${internalNamespaces.alertingV2}.list_notification_policies`,
+  `${internalNamespaces.alertingV2}.explain_rule_query`,
+  `${internalNamespaces.alertingV2}.validate_esql_query`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
