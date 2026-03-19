@@ -973,6 +973,11 @@
   "monitoring-telemetry": [
     "reportedClusterUuids"
   ],
+  "oauth_state": [
+    "connectorId",
+    "expiresAt",
+    "state"
+  ],
   "observability-onboarding-state": [
     "progress",
     "state",
@@ -1399,6 +1404,11 @@
   ],
   "usage-counters": [
     "domainId"
+  ],
+  "user_connector_token": [
+    "connectorId",
+    "credentialType",
+    "profileUid"
   ],
   "visualization": [
     "description",

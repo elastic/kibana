@@ -35,6 +35,10 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
 } as const;
 
+export const platformStreamsSigEventsTools = {
+  searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.search_knowledge_indicators`,
+} as const;
+
 export const attachmentTools = {
   read: `${internalNamespaces.attachments}.read`,
   update: `${internalNamespaces.attachments}.update`,
