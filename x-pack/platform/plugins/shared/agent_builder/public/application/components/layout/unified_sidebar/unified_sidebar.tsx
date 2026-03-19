@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
@@ -24,6 +24,7 @@ import { SidebarHeader } from './shared/sidebar_header';
 import { appPaths } from '../../../utils/app_paths';
 
 const SIDEBAR_WIDTH = 300;
+const CONDENSED_SIDEBAR_WIDTH = 64;
 
 export const UnifiedSidebar: React.FC = () => {
   const location = useLocation();
@@ -32,6 +33,8 @@ export const UnifiedSidebar: React.FC = () => {
   const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.agentId);
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const validateAgentId = useValidateAgentId();
+  const [isCondensed, setIsCondensed] = useState(false);
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     // Wait for agents to load before validating — prevents falsely skipping valid IDs during initial load
@@ -46,9 +49,10 @@ export const UnifiedSidebar: React.FC = () => {
   );
 
   const sidebarStyles = css`
-    width: ${SIDEBAR_WIDTH}px;
+    width: ${isCondensed ? CONDENSED_SIDEBAR_WIDTH : SIDEBAR_WIDTH}px;
     height: 100%;
     border-radius: 0;
+    border-right: 1px solid ${euiTheme.colors.borderBaseSubdued};
     display: flex;
     flex-direction: column;
   `;
@@ -64,7 +68,7 @@ export const UnifiedSidebar: React.FC = () => {
       css={sidebarStyles}
       paddingSize="none"
       hasShadow={false}
-      hasBorder
+      hasBorder={false}
       role="navigation"
       aria-label="Agent Builder navigation"
     >
@@ -72,14 +76,18 @@ export const UnifiedSidebar: React.FC = () => {
         sidebarView={sidebarView}
         agentId={agentIdFromPath}
         getNavigationPath={getNavigationPath}
+        isCondensed={isCondensed}
+        onToggleCondensed={() => setIsCondensed((v) => !v)}
       />
-      <EuiFlexGroup css={sidebarContentStyles}>
-        {sidebarView === 'conversation' && <ConversationSidebarView />}
-        {sidebarView === 'agentSettings' && (
-          <AgentSettingsSidebarView pathname={location.pathname} />
-        )}
-        {sidebarView === 'manage' && <ManageSidebarView pathname={location.pathname} />}
-      </EuiFlexGroup>
+      {!isCondensed && (
+        <EuiFlexGroup css={sidebarContentStyles}>
+          {sidebarView === 'conversation' && <ConversationSidebarView />}
+          {sidebarView === 'agentSettings' && (
+            <AgentSettingsSidebarView pathname={location.pathname} />
+          )}
+          {sidebarView === 'manage' && <ManageSidebarView pathname={location.pathname} />}
+        </EuiFlexGroup>
+      )}
     </EuiPanel>
   );
 };

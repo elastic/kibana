@@ -46,12 +46,16 @@ interface SidebarHeaderProps {
   sidebarView: 'conversation' | 'agentSettings' | 'manage';
   agentId: string;
   getNavigationPath: (newAgentId: string) => string;
+  isCondensed: boolean;
+  onToggleCondensed: () => void;
 }
 
 export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   sidebarView,
   agentId,
   getNavigationPath,
+  isCondensed,
+  onToggleCondensed,
 }) => {
   const { euiTheme } = useEuiTheme();
   const navigate = useNavigate();
@@ -63,6 +67,38 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
     flex-grow: 0;
   `;
 
+  const condensedHeaderStyles = css`
+    padding: ${euiTheme.size.base} 0;
+    flex-grow: 0;
+    align-items: center;
+  `;
+
+  if (isCondensed) {
+    return (
+      <EuiFlexGroup
+        direction="column"
+        alignItems="center"
+        css={condensedHeaderStyles}
+        gutterSize="s"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="transitionLeftIn"
+            aria-label={labels.toggleSidebar}
+            color="text"
+            size="s"
+            onClick={onToggleCondensed}
+          />
+        </EuiFlexItem>
+        {currentAgent && sidebarView === 'conversation' && (
+          <EuiFlexItem grow={false}>
+            <AgentAvatar agent={currentAgent} size="m" color="subdued" shape="circle" />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }
+
   const sidebarToggle = (
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
@@ -70,6 +106,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         aria-label={labels.toggleSidebar}
         color="text"
         size="s"
+        onClick={onToggleCondensed}
       />
     </EuiFlexItem>
   );
