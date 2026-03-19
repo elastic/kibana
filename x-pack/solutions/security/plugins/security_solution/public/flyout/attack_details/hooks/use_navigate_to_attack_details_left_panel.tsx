@@ -17,10 +17,12 @@ const ENTITIES_SUB_TAB_ID = 'entity' as const;
 export interface UseNavigateToAttackDetailsLeftPanelParams {
   /**
    * Optional tab to open in the left panel. Defaults to the Insights tab.
+   * Use 'notes' to open the Notes tab.
    */
-  tab?: string;
+  tab?: 'insights' | 'notes';
   /**
    * Optional sub-tab (e.g. 'entity' for Entities). When opening Insights, defaults to Entities.
+   * Ignored when tab is 'notes'.
    */
   subTab?: string;
 }
@@ -44,7 +46,7 @@ export const useNavigateToAttackDetailsLeftPanel = (
       },
       path: {
         tab,
-        subTab,
+        ...(tab === INSIGHTS_TAB_ID ? { subTab } : {}),
       },
     }),
     [attackId, indexName, tab, subTab]
