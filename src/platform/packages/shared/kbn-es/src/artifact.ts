@@ -13,9 +13,9 @@ import path from 'path';
 import { createHash } from 'crypto';
 import { pipeline, Transform } from 'stream';
 import { setTimeout } from 'timers/promises';
+import type { Headers } from 'undici';
+import { fetch } from 'undici';
 
-import type { Headers } from 'node-fetch';
-import fetch from 'node-fetch';
 import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -300,6 +300,10 @@ export class Artifact {
     let contentLength = 0;
 
     fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
+
+    if (!resp.body) {
+      throw new Error('Response body is null');
+    }
 
     await asyncPipeline(
       resp.body,

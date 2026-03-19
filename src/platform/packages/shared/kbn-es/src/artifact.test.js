@@ -8,9 +8,9 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-jest.mock('node-fetch');
-import fetch from 'node-fetch';
-const { Response } = jest.requireActual('node-fetch');
+import { fetch } from 'undici';
+
+jest.mock('undici');
 
 import { Artifact } from './artifact';
 
