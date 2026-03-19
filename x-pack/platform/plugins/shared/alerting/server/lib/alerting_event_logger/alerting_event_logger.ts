@@ -814,6 +814,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
           ),
           frozen_indices_queried_count: consumerMetrics.frozen_indices_queried_count,
           total_indexing_duration_ms: consumerMetrics.total_indexing_duration_ms,
+          total_enrichment_duration_ms: consumerMetrics.total_enrichment_duration_ms,
           execution_gap_duration_s: consumerMetrics.gap_duration_s,
           gap_range: consumerMetrics.gap_range,
         },

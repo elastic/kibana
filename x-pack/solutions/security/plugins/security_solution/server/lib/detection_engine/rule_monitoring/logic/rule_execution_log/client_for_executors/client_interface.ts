@@ -59,9 +59,9 @@ export interface IRuleExecutionLogForExecutors {
    * Logs a rule execution metric like a number of source events found and a number of generated alerts.
    * Metric names are type-checked against RuleExecutionMetrics.
    */
-  logMetric<Metric extends keyof ConsumerExecutionMetrics>(
+  logMetric<Metric extends keyof RuleExecutionLogMetrics>(
     metricName: Metric,
-    value: ConsumerExecutionMetrics[Metric]
+    value: RuleExecutionLogMetrics[Metric]
   ): void;
 
   /**
@@ -69,7 +69,7 @@ export interface IRuleExecutionLogForExecutors {
    * found and a number of generated alerts.
    * Metric names are type-checked against RuleExecutionMetrics.
    */
-  logMetrics(metrics: Partial<ConsumerExecutionMetrics>): void;
+  logMetrics(metrics: Partial<RuleExecutionLogMetrics>): void;
 
   /**
    * Logs rule execution result at the end of rule execution. This includes the final rule outcome (failed, partial failure, succeeded)
@@ -137,6 +137,19 @@ export interface LogMessageOptions {
    */
   consoleLogLevel?: LogLevel;
 }
+
+/**
+ * @deprecated To be removed in favor of Alerting Framework's "execute" event
+ *
+ * We have to accept total_search_duration_ms in the rule execution logger as
+ * it's difficult to extract this value from the Alerting Framework
+ *
+ * After fully migrating to the AF's execute event RuleExecutionLogMetrics should
+ * be removed.
+ */
+export type RuleExecutionLogMetrics = Partial<
+  ConsumerExecutionMetrics & { total_search_duration_ms: number }
+>;
 
 /**
  * Arguments for logging the final execution result. The status must not be 'running'.

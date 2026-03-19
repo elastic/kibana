@@ -462,7 +462,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
 
             ruleExecutionLogger.logMetrics({
+              total_search_duration_ms: Math.round(sum(result.searchAfterTimes.map(Number))),
               total_indexing_duration_ms: Math.round(sum(result.bulkCreateTimes.map(Number))),
+              total_enrichment_duration_ms: Math.round(sum(result.enrichmentTimes.map(Number))),
               frozen_indices_queried_count: frozenIndicesQueriedCount,
               suppressed_alerts: suppressedAlertsCount,
               gap_duration_s: remainingGap ? Math.round(remainingGap.asSeconds()) : undefined,

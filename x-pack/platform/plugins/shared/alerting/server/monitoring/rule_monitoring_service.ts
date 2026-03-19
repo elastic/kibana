@@ -68,10 +68,10 @@ export class RuleMonitoringService {
   }
 
   public getExecutorMetrics(): Partial<ConsumerExecutionMetrics> | undefined {
-    if (Object.values(this.metrics).some((value) => value != null)) {
-      return {
-        ...this.metrics,
-      };
+    const result = omitBy(this.metrics, (value) => value == null);
+
+    if (Object.keys(result).length === 0) {
+      return;
     }
   }
 

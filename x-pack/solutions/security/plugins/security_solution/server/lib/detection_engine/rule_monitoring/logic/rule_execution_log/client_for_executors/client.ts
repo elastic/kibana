@@ -9,7 +9,6 @@ import { omitBy } from 'lodash';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import type {
-  ConsumerExecutionMetrics,
   PublicRuleMonitoringService,
   PublicRuleResultService,
 } from '@kbn/alerting-plugin/server/types';
@@ -25,7 +24,7 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { ExtMeta } from '../../utils/console_logging';
 import { truncateValue } from '../../utils/normalization';
-import type { ExecutionResultLogEntry, IEventLogWriter } from '../event_log/event_log_writer';
+import type { IEventLogWriter } from '../event_log/event_log_writer';
 import {
   LogLevelEnum,
   LogLevelSetting,
@@ -37,6 +36,7 @@ import type {
   IRuleExecutionLogForExecutors,
   LogMessageOptions,
   RuleExecutionContext,
+  RuleExecutionLogMetrics,
 } from './client_interface';
 import { getCorrelationIds } from './correlation_ids';
 
@@ -55,9 +55,8 @@ export function createRuleExecutionLogClientForExecutors(
 
   // Buffers the execution related data
   const executionResultBuffer: ExecutionResultBuffer = {
-    errors: [],
-    warnings: [],
     executionResult: undefined,
+    metrics: {},
     closed: false,
   };
 
@@ -101,23 +100,33 @@ export function createRuleExecutionLogClientForExecutors(
       });
     },
 
-    logMetric<Metric extends keyof ConsumerExecutionMetrics>(
+    logMetric<Metric extends keyof RuleExecutionLogMetrics>(
       metricName: Metric,
-      value: ConsumerExecutionMetrics[Metric]
+      value: RuleExecutionLogMetrics[Metric]
     ): void {
       if (this.closed() || !value) {
         return;
       }
 
-      ruleMonitoringService.setMetric(metricName, value);
+      executionResultBuffer.metrics[metricName] = value;
+
+      // total_search_duration_ms gets calculated and logged at the Alerting Framework level
+      if (metricName !== 'total_search_duration_ms') {
+        ruleMonitoringService.setMetric(metricName, value);
+      }
     },
 
-    logMetrics(metrics: Partial<ConsumerExecutionMetrics>): void {
+    logMetrics(metrics: Partial<RuleExecutionLogMetrics>): void {
       if (this.closed()) {
         return;
       }
 
-      ruleMonitoringService.setMetrics(omitBy(metrics, (value) => !value));
+      Object.assign(executionResultBuffer.metrics, metrics);
+
+      // total_search_duration_ms gets calculated and logged at the Alerting Framework level
+      ruleMonitoringService.setMetrics(
+        omitBy(metrics, (value, key) => !value || key === 'total_search_duration_ms')
+      );
     },
 
     logExecutionResult(args: ExecutionResult): void {
@@ -155,6 +164,9 @@ export function createRuleExecutionLogClientForExecutors(
             message: truncateValue(executionResult.message) ?? '',
             userError: executionResult.userError,
           };
+
+          writeStatusChangeToEventLog(normalizedExecutionResult);
+          writeMetricsToEventLog(executionResultBuffer.metrics);
 
           await Promise.all([
             writeExecutionResultToConsole(normalizedExecutionResult, logMeta),
@@ -199,6 +211,52 @@ export function createRuleExecutionLogClientForExecutors(
   ): void => {
     writeMessageToConsole(message, levels.consoleLogLevel ?? LogLevelEnum.debug, baseLogMeta);
     writeMessageToEventLog(message, levels.eventLogLevel);
+  };
+
+  /**
+   * @deprecated To be removed in favor of Alerting Framework's "execute" event
+   */
+  const writeStatusChangeToEventLog = (args: ExecutionResult): void => {
+    const { status, message } = args;
+
+    eventLog.logStatusChange({
+      status,
+      message,
+      ruleInfo: {
+        ruleId,
+        ruleUuid,
+        ruleName,
+        ruleRevision,
+        ruleType,
+        spaceId,
+        executionId,
+      },
+    });
+  };
+
+  /**
+   * @deprecated To be removed in favor of Alerting Framework's "execute" event
+   */
+  const writeMetricsToEventLog = (metrics: RuleExecutionLogMetrics): void => {
+    eventLog.logExecutionMetrics({
+      metrics: {
+        total_search_duration_ms: metrics.total_search_duration_ms,
+        total_indexing_duration_ms: metrics.total_indexing_duration_ms,
+        total_enrichment_duration_ms: metrics.total_enrichment_duration_ms,
+        frozen_indices_queried_count: metrics.frozen_indices_queried_count,
+        execution_gap_duration_s: metrics.gap_duration_s,
+        gap_range: metrics.gap_range,
+      },
+      ruleInfo: {
+        ruleId,
+        ruleUuid,
+        ruleName,
+        ruleRevision,
+        ruleType,
+        spaceId,
+        executionId,
+      },
+    });
   };
 
   const writeMessageToEventLog = (message: string, logLevel: LogLevel): void => {
@@ -252,8 +310,7 @@ export function createRuleExecutionLogClientForExecutors(
 }
 
 interface ExecutionResultBuffer {
-  errors: ExecutionResultLogEntry[];
-  warnings: ExecutionResultLogEntry[];
   executionResult: ExecutionResult | undefined;
+  metrics: RuleExecutionLogMetrics;
   closed: boolean;
 }

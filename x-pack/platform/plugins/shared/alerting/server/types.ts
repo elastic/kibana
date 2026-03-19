@@ -453,6 +453,7 @@ export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQuer
 
 export interface ConsumerExecutionMetrics {
   total_indexing_duration_ms: number;
+  total_enrichment_duration_ms: number;
   gap_duration_s: number;
   gap_range: { lte: string; gte: string };
   candidate_alerts_count: number;
