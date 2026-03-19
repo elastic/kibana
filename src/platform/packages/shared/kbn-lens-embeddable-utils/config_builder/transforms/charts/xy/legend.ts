@@ -10,7 +10,7 @@
 import { LegendLayout, LegendSize, type XYLegendValue } from '@kbn/chart-expressions-common';
 import type { XYState as XYLensState } from '@kbn/lens-common';
 import type { XYState } from '../../../schema';
-import { stripUndefined } from '../utils';
+import { getLegendTruncateAfterLines, stripUndefined } from '../utils';
 
 type OutsideLegendType = Extract<Required<XYState['legend']>, { inside: false }>;
 
@@ -184,7 +184,7 @@ export function convertLegendToAPIFormat(
 ): Pick<XYState, 'legend'> | {} {
   const legendOptions = stripUndefined({
     visibility: !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'auto' : 'visible',
-    truncate_after_lines: legend?.maxLines == null ? undefined : legend.maxLines,
+    truncate_after_lines: getLegendTruncateAfterLines(legend),
     statistics: legend?.legendStats?.length
       ? legend.legendStats.map(mapStatToSnakeCase)
       : undefined,
