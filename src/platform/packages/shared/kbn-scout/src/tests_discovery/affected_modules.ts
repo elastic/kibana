@@ -10,8 +10,8 @@
 import fs from 'fs';
 import path from 'path';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { findPackageForPath } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { findPackageForPath } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ModuleDiscoveryInfo } from './types';
 
