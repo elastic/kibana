@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { EuiHorizontalRule, EuiFlexItem, useEuiTheme, EuiFlexGroup } from '@elastic/eui';
+import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
@@ -20,7 +20,7 @@ import { useValidateAgentId } from '../../../../../hooks/agents/use_validate_age
 import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 
-import { ConversationFooter, FOOTER_HEIGHT } from './conversation_footer';
+import { ConversationFooter } from './conversation_footer';
 import { ConversationList } from './conversation_list';
 import { SidebarLink } from './sidebar_link';
 
@@ -29,12 +29,11 @@ const customizeLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.c
 });
 
 const containerStyles = css`
-  position: relative;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   width: 100%;
 `;
-
-const HEADER_HEIGHT = 66;
 
 export const ConversationSidebarView: React.FC = () => {
   const { pathname } = useLocation();
@@ -46,15 +45,11 @@ export const ConversationSidebarView: React.FC = () => {
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const lastAgentId = useLastAgentId();
 
-  // 66px is the height of the header
-  const scrollableStyles = css`
-    position: absolute;
-    top: ${HEADER_HEIGHT}px;
-    bottom: ${FOOTER_HEIGHT}px;
-    padding: ${euiTheme.size.base};
-    left: 0;
-    right: 0;
+  const listStyles = css`
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    padding: ${euiTheme.size.base};
   `;
 
   useEffect(() => {
@@ -84,11 +79,17 @@ export const ConversationSidebarView: React.FC = () => {
   ]);
 
   const CustomizeLink = () => (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      css={css`
+        flex-grow: 0;
+      `}
+    >
       <EuiFlexItem grow={false}>
         <EuiHorizontalRule margin="none" />
       </EuiFlexItem>
-      <EuiFlexItem grow>
+      <EuiFlexItem grow={false}>
         <SidebarLink
           label={customizeLabel}
           href={appPaths.agent.overview({ agentId })}
@@ -107,11 +108,9 @@ export const ConversationSidebarView: React.FC = () => {
   return (
     <div css={containerStyles}>
       <CustomizeLink />
-      {/* Scrollable conversation list */}
-      <div css={scrollableStyles}>
+      <div css={listStyles}>
         <ConversationList agentId={agentId} currentConversationId={conversationId} />
       </div>
-
       <ConversationFooter />
     </div>
   );

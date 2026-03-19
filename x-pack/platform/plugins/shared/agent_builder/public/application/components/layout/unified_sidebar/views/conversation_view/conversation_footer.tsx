@@ -15,24 +15,21 @@ import { appPaths } from '../../../../../utils/app_paths';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { SidebarLink } from './sidebar_link';
 
-export const FOOTER_HEIGHT = 64;
-
-const footerStyles = css`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-`;
-
 export const ConversationFooter: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" css={footerStyles}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      css={css`
+        flex-grow: 0;
+      `}
+    >
       <EuiFlexItem grow={false}>
         <EuiHorizontalRule margin="none" />
       </EuiFlexItem>
-      <EuiFlexItem grow>
+      <EuiFlexItem grow={false}>
         <SidebarLink
           label={i18n.translate('xpack.agentBuilder.sidebar.conversation.manageComponents', {
             defaultMessage: 'Manage components',
