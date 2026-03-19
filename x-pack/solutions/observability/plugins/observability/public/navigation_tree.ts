@@ -680,9 +680,7 @@ export const createDefinition = (
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
-        showAlertingV2:
-          (coreStart.application.capabilities.alertingVTwo as { enabled?: boolean })?.enabled ??
-          false,
+        showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
       })
     )
   ),
