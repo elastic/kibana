@@ -54,7 +54,12 @@ export const ToolbarPopover = ({
       onClick={onButtonClick}
       size={size}
       isDisabled={isDisabled}
-      {...{ type, label, iconType: iconType || 'arrowDown', iconSide: iconType ? 'left' : 'right' }}
+      {...{
+        type,
+        label,
+        iconType: iconType || 'chevronSingleDown',
+        iconSide: iconType ? 'left' : 'right',
+      }}
     />
   );
 

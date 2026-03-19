@@ -7,6 +7,8 @@
 
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
+import { MAX_ES_RESPONSE_SIZE_BYTES } from '../../constants';
 
 export interface EsqlResponse {
   columns: EsqlEsqlColumnInfo[];
@@ -28,14 +30,27 @@ export const executeEsql = async ({
   params?: Array<Record<string, FieldValue>>;
   esClient: ElasticsearchClient;
 }): Promise<EsqlResponse> => {
-  const response = await esClient.esql.query({
-    query,
-    drop_null_columns: true,
-    allow_partial_results: true,
-    ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
-  });
-  return {
-    columns: response.columns,
-    values: response.values,
-  };
+  try {
+    const response = await esClient.esql.query(
+      {
+        query,
+        drop_null_columns: true,
+        allow_partial_results: true,
+        ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
+      },
+      { maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES }
+    );
+    return {
+      columns: response.columns,
+      values: response.values,
+    };
+  } catch (err) {
+    if (isMaximumResponseSizeExceededError(err)) {
+      throw new Error(
+        `ES|QL query response exceeded the maximum allowed size of 20MB. ` +
+          `Try narrowing your query with tighter filters, a LIMIT clause, or fewer fields.`
+      );
+    }
+    throw err;
+  }
 };

@@ -1196,6 +1196,10 @@ Object {
       "default": true,
       "type": "boolean",
     },
+    "hasProxyAuth": Object {
+      "default": false,
+      "type": "boolean",
+    },
     "headers": Object {
       "anyOf": Array [
         Object {
@@ -1212,6 +1216,26 @@ Object {
         },
       ],
       "default": null,
+    },
+    "proxyUrl": Object {
+      "anyOf": Array [
+        Object {
+          "format": "uri",
+          "type": "string",
+        },
+        Object {
+          "type": "null",
+        },
+      ],
+      "default": null,
+    },
+    "proxyVerificationMode": Object {
+      "enum": Array [
+        "none",
+        "certificate",
+        "full",
+      ],
+      "type": "string",
     },
     "scope": Object {
       "type": "string",
@@ -1285,6 +1309,28 @@ Object {
       "default": null,
     },
     "pfx": Object {
+      "anyOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "type": "null",
+        },
+      ],
+      "default": null,
+    },
+    "proxyPassword": Object {
+      "anyOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "type": "null",
+        },
+      ],
+      "default": null,
+    },
+    "proxyUsername": Object {
       "anyOf": Array [
         Object {
           "type": "string",
@@ -4937,6 +4983,21 @@ Object {
     "subActionParams": Object {
       "additionalProperties": false,
       "properties": Object {
+        "alertStates": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "new": Object {
+              "type": "boolean",
+            },
+            "ongoing": Object {
+              "type": "boolean",
+            },
+            "recovered": Object {
+              "type": "boolean",
+            },
+          },
+          "type": "object",
+        },
         "inputs": Object {},
         "spaceId": Object {
           "type": "string",

@@ -189,7 +189,35 @@ describe('runTool', () => {
         esClient: expect.anything(),
         modelProvider: expect.anything(),
         runner: expect.anything(),
+        runContext: expect.objectContaining({ runId: runnerManager.context.runId }),
       })
+    );
+  });
+
+  it('passes the run context (including agent stack) to the tool handler', async () => {
+    const contextWithAgent = forkContextForAgentRun({
+      agentId: 'my-agent',
+      parentContext: runnerManager.context,
+    });
+    const managerWithAgent = new RunnerManager(runnerDeps, contextWithAgent);
+
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    toolHandler.mockImplementation(() => {
+      return { results: [{ type: ToolResultType.other, data: { value: 42 } }] };
+    });
+
+    await runInternalTool({
+      toolExecutionParams: { ...params, tool },
+      parentManager: managerWithAgent,
+    });
+
+    const context = toolHandler.mock.lastCall![1];
+    expect(context.runContext.stack).toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: 'agent', agentId: 'my-agent' })])
     );
   });
 
