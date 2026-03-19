@@ -648,8 +648,12 @@ export const WorkflowYAMLEditor = ({
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
-      <div css={styles.stepActionsContainer} style={positionStyles ? positionStyles : {}}>
-        <StepActions onStepActionClicked={onStepRun} />
+      <div
+        css={styles.stepActionsContainer}
+        style={positionStyles ? positionStyles : {}}
+        data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
+      >
+        <StepActions onStepRun={onStepRun} />
       </div>
       {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml && (
         <div

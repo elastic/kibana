@@ -8,60 +8,52 @@
 import { take } from 'lodash';
 import type { ResolvedResourceWithSampling } from './resolve_resource_with_sampling_stats';
 import type { MappingFieldWithStats } from '../sampling';
-import type { XmlNode } from '../formatting';
-import { generateXmlTree } from '../formatting';
 
 /**
- * Represents a resource as a xml tree,
- * useful for including them into a prompt
+ * Field types where sample values are meaningful for ES|QL query generation.
+ * Numeric, date, boolean, and ip fields are excluded — their sampled values
+ * do not constrain the query vocabulary and would only add token cost.
+ */
+const SAMPLE_VALUE_TYPES = new Set([
+  'keyword',
+  'constant_keyword',
+  'wildcard',
+  'text',
+  'semantic_text',
+  'match_only_text',
+  'pattern_text',
+]);
+
+/**
+ * Formats a resource with sampled field values as a compact plain-text block,
+ * suitable for inclusion in a prompt.
+ *
+ * Each field is rendered as a single line:
+ *   path (type) [description][: val1, val2]
  */
 export const formatResourceWithSampledValues = ({
   resource,
-  indentLevel,
 }: {
   resource: ResolvedResourceWithSampling;
-  indentLevel?: number;
 }) => {
-  return generateXmlTree(
-    {
-      tagName: 'target_resource',
-      attributes: {
-        name: resource.name,
-        type: resource.type,
-      },
-      children: [
-        {
-          tagName: 'fields',
-          children: resource.fields.map((field) => mapFieldWithStats(field, 3)),
-        },
-      ],
-    },
-    { initialIndentLevel: indentLevel }
-  );
+  const samplingCount = resource.fields.length > 1000 ? 0 : resource.fields.length > 200 ? 1 : 2;
+  const lines = resource.fields.map((field) => renderFieldLine(field, samplingCount));
+  return [
+    `<target_resource name="${resource.name}" type="${resource.type}">`,
+    ...lines,
+    `</target_resource>`,
+  ].join('\n');
 };
 
-const mapFieldWithStats = (field: MappingFieldWithStats, maxValues: number = 3): XmlNode => {
-  return {
-    tagName: 'field',
-    attributes: {
-      path: field.path,
-      type: field.type,
-      description: field.meta.description,
-    },
-    children: field.stats.values.length
-      ? [
-          {
-            tagName: 'sample_values',
-            children: take(field.stats.values, maxValues).map<XmlNode>((value) => {
-              return {
-                tagName: 'value',
-                children: [truncate(normalizeSpaces(`${value.value}`), 100)],
-              };
-            }),
-          },
-        ]
-      : undefined,
-  };
+const renderFieldLine = (field: MappingFieldWithStats, samplingCount: number): string => {
+  const description = field.meta.description ? ` ${field.meta.description}` : '';
+  const samples =
+    SAMPLE_VALUE_TYPES.has(field.type) && field.stats.values.length && samplingCount > 0
+      ? ` (${take(field.stats.values, samplingCount)
+          .map((v) => truncate(normalizeSpaces(`${v.value}`), 80))
+          .join(', ')}...)`
+      : '';
+  return `- ${field.path} [${field.type}]${description}${samples}`;
 };
 
 const truncate = (text: unknown, maxLength: number): string => {

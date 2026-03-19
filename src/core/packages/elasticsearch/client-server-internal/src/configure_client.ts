@@ -83,13 +83,22 @@ function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logg
     const routingContext = (event.meta.request.options?.context as any)?.cpsRoutingContext;
     if (!routingContext) return; // Not a CPS-instrumented request
 
-    const { routingType, cpsEnabled, apiName, bypassReason, requestId, routePath, requestPath } =
-      routingContext;
+    const {
+      routingType,
+      routingAccepted,
+      cpsEnabled,
+      apiName,
+      bypassReason,
+      requestId,
+      routePath,
+      requestPath,
+    } = routingContext;
     const httpStatus = error ? getErrorStatus(error) : event.statusCode ?? 200;
 
     const metricAttributes: Record<string, string | number | boolean> = {
       'kibana.cps.enabled': cpsEnabled,
       'kibana.cps.routing.type': routingType,
+      'kibana.cps.routing.accepted': routingAccepted,
       'db.operation.name': apiName,
       'http.response.status_code': httpStatus,
     };
