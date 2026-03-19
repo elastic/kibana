@@ -16,9 +16,7 @@ import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { Loading } from './loading';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
-interface Props extends FullTraceWaterfallProps {
-  core: CoreStart;
-}
+type Props = FullTraceWaterfallProps & { core: CoreStart };
 
 export function FullTraceWaterfallRenderer({
   traceId,
