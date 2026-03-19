@@ -14,6 +14,7 @@ export class HostsPage {
   public readonly searchBar: Locator;
   public readonly logsTab: Locator;
   public readonly logsSearchBar: Locator;
+  public readonly excludeButton: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.tableLoaded = this.page.getByTestId('hostsView-table-loaded');
@@ -21,6 +22,7 @@ export class HostsPage {
     this.searchBar = this.page.getByTestId('queryInput');
     this.logsTab = this.page.getByTestId('hostsView-tabs-logs');
     this.logsSearchBar = this.page.getByTestId('hostsView-logs-text-field-search');
+    this.excludeButton = this.page.getByTestId('optionsList__excludeResults');
   }
 
   private async waitForTableToLoad() {
@@ -58,17 +60,20 @@ export class HostsPage {
   public async openFilterControl(fieldName: string) {
     const controlTestId = `optionsList-control-${fieldName}`;
     const control = this.page.getByTestId(controlTestId);
+    await control.waitFor();
     await control.click();
+    await this.excludeButton.waitFor();
   }
 
   public async enableExcludeMode() {
-    const excludeButton = this.page.getByTestId('optionsList__excludeResults');
-    await excludeButton.click();
+    await this.excludeButton.waitFor();
+    await this.excludeButton.click();
   }
 
   public async selectFilterOption(optionValue: string) {
     const optionTestId = `optionsList-control-selection-${optionValue}`;
     const option = this.page.getByTestId(optionTestId);
+    await option.waitFor();
     await option.click();
     await this.waitForTableToLoad();
   }

@@ -14,6 +14,7 @@ import {
   HOSTS_METADATA_FIELD,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
+  EXTENDED_TIMEOUT,
 } from '../../fixtures/constants';
 
 test.describe(
@@ -66,9 +67,15 @@ test.describe(
 
     test('Filter hosts using the Cloud Provider control', async ({
       pageObjects: { hostsPage },
+      page,
     }) => {
       await test.step('verify all hosts are visible before filtering', async () => {
         await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+        await expect(
+          page.getByTestId('embeddablePanelHoverActions-CPUUsage').getByRole('progressbar', {
+            name: 'Loading',
+          })
+        ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('select a cloud provider option (include mode)', async () => {
@@ -90,9 +97,15 @@ test.describe(
 
     test('Filter hosts using the Operating System control', async ({
       pageObjects: { hostsPage },
+      page,
     }) => {
       await test.step('verify all hosts are visible before filtering', async () => {
         await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+        await expect(
+          page.getByTestId('embeddablePanelHoverActions-CPUUsage').getByRole('progressbar', {
+            name: 'Loading',
+          })
+        ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('open the Operating System filter control', async () => {
