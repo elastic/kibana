@@ -190,7 +190,27 @@ export const suggestionsApi = ({
       const compatibleSuggestion = findCompatibleSuggestion(suggestionsList, targetChartType);
       const selectedSuggestion = compatibleSuggestion ?? suggestionsList[0];
 
-      return [createSuggestionWithAttributes(selectedSuggestion, preferredVisAttributes, context)];
+      // Switch the visualization sub-type if needed (e.g., bar → line within XY, pie → donut)
+      let finalSuggestion = selectedSuggestion;
+      if (chartType) {
+        const vis = visualizationMap[selectedSuggestion.visualizationId];
+        if (vis?.isSubtypeSupported?.(chartType) && vis?.switchVisualizationType) {
+          const currentSubType = vis.getVisualizationTypeId?.(
+            selectedSuggestion.visualizationState
+          );
+          if (currentSubType !== chartType) {
+            finalSuggestion = {
+              ...selectedSuggestion,
+              visualizationState: vis.switchVisualizationType(
+                chartType,
+                selectedSuggestion.visualizationState
+              ),
+            };
+          }
+        }
+      }
+
+      return [createSuggestionWithAttributes(finalSuggestion, preferredVisAttributes, context)];
     }
   }
 
