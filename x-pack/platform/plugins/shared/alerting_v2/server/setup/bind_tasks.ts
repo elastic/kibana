@@ -8,6 +8,7 @@
 import { PluginSetup } from '@kbn/core-di';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { DispatcherTaskDefinition } from '../lib/dispatcher/task_definition';
+import { ApiKeyInvalidationTaskDefinition } from '../lib/tasks/invalidate_pending_api_keys/task_definition';
 import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import {
   TaskDefinition,
@@ -45,4 +46,5 @@ export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
   // Bind task definitions - add more tasks here as needed
   bind(TaskDefinition).toConstantValue(RuleExecutorTaskDefinition);
   bind(TaskDefinition).toConstantValue(DispatcherTaskDefinition);
+  bind(TaskDefinition).toConstantValue(ApiKeyInvalidationTaskDefinition);
 }
