@@ -16,7 +16,7 @@ import {
 } from './tool';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 
-jest.mock('../../routes/utils/assert_significant_events_access', () => ({
+jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
 
