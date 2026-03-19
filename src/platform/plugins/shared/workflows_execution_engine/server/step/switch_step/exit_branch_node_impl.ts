@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitCaseBranchNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { ExitCaseBranchNode, ExitDefaultBranchNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { NodeImplementation } from '../node_implementation';
 
-export class ExitCaseBranchNodeImpl implements NodeImplementation {
+export class ExitBranchNodeImpl implements NodeImplementation {
   constructor(
-    private step: ExitCaseBranchNode,
+    private step: ExitCaseBranchNode | ExitDefaultBranchNode,
     private workflowGraph: WorkflowGraph,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
@@ -23,16 +23,17 @@ export class ExitCaseBranchNodeImpl implements NodeImplementation {
 
     if (successors.length !== 1) {
       throw new Error(
-        `ExitCaseBranchNode with id ${this.step.id} must have exactly one successor, but found ${successors.length}.`
+        `Exit branch node with id ${this.step.id} must have exactly one successor, but found ${successors.length}.`
       );
     }
 
     if (successors[0].type !== 'exit-switch') {
       throw new Error(
-        `ExitCaseBranchNode with id ${this.step.id} must have an exit-switch successor, but found ${successors[0].type} with id ${successors[0].id}.`
+        `Exit branch node with id ${this.step.id} must have an exit-switch successor, but found ${successors[0].type} with id ${successors[0].id}.`
       );
     }
 
     this.wfExecutionRuntimeManager.navigateToNode(successors[0].id);
   }
 }
+

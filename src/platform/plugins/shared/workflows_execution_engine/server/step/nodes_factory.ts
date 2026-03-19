@@ -67,11 +67,9 @@ import {
 } from './on_failure/fallback_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
 import {
-  EnterCaseBranchNodeImpl,
-  EnterDefaultBranchNodeImpl,
+  EnterBranchNodeImpl,
   EnterSwitchNodeImpl,
-  ExitCaseBranchNodeImpl,
-  ExitDefaultBranchNodeImpl,
+  ExitBranchNodeImpl,
   ExitSwitchNodeImpl,
 } from './switch_step';
 import {
@@ -316,18 +314,16 @@ export class NodesFactory {
           stepLogger
         );
       case 'enter-case-branch':
-        return new EnterCaseBranchNodeImpl(node as EnterCaseBranchNode, this.workflowRuntime);
       case 'enter-default-branch':
-        return new EnterDefaultBranchNodeImpl(node as EnterDefaultBranchNode, this.workflowRuntime);
-      case 'exit-case-branch':
-        return new ExitCaseBranchNodeImpl(
-          node as ExitCaseBranchNode,
-          this.workflowGraph,
-          this.workflowRuntime
+        return new EnterBranchNodeImpl(
+          node as EnterCaseBranchNode | EnterDefaultBranchNode,
+          this.workflowRuntime,
+          stepExecutionRuntime
         );
+      case 'exit-case-branch':
       case 'exit-default-branch':
-        return new ExitDefaultBranchNodeImpl(
-          node as ExitDefaultBranchNode,
+        return new ExitBranchNodeImpl(
+          node as ExitCaseBranchNode | ExitDefaultBranchNode,
           this.workflowGraph,
           this.workflowRuntime
         );

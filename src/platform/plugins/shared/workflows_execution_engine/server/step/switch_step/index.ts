@@ -8,8 +8,6 @@
  */
 
 export { EnterSwitchNodeImpl } from './enter_switch_node_impl';
-export { EnterCaseBranchNodeImpl } from './enter_case_branch_node_impl';
-export { EnterDefaultBranchNodeImpl } from './enter_default_branch_node_impl';
-export { ExitCaseBranchNodeImpl } from './exit_case_branch_node_impl';
-export { ExitDefaultBranchNodeImpl } from './exit_default_branch_node_impl';
+export { EnterBranchNodeImpl } from './enter_branch_node_impl';
+export { ExitBranchNodeImpl } from './exit_branch_node_impl';
 export { ExitSwitchNodeImpl } from './exit_switch_node_impl';
