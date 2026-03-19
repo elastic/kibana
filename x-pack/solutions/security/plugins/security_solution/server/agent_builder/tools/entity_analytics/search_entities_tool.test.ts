@@ -9,6 +9,7 @@ import { ToolResultType, type ErrorResult, type EsqlResults } from '@kbn/agent-b
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import type { coreMock } from '@kbn/core/server/mocks';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import {
   createToolAvailabilityContext,
@@ -19,7 +20,8 @@ import {
 import type { EntityAttachmentData } from '../../utils/entity_utils';
 import { ENTITY_ATTACHMENT_CONVERSATION_ID } from '../../utils/entity_utils';
 import type { ExperimentalFeatures } from '../../../../common';
-import { searchEntitiesTool } from './search_entities_tool';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
+import { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
 
 jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
   getAgentBuilderResourceAvailability: jest.fn(),
@@ -49,10 +51,11 @@ const mockSingleEntityResponse = () =>
 describe('searchEntitiesTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = searchEntitiesTool(mockCore, mockLogger, mockExperimentalFeatures);
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setupMockCoreStartServices(mockCore, mockEsClient);
+    mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
@@ -497,6 +500,88 @@ describe('searchEntitiesTool', () => {
       expect(errorResult.data.message).toContain(
         'Error searching entities in Entity Store: ES|QL failure'
       );
+    });
+
+    describe('telemetry', () => {
+      it('reports success=true and entitiesReturned=N when entities are found', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce({
+          columns: [{ name: 'entity.id', type: 'keyword' }],
+          values: [['host:server1'], ['user:alice'], ['host:server2']],
+        });
+
+        await tool.handler(
+          { entityTypes: ['host', 'user'] },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            entityTypes: ['host', 'user'],
+            spaceId: 'default',
+            success: true,
+            entitiesReturned: 3,
+            errorMessage: undefined,
+          }
+        );
+      });
+
+      it('reports success=true and entitiesReturned=0 when no entities are found', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce({
+          columns: [{ name: 'entity.id', type: 'keyword' }],
+          values: [],
+        });
+
+        await tool.handler(
+          { entityTypes: ['host'] },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            entityTypes: ['host'],
+            spaceId: 'default',
+            success: true,
+            entitiesReturned: 0,
+            errorMessage: undefined,
+          }
+        );
+      });
+
+      it('reports success=false and errorMessage when the query throws', async () => {
+        (executeEsql as jest.Mock).mockRejectedValueOnce(new Error('ES|QL failure'));
+
+        await tool.handler(
+          { entityTypes: ['user'] },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        );
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            entityTypes: ['user'],
+            spaceId: 'default',
+            success: false,
+            entitiesReturned: 0,
+            errorMessage: 'ES|QL failure',
+          }
+        );
+      });
+
+      it('reports entityTypes=[] when no entityTypes filter is provided', async () => {
+        mockSingleEntityResponse();
+
+        await tool.handler({}, createToolHandlerContext(mockRequest, mockEsClient, mockLogger));
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          expect.objectContaining({ entityTypes: [] })
+        );
+      });
     });
 
     it('builds risk score change query when riskScoreChangeInterval is provided', async () => {

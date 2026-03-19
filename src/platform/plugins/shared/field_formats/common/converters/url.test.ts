@@ -328,5 +328,17 @@ describe('UrlFormat', () => {
         '<a href="http://kibana.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">#/dashboard/</a>'
       );
     });
+
+    test('escapes HTML in URL templates', () => {
+      const url = new UrlFormat({
+        type: 'a',
+        urlTemplate: 'http://example.com/{{value}}',
+        labelTemplate: 'Link: {{value}}',
+      });
+      const result = url.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE);
+      expect(result).toContain('&lt;script&gt;');
+      expect(result).toContain('alert(&quot;test&quot;)');
+      expect(result).not.toContain('<script>');
+    });
   });
 });

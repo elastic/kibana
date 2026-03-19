@@ -174,8 +174,8 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
 
     // Both documents should be present
     expect(esqlResult.documents).toHaveLength(2);
-    const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-    const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+    const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+    const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
     expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
     expect(doc2).toStrictEqual(expect.objectContaining({ tags: null }));
   });
@@ -209,12 +209,12 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
     expect(esqlResult.documents).toHaveLength(2);
 
     // First doc should have tags split (where condition matched)
-    const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
+    const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
     expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
     expect(doc1?.['event.kind']).toBe('test');
 
     // Second doc should keep original tags (where condition not matched)
-    const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+    const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
     expect(doc2).toStrictEqual(expect.objectContaining({ tags: 'one,two,three' }));
     expect(doc2?.['event.kind']).toBe('production');
   });
@@ -261,7 +261,7 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
       expect(esqlResult.documents).toHaveLength(2);
 
       // First doc should have tags_array created (where condition matched)
-      const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
+      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
       expect(doc1).toStrictEqual(
         expect.objectContaining({
           tags: 'foo,bar,baz', // Original preserved
@@ -271,7 +271,7 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
       expect(doc1?.['event.kind']).toBe('test');
 
       // Second doc should have tags_array as empty string (where condition not matched)
-      const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
       expect(doc2).toStrictEqual(
         expect.objectContaining({
           tags: 'one,two,three',

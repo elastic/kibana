@@ -185,6 +185,8 @@ export class WorkflowsExecutionEnginePlugin
                 dependencies,
                 workflowsExecutionEngine,
                 meteringService: this.meteringService,
+                isEventDrivenExecutionEnabled:
+                  workflowsExecutionEngine.isEventDrivenExecutionEnabled,
               });
             },
             cancel: async () => {
@@ -519,7 +521,8 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
-      request: KibanaRequest
+      request: KibanaRequest,
+      options: { refresh: boolean | 'wait_for' } = { refresh: false }
     ): Promise<{
       workflowExecution: Partial<EsWorkflowExecution>;
       repository: WorkflowExecutionRepository;
@@ -533,6 +536,7 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
+      const metadata = context.metadata as Record<string, unknown> | undefined;
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId,
@@ -545,6 +549,7 @@ export class WorkflowsExecutionEnginePlugin
         createdAt: workflowCreatedAt.toISOString(),
         executedBy,
         triggeredBy,
+        ...(metadata ? { metadata } : {}),
       };
 
       const concurrencyGroupKey = this.getConcurrencyGroupKey(
@@ -557,7 +562,14 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
 
-      await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      // Only pay the refresh cost when the concurrency check will actually run.
+      // Without a concurrencyGroupKey there is no check, so refresh:false is fine.
+      // When a check will run, the caller dictates the strategy: manual/UI paths use
+      // refresh:true (immediate, no latency for the user); async paths use refresh:'wait_for'
+      // (piggybacks on the scheduled cycle, lower cluster cost).
+      await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
+        refresh: concurrencyGroupKey ? options.refresh : false,
+      });
 
       return { workflowExecution, repository: workflowExecutionRepository };
     };
@@ -606,7 +618,8 @@ export class WorkflowsExecutionEnginePlugin
         workflow,
         context,
         'manual',
-        request
+        request,
+        { refresh: true }
       );
 
       // Check concurrency limits and apply collision strategy if needed
@@ -663,7 +676,8 @@ export class WorkflowsExecutionEnginePlugin
         workflow,
         context,
         'alert',
-        request
+        request,
+        { refresh: 'wait_for' }
       );
 
       // Check concurrency limits and apply collision strategy if needed
@@ -843,10 +857,20 @@ export class WorkflowsExecutionEnginePlugin
       scheduleWorkflow,
       cancelWorkflowExecution,
       resumeWorkflowExecution,
+      isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
+      isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),
     };
   }
 
   public stop() {}
+
+  private isEventDrivenExecutionEnabled(): boolean {
+    return this.config?.eventDriven?.enabled ?? true;
+  }
+
+  private isLogTriggerEventsEnabled(): boolean {
+    return this.config?.eventDriven?.logEvents ?? true;
+  }
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {

@@ -48,7 +48,7 @@ export const VarGroupSelectionsSchema = schema.maybe(
 
 export const DeprecationInfoSchema = schema.object({
   description: schema.string(),
-  since: schema.string(),
+  since: schema.maybe(schema.string()),
   replaced_by: schema.maybe(
     schema.recordOf(
       schema.oneOf([
