@@ -10,18 +10,22 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DeleteConfirmationModal } from './delete_confirmation_modal';
 
-const renderModal = (props: Partial<React.ComponentProps<typeof DeleteConfirmationModal>> = {}) => {
-  const defaultProps = {
-    ruleName: 'Test Rule',
-    onCancel: jest.fn(),
-    onConfirm: jest.fn(),
-    isLoading: false,
-    ...props,
-  };
-
+const renderModal = (
+  overrides: {
+    ruleName?: string;
+    onCancel?: () => void;
+    onConfirm?: () => void;
+    isLoading?: boolean;
+  } = {}
+) => {
   return render(
     <I18nProvider>
-      <DeleteConfirmationModal {...defaultProps} />
+      <DeleteConfirmationModal
+        ruleName={overrides.ruleName ?? 'Test Rule'}
+        onCancel={overrides.onCancel ?? jest.fn()}
+        onConfirm={overrides.onConfirm ?? jest.fn()}
+        isLoading={overrides.isLoading ?? false}
+      />
     </I18nProvider>
   );
 };
@@ -60,19 +64,21 @@ describe('DeleteConfirmationModal', () => {
 
   describe('bulk delete mode', () => {
     const renderBulkModal = (
-      props: Partial<React.ComponentProps<typeof DeleteConfirmationModal>> = {}
+      overrides: {
+        ruleCount?: number;
+        onCancel?: () => void;
+        onConfirm?: () => void;
+        isLoading?: boolean;
+      } = {}
     ) => {
-      const defaultProps = {
-        ruleCount: 5,
-        onCancel: jest.fn(),
-        onConfirm: jest.fn(),
-        isLoading: false,
-        ...props,
-      };
-
       return render(
         <I18nProvider>
-          <DeleteConfirmationModal {...defaultProps} />
+          <DeleteConfirmationModal
+            ruleCount={overrides.ruleCount ?? 5}
+            onCancel={overrides.onCancel ?? jest.fn()}
+            onConfirm={overrides.onConfirm ?? jest.fn()}
+            isLoading={overrides.isLoading ?? false}
+          />
         </I18nProvider>
       );
     };

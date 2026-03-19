@@ -19,7 +19,6 @@ import { RulesListTableContainer } from './rules_list_table_container';
 const DEFAULT_PER_PAGE = 20;
 
 export const RulesListPage = () => {
-  const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
 
   useBreadcrumbs('rules_list');
