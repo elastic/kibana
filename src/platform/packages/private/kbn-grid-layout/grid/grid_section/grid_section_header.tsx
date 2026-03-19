@@ -9,7 +9,7 @@
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { distinctUntilChanged, map, pairwise } from 'rxjs';
+import { distinctUntilChanged, filter, map, pairwise } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, euiCanAnimate } from '@elastic/eui';
@@ -71,11 +71,23 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
   const collapseSectionOnDrag = useCallback(() => {
     const section = gridLayoutStateManager.gridLayout$.getValue()[sectionId];
-    if (section && !section.isMainSection && !section.isCollapsed) {
-      console.log('close section');
-      toggleIsCollapsed();
-    }
+    if (section && (section.isMainSection || section.isCollapsed)) return;
+    toggleIsCollapsed();
   }, [gridLayoutStateManager, sectionId, toggleIsCollapsed]);
+
+  const shouldIgnoreHeaderClick = (target: EventTarget | null) => {
+    if (!(target instanceof Element)) return false;
+    // console.log(Boolean(target.closest('[data-no-drag]')));
+    return Boolean(target.closest('[data-no-drag]'));
+  };
+
+  const handleSectionDragStart = useCallback(
+    (e: UserInteractionEvent) => {
+      if (shouldIgnoreHeaderClick((e as unknown as React.MouseEvent).target)) return;
+      startDrag(e);
+    },
+    [startDrag]
+  );
 
   useEffect(() => {
     /**
@@ -101,55 +113,75 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       });
 
     /**
-     * This subscription is responsible for handling the drag + drop styles for
-     * re-ordering grid rows
+     * Extracted drag state stream that maps the before and after of the activeSectionEvent$ stream to a more explicit "drag state"
      */
-    const dragRowStyleSubscription = gridLayoutStateManager.activeSectionEvent$
-      .pipe(
-        pairwise(),
-        map(([before, after]) => {
-          if (!before && after) {
-            return { type: 'init', activeSectionEvent: after };
-          } else if (before && after) {
-            return { type: 'update', activeSectionEvent: after };
-          } else {
-            return { type: 'finish', activeSectionEvent: before };
-          }
-        })
-      )
-      .subscribe(({ type, activeSectionEvent }) => {
-        const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
-        if (!headerRef || activeSectionEvent?.id !== sectionId) return;
+    const dragState$ = gridLayoutStateManager.activeSectionEvent$.pipe(
+      pairwise(),
+      map(([before, after]) => {
+        if (!before && after) return { type: 'init', event: after };
+        if (before && after) return { type: 'update', event: after };
+        return { type: 'finish', event: before };
+      }),
+      filter(({ event }) => event?.id === sectionId)
+    );
 
-        if (type === 'init') {
-          hasDraggedHeaderRef.current = false; // reset the flag for new drag event
-        } else if (type === 'update') {
-          if (hasDraggedHeaderRef.current === false) {
-            collapseSectionOnDrag();
-            setIsActive(true);
-            hasDraggedHeaderRef.current = true;
-            const width = headerRef.getBoundingClientRect().width;
-            headerRef.style.width = `${width}px`;
-            headerRef.style.position = 'fixed';
-            headerRef.style.top = `${activeSectionEvent.startingPosition.top}px`;
-            headerRef.style.left = `${activeSectionEvent.startingPosition.left}px`;
+    /**
+     * This subscription is responsible for handling the drag + drop styles for
+     * re-ordering grid rows and also collapsing the section when the drag starts (if it isn't already collapsed) or toggling the collapsed state when the drag finishes without any movement (i.e. a click)
+     */
+
+    const sectionInteractionSubscription = dragState$.subscribe(({ type, event }) => {
+      const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
+      if (!headerRef) return;
+
+      const handleFirstDrag = () => {
+        collapseSectionOnDrag();
+        setIsActive(true);
+        hasDraggedHeaderRef.current = true;
+
+        const width = headerRef.getBoundingClientRect().width;
+        headerRef.style.width = `${width}px`;
+        headerRef.style.position = 'fixed';
+        headerRef.style.top = `${event!.startingPosition.top}px`;
+        headerRef.style.left = `${event!.startingPosition.left}px`;
+      };
+
+      const resetHeaderStyles = () => {
+        headerRef.style.position = '';
+        headerRef.style.width = '';
+        headerRef.style.top = '';
+        headerRef.style.left = '';
+        headerRef.style.transform = '';
+      };
+
+      switch (type) {
+        case 'init':
+          hasDraggedHeaderRef.current = false;
+          break;
+
+        case 'update':
+          if (!hasDraggedHeaderRef.current) {
+            handleFirstDrag();
           }
 
-          headerRef.style.transform = `translate(${activeSectionEvent.translate.left}px, ${activeSectionEvent.translate.top}px)`;
-        } else if (type === 'finish') {
-          console.log(hasDraggedHeaderRef.current, 'hasDraggedHeaderRef.current');
-          if (hasDraggedHeaderRef.current === false) {
-            toggleIsCollapsed(); // no drag, only click => toggle
+          headerRef.style.transform = `translate(${event!.translate.left}px, ${
+            event!.translate.top
+          }px)`;
+          break;
+
+        case 'finish':
+          const isClick = !hasDraggedHeaderRef.current;
+
+          if (isClick) {
+            toggleIsCollapsed();
           }
+
           setIsActive(false);
           hasDraggedHeaderRef.current = false;
-          headerRef.style.position = ``;
-          headerRef.style.width = ``;
-          headerRef.style.top = ``;
-          headerRef.style.left = ``;
-          headerRef.style.transform = ``;
-        }
-      });
+          resetHeaderStyles();
+          break;
+      }
+    });
 
     /**
      * This subscription is responsible for setting the collapsed state class name
@@ -175,10 +207,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     return () => {
       accessModeSubscription.unsubscribe();
       panelCountSubscription.unsubscribe();
-      dragRowStyleSubscription.unsubscribe();
+      sectionInteractionSubscription.unsubscribe();
       collapsedStateSubscription.unsubscribe();
     };
-  }, [gridLayoutStateManager, sectionId, toggleIsCollapsed]);
+  }, [gridLayoutStateManager, sectionId, toggleIsCollapsed, collapseSectionOnDrag]);
 
   const confirmDeleteSection = useCallback(() => {
     /**
@@ -195,20 +227,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       setDeleteModalVisible(true);
     }
   }, [gridLayoutStateManager, sectionId]);
-
-  const shouldIgnoreHeaderClick = (target: EventTarget | null) => {
-    if (!(target instanceof Element)) return false;
-    // console.log(Boolean(target.closest('[data-no-drag]')));
-    return Boolean(target.closest('[data-no-drag]'));
-  };
-
-  const handleSectionDragStart = useCallback(
-    (e: UserInteractionEvent) => {
-      if (shouldIgnoreHeaderClick((e as unknown as React.MouseEvent).target)) return;
-      startDrag(e);
-    },
-    [startDrag]
-  );
 
   return (
     <>
