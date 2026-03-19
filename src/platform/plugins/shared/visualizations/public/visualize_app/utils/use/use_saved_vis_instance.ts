@@ -109,7 +109,7 @@ export const useSavedVisInstance = (
 
         const originatingAppName = originatingApp
           ? stateTransferService.getAppNameFromId(originatingApp)
-          : stateTransferService.getAppNameFromId(VisualizeConstants.APP_ID);
+          : undefined;
         const redirectToOrigin = originatingApp
           ? () => navigateToApp(originatingApp)
           : () => history.push(VisualizeConstants.LANDING_PAGE_PATH);
