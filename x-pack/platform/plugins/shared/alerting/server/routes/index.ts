@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, DocLinksServiceSetup, IRouter } from '@kbn/core/server';
+import type { CoreSetup, DocLinksServiceSetup, IRouter, Logger } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/kql/server/config';
@@ -13,6 +13,7 @@ import type { Observable } from 'rxjs';
 import type { AlertingConfig } from '../config';
 import type { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import type { AlertingRequestHandlerContext } from '../types';
+import type { RuleTypeRegistry } from '../rule_type_registry';
 import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './rule/apis/get/get_rule_route';
 import { updateRuleRoute } from './rule/apis/update/update_rule_route';
@@ -93,6 +94,7 @@ import { getInternalRuleTemplateRoute } from './rule_templates/apis/get/get_rule
 import { findInternalRuleTemplatesRoute } from './rule_templates/apis/find/find_rule_template_route';
 import { bulkMuteAlertsRoute } from './rule/apis/bulk_mute_alerts/bulk_mute_alerts_route';
 import { bulkUnmuteAlertsRoute } from './rule/apis/bulk_unmute_alerts/bulk_unmute_alerts_route';
+import { mcpRoute } from './rule/apis/mcp/mcp_route';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -105,6 +107,8 @@ export interface RouteOptions {
   docLinks: DocLinksServiceSetup;
   alertingConfig: AlertingConfig;
   core: CoreSetup<AlertingPluginsStart, unknown>;
+  ruleTypeRegistry?: RuleTypeRegistry;
+  logger?: Logger;
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -205,4 +209,7 @@ export function defineRoutes(opts: RouteOptions) {
   healthRoute(router, licenseState, encryptedSavedObjects);
   getGlobalExecutionKPIRoute(router, licenseState);
   getGlobalExecutionSummaryRoute(router, licenseState);
+
+  // MCP server for rule management
+  mcpRoute(opts);
 }

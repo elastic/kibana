@@ -12,7 +12,16 @@ import type { IHttpConfig } from './types';
 import { defaultValidationErrorHandler } from './default_validation_error_handler';
 import { getServerListener } from './get_listener';
 
-const corsAllowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'];
+const corsAllowedHeaders = [
+  'Accept',
+  'Authorization',
+  'Content-Type',
+  'If-None-Match',
+  'kbn-xsrf',
+  'mcp-session-id',
+  'mcp-protocol-version',
+  'last-event-id',
+];
 
 /**
  * Converts Kibana `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.

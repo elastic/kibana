@@ -467,6 +467,8 @@ export class AlertingPlugin {
       docLinks: core.docLinks,
       alertingConfig: this.config,
       core,
+      ruleTypeRegistry: this.ruleTypeRegistry!,
+      logger: this.logger,
     });
 
     return {
