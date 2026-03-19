@@ -6,7 +6,7 @@
  */
 
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { INSTALLED_VERSION } from '../../../services/synthetics_private_location';
+import { DEFAULT_SYNTHETICS_VERSION } from '../../../services/synthetics_private_location';
 import { getDataStream } from './test_policy';
 
 export const commonVars = {
@@ -53,7 +53,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-${locationName}`,
   namespace: namespace || undefined,
   spaceIds: ['default'],
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: DEFAULT_SYNTHETICS_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   policy_ids: ['46034710-0ba6-11ed-ba04-5f123b9faa8b'],
@@ -548,7 +548,7 @@ export const getTestProjectSyntheticsPolicy = (
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: namespace || undefined,
   spaceIds: ['default'],
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: DEFAULT_SYNTHETICS_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   policy_ids: ['46034710-0ba6-11ed-ba04-5f123b9faa8b'],

@@ -16,7 +16,8 @@ import type {
 } from './types';
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
-import { dataExplorationSkill } from './skills';
+import { registerSkills } from './skills';
+import { visualizationSmlType } from './sml_types/visualization';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -49,8 +50,8 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
-
-    setupDeps.agentBuilder.skills.register(dataExplorationSkill);
+    registerSkills(setupDeps.agentBuilder);
+    setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
 
     return {};
   }

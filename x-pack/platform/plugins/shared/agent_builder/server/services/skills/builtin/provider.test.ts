@@ -93,4 +93,36 @@ describe('createBuiltinSkillProvider', () => {
       expect(await provider.list()).toEqual([]);
     });
   });
+
+  describe('list with summaryOnly', () => {
+    it('returns skills with empty content and referencedContentCount populated', async () => {
+      const skills = [
+        createMockSkillDefinition({
+          id: 'skill-1',
+          referencedContent: [
+            { name: 'ref1', relativePath: './ref1.md', content: 'content1' },
+            { name: 'ref2', relativePath: './ref2.md', content: 'content2' },
+          ],
+        }),
+        createMockSkillDefinition({ id: 'skill-2' }),
+      ];
+      const provider = createBuiltinSkillProvider(skills);
+
+      const result = await provider.list({ summaryOnly: true });
+
+      expect(result).toHaveLength(2);
+      expect(result[0].id).toBe('skill-1');
+      expect(result[0].readonly).toBe(true);
+      expect(result[0].content).toBe('');
+      expect(result[0].referencedContent).toEqual([]);
+      expect(result[0].referencedContentCount).toBe(2);
+      expect(result[1].referencedContentCount).toBe(0);
+    });
+
+    it('returns empty array when no skills are registered', async () => {
+      const provider = createBuiltinSkillProvider([]);
+
+      expect(await provider.list({ summaryOnly: true })).toEqual([]);
+    });
+  });
 });

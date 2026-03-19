@@ -849,7 +849,7 @@
       "label": "EncryptedSavedObjectsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-      "lineNumber": 34,
+      "lineNumber": 40,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -864,7 +864,7 @@
             "\nIndicates if Saved Object encryption is possible. Requires an encryption key to be explicitly set via `xpack.encryptedSavedObjects.encryptionKey`."
           ],
           "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-          "lineNumber": 35,
+          "lineNumber": 41,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -888,7 +888,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-          "lineNumber": 39,
+          "lineNumber": 45,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -910,7 +910,7 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-              "lineNumber": 39,
+              "lineNumber": 45,
               "columnNumber": 18,
               "deprecated": false,
               "trackAdoption": false,
@@ -938,7 +938,7 @@
             "<InputAttributes, MigratedAttributes>) => SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes>"
           ],
           "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-          "lineNumber": 40,
+          "lineNumber": 46,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -983,7 +983,7 @@
             "SavedObjectsModelVersion"
           ],
           "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-          "lineNumber": 41,
+          "lineNumber": 47,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1019,7 +1019,7 @@
       "label": "EncryptedSavedObjectsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-      "lineNumber": 44,
+      "lineNumber": 50,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1035,7 +1035,7 @@
             "(error: Error) => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-          "lineNumber": 45,
+          "lineNumber": 51,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1051,7 +1051,7 @@
                 "Error"
               ],
               "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-              "lineNumber": 45,
+              "lineNumber": 51,
               "columnNumber": 23,
               "deprecated": false,
               "trackAdoption": false,
@@ -1086,7 +1086,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-          "lineNumber": 46,
+          "lineNumber": 52,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1116,6 +1116,79 @@
               "trackAdoption": false
             }
           ]
+        },
+        {
+          "parentPluginId": "encryptedSavedObjects",
+          "id": "def-server.EncryptedSavedObjectsPluginStart.__testCreateDangerousExtension",
+          "type": "Function",
+          "tags": [],
+          "label": "__testCreateDangerousExtension",
+          "description": [
+            "\nThis function is exposed for Core migration testing purposes only."
+          ],
+          "signature": [
+            "(typeRegistry: ",
+            "ISavedObjectTypeRegistry",
+            ", typeRegistrationOverrides?: ",
+            {
+              "pluginId": "encryptedSavedObjects",
+              "scope": "server",
+              "docId": "kibEncryptedSavedObjectsPluginApi",
+              "section": "def-server.EncryptedSavedObjectTypeRegistration",
+              "text": "EncryptedSavedObjectTypeRegistration"
+            },
+            "[] | undefined) => ",
+            "SavedObjectsEncryptionExtension"
+          ],
+          "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
+          "lineNumber": 53,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "encryptedSavedObjects",
+              "id": "def-server.EncryptedSavedObjectsPluginStart.__testCreateDangerousExtension.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "typeRegistry",
+              "description": [],
+              "signature": [
+                "ISavedObjectTypeRegistry"
+              ],
+              "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
+              "lineNumber": 57,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "encryptedSavedObjects",
+              "id": "def-server.EncryptedSavedObjectsPluginStart.__testCreateDangerousExtension.$2",
+              "type": "Array",
+              "tags": [],
+              "label": "typeRegistrationOverrides",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "encryptedSavedObjects",
+                  "scope": "server",
+                  "docId": "kibEncryptedSavedObjectsPluginApi",
+                  "section": "def-server.EncryptedSavedObjectTypeRegistration",
+                  "text": "EncryptedSavedObjectTypeRegistration"
+                },
+                "[] | undefined"
+              ],
+              "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
+              "lineNumber": 58,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

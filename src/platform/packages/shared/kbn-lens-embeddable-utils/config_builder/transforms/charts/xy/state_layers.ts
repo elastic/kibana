@@ -41,7 +41,11 @@ const BREAKDOWN_ACCESSOR = 'breakdown';
 const METRIC_ACCESSOR_PREFIX = 'y';
 const REFERENCE_LINE_ACCESSOR_PREFIX = 'threshold';
 
-export function getValueColumns(layer: unknown, i: number) {
+export function getValueColumns(
+  layer: unknown,
+  i: number,
+  xAxisScale?: 'temporal' | 'ordinal' | 'linear'
+) {
   if (!isAPIXYLayer(layer) || !isAPIesqlXYLayer(layer)) {
     return [];
   }
@@ -55,8 +59,12 @@ export function getValueColumns(layer: unknown, i: number) {
       ),
     ];
   }
+  const xColumnType =
+    xAxisScale === 'temporal' ? 'date' : xAxisScale === 'linear' ? 'number' : undefined;
   return [
-    ...(layer.x ? [getValueColumn(getAccessorNameForXY(layer, X_ACCESSOR), layer.x.column)] : []),
+    ...(layer.x
+      ? [getValueColumn(getAccessorNameForXY(layer, X_ACCESSOR), layer.x.column, xColumnType)]
+      : []),
     ...layer.y.map((y, index) =>
       getValueColumn(getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index), y.column, 'number')
     ),
@@ -90,7 +98,7 @@ function buildDataLayer(layer: DataLayerType, i: number): XYDataLayerConfig {
       ? { collapseFn: layer.breakdown_by.collapse_by }
       : {}),
     ...(layer.breakdown_by && 'color' in layer.breakdown_by
-      ? { colorMapping: fromColorMappingAPIToLensState(layer.breakdown_by.color) }
+      ? { ...fromColorMappingAPIToLensState(layer.breakdown_by.color) }
       : {}),
   };
 }
@@ -231,7 +239,7 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
 
   if (isAPIDataLayer(layer)) {
     // convert metrics in buckets, do not flat yet
-    const yColumnsConverted = layer.y.map(fromMetricAPItoLensState);
+    const yColumnsConverted = layer.y.map((col) => fromMetricAPItoLensState(col));
     const yColumnsWithIds = processMetricColumnsWithReferences(
       yColumnsConverted,
       (index) => getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),

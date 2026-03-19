@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   CreateListItemRequestBody,
   CreateListItemResponse,
@@ -62,12 +62,10 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
             }
           }
           const createdListItem = await lists.createListItem({
-            deserializer: list.deserializer,
             id,
             listId,
             meta,
             refresh,
-            serializer: list.serializer,
             type: list.type,
             value,
           });

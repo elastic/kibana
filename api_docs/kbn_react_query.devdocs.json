@@ -13909,7 +13909,7 @@
               "\nIf set, the component will only re-render if any of the listed properties change.\nWhen set to `['data', 'error']`, the component will only re-render when the `data` or `error` properties change.\nWhen set to `'all'`, the component will re-render whenever a query is updated.\nBy default, access to properties will be tracked, and the component will only re-render when one of the tracked properties change."
             ],
             "signature": [
-              "\"all\" | (\"error\" | \"status\" | \"data\" | \"remove\" | \"isError\" | \"isLoading\" | \"isSuccess\" | \"failureCount\" | \"failureReason\" | \"isPaused\" | \"fetchStatus\" | \"isInitialLoading\" | \"refetch\" | \"isRefetching\" | \"isFetching\" | \"isLoadingError\" | \"dataUpdatedAt\" | \"errorUpdateCount\" | \"errorUpdatedAt\" | \"isRefetchError\" | \"fetchNextPage\" | \"fetchPreviousPage\" | \"hasNextPage\" | \"hasPreviousPage\" | \"isFetchingNextPage\" | \"isFetchingPreviousPage\" | \"isFetched\" | \"isFetchedAfterMount\" | \"isPlaceholderData\" | \"isPreviousData\" | \"isStale\")[] | undefined"
+              "\"all\" | (\"error\" | \"data\" | \"status\" | \"remove\" | \"isError\" | \"isLoading\" | \"isSuccess\" | \"failureCount\" | \"failureReason\" | \"isPaused\" | \"fetchStatus\" | \"isInitialLoading\" | \"refetch\" | \"isRefetching\" | \"isFetching\" | \"isLoadingError\" | \"dataUpdatedAt\" | \"errorUpdateCount\" | \"errorUpdatedAt\" | \"isRefetchError\" | \"fetchNextPage\" | \"fetchPreviousPage\" | \"hasNextPage\" | \"hasPreviousPage\" | \"isFetchingNextPage\" | \"isFetchingPreviousPage\" | \"isFetched\" | \"isFetchedAfterMount\" | \"isPlaceholderData\" | \"isPreviousData\" | \"isStale\")[] | undefined"
             ],
             "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
             "lineNumber": 124,
@@ -13974,8 +13974,20 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/servicenow/use_get_choices.tsx"
               },
               {
+                "plugin": "@kbn/anonymization-ui",
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/hooks/use_preview_document_loader.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_live_query_details.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_scheduled_execution_details.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_history_tags.ts"
               },
               {
                 "plugin": "osquery",
@@ -13984,10 +13996,6 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/action_results/use_action_results.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
               },
               {
                 "plugin": "osquery",
@@ -14011,7 +14019,15 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_all_live_queries.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_unified_history.ts"
               },
               {
                 "plugin": "osquery",
@@ -14036,6 +14052,10 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/public/hooks/use_metrics_explorer_views.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/components/endpoint_runscript_script_selector/endpoint_runscript_script_selector.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -14209,15 +14229,19 @@
               },
               {
                 "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_templates.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template.ts"
+              },
+              {
+                "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_action_license.tsx"
               },
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_action_types.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template.ts"
               },
               {
                 "plugin": "cases",
@@ -14265,10 +14289,6 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_templates.ts"
-              },
-              {
-                "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template_tags.ts"
               },
               {
@@ -14309,11 +14329,11 @@
               },
               {
                 "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_connectors.ts"
+                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_stack_connector.ts"
               },
               {
                 "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_stack_connector.ts"
+                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_connectors.ts"
               },
               {
                 "plugin": "maintenanceWindows",
@@ -14333,15 +14353,19 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_scheduled_execution_details.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_history_tags.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/results/use_all_results.ts"
               },
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/action_results/use_action_results.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
               },
               {
                 "plugin": "osquery",
@@ -14373,7 +14397,15 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_all_live_queries.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_unified_history.ts"
               },
               {
                 "plugin": "osquery",
@@ -14390,10 +14422,6 @@
               {
                 "plugin": "streamsApp",
                 "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_significant_events.ts"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_systems/stream_systems/hooks/use_stream_systems.ts"
               },
               {
                 "plugin": "streamsApp",
@@ -14516,22 +14544,6 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_rule_management_filters.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_coverage_overview_query.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_rule.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
-              },
-              {
                 "plugin": "@kbn/cloud-security-posture",
                 "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_preview.ts"
               },
@@ -14540,12 +14552,16 @@
                 "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_preview.ts"
               },
               {
-                "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_findings.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_rule.ts"
               },
               {
-                "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_findings.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_coverage_overview_query.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14565,6 +14581,18 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connectors_query.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connector_types_query.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml/hooks/use_installed_security_jobs.ts"
               },
               {
@@ -14578,6 +14606,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/dashboards/logic/use_get_migration_translation_stats.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_suggest_users.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -14598,14 +14630,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/components/execution_results_table/use_execution_results.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_suggest_users.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/use_get_saved_query.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14661,14 +14685,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connectors_query.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connector_types_query.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/pages/ai_rule_creation/hooks/use_inference_connectors.ts"
               },
               {
@@ -14698,6 +14714,18 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/rules/logic/use_get_migration_privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/use_get_saved_query.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_findings.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_findings.ts"
               },
               {
                 "plugin": "securitySolution",

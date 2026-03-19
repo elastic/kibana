@@ -11,6 +11,7 @@ import {
   type IdentifyFeaturesResult,
   type BaseFeature,
   isComputedFeature,
+  getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
 import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
 import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
@@ -19,15 +20,16 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
 import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
 import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_found_error';
+import type { StreamsFeaturesIdentifiedProps } from '../../telemetry';
 
 export interface FeaturesIdentificationTaskParams {
-  connectorId: string;
   start: number;
   end: number;
   streamName: string;
@@ -50,8 +52,22 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, streamName, _task } = runContext.taskInstance
+              const taskStart = Date.now();
+              const { start, end, streamName, _task } = runContext.taskInstance
                 .params as TaskParams<FeaturesIdentificationTaskParams>;
+
+              const telemetryProps: StreamsFeaturesIdentifiedProps = {
+                total_duration_ms: 0,
+                identification_duration_ms: 0,
+                stream_name: streamName,
+                stream_type: 'unknown',
+                input_tokens_used: 0,
+                output_tokens_used: 0,
+                total_tokens_used: 0,
+                inferred_total_count: 0,
+                inferred_dedup_count: 0,
+                state: 'success',
+              };
 
               const {
                 taskClient,
@@ -60,9 +76,20 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 streamsClient,
                 inferenceClient,
                 soClient,
+                modelSettingsClient,
+                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
+
+              const taskLogger = taskContext.logger.get('features_identification');
+              const settings = await modelSettingsClient.getSettings();
+              const connectorId = await resolveConnectorId({
+                connectorId: settings.connectorIdKnowledgeIndicatorExtraction,
+                uiSettingsClient,
+                logger: taskLogger,
+              });
+              taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
               try {
                 const [stream, { featurePromptOverride }] = await Promise.all([
@@ -72,6 +99,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     logger: taskContext.logger,
                   }).getPrompt(),
                 ]);
+
+                telemetryProps.stream_type = getStreamTypeFromDefinition(stream);
 
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
@@ -84,6 +113,15 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   size: 20,
                 });
 
+                if (sampleDocuments.length === 0) {
+                  taskContext.logger.debug(
+                    () =>
+                      `No sample documents found for stream ${streamName}, skipping features identification`
+                  );
+                  return getDeleteTaskRunResult();
+                }
+
+                const identifyFeaturesStart = Date.now();
                 const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
                   identifyFeatures({
                     streamName: stream.name,
@@ -92,7 +130,17 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     logger: taskContext.logger.get('features_identification'),
                     signal: runContext.abortController.signal,
                     systemPrompt: featurePromptOverride,
-                  }),
+                  })
+                    .then((result) => {
+                      telemetryProps.input_tokens_used = result.tokensUsed.prompt;
+                      telemetryProps.output_tokens_used = result.tokensUsed.completion;
+                      telemetryProps.total_tokens_used = result.tokensUsed.total;
+                      return result;
+                    })
+                    .finally(() => {
+                      telemetryProps.identification_duration_ms =
+                        Date.now() - identifyFeaturesStart;
+                    }),
                   generateAllComputedFeatures({
                     stream,
                     start,
@@ -108,19 +156,24 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 ];
 
                 const { hits: existingFeatures } = await featureClient.getFeatures(stream.name);
+
+                let newFeaturesCount = inferredBaseFeatures.length;
                 const now = Date.now();
                 const features = identifiedFeatures.map((feature) => {
                   const existing = featureClient.findDuplicateFeature({
                     existingFeatures,
                     feature,
                   });
-                  if (existing) {
+                  const isComputed = isComputedFeature(feature);
+                  if (existing && !isComputed) {
+                    newFeaturesCount--;
                     taskContext.logger.debug(
-                      `Overwriting feature with id [${
-                        feature.id
-                      }] since it already exists.\nExisting feature: ${JSON.stringify(
-                        existing
-                      )}\nNew feature: ${JSON.stringify(feature)}`
+                      () =>
+                        `Overwriting feature with id [${
+                          feature.id
+                        }] since it already exists.\nExisting feature: ${JSON.stringify(
+                          existing
+                        )}\nNew feature: ${JSON.stringify(feature)}`
                     );
                   }
                   return {
@@ -128,7 +181,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     status: 'active' as const,
                     last_seen: new Date(now).toISOString(),
                     expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
-                    uuid: isComputedFeature(feature)
+                    uuid: isComputed
                       ? uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS)
                       : existing?.uuid ?? uuid(),
                   };
@@ -141,13 +194,22 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
-                  { connectorId, start, end, streamName },
+                  { start, end, streamName },
                   { features }
                 );
+
+                taskContext.telemetry.trackFeaturesIdentified({
+                  ...telemetryProps,
+                  inferred_total_count: inferredBaseFeatures.length,
+                  inferred_dedup_count: newFeaturesCount,
+                  total_duration_ms: Date.now() - taskStart,
+                  state: 'success',
+                });
               } catch (error) {
                 if (isDefinitionNotFoundError(error)) {
                   taskContext.logger.debug(
-                    `Stream ${streamName} was deleted before features identification task started, skipping`
+                    () =>
+                      `Stream ${streamName} was deleted before features identification task started, skipping`
                   );
                   return getDeleteTaskRunResult();
                 }
@@ -163,6 +225,14 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
+                  taskContext.logger.debug(
+                    () => `Task ${runContext.taskInstance.id} was canceled: ${errorMessage}`
+                  );
+                  taskContext.telemetry.trackFeaturesIdentified({
+                    ...telemetryProps,
+                    total_duration_ms: Date.now() - taskStart,
+                    state: 'canceled',
+                  });
                   return getDeleteTaskRunResult();
                 }
 
@@ -173,9 +243,15 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.fail<FeaturesIdentificationTaskParams>(
                   _task,
-                  { connectorId, start, end, streamName },
+                  { start, end, streamName },
                   errorMessage
                 );
+
+                taskContext.telemetry.trackFeaturesIdentified({
+                  ...telemetryProps,
+                  total_duration_ms: Date.now() - taskStart,
+                  state: 'failure',
+                });
 
                 return getDeleteTaskRunResult();
               }

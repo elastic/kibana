@@ -215,13 +215,12 @@ describe('SubActionConnector', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(`
         "Response validation failed ([
           {
-            \\"code\\": \\"invalid_type\\",
             \\"expected\\": \\"string\\",
-            \\"received\\": \\"undefined\\",
+            \\"code\\": \\"invalid_type\\",
             \\"path\\": [
               \\"status\\"
             ],
-            \\"message\\": \\"Required\\"
+            \\"message\\": \\"Invalid input: expected string, received undefined\\"
           }
         ])"
       `);

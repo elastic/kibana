@@ -114,9 +114,6 @@ describe('createStackConnector', () => {
           },
           secrets: {
             apiKey: 'api-key-123',
-            secretHeaders: {
-              'X-API-Key': 'api-key-123',
-            },
           },
         },
       });
@@ -162,6 +159,54 @@ describe('createStackConnector', () => {
           secrets: {
             user: 'username',
             password: 'password',
+          },
+        },
+      });
+    });
+
+    it('should create MCP connector with apiKey auth and valueTemplate (e.g. PagerDuty)', async () => {
+      const mockStackConnector = {
+        id: 'mcp-connector-pagerduty',
+        name: '.mcp',
+        actionTypeId: '.mcp',
+      };
+
+      const connectorConfigPagerDuty: StackConnectorConfig = {
+        type: '.mcp',
+        config: {
+          serverUrl: 'https://mcp.pagerduty.com/mcp',
+          hasAuth: true,
+          authType: 'apiKey' as const,
+          apiKeyHeaderName: 'Authorization',
+          apiKeyHeaderValue: 'Token token={{apiKey}}',
+        },
+        importedTools: undefined,
+      };
+
+      mockActionsClient.create.mockResolvedValue(mockStackConnector);
+
+      const result = await createStackConnector(
+        mockActions as any,
+        mockRequest,
+        MOCK_DATA_SOURCE_NAME,
+        connectorConfigPagerDuty,
+        'pagerduty-token-abc'
+      );
+
+      expect(result).toEqual(mockStackConnector);
+      expect(mockActionsClient.create).toHaveBeenCalledWith({
+        action: {
+          name: MOCK_DATA_SOURCE_NAME,
+          actionTypeId: '.mcp',
+          config: {
+            serverUrl: 'https://mcp.pagerduty.com/mcp',
+            hasAuth: true,
+            authType: 'apiKey',
+            apiKeyHeaderName: 'Authorization',
+            apiKeyHeaderValue: 'Token token={{apiKey}}',
+          },
+          secrets: {
+            apiKey: 'pagerduty-token-abc',
           },
         },
       });
@@ -425,6 +470,51 @@ describe('createStackConnector', () => {
           secrets: expect.objectContaining({
             authType: 'api_key_header',
             apiKey: 'api-key-123',
+          }),
+        },
+      });
+    });
+
+    it('should pass through config for non-MCP connector (e.g. Zendesk)', async () => {
+      const mockStackConnector = {
+        id: 'zendesk-connector-1',
+        name: '.zendesk',
+        actionTypeId: '.zendesk',
+      };
+
+      const zendeskConnectorConfig: StackConnectorConfig = {
+        type: '.zendesk',
+        config: { subdomain: 'test-company' },
+        importedTools: undefined,
+      };
+
+      const zendeskSpec = Object.values(connectorsSpecs).find(
+        (spec) => spec.metadata.id === '.zendesk'
+      );
+      if (!zendeskSpec) {
+        throw new Error('Zendesk spec not found');
+      }
+
+      mockActionsClient.create.mockResolvedValue(mockStackConnector);
+
+      const result = await createStackConnector(
+        mockActions as any,
+        mockRequest,
+        MOCK_DATA_SOURCE_NAME,
+        zendeskConnectorConfig,
+        'agent@example.com/token:my-api-token'
+      );
+
+      expect(result).toEqual(mockStackConnector);
+      expect(mockActionsClient.create).toHaveBeenCalledWith({
+        action: {
+          name: MOCK_DATA_SOURCE_NAME,
+          actionTypeId: '.zendesk',
+          config: { subdomain: 'test-company' },
+          secrets: expect.objectContaining({
+            authType: 'basic',
+            username: 'agent@example.com/token',
+            password: 'my-api-token',
           }),
         },
       });

@@ -18,7 +18,7 @@ import type {
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLLocation, ESQLProperNode } from '../../types';
+import type { ESQLLocation, ESQLProperNode } from '@elastic/esql/types';
 import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
 import type { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
@@ -246,6 +246,11 @@ export enum Location {
   STATS_BY = 'stats_by',
 
   /**
+   * In a LIMIT grouping clause
+   */
+  LIMIT_BY = 'limit_by',
+
+  /**
    * In a per-agg filter
    */
   STATS_WHERE = 'stats_where',
@@ -295,6 +300,11 @@ export enum Location {
    * In the COMPLETION command
    */
   COMPLETION = 'completion',
+
+  /**
+   * In the MMR command
+   */
+  MMR = 'mmr',
 
   /**
    * In the PROMQL command (PromQL query expression)

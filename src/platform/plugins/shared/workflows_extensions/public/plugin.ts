@@ -70,6 +70,9 @@ export class WorkflowsExtensionsPublicPlugin
       hasTriggerDefinition: (triggerId: string) => {
         return this.triggerRegistry.has(triggerId);
       },
+      isReady: async () => {
+        await Promise.all([this.stepRegistry.whenReady(), this.triggerRegistry.whenReady()]);
+      },
     };
   }
 

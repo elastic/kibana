@@ -7,6 +7,11 @@
 
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 
+export type { EntityStoreStartContract, EntityStoreCRUDClient } from './types';
+export type { BulkObject, BulkObjectResponse } from './domain/crud';
+export { getLatestEntitiesIndexName } from './domain/asset_manager/latest_index';
+export { getHistorySnapshotIndexPattern } from './domain/asset_manager/history_snapshot_index';
+
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { EntityStorePlugin } = await import('./plugin');
   return new EntityStorePlugin(initializerContext);

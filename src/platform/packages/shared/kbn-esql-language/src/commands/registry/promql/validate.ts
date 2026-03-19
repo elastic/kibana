@@ -14,9 +14,14 @@ import type {
   ESQLAstPromqlCommand,
   ESQLLocation,
   ESQLMessage,
-} from '../../../types';
-import { Walker } from '../../../ast';
-import { isIdentifier, isList, isSource } from '../../../ast/is';
+} from '@elastic/esql/types';
+import { isIdentifier, isList, isSource, Walker } from '@elastic/esql';
+import type {
+  PromQLBinaryExpression,
+  PromQLFunction,
+  PromQLLabelName,
+  PromQLSelector,
+} from '@elastic/esql';
 import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
 import {
@@ -34,12 +39,6 @@ import {
   getPromqlMatchingSignatures,
   getPromqlSignatureMismatch,
 } from '../../definitions/utils/validation/function';
-import type {
-  PromQLBinaryExpression,
-  PromQLFunction,
-  PromQLLabelName,
-  PromQLSelector,
-} from '../../../embedded_languages/promql/types';
 import {
   getUsedPromqlParamNames,
   IDENTIFIER_PATTERN,

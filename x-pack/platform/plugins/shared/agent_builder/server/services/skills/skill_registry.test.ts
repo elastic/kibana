@@ -18,7 +18,9 @@ const createMockInternalSkillDefinition = (
   description: 'A test skill',
   content: 'Skill body content',
   readonly: true,
+  basePath: 'skills/platform',
   getRegistryTools: () => [],
+  referencedContentCount: 0,
   ...overrides,
 });
 
@@ -31,6 +33,14 @@ const createMockBuiltinProvider = (
     readonly: true,
     has: jest.fn(async (id: string) => skillsMap.has(id)),
     get: jest.fn(async (id: string) => skillsMap.get(id)),
+    bulkGet: jest.fn(async (ids: string[]) => {
+      const result = new Map<string, InternalSkillDefinition>();
+      for (const id of ids) {
+        const skill = skillsMap.get(id);
+        if (skill) result.set(id, skill);
+      }
+      return result;
+    }),
     list: jest.fn(async () => skills),
   };
 };
@@ -44,11 +54,21 @@ const createMockPersistedProvider = (
     readonly: false,
     has: jest.fn(async (id: string) => skillsMap.has(id)),
     get: jest.fn(async (id: string) => skillsMap.get(id)),
+    bulkGet: jest.fn(async (ids: string[]) => {
+      const result = new Map<string, InternalSkillDefinition>();
+      for (const id of ids) {
+        const skill = skillsMap.get(id);
+        if (skill) result.set(id, skill);
+      }
+      return result;
+    }),
     list: jest.fn(async () => skills),
     create: jest.fn(async (params) => ({
       ...params,
       readonly: false,
+      basePath: '/skills',
       getRegistryTools: () => params.tool_ids ?? [],
+      referencedContentCount: params.referenced_content?.length ?? 0,
     })),
     update: jest.fn(async (id, update) => ({
       id,
@@ -56,7 +76,9 @@ const createMockPersistedProvider = (
       description: update.description ?? 'original-description',
       content: update.content ?? 'original-content',
       readonly: false,
+      basePath: '/skills',
       getRegistryTools: () => update.tool_ids ?? [],
+      referencedContentCount: 0,
     })),
     delete: jest.fn(async (_skillId: string) => undefined),
   };
@@ -148,14 +170,14 @@ describe('createSkillRegistry', () => {
       expect(await registry.get('builtin-skill-1')).toEqual(builtinSkill1);
     });
 
-    it('throws for non-existent skill', async () => {
+    it('returns undefined for non-existent skill', async () => {
       const registry = createSkillRegistry({
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
       });
 
-      await expect(registry.get('non-existent')).rejects.toThrow('Skill non-existent not found');
+      expect(await registry.get('non-existent')).toBeUndefined();
     });
   });
 
@@ -175,6 +197,139 @@ describe('createSkillRegistry', () => {
 
       const persisted = result.find((s) => s.id === 'custom-skill-1');
       expect(persisted?.readonly).toBe(false);
+    });
+  });
+
+  describe('list with summaryOnly', () => {
+    it('forwards options to both providers', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.list({ summaryOnly: true });
+      expect(result).toHaveLength(2);
+
+      expect(builtinProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
+      expect(persistedProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
+    });
+  });
+
+  describe('list with type filter', () => {
+    it('returns only built-in skills when type is built-in', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.list({ type: 'built-in' });
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('builtin-skill-1');
+      expect(builtinProvider.list).toHaveBeenCalledWith({});
+      expect(persistedProvider.list).not.toHaveBeenCalled();
+    });
+
+    it('returns only persisted skills when type is persisted', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.list({ type: 'persisted' });
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('custom-skill-1');
+      expect(persistedProvider.list).toHaveBeenCalledWith({});
+      expect(builtinProvider.list).not.toHaveBeenCalled();
+    });
+
+    it('does not forward the type field to providers', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      await registry.list({ type: 'built-in', summaryOnly: true });
+      expect(builtinProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
+    });
+  });
+
+  describe('bulkGet', () => {
+    it('returns all built-in skills when all IDs are built-in', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const persistedProvider = createMockPersistedProvider([]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.bulkGet(['builtin-skill-1']);
+      expect(result.size).toBe(1);
+      expect(result.get('builtin-skill-1')).toEqual(builtinSkill1);
+      expect(persistedProvider.bulkGet).not.toHaveBeenCalled();
+    });
+
+    it('falls through to persisted provider for non-builtin IDs', async () => {
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.bulkGet(['custom-skill-1']);
+      expect(result.size).toBe(1);
+      expect(result.get('custom-skill-1')).toEqual(persistedSkill1);
+      expect(persistedProvider.bulkGet).toHaveBeenCalledWith(['custom-skill-1']);
+    });
+
+    it('merges results from both providers', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.bulkGet(['builtin-skill-1', 'custom-skill-1']);
+      expect(result.size).toBe(2);
+      expect(result.get('builtin-skill-1')).toEqual(builtinSkill1);
+      expect(result.get('custom-skill-1')).toEqual(persistedSkill1);
+    });
+
+    it('omits IDs that are not found in either provider', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.bulkGet(['builtin-skill-1', 'non-existent']);
+      expect(result.size).toBe(1);
+      expect(result.has('non-existent')).toBe(false);
+    });
+
+    it('returns empty map for empty input', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.bulkGet([]);
+      expect(result.size).toBe(0);
     });
   });
 
@@ -308,18 +463,6 @@ describe('createSkillRegistry', () => {
       );
     });
 
-    it('throws when skill does not exist', async () => {
-      const registry = createSkillRegistry({
-        builtinProvider: createMockBuiltinProvider([]),
-        persistedProvider: createMockPersistedProvider([]),
-        toolRegistry: createMockToolRegistry(),
-      });
-
-      await expect(registry.update('non-existent', { name: 'Updated' })).rejects.toThrow(
-        'Skill non-existent not found'
-      );
-    });
-
     it('throws when updating with more than 5 tool IDs', async () => {
       const toolIds = ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6'];
       const registry = createSkillRegistry({
@@ -359,14 +502,16 @@ describe('createSkillRegistry', () => {
       );
     });
 
-    it('throws when skill does not exist', async () => {
+    it('delegates to persisted provider for non-existent skill', async () => {
+      const persistedProvider = createMockPersistedProvider([]);
       const registry = createSkillRegistry({
         builtinProvider: createMockBuiltinProvider([]),
-        persistedProvider: createMockPersistedProvider([]),
+        persistedProvider,
         toolRegistry: createMockToolRegistry(),
       });
 
-      await expect(registry.delete('non-existent')).rejects.toThrow('Skill non-existent not found');
+      await registry.delete('non-existent');
+      expect(persistedProvider.delete).toHaveBeenCalledWith('non-existent');
     });
   });
 });

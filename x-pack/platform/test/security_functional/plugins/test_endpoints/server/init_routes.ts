@@ -615,4 +615,48 @@ export function initRoutes(
       }
     }
   );
+
+  // UIAM API Key Convert Route
+  router.post(
+    {
+      path: '/test_endpoints/uiam/api_keys/_convert',
+      validate: {
+        body: schema.object({
+          keys: schema.arrayOf(schema.string(), { minSize: 1 }),
+        }),
+      },
+      security: {
+        authc: { enabled: 'optional' },
+        authz: { enabled: false, reason: 'Test endpoint for UIAM API key operations' },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { keys } = request.body;
+        const [{ security }] = await core.getStartServices();
+
+        if (!security.authc.apiKeys.uiam) {
+          return response.badRequest({
+            body: { message: 'UIAM API keys service is not available' },
+          });
+        }
+
+        const result = await security.authc.apiKeys.uiam.convert(keys);
+
+        if (!result) {
+          return response.badRequest({
+            body: { message: 'Failed to convert API keys' },
+          });
+        }
+
+        return response.ok({ body: result });
+      } catch (err) {
+        logger.error(`Failed to convert UIAM API keys: ${err}`, err);
+        return response.customError({
+          statusCode: 500,
+          body: { message: err.message },
+        });
+      }
+    }
+  );
 }

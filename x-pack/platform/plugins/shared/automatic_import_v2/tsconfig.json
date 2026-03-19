@@ -37,6 +37,7 @@
     "@kbn/core-application-common",
     "@kbn/i18n",
     "@kbn/features-plugin",
+    "@kbn/fields-metadata-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/logging",
     "@kbn/i18n-react",
@@ -52,6 +53,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/ingest-pipelines-plugin",
     "@kbn/utility-types",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/monaco"
   ]
 }

@@ -17,6 +17,7 @@ import {
   type TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
@@ -55,6 +56,7 @@ import {
   fromColorByValueLensStateToAPI,
   fromStaticColorAPIToLensState,
   fromStaticColorLensStateToAPI,
+  isColorByValueColor,
 } from '../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../columns/utils';
 
@@ -65,7 +67,7 @@ type WritableMetricStateWithoutDataset = DeepWriteable<Omit<MetricState, 'datase
 const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
-export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
+export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT: KbnPaletteId = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
@@ -95,7 +97,8 @@ function fromCompareAPIToLensState(compareToConfig: MetricApiCompareType): {
         compareToConfig.to === 'primary' ? compareToConfig.to : compareToConfig.baseline,
       visuals: getCompareVisualsState(compareToConfig),
       reversed: compareToConfig.palette?.includes('reversed') ?? LENS_METRIC_COMPARE_TO_REVERSED,
-      paletteId: compareToConfig.palette ?? LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
+      paletteId:
+        (compareToConfig.palette as KbnPaletteId) ?? LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
     },
   };
 }
@@ -128,7 +131,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     ...(primaryMetric.color?.type === 'static'
       ? fromStaticColorAPIToLensState(primaryMetric.color)
       : {}),
-    ...(primaryMetric.color?.type === 'dynamic'
+    ...(isColorByValueColor(primaryMetric.color)
       ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
       : {}),
     ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
@@ -577,7 +580,7 @@ function getValueColumns(layer: MetricStateESQL) {
         ]
       : []),
     ...(secondaryMetric
-      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric.column)]
+      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric.column, 'number')]
       : []),
   ];
 }
@@ -615,7 +618,7 @@ export function fromAPItoLensState(config: MetricState): MetricAttributesWithout
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

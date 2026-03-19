@@ -303,6 +303,143 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.results[0].summary.healthy).to.eql(2);
     });
 
+    it('filters by statusFilters', async () => {
+      const now = new Date().toISOString();
+      const docs = [
+        createApmSummaryDoc('slo-1', 'service-a', 'HEALTHY', now),
+        createApmSummaryDoc('slo-2', 'service-a', 'VIOLATED', now),
+        createApmSummaryDoc('slo-3', 'service-a', 'DEGRADING', now),
+        createApmSummaryDoc('slo-4', 'service-b', 'HEALTHY', now),
+        createApmSummaryDoc('slo-5', 'service-b', 'VIOLATED', now),
+      ];
+
+      await insertSummaryDocs(docs);
+
+      const response = await supertestWithoutAuth
+        .post(`/internal/slos/_grouped_stats`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(internalHeaders)
+        .send({ type: 'apm', statusFilters: ['VIOLATED'] })
+        .expect(200);
+
+      expect(response.body.results).to.have.length(2);
+
+      const serviceA = response.body.results.find(
+        (r: { entity: string }) => r.entity === 'service-a'
+      );
+      const serviceB = response.body.results.find(
+        (r: { entity: string }) => r.entity === 'service-b'
+      );
+
+      expect(serviceA).to.be.ok();
+      expect(serviceA.summary.violated).to.eql(1);
+      expect(serviceA.summary.healthy).to.eql(0);
+      expect(serviceA.summary.degrading).to.eql(0);
+
+      expect(serviceB).to.be.ok();
+      expect(serviceB.summary.violated).to.eql(1);
+      expect(serviceB.summary.healthy).to.eql(0);
+    });
+
+    it('filters by multiple statusFilters', async () => {
+      const now = new Date().toISOString();
+      const docs = [
+        createApmSummaryDoc('slo-1', 'service-a', 'HEALTHY', now),
+        createApmSummaryDoc('slo-2', 'service-a', 'VIOLATED', now),
+        createApmSummaryDoc('slo-3', 'service-a', 'DEGRADING', now),
+      ];
+
+      await insertSummaryDocs(docs);
+
+      const response = await supertestWithoutAuth
+        .post(`/internal/slos/_grouped_stats`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(internalHeaders)
+        .send({ type: 'apm', statusFilters: ['VIOLATED', 'DEGRADING'] })
+        .expect(200);
+
+      expect(response.body.results).to.have.length(1);
+
+      const serviceA = response.body.results.find(
+        (r: { entity: string }) => r.entity === 'service-a'
+      );
+
+      expect(serviceA).to.be.ok();
+      expect(serviceA.summary.violated).to.eql(1);
+      expect(serviceA.summary.degrading).to.eql(1);
+      expect(serviceA.summary.healthy).to.eql(0);
+    });
+
+    it('filters by kqlQuery', async () => {
+      const now = new Date().toISOString();
+      const docs = [
+        createApmSummaryDoc('slo-1', 'service-a', 'HEALTHY', now),
+        createApmSummaryDoc('slo-2', 'service-a', 'VIOLATED', now),
+        createApmSummaryDoc('slo-3', 'service-b', 'DEGRADING', now),
+      ];
+
+      await insertSummaryDocs(docs);
+
+      const response = await supertestWithoutAuth
+        .post(`/internal/slos/_grouped_stats`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(internalHeaders)
+        .send({ type: 'apm', kqlQuery: 'service.name : service-a' })
+        .expect(200);
+
+      expect(response.body.results).to.have.length(1);
+
+      const serviceA = response.body.results.find(
+        (r: { entity: string }) => r.entity === 'service-a'
+      );
+
+      expect(serviceA).to.be.ok();
+      expect(serviceA.summary.healthy).to.eql(1);
+      expect(serviceA.summary.violated).to.eql(1);
+
+      const serviceB = response.body.results.find(
+        (r: { entity: string }) => r.entity === 'service-b'
+      );
+      expect(serviceB).to.be(undefined);
+    });
+
+    it('combines kqlQuery with statusFilters', async () => {
+      const now = new Date().toISOString();
+      const docs = [
+        createApmSummaryDoc('slo-1', 'service-a', 'HEALTHY', now),
+        createApmSummaryDoc('slo-2', 'service-a', 'VIOLATED', now),
+        createApmSummaryDoc('slo-3', 'service-b', 'VIOLATED', now),
+      ];
+
+      await insertSummaryDocs(docs);
+
+      const response = await supertestWithoutAuth
+        .post(`/internal/slos/_grouped_stats`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(internalHeaders)
+        .send({
+          type: 'apm',
+          kqlQuery: 'service.name : service-a',
+          statusFilters: ['VIOLATED'],
+        })
+        .expect(200);
+
+      expect(response.body.results).to.have.length(1);
+
+      const serviceA = response.body.results.find(
+        (r: { entity: string }) => r.entity === 'service-a'
+      );
+
+      expect(serviceA).to.be.ok();
+      expect(serviceA.summary.violated).to.eql(1);
+      expect(serviceA.summary.healthy).to.eql(0);
+
+      const serviceB = response.body.results.find(
+        (r: { entity: string }) => r.entity === 'service-b'
+      );
+      expect(serviceB).to.be(undefined);
+    });
+
     it('returns 400 for unsupported SLO type', async () => {
       const response = await supertestWithoutAuth
         .post(`/internal/slos/_grouped_stats`)

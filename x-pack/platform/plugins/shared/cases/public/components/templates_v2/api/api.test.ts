@@ -10,6 +10,7 @@ import {
   INTERNAL_BULK_DELETE_TEMPLATES_URL,
   INTERNAL_BULK_EXPORT_TEMPLATES_URL,
   INTERNAL_TEMPLATE_CREATORS_URL,
+  INTERNAL_TEMPLATE_DETAILS_URL,
   INTERNAL_TEMPLATE_TAGS_URL,
   INTERNAL_TEMPLATES_URL,
 } from '../../../../common/constants';
@@ -32,6 +33,7 @@ jest.mock('../utils/templates_to_yaml', () => {
 import { KibanaServices } from '../../../common/lib/kibana';
 import { templatesToYaml } from '../utils/templates_to_yaml';
 import {
+  getTemplate,
   getTemplates,
   bulkDeleteTemplates,
   bulkExportTemplates,
@@ -74,6 +76,7 @@ describe('templates_v2 api bulk actions', () => {
         sortOrder: 'asc' as const,
         tags: ['security'],
         author: ['alice'],
+        owner: ['securitySolution'],
         isDeleted: false,
       };
 
@@ -89,6 +92,7 @@ describe('templates_v2 api bulk actions', () => {
           sortOrder: 'asc',
           tags: ['security'],
           author: ['alice'],
+          owner: ['securitySolution'],
           isDeleted: false,
         },
         signal,
@@ -114,6 +118,7 @@ describe('templates_v2 api bulk actions', () => {
         sortOrder: 'asc' as const,
         tags: [] as string[],
         author: [] as string[],
+        owner: [] as string[],
         isDeleted: false,
       };
 
@@ -132,6 +137,62 @@ describe('templates_v2 api bulk actions', () => {
         signal: undefined,
       });
 
+      expect(res).toEqual(mockResponse);
+    });
+  });
+
+  describe('getTemplate', () => {
+    it('calls the template details endpoint with templateId', async () => {
+      const signal = new AbortController().signal;
+      const mockResponse: ParsedTemplate = {
+        templateId: 'template-1',
+        name: 'My template',
+        owner: 'securitySolution',
+        definition: { name: 'My template', fields: [] },
+        templateVersion: 1,
+        deletedAt: null,
+        isLatest: true,
+        latestVersion: 1,
+      };
+      fetchMock.mockResolvedValue(mockResponse);
+
+      const res = await getTemplate({ templateId: 'template-1', signal });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        INTERNAL_TEMPLATE_DETAILS_URL.replace('{template_id}', 'template-1'),
+        {
+          method: 'GET',
+          query: undefined,
+          signal,
+        }
+      );
+      expect(res).toEqual(mockResponse);
+    });
+
+    it('passes version as a query param when provided', async () => {
+      const signal = new AbortController().signal;
+      const mockResponse: ParsedTemplate = {
+        templateId: 'template-1',
+        name: 'My template',
+        owner: 'securitySolution',
+        definition: { name: 'My template', fields: [] },
+        templateVersion: 2,
+        deletedAt: null,
+        isLatest: false,
+        latestVersion: 3,
+      };
+      fetchMock.mockResolvedValue(mockResponse);
+
+      const res = await getTemplate({ templateId: 'template-1', version: 2, signal });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        INTERNAL_TEMPLATE_DETAILS_URL.replace('{template_id}', 'template-1'),
+        {
+          method: 'GET',
+          query: { version: 2 },
+          signal,
+        }
+      );
       expect(res).toEqual(mockResponse);
     });
   });

@@ -62,11 +62,11 @@ const compatibilityMap: Record<string, string> = {
   lnsLegacyMetric: 'legacy_metric',
   lnsXY: 'xy',
   lnsGauge: 'gauge',
-  lnsHeatmap: 'heatmap',
-  lnsTagcloud: 'tagcloud',
+  lnsHeatmap: 'heat_map',
+  lnsTagcloud: 'tag_cloud',
   lnsChoropleth: 'region_map',
   lnsPie: 'pie',
-  lnsDatatable: 'datatable',
+  lnsDatatable: 'data_table',
 };
 
 /**
@@ -115,11 +115,11 @@ const apiConvertersByChart = {
     fromAPItoLensState: fromGaugeAPItoLensState,
     fromLensStateToAPI: fromGaugeLensStateToAPI,
   },
-  heatmap: {
+  heat_map: {
     fromAPItoLensState: fromHeatmapAPItoLensState,
     fromLensStateToAPI: fromHeatmapLensStateToAPI,
   },
-  tagcloud: {
+  tag_cloud: {
     fromAPItoLensState: fromTagcloudAPItoLensState,
     fromLensStateToAPI: fromTagcloudLensStateToAPI,
   },
@@ -128,7 +128,7 @@ const apiConvertersByChart = {
     fromLensStateToAPI: fromRegionMapLensStateToAPI,
   },
   ...addPartitionChartConverters(),
-  datatable: {
+  data_table: {
     fromAPItoLensState: fromDatatableAPItoLensState,
     fromLensStateToAPI: fromDatatableLensStateToAPI,
   },
@@ -167,7 +167,6 @@ export class LensConfigBuilder {
   }
 
   isSupported(chartType?: string | null): boolean {
-    if (!this.enableAPITransforms) return false;
     if (!chartType) return false;
     const type = compatibilityMap[chartType] ?? chartType;
     return type in this.apiConvertersByChart;
@@ -235,15 +234,21 @@ export class LensConfigBuilder {
 
     const converter = this.apiConvertersByChart[chartType];
     const attributes = converter.fromAPItoLensState(config as any); // handle type mismatches
+    const { filters, query, references } = filtersAndQueryToLensState(
+      config,
+      attributes.references ?? []
+    );
 
     return {
       // @TODO investigate why it complains about missing type
       // type: 'lens',
       ...attributes,
+      references: [...(attributes.references ?? []), ...references],
       state: {
         ...attributes.state,
         query: { language: 'kuery', query: '' },
-        ...filtersAndQueryToLensState(config),
+        ...(query ? { query } : {}),
+        filters,
       },
     };
   }

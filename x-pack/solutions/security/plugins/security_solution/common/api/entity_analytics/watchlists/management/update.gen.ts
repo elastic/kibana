@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { WatchlistObject } from './common.gen';
 
@@ -36,11 +36,11 @@ export const UpdateWatchlistRequestBody = z.object({
   /**
    * Description of the watchlist
    */
-  description: z.string(),
+  description: z.string().optional(),
   /**
    * Risk score modifier associated with the watchlist
    */
-  riskModifier: z.number(),
+  riskModifier: z.number().min(0).max(2),
   /**
    * Indicates if the watchlist is managed by the system
    */

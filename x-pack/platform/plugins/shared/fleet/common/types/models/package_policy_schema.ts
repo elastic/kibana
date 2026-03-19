@@ -48,7 +48,7 @@ export const VarGroupSelectionsSchema = schema.maybe(
 
 export const DeprecationInfoSchema = schema.object({
   description: schema.string(),
-  since: schema.string(),
+  since: schema.maybe(schema.string()),
   replaced_by: schema.maybe(
     schema.recordOf(
       schema.oneOf([
@@ -320,9 +320,9 @@ export const SimplifiedVarsSchema = schema.recordOf(
   schema.string(),
   schema.nullable(
     schema.oneOf([
-      schema.boolean(),
       schema.string(),
       schema.number(),
+      schema.boolean(),
       schema.arrayOf(schema.string(), { maxSize: 100 }),
       schema.arrayOf(schema.number(), { maxSize: 100 }),
       // Secrets

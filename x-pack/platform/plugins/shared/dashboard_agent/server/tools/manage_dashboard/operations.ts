@@ -5,26 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { z } from '@kbn/zod/v4';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   AttachmentPanel,
   DashboardAttachmentData,
-  LensAttachmentPanel,
+  DashboardSection,
 } from '@kbn/dashboard-agent-common';
+import { panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
-import { getRemovedPanels, upsertMarkdownPanel, type VisualizationFailure } from './utils';
-import type { VisualizationQueryInput } from './visualization_generation';
-
-export const visualizationQueryInputSchema = z.object({
-  query: z.string().describe('A natural language query describing the desired visualization.'),
-  index: z.string().optional().describe('(optional) Index, alias, or datastream to target.'),
-  chartType: z
-    .nativeEnum(SupportedChartType)
-    .optional()
-    .describe('(optional) The type of chart to create.'),
-  esql: z.string().optional().describe('(optional) An ES|QL query to use for the visualization.'),
-}) satisfies z.ZodType<VisualizationQueryInput>;
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
+import type { GenericAttachmentPanel } from '@kbn/dashboard-agent-common';
+import type { VisualizationFailure } from './utils';
 
 export const setMetadataOperationSchema = z.object({
   operation: z.literal('set_metadata'),
@@ -32,25 +24,63 @@ export const setMetadataOperationSchema = z.object({
   description: z.string().optional(),
 });
 
-export const upsertMarkdownOperationSchema = z.object({
-  operation: z.literal('upsert_markdown'),
-  markdownContent: z.string().describe('Markdown content for the dashboard summary panel.'),
+export const addMarkdownOperationSchema = z.object({
+  operation: z.literal('add_markdown'),
+  markdownContent: z.string().describe('Markdown content for the panel.'),
+  grid: panelGridSchema.describe(
+    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row.'
+  ),
+  sectionId: z
+    .string()
+    .optional()
+    .describe(
+      'Optional section ID to add this panel into. If omitted, panel is added at the top level.'
+    ),
 });
 
-export const addGeneratedPanelsOperationSchema = z.object({
-  operation: z.literal('add_generated_panels'),
-  items: z
-    .array(visualizationQueryInputSchema)
-    .min(1)
-    .describe('Visualization generation requests to execute in order.'),
+const attachmentWithGridSchema = z.object({
+  attachmentId: z.string().describe('Visualization attachment ID to add as a dashboard panel.'),
+  grid: panelGridSchema.describe(
+    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
+  ),
+});
+
+const sectionGridSchema = z.object({
+  y: z.number().int().min(0).describe('Section position in outer dashboard grid coordinates.'),
 });
 
 export const addPanelsFromAttachmentsOperationSchema = z.object({
   operation: z.literal('add_panels_from_attachments'),
-  attachmentIds: z
-    .array(z.string())
+  items: z
+    .array(
+      attachmentWithGridSchema.extend({
+        sectionId: z
+          .string()
+          .optional()
+          .describe(
+            'Optional section ID to add this panel into. If omitted, panel is added at the top level.'
+          ),
+      })
+    )
     .min(1)
-    .describe('Attachment ids to resolve into dashboard panels.'),
+    .describe('Visualization attachments to add, each with its dashboard grid layout.'),
+});
+
+export const addSectionOperationSchema = z.object({
+  operation: z.literal('add_section'),
+  title: z.string().describe('Section title.'),
+  grid: sectionGridSchema,
+  panels: z
+    .array(attachmentWithGridSchema)
+    .describe('Panels to create inside the section. Coordinates are section-relative.'),
+});
+
+export const removeSectionOperationSchema = z.object({
+  operation: z.literal('remove_section'),
+  sectionId: z.string().describe('Section id to remove.'),
+  panelAction: z
+    .enum(['promote', 'delete'])
+    .describe('How to handle section panels: promote to top-level or delete them.'),
 });
 
 export const removePanelsOperationSchema = z.object({
@@ -60,9 +90,10 @@ export const removePanelsOperationSchema = z.object({
 
 export const dashboardOperationSchema = z.discriminatedUnion('operation', [
   setMetadataOperationSchema,
-  upsertMarkdownOperationSchema,
-  addGeneratedPanelsOperationSchema,
+  addMarkdownOperationSchema,
   addPanelsFromAttachmentsOperationSchema,
+  addSectionOperationSchema,
+  removeSectionOperationSchema,
   removePanelsOperationSchema,
 ]);
 
@@ -72,22 +103,74 @@ interface ExecuteDashboardOperationsParams {
   dashboardData: DashboardAttachmentData;
   operations: DashboardOperation[];
   logger: Logger;
-  generatePanels: (
-    items: VisualizationQueryInput[],
-    onPanelCreated?: (panel: LensAttachmentPanel) => void
-  ) => Promise<{ panels: LensAttachmentPanel[]; failures: VisualizationFailure[] }>;
   resolvePanelsFromAttachments: (
-    attachmentIds: string[]
+    attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
   ) => Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }>;
   onPanelsAdded: (panels: AttachmentPanel[]) => void;
   onPanelsRemoved: (panels: AttachmentPanel[]) => void;
 }
 
+const asOptionalSections = (
+  sections: DashboardSection[] | undefined
+): DashboardSection[] | undefined => {
+  return sections && sections.length > 0 ? sections : undefined;
+};
+
+const getPanelsBottomY = (panels: AttachmentPanel[]): number => {
+  return panels.reduce((maxY, panel) => Math.max(maxY, panel.grid.y + panel.grid.h), 0);
+};
+
+const removePanelsFromDashboard = ({
+  dashboardData,
+  panelIds,
+}: {
+  dashboardData: DashboardAttachmentData;
+  panelIds: string[];
+}): {
+  dashboardData: DashboardAttachmentData;
+  removedPanels: AttachmentPanel[];
+} => {
+  const panelIdSet = new Set(panelIds);
+  const removedPanels: AttachmentPanel[] = [];
+  const topLevelPanelsToKeep: AttachmentPanel[] = [];
+
+  for (const panel of dashboardData.panels) {
+    if (panelIdSet.has(panel.panelId)) {
+      removedPanels.push(panel);
+    } else {
+      topLevelPanelsToKeep.push(panel);
+    }
+  }
+
+  const nextSections = (dashboardData.sections ?? []).map((section) => {
+    const sectionPanelsToKeep: AttachmentPanel[] = [];
+    for (const panel of section.panels) {
+      if (panelIdSet.has(panel.panelId)) {
+        removedPanels.push(panel);
+      } else {
+        sectionPanelsToKeep.push(panel);
+      }
+    }
+    return {
+      ...section,
+      panels: sectionPanelsToKeep,
+    };
+  });
+
+  return {
+    dashboardData: {
+      ...dashboardData,
+      panels: topLevelPanelsToKeep,
+      sections: asOptionalSections(nextSections),
+    },
+    removedPanels,
+  };
+};
+
 export const executeDashboardOperations = async ({
   dashboardData,
   operations,
   logger,
-  generatePanels,
   resolvePanelsFromAttachments,
   onPanelsAdded,
   onPanelsRemoved,
@@ -117,62 +200,161 @@ export const executeDashboardOperations = async ({
         break;
       }
 
-      case 'upsert_markdown': {
-        const markdownResult = upsertMarkdownPanel(
-          nextDashboardData.panels,
-          operation.markdownContent
-        );
-        nextDashboardData = {
-          ...nextDashboardData,
-          panels: markdownResult.panels,
+      case 'add_markdown': {
+        const markdownPanel: GenericAttachmentPanel = {
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          panelId: uuidv4(),
+          rawConfig: { content: operation.markdownContent },
+          grid: operation.grid,
         };
 
-        if (markdownResult.changedPanel) {
-          onPanelsAdded([markdownResult.changedPanel]);
-        }
-        break;
-      }
+        if (operation.sectionId) {
+          const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
+            ({ sectionId }) => sectionId === operation.sectionId
+          );
+          if (sectionIndex === -1) {
+            throw new Error(`Section "${operation.sectionId}" not found.`);
+          }
 
-      case 'add_generated_panels': {
-        const generatedPanels = await generatePanels(operation.items, (panel) => {
-          onPanelsAdded([panel]);
-        });
-        if (generatedPanels.panels.length > 0) {
+          const sections = [...(nextDashboardData.sections ?? [])];
+          sections[sectionIndex] = {
+            ...sections[sectionIndex],
+            panels: [...sections[sectionIndex].panels, markdownPanel],
+          };
           nextDashboardData = {
             ...nextDashboardData,
-            panels: [...nextDashboardData.panels, ...generatedPanels.panels],
+            sections: asOptionalSections(sections),
+          };
+        } else {
+          nextDashboardData = {
+            ...nextDashboardData,
+            panels: [...nextDashboardData.panels, markdownPanel],
           };
         }
 
-        failures.push(...generatedPanels.failures);
+        onPanelsAdded([markdownPanel]);
         break;
       }
 
       case 'add_panels_from_attachments': {
-        const attachmentPanels = await resolvePanelsFromAttachments(operation.attachmentIds);
-        if (attachmentPanels.panels.length > 0) {
+        for (const item of operation.items) {
+          const result = await resolvePanelsFromAttachments([
+            {
+              attachmentId: item.attachmentId,
+              grid: item.grid,
+            },
+          ]);
+          if (result.panels.length > 0) {
+            if (item.sectionId) {
+              const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
+                ({ sectionId }) => sectionId === item.sectionId
+              );
+              if (sectionIndex === -1) {
+                throw new Error(`Section "${item.sectionId}" not found.`);
+              }
+
+              const sections = [...(nextDashboardData.sections ?? [])];
+              sections[sectionIndex] = {
+                ...sections[sectionIndex],
+                panels: [...sections[sectionIndex].panels, ...result.panels],
+              };
+              nextDashboardData = {
+                ...nextDashboardData,
+                sections: asOptionalSections(sections),
+              };
+            } else {
+              nextDashboardData = {
+                ...nextDashboardData,
+                panels: [...nextDashboardData.panels, ...result.panels],
+              };
+            }
+            onPanelsAdded(result.panels);
+          }
+          failures.push(...result.failures);
+        }
+        break;
+      }
+
+      case 'add_section': {
+        const sectionPanels: AttachmentPanel[] = [];
+        for (const panelInput of operation.panels) {
+          const result = await resolvePanelsFromAttachments([
+            {
+              attachmentId: panelInput.attachmentId,
+              grid: panelInput.grid,
+            },
+          ]);
+          if (result.panels.length > 0) {
+            sectionPanels.push(...result.panels);
+            onPanelsAdded(result.panels);
+          }
+          failures.push(...result.failures);
+        }
+
+        const nextSection: DashboardSection = {
+          sectionId: uuidv4(),
+          title: operation.title,
+          collapsed: false,
+          grid: operation.grid,
+          panels: sectionPanels,
+        };
+
+        nextDashboardData = {
+          ...nextDashboardData,
+          sections: [...(nextDashboardData.sections ?? []), nextSection],
+        };
+        break;
+      }
+
+      case 'remove_section': {
+        const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
+          ({ sectionId }) => sectionId === operation.sectionId
+        );
+        if (sectionIndex === -1) {
+          throw new Error(`Section "${operation.sectionId}" not found.`);
+        }
+
+        const sections = [...(nextDashboardData.sections ?? [])];
+        const sectionToRemove = sections[sectionIndex];
+        sections.splice(sectionIndex, 1);
+
+        if (operation.panelAction === 'delete') {
+          if (sectionToRemove.panels.length > 0) {
+            onPanelsRemoved(sectionToRemove.panels);
+          }
           nextDashboardData = {
             ...nextDashboardData,
-            panels: [...nextDashboardData.panels, ...attachmentPanels.panels],
+            sections: asOptionalSections(sections),
           };
-          onPanelsAdded(attachmentPanels.panels);
+          break;
         }
-        failures.push(...attachmentPanels.failures);
+
+        const baseY = getPanelsBottomY(nextDashboardData.panels);
+        const promotedPanels = sectionToRemove.panels.map((panel) => ({
+          ...panel,
+          grid: {
+            ...panel.grid,
+            y: baseY + panel.grid.y,
+          },
+        }));
+
+        nextDashboardData = {
+          ...nextDashboardData,
+          panels: [...nextDashboardData.panels, ...promotedPanels],
+          sections: asOptionalSections(sections),
+        };
         break;
       }
 
       case 'remove_panels': {
-        const { panelsToKeep, panelsToRemove } = getRemovedPanels(
-          nextDashboardData.panels,
-          operation.panelIds
-        );
-        if (panelsToRemove.length > 0) {
-          nextDashboardData = {
-            ...nextDashboardData,
-            panels: panelsToKeep,
-          };
-          onPanelsRemoved(panelsToRemove);
-          logger.debug(`Removed ${panelsToRemove.length} panels from dashboard`);
+        const { dashboardData: dashboardWithoutPanels, removedPanels } = removePanelsFromDashboard({
+          dashboardData: nextDashboardData,
+          panelIds: operation.panelIds,
+        });
+        if (removedPanels.length > 0) {
+          nextDashboardData = dashboardWithoutPanels;
+          onPanelsRemoved(removedPanels);
+          logger.debug(`Removed ${removedPanels.length} panels from dashboard`);
         }
         break;
       }

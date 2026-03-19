@@ -13,6 +13,10 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { intersection } from 'lodash';
+import {
+  isLegacyAttachmentRequest,
+  isUnifiedAttachmentRequest,
+} from '../../../common/utils/attachments';
 import type {
   AlertAttachmentPayload,
   AttachmentAttributes,
@@ -47,10 +51,18 @@ import {
   countEventsForID,
 } from '../utils';
 import { decodeOrThrow } from '../runtime_types';
-import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
+import type {
+  AttachmentRequest,
+  AttachmentPatchRequestV2,
+  AttachmentRequestV2,
+} from '../../../common/types/api';
+import type {
+  AttachmentAttributesV2,
+  UnifiedAttachmentPayload,
+} from '../../../common/types/domain/attachment/v2';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
-type CommentRequestWithId = Array<{ id: string } & AttachmentRequest>;
+type CommentRequestWithId = Array<{ id: string } & (AttachmentRequest | UnifiedAttachmentPayload)>;
 
 /**
  * This class represents a case that can have a comment attached to it.
@@ -87,7 +99,7 @@ export class CaseCommentModel {
     updatedAt,
     owner,
   }: {
-    updateRequest: AttachmentPatchRequest;
+    updateRequest: AttachmentPatchRequestV2;
     updatedAt: string;
     owner: string;
   }): Promise<CaseCommentModel> {
@@ -105,7 +117,11 @@ export class CaseCommentModel {
         refresh: false,
       };
 
-      if (queryRestAttributes.type === AttachmentType.user && queryRestAttributes?.comment) {
+      if (
+        queryRestAttributes.type === AttachmentType.user &&
+        'comment' in queryRestAttributes &&
+        queryRestAttributes.comment
+      ) {
         const currentComment = (await this.params.services.attachmentService.getter.get({
           attachmentId: id,
         })) as SavedObject<UserCommentAttachmentPayload>;
@@ -221,8 +237,8 @@ export class CaseCommentModel {
   }
 
   private async createUpdateCommentUserAction(
-    comment: SavedObjectsUpdateResponse<AttachmentAttributes>,
-    updateRequest: AttachmentPatchRequest,
+    comment: SavedObjectsUpdateResponse<AttachmentAttributesV2>,
+    updateRequest: AttachmentPatchRequestV2,
     owner: string
   ) {
     const { id, version, ...queryRestAttributes } = updateRequest;
@@ -249,7 +265,7 @@ export class CaseCommentModel {
     id,
   }: {
     createdDate: string;
-    commentReq: AttachmentRequest;
+    commentReq: AttachmentRequestV2;
     id: string;
   }): Promise<CaseCommentModel> {
     try {
@@ -281,10 +297,15 @@ export class CaseCommentModel {
         date: createdDate,
       });
 
-      await Promise.all([
-        commentableCase.handleAlertComments([attachment]),
-        this.createCommentUserAction(comment, attachment),
-      ]);
+      await Promise.all(
+        isLegacyAttachmentRequest(attachment)
+          ? [
+              commentableCase.handleAlertComments([attachment]),
+              this.createCommentUserAction(comment, attachment),
+            ]
+          : // TO-DO: handle alert comments for unified attachments
+            [this.createCommentUserAction(comment, attachment)]
+      );
 
       return commentableCase;
     } catch (error) {
@@ -320,7 +341,7 @@ export class CaseCommentModel {
     );
 
     attachments.forEach((attachment) => {
-      if (isCommentRequestTypeAlert(attachment)) {
+      if (isLegacyAttachmentRequest(attachment) && isCommentRequestTypeAlert(attachment)) {
         const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
         const idPositionsThatAlreadyExistInCase: number[] = [];
 
@@ -354,7 +375,7 @@ export class CaseCommentModel {
         return;
       }
 
-      if (isCommentRequestTypeEvent(attachment)) {
+      if (isLegacyAttachmentRequest(attachment) && isCommentRequestTypeEvent(attachment)) {
         const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
 
         // filter out events already present in the case
@@ -380,11 +401,11 @@ export class CaseCommentModel {
   private getAttachmentsByType<
     T extends AttachmentType,
     R = T extends AttachmentType.event ? AlertAttachmentPayload[] : EventAttachmentPayload[]
-  >(attachments: AttachmentRequest[], attachmentType: T): R {
+  >(attachments: AttachmentRequestV2[], attachmentType: T): R {
     return attachments.filter((attachment) => attachment.type === attachmentType) as R;
   }
 
-  private async validateCreateCommentRequest(req: AttachmentRequest[]) {
+  private async validateCreateCommentRequest(req: Array<AttachmentRequestV2>) {
     if (this.caseInfo.attributes.status === CaseStatuses.closed) {
       const alertAttachments = this.getAttachmentsByType(req, AttachmentType.alert);
       const hasAlertsInRequest = alertAttachments.length > 0;
@@ -424,13 +445,27 @@ export class CaseCommentModel {
     ];
   }
 
-  private getCommentReferences(commentReq: AttachmentRequest) {
+  private getCommentReferences(commentReq: AttachmentRequestV2) {
     let references: SavedObjectReference[] = [];
 
-    if (commentReq.type === AttachmentType.user && commentReq?.comment) {
+    if (
+      isLegacyAttachmentRequest(commentReq) &&
+      commentReq.type === AttachmentType.user &&
+      commentReq?.comment
+    ) {
       const commentStringReferences = getOrUpdateLensReferences(
         this.params.lensEmbeddableFactory,
         commentReq.comment
+      );
+      references = [...references, ...commentStringReferences];
+    } else if (
+      isUnifiedAttachmentRequest(commentReq) &&
+      commentReq.type === 'comment' &&
+      commentReq.data?.content
+    ) {
+      const commentStringReferences = getOrUpdateLensReferences(
+        this.params.lensEmbeddableFactory,
+        commentReq.data?.content as string
       );
       references = [...references, ...commentStringReferences];
     }
@@ -438,7 +473,7 @@ export class CaseCommentModel {
     return references;
   }
 
-  private async handleAlertComments(attachments: AttachmentRequest[]) {
+  private async handleAlertComments(attachments: AttachmentRequestV2[]) {
     const alertAttachments = this.getAttachmentsByType(attachments, AttachmentType.alert);
 
     const alerts = getAlertInfoFromComments(alertAttachments);
@@ -470,8 +505,8 @@ export class CaseCommentModel {
   }
 
   private async createCommentUserAction(
-    comment: SavedObject<AttachmentAttributes>,
-    req: AttachmentRequest
+    comment: SavedObject<AttachmentAttributesV2>,
+    req: AttachmentRequestV2
   ) {
     await this.params.services.userActionService.creator.createUserAction({
       userAction: {
@@ -483,13 +518,13 @@ export class CaseCommentModel {
           attachment: req,
         },
         user: this.params.user,
-        owner: comment.attributes.owner,
+        owner: req.owner,
       },
     });
   }
 
   private async bulkCreateCommentUserAction(
-    attachments: Array<{ id: string } & AttachmentRequest>
+    attachments: Array<{ id: string } & AttachmentRequestV2>
   ) {
     await this.params.services.userActionService.creator.bulkCreateAttachmentCreation({
       caseId: this.caseInfo.id,

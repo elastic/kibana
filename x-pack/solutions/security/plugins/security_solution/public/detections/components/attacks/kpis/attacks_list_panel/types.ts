@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SeverityCount } from '../../../../../entity_analytics/components/severity/types';
+
 export interface AttacksListBucket {
   /** The attack ID */
   key: string;
@@ -14,6 +16,13 @@ export interface AttacksListBucket {
   attackRelatedAlerts?: {
     /** The attack related alerts count */
     doc_count: number;
+  };
+  /** The alerts severities */
+  alertsSeverities?: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
   };
 }
 
@@ -37,4 +46,6 @@ export interface AttacksListItem {
   name: string;
   /** The alerts count */
   alertsCount: number;
+  /** The severity count */
+  severityCount: SeverityCount;
 }

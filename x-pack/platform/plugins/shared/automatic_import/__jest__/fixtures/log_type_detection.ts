@@ -17,7 +17,7 @@ export const logFormatDetectionTestState = {
   packageTitle: 'Test Title',
   dataStreamTitle: 'Test Datastream Title',
   finalized: false,
-  samplesFormat: { name: SamplesFormatName.Values.structured },
+  samplesFormat: { name: SamplesFormatName.enum.structured },
   header: true,
   ecsVersion: 'testVersion',
   results: { test1: 'test1' },

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { isColumn } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstFuseCommand } from '@elastic/esql/types';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import {
@@ -18,10 +20,8 @@ import {
 } from '../complete_items';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { EDITOR_MARKER } from '../../definitions/constants';
-import { isColumn } from '../../../ast/is';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { columnExists, handleFragment } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands, ESQLAstFuseCommand } from '../../../types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import {

@@ -229,6 +229,7 @@ export interface EdgeMarker extends ReactFlowEdgeMarker {
 
 export interface ServiceMapEdgeData extends Record<string, unknown> {
   isBidirectional: boolean;
+  isGrouped?: boolean;
   sourceData?: ConnectionNode;
   targetData?: ConnectionNode;
   /** Display-ready source node name for titles/aria. */

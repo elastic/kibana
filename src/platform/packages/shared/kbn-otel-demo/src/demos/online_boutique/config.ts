@@ -43,6 +43,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 5000,
       env: {
         PORT: '5000',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -58,6 +60,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
         EMAIL_SERVICE_ADDR: 'emailservice:5000',
         CURRENCY_SERVICE_ADDR: 'currencyservice:7000',
         CART_SERVICE_ADDR: 'cartservice:7070',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
       },
     },
     {
@@ -67,6 +71,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       env: {
         PORT: '8080',
         PRODUCT_CATALOG_SERVICE_ADDR: 'productcatalogservice:3550',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -84,6 +90,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
         CHECKOUT_SERVICE_ADDR: 'checkoutservice:5050',
         AD_SERVICE_ADDR: 'adservice:9555',
         SHOPPING_ASSISTANT_SERVICE_ADDR: 'shoppingassistantservice:80',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -93,6 +101,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 50051,
       env: {
         PORT: '50051',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -102,6 +112,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 3550,
       env: {
         PORT: '3550',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
       },
     },
     {
@@ -110,6 +122,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 7070,
       env: {
         REDIS_ADDR: 'redis-cart:6379',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
       },
     },
     {
@@ -118,6 +132,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       env: {
         FRONTEND_ADDR: 'frontend:8080',
         USERS: '10',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
       },
     },
     {
@@ -126,6 +142,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 7000,
       env: {
         PORT: '7000',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -135,6 +153,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 50051,
       env: {
         PORT: '50051',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
         DISABLE_PROFILER: '1',
       },
     },
@@ -144,6 +164,8 @@ export const onlineBoutiqueConfig: DemoConfig = {
       port: 9555,
       env: {
         PORT: '9555',
+        ENABLE_TRACING: '1',
+        COLLECTOR_SERVICE_ADDR: 'otel-collector:4317',
       },
     },
   ],

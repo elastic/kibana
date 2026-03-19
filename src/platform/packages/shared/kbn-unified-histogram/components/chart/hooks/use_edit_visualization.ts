@@ -59,7 +59,7 @@ export const useEditVisualization = ({
     return () => {
       services.lens.navigateToPrefilledEditor({
         id: '',
-        timeRange: relativeTimeRange,
+        time_range: relativeTimeRange,
         attributes: lensAttributes,
       });
     };

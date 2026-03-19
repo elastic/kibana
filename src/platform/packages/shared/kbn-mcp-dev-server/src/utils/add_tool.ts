@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolDefinition, ToolDefinitionInputSchema } from '../types';
 
@@ -19,8 +19,12 @@ export const addTool = <T extends ToolDefinitionInputSchema>(
     tool.name,
     {
       description: tool.description,
-      inputSchema: tool.inputSchema.shape,
+      inputSchema: tool.inputSchema,
     },
-    (input: z.infer<T>) => tool.handler(input)
+    // MCP SDK uses zod/v4/core for SchemaOutput while we use @kbn/zod/v4 - types are structurally
+    // compatible but TypeScript treats them as distinct. Cast to satisfy the type checker.
+    ((input: z.infer<T>, _extra: unknown) => tool.handler(input)) as Parameters<
+      McpServer['registerTool']
+    >[2]
   );
 };

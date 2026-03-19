@@ -39,7 +39,7 @@ describe('getPluginApiMap', () => {
     );
     const plugins = [pluginA, pluginB];
 
-    const result = getPluginApiMap(project, plugins, log, {
+    const result = getPluginApiMap(project, plugins, plugins, log, {
       collectReferences: false,
     });
 
@@ -54,7 +54,7 @@ describe('getPluginApiMap', () => {
     const pluginA = getKibanaPlatformPlugin('pluginA');
     const plugins = [pluginA];
 
-    const result = getPluginApiMap(project, plugins, log, {
+    const result = getPluginApiMap(project, plugins, plugins, log, {
       collectReferences: false,
     });
 
@@ -67,7 +67,7 @@ describe('getPluginApiMap', () => {
     const pluginA = getKibanaPlatformPlugin('pluginA');
     const plugins = [pluginA];
 
-    const result = getPluginApiMap(project, plugins, log, {
+    const result = getPluginApiMap(project, plugins, plugins, log, {
       collectReferences: true,
     });
 
@@ -79,7 +79,7 @@ describe('getPluginApiMap', () => {
     const pluginA = getKibanaPlatformPlugin('pluginA');
     const plugins = [pluginA];
 
-    const result = getPluginApiMap(project, plugins, log, {
+    const result = getPluginApiMap(project, plugins, plugins, log, {
       collectReferences: false,
     });
 
@@ -96,7 +96,7 @@ describe('getPluginApiMap', () => {
     );
     const plugins = [pluginA, pluginB];
 
-    const result = getPluginApiMap(project, plugins, log, {
+    const result = getPluginApiMap(project, plugins, plugins, log, {
       collectReferences: false,
       pluginFilter: ['pluginA'],
     });
@@ -111,7 +111,7 @@ describe('getPluginApiMap', () => {
     const pluginA = getKibanaPlatformPlugin('pluginA');
     const plugins = [pluginA];
 
-    const result = getPluginApiMap(project, plugins, log, {
+    const result = getPluginApiMap(project, plugins, plugins, log, {
       collectReferences: true,
     });
 
@@ -124,7 +124,7 @@ describe('getPluginApiMap', () => {
   });
 
   it('handles empty plugin list', () => {
-    const result = getPluginApiMap(project, [], log, {
+    const result = getPluginApiMap(project, [], [], log, {
       collectReferences: false,
     });
 

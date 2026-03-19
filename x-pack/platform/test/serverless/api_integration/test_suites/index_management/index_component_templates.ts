@@ -20,10 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlComponentTemplatesApi = getService('svlComponentTemplatesApi');
   const svlComponentTemplateHelpers = getService('svlComponentTemplateHelpers');
 
-  // Failing: See https://github.com/elastic/kibana/issues/182792
-  // Failing: See https://github.com/elastic/kibana/issues/182797
-  // Failing: See https://github.com/elastic/kibana/issues/182791
-  describe.skip('component templates', () => {
+  describe('component templates', () => {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
@@ -39,11 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
       const COMPONENT_NAME = 'test_get_component_template';
       const COMPONENT = {
         template: {
-          settings: {
-            index: {
-              number_of_shards: 1,
-            },
-          },
+          settings: {},
           mappings: {
             properties: {
               host_name: {
@@ -86,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: COMPONENT_NAME,
             usedBy: [],
             isManaged: false,
-            hasSettings: true,
+            hasSettings: false,
             isDeprecated: false,
             hasMappings: true,
             hasAliases: false,
@@ -116,14 +109,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Update #1', () => {
-      const COMPONENT_NAME = 'test_update_component_template';
+      const COMPONENT_NAME = 'test_update_component_template_1';
       const COMPONENT = {
         template: {
-          settings: {
-            index: {
-              number_of_shards: 1,
-            },
-          },
+          settings: {},
           mappings: {
             properties: {
               host_name: {
@@ -186,7 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
           roleAuthc
         );
 
-        svlCommonApi.assertResponseStatusCode(400, status, body);
+        svlCommonApi.assertResponseStatusCode(404, status, body);
 
         expect(body).to.eql({
           statusCode: 404,
@@ -209,14 +198,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Update #2', () => {
-      const COMPONENT_NAME = 'test_update_component_template';
+      const COMPONENT_NAME = 'test_update_component_template_2';
       const COMPONENT = {
         template: {
-          settings: {
-            index: {
-              number_of_shards: 1,
-            },
-          },
+          settings: {},
           mappings: {
             properties: {
               host_name: {
@@ -303,9 +288,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe('Delete', () => {
       const COMPONENT = {
         template: {
-          settings: {
-            index: {
-              number_of_shards: 1,
+          settings: {},
+          mappings: {
+            properties: {
+              host_name: {
+                type: 'keyword',
+              },
             },
           },
         },
@@ -394,11 +382,7 @@ export default function ({ getService }: FtrProviderContext) {
       const COMPONENT_NAME = 'test_get_component_template_datastreams';
       const COMPONENT = {
         template: {
-          settings: {
-            index: {
-              number_of_shards: 1,
-            },
-          },
+          settings: {},
           mappings: {
             properties: {
               host_name: {

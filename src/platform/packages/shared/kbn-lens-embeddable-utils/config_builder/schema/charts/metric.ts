@@ -18,12 +18,7 @@ import {
   esqlColumnSchema,
   esqlColumnOperationWithLabelAndFormatSchema,
 } from '../metric_ops';
-import {
-  colorByValueAbsolute,
-  staticColorSchema,
-  applyColorToSchema,
-  colorByValueSchema,
-} from '../color';
+import { staticColorSchema, applyColorToSchema, colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   collapseBySchema,
@@ -268,7 +263,7 @@ const metricStateSecondaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
+  color: schema.maybe(staticColorSchema),
 };
 
 const metricStateBreakdownByOptionsSchema = {

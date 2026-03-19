@@ -4,29 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
-import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
-import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
-import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
-import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
-import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { generateEsql } from '..';
 import { extractTextContent } from '../../langchain';
-import type { VisualizationConfig } from './types';
+import { chartTypeRegistry } from './chart_type_registry';
+import type { VisualizationConfig } from './chart_type_registry';
 import {
   GENERATE_ESQL_NODE,
   GENERATE_CONFIG_NODE,
   VALIDATE_CONFIG_NODE,
+  GENERATE_TIME_RANGE_NODE,
   MAX_RETRY_ATTEMPTS,
   type Action,
   type GenerateEsqlAction,
   type GenerateConfigAction,
   type ValidateConfigAction,
+  type GenerateTimeRangeAction,
   isGenerateConfigAction,
   isValidateConfigAction,
 } from './actions_lens';
@@ -34,6 +32,11 @@ import { createGenerateConfigPrompt } from './prompts';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+
+const validateConfigForChartType = (
+  chartType: SupportedChartType,
+  config: unknown
+): VisualizationConfig => chartTypeRegistry[chartType].schema.validate(config);
 
 /**
  * Helper to extract ESQL queries from a visualization config.
@@ -95,6 +98,7 @@ const VisualizationStateAnnotation = Annotation.Root({
   }),
   // outputs
   validatedConfig: Annotation<VisualizationConfig | null>(),
+  timeRange: Annotation<{ from: string; to: string } | null>(),
   error: Annotation<string | null>(),
 });
 
@@ -131,6 +135,8 @@ export const createVisualizationGraph = (
         events,
         logger,
         esClient: esClient.asCurrentUser,
+        additionalInstructions:
+          'Use human-readable column aliases in STATS/EVAL (e.g. `Unique Visitors` not `unique_visitors`). Wrap multi-word aliases in backticks.',
       });
 
       if (!generateEsqlResponse.query) {
@@ -298,22 +304,7 @@ export const createVisualizationGraph = (
         };
       } else {
         // Validate configuration based on chart type
-        let validatedConfig: VisualizationConfig | null = null;
-        if (state.chartType === SupportedChartType.Metric) {
-          validatedConfig = esqlMetricState.validate(config);
-        } else if (state.chartType === SupportedChartType.Gauge) {
-          validatedConfig = gaugeStateSchemaESQL.validate(config);
-        } else if (state.chartType === SupportedChartType.Tagcloud) {
-          validatedConfig = tagcloudStateSchemaESQL.validate(config);
-        } else if (state.chartType === SupportedChartType.XY) {
-          validatedConfig = xyStateSchema.validate(config);
-        } else if (state.chartType === SupportedChartType.RegionMap) {
-          validatedConfig = regionMapStateSchemaESQL.validate(config);
-        } else if (state.chartType === SupportedChartType.Heatmap) {
-          validatedConfig = heatmapStateSchemaESQL.validate(config);
-        } else {
-          throw new Error(`Unsupported chart type: ${state.chartType}`);
-        }
+        const validatedConfig = validateConfigForChartType(state.chartType, config);
 
         logger.debug('Configuration validated successfully');
         action = {
@@ -340,17 +331,95 @@ export const createVisualizationGraph = (
     };
   };
 
+  // Node: Generate time range - ask the LLM to determine the appropriate time range
+  const generateTimeRangeNode = async (state: VisualizationState) => {
+    logger.debug('Generating time range for visualization');
+
+    const lastGenerateEsqlAction = [...state.actions]
+      .reverse()
+      .find((action): action is GenerateEsqlAction => action.type === 'generate_esql');
+    const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
+
+    let action: GenerateTimeRangeAction;
+    try {
+      const timeRangeModel = model.chatModel.withStructuredOutput(
+        z.object({
+          from: z
+            .string()
+            .describe(
+              'Start of the time range in Elasticsearch date math format (e.g., "now-24h", "now-7d", "now-1M")'
+            ),
+          to: z
+            .string()
+            .describe('End of the time range in Elasticsearch date math format (e.g., "now")'),
+        }),
+        { name: 'determine_time_range' }
+      );
+
+      const result = await timeRangeModel.invoke([
+        [
+          'system',
+          `You are an expert at determining appropriate time ranges for Elasticsearch visualizations.
+Given a user's natural language query and the ES|QL query that was generated, determine the most appropriate time range for the visualization.
+
+Use Elasticsearch date math expressions for both "from" and "to" values:
+- "now-15m" for last 15 minutes
+- "now-1h" for last hour
+- "now-24h" for last 24 hours
+- "now-7d" for last 7 days
+- "now-30d" for last 30 days
+- "now-1y" for last year
+- "now" for the current time
+
+The "to" value should almost always be "now" unless the user specifies a specific end time.
+Choose a "from" value that best matches the intent of the query. If unsure, default to "now-24h".`,
+        ],
+        [
+          'human',
+          `User query: ${state.nlQuery}
+
+ES|QL query: ${esqlQuery}
+
+What is the most appropriate time range for this visualization?`,
+        ],
+      ]);
+
+      logger.debug(`Generated time range: ${result.from} to ${result.to}`);
+      action = {
+        type: 'generate_time_range',
+        success: true,
+        timeRange: { from: result.from, to: result.to },
+      };
+    } catch (error) {
+      logger.warn(`Failed to generate time range, defaulting to now-24h: ${error.message}`);
+      action = {
+        type: 'generate_time_range',
+        success: false,
+        timeRange: { from: 'now-24h', to: 'now' },
+        error: error.message,
+      };
+    }
+
+    return {
+      actions: [action],
+    };
+  };
+
   // Node: Finalize - extract outputs from actions
   const finalizeNode = async (state: VisualizationState) => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
     const lastGenerateEsqlAction = [...state.actions]
       .reverse()
       .find((action): action is GenerateEsqlAction => action.type === 'generate_esql');
+    const lastTimeRangeAction = [...state.actions]
+      .reverse()
+      .find((action): action is GenerateTimeRangeAction => action.type === 'generate_time_range');
 
     return {
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
       error: lastValidateAction?.success ? null : lastValidateAction?.error || null,
       esqlQuery: lastGenerateEsqlAction?.query,
+      timeRange: lastTimeRangeAction?.timeRange ?? null,
     };
   };
 
@@ -358,10 +427,10 @@ export const createVisualizationGraph = (
   const shouldRetryRouter = (state: VisualizationState): string => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
 
-    // Success case - configuration is valid
+    // Success case - generate time range before finalizing
     if (lastValidateAction?.success) {
-      logger.debug('Configuration validated successfully, finalizing');
-      return 'finalize';
+      logger.debug('Configuration validated successfully, generating time range');
+      return GENERATE_TIME_RANGE_NODE;
     }
 
     // Failure case - max attempts reached
@@ -396,6 +465,7 @@ export const createVisualizationGraph = (
     .addNode(GENERATE_ESQL_NODE, generateESQLNode)
     .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
     .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
+    .addNode(GENERATE_TIME_RANGE_NODE, generateTimeRangeNode)
     .addNode('finalize', finalizeNode)
     // Add edges
     .addConditionalEdges('__start__', shouldGenerateESQLRouter, {
@@ -406,8 +476,10 @@ export const createVisualizationGraph = (
     .addEdge(GENERATE_CONFIG_NODE, VALIDATE_CONFIG_NODE)
     .addConditionalEdges(VALIDATE_CONFIG_NODE, shouldRetryRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
+      [GENERATE_TIME_RANGE_NODE]: GENERATE_TIME_RANGE_NODE,
       finalize: 'finalize',
     })
+    .addEdge(GENERATE_TIME_RANGE_NODE, 'finalize')
     .addEdge('finalize', '__end__')
     .compile();
 

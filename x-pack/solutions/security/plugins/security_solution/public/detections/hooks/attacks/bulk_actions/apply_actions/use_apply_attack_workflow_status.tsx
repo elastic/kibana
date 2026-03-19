@@ -7,6 +7,8 @@
 
 import { useCallback } from 'react';
 
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { FILTER_CLOSED } from '../../../../../../common/types';
 import type { AlertClosingReason } from '../../../../../../common/types';
 import type { AlertWorkflowStatus } from '../../../../../common/types';
@@ -33,6 +35,9 @@ interface ApplyAttackWorkflowStatusReturn {
 export const useApplyAttackWorkflowStatus = (): ApplyAttackWorkflowStatusReturn => {
   const { mutateAsync: setUnifiedAlertsWorkflowStatus } = useSetUnifiedAlertsWorkflowStatus();
   const showModalIfNeeded = useUpdateAttacksModal();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
   const applyWorkflowStatus = useCallback(
     async ({
@@ -42,6 +47,7 @@ export const useApplyAttackWorkflowStatus = (): ApplyAttackWorkflowStatusReturn 
       relatedAlertIds,
       setIsLoading,
       onSuccess,
+      telemetrySource,
     }: ApplyAttackWorkflowStatusProps) => {
       // Show modal (if needed) and wait for user decision
       const result = await showModalIfNeeded({
@@ -52,6 +58,15 @@ export const useApplyAttackWorkflowStatus = (): ApplyAttackWorkflowStatusReturn 
         // User cancelled, don't proceed with update
         return;
       }
+
+      if (telemetrySource) {
+        telemetry.reportEvent(AttacksEventTypes.ActionStatusUpdated, {
+          status,
+          source: telemetrySource,
+          scope: result.updateAlerts ? 'attack_and_related_alerts' : 'attack_only',
+        });
+      }
+
       setIsLoading?.(true);
       try {
         // Combine IDs based on user choice
@@ -67,7 +82,7 @@ export const useApplyAttackWorkflowStatus = (): ApplyAttackWorkflowStatusReturn 
         setIsLoading?.(false);
       }
     },
-    [setUnifiedAlertsWorkflowStatus, showModalIfNeeded]
+    [setUnifiedAlertsWorkflowStatus, showModalIfNeeded, telemetry]
   );
 
   return { applyWorkflowStatus };

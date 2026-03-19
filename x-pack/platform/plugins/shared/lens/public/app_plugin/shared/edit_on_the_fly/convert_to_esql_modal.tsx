@@ -28,6 +28,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { esql } from '@elastic/esql';
+
 import { layerTypes } from '../../..';
 import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
 
@@ -78,7 +80,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         itemIdToExpandedRowMapValues[layer.id] = (
           <EuiFlexItem>
             <EuiCodeBlock isCopyable language="esql" paddingSize="s">
-              {layer.query}
+              {esql(layer.query).print('wrapping')}
             </EuiCodeBlock>
           </EuiFlexItem>
         );
@@ -95,7 +97,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         field: 'icon',
         name: '',
         width: euiTheme.size.l,
-        render: (icon: string) => <EuiIcon type={icon} />,
+        render: (icon: string) => <EuiIcon type={icon} aria-hidden={true} />,
       },
       {
         field: 'name',
@@ -254,7 +256,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCodeBlock isCopyable language="esql" paddingSize="s">
-              {layers[0].query}
+              {esql(layers[0].query).print('wrapping')}
             </EuiCodeBlock>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -15,6 +15,7 @@ import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { LoadingStates } from './utils/loading_states';
 import type { WorkflowZodSchemaType } from '../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../connectors/model/types';
+import type { WorkflowsResponse } from '../../model/types';
 
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
@@ -43,10 +44,17 @@ export interface WorkflowDetailState {
   highlightedStepId?: string;
   /** The modal to test the workflow is open */
   isTestModalOpen: boolean;
-  /** When set, open test modal in "From historical" mode with this execution pre-selected */
-  replayExecutionId: string | null;
+  /** When set, Test Step modal is open for this step id (undefined = closed) */
+  testStepModalOpenStepId?: string;
+  /** Replay context: workflow-level (executionId) or step-level (stepExecutionId) for pre-selection in modals */
+  replay?: {
+    executionId?: string;
+    stepExecutionId?: string;
+  };
   /** The connectors data */
   connectors?: ConnectorsResponse;
+  /** The workflows data for lookup by ID (always present, empty if not loaded yet) */
+  workflows: WorkflowsResponse;
   /** The schema for the workflow, depends on the connectors available */
   schema: WorkflowZodSchemaType;
   /** Loading states for async operations */

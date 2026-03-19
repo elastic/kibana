@@ -15,9 +15,9 @@
         "description": [],
         "signature": [
           "SettersOf",
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> & ",
+          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & ",
           "SubjectsOf",
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> & Partial<",
+          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & Partial<",
           "HasCustomPrepend",
           "> & ",
           {
@@ -45,15 +45,7 @@
           },
           " & ",
           "PublishesField",
-          " & Pick<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesTitle",
-            "text": "PublishesTitle"
-          },
-          ", \"defaultTitle$\"> & ",
+          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -101,7 +93,39 @@
             "section": "def-common.IsPinnable",
             "text": "IsPinnable"
           },
-          " & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; }"
+          " & ",
+          "SettersOf",
+          "<ControlTitleState> & ",
+          "SubjectsOf",
+          "<ControlTitleState> & ",
+          "SettersOf",
+          "<ControlTitleState> & ",
+          "SubjectsOf",
+          "<ControlTitleState> & { defaultTitle$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined>; hideTitle$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean | undefined>; label$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string>; } & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; }"
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/data_controls/types.ts",
         "lineNumber": 34,
@@ -125,7 +149,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> & ",
+          "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> & ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -146,20 +170,12 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.TitlesApi",
-            "text": "TitlesApi"
-          },
-          " & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.PublishesDataLoading",
             "text": "PublishesDataLoading"
           }
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/esql_control/types.ts",
-        "lineNumber": 20,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -190,9 +206,9 @@
           },
           "> & ",
           "SettersOf",
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> & ",
+          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & ",
           "SubjectsOf",
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> & Partial<",
+          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & Partial<",
           "HasCustomPrepend",
           "> & ",
           {
@@ -220,15 +236,7 @@
           },
           " & ",
           "PublishesField",
-          " & Pick<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesTitle",
-            "text": "PublishesTitle"
-          },
-          ", \"defaultTitle$\"> & ",
+          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -276,7 +284,39 @@
             "section": "def-common.IsPinnable",
             "text": "IsPinnable"
           },
-          " & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & { setSelectedOptions: (options: (string | number)[] | undefined) => void; clearSelections: () => void; hasSelections$: ",
+          " & ",
+          "SettersOf",
+          "<ControlTitleState> & ",
+          "SubjectsOf",
+          "<ControlTitleState> & ",
+          "SettersOf",
+          "<ControlTitleState> & ",
+          "SubjectsOf",
+          "<ControlTitleState> & { defaultTitle$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined>; hideTitle$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean | undefined>; label$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string>; } & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & { setSelectedOptions: (options: (string | number)[] | undefined) => void; clearSelections: () => void; hasSelections$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -308,11 +348,11 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<Readonly<{ value?: string[] | undefined; description?: string | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> & ",
+          "<Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> & ",
           "SettersOf",
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> & ",
+          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & ",
           "SubjectsOf",
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> & Partial<",
+          "<Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"title\">> & Partial<",
           "HasCustomPrepend",
           "> & ",
           {
@@ -340,15 +380,7 @@
           },
           " & ",
           "PublishesField",
-          " & Pick<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesTitle",
-            "text": "PublishesTitle"
-          },
-          ", \"defaultTitle$\"> & ",
+          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -396,7 +428,39 @@
             "section": "def-common.IsPinnable",
             "text": "IsPinnable"
           },
-          " & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & { clearSelections: () => void; hasSelections$: ",
+          " & ",
+          "SettersOf",
+          "<ControlTitleState> & ",
+          "SubjectsOf",
+          "<ControlTitleState> & ",
+          "SettersOf",
+          "<ControlTitleState> & ",
+          "SubjectsOf",
+          "<ControlTitleState> & { defaultTitle$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined>; hideTitle$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean | undefined>; label$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string>; } & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & { clearSelections: () => void; hasSelections$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -429,14 +493,38 @@
             "text": "DefaultEmbeddableApi"
           },
           "<Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>> & Pick<",
+          "SettersOf",
+          "<ControlTitleState> & ",
+          "SubjectsOf",
+          "<ControlTitleState> & ",
+          "SettersOf",
+          "<ControlTitleState> & ",
+          "SubjectsOf",
+          "<ControlTitleState> & { defaultTitle$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesTitle",
-            "text": "PublishesTitle"
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
           },
-          ", \"defaultTitle$\"> & ",
+          "<string | undefined>; hideTitle$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean | undefined>; label$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string>; }, \"label$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",

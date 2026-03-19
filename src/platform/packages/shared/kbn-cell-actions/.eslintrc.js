@@ -73,7 +73,7 @@ const path = require('path');
 // eslint-disable-next-line import/no-nodejs-modules
 const { execSync } = require('child_process');
 
-const minimatch = require('minimatch');
+const { minimatch } = require('minimatch');
 
 /** @type {Array.<RestrictedImportPath>} */
 const RESTRICTED_IMPORTS_PATHS = [

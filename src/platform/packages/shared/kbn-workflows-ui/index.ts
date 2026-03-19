@@ -8,4 +8,5 @@
  */
 
 export * from './src/hooks';
+export * from './src/services';
 export * from './src/components';
