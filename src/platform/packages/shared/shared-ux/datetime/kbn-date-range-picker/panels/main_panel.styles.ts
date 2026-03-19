@@ -27,6 +27,10 @@ export const mainPanelStyles = ({ euiTheme }: UseEuiTheme) => {
     position: sticky;
     bottom: 0px;
   `;
+  const documentationButtonWrapper = css`
+    padding-inline: ${euiTheme.size.s};
+    margin-block-start: calc(${euiTheme.size.s} * 2);
+  `;
 
-  return { root, tabs, list, stickyBottom };
+  return { root, tabs, list, stickyBottom, documentationButtonWrapper };
 };
