@@ -5,48 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-
-const graphNodeSchema = z.looseObject({
-  id: z.string().min(1),
-  position: z.object({
-    x: z.number(),
-    y: z.number(),
-  }),
-  data: z.looseObject({
-    label: z.string(),
-  }),
-});
-
-const graphEdgeSchema = z.looseObject({
-  id: z.string().min(1),
-  source: z.string().min(1),
-  target: z.string().min(1),
-  type: z.string().min(1),
-  label: z.string().optional(),
-  markerEnd: z.enum(['arrow']).optional(),
-});
-
-const graphAttachmentDataSchema = z.looseObject({
-  nodes: z.array(graphNodeSchema).min(1),
-  edges: z.array(graphEdgeSchema),
-  title: z.string().optional(),
-  description: z.string().optional(),
-});
-
-export type GraphNode = z.infer<typeof graphNodeSchema>;
-export type GraphEdge = z.infer<typeof graphEdgeSchema>;
-export type GraphAttachmentData = z.infer<typeof graphAttachmentDataSchema>;
+import type { GraphAttachment, GraphAttachmentData, GraphEdge } from '../../common/attachments';
+import { GRAPH_ATTACHMENT_TYPE, graphAttachmentDataSchema } from '../../common/attachments';
 
 export const createGraphAttachmentType = (): AttachmentTypeDefinition<
-  AttachmentType.graph,
+  typeof GRAPH_ATTACHMENT_TYPE,
   GraphAttachmentData
 > => {
   return {
-    id: AttachmentType.graph,
+    id: GRAPH_ATTACHMENT_TYPE,
     validate: (input) => {
       const parseResult = graphAttachmentDataSchema.safeParse(input);
 
@@ -56,7 +24,7 @@ export const createGraphAttachmentType = (): AttachmentTypeDefinition<
 
       return { valid: false, error: parseResult.error.message };
     },
-    format: (attachment: Attachment<AttachmentType.graph, GraphAttachmentData>) => {
+    format: (attachment: GraphAttachment) => {
       return {
         getRepresentation: () => ({
           type: 'text' as const,

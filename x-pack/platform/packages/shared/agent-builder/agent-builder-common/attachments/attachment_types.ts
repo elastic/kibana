@@ -17,7 +17,6 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   visualization = 'visualization',
-  graph = 'graph',
 }
 
 interface AttachmentDataMap {
@@ -25,7 +24,6 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.visualization]: VisualizationAttachmentData;
-  [AttachmentType.graph]: GraphAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({

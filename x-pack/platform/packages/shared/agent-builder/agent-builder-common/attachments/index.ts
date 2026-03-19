@@ -13,7 +13,6 @@ export type {
   ScreenContextAttachment,
   EsqlAttachment,
   VisualizationAttachment,
-  GraphAttachment,
 } from './attachments';
 export {
   AttachmentType,

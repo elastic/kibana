@@ -9,8 +9,8 @@ import React, { Suspense } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GraphAttachment } from '@kbn/agent-builder-common/attachments';
 import { type AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
+import type { GraphAttachment } from '../../../common/attachments';
 
 const GraphFlowCanvas = React.lazy(() =>
   import('./graph_flow_canvas').then((module) => ({ default: module.GraphFlowCanvas }))
