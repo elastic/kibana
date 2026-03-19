@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { LEGACY_CUSTOM_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/common/preconfigured_inference_ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { getKbIndexCreatedVersion, getKnowledgeBaseEntriesFromApi } from '../utils/knowledge_base';
+import { getKbIndexCreatedVersion, getKnowledgeBaseEntriesFromEs } from '../utils/knowledge_base';
 import {
   createOrUpdateIndexAssets,
   deleteIndexAssets,
@@ -69,10 +69,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('can retrieve entries', async () => {
-      const res = await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient });
-      expect(res.status).to.be(200);
-      expect(res.body.entries).to.have.length(1);
-      expect(res.body.entries[0].text).to.be(
+      const hits = await getKnowledgeBaseEntriesFromEs(es);
+      expect(hits).to.have.length(1);
+      expect(hits[0]._source?.text).to.be(
         'The user has a 10 meter tall pet dinosaur. It loves carrots.'
       );
     });
