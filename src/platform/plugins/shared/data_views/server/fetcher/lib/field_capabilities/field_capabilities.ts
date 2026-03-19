@@ -63,6 +63,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
   } = params;
 
   const excludedTiers = await uiSettingsClient?.get<string>(DATA_VIEWS_FIELDS_EXCLUDED_TIERS);
+  const fieldCapsStart = performance.now();
   const esFieldCaps = await callFieldCapsApi({
     callCluster,
     indices,
@@ -76,6 +77,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     abortSignal,
     projectRouting,
   });
+  const fieldCapsEnd = performance.now();
   const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');
 
@@ -111,5 +113,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
   return {
     fields: sortBy(allFieldsUnsorted, 'name'),
     indices: esFieldCaps.body.indices as string[],
+    fieldCapsStart,
+    fieldCapsEnd,
   };
 }

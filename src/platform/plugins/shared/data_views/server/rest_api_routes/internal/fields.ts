@@ -27,6 +27,7 @@ export const createHandler: (
   isRollupsEnabled: () => boolean
 ) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
+    const routeStart = performance.now();
     const core = await context.core;
     const uiSettings = core.uiSettings.client;
     const { asCurrentUser } = core.elasticsearch.client;
@@ -58,19 +59,20 @@ export const createHandler: (
     }
 
     try {
-      const { fields, indices } = await indexPatterns.getFieldsForWildcard({
-        pattern,
-        metaFields: parsedMetaFields,
-        type,
-        rollupIndex,
-        fieldCapsOptions: {
-          allow_no_indices: allowNoIndex || false,
-          includeUnmapped,
-        },
-        allowHidden,
-        fieldTypes: parsedFieldTypes,
-        ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
-      });
+      const { fields, indices, fieldCapsStart, fieldCapsEnd } =
+        await indexPatterns.getFieldsForWildcard({
+          pattern,
+          metaFields: parsedMetaFields,
+          type,
+          rollupIndex,
+          fieldCapsOptions: {
+            allow_no_indices: allowNoIndex || false,
+            includeUnmapped,
+          },
+          allowHidden,
+          fieldTypes: parsedFieldTypes,
+          ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
+        });
 
       const body: { fields: FieldDescriptorRestResponse[]; indices: string[] } = {
         fields,
@@ -115,9 +117,24 @@ export const createHandler: (
         }
       }
 
+      let serverTiming = '';
+      try {
+        serverTiming = `pre;dur=${(fieldCapsStart - routeStart).toFixed(
+          2
+        )};desc="Server Route Pre-processing",field_caps;dur=${(
+          fieldCapsEnd - fieldCapsStart
+        ).toFixed(2)};desc="Field Capabilities API",post;dur=${(
+          performance.now() - fieldCapsEnd
+        ).toFixed(2)};desc="Server Route Post-processing"`;
+      } catch {
+        // nothing
+      }
       return response.ok({
         body: bodyAsString,
-        headers,
+        headers: {
+          ...headers,
+          'Server-Timing': serverTiming,
+        },
       });
     } catch (error) {
       if (

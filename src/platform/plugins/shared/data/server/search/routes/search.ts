@@ -63,6 +63,7 @@ export function registerSearchRoute(
         },
       },
       async (context, request, res) => {
+        const routeStart = performance.now();
         const {
           legacyHitsTotal = true,
           sessionId,
@@ -112,12 +113,26 @@ export function registerSearchRoute(
               .pipe(first())
               .toPromise();
 
+            let serverTiming = '';
+            try {
+              serverTiming = `pre;dur=${(response.esStart - routeStart).toFixed(
+                2
+              )};desc="Server Route Pre-processing",es;dur=${(
+                response.esFinish - response.esStart
+              ).toFixed(2)};desc="Elasticsearch Time",post;dur=${(
+                performance.now() - response.esFinish
+              ).toFixed(2)};desc="Server Route Post-processing"`;
+            } catch (e) {
+              // nothing
+            }
+
             if (response && (response.rawResponse as unknown as IncomingMessage).pipe) {
               return res.ok({
                 body: response.rawResponse,
                 headers: {
                   'kbn-search-is-restored': response.isRestored ? '?1' : '?0',
                   'kbn-search-request-params': JSON.stringify(response.requestParams),
+                  'Server-Timing': serverTiming,
                 },
               });
             } else {

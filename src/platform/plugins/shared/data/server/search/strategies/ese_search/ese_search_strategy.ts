@@ -81,6 +81,8 @@ export const enhancedEsSearchStrategyProvider = (
         ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
         : {}),
     };
+
+    const esStart = performance.now();
     const { body, headers, meta } = await client.asyncSearch.get(
       { ...params, id: id! },
       {
@@ -90,8 +92,13 @@ export const enhancedEsSearchStrategyProvider = (
         asStream: options.stream,
       }
     );
+    const esFinish = performance.now();
 
-    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
+    return {
+      ...toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options),
+      esStart,
+      esFinish,
+    };
   }
 
   async function submitAsyncSearch(
@@ -107,14 +114,20 @@ export const enhancedEsSearchStrategyProvider = (
       })),
       ...request.params,
     };
+    const esStart = performance.now();
     const { body, headers, meta } = await client.asyncSearch.submit(params, {
       ...options.transport,
       signal: options.abortSignal,
       meta: true,
       asStream: options.stream,
     });
+    const esFinish = performance.now();
 
-    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
+    return {
+      ...toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options),
+      esStart,
+      esFinish,
+    };
   }
 
   function asyncSearch(
