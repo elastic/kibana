@@ -365,6 +365,26 @@ import type {
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
 import type {
+  CreateWatchlistEntitySourceRequestParamsInput,
+  CreateWatchlistEntitySourceRequestBodyInput,
+  CreateWatchlistEntitySourceResponse,
+} from './entity_analytics/watchlists/data_source/create.gen';
+import type { DeleteWatchlistEntitySourceRequestParamsInput } from './entity_analytics/watchlists/data_source/delete.gen';
+import type {
+  GetWatchlistEntitySourceRequestParamsInput,
+  GetWatchlistEntitySourceResponse,
+} from './entity_analytics/watchlists/data_source/get.gen';
+import type {
+  ListWatchlistEntitySourcesRequestQueryInput,
+  ListWatchlistEntitySourcesRequestParamsInput,
+  ListWatchlistEntitySourcesResponse,
+} from './entity_analytics/watchlists/data_source/list.gen';
+import type {
+  UpdateWatchlistEntitySourceRequestParamsInput,
+  UpdateWatchlistEntitySourceRequestBodyInput,
+  UpdateWatchlistEntitySourceResponse,
+} from './entity_analytics/watchlists/data_source/update.gen';
+import type {
   CreateWatchlistRequestBodyInput,
   CreateWatchlistResponse,
 } from './entity_analytics/watchlists/management/create.gen';
@@ -704,6 +724,12 @@ If asset criticality records already exist for the specified entities, those rec
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Creates an index for Elastic Security alerts. Calling this API is not
+required for the detection engine to function properly. You can create
+rules and alerts without calling this API.
+
+    */
   async createAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API CreateAlertsIndex`);
     return this.kbnClient
@@ -993,6 +1019,22 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async createWatchlistEntitySource(props: CreateWatchlistEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateWatchlistEntitySource`);
+    return this.kbnClient
+      .request<CreateWatchlistEntitySourceResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async deleteAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API DeleteAlertsIndex`);
     return this.kbnClient
@@ -1193,6 +1235,21 @@ The entity will be immediately deleted from the latest index.  It will remain av
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async deleteWatchlistEntitySource(props: DeleteWatchlistEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteWatchlistEntitySource`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
    */
@@ -1262,7 +1319,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Download a file associated with a response action.
+    * Download a file associated with a response action. Files are downloaded in a password-protected `.zip` archive to prevent the file from running. Use password `elastic` to open the `.zip` in a safe environment.
+> info
+> Files retrieved from third-party-protected hosts require a different password. Refer to [Third-party response actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions) for your system's password.
 
     */
   async endpointFileDownload(props: EndpointFileDownloadProps) {
@@ -2169,6 +2228,21 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getWatchlistEntitySource(props: GetWatchlistEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetWatchlistEntitySource`);
+    return this.kbnClient
+      .request<GetWatchlistEntitySourceResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async getWorkflowInsights(props: GetWorkflowInsightsProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetWorkflowInsights`);
     return this.kbnClient
@@ -2437,6 +2511,23 @@ providing you with the most current and effective threat detection capabilities.
     return this.kbnClient
       .request<ListPrivMonUsersResponse>({
         path: '/api/entity_analytics/monitoring/users/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async listWatchlistEntitySources(props: ListWatchlistEntitySourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListWatchlistEntitySources`);
+    return this.kbnClient
+      .request<ListWatchlistEntitySourcesResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/list',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3266,6 +3357,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async updateWatchlistEntitySource(props: UpdateWatchlistEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateWatchlistEntitySource`);
+    return this.kbnClient
+      .request<UpdateWatchlistEntitySourceResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async updateWorkflowInsight(props: UpdateWorkflowInsightProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateWorkflowInsight`);
     return this.kbnClient
@@ -3437,6 +3544,10 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 export interface CreateWatchlistProps {
   body: CreateWatchlistRequestBodyInput;
 }
+export interface CreateWatchlistEntitySourceProps {
+  params: CreateWatchlistEntitySourceRequestParamsInput;
+  body: CreateWatchlistEntitySourceRequestBodyInput;
+}
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
@@ -3474,6 +3585,9 @@ export interface DeleteSingleEntityProps {
 }
 export interface DeleteTimelinesProps {
   body: DeleteTimelinesRequestBodyInput;
+}
+export interface DeleteWatchlistEntitySourceProps {
+  params: DeleteWatchlistEntitySourceRequestParamsInput;
 }
 export interface DeprecatedTriggerRiskScoreCalculationProps {
   body: DeprecatedTriggerRiskScoreCalculationRequestBodyInput;
@@ -3628,6 +3742,9 @@ export interface GetTimelinesProps {
 export interface GetWatchlistProps {
   params: GetWatchlistRequestParamsInput;
 }
+export interface GetWatchlistEntitySourceProps {
+  params: GetWatchlistEntitySourceRequestParamsInput;
+}
 export interface GetWorkflowInsightsProps {
   query: GetWorkflowInsightsRequestQueryInput;
 }
@@ -3667,6 +3784,10 @@ export interface ListEntitySourcesProps {
 }
 export interface ListPrivMonUsersProps {
   query: ListPrivMonUsersRequestQueryInput;
+}
+export interface ListWatchlistEntitySourcesProps {
+  query: ListWatchlistEntitySourcesRequestQueryInput;
+  params: ListWatchlistEntitySourcesRequestParamsInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
@@ -3796,6 +3917,10 @@ export interface UpdateRuleMigrationRulesProps {
 export interface UpdateWatchlistProps {
   params: UpdateWatchlistRequestParamsInput;
   body: UpdateWatchlistRequestBodyInput;
+}
+export interface UpdateWatchlistEntitySourceProps {
+  params: UpdateWatchlistEntitySourceRequestParamsInput;
+  body: UpdateWatchlistEntitySourceRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {
   params: UpdateWorkflowInsightRequestParamsInput;

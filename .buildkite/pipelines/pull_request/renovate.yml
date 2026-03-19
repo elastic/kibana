@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/renovate.sh
-    cancel_on_build_failing: true
     label: 'Renovate validation'
     agents:
       machineType: n2-highcpu-8

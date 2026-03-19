@@ -83,6 +83,18 @@ describe('TimeWindowButtons', () => {
     expect(screen.queryByTestId('dateRangePickerTimeWindowButtons')).not.toBeInTheDocument();
   });
 
+  describe('disabled prop', () => {
+    it('disables all time window buttons when disabled is true', () => {
+      renderPicker({ disabled: true });
+
+      const group = screen.getByTestId('dateRangePickerTimeWindowButtons');
+      const buttons = group.querySelectorAll('button');
+      buttons.forEach((button) => {
+        expect(button).toBeDisabled();
+      });
+    });
+  });
+
   describe('time shift', () => {
     it('calls onChange when stepping forward', async () => {
       const { onChange } = renderPicker({

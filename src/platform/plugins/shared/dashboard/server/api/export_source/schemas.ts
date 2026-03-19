@@ -11,12 +11,12 @@ import { schema } from '@kbn/config-schema';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function getExportSourceRequestBodySchema() {
-  return getDashboardStateSchema();
+  return getDashboardStateSchema(true);
 }
 
 export function getExportSourceResponseBodySchema() {
   return schema.object({
-    data: getDashboardStateSchema(),
+    data: getDashboardStateSchema(false),
     warnings: schema.maybe(schema.arrayOf(schema.string())),
   });
 }

@@ -50,7 +50,6 @@ export type {
   DashboardFilter,
   DashboardOptions,
   DashboardQuery,
-  DashboardExportSourceRequestBody,
   DashboardExportSourceResponseBody,
   DashboardCreateRequestBody,
   DashboardCreateResponseBody,

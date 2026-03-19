@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import {
-  HEATMAP_NAME,
   type FormBasedLayer,
   type HeatmapVisualizationState,
   type TextBasedLayer,
@@ -60,6 +59,7 @@ function getGridConfigProps(
         value: gridConfig.xTitle,
         visible: gridConfig.isXAxisTitleVisible,
       },
+      ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
     },
     y: {
       labels: { visible: gridConfig.isYAxisLabelVisible },
@@ -67,6 +67,7 @@ function getGridConfigProps(
         value: gridConfig.yTitle,
         visible: gridConfig.isYAxisTitleVisible,
       },
+      ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
     },
   };
 }
@@ -86,7 +87,7 @@ function reverseBuildVisualizationState(
 
   const sharedProps = {
     ...generateApiLayer(layer),
-    type: HEATMAP_NAME,
+    type: 'heat_map' as const,
     legend: getLegendProps(visualization.legend),
     axes: getGridConfigProps(visualization.gridConfig),
     cells: {

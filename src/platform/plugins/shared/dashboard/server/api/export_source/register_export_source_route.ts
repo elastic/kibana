@@ -9,12 +9,14 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { commonRouteConfig } from '../constants';
-import { stripUnmappedKeys } from '../scope_tooling';
+import { once } from 'lodash';
 import { DASHBOARD_INTERNAL_API_PATH } from '../../../common/constants';
 import { getExportSourceRequestBodySchema, getExportSourceResponseBodySchema } from './schemas';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { exportSource } from './export';
 
-/** Register the export source route.
+/**
+ * Register the export source route.
  * This route uses an internal API path because it is not intended for public use.
  * It is only used by the dashboard app to sanitize the export source for the export share integration.
  */
@@ -22,32 +24,40 @@ export function registerExportSourceRoute(router: VersionedRouter<RequestHandler
   const exportSourceRoute = router.post({
     path: `${DASHBOARD_INTERNAL_API_PATH}/_export_source`,
     summary: 'Sanitize a dashboard export source',
-    ...commonRouteConfig,
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on Content Client for authorization',
+      },
+    },
+    access: 'internal',
+  });
+
+  // Do not call getDashboardStateSchema when registering route.
+  // Route is registered during setup and before all plugins have registered embeddable schemas.
+  // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
+  const getCachedDashboardStateSchema = once(() => {
+    return getDashboardStateSchema(false);
   });
 
   exportSourceRoute.addVersion(
     {
       version: '1',
-      validate: {
+      validate: () => ({
         request: {
           body: getExportSourceRequestBodySchema(),
         },
         response: {
           200: {
-            body: getExportSourceResponseBodySchema,
+            body: () => getExportSourceResponseBodySchema(),
           },
         },
-      },
+      }),
     },
     async (_ctx, req, res) => {
       try {
-        const { data, warnings } = stripUnmappedKeys(req.body);
-        return res.ok({
-          body: {
-            data,
-            ...(warnings.length ? { warnings } : {}),
-          },
-        });
+        const result = await exportSource(_ctx, getCachedDashboardStateSchema(), req.body);
+        return res.ok({ body: result });
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Unknown error';
         return res.badRequest({

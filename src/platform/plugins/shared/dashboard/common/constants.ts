@@ -11,6 +11,7 @@ import { DASHBOARD_GRID_COLUMN_COUNT } from './page_bundle_constants';
 
 /** The base API path for public dashboard endpoints. */
 export const DASHBOARD_API_PATH = '/api/dashboards';
+export const DASHBOARD_APP_API_PATH = '/internal/dashboards/app';
 export const DASHBOARD_API_VERSION = '1';
 
 /** The base API path for internal dashboard endpoints. */
@@ -23,6 +24,7 @@ export const DEFAULT_PANEL_HEIGHT = 15;
 
 export const DEFAULT_DASHBOARD_OPTIONS = {
   hide_panel_titles: false,
+  hide_panel_borders: false,
   use_margins: true,
   auto_apply_filters: true,
   sync_colors: false,

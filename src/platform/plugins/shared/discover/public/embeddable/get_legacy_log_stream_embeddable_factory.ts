@@ -38,7 +38,7 @@ export const getLegacyLogStreamEmbeddableFactory = (
       const savedSearch: SavedSearch = {
         title: initialState.title,
         description: initialState.description,
-        timeRange: initialState.timeRange,
+        timeRange: initialState.time_range,
         sort: initialState.sort ?? [],
         columns: initialState.columns ?? [],
         searchSource,

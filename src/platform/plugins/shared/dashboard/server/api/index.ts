@@ -10,10 +10,7 @@
 export { registerRoutes } from './register_routes';
 
 export type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './create';
-export type {
-  DashboardExportSourceRequestBody,
-  DashboardExportSourceResponseBody,
-} from './export_source';
+export type { DashboardExportSourceResponseBody } from './export_source';
 export type { DashboardReadResponseBody } from './read';
 export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './search';
 export type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './update';

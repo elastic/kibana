@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { isEmpty } from 'lodash';
 import { MESSAGE_NON_EMPTY } from '../constants';
 
@@ -91,52 +91,64 @@ export const CreateAlertParamsSchema = z
     description: z.string().max(15000).optional(),
     responders: z
       .array(
-        z.union([
-          z
-            .object({
-              name: z.string(),
-              type: responderTypes,
-            })
-            .strict(),
-          z.object({ id: z.string(), type: responderTypes }).strict(),
-          /**
-           * This field is not explicitly called out in the description of responders within Opsgenie's API docs but it is
-           * shown in an example and when I tested it, it seems to work as they throw an error if you try to specify a username
-           * without a valid email
-           */
-          z.object({ username: z.string(), type: z.literal('user') }).strict(),
-        ])
+        z.union(
+          [
+            z
+              .object({
+                name: z.string(),
+                type: responderTypes,
+              })
+              .strict(),
+            z.object({ id: z.string(), type: responderTypes }).strict(),
+            /**
+             * This field is not explicitly called out in the description of responders within Opsgenie's API docs but it is
+             * shown in an example and when I tested it, it seems to work as they throw an error if you try to specify a username
+             * without a valid email
+             */
+            z.object({ username: z.string(), type: z.literal('user') }).strict(),
+          ],
+          {
+            error:
+              'Each responder must have a "type" (team|user|escalation|schedule) and one of "name", "id", or "username"',
+          }
+        )
       )
       .max(50)
       .optional(),
     visibleTo: z
       .array(
-        z.union([
-          z
-            .object({
-              name: z.string(),
-              type: z.literal('team'),
-            })
-            .strict(),
-          z
-            .object({
-              id: z.string(),
-              type: z.literal('team'),
-            })
-            .strict(),
-          z
-            .object({
-              id: z.string(),
-              type: z.literal('user'),
-            })
-            .strict(),
-          z
-            .object({
-              username: z.string(),
-              type: z.literal('user'),
-            })
-            .strict(),
-        ])
+        z.union(
+          [
+            z
+              .object({
+                name: z.string(),
+                type: z.literal('team'),
+              })
+              .strict(),
+            z
+              .object({
+                id: z.string(),
+                type: z.literal('team'),
+              })
+              .strict(),
+            z
+              .object({
+                id: z.string(),
+                type: z.literal('user'),
+              })
+              .strict(),
+            z
+              .object({
+                username: z.string(),
+                type: z.literal('user'),
+              })
+              .strict(),
+          ],
+          {
+            error:
+              'Each visible target must have a "type" (team|user) and one of "name", "id", or "username"',
+          }
+        )
       )
       .max(50)
       .optional(),

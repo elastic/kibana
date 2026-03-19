@@ -6,6 +6,7 @@
  */
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import {
   AGENT_BUILDER_BUILTIN_AGENTS,
   AGENT_BUILDER_BUILTIN_TOOLS,
@@ -45,5 +46,7 @@ export function normalizeAgentIdForTelemetry(agentId?: string): string | undefin
  * custom/user-created tools are reported as a stable hashed label (CUSTOM-<sha256_prefix>).
  */
 export function normalizeToolIdForTelemetry(toolId: string): string {
-  return (BUILTIN_TOOL_IDS as Set<string>).has(toolId) ? toolId : toCustomHashedId(toolId);
+  return (BUILTIN_TOOL_IDS as Set<string>).has(toolId) || isInternalTool(toolId)
+    ? toolId
+    : toCustomHashedId(toolId);
 }

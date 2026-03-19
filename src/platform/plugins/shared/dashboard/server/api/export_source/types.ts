@@ -8,15 +8,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type {
-  getExportSourceRequestBodySchema,
-  getExportSourceResponseBodySchema,
-} from './schemas';
+import type { getExportSourceResponseBodySchema } from './schemas';
 
-/** The request body type for sanitizing a dashboard export source. */
-export type DashboardExportSourceRequestBody = TypeOf<
-  ReturnType<typeof getExportSourceRequestBodySchema>
->;
 /** The response body type for sanitizing a dashboard export source. */
 export type DashboardExportSourceResponseBody = TypeOf<
   ReturnType<typeof getExportSourceResponseBodySchema>

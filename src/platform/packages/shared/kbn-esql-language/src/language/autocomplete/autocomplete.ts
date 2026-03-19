@@ -8,17 +8,15 @@
  */
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
+import { EsqlQuery, parse, isHeaderCommand, Walker } from '@elastic/esql';
 import type {
   ESQLColumn,
   ESQLAstItem,
   ESQLCommandOption,
   ESQLFunction,
   ESQLAstAllCommands,
-} from '../../types';
-import { EsqlQuery } from '../../composer';
+} from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands';
-import { isHeaderCommand, Walker } from '../../ast';
-import { parse } from '../../parser';
 import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
 import { SuggestionOrderingEngine } from './utils';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
@@ -38,6 +36,7 @@ import { getQueryForFields } from '../shared/get_query_for_fields';
 import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
+import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -115,6 +114,32 @@ export async function suggest(
 
         return hasLicenseAccess && hasObservabilityAccess;
       })
+      .filter((command) => {
+        // Commands that require a TS source are only suggested when the source command is TS
+        if (command.metadata?.requiresTimeseriesSource) {
+          return (
+            astContext.astForContext.commands.length > 0 &&
+            isTimeseriesSourceCommand(astContext.astForContext.commands)
+          );
+        }
+        return true;
+      })
+      .filter((command) => {
+        // Commands with hiddenAfterCommands are not suggested when any command in the pipeline is in that list
+        const hiddenAfter = command.metadata?.hiddenAfterCommands;
+        if (hiddenAfter?.length && astContext.astForContext.commands.length > 0) {
+          const commandNamesInPipeline = new Set(
+            astContext.astForContext.commands.map((cmd) => cmd.name).filter(Boolean)
+          );
+          const hasHiddenCommandInPipeline = hiddenAfter.some((name) =>
+            commandNamesInPipeline.has(name)
+          );
+          if (hasHiddenCommandInPipeline) {
+            return false;
+          }
+        }
+        return true;
+      })
       .map((command) => command.name);
 
     const suggestions = getCommandAutocompleteDefinitions(commands);
@@ -133,7 +158,9 @@ export async function suggest(
         innerText,
         resourceRetriever
       );
-      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.('from *')) ?? {
+      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(
+        fromCommand + ' '
+      )) ?? {
         recommendedQueries: [],
       };
       const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(

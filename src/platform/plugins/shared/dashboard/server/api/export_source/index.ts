@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardExportSourceRequestBody, DashboardExportSourceResponseBody } from './types';
+export type { DashboardExportSourceResponseBody } from './types';
 export { registerExportSourceRoute } from './register_export_source_route';

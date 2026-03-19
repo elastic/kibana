@@ -773,4 +773,48 @@ describe('create', () => {
       });
     });
   });
+
+  describe('Template usage stats', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('increments template usage stats when a case is created with a template', async () => {
+      const caseWithTemplate = {
+        ...theCase,
+        template: { id: 'tmpl-1', version: 1 },
+      };
+
+      await create(caseWithTemplate, clientArgs, casesClientMock);
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
+        'tmpl-1'
+      );
+    });
+
+    it('does not increment template usage stats when no template is provided', async () => {
+      await create(theCase, clientArgs, casesClientMock);
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).not.toHaveBeenCalled();
+    });
+
+    it('does not fail case creation when template stats update fails', async () => {
+      clientArgs.services.templatesService.incrementUsageStats.mockRejectedValueOnce(
+        new Error('stats update failed')
+      );
+
+      const caseWithTemplate = {
+        ...theCase,
+        template: { id: 'tmpl-1', version: 1 },
+      };
+
+      await expect(create(caseWithTemplate, clientArgs, casesClientMock)).resolves.not.toThrow();
+      expect(clientArgs.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update template usage stats')
+      );
+    });
+  });
 });

@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
-    cancel_on_build_failing: true
     label: 'Build Webpack Bundle Analyzer reports'
     agents:
       machineType: n2-standard-8

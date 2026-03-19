@@ -15,9 +15,9 @@ import {
   EuiIcon,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiTextColor,
   EuiSkeletonText,
   EuiToolTip,
+  type CriteriaWithPagination,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -25,29 +25,19 @@ import { useHistory } from 'react-router-dom';
 import { QUERY_TIMEOUT } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
-import { useBulkGetUserProfiles } from './use_user_profiles';
-import type { ActionDetails, SearchHit } from '../../common/search_strategy';
-import type { PackResultCounts } from '../../common/search_strategy/osquery/actions';
+import type { SearchHit } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
-import { RunByColumn } from './components/run_by_column';
-import { SourceColumn } from './components/source_column';
-import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
+import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
 interface ActionTableResultsButtonProps {
   actionId: string;
-  isHistoryEnabled: boolean;
 }
 
-const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({
-  actionId,
-  isHistoryEnabled,
-}) => {
-  const navProps = useRouterNavigate(
-    isHistoryEnabled ? `history/${actionId}` : `live_queries/${actionId}`
-  );
+const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
+  const navProps = useRouterNavigate(`live_queries/${actionId}`);
 
   const detailsText = i18n.translate(
     'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
@@ -67,10 +57,11 @@ ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = usePersistedPageSize();
+
+  const kuery = 'user_id: *';
 
   const { data: packsData } = usePacks({});
 
@@ -81,8 +72,7 @@ const ActionsTableComponent = () => {
   } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    ...(!isHistoryEnabled ? { kuery: 'user_id: *' } : {}),
-    withResultCounts: isHistoryEnabled,
+    kuery,
   });
 
   const actionItems = useMemo(
@@ -90,23 +80,20 @@ const ActionsTableComponent = () => {
     [actionsData?.data?.items]
   );
 
-  const { profilesMap, isLoading: isLoadingProfiles } = useBulkGetUserProfiles(
-    isHistoryEnabled ? actionItems : EMPTY_ARRAY
+  const onTableChange = useCallback(
+    ({ page }: CriteriaWithPagination<SearchHit>) => {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    },
+    [setPageSize]
   );
-
-  const onTableChange = useCallback(({ page = {} }: any) => {
-    const { index, size } = page;
-
-    setPageIndex(index);
-    setPageSize(size);
-  }, []);
 
   const renderQueryColumn = useCallback((_: any, item: any) => {
     if (item._source.pack_name) {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="package" />
+            <EuiIcon type="package" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>{item._source.pack_name}</EuiFlexItem>
         </EuiFlexGroup>
@@ -129,94 +116,22 @@ const ActionsTableComponent = () => {
     []
   );
 
-  const renderHistoryAgentsColumn = useCallback((_: unknown, item: SearchHit) => {
-    const action = item._source as ActionDetails | undefined;
-    const counts = action?.result_counts;
-
-    if (!counts || counts.successful_agents == null) {
-      return <>{item.fields?.agents?.length ?? action?.agents?.length ?? 0}</>;
-    }
-
-    return (
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="check" color="success" size="m" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTextColor color="success">{counts.successful_agents}</EuiTextColor>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="cross" color="danger" size="m" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTextColor color="danger">{counts.error_agents ?? 0}</EuiTextColor>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }, []);
-
   const renderCreatedByColumn = useCallback(
     (userId: any) => (isArray(userId) ? userId[0] : '-'),
     []
   );
-
-  const renderRunByColumn = useCallback(
-    (_: unknown, item: SearchHit) => {
-      const userId = (item.fields?.user_id as string[] | undefined)?.[0];
-      const userProfileUid = (item.fields?.user_profile_uid as string[] | undefined)?.[0];
-
-      return (
-        <RunByColumn
-          userId={userId}
-          userProfileUid={userProfileUid}
-          profilesMap={profilesMap}
-          isLoadingProfiles={isLoadingProfiles}
-        />
-      );
-    },
-    [profilesMap, isLoadingProfiles]
-  );
-
-  const renderSourceColumn = useCallback((_: unknown, item: SearchHit) => {
-    const userId = (item.fields?.user_id as string[] | undefined)?.[0];
-
-    return <SourceColumn userId={userId} />;
-  }, []);
 
   const renderTimestampColumn = useCallback(
     (_: any, item: any) => <>{formatDate(item.fields['@timestamp'][0])}</>,
     []
   );
 
-  const renderResultsColumn = useCallback((_: unknown, item: SearchHit) => {
-    const action = item._source as ActionDetails | undefined;
-    const counts = action?.result_counts;
-    if (!counts) return <>{'\u2014'}</>;
-
-    if (action?.pack_id && 'queries_total' in counts) {
-      const packCounts = counts as PackResultCounts;
-
-      return (
-        <>
-          {packCounts.queries_with_results} of {packCounts.queries_total}
-        </>
-      );
-    }
-
-    return <>{counts.total_rows}</>;
-  }, []);
-
   const renderActionsColumn = useCallback(
-    (item: any) => (
-      <ActionTableResultsButton
-        actionId={item.fields.action_id[0]}
-        isHistoryEnabled={isHistoryEnabled}
-      />
-    ),
-    [isHistoryEnabled]
+    (item: any) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
+    []
   );
 
-  const newQueryPath = isHistoryEnabled ? '/new' : '/live_queries/new';
+  const newQueryPath = '/live_queries/new';
 
   const handlePlayClick = useCallback(
     (item: any) => () => {
@@ -257,8 +172,9 @@ const ActionsTableComponent = () => {
         ),
       });
     },
-    [push, newQueryPath]
+    [push]
   );
+
   const renderPlayButton = useCallback(
     (item: any, enabled: any) => {
       const playText = i18n.translate('xpack.osquery.liveQueryActions.table.runActionAriaLabel', {
@@ -296,23 +212,6 @@ const ActionsTableComponent = () => {
     [permissions, existingPackIds]
   );
 
-  const resultsColumn = useMemo(
-    () =>
-      isHistoryEnabled
-        ? [
-            {
-              field: 'results',
-              name: i18n.translate('xpack.osquery.liveQueryActions.table.resultsColumnTitle', {
-                defaultMessage: 'Results',
-              }),
-              width: '120px',
-              render: renderResultsColumn,
-            },
-          ]
-        : [],
-    [isHistoryEnabled, renderResultsColumn]
-  );
-
   const columns = useMemo(
     () => [
       {
@@ -324,26 +223,13 @@ const ActionsTableComponent = () => {
         width: '60%',
         render: renderQueryColumn,
       },
-      ...(isHistoryEnabled
-        ? [
-            {
-              field: 'source',
-              name: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumnTitle', {
-                defaultMessage: 'Source',
-              }),
-              width: '120px',
-              render: renderSourceColumn,
-            },
-          ]
-        : []),
-      ...resultsColumn,
       {
         field: 'agents',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.agentsColumnTitle', {
           defaultMessage: 'Agents',
         }),
-        width: isHistoryEnabled ? '120px' : '100px',
-        render: isHistoryEnabled ? renderHistoryAgentsColumn : renderAgentsColumn,
+        width: '100px',
+        render: renderAgentsColumn,
       },
       {
         field: 'created_at',
@@ -359,13 +245,12 @@ const ActionsTableComponent = () => {
           defaultMessage: 'Run by',
         }),
         width: '200px',
-        render: isHistoryEnabled ? renderRunByColumn : renderCreatedByColumn,
+        render: renderCreatedByColumn,
       },
       {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle', {
           defaultMessage: 'View details',
         }),
-        ...(isHistoryEnabled ? { width: '120px' } : {}),
         actions: [
           {
             available: isPlayButtonAvailable,
@@ -378,18 +263,13 @@ const ActionsTableComponent = () => {
       },
     ],
     [
-      isHistoryEnabled,
       isPlayButtonAvailable,
       renderActionsColumn,
       renderAgentsColumn,
       renderCreatedByColumn,
-      renderHistoryAgentsColumn,
       renderPlayButton,
       renderQueryColumn,
-      renderRunByColumn,
-      renderSourceColumn,
       renderTimestampColumn,
-      resultsColumn,
     ]
   );
 
@@ -398,7 +278,7 @@ const ActionsTableComponent = () => {
       pageIndex,
       pageSize,
       totalItemCount: actionsData?.data?.total ?? 0,
-      pageSizeOptions: [20, 50, 100],
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
     }),
     [actionsData, pageIndex, pageSize]
   );
