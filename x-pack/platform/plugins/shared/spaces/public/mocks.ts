@@ -44,6 +44,7 @@ const createApiUiComponentsMock = () => {
     getLegacyUrlConflict: jest.fn(),
     getSpaceAvatar: jest.fn(),
     getEmbeddableLegacyUrlConflict: jest.fn(),
+    getSolutionViewSwitchCallout: jest.fn(),
   };
 
   return mock;

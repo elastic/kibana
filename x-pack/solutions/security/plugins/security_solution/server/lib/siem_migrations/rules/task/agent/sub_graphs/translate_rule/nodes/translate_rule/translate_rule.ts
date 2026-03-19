@@ -24,9 +24,9 @@ export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): Graph
   return async (state) => {
     const vendor = state.original_rule.vendor;
 
-    const indexPatterns = state.integration?.data_streams
-      ?.map((dataStream) => dataStream.index_pattern)
-      .join(',');
+    const indexPatterns =
+      state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
+      'logs-*';
 
     const fieldsMetadata = state.integration?.fields_metadata;
 
