@@ -79,12 +79,7 @@ const getLabelColors = (colors: UseEuiTheme['euiTheme']['colors']): AiGradientCo
   endColor: colors.textAssistance,
 });
 
-const gradientLabelCss = (
-  euiTheme: UseEuiTheme['euiTheme'],
-  cssGradient: string,
-  hoverGradient?: string
-) => css`
-  padding: 0 ${euiTheme.size.xs};
+const gradientLabelCss = (cssGradient: string, hoverGradient?: string) => css`
   display: inline-block;
   background: ${cssGradient} !important;
   background-clip: text !important;
@@ -102,8 +97,7 @@ const gradientLabelCss = (
     : ''}
 `;
 
-const plainLabelCss = (euiTheme: UseEuiTheme['euiTheme'], color: string) => css`
-  padding: 0 ${euiTheme.size.xs};
+const plainLabelCss = (color: string) => css`
   background: none !important;
   background-clip: initial !important;
   -webkit-background-clip: initial !important;
@@ -161,7 +155,7 @@ const resolveVariantStyles = (
         buttonBackground: 'transparent',
         hoverBackground: hoverGradient,
         labelColor: defaultLabelColor,
-        labelCss: gradientLabelCss(euiTheme, labelGradient),
+        labelCss: gradientLabelCss(labelGradient),
       };
 
     case 'outlined':
@@ -178,7 +172,7 @@ const resolveVariantStyles = (
           }
         ),
         labelColor: defaultLabelColor,
-        labelCss: gradientLabelCss(euiTheme, labelGradient),
+        labelCss: gradientLabelCss(labelGradient),
       };
 
     case 'accent': {
@@ -194,7 +188,7 @@ const resolveVariantStyles = (
         buttonBackground: accentBackground,
         hoverBackground: `${hoverGradient}, ${accentBackground}`,
         labelColor: colors.textInverse,
-        labelCss: plainLabelCss(euiTheme, colors.textInverse),
+        labelCss: plainLabelCss(colors.textInverse),
       };
     }
 
@@ -211,7 +205,7 @@ const resolveVariantStyles = (
         buttonBackground: baseBackground,
         hoverBackground: `${hoverGradient}, ${baseBackground}`,
         labelColor: defaultLabelColor,
-        labelCss: gradientLabelCss(euiTheme, labelGradient, `${hoverGradient}, ${labelGradient}`),
+        labelCss: gradientLabelCss(labelGradient, `${hoverGradient}, ${labelGradient}`),
       };
     }
   }
