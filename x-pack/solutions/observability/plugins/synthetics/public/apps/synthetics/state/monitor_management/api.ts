@@ -15,6 +15,7 @@ import type {
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import type { PackagePolicyLink } from '../../../../../common/types';
 
 export type UpsertMonitorResponse = ServiceLocationErrorsResponse | SyntheticsMonitorWithId;
 
@@ -28,13 +29,6 @@ export const createMonitorAPI = async ({
     internal: true,
   });
 };
-
-export interface PackagePolicyLink {
-  locationId: string;
-  locationLabel: string;
-  agentPolicyId: string;
-  packagePolicyId: string;
-}
 
 export interface MonitorInspectResponse {
   publicConfigs: any[];

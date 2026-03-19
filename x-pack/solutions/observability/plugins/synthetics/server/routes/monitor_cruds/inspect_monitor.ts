@@ -17,13 +17,8 @@ import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { validateMonitor } from './monitor_validation';
 import { getPrivateLocationsForMonitor } from './add_monitor/utils';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
+import type { PackagePolicyLink } from '../../../common/types';
 
-export interface PackagePolicyLink {
-  locationId: string;
-  locationLabel: string;
-  agentPolicyId: string;
-  packagePolicyId: string;
-}
 
 export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
