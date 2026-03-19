@@ -160,6 +160,51 @@
       },
       {
         "parentPluginId": "@kbn/actions-utils",
+        "id": "def-common.getProxySettings",
+        "type": "Function",
+        "tags": [],
+        "label": "getProxySettings",
+        "description": [],
+        "signature": [
+          "(opts: GetProxySettingsOpts) => ",
+          {
+            "pluginId": "@kbn/actions-utils",
+            "scope": "common",
+            "docId": "kibKbnActionsUtilsPluginApi",
+            "section": "def-common.ProxySettings",
+            "text": "ProxySettings"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_proxy_settings.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.getProxySettings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "GetProxySettingsOpts"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_proxy_settings.ts",
+            "lineNumber": 23,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-utils",
         "id": "def-common.getSSLSettingsFromConfig",
         "type": "Function",
         "tags": [],
