@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback, useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -20,6 +20,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
+import type { RuleListProps } from '@kbn/alerting-v2-rule-list';
 import { RulesSettingsLink } from '../../components/rules_setting/rules_settings_link';
 import { RulesListDocLink } from '../rules_list/components/rules_list_doc_link';
 import { RulesPageTemplate } from './rules_page_template';
@@ -34,6 +35,11 @@ import { suspendedComponentWithProps } from '../../lib/suspended_component_with_
 
 const LogsList = lazy(() => import('../rule_details/components/global_rule_event_log_list'));
 const RulesList = lazy(() => import('../rules_list/components/rules_list'));
+const AlertingV2RuleList = lazy(() =>
+  import('@kbn/alerting-v2-rule-list').then((m) => ({ default: m.RuleList }))
+);
+
+const ALERTING_V2_BASE_PATH = '/app/management/insightsAndAlerting/alerting_v2';
 
 const RulesPage = () => {
   const history = useHistory();
@@ -41,20 +47,27 @@ const RulesPage = () => {
   const {
     chrome: { docTitle },
     setBreadcrumbs,
-    application: { navigateToApp, getUrlForApp, isAppRegistered },
+    application,
     http,
-    notifications: { toasts },
+    notifications,
     ruleTypeRegistry,
   } = useKibana().services;
+  const { navigateToApp, getUrlForApp, isAppRegistered, capabilities } = application;
   const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
+
+  const canViewAlertingV2 = !!capabilities.alertingVTwo;
 
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
-    toasts,
+    toasts: notifications.toasts,
     filteredRuleTypes: [],
   });
 
-  const currentSection: Section = location.pathname.endsWith('/logs') ? 'logs' : 'rules';
+  const currentSection: Section = location.pathname.endsWith('/logs')
+    ? 'logs'
+    : location.pathname.endsWith('/alerting_v2')
+    ? 'alerting_v2'
+    : 'rules';
 
   const tabs: Array<{
     id: Section;
@@ -67,6 +80,18 @@ const RulesPage = () => {
       <FormattedMessage id="xpack.triggersActionsUI.home.rulesTabTitle" defaultMessage="Rules" />
     ),
   });
+
+  if (canViewAlertingV2) {
+    tabs.push({
+      id: 'alerting_v2',
+      name: (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.home.alertingV2TabTitle"
+          defaultMessage="Rules V2"
+        />
+      ),
+    });
+  }
 
   if (authorizedToReadAnyRules) {
     tabs.push({
@@ -93,6 +118,8 @@ const RulesPage = () => {
   const onSectionChange = (newSection: Section) => {
     if (newSection === 'logs') {
       history.push('/logs');
+    } else if (newSection === 'alerting_v2') {
+      history.push('/alerting_v2');
     } else {
       history.push('/');
     }
@@ -160,6 +187,32 @@ const RulesPage = () => {
     );
   }, [navigateToEditRuleForm, navigateToCreateRuleForm]);
 
+  const alertingV2RuleListProps: RuleListProps = useMemo(
+    () => ({
+      services: { http, notifications, application },
+      paths: {
+        ruleDetails: (id: string) => `${ALERTING_V2_BASE_PATH}/${encodeURIComponent(id)}`,
+        ruleEdit: (id: string) => `${ALERTING_V2_BASE_PATH}/edit/${encodeURIComponent(id)}`,
+        ruleCreate: `${ALERTING_V2_BASE_PATH}/create`,
+      },
+      showPageHeader: false,
+    }),
+    [http, notifications, application]
+  );
+
+  const renderAlertingV2RulesList = useCallback(() => {
+    if (!canViewAlertingV2) {
+      return null;
+    }
+    return (
+      <KibanaPageTemplate.Section paddingSize="l" data-test-subj="alertingV2RulesListWrapper">
+        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+          <AlertingV2RuleList {...alertingV2RuleListProps} />
+        </Suspense>
+      </KibanaPageTemplate.Section>
+    );
+  }, [canViewAlertingV2, alertingV2RuleListProps]);
+
   const renderLogsList = useCallback(() => {
     return (
       <KibanaPageTemplate.Section grow={false} paddingSize="l">
@@ -178,6 +231,9 @@ const RulesPage = () => {
       if (currentSection === 'logs') {
         const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
         setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('logs')]);
+      } else if (currentSection === 'alerting_v2') {
+        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
+        setBreadcrumbs([rulesBreadcrumbWithAppPath, { text: 'Rules V2' }]);
       } else {
         setBreadcrumbs([getAlertingSectionBreadcrumb('rules')]);
       }
@@ -218,6 +274,9 @@ const RulesPage = () => {
         <EuiSpacer size="l" />
         <Routes>
           <Route exact path="/logs" component={renderLogsList} />
+          {canViewAlertingV2 && (
+            <Route exact path="/alerting_v2" component={renderAlertingV2RulesList} />
+          )}
           <Route exact path="/" component={renderRulesList} />
         </Routes>
       </RulesPageTemplate>
@@ -243,7 +302,7 @@ const RulesPage = () => {
             });
           }}
           http={http}
-          toasts={toasts}
+          toasts={notifications.toasts}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
         />

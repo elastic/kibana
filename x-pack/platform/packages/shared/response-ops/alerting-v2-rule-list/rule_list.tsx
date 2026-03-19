@@ -27,17 +27,22 @@ import {
   type CriteriaWithPagination,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { RuleApiResponse } from '../../services/rules_api';
-import { useFetchRules } from '../../hooks/use_fetch_rules';
-import { useDeleteRule } from '../../hooks/use_delete_rule';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
-import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
-import { paths } from '../../constants';
+import { QueryClientProvider, QueryClient } from '@kbn/react-query';
+import type { RuleApiResponse } from './rules_api';
+import { useFetchRules } from './use_fetch_rules';
+import { useDeleteRule } from './use_delete_rule';
+import { useToggleRuleEnabled } from './use_toggle_rule_enabled';
+import { DeleteConfirmationModal } from './delete_confirmation_modal';
+import {
+  RuleListProvider,
+  useRuleListServices,
+  useRuleListPaths,
+  type RuleListServices,
+  type RuleListPaths,
+} from './rule_list_context';
 
 const DEFAULT_PER_PAGE = 20;
 
@@ -124,6 +129,9 @@ const RuleActionsMenu = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
+        defaultMessage: 'More actions',
+      })}
       button={
         <EuiButtonIcon
           iconType="boxesHorizontal"
@@ -145,11 +153,27 @@ const RuleActionsMenu = ({
   );
 };
 
-export const RulesListPage = () => {
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
+export interface RuleListProps {
+  services: RuleListServices;
+  paths: RuleListPaths;
+  showPageHeader?: boolean;
+}
 
-  useBreadcrumbs('rules_list');
+const queryClient = new QueryClient();
+
+export const RuleList = ({ services, paths, showPageHeader = true }: RuleListProps) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RuleListProvider services={services} paths={paths}>
+        <RuleListInner showPageHeader={showPageHeader} />
+      </RuleListProvider>
+    </QueryClientProvider>
+  );
+};
+
+const RuleListInner = ({ showPageHeader }: { showPageHeader: boolean }) => {
+  const { application, http } = useRuleListServices();
+  const paths = useRuleListPaths();
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -190,7 +214,7 @@ export const RulesListPage = () => {
         return (
           <div>
             <EuiLink
-              href={basePath.prepend(paths.ruleDetails(rule.id))}
+              href={http.basePath.prepend(paths.ruleDetails(rule.id))}
               data-test-subj={`ruleDetailsLink-${rule.id}`}
             >
               {metadata?.name ?? rule.id}
@@ -297,10 +321,10 @@ export const RulesListPage = () => {
       render: (rule: RuleApiResponse) => (
         <RuleActionsMenu
           rule={rule}
-          onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
+          onEdit={(r) => application.navigateToUrl(http.basePath.prepend(paths.ruleEdit(r.id)))}
           onClone={(r) =>
-            navigateToUrl(
-              basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(r.id)}`)
+            application.navigateToUrl(
+              http.basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(r.id)}`)
             )
           }
           onDelete={(r) => setRuleToDelete(r)}
@@ -312,27 +336,29 @@ export const RulesListPage = () => {
 
   return (
     <>
-      <EuiPageHeader
-        pageTitle={
-          <FormattedMessage
-            id="xpack.alertingV2.rulesList.pageTitle"
-            defaultMessage="Alerting V2 Rules"
-          />
-        }
-        rightSideItems={[
-          <EuiButton
-            key="create-rule"
-            href={basePath.prepend(paths.ruleCreate)}
-            data-test-subj="createRuleButton"
-          >
+      {showPageHeader && (
+        <EuiPageHeader
+          pageTitle={
             <FormattedMessage
-              id="xpack.alertingV2.rulesList.createRuleButton"
-              defaultMessage="Create rule"
+              id="xpack.alertingV2.rulesList.pageTitle"
+              defaultMessage="Alerting V2 Rules"
             />
-          </EuiButton>,
-        ]}
-      />
-      <EuiSpacer size="m" />
+          }
+          rightSideItems={[
+            <EuiButton
+              key="create-rule"
+              href={http.basePath.prepend(paths.ruleCreate)}
+              data-test-subj="createRuleButton"
+            >
+              <FormattedMessage
+                id="xpack.alertingV2.rulesList.createRuleButton"
+                defaultMessage="Create rule"
+              />
+            </EuiButton>,
+          ]}
+        />
+      )}
+      {showPageHeader && <EuiSpacer size="m" />}
       {isError ? (
         <>
           <EuiCallOut

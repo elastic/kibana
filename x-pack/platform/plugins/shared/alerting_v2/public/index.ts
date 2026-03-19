@@ -26,7 +26,7 @@ export const module = new ContainerModule(({ bind }) => {
     management.sections.section.insightsAndAlerting.registerApp({
       id: ALERTING_V2_APP_ID,
       title: 'Rules V2',
-
+      hideFromSidebar: true,
       order: 1,
       async mount(params) {
         const [coreStart] = await getStartServices();
