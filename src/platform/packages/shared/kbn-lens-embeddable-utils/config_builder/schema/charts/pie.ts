@@ -27,7 +27,7 @@ import {
 import type { PartitionMetric } from './partition_shared';
 import {
   legendNestedSchema,
-  legendVisibleSchema,
+  legendVisibilitySchema,
   validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
@@ -42,7 +42,7 @@ const pieStateSharedSchema = {
       {
         nested: legendNestedSchema,
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visible: legendVisibleSchema,
+        visibility: legendVisibilitySchema,
         size: legendSizeSchema,
       },
       {
@@ -54,11 +54,23 @@ const pieStateSharedSchema = {
       }
     )
   ),
-  value_display: valueDisplaySchema,
-  label_position: schema.maybe(
-    schema.oneOf([schema.literal('hidden'), schema.literal('inside'), schema.literal('outside')], {
-      meta: { description: 'Position of slice labels: hidden, inside, or outside' },
-    })
+  values: valueDisplaySchema,
+  labels: schema.maybe(
+    schema.object(
+      {
+        visible: schema.maybe(schema.boolean({ meta: { description: 'Show slice labels' } })),
+        position: schema.maybe(
+          schema.oneOf([schema.literal('inside'), schema.literal('outside')], {
+            meta: { description: 'Section of slice labels' },
+          })
+        ),
+      },
+      {
+        meta: {
+          description: 'Section label configuration',
+        },
+      }
+    )
   ),
   donut_hole: schema.maybe(
     schema.oneOf(

@@ -22,13 +22,18 @@ import {
 
 const tagcloudStateMetricOptionsSchema = {
   /**
-   * Whether to show the metric label
+   * Show the metric label
    */
-  show_metric_label: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Show metric label' },
-      defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
-    })
+  label: schema.maybe(
+    schema.object(
+      {
+        visible: schema.boolean({
+          meta: { description: 'Show metric label' },
+          defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
+        }),
+      },
+      { meta: { description: 'Metric label configuration' } }
+    )
   ),
 };
 

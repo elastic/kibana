@@ -20,7 +20,7 @@ import {
   legendTruncateAfterLinesSchema,
 } from '../shared';
 import {
-  legendVisibleSchema,
+  legendVisibilitySchema,
   validateMultipleMetricsCriteria,
   valueDisplaySchema,
 } from './partition_shared';
@@ -49,7 +49,7 @@ export const waffleStateSharedSchema = {
           )
         ),
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visible: legendVisibleSchema,
+        visibility: legendVisibilitySchema,
         size: legendSizeSchema,
       },
       {
@@ -61,7 +61,7 @@ export const waffleStateSharedSchema = {
       }
     )
   ),
-  value_display: valueDisplaySchema,
+  values: valueDisplaySchema,
 };
 
 /**
