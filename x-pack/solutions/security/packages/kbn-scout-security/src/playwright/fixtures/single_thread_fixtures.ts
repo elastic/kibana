@@ -16,6 +16,7 @@ import {
   getDetectionRuleApiService,
   getDetectionAlertsApiService,
   getEntityAnalyticsApiService,
+  getTimelineApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -26,10 +27,15 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
     {
       pageObjects,
       page,
-    }: { pageObjects: SecurityTestFixtures['pageObjects']; page: SecurityTestFixtures['page'] },
+      config,
+    }: {
+      pageObjects: SecurityTestFixtures['pageObjects'];
+      page: SecurityTestFixtures['page'];
+      config: SecurityWorkerFixtures['config'];
+    },
     use: (pageObjects: SecurityTestFixtures['pageObjects']) => Promise<void>
   ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
+    const extendedPageObjects = extendPageObjects(pageObjects, page, config);
     await use(extendedPageObjects);
   },
   apiServices: [
@@ -57,6 +63,10 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         log,
       });
       extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
+        kbnClient,
+        log,
+      });
+      extendedApiServices.timeline = getTimelineApiService({
         kbnClient,
         log,
       });

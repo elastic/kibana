@@ -8,7 +8,7 @@
  */
 
 import { LineCounter, parseDocument } from 'yaml';
-import { buildWorkflowLookup, inspectStep } from './build_workflow_lookup';
+import { buildWorkflowLookup, getValueFromValueNode, inspectStep } from './build_workflow_lookup';
 
 describe('inspectStep', () => {
   describe('simple step parsing', () => {
@@ -78,8 +78,8 @@ steps:
       expect(result.step1.propInfos).toHaveProperty('message');
       expect(result.step1.propInfos).toHaveProperty('enabled');
       expect(result.step1.propInfos.message.path).toEqual(['message']);
-      expect(result.step1.propInfos.message.valueNode.value).toBe('Hello');
-      expect(result.step1.propInfos.enabled.valueNode.value).toBe(true);
+      expect(getValueFromValueNode(result.step1.propInfos.message.valueNode)).toBe('Hello');
+      expect(getValueFromValueNode(result.step1.propInfos.enabled.valueNode)).toBe(true);
     });
 
     it('should collect nested properties in with block', () => {
@@ -99,8 +99,8 @@ steps:
       expect('with.message' in result.step1.propInfos).toBe(true);
       expect('with.level' in result.step1.propInfos).toBe(true);
       expect(result.step1.propInfos['with.message'].path).toEqual(['with', 'message']);
-      expect(result.step1.propInfos['with.message'].valueNode.value).toBe('Hello');
-      expect(result.step1.propInfos['with.level'].valueNode.value).toBe('info');
+      expect(getValueFromValueNode(result.step1.propInfos['with.message'].valueNode)).toBe('Hello');
+      expect(getValueFromValueNode(result.step1.propInfos['with.level'].valueNode)).toBe('info');
     });
 
     it('should exclude steps, else, and fallback from propInfos', () => {
@@ -152,7 +152,9 @@ steps:
         'settings',
         'timeout',
       ]);
-      expect(result.step1.propInfos['config.settings.timeout'].valueNode.value).toBe(5000);
+      expect(
+        getValueFromValueNode(result.step1.propInfos['config.settings.timeout'].valueNode)
+      ).toBe(5000);
     });
   });
 
@@ -320,7 +322,9 @@ steps:
 
       // Check nested step properties
       expect(result.nested_step.propInfos).toHaveProperty('message');
-      expect(result.nested_step.propInfos.message.valueNode.value).toBe('inside if');
+      expect(getValueFromValueNode(result.nested_step.propInfos.message.valueNode)).toBe(
+        'inside if'
+      );
     });
 
     it('should parse nested steps in foreach loop', () => {

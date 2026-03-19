@@ -29,7 +29,9 @@ export interface InteractiveModeMachineDeps {
 export type InteractiveModeToParentEvent =
   | { type: 'mode.dslUpdated'; dsl: StreamlangDSL }
   | { type: 'simulation.reset' }
-  | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] };
+  | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
+  | { type: 'simulation.filterByConditionAuto'; conditionId: string }
+  | { type: 'simulation.clearAutoConditionFilter' };
 
 interface InteractiveModeParentSnapshot {
   context: {
@@ -86,8 +88,8 @@ export interface InteractiveModeInput {
 }
 
 export type InteractiveModeEvent =
-  | { type: 'step.edit' }
-  | { type: 'step.cancel' }
+  | { type: 'step.edit'; id?: string }
+  | { type: 'step.cancel'; id?: string }
   | { type: 'step.save'; id: string }
   | {
       type: 'step.changeProcessor';

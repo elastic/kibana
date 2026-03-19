@@ -15,6 +15,31 @@ import * as api from '../api/api';
 
 jest.mock('../api/api');
 
+jest.mock('../../use_breadcrumbs', () => ({
+  useCasesTemplatesBreadcrumbs: jest.fn(),
+}));
+
+const mockNavigateToCasesCreateTemplate = jest.fn();
+const mockNavigateToCasesEditTemplate = jest.fn();
+
+jest.mock('../../../common/navigation/hooks', () => ({
+  useCasesCreateTemplateNavigation: () => ({
+    getCasesCreateTemplateUrl: jest.fn().mockReturnValue('/templates/create'),
+    navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
+  }),
+}));
+
+jest.mock('../../../common/navigation', () => ({
+  useCasesCreateTemplateNavigation: () => ({
+    getCasesCreateTemplateUrl: jest.fn().mockReturnValue('/templates/create'),
+    navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
+  }),
+  useCasesEditTemplateNavigation: () => ({
+    getCasesEditTemplateUrl: jest.fn().mockReturnValue('/templates/edit'),
+    navigateToCasesEditTemplate: mockNavigateToCasesEditTemplate,
+  }),
+}));
+
 const apiMock = api as jest.Mocked<typeof api>;
 
 describe('AllTemplatesPage', () => {
@@ -34,6 +59,7 @@ describe('AllTemplatesPage', () => {
         lastUsedAt: '2024-01-01T00:00:00.000Z',
         usageCount: 10,
         isDefault: true,
+        fieldSearchMatches: false,
       },
       {
         templateId: 'template-2',
@@ -49,6 +75,7 @@ describe('AllTemplatesPage', () => {
         lastUsedAt: '2024-01-02T00:00:00.000Z',
         usageCount: 5,
         isDefault: false,
+        fieldSearchMatches: false,
       },
     ],
     page: 1,
@@ -294,6 +321,37 @@ describe('AllTemplatesPage', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('template-flyout')).not.toBeInTheDocument();
+    });
+  });
+
+  it('selects and deselects templates via table checkboxes', async () => {
+    const queryClient = createTestQueryClient();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+
+    renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
+    });
+
+    // EuiBasicTable renders a "select all" checkbox + one per row.
+    const checkboxes = screen.getAllByRole('checkbox');
+    expect(checkboxes.length).toBeGreaterThan(1);
+
+    // Select first row
+    await user.click(checkboxes[1]);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table-selected-count')).toBeInTheDocument();
+    });
+    expect(screen.getByText('Selected 1 template')).toBeInTheDocument();
+
+    // Deselect first row
+    await user.click(checkboxes[1]);
+    await waitFor(() => {
+      expect(screen.queryByTestId('templates-table-selected-count')).not.toBeInTheDocument();
     });
   });
 });

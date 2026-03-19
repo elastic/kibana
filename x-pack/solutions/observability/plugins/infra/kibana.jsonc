@@ -23,6 +23,7 @@
       "embeddable",
       "features",
       "fieldFormats",
+      "inspector",
       "lens",
       "logsShared",
       "metricsDataAccess",
@@ -51,6 +52,7 @@
       "profilingDataAccess",
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
+      "agentBuilder",
       "licenseManagement",
       "serverless"
     ],
@@ -60,7 +62,8 @@
       "kibanaUtils",
       "kibanaReact",
       "ml",
-      "fleet"
+      "fleet",
+      "observabilityAgentBuilder"
     ]
   }
 }

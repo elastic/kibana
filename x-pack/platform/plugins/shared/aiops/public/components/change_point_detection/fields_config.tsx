@@ -430,7 +430,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 onClick={() => {
                   setIsActionMenuOpen(false);
                   openCasesModalCallback({
-                    timeRange,
+                    time_range: timeRange,
                     viewType: caseAttachment.viewType,
                     fn: fieldConfig.fn,
                     metricField: fieldConfig.metricField,
@@ -686,7 +686,7 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
       }
     >
       <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'s'}>
-        <EuiFlexItem grow={false} css={{ width: '200px' }}>
+        <EuiFlexItem grow={false} css={{ width: '224px' }}>
           <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={selectControlCss}>

@@ -14,7 +14,7 @@ import { apiTest, COMMON_HEADERS, KBN_ARCHIVES } from '../fixtures';
 
 const SEARCH_ENDPOINT = 'api/dashboards/search';
 
-apiTest.describe('dashboards - search', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {

@@ -85,7 +85,7 @@ export function WaterfallContainer({
         justifyContent="spaceBetween"
         css={css`
           position: sticky;
-          top: var(--euiFixedHeadersOffset, 0);
+          top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
           z-index: ${euiTheme.levels.menu};
           background-color: ${euiTheme.colors.backgroundBasePlain};
           padding: ${euiTheme.size.s} 0;

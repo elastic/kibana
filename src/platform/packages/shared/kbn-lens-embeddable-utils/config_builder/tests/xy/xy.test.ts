@@ -24,7 +24,11 @@ import {
 } from './basicXY.mock';
 import { dualReferenceLineXY, referenceLineXY } from './referenceLines.mock';
 import { annotationXY } from './annotations.mock';
-import { esqlChart, esqlChartWithBreakdownColorMapping } from './esqlXY.mock';
+import {
+  esqlChart,
+  esqlChartWithBreakdownColorMapping,
+  esqlXYWithCollapseByBreakdown,
+} from './esqlXY.mock';
 
 function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 'area') {
   return {
@@ -82,6 +86,10 @@ describe('XY', () => {
           xyStateSchema
         );
       });
+
+      it('should convert an esql xy with collapse by breakdown', () => {
+        validateConverter(esqlXYWithCollapseByBreakdown, xyStateSchema);
+      });
     });
 
     describe('Reference lines', () => {
@@ -116,6 +124,128 @@ describe('XY', () => {
           validateConverter(setSeriesType(esqlChartWithBreakdownColorMapping, type), xyStateSchema);
         });
       }
+
+      describe('X-axis scale detection', () => {
+        it('should detect temporal scale for ES|QL chart with date column', () => {
+          const esqlChartWithDateColumn: LensAttributes = {
+            title: 'ES|QL Chart with Date X-Axis',
+            references: [],
+            visualizationType: 'lnsXY',
+            state: {
+              datasourceStates: {
+                textBased: {
+                  layers: {
+                    layer1: {
+                      index: 'test-index',
+                      query: {
+                        esql: 'FROM logs | STATS count = COUNT(*) BY timestamp',
+                      },
+                      columns: [
+                        {
+                          columnId: 'timestamp',
+                          fieldName: 'timestamp',
+                          meta: {
+                            type: 'date',
+                            esType: 'date',
+                          },
+                        },
+                        {
+                          columnId: 'count',
+                          fieldName: 'count',
+                          meta: {
+                            type: 'number',
+                            esType: 'long',
+                          },
+                          inMetricDimension: true,
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              visualization: {
+                legend: { isVisible: true, position: 'right' },
+                preferredSeriesType: 'bar',
+                layers: [
+                  {
+                    layerId: 'layer1',
+                    seriesType: 'bar',
+                    xAccessor: 'timestamp',
+                    accessors: ['count'],
+                    layerType: 'data',
+                  },
+                ],
+              },
+              query: { esql: 'FROM logs | STATS count = COUNT(*) BY timestamp' },
+              filters: [],
+            },
+          };
+
+          validateConverter(esqlChartWithDateColumn, xyStateSchema);
+        });
+
+        it('should detect linear scale for ES|QL chart with numeric column', () => {
+          const esqlChartWithNumericColumn: LensAttributes = {
+            title: 'ES|QL Chart with Numeric X-Axis',
+            references: [],
+            visualizationType: 'lnsXY',
+            state: {
+              datasourceStates: {
+                textBased: {
+                  layers: {
+                    layer1: {
+                      index: 'test-index',
+                      query: {
+                        esql: 'FROM logs | STATS count = COUNT(*) BY bytes',
+                      },
+                      columns: [
+                        {
+                          columnId: 'bytes',
+                          fieldName: 'bytes',
+                          meta: {
+                            type: 'number',
+                            esType: 'long',
+                          },
+                        },
+                        {
+                          columnId: 'count',
+                          fieldName: 'count',
+                          meta: {
+                            type: 'number',
+                            esType: 'long',
+                          },
+                          inMetricDimension: true,
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              visualization: {
+                legend: { isVisible: true, position: 'right' },
+                preferredSeriesType: 'line',
+                layers: [
+                  {
+                    layerId: 'layer1',
+                    seriesType: 'line',
+                    xAccessor: 'bytes',
+                    accessors: ['count'],
+                    layerType: 'data',
+                  },
+                ],
+              },
+              query: { esql: 'FROM logs | STATS count = COUNT(*) BY bytes' },
+              filters: [],
+            },
+          };
+
+          validateConverter(esqlChartWithNumericColumn, xyStateSchema);
+        });
+
+        it('should default to ordinal scale for form-based chart', () => {
+          validateConverter(minimalAttributesXY, xyStateSchema);
+        });
+      });
     });
   });
   describe('API => Lens State SO format', () => {
@@ -180,6 +310,33 @@ describe('XY', () => {
     });
 
     it.each(anyType)(
+      'should work for ES|QL mode for a %s chart with breakdown and collapse_by',
+      (type) => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: `${type} Chart with collapse`,
+            layers: [
+              {
+                dataset: {
+                  type: 'esql',
+                  query: 'FROM kibana_sample_data_logs',
+                },
+                type,
+                ignore_global_filters: false,
+                sampling: 1,
+                x: { operation: 'value', column: '@timestamp' },
+                y: [{ operation: 'value', column: 'bytes' }],
+                breakdown_by: { operation: 'value', column: 'agent', collapse_by: 'max' },
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      }
+    );
+
+    it.each(anyType)(
       'should work for ES|QL mode for %s chart with breakdown and categorical color mapping',
       (type) => {
         validateAPIConverter(
@@ -207,7 +364,7 @@ describe('XY', () => {
                     mapping: [
                       {
                         values: ['Clothing'],
-                        color: { type: 'colorCode', value: '#ff0000' },
+                        color: { type: 'color_code', value: '#ff0000' },
                       },
                     ],
                   },
@@ -358,6 +515,115 @@ describe('XY', () => {
 
     it('should correctly transform with custom position legend - bug 248611', () => {
       validateAPIConverter(apiXYWithNoTitleAndCustomOutsideLegend, xyStateSchema);
+    });
+
+    describe('XY axis scale support (text-based)', () => {
+      it('should convert temporal scale correctly for ES|QL layer', () => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: 'XY Chart with Temporal Scale',
+            axis: {
+              x: {
+                scale: 'temporal',
+              },
+            },
+            layers: [
+              {
+                ignore_global_filters: false,
+                sampling: 1,
+                dataset: {
+                  type: 'esql',
+                  query:
+                    'FROM kibana_sample_data_logs | STATS count = count() BY buckets = BUCKET(@timestamp, 1 hour)',
+                },
+                type: 'bar',
+                x: { operation: 'value', column: 'buckets' },
+                y: [{ operation: 'value', column: 'count' }],
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      });
+
+      it('should convert linear scale correctly for ES|QL layer', () => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: 'XY Chart with Linear Scale',
+            axis: {
+              x: {
+                scale: 'linear',
+              },
+            },
+            layers: [
+              {
+                ignore_global_filters: false,
+                sampling: 1,
+                dataset: {
+                  type: 'esql',
+                  query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
+                },
+                type: 'line',
+                x: { operation: 'value', column: 'bytes' },
+                y: [{ operation: 'value', column: 'count' }],
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      });
+
+      it('should handle config without axis object', () => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: 'XY Chart without Axis',
+            layers: [
+              {
+                ignore_global_filters: false,
+                sampling: 1,
+                dataset: {
+                  type: 'esql',
+                  query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
+                },
+                type: 'bar',
+                y: [{ operation: 'value', column: 'count' }],
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      });
+
+      it('should handle config with axis but no x axis', () => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: 'XY Chart with Y-Axis Only',
+            axis: {
+              left: {
+                ticks: true,
+                grid: true,
+              },
+            },
+            layers: [
+              {
+                ignore_global_filters: false,
+                sampling: 1,
+                dataset: {
+                  type: 'esql',
+                  query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
+                },
+                type: 'bar',
+                y: [{ operation: 'value', column: 'count' }],
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      });
     });
   });
 });

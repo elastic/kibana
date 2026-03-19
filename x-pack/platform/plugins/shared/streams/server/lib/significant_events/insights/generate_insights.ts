@@ -9,9 +9,11 @@ import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/infere
 import { sumTokens } from '@kbn/streams-ai';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
-import type { InsightsResult } from '@kbn/streams-schema';
+import type { GenerateInsightsResult } from '@kbn/streams-schema';
+import type { LogMeta } from '@kbn/logging';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { SummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
 import { SummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
 import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
@@ -23,6 +25,7 @@ export async function generateInsights({
   inferenceClient,
   signal,
   logger,
+  streamNames,
 }: {
   streamsClient: StreamsClient;
   queryClient: QueryClient;
@@ -30,8 +33,15 @@ export async function generateInsights({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
-}): Promise<InsightsResult> {
-  const streams = await streamsClient.listStreams();
+  /** When provided, only generate insights for these streams. Otherwise all streams are used. */
+  streamNames?: string[];
+}): Promise<GenerateInsightsResult> {
+  const allStreams = await streamsClient.listStreams();
+  let streams = allStreams;
+  if (streamNames !== undefined && streamNames.length > 0) {
+    const streamNamesSet = new Set(streamNames);
+    streams = allStreams.filter((s) => streamNamesSet.has(s.name));
+  }
   const streamInsightsResults = await Promise.all(
     streams.map(async (stream) => {
       const streamInsightResult = await generateStreamInsights({
@@ -55,7 +65,7 @@ export async function generateInsights({
   );
 
   const tokensUsed = streamInsightsResults.reduce<ChatCompletionTokenCount>(
-    (acc, result) => sumTokens(acc, result.tokensUsed),
+    (acc, result) => sumTokens(acc, result.tokens_used),
     { prompt: 0, completion: 0, total: 0 }
   );
 
@@ -63,7 +73,7 @@ export async function generateInsights({
   if (streamInsightsWithData.length === 0) {
     return {
       insights: [],
-      tokensUsed,
+      tokens_used: tokensUsed,
     };
   }
 
@@ -80,17 +90,19 @@ export async function generateInsights({
 
     return {
       insights,
-      tokensUsed: sumTokens(tokensUsed, response.tokens),
+      tokens_used: sumTokens(tokensUsed, response.tokens),
     };
   } catch (error) {
-    if (error.message.includes(`The request exceeded the model's maximum context length`)) {
+    if (
+      getErrorMessage(error).includes(`The request exceeded the model's maximum context length`)
+    ) {
       logger.debug(
         `Context too big when generating system insights, number of streams: ${streamInsightsWithData.length}`,
-        { error }
+        { error } as LogMeta
       );
       return {
         insights: [],
-        tokensUsed,
+        tokens_used: tokensUsed,
       };
     }
 
@@ -112,7 +124,7 @@ async function generateStreamInsights({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
-}): Promise<InsightsResult> {
+}): Promise<GenerateInsightsResult> {
   const queries = await queryClient.getAssets(stream.name);
 
   const queryDataResults = await Promise.all(
@@ -130,7 +142,7 @@ async function generateStreamInsights({
   if (queryDataList.length === 0) {
     return {
       insights: [],
-      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+      tokens_used: { prompt: 0, completion: 0, total: 0 },
     };
   }
 
@@ -148,17 +160,19 @@ async function generateStreamInsights({
 
     return {
       insights,
-      tokensUsed: response.tokens ?? { prompt: 0, completion: 0, total: 0 },
+      tokens_used: response.tokens ?? { prompt: 0, completion: 0, total: 0 },
     };
   } catch (error) {
-    if (error.message.includes(`The request exceeded the model's maximum context length`)) {
+    if (
+      getErrorMessage(error).includes(`The request exceeded the model's maximum context length`)
+    ) {
       logger.debug(
         `Context too big when generating insights for stream ${stream.name}, number of queries: ${queryDataList.length}`,
-        { error }
+        { error } as LogMeta
       );
       return {
         insights: [],
-        tokensUsed: { prompt: 0, completion: 0, total: 0 },
+        tokens_used: { prompt: 0, completion: 0, total: 0 },
       };
     }
 

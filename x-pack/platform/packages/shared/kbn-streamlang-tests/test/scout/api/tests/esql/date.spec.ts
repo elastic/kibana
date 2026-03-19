@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { DateProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -13,7 +14,7 @@ import { streamlangApiTest as apiTest } from '../..';
 apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
   apiTest(
     'should parse a date and set it to @timestamp',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-date';
       const streamlangDSL: StreamlangDSL = {
@@ -36,7 +37,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
   // This test fails in Serverless which is a different behavior then Stateful and needs to be checked
   apiTest(
     'should parse a date with multiple formats',
-    { tag: ['@ess'] },
+    { tag: tags.stateful.classic },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-date-multiple-formats';
       const streamlangDSL: StreamlangDSL = {
@@ -64,7 +65,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
 
   apiTest(
     'should use a different to field',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-date-to-field';
       const streamlangDSL: StreamlangDSL = {
@@ -87,7 +88,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
 
   apiTest(
     'should use a different output format',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-date-output-format';
       const streamlangDSL: StreamlangDSL = {
@@ -110,7 +111,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
 
   apiTest(
     'should not parse a date when where is false',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-date-where-false';
       const streamlangDSL: StreamlangDSL = {
@@ -143,7 +144,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
 
   apiTest(
     'should leave source unchanged in case of error',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-date-fail';
       const streamlangDSL: StreamlangDSL = {
@@ -166,7 +167,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
 
   apiTest(
     'should reject Mustache template syntax {{ and {{{',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [

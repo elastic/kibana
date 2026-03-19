@@ -20,7 +20,8 @@ import {
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
+  EuiFormAppend,
+  EuiFormPrepend,
   EuiHorizontalRule,
   EuiSpacer,
   EuiSplitPanel,
@@ -249,9 +250,10 @@ export const RecurringScheduleFormFields = memo(
                           isClearable={false}
                           aria-label={i18n.RECURRING_SCHEDULE_FORM_TIMEZONE}
                           prepend={
-                            <EuiFormLabel htmlFor={'disabled-timezone'}>
-                              {i18n.RECURRING_SCHEDULE_FORM_TIMEZONE}
-                            </EuiFormLabel>
+                            <EuiFormPrepend
+                              inputId="disabled-timezone"
+                              label={i18n.RECURRING_SCHEDULE_FORM_TIMEZONE}
+                            />
                           }
                           compressed={compressed}
                         />
@@ -272,14 +274,16 @@ export const RecurringScheduleFormFields = memo(
                       type: 'number',
                       min: 1,
                       prepend: (
-                        <EuiFormLabel htmlFor={'count'}>
-                          {i18n.RECURRING_SCHEDULE_FORM_COUNT_AFTER}
-                        </EuiFormLabel>
+                        <EuiFormPrepend
+                          inputId="count"
+                          label={i18n.RECURRING_SCHEDULE_FORM_COUNT_AFTER}
+                        />
                       ),
                       append: (
-                        <EuiFormLabel htmlFor={'count'}>
-                          {i18n.RECURRING_SCHEDULE_FORM_COUNT_OCCURRENCE}
-                        </EuiFormLabel>
+                        <EuiFormAppend
+                          inputId="count"
+                          label={i18n.RECURRING_SCHEDULE_FORM_COUNT_OCCURRENCE}
+                        />
                       ),
                       readOnly,
                     },

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*", "public/**/*"],
+  "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*", "public/**/*", "scripts/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/agent-builder-common",
@@ -40,12 +40,16 @@
     "@kbn/i18n",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
-    "@kbn/observability-nav-icons",
     "@kbn/agent-builder-browser",
     "@kbn/sse-utils-server",
     "@kbn/kibana-utils-plugin",
     "@kbn/server-route-repository-client",
-    "@kbn/apm-types"
+    "@kbn/core-analytics-browser",
+    "@kbn/apm-types",
+    "@kbn/slo-schema",
+    "@kbn/apm-types-shared",
+    "@kbn/observability-utils-server",
+    "@kbn/calculate-auto",
   ],
   "exclude": ["target/**/*"]
 }

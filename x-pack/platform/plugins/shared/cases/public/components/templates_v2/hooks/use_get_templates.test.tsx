@@ -34,6 +34,7 @@ describe('useGetTemplates', () => {
         lastUsedAt: '2024-01-01T00:00:00.000Z',
         usageCount: 10,
         isDefault: false,
+        fieldSearchMatches: false,
       },
     ],
     page: 1,
@@ -85,6 +86,8 @@ describe('useGetTemplates', () => {
         search: '',
         tags: [],
         author: [],
+        owner: [],
+        isDeleted: false,
       },
     });
   });
@@ -124,6 +127,8 @@ describe('useGetTemplates', () => {
         sortOrder: 'desc',
         tags: [],
         author: [],
+        owner: [],
+        isDeleted: false,
       },
     });
   });
@@ -159,6 +164,8 @@ describe('useGetTemplates', () => {
         search: 'partial search',
         tags: [],
         author: [],
+        owner: [],
+        isDeleted: false,
       },
     });
   });

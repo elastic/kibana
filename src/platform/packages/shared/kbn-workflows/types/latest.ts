@@ -53,13 +53,13 @@ export type {
   InternalConnectorContract,
   DynamicConnectorContract,
   BaseConnectorContract,
+  StepStabilityLevel,
   HttpMethod,
   StepPropertyHandler,
   PropertySelectionHandler,
   SelectionOption,
   SelectionDetails,
   SelectionContext,
-  PropertyValidationContext,
   RequestOptions,
 } from './v1';
 

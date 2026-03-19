@@ -40,38 +40,55 @@ async function updateScoutConfigManifests(
   onlyOutdated: boolean,
   removeDangling: boolean,
   reload: boolean,
+  concurrencyLimit: number,
   log: ToolingLog
 ) {
   const expectedManifestPaths: string[] = [];
   const updatedConfigPaths: string[] = [];
+  const ongoingManifestUpdates = new Set<Promise<any>>();
+  const maxOngoingManifestUpdates = concurrencyLimit > 0 ? concurrencyLimit : 1;
 
   // Update manifests for files that are outdated
-  await Promise.all(
-    testConfigs.all.map(async (config) => {
-      expectedManifestPaths.push(config.manifest.path);
-      const configDirSHA1 = await getGitSHA1ForPath(path.dirname(config.path));
+  for (const config of testConfigs.all) {
+    expectedManifestPaths.push(config.manifest.path);
+    const configDirSHA1 = await getGitSHA1ForPath(path.dirname(config.path));
 
-      if (onlyOutdated && config.manifest.exists && config.manifest.sha1 === configDirSHA1) {
-        log.debug(` ✅ ${config.module.name} / ${config.category} / ${config.type}`);
-        return;
+    if (onlyOutdated && config.manifest.exists && config.manifest.sha1 === configDirSHA1) {
+      log.debug(` ✅ ${config.module.name} / ${config.category} / ${config.type}`);
+      continue;
+    }
+
+    if (config.manifest.exists) {
+      if (config.manifest.sha1 !== configDirSHA1) {
+        log.info(
+          `Manifest file is outdated for Scout test config at ${config.path} ` +
+            `(expected parent directory git object hash '${config.manifest.sha1}' but got '${configDirSHA1}')`
+        );
       }
+    } else {
+      log.info(`No manifest file found for Scout test config at ${config.path}`);
+    }
 
-      if (config.manifest.exists) {
-        if (config.manifest.sha1 !== configDirSHA1) {
-          log.info(
-            `Manifest file is outdated for Scout test config at ${config.path} ` +
-              `(expected parent directory git object hash '${config.manifest.sha1}' but got '${configDirSHA1}')`
-          );
-        }
-      } else {
-        log.info(`No manifest file found for Scout test config at ${config.path}`);
-      }
+    if (ongoingManifestUpdates.size >= maxOngoingManifestUpdates) {
+      // We've hit the configured concurrency limit; wait for a slot to free up
+      await Promise.race(ongoingManifestUpdates);
+    }
 
-      log.info(`Generating manifest for test config at '${config.path}'`);
-      await generateScoutConfigManifest(config.path, log);
-      updatedConfigPaths.push(config.path);
-    })
-  );
+    // Start manifest update task
+    log.info(`Generating manifest for test config at '${config.path}'`);
+    const manifestUpdateTask = generateScoutConfigManifest(config.path, log)
+      .then(() => {
+        updatedConfigPaths.push(config.path);
+      })
+      .finally(() => {
+        ongoingManifestUpdates.delete(manifestUpdateTask);
+      });
+
+    ongoingManifestUpdates.add(manifestUpdateTask);
+  }
+
+  // Wait for all manifest updates to complete
+  await Promise.all(ongoingManifestUpdates);
 
   if (removeDangling) {
     // Remove any manifest files that no longer have a corresponding test config
@@ -155,20 +172,26 @@ export const updateTestConfigManifests: Command<void> = {
     "that's usually only available during Playwright runtime",
   flags: {
     boolean: ['includingUpToDate', 'noSummary', 'keepDangling'],
+    string: ['concurrencyLimit'],
+    default: { concurrencyLimit: '1' },
     help: `
     --includingUpToDate  (optional)  Update all manifests, not just the ones that are outdated
     --keepDangling       (optional)  Don't remove dangling manifest files
     --noSummary          (optional)  Don't display summary
+    --concurrencyLimit   (optional)  Maximum amount of manifest updates allowed to run concurrently [default: 1]
     `,
   },
   run: async ({ flagsReader, log }) => {
     testConfigs.log = log;
     const shouldDisplaySummary = !flagsReader.boolean('noSummary');
     const shouldRemoveDangling = !flagsReader.boolean('keepDangling');
+    const concurrencyLimit = flagsReader.requiredNumber('concurrencyLimit');
+
     await updateScoutConfigManifests(
       !flagsReader.boolean('includingUpToDate'),
-      shouldDisplaySummary,
       shouldRemoveDangling,
+      true,
+      concurrencyLimit,
       log
     );
     if (!shouldDisplaySummary) return;

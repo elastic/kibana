@@ -17,6 +17,7 @@ import {
   type TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
@@ -55,6 +56,7 @@ import {
   fromColorByValueLensStateToAPI,
   fromStaticColorAPIToLensState,
   fromStaticColorLensStateToAPI,
+  isColorByValueColor,
 } from '../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../columns/utils';
 
@@ -65,7 +67,7 @@ type WritableMetricStateWithoutDataset = DeepWriteable<Omit<MetricState, 'datase
 const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
-export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
+export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT: KbnPaletteId = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
@@ -95,7 +97,8 @@ function fromCompareAPIToLensState(compareToConfig: MetricApiCompareType): {
         compareToConfig.to === 'primary' ? compareToConfig.to : compareToConfig.baseline,
       visuals: getCompareVisualsState(compareToConfig),
       reversed: compareToConfig.palette?.includes('reversed') ?? LENS_METRIC_COMPARE_TO_REVERSED,
-      paletteId: compareToConfig.palette ?? LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
+      paletteId:
+        (compareToConfig.palette as KbnPaletteId) ?? LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
     },
   };
 }
@@ -128,7 +131,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     ...(primaryMetric.color?.type === 'static'
       ? fromStaticColorAPIToLensState(primaryMetric.color)
       : {}),
-    ...(primaryMetric.color?.type === 'dynamic'
+    ...(isColorByValueColor(primaryMetric.color)
       ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
       : {}),
     ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
@@ -137,10 +140,12 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     valueFontMode: primaryMetric.fit ? 'fit' : 'default',
     ...(primaryMetric.alignments
       ? {
-          valuesTextAlign: primaryMetric.alignments.value,
+          primaryAlign: primaryMetric.alignments.value,
           titlesTextAlign: primaryMetric.alignments.labels,
         }
       : {}),
+    ...(primaryMetric.position ? { primaryPosition: primaryMetric.position } : {}),
+    ...(primaryMetric.title_weight ? { titleWeight: primaryMetric.title_weight } : {}),
     ...(primaryMetric.icon
       ? {
           icon: primaryMetric.icon.name,
@@ -151,10 +156,14 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? {
           secondaryMetricAccessor: getAccessorName('secondary'),
           ...('prefix' in secondaryMetric && secondaryMetric.prefix
-            ? { secondaryPrefix: secondaryMetric.prefix }
+            ? { secondaryLabel: secondaryMetric.prefix }
+            : {}),
+          ...('label_position' in secondaryMetric && secondaryMetric.label_position
+            ? { secondaryLabelPosition: secondaryMetric.label_position }
             : {}),
           secondaryAlign:
-            'alignments' in primaryMetric ? primaryMetric.alignments?.value : undefined,
+            ('alignments' in secondaryMetric && secondaryMetric.alignments?.value) ||
+            ('alignments' in primaryMetric ? primaryMetric.alignments?.value : undefined),
           ...('compare' in secondaryMetric && secondaryMetric.compare
             ? fromCompareAPIToLensState(secondaryMetric.compare)
             : {}),
@@ -240,7 +249,7 @@ function buildFromTextBasedLayer(
             ? {
                 background_chart: {
                   type: 'bar',
-                  goal_value: getValueApiColumn(visualization.maxAccessor, layer),
+                  max_value: getValueApiColumn(visualization.maxAccessor, layer),
                   ...(visualization.progressDirection
                     ? { direction: visualization.progressDirection }
                     : {}),
@@ -293,7 +302,7 @@ function buildFromFormBasedLayer(
       ? {
           background_chart: {
             type: 'bar',
-            goal_value: maxValue,
+            max_value: maxValue,
             ...(visualization.progressDirection
               ? { direction: visualization.progressDirection }
               : {}),
@@ -388,14 +397,29 @@ function enrichConfigurationWithVisualizationProperties(
       };
     }
 
-    if (visualization.valuesTextAlign || visualization.titlesTextAlign) {
+    if (
+      visualization.primaryAlign ||
+      visualization.valuesTextAlign ||
+      visualization.titlesTextAlign
+    ) {
       primaryMetric.alignments = {
-        value: visualization.valuesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
+        value:
+          visualization.primaryAlign ??
+          visualization.valuesTextAlign ??
+          LENS_METRIC_STATE_DEFAULTS.primaryAlign,
         labels: visualization.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
       };
     }
 
     primaryMetric.fit = visualization.valueFontMode === 'fit';
+
+    if (visualization.primaryPosition) {
+      primaryMetric.position = visualization.primaryPosition;
+    }
+
+    if (visualization.titleWeight) {
+      primaryMetric.title_weight = visualization.titleWeight;
+    }
   }
 
   if (secondaryMetric) {
@@ -403,14 +427,24 @@ function enrichConfigurationWithVisualizationProperties(
       secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
     }
 
-    if (visualization.secondaryPrefix) {
-      secondaryMetric.prefix = visualization.secondaryPrefix;
+    if (visualization.secondaryLabel || visualization.secondaryPrefix) {
+      secondaryMetric.prefix = visualization.secondaryLabel ?? visualization.secondaryPrefix;
+    }
+
+    if (visualization.secondaryLabelPosition) {
+      secondaryMetric.label_position = visualization.secondaryLabelPosition;
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {
       secondaryMetric.color = {
         type: 'static',
         color: visualization.secondaryTrend.color,
+      };
+    }
+
+    if (visualization.secondaryAlign) {
+      secondaryMetric.alignments = {
+        value: visualization.secondaryAlign,
       };
     }
   }
@@ -512,7 +546,7 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
 
   if (primaryMetric.background_chart?.type === 'bar') {
     const columnName = getAccessorName('max');
-    const newColumn = fromMetricAPItoLensState(primaryMetric.background_chart.goal_value);
+    const newColumn = fromMetricAPItoLensState(primaryMetric.background_chart.max_value);
 
     addLayerColumn(defaultLayer, columnName, newColumn);
     if (trendLineLayer) {
@@ -540,13 +574,13 @@ function getValueColumns(layer: MetricStateESQL) {
       ? [
           getValueColumn(
             getAccessorName('max'),
-            primaryMetric.background_chart.goal_value.column,
+            primaryMetric.background_chart.max_value.column,
             'number'
           ),
         ]
       : []),
     ...(secondaryMetric
-      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric.column)]
+      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric.column, 'number')]
       : []),
   ];
 }
@@ -584,7 +618,7 @@ export function fromAPItoLensState(config: MetricState): MetricAttributesWithout
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

@@ -9,11 +9,10 @@ import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isEmpty } from 'lodash';
-import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
-import { assign, setup } from 'xstate5';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate';
+import { assign, setup } from 'xstate';
 import type { MappedSchemaField } from '../../../schema_editor/types';
 import { getValidSteps } from '../../utils';
-import { selectSamplesForSimulation } from './selectors';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import {
   createSimulationRunFailureNotifier,
@@ -27,7 +26,7 @@ import type {
   SimulationInput,
   SimulationMachineDeps,
 } from './types';
-import { getSchemaFieldsFromSimulation, mapField, unmapField } from './utils';
+import { getSchemaFieldsFromSimulation, mapField, stageDocOnlyOverride, unmapField } from './utils';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -64,7 +63,9 @@ export const simulationMachine = setup({
     })),
     storeSimulation: assign(({ context }, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
-      baseSimulation: context.selectedConditionId ? context.baseSimulation : params.simulation,
+      baseSimulation: context.selectedConditionId
+        ? context.baseSimulation ?? params.simulation
+        : params.simulation,
     })),
     storeExplicitlyEnabledPreviewColumns: assign(({ context }, params: { columns: string[] }) => ({
       explicitlyEnabledPreviewColumns: params.columns,
@@ -98,17 +99,50 @@ export const simulationMachine = setup({
       return {
         detectedSchemaFields: result.detectedSchemaFields,
         detectedSchemaFieldsCache: result.detectedSchemaFieldsCache,
+        docOnlyOverrides: (() => {
+          const next = { ...context.docOnlyOverrides };
+          delete next[params.field.name];
+          return next;
+        })(),
       };
     }),
+    stageDocOnlyOverride: assign(
+      ({ context }, params: { fieldName: string; description?: string }) => {
+        const normalizedDescription = params.description?.trim();
+        const result = stageDocOnlyOverride(context, {
+          fieldName: params.fieldName,
+          description: normalizedDescription,
+        });
+
+        const nextDocOnlyOverrides = { ...context.docOnlyOverrides };
+        if (normalizedDescription) {
+          nextDocOnlyOverrides[params.fieldName] = { description: normalizedDescription };
+        } else {
+          delete nextDocOnlyOverrides[params.fieldName];
+        }
+
+        return {
+          detectedSchemaFields: result.detectedSchemaFields,
+          detectedSchemaFieldsCache: result.detectedSchemaFieldsCache,
+          docOnlyOverrides: nextDocOnlyOverrides,
+        };
+      }
+    ),
     unmapField: assign(({ context }, params: { fieldName: string }) => {
       const result = unmapField(context, params.fieldName);
       return {
         detectedSchemaFields: result.detectedSchemaFields,
         detectedSchemaFieldsCache: result.detectedSchemaFieldsCache,
+        docOnlyOverrides: (() => {
+          const next = { ...context.docOnlyOverrides };
+          delete next[params.fieldName];
+          return next;
+        })(),
       };
     }),
     resetSimulationOutcome: assign({
       detectedSchemaFields: [],
+      docOnlyOverrides: {},
       explicitlyEnabledPreviewColumns: [],
       explicitlyDisabledPreviewColumns: [],
       previewColumnsOrder: [],
@@ -147,6 +181,7 @@ export const simulationMachine = setup({
   context: ({ input }) => ({
     detectedSchemaFields: [],
     detectedSchemaFieldsCache: new Map(),
+    docOnlyOverrides: {},
     previewDocsFilter: 'outcome_filter_all',
     explicitlyDisabledPreviewColumns: [],
     explicitlyEnabledPreviewColumns: [],
@@ -223,6 +258,10 @@ export const simulationMachine = setup({
           target: 'assertingRequirements',
           actions: [{ type: 'mapField', params: ({ event }) => event }],
         },
+        'simulation.fields.stageDocOnlyOverride': {
+          target: 'assertingRequirements',
+          actions: [{ type: 'stageDocOnlyOverride', params: ({ event }) => event }],
+        },
         'simulation.fields.unmap': {
           target: 'assertingRequirements',
           actions: [{ type: 'unmapField', params: ({ event }) => event }],
@@ -281,7 +320,7 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: selectSamplesForSimulation(context)
+          documents: context.samples
             .map((doc) => doc.document)
             .map(flattenObjectNestedLast) as FlattenRecord[],
           steps: getValidSteps(context.steps),

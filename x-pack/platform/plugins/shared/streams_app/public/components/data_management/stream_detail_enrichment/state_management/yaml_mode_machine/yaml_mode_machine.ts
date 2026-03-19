@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { assign, setup, type ActorRefFrom, type SnapshotFrom, and } from 'xstate5';
+import { assign, setup, type ActorRefFrom, type SnapshotFrom, and } from 'xstate';
 import {
   checkAdditiveChanges,
   addDeterministicCustomIdentifiers,

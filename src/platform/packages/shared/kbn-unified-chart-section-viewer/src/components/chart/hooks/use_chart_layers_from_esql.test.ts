@@ -67,6 +67,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>
@@ -97,6 +98,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>
@@ -119,10 +121,10 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].label).toBe('value');
     expect(layer.yAxis[0].seriesColor).toBe('blue');
     expect(layer.seriesType).toBe('area');
-    expect(layer.breakdown).toBe('service.name'); // Single dimension uses actual dimension name
+    expect(layer.breakdown).toEqual(['service.name']); // Single dimension as array
   });
 
-  it('maps columns correctly to yAxis and uses first dimension for multiple dimensions', async () => {
+  it('maps columns correctly to yAxis and uses array for multiple dimensions', async () => {
     getESQLQueryColumnsMock.mockResolvedValue([
       { name: '@timestamp', meta: { type: 'date' }, id: '@timestamp' },
       { name: 'value', meta: { type: 'number' }, id: 'value' },
@@ -136,6 +138,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>
@@ -158,8 +161,8 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].label).toBe('value');
     expect(layer.yAxis[0].seriesColor).toBe('blue');
     expect(layer.seriesType).toBe('area');
-    // Lens natively supports multiple dimensions - pass first dimension as breakdown
-    expect(layer.breakdown).toBe('service.name');
+    // Lens natively supports multiple dimensions - pass all dimensions as array
+    expect(layer.breakdown).toEqual(['service.name', 'host.name']);
   });
 
   it('uses first date column as xAxis', async () => {
@@ -174,6 +177,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>
@@ -206,6 +210,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>
@@ -245,6 +250,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>

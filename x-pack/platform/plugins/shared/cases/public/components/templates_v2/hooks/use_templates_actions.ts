@@ -6,12 +6,12 @@
  */
 
 import { useCallback, useState } from 'react';
+import { dump as yamlDump, load as yamlLoad } from 'js-yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
-import { useDeleteTemplate } from './use_delete_template';
-import { useUpdateTemplate } from './use_update_template';
+import { useBulkDeleteTemplates } from './use_bulk_delete_templates';
 import { useCreateTemplate } from './use_create_template';
-import { useExportTemplate } from './use_export_template';
+import { useBulkExportTemplates } from './use_bulk_export_templates';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import * as i18n from '../../templates/translations';
 
@@ -22,22 +22,15 @@ interface UseTemplatesActionsProps {
 export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProps = {}) => {
   const { navigateToCasesEditTemplate } = useCasesEditTemplateNavigation();
   const { showSuccessToast } = useCasesToast();
-  const { mutate: deleteTemplate, isLoading: isDeleting } = useDeleteTemplate({
+  const { mutate: bulkDeleteTemplates, isLoading: isDeleting } = useBulkDeleteTemplates({
     onSuccess: onDeleteSuccess,
-  });
-
-  const { mutate: setDefaultTemplate, isLoading: isSettingDefault } = useUpdateTemplate({
-    disableDefaultSuccessToast: true,
-    onSuccess: (data) => {
-      showSuccessToast(i18n.SUCCESS_SET_AS_DEFAULT_TEMPLATE(data.name));
-    },
   });
 
   const { mutate: cloneTemplate, isLoading: isCloning } = useCreateTemplate({
     disableDefaultSuccessToast: true,
   });
 
-  const { mutate: exportTemplate, isLoading: isExporting } = useExportTemplate();
+  const { mutate: bulkExportTemplates, isLoading: isExporting } = useBulkExportTemplates();
 
   const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
 
@@ -50,18 +43,26 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
 
   const handleClone = useCallback(
     (template: Template) => {
+      // The list endpoint returns definition as a parsed object (via parseTemplate),
+      // but the create endpoint expects a YAML string. Parse if needed, update the
+      // name, then re-serialize to YAML.
+      const parsed =
+        typeof template.definition === 'string'
+          ? (yamlLoad(template.definition) as Record<string, unknown>)
+          : (template.definition as Record<string, unknown>);
+
+      const clonedDefinition = yamlDump(
+        { ...parsed, name: i18n.CLONED_TEMPLATE_NAME_PREFIX(template.name) },
+        { lineWidth: -1 }
+      ).trimEnd();
+
       cloneTemplate(
         {
           template: {
-            name: i18n.CLONED_TEMPLATE_NAME_PREFIX(template.name),
             owner: template.owner,
-            definition: template.definition,
+            definition: clonedDefinition,
             description: template.description,
             tags: template.tags,
-            author: template.author,
-            fieldCount: template.fieldCount,
-            fieldNames: template.fieldNames,
-            isDefault: false,
           },
         },
         {
@@ -74,21 +75,11 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     [cloneTemplate, showSuccessToast]
   );
 
-  const handleSetAsDefault = useCallback(
-    (template: Template) => {
-      setDefaultTemplate({
-        templateId: template.templateId,
-        template: { isDefault: true },
-      });
-    },
-    [setDefaultTemplate]
-  );
-
   const handleExport = useCallback(
     (template: Template) => {
-      exportTemplate({ templateId: template.templateId });
+      bulkExportTemplates({ templateIds: [template.templateId] });
     },
-    [exportTemplate]
+    [bulkExportTemplates]
   );
 
   const handleDelete = useCallback((template: Template) => {
@@ -97,10 +88,10 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
 
   const confirmDelete = useCallback(() => {
     if (templateToDelete) {
-      deleteTemplate({ templateId: templateToDelete.templateId });
+      bulkDeleteTemplates({ templateIds: [templateToDelete.templateId] });
       setTemplateToDelete(null);
     }
-  }, [templateToDelete, deleteTemplate]);
+  }, [templateToDelete, bulkDeleteTemplates]);
 
   const cancelDelete = useCallback(() => {
     setTemplateToDelete(null);
@@ -109,14 +100,12 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
   return {
     handleEdit,
     handleClone,
-    handleSetAsDefault,
     handleExport,
     handleDelete,
     confirmDelete,
     cancelDelete,
     templateToDelete,
     isDeleting,
-    isSettingDefault,
     isCloning,
     isExporting,
   };

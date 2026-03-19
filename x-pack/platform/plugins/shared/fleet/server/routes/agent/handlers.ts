@@ -49,6 +49,8 @@ import { getCurrentNamespace } from '../../services/spaces/get_current_namespace
 import { getPackageInfo } from '../../services/epm/packages';
 import { generateTemplateIndexPattern } from '../../services/epm/elasticsearch/template/template';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
+import { appContextService } from '../../services';
+import { AGENTS_INDEX } from '../../constants';
 
 async function verifyNamespace(agent: Agent, namespace?: string) {
   if (!(await isAgentInNamespace(agent, namespace))) {
@@ -76,6 +78,38 @@ export const getAgentHandler: FleetRequestHandler<
     };
 
     return response.ok({ body });
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.notFound({
+        body: { message: `Agent ${request.params.agentId} not found` },
+      });
+    }
+
+    throw error;
+  }
+};
+
+export const getAgentEffectiveConfigHandler: FleetRequestHandler<
+  TypeOf<typeof GetOneAgentRequestSchema.params>,
+  TypeOf<typeof GetOneAgentRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const [coreContext] = await Promise.all([context.core, context.fleet]);
+    const esClient = appContextService.getInternalUserESClient();
+    const agentDoc = await esClient.get({
+      index: AGENTS_INDEX,
+      id: request.params.agentId,
+      _source: ['effective_config', 'namespaces'],
+    });
+    const agentSource = agentDoc._source as any;
+    await verifyNamespace(
+      {
+        id: request.params.agentId,
+        namespaces: agentSource.namespaces,
+      } as Agent,
+      getCurrentNamespace(coreContext.savedObjects.client)
+    );
+    return response.ok({ body: { effective_config: agentSource.effective_config } });
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return response.notFound({

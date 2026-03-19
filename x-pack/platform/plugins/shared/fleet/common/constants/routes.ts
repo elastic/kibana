@@ -60,6 +60,7 @@ export const EPM_API_ROUTES = {
   ROLLBACK_AVAILABLE_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/rollback/available_check`,
   BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/_bulk_rollback/available_check`,
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
+  REVIEW_UPGRADE_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/review_upgrade`,
 };
 
 // Data stream API routes
@@ -167,6 +168,7 @@ export const AGENT_API_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/agents`,
   INFO_PATTERN: `${API_ROOT}/agents/{agentId}`,
   UPDATE_PATTERN: `${API_ROOT}/agents/{agentId}`,
+  EFFECTIVE_CONFIG_PATTERN: `${API_ROOT}/agents/{agentId}/effective_config`,
   BULK_UPDATE_AGENT_TAGS_PATTERN: `${API_ROOT}/agents/bulk_update_agent_tags`,
   DELETE_PATTERN: `${API_ROOT}/agents/{agentId}`,
   CHECKIN_PATTERN: `${API_ROOT}/agents/{agentId}/checkin`,
@@ -195,6 +197,7 @@ export const AGENT_API_ROUTES = {
   BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/bulk_privilege_level_change`,
   ROLLBACK_PATTERN: `${API_ROOT}/agents/{agentId}/rollback`,
   BULK_ROLLBACK_PATTERN: `${API_ROOT}/agents/bulk_rollback`,
+  GENERATE_REPORT_PATTERN: `${INTERNAL_ROOT}/agents/reporting/generate`,
 };
 
 export const AGENTLESS_POLICIES_ROUTES = {

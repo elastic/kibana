@@ -243,7 +243,7 @@
           "\nA HOC which supplies React.Suspense with a fallback component, and a `KibanaErrorBoundary` to contain errors."
         ],
         "signature": [
-          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P & ",
+          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -326,7 +326,7 @@
             "label": "fallback",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
             "lineNumber": 21,

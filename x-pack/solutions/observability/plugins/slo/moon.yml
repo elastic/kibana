@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/slo-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/actionable-obs-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/slo-plugin'
+  title: '@kbn/slo-plugin'
   description: Moon project for @kbn/slo-plugin
   channel: ''
   owner: '@elastic/actionable-obs-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/slo
+  sourceRoot: x-pack/solutions/observability/plugins/slo
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -34,7 +33,6 @@ dependsOn:
   - '@kbn/alerting-plugin'
   - '@kbn/rison'
   - '@kbn/embeddable-plugin'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/lens-plugin'
   - '@kbn/es-query'
   - '@kbn/react-kibana-mount'
@@ -85,13 +83,14 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/core-http-server'
   - '@kbn/aiops-plugin'
+  - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-filters-transforms'
   - '@kbn/presentation-publishing'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/data-view-field-editor-plugin'
   - '@kbn/securitysolution-io-ts-utils'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/datemath'
-  - '@kbn/presentation-containers'
   - '@kbn/dashboard-plugin'
   - '@kbn/monaco'
   - '@kbn/code-editor'
@@ -123,6 +122,11 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-observability'
   - '@kbn/observability-get-padded-alert-time-range-util'
+  - '@kbn/presentation-publishing-schemas'
+  - '@kbn/content-management-utils'
+  - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/core-analytics-browser'
 tags:
   - plugin
   - prod
@@ -134,18 +138,27 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - ./emotion.d.ts
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

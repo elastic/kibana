@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Liquid } from 'liquidjs';
+import { createWorkflowLiquidEngine } from '../create_workflow_liquid_engine/create_workflow_liquid_engine';
 
-const liquidEngine = new Liquid({
+const liquidEngine = createWorkflowLiquidEngine({
   strictFilters: false,
   strictVariables: false,
 });

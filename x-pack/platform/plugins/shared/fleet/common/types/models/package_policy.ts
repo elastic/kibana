@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
+import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
 import type { SecretReference } from './secret';
 
 export interface PackagePolicyPackage {
@@ -67,6 +67,7 @@ export interface NewPackagePolicyInput {
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
+  deprecated?: DeprecationInfo;
 }
 
 export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams'> {

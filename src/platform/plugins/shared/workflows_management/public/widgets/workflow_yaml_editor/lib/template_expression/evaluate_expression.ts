@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Liquid } from 'liquidjs';
 import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { resolvePathValue } from './resolve_path_value';
 import type { ExecutionContext } from '../execution_context/build_execution_context';
 
 // Create a liquid engine instance with the same configuration as the server
-const liquidEngine = new Liquid({
+const liquidEngine = createWorkflowLiquidEngine({
   strictFilters: true, // Match server-side behavior - error on unknown filters
   strictVariables: false,
 });

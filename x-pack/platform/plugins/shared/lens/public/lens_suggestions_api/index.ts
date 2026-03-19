@@ -89,6 +89,8 @@ export const suggestionsApi = ({
     ? initialVisualization?.isSubtypeSupported?.(preferredChartType.toLowerCase())
     : undefined;
 
+  const query = 'query' in context ? context.query : undefined;
+
   // find the active visualizations from the context
   const suggestions = getSuggestions({
     datasourceMap,
@@ -99,6 +101,7 @@ export const suggestionsApi = ({
     visualizeTriggerFieldContext: context,
     subVisualizationId: isInitialSubTypeSupported ? preferredChartType?.toLowerCase() : undefined,
     dataViews,
+    query,
   });
   if (!suggestions.length) return [];
 
@@ -123,6 +126,7 @@ export const suggestionsApi = ({
     activeVisualization,
     visualizationState: primarySuggestion.visualizationState,
     dataViews,
+    query,
   }).filter(
     (sug) =>
       // Datatables are always return as hidden suggestions
@@ -135,7 +139,6 @@ export const suggestionsApi = ({
 
   const chartType = preferredChartType?.toLowerCase();
 
-  // to return line / area instead of a bar chart
   const xyResult = switchVisualizationType({
     visualizationMap,
     suggestions: newSuggestions,
@@ -162,7 +165,6 @@ export const suggestionsApi = ({
   const targetChartType = preferredChartType ?? chartTypeFromAttrs;
 
   // However, for ESQL queries without transformational commands, prefer datatable
-  const query = 'query' in context ? context.query : undefined;
   const hasTransformations = query ? hasTransformationalCommand(query.esql) : true;
 
   // in case the user asks for another type (except from area, line) check if it exists
@@ -203,7 +205,6 @@ export const suggestionsApi = ({
     // Skip if user hasn't changed chart type, has multiple suggestions, and wants table
     const shouldSkipSearch =
       !preferredChartType && suggestionsList.length > 1 && targetChartType === ChartType.Table;
-
     if (!shouldSkipSearch) {
       const compatibleSuggestion = findCompatibleSuggestion(suggestionsList, targetChartType);
       const selectedSuggestion = compatibleSuggestion ?? suggestionsList[0];

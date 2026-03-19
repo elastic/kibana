@@ -19,6 +19,7 @@ export interface EmailSectionProps {
   handleChangeEmail: (email: string) => void;
   onEmailValidationChange: (isValid: boolean) => void;
   getCurrentUserEmail: () => Promise<string | undefined>;
+  forceShowEmailError?: boolean;
 }
 
 export const EmailSection = ({
@@ -28,6 +29,7 @@ export const EmailSection = ({
   handleChangeEmail,
   onEmailValidationChange,
   getCurrentUserEmail,
+  forceShowEmailError = false,
 }: EmailSectionProps) => {
   return (
     <EuiFormRow display="center">
@@ -45,6 +47,7 @@ export const EmailSection = ({
               handleChangeEmail={handleChangeEmail}
               onValidationChange={onEmailValidationChange}
               getCurrentUserEmail={getCurrentUserEmail}
+              forceShowError={forceShowEmailError}
             />
           </EuiFlexItem>
         )}

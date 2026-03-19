@@ -36,10 +36,10 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
       loadComponent: () => import('./counter_app').then((m) => m.CounterApp),
     });
 
-    // Register tab selection app as initially inaccessible (simulating permission check)
+    // Register tab selection app as initially pending (simulating permission check)
     this.updateTabSelectionApp = core.chrome.sidebar.registerApp({
       appId: tabSelectionAppId,
-      status: 'inaccessible', // Initially inaccessible
+      status: 'pending', // Initially pending async check
       store: tabSelectionStore,
       loadComponent: () => import('./tab_selection_app').then((m) => m.TabSelectionApp),
     });
@@ -64,11 +64,11 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   }
 
   public start(core: CoreStart) {
-    // Simulate async permission check - make tab selection app accessible after 2 seconds
+    // Simulate async permission check - make tab selection app available after 2 seconds
     setTimeout(() => {
-      this.updateTabSelectionApp?.({ status: 'accessible' });
+      this.updateTabSelectionApp?.({ status: 'available' });
       // eslint-disable-next-line no-console
-      console.log('[Sidebar Example] Tab Selection app is now accessible after permission check');
+      console.log('[Sidebar Example] Tab Selection app is now available after permission check');
     }, 2000);
 
     return {};

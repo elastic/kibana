@@ -8,7 +8,7 @@ Public types, constants, and utilities for the Chrome Sidebar API. Use this pack
 - TypeScript types:
   - `SidebarStoreConfig` - Store configuration type (schema + actions)
   - `SetState`, `GetState`, `SidebarContext` - Store helper types
-  - `SidebarApp`, `SidebarAppDefinition`, `SidebarSetup`, `SidebarStart` - Service types
+  - `SidebarApp`, `SidebarAppConfig`, `SidebarAppDefinition`, `SidebarSetup`, `SidebarStart` - Service types
   - `SidebarComponentProps`, `SidebarComponentType` - Component types
   - `SidebarAppId`, `SidebarAppStatus`, `SidebarAppUpdate`, `SidebarAppUpdater` - App types
 - Constants: `VALID_SIDEBAR_APP_IDS`, `EXAMPLE_APP_ID_PREFIX`

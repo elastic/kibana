@@ -36,9 +36,12 @@ import {
 
 import {
   AgentPolicySchemaV3,
+  EpmPackagesSchemaV6,
+  EpmPackagesSchemaV7,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
+  SettingsSchemaV8,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -187,6 +190,7 @@ export const getSavedObjectTypes = (
           },
           integration_knowledge_enabled: { type: 'boolean' },
           ssl_secret_storage_requirements_met: { type: 'boolean' },
+          download_source_auth_secret_storage_requirements_met: { type: 'boolean' },
         },
       },
       migrations: {
@@ -275,6 +279,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: SettingsSchemaV7.extends({}, { unknowns: 'ignore' }),
             create: SettingsSchemaV7,
+          },
+        },
+        8: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                download_source_auth_secret_storage_requirements_met: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: SettingsSchemaV8.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV8,
           },
         },
       },
@@ -1168,6 +1186,13 @@ export const getSavedObjectTypes = (
           name: { type: 'keyword' },
           version: { type: 'keyword' },
           internal: { type: 'boolean' },
+          dependencies: {
+            type: 'nested',
+            properties: {
+              name: { type: 'keyword' },
+              version: { type: 'keyword' },
+            },
+          },
           keep_policies_up_to_date: { type: 'boolean', index: false },
           es_index_patterns: {
             dynamic: false,
@@ -1219,6 +1244,10 @@ export const getSavedObjectTypes = (
             },
           },
           previous_version: { type: 'keyword' },
+          pending_upgrade_review: {
+            dynamic: false,
+            properties: {},
+          },
         },
       },
       modelVersions: {
@@ -1269,6 +1298,43 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+        },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                pending_upgrade_review: {
+                  dynamic: false,
+                  properties: {},
+                },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV6.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV6.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                dependencies: {
+                  type: 'nested',
+                  properties: {
+                    name: { type: 'keyword' },
+                    version: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV7,
+          },
         },
       },
       migrations: {
@@ -1597,6 +1663,8 @@ export const OUTPUT_ENCRYPTED_FIELDS = new Set([
 
 export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([{ key: 'ssl' }]);
 
+export const DOWNLOAD_SOURCE_ENCRYPTED_FIELDS = new Set([{ key: 'ssl' }, { key: 'auth' }]);
+
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
@@ -1624,7 +1692,7 @@ export function registerEncryptedSavedObjects(
   });
   encryptedSavedObjects.registerType({
     type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([{ key: 'ssl' }]),
+    attributesToEncrypt: DOWNLOAD_SOURCE_ENCRYPTED_FIELDS,
     // enforceRandomId allows to create an SO with an arbitrary id
     enforceRandomId: false,
   });

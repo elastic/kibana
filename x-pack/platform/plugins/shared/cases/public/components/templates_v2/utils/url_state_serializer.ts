@@ -6,9 +6,12 @@
  */
 
 import { isEmpty, isNumber } from 'lodash';
-import type { TemplatesURLQueryParams, QueryParams } from '../types';
+import type { TemplatesFindRequest } from '../../../../common/types/api/template/v1';
+import type { TemplatesURLQueryParams } from '../types';
 
-export const templatesUrlStateSerializer = (state: QueryParams): TemplatesURLQueryParams => {
+export const templatesUrlStateSerializer = (
+  state: TemplatesFindRequest
+): TemplatesURLQueryParams => {
   const urlState: TemplatesURLQueryParams = {
     ...state,
     search: state.search ? encodeURIComponent(state.search) : undefined,

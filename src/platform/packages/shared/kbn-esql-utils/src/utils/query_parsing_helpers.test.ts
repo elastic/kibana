@@ -8,8 +8,8 @@
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
-import type { ESQLColumn } from '@kbn/esql-language';
-import { Parser, walk } from '@kbn/esql-language';
+import type { ESQLColumn } from '@elastic/esql/types';
+import { Parser, walk } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getRemoteClustersFromESQLQuery,
@@ -31,8 +31,8 @@ import {
   convertTimeseriesCommandToFrom,
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
-  hasDateBreakdown,
   hasOnlySourceCommand,
+  hasTimeseriesInfoCommand,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -228,6 +228,21 @@ describe('esql query helpers', () => {
       );
       expect(code).toEqual(
         'FROM index1 /* cmt */\n  | KEEP field1, field2 /* cmt */\n  | SORT field1 /* cmt */'
+      );
+    });
+
+    it('should respect custom lineWidth when provided', function () {
+      const query =
+        'FROM kibana_sample_data_logs | STATS count = COUNT(*), avg = AVG(bytes), p95 = PERCENTILE(bytes, 95), ext = VALUES(tags.keyword) BY ip | EVAL newField = CASE(count < 100, "groupA", count > 100 AND count < 500, "groupB", "Other") | KEEP newField';
+      const codeWithNarrowWidth = prettifyQuery(query, 40);
+      const codeWithWideWidth = prettifyQuery(query, 120);
+      const maxLineLength = (code: string) =>
+        Math.max(...code.split('\n').map((line) => line.length));
+      expect(maxLineLength(codeWithNarrowWidth)).toBeLessThanOrEqual(40);
+      expect(maxLineLength(codeWithWideWidth)).toBeLessThanOrEqual(120);
+      // Wider width should allow longer lines (fewer wraps)
+      expect(maxLineLength(codeWithWideWidth)).toBeGreaterThanOrEqual(
+        maxLineLength(codeWithNarrowWidth)
       );
     });
   });
@@ -1067,139 +1082,6 @@ describe('esql query helpers', () => {
     });
   });
 
-  describe('hasDateBreakdown', () => {
-    const countColumn = {
-      id: 'COUNT()',
-      isNull: false,
-      meta: { type: 'number', esType: 'long' },
-      name: 'COUNT()',
-    } as DatatableColumn;
-
-    const mockDateFieldColumn = {
-      id: '@timestamp',
-      isNull: false,
-      meta: { type: 'date', esType: 'date' },
-      name: '@timestamp',
-    } as DatatableColumn;
-
-    const mockBucketColumn = {
-      id: 'BUCKET(@timestamp, 1h)',
-      isNull: false,
-      meta: { type: 'date', esType: 'date' },
-      name: 'BUCKET(@timestamp, 1h)',
-    } as DatatableColumn;
-
-    it('should return false if the query is empty', () => {
-      expect(hasDateBreakdown('')).toBe(false);
-    });
-    it('should return false if date column cannot be identified', () => {
-      expect(hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h)')).toBe(false);
-    });
-    it('should return false if it is not a TS command', () => {
-      expect(hasDateBreakdown('FROM index | STATS COUNT() BY BUCKET(@timestamp, 1h)')).toBe(false);
-    });
-    it('should return false if the STATS BY command does not use a date column', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY agent.name', [
-          countColumn,
-          {
-            id: 'agent.name',
-            isNull: false,
-            meta: { type: 'string', esType: 'keyword' },
-            name: 'agent.name',
-          },
-        ] as DatatableColumn[])
-      ).toBe(false);
-    });
-    it('should return false if the last STATS BY command does use a date column', () => {
-      expect(
-        hasDateBreakdown(
-          `TS index 
-            | STATS count=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) 
-            | STATS sample = SAMPLE(count, 10) BY category`,
-          [
-            {
-              id: 'count',
-              isNull: false,
-              meta: { type: 'number', esType: 'long' },
-              name: 'count',
-            },
-            {
-              id: 'category',
-              isNull: false,
-              meta: { type: 'string', esType: 'keyword' },
-              name: 'category',
-            },
-            mockDateFieldColumn,
-          ]
-        )
-      ).toBe(false);
-    });
-    it('should return true if the query bucket aggregation, case insensitive and ignoring spaces', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY bucket(@timestamp,    1h)', [
-          countColumn,
-          mockBucketColumn,
-        ])
-      ).toBe(true);
-    });
-    it('should return true if STATS BY command uses a date column', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY @timestamp', [
-          countColumn,
-          mockDateFieldColumn,
-        ])
-      ).toBe(true);
-    });
-    it('should return true if the query contains a STATS BY command with multiple breakdowns, one of which is a date column', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h), agent.name', [
-          countColumn,
-          mockDateFieldColumn,
-          {
-            id: 'agent.name',
-            isNull: false,
-            meta: { type: 'string', esType: 'keyword' },
-            name: 'agent.name',
-          },
-        ])
-      ).toBe(true);
-    });
-    it('should return true if the query contains a STATS BY command with an aliased breakdown field that is a date column', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY t=BUCKET(@timestamp, 1h)', [
-          countColumn,
-          {
-            id: 't',
-            isNull: false,
-            meta: { type: 'date', esType: 'date' },
-            name: 't',
-          },
-        ])
-      ).toBe(true);
-    });
-    it('should return true if the query contains a STATS BY a function that uses a date column', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h)', [
-          countColumn,
-          mockBucketColumn,
-        ])
-      ).toBe(true);
-
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY DATE_TRUNC(1h, @timestamp)', [
-          countColumn,
-          {
-            id: 'DATE_TRUNC(1h, @timestamp)',
-            isNull: false,
-            meta: { type: 'date', esType: 'date' },
-            name: 'DATE_TRUNC(1h, @timestamp)',
-          },
-        ])
-      ).toBe(true);
-    });
-  });
-
   describe('hasOnlySourceCommand', () => {
     it('should return true for queries with only FROM command', () => {
       expect(hasOnlySourceCommand('FROM index')).toBe(true);
@@ -1227,6 +1109,28 @@ describe('esql query helpers', () => {
           'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
         )
       ).toBe(false);
+    });
+  });
+
+  describe('hasInfoCommand', () => {
+    it('should return true when query contains METRICS_INFO command', () => {
+      expect(hasTimeseriesInfoCommand('TS index | METRICS_INFO')).toBe(true);
+    });
+
+    it('should return true when query contains TS_INFO command', () => {
+      expect(hasTimeseriesInfoCommand('TS index | TS_INFO')).toBe(true);
+    });
+
+    it('should return true when METRICS_INFO appears with other commands', () => {
+      expect(hasTimeseriesInfoCommand('TS index | METRICS_INFO | LIMIT 10')).toBe(true);
+    });
+
+    it('should return true when TS_INFO appears with other commands', () => {
+      expect(hasTimeseriesInfoCommand('TS index | TS_INFO | LIMIT 10')).toBe(true);
+    });
+
+    it('should return false when query does not contain METRICS_INFO or TS_INFO', () => {
+      expect(hasTimeseriesInfoCommand('FROM index | STATS count()')).toBe(false);
     });
   });
 });

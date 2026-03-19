@@ -112,7 +112,6 @@ export const NoObservedData = {
           isLoading: false,
           date: undefined,
         },
-        anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
       }}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
@@ -154,7 +153,6 @@ export const Loading = {
           isLoading: true,
           date: undefined,
         },
-        anomalies: { isLoading: true, anomalies: null, jobNameById: {} },
       }}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}

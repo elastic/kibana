@@ -46,7 +46,7 @@ const availableApps: ReadonlyMap<string, App> = new Map([
     {
       id: 'chromelessApp',
       order: 20,
-      title: 'Chromless App',
+      title: 'Chromeless App',
       chromeless: true,
       mount: () => () => undefined,
     },
@@ -110,7 +110,7 @@ describe('NavLinksService', () => {
       ).not.toContain('chromelessApp');
     });
 
-    it('does not include `inaccesible` applications', async () => {
+    it('does not include `inaccessible` applications', async () => {
       expect(
         await lastValueFrom(
           start.getNavLinks$().pipe(
@@ -179,20 +179,6 @@ describe('NavLinksService', () => {
 
     it('returns false if it does not exist', () => {
       expect(start.has('phony')).toBe(false);
-    });
-  });
-
-  describe('#enableForcedAppSwitcherNavigation()', () => {
-    it('flips #getForceAppSwitcherNavigation$()', async () => {
-      await expect(
-        lastValueFrom(start.getForceAppSwitcherNavigation$().pipe(take(1)))
-      ).resolves.toBe(false);
-
-      start.enableForcedAppSwitcherNavigation();
-
-      await expect(
-        lastValueFrom(start.getForceAppSwitcherNavigation$().pipe(take(1)))
-      ).resolves.toBe(true);
     });
   });
 });

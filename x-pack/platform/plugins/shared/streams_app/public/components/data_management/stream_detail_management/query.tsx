@@ -138,6 +138,7 @@ export function QueryStreamDetailManagement({
             path: { key, tab: tabKey },
           }),
           isSelected: tab === tabKey,
+          'data-test-subj': `queryStreamDetails-${tabKey}-tab`,
         }))}
       />
       <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>

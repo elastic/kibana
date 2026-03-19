@@ -24,6 +24,7 @@ import { PageScope } from '../../data_view_manager/constants';
 import { CombinedRiskDonutChart } from '../components/threat_hunting/combined_risk_donut_chart';
 import { AnomaliesPlaceholderPanel } from '../components/threat_hunting/anomalies_placeholder_panel';
 import { ThreatHuntingEntitiesTable } from '../components/threat_hunting/threat_hunting_entities_table';
+import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 
 export const EntityThreatHuntingPage = () => {
   const {
@@ -72,6 +73,7 @@ export const EntityThreatHuntingPage = () => {
               defaultMessage="Entity Threat Hunting"
             />
           }
+          rightSideItems={[<WatchlistFilter />]}
         />
 
         {isSourcererLoading ? (

@@ -10,7 +10,7 @@ export interface IndexInfo {
   docs: number;
 }
 
-type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
+export type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
 
 export interface CategoryGroup {
   category: MainCategories | string;
@@ -86,10 +86,38 @@ export interface SiemReadinessPackageInfo {
   version: string;
   status: string;
   categories?: string[];
+  packagePoliciesInfo?: {
+    count: number;
+  };
+}
+
+export interface PipelineStats {
+  name: string;
+  indices: string[];
+  docsCount: number;
+  failedDocsCount: number;
 }
 export interface CasesSearchResponse {
   total: number;
   countOpenCases: number;
   countClosedCases: number;
   countInProgressCases: number;
+}
+
+// Retention types
+export type RetentionType = 'ilm' | 'dsl' | null;
+export type RetentionStatus = 'healthy' | 'non-compliant';
+
+export interface RetentionInfo {
+  indexName: string;
+  isDataStream: boolean;
+  retentionType: RetentionType;
+  retentionPeriod: string | null;
+  retentionDays: number | null;
+  policyName: string | null;
+  status: RetentionStatus;
+}
+
+export interface RetentionResponse {
+  items: RetentionInfo[];
 }

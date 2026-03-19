@@ -42,6 +42,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     toolsService,
     attachmentsService,
     resultStore,
+    skillsStore,
     attachmentStateManager,
     logger,
     promptManager,
@@ -80,6 +81,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       request,
     }),
     resultStore,
+    skillsStore,
     attachmentStateManager,
     filestore,
     stateManager,
@@ -91,7 +93,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       spaceId,
       runner: manager.getRunner(),
     }),
-    skills: createSkillsService({
+    skills: await createSkillsService({
       skillServiceStart,
       toolsServiceStart: toolsService,
       request,
@@ -100,6 +102,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     }),
     toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    hooks: manager.deps.hooks,
     experimentalFeatures,
   };
 };
@@ -111,9 +114,15 @@ export const runAgent = async ({
   agentExecutionParams: ScopedRunnerRunAgentParams;
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
-  const { agentId, agentParams, abortSignal } = agentExecutionParams;
-  const context = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
-  const manager = parentManager.createChild(context);
+  const { agentId, agentParams, executionId } = agentExecutionParams;
+
+  const forkedContext = forkContextForAgentRun({
+    parentContext: parentManager.context,
+    agentId,
+    executionId,
+    conversationId: agentParams.conversation?.id,
+  });
+  const manager = parentManager.createChild(forkedContext);
 
   const { agentsService, request } = manager.deps;
   const agentRegistry = await agentsService.getRegistry({ request });
@@ -126,7 +135,7 @@ export const runAgent = async ({
       {
         runId: manager.context.runId,
         agentParams,
-        abortSignal,
+        abortSignal: manager.deps.abortSignal,
       },
       agentHandlerContext
     );

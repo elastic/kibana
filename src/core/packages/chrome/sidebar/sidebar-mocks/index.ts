@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type {
   SidebarApp,
-  SidebarAppDefinition,
+  SidebarAppConfig,
   SidebarSetup,
   SidebarStart,
 } from '@kbn/core-chrome-sidebar';
@@ -19,7 +19,7 @@ const DEFAULT_WIDTH = 400;
 
 const createSetupContractMock = (): jest.Mocked<SidebarSetup> => {
   const registerApp = jest.fn(
-    <TState = undefined, TActions = undefined>(_app: SidebarAppDefinition<TState, TActions>) =>
+    <TState = undefined, TActions = undefined>(_app: SidebarAppConfig<TState, TActions>) =>
       jest.fn()
   ) as jest.MockedFunction<SidebarSetup['registerApp']>;
 
@@ -38,6 +38,8 @@ const createAppMock = <TState = undefined, TActions = undefined>(): jest.Mocked<
     actions: {} as unknown as jest.Mocked<SidebarApp<TState, TActions>>['actions'],
     getState: jest.fn().mockReturnValue({} as TState),
     getState$: jest.fn().mockReturnValue(new BehaviorSubject<TState>({} as TState)),
+    getStatus: jest.fn().mockReturnValue('available'),
+    getStatus$: jest.fn().mockReturnValue(new BehaviorSubject('available')),
   };
 };
 

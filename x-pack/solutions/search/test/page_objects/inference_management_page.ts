@@ -11,6 +11,7 @@ import type { FtrProviderContext } from './ftr_provider_context';
 export function SearchInferenceManagementPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const find = getService('find');
   const retry = getService('retry');
 
   return {
@@ -44,22 +45,12 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
       async expectEndpointStatsToBeDisplayed() {
         // Verify the endpoint stats bar exists
         await testSubjects.existOrFail('endpointStats');
-        await testSubjects.existOrFail('endpointStatsServicesCount');
         await testSubjects.existOrFail('endpointStatsModelsCount');
-        await testSubjects.existOrFail('endpointStatsTypesCount');
         await testSubjects.existOrFail('endpointStatsEndpointsCount');
 
         // Verify stats show non-zero counts (we have preconfigured endpoints)
-        const servicesCount = parseInt(
-          await testSubjects.getVisibleText('endpointStatsServicesCount'),
-          10
-        );
         const modelsCount = parseInt(
           await testSubjects.getVisibleText('endpointStatsModelsCount'),
-          10
-        );
-        const typesCount = parseInt(
-          await testSubjects.getVisibleText('endpointStatsTypesCount'),
           10
         );
         const endpointsCount = parseInt(
@@ -68,9 +59,7 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         );
 
         // We should have at least 1 service, 1 model, 1 type, and 1 endpoint (preconfigured)
-        expect(servicesCount).to.greaterThan(0);
         expect(modelsCount).to.greaterThan(0);
-        expect(typesCount).to.greaterThan(0);
         expect(endpointsCount).to.greaterThan(0);
       },
 
@@ -188,6 +177,64 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
 
         await elserCopyEndpointId.click();
         expect((await browser.getClipboardValue()).includes('.elser-2-elasticsearch')).to.be(true);
+      },
+
+      async expectGroupBySelection(label: string) {
+        await testSubjects.existOrFail('group-by-select');
+        await testSubjects.existOrFail('group-by-button');
+        expect(await testSubjects.getVisibleText('group-by-button')).contain(label);
+      },
+
+      async selectGroupByOption(key: string) {
+        await testSubjects.existOrFail('group-by-button');
+        await testSubjects.click('group-by-button');
+        await testSubjects.existOrFail('group-by-selectable');
+        await testSubjects.existOrFail(`group-by-option-${key}`);
+        await testSubjects.click(`group-by-option-${key}`);
+      },
+
+      async expectGroupByViewToBeDisplayed() {
+        await testSubjects.existOrFail('group-by-tables-container');
+        await testSubjects.missingOrFail('inferenceEndpointTable');
+      },
+
+      async expectGroupByTable(groupId: string) {
+        await testSubjects.existOrFail(`${groupId}-accordion`);
+        await testSubjects.existOrFail(`${groupId}-table`);
+      },
+
+      async expectGroupByAccordionsToBeOpen(groupId: string) {
+        await testSubjects.existOrFail(`${groupId}-accordion`);
+
+        await retry.tryWithRetries(
+          `Waiting for ${groupId} accordion to be open`,
+          async () => {
+            const isOpen =
+              (await (
+                await find.byCssSelector(`[aria-controls="${groupId}-group-accordion"]`)
+              ).getAttribute('aria-expanded')) === 'true';
+            expect(isOpen).equal(true, `${groupId} accordion is closed`);
+          },
+          { timeout: 5000, retryCount: 5 }
+        );
+      },
+      async expectGroupByAccordionsToBeClosed(groupId: string) {
+        await testSubjects.existOrFail(`${groupId}-accordion`);
+        await retry.tryWithRetries(
+          `Waiting for ${groupId} accordion to be closed`,
+          async () => {
+            const isClosed =
+              (await (
+                await find.byCssSelector(`[aria-controls="${groupId}-group-accordion"]`)
+              ).getAttribute('aria-expanded')) === 'false';
+            expect(isClosed).equal(true, `${groupId} accordion is still open`);
+          },
+          { timeout: 5000, retryCount: 5 }
+        );
+      },
+      async toggleGroupByAccordion(groupId: string) {
+        await testSubjects.existOrFail(`${groupId}-accordion`);
+        await (await find.byCssSelector(`[aria-controls="${groupId}-group-accordion"]`)).click();
       },
     },
 

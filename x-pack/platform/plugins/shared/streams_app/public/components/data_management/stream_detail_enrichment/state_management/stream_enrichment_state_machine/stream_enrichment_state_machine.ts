@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
+import { getRoot, isEnabledFailureStore, LOGS_ECS_STREAM_NAME, Streams } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
-import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate5';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate';
+import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate';
 
 import {
   addDeterministicCustomIdentifiers,
@@ -18,7 +18,7 @@ import {
 import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import {
   isStreamlangDSLSchema,
-  streamlangDSLSchema,
+  streamlangDSLSchemaStrict,
   type StreamlangDSL,
 } from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
@@ -82,7 +82,8 @@ export const streamEnrichmentMachine = setup({
     /* Validation actions */
     computeValidation: assign(({ context }) => {
       // First, check for schema errors (Zod parsing)
-      const parseResult = streamlangDSLSchema.safeParse(context.nextStreamlangDSL);
+      // Use pre-built strict schema to catch excess keys, matching server-side validation behavior
+      const parseResult = streamlangDSLSchemaStrict.safeParse(context.nextStreamlangDSL);
       if (!parseResult.success) {
         const schemaErrors = parseResult.error.issues.map((issue) => {
           const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
@@ -97,10 +98,12 @@ export const streamEnrichmentMachine = setup({
       }
 
       const isWiredStream = Streams.WiredStream.Definition.is(context.definition.stream);
+      const rootStream = getRoot(context.definition.stream.name);
 
       const validationResult = validateStreamlang(context.nextStreamlangDSL, {
         reservedFields: [],
         streamType: isWiredStream ? 'wired' : 'classic',
+        skipNamespaceValidation: isWiredStream && rootStream === LOGS_ECS_STREAM_NAME,
       });
 
       const errorsByStep = new Map<string, typeof validationResult.errors>();
@@ -284,11 +287,16 @@ export const streamEnrichmentMachine = setup({
         type: 'simulation.clearConditionFilter',
       });
     },
+    storeAutoSelectedConditionId: assign((_, params: { conditionId: string }) => ({
+      autoSelectedConditionId: params.conditionId,
+    })),
+    clearAutoSelectedConditionId: assign(() => ({ autoSelectedConditionId: undefined })),
   },
   guards: {
     /* Staged changes are determined by comparing previous and next DSL */
     hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
     hasSimulatePrivileges: ({ context }) => context.definition.privileges.simulate,
+    hasAutoSelectedConditionId: ({ context }) => Boolean(context.autoSelectedConditionId),
     canUpdateStream: ({ context }) => {
       const hasSchemaErrors = context.schemaErrors.length > 0;
       const hasValidationErrors = context.validationErrors.size > 0;
@@ -329,6 +337,7 @@ export const streamEnrichmentMachine = setup({
       urlState: defaultEnrichmentUrlState,
       validationErrors: new Map(),
       fieldTypesByProcessor: new Map(),
+      autoSelectedConditionId: undefined,
       suggestedPipeline: undefined,
       simulatorRef: spawn('simulationMachine', {
         id: 'simulator',
@@ -549,8 +558,23 @@ export const streamEnrichmentMachine = setup({
                     'simulation.updateSteps': {
                       actions: forwardTo('simulator'),
                     },
+                    'simulation.filterByConditionAuto': {
+                      actions: [
+                        {
+                          type: 'storeAutoSelectedConditionId',
+                          params: ({ event }) => ({ conditionId: event.conditionId }),
+                        },
+                        {
+                          type: 'filterByCondition',
+                          params: ({ event }) => ({ conditionId: event.conditionId }),
+                        },
+                      ],
+                    },
                     'simulation.filterByCondition': {
                       actions: [
+                        {
+                          type: 'clearAutoSelectedConditionId',
+                        },
                         {
                           type: 'filterByCondition',
                           params: ({ event }) => ({ conditionId: event.conditionId }),
@@ -560,8 +584,18 @@ export const streamEnrichmentMachine = setup({
                     'simulation.clearConditionFilter': {
                       actions: [
                         {
+                          type: 'clearAutoSelectedConditionId',
+                        },
+                        {
                           type: 'clearConditionFilter',
                         },
+                      ],
+                    },
+                    'simulation.clearAutoConditionFilter': {
+                      guard: 'hasAutoSelectedConditionId',
+                      actions: [
+                        { type: 'clearConditionFilter' },
+                        { type: 'clearAutoSelectedConditionId' },
                       ],
                     },
                     // Forward other step events to interactive mode machine

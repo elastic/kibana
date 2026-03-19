@@ -33,7 +33,7 @@ const normalizeStringList = (value: unknown | string[], flagName: string) => {
 const dedupe = (values: string[] | undefined) =>
   values && values.length > 0 ? Array.from(new Set(values)) : undefined;
 
-const VALID_CHECKS = ['any', 'comments', 'exports', 'all'] as const;
+const VALID_CHECKS = ['any', 'comments', 'exports', 'unnamed', 'all'] as const;
 
 const normalizeCheckFlagValues = (check: unknown | string[]) => {
   if (!check) {
@@ -46,7 +46,7 @@ const normalizeCheckFlagValues = (check: unknown | string[]) => {
 
   if (!isStringArray(check)) {
     throw createFlagError(
-      'expected --check must only contain `any`, `comments`, `exports`, or `all`'
+      'expected --check must only contain `any`, `comments`, `exports`, `unnamed`, or `all`'
     );
   }
 
@@ -58,12 +58,14 @@ const expandChecks = (checks: string[] | undefined) => {
     return undefined;
   }
 
-  const expanded = checks.flatMap((c) => (c === 'all' ? ['any', 'comments', 'exports'] : [c]));
+  const expanded = checks.flatMap((c) =>
+    c === 'all' ? ['any', 'comments', 'exports', 'unnamed'] : [c]
+  );
 
   const invalid = expanded.find((c) => !VALID_CHECKS.includes(c as (typeof VALID_CHECKS)[number]));
   if (invalid) {
     throw createFlagError(
-      'expected --check must only contain `any`, `comments`, `exports`, or `all`'
+      'expected --check must only contain `any`, `comments`, `exports`, `unnamed`, or `all`'
     );
   }
 
@@ -71,8 +73,11 @@ const expandChecks = (checks: string[] | undefined) => {
 };
 
 const validateStats = (stats: string[] | undefined) => {
-  if (stats && stats.find((s) => s !== 'any' && s !== 'comments' && s !== 'exports')) {
-    throw createFlagError('expected --stats must only contain `any`, `comments` and/or `exports`');
+  const validValues = ['any', 'comments', 'exports', 'unnamed'];
+  if (stats && stats.find((s) => !validValues.includes(s))) {
+    throw createFlagError(
+      'expected --stats must only contain `any`, `comments`, `exports`, and/or `unnamed`'
+    );
   }
 };
 
@@ -86,7 +91,9 @@ const normalizeStats = (value: unknown | string[]) => {
   }
 
   if (!isStringArray(value)) {
-    throw createFlagError('expected --stats must only contain `any`, `comments` and/or `exports`');
+    throw createFlagError(
+      'expected --stats must only contain `any`, `comments`, `exports`, and/or `unnamed`'
+    );
   }
 
   return value;

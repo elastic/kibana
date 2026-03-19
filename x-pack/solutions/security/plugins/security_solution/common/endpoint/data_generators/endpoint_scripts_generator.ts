@@ -10,7 +10,8 @@ import { merge } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
 import type { EndpointScript } from '../types';
 import { SUPPORTED_HOST_OS_TYPE } from '../constants';
-import { SCRIPT_TAGS } from '../service/scripts_library/constants';
+import type { SCRIPT_TAGS } from '../service/script_library/constants';
+import { SORTED_SCRIPT_TAGS_KEYS } from '../service/script_library/constants';
 
 export class EndpointScriptsGenerator extends BaseDataGenerator {
   generate(overrides: DeepPartial<EndpointScript> = {}): EndpointScript {
@@ -32,6 +33,8 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
     const name = overrides.name ?? this.randomScriptName();
 
     const id = overrides.id ?? this.seededUUIDv4();
+    const fileType = overrides.fileType ?? this.randomFileType();
+
     const randomScript = {
       id,
       name,
@@ -40,6 +43,7 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
       fileSize: this.randomFileSizeInBytes(),
       fileHash: this.randomSHA256(),
       fileId: this.randomUUID(),
+      fileType,
       requiresInput: this.randomBoolean(),
       downloadUri: `/api/endpoint/scripts_library/${id}/download`,
       tags,
@@ -50,6 +54,7 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
         60
       )}`,
       example: `${this.randomString(30)}\n ${this.randomString(30)} \n ${this.randomString(30)}`,
+      pathToExecutable: fileType === 'archive' ? `/usr/local/bin/${name}` : undefined,
       createdBy,
       createdAt,
       updatedAt,
@@ -100,17 +105,20 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
     return selectedPlatforms;
   }
 
+  protected randomFileType(): 'script' | 'archive' {
+    return this.randomChoice(['script', 'archive']);
+  }
+
   protected randomSHA256(): string {
     return this.randomArray(64, () => Math.floor(Math.random() * 36).toString(36)).join('');
   }
 
   protected randomTags(): Array<keyof typeof SCRIPT_TAGS> {
     const tags: Array<keyof typeof SCRIPT_TAGS> = [];
-    const tagKeys = Object.keys(SCRIPT_TAGS) as Array<keyof typeof SCRIPT_TAGS>;
-    const numberOfTags = this.randomN(tagKeys.length);
+    const numberOfTags = this.randomN(SORTED_SCRIPT_TAGS_KEYS.length);
     // Ensure unique tags and no duplicates, but random number of items
     while (tags.length < numberOfTags) {
-      const tag = this.randomChoice(tagKeys);
+      const tag = this.randomChoice(SORTED_SCRIPT_TAGS_KEYS);
       if (!tags.includes(tag)) {
         tags.push(tag);
       }

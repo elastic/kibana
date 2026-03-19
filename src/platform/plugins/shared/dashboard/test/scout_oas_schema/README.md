@@ -10,20 +10,20 @@ First start the servers with the custom config:
 
 ```bash
 // ESS (stateful)
-node scripts/scout.js start-server --stateful --config-dir oas_schema
+node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet oas_schema
 
 // Serverless
-node scripts/scout.js start-server --serverless=es --config-dir oas_schema
+node scripts/scout.js start-server --arch serverless --domain search --serverConfigSet oas_schema
 ```
 
 Then run the tests in another terminal:
 
 ```bash
 // ESS (stateful)
-npx playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/playwright.config.ts --grep=@ess --project=local
+npx playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/playwright.config.ts --grep=@local-stateful-classic --project=local
 
 // Serverless
-npx playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/playwright.config.ts --grep=@svlSearch --project=local
+npx playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/playwright.config.ts --grep=@local-serverless-search --project=local
 ```
 
 ### Server Configuration

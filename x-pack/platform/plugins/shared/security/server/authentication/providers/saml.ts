@@ -9,6 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { isInternalURL } from '@kbn/std';
 
 import type { AuthenticationProviderOptions } from './base';
@@ -21,11 +22,9 @@ import {
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
 import type { UiamServicePublic } from '../../uiam';
-import { isUiamCredential } from '../../uiam/utils';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
 
@@ -399,12 +398,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       !isIdPInitiatedLogin
         ? `Login has been previously initiated by Kibana. Current requestIds: ${stateRequestIds}`
         : 'Login has been initiated by Identity Provider.'
-    );
-
-    this.logger.debug(
-      `SAML RESPONSE: ${samlResponse}:::${JSON.stringify(
-        !isIdPInitiatedLogin ? [...stateRequestIds] : []
-      )}`
     );
 
     const providerRealm = this.realm || stateRealm;

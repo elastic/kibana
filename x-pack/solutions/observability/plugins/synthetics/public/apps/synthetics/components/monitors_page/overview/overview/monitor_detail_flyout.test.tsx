@@ -15,6 +15,10 @@ import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import {
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
+} from '@kbn/observability-agent-builder-plugin/public';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
@@ -180,5 +184,103 @@ describe('Monitor Detail Flyout', () => {
     expect(links).toHaveLength(2);
     expect(links[0]).toHaveAttribute('href', 'https://www.elastic.co');
     expect(links[1]).toHaveAttribute('href', detailLink);
+  });
+
+  describe('agent builder attachment', () => {
+    const mockSetChatConfig = jest.fn();
+    const mockClearChatConfig = jest.fn();
+    const mockAgentBuilder = {
+      setChatConfig: mockSetChatConfig,
+      clearChatConfig: mockClearChatConfig,
+    };
+
+    const monitorState = {
+      monitorDetails: {
+        syntheticsMonitor: {
+          enabled: true,
+          type: 'http',
+          name: 'test-monitor',
+          schedule: { number: '1', unit: 'm' },
+          tags: ['prod'],
+          config_id: 'test-config-id',
+        } as any,
+      },
+    };
+
+    it('configures attachment when agentBuilder is available and monitor is loaded', () => {
+      render(
+        <MonitorDetailFlyout
+          configId="test-config-id"
+          id="test-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: monitorState,
+          core: { agentBuilder: mockAgentBuilder } as any,
+        }
+      );
+
+      expect(mockSetChatConfig).toHaveBeenCalledWith({
+        agentId: OBSERVABILITY_AGENT_ID,
+        attachments: [
+          {
+            type: OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
+            data: {
+              attachmentLabel: 'test-monitor monitor',
+              configId: 'test-config-id',
+              monitorName: 'test-monitor',
+              monitorType: 'http',
+            },
+          },
+        ],
+      });
+    });
+
+    it('does not configure attachment when agentBuilder is not available', () => {
+      render(
+        <MonitorDetailFlyout
+          configId="test-config-id"
+          id="test-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: monitorState,
+        }
+      );
+
+      expect(mockSetChatConfig).not.toHaveBeenCalled();
+    });
+
+    it('clears attachment config on unmount', () => {
+      const { unmount } = render(
+        <MonitorDetailFlyout
+          configId="test-config-id"
+          id="test-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: monitorState,
+          core: { agentBuilder: mockAgentBuilder } as any,
+        }
+      );
+
+      expect(mockSetChatConfig).toHaveBeenCalledTimes(1);
+
+      unmount();
+
+      expect(mockClearChatConfig).toHaveBeenCalledTimes(1);
+    });
   });
 });

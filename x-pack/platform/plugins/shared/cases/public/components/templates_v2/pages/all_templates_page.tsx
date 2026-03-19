@@ -16,8 +16,10 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { Template } from '../../../../common/types/domain/template/v1';
+import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { useCasesCreateTemplateNavigation } from '../../../common/navigation/hooks';
+import { useCasesTemplatesBreadcrumbs } from '../../use_breadcrumbs';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../../templates/translations';
 import { useTemplatesColumns } from '../hooks/use_templates_columns';
 import { useTemplatesState } from '../hooks/use_templates_state';
@@ -34,14 +36,18 @@ import { TemplatesTableEmptyPrompt } from '../components/templates_table_empty_p
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
 
 export const AllTemplatesPage: React.FC = () => {
+  useCasesTemplatesBreadcrumbs();
   const { euiTheme } = useEuiTheme();
+  const { owner } = useCasesContext();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
 
   const { queryParams, setQueryParams, sorting, selectedTemplates, selection, deselectTemplates } =
     useTemplatesState();
 
-  const { data, isLoading, refetch } = useGetTemplates({ queryParams });
+  const { data, isLoading, refetch } = useGetTemplates({
+    queryParams: { ...queryParams, owner },
+  });
   const { data: tags = [], isLoading: isLoadingTags } = useGetTemplateTags();
   const { data: creators = [], isLoading: isLoadingCreators } = useGetTemplateCreators();
   const { pagination, onTableChange } = useTemplatesPagination({
@@ -62,7 +68,6 @@ export const AllTemplatesPage: React.FC = () => {
   const {
     handleEdit,
     handleClone,
-    handleSetAsDefault,
     handleExport,
     handleDelete,
     confirmDelete,
@@ -73,14 +78,13 @@ export const AllTemplatesPage: React.FC = () => {
   const { columns } = useTemplatesColumns({
     onEdit: handleEdit,
     onClone: handleClone,
-    onSetAsDefault: handleSetAsDefault,
     onExport: handleExport,
     onDelete: handleDelete,
     disableActions: selectedTemplates.length > 0,
   });
 
   const tableRowProps = useCallback(
-    (template: Template) => ({
+    (template: TemplateListItem) => ({
       'data-test-subj': `templates-table-row-${template.templateId}`,
     }),
     []
@@ -170,7 +174,7 @@ export const AllTemplatesPage: React.FC = () => {
           <EuiBasicTable
             columns={columns}
             data-test-subj="templates-table"
-            itemId="key"
+            itemId="templateId"
             items={data?.templates ?? []}
             loading={isLoading}
             tableCaption={i18n.TEMPLATE_TITLE}

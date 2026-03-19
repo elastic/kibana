@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { createActorContext, useSelector } from '@xstate5/react';
+import { createActorContext, useSelector } from '@xstate/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import type {
   StreamlangProcessorDefinition,
@@ -116,6 +116,13 @@ export const useStreamEnrichmentEvents = () => {
       },
       mapField: (field: SchemaField) => {
         service.send({ type: 'simulation.fields.map', field: field as MappedSchemaField });
+      },
+      stageDocOnlyOverride: (params: { fieldName: string; description?: string }) => {
+        service.send({
+          type: 'simulation.fields.stageDocOnlyOverride',
+          fieldName: params.fieldName,
+          description: params.description,
+        });
       },
       unmapField: (fieldName: string) => {
         service.send({ type: 'simulation.fields.unmap', fieldName });

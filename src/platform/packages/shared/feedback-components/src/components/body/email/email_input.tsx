@@ -18,6 +18,7 @@ export interface EmailInputProps {
   handleChangeEmail: (email: string) => void;
   onValidationChange: (isValid: boolean) => void;
   getCurrentUserEmail: () => Promise<string | undefined>;
+  forceShowError?: boolean;
 }
 
 const validateEmail = (value: string): boolean => {
@@ -37,13 +38,14 @@ export const EmailInput = ({
   handleChangeEmail,
   onValidationChange,
   getCurrentUserEmail,
+  forceShowError = false,
 }: EmailInputProps) => {
   const hasFetchedEmailRef = useRef(false);
   const [touched, setTouched] = useState(false);
 
   const isValid = useMemo(() => validateEmail(email), [email]);
 
-  const showError = touched && !isValid;
+  const showError = (touched || forceShowError) && !isValid;
 
   useEffect(() => {
     onValidationChange(isValid);

@@ -75,7 +75,7 @@ export function WorkflowYamlValidationAccordion({
               hoverMessage: null,
               severity: 'error' as YamlValidationErrorSeverity,
               message: errorValidating.message,
-              owner: 'variable-validation' as YamlValidationResult['owner'],
+              owner: 'variable-validation' as const,
               startLineNumber: 0,
               startColumn: 0,
               afterMessage: null,
@@ -185,7 +185,7 @@ export function WorkflowYamlValidationAccordion({
   return (
     <EuiAccordion
       id={accordionId}
-      data-testid="wf-yaml-editor-validation-errors-list"
+      data-test-subj="workflowYamlEditorValidationErrorsList"
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>

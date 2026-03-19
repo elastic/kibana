@@ -28,6 +28,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { ReportingStart } from '@kbn/reporting-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type { FleetConfigType } from '../../common/types';
@@ -91,6 +92,7 @@ class AppContextService {
     KibanaSavedObjectType.alertingRuleTemplate,
     KibanaSavedObjectType.sloTemplate,
   ];
+  private reportingStart: ReportingStart | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -119,6 +121,7 @@ class AppContextService {
     this.fetchUsage = appContext.fetchUsage;
     this.lockManagerService = appContext.lockManagerService;
     this.alertingStart = appContext.alertingStart;
+    this.reportingStart = appContext.reportingStart;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -345,6 +348,10 @@ class AppContextService {
 
   public getAlertingStart() {
     return this.alertingStart;
+  }
+
+  public getReportingStart() {
+    return this.reportingStart;
   }
 }
 

@@ -18,7 +18,8 @@ import { isEmpty } from 'lodash';
 
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
-import type { QueryParams, TemplatesURLQueryParams } from '../types';
+import type { TemplatesFindRequest } from '../../../../common/types/api/template/v1';
+import type { TemplatesURLQueryParams } from '../types';
 import { DEFAULT_QUERY_PARAMS } from '../constants';
 import { stringifyUrlParams } from '../utils/stringify_url_params';
 import { parseUrlParams } from '../utils/parse_url_params';
@@ -27,8 +28,8 @@ import { templatesUrlStateDeserializer } from '../utils/url_state_deserializer';
 import { sanitizeState } from '../utils/sanitize_state';
 
 interface UseSyncedQueryParamsReturn {
-  queryParams: QueryParams;
-  setQueryParams: (params: Partial<QueryParams>) => void;
+  queryParams: TemplatesFindRequest;
+  setQueryParams: (params: Partial<TemplatesFindRequest>) => void;
 }
 
 export const useSyncedQueryParams = (): UseSyncedQueryParamsReturn => {
@@ -38,13 +39,13 @@ export const useSyncedQueryParams = (): UseSyncedQueryParamsReturn => {
   const [urlState, setUrlState] = useTemplatesUrlState();
   const [localStorageState, setLocalStorageState] = useTemplatesLocalStorage();
 
-  const queryParams: QueryParams = useMemo(
+  const queryParams: TemplatesFindRequest = useMemo(
     () => getQueryParams(urlState, localStorageState),
     [urlState, localStorageState]
   );
 
   const setQueryParams = useCallback(
-    (newParams: Partial<QueryParams>) => {
+    (newParams: Partial<TemplatesFindRequest>) => {
       const newState = { ...queryParams, ...newParams };
 
       if (!deepEqual(newState, urlState)) {
@@ -85,7 +86,7 @@ export const useSyncedQueryParams = (): UseSyncedQueryParamsReturn => {
 
 const useTemplatesUrlState = (): [
   TemplatesURLQueryParams,
-  (updated: QueryParams, mode?: 'push' | 'replace') => void
+  (updated: TemplatesFindRequest, mode?: 'push' | 'replace') => void
 ] => {
   const history = useHistory();
   const location = useLocation();
@@ -94,7 +95,7 @@ const useTemplatesUrlState = (): [
   const parsedUrlParams = templatesUrlStateDeserializer(urlParams);
 
   const updateQueryParams = useCallback(
-    (updated: QueryParams, mode: 'push' | 'replace' = 'push') => {
+    (updated: TemplatesFindRequest, mode: 'push' | 'replace' = 'push') => {
       const updatedQuery = templatesUrlStateSerializer(updated);
       const search = stringifyUrlParams(updatedQuery, location.search);
 
@@ -111,8 +112,8 @@ const useTemplatesUrlState = (): [
 
 const getQueryParams = (
   urlState: TemplatesURLQueryParams,
-  localStorageState?: QueryParams
-): QueryParams => {
+  localStorageState?: TemplatesFindRequest
+): TemplatesFindRequest => {
   if (isURLStateEmpty(urlState)) {
     return {
       ...DEFAULT_QUERY_PARAMS,
@@ -131,10 +132,10 @@ const isURLStateEmpty = (urlState: TemplatesURLQueryParams) => {
 };
 
 const useTemplatesLocalStorage = (): [
-  QueryParams | undefined,
-  (item: QueryParams | undefined) => void
+  TemplatesFindRequest | undefined,
+  (item: TemplatesFindRequest | undefined) => void
 ] => {
-  const [state, setState] = useCasesLocalStorage<QueryParams | undefined>(
+  const [state, setState] = useCasesLocalStorage<TemplatesFindRequest | undefined>(
     LOCAL_STORAGE_KEYS.templatesTableState,
     DEFAULT_QUERY_PARAMS
   );

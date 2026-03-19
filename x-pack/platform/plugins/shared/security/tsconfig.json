@@ -8,8 +8,7 @@
     "public/**/*",
     "server/**/*",
     "test/**/*",
-    "__mocks__/**/*",
-    "../../../../../typings/emotion.d.ts"
+    "__mocks__/**/*"
   ],
   "kbn_references": [
     "@kbn/cloud-plugin",
@@ -96,7 +95,9 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/scout",
-    "@kbn/mock-idp-utils"
+    "@kbn/mock-idp-utils",
+    "@kbn/core-user-activity-server",
+    "@kbn/core-user-activity-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

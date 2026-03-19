@@ -14,7 +14,7 @@ import { timeUnitsToSuggest } from '../constants';
 import { getControlSuggestion } from './autocomplete/helpers';
 import type { FunctionParameterType, SupportedDataType } from '../types';
 import { commaCompleteItem } from '../../registry/complete_items';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 
@@ -98,11 +98,7 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
 }
 
 export function getUnitDuration(unit: number = 1) {
-  const filteredTimeLiteral = timeUnitsToSuggest.filter(({ name }) => {
-    const result = /s$/.test(name);
-    return unit > 1 ? result : !result;
-  });
-  return filteredTimeLiteral.map(({ name }) => `${unit} ${name}`);
+  return timeUnitsToSuggest.map(({ name }) => `${unit} ${name}`);
 }
 
 /**

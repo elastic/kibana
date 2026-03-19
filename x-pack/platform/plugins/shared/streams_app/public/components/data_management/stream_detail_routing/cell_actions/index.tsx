@@ -49,12 +49,18 @@ const FilterBtn = ({
   onFilter: RoutingFilterFn;
   mode: BtnMode;
 }) => {
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const isRuleActive = routingSnapshot.matches({
-    ready: { ingestMode: { creatingNewRule: 'changing' } },
-  });
-
-  const currentRule = isRuleActive ? selectCurrentRule(routingSnapshot.context) : {};
+  const isRuleActive = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({
+      ready: { ingestMode: { creatingNewRule: 'changing' } },
+    })
+  );
+  const currentRule = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({
+      ready: { ingestMode: { creatingNewRule: 'changing' } },
+    })
+      ? selectCurrentRule(snapshot.context)
+      : {}
+  );
 
   const iconType = mode === '+' ? 'plusInCircle' : 'minusInCircle';
   const operator = getOperator(context[rowIndex][columnId] as StringOrNumberOrBoolean, mode);

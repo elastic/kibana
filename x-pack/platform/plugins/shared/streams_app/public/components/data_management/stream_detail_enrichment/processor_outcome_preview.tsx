@@ -25,13 +25,7 @@ import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  useGrokExpressions,
-  GrokExpressionsProvider,
-  GrokSampleWithContext,
-  type DraftGrokExpression,
-  type FieldDefinition,
-} from '@kbn/grok-ui';
+import { useGrokExpressions, GrokExpressionsProvider, GrokSampleWithContext } from '@kbn/grok-ui';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
@@ -41,6 +35,12 @@ import { RowSelectionContext } from '../shared/preview_table';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
 import {
+  createOriginalGrokFieldValuesMap,
+  getGrokFieldDisplayValue,
+  grokExpressionOverwritesSourceField,
+  hasPrecedingProcessorTouchedField,
+} from './processor_outcome_preview_helpers';
+import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
@@ -49,6 +49,7 @@ import { selectDraftProcessor } from './state_management/interactive_mode_machin
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
   getAllFieldsInOrder,
+  getOriginalSampleDocument,
   getSourceField,
   getTableColumns,
   previewDocsFilterOptions,
@@ -57,7 +58,6 @@ import {
   selectHasSimulatedRecords,
   selectOriginalPreviewRecords,
   selectPreviewRecords,
-  selectSamplesForSimulation,
 } from './state_management/simulation_state_machine/selectors';
 import { isStepUnderEdit } from './state_management/steps_state_machine';
 import {
@@ -120,29 +120,51 @@ const PreviewDocumentsGroupBy = () => {
     useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
-  const hasMetrics = useSimulatorSelector((state) => !!state.context.simulation?.documents_metrics);
-  const simulationFailedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.failed_rate)
+  const derivedDocumentMetrics = useSimulatorSelector((state) => {
+    const docs = state.context.simulation?.documents;
+    if (!docs) return undefined;
+
+    const selectedConditionId = state.context.selectedConditionId;
+    const filteredDocs = selectedConditionId
+      ? docs.filter((doc) => doc.processed_by?.includes(selectedConditionId) ?? false)
+      : docs;
+
+    const total = filteredDocs.length;
+    if (total === 0) return undefined;
+
+    const counts = filteredDocs.reduce((acc, doc) => {
+      acc[doc.status] = (acc[doc.status] ?? 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      failed_rate: (counts.failed ?? 0) / total,
+      partially_parsed_rate: (counts.partially_parsed ?? 0) / total,
+      skipped_rate: (counts.skipped ?? 0) / total,
+      parsed_rate: (counts.parsed ?? 0) / total,
+      dropped_rate: (counts.dropped ?? 0) / total,
+    };
+  });
+
+  const hasMetrics = Boolean(derivedDocumentMetrics);
+  const simulationFailedRate = formatRateToPercentage(derivedDocumentMetrics?.failed_rate);
+  const simulationSkippedRate = formatRateToPercentage(derivedDocumentMetrics?.skipped_rate);
+  const simulationPartiallyParsedRate = formatRateToPercentage(
+    derivedDocumentMetrics?.partially_parsed_rate
   );
-  const simulationSkippedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.skipped_rate)
-  );
-  const simulationPartiallyParsedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.partially_parsed_rate)
-  );
-  const simulationParsedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
-  );
-  const simulationDroppedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.dropped_rate)
-  );
+  const simulationParsedRate = formatRateToPercentage(derivedDocumentMetrics?.parsed_rate);
+  const simulationDroppedRate = formatRateToPercentage(derivedDocumentMetrics?.dropped_rate);
   const selectedConditionId = useSimulatorSelector((state) => state.context.selectedConditionId);
-  const totalSamples = useSimulatorSelector((state) => state.context.samples.length);
-  const activeSamples = useSimulatorSelector(
-    (state) => selectSamplesForSimulation(state.context).length
-  );
-  const conditionPercentage =
-    totalSamples > 0 ? Math.round((activeSamples / totalSamples) * 100) : 0;
+  const conditionPercentage = useSimulatorSelector((state) => {
+    const conditionId = state.context.selectedConditionId;
+    if (!conditionId) return 0;
+    const metrics = state.context.simulation?.processors_metrics?.[conditionId];
+    if (!metrics) return 0;
+    // Condition match rate is tracked via the simulation-only condition noop processor:
+    // it is skipped when the condition doesn't match.
+    const matchedRate = 1 - (metrics.skipped_rate ?? 0);
+    return Math.round(matchedRate * 100);
+  });
 
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     isToggle: previewDocsFilter === filter,
@@ -288,23 +310,40 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
-    const isInteractiveMode = selectIsInteractiveMode(state);
-    if (!isInteractiveMode || !state.context.interactiveModeRef) return undefined;
-
-    const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
-
-    for (const stepRef of stepRefs) {
-      const snapshot = stepRef.getSnapshot();
-      const step = snapshot.context.step;
-
-      if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
-        return getSourceField(step);
+  const { currentProcessorSourceField, currentStepId, stepIds } = useStreamEnrichmentSelector(
+    (state) => {
+      const isInteractiveMode = selectIsInteractiveMode(state);
+      if (!isInteractiveMode || !state.context.interactiveModeRef) {
+        return { currentProcessorSourceField: undefined, currentStepId: undefined, stepIds: [] };
       }
-    }
 
-    return undefined;
-  });
+      const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
+      const allStepIds = stepRefs.map((ref) => ref.id);
+
+      for (const stepRef of stepRefs) {
+        const snapshot = stepRef.getSnapshot();
+        const step = snapshot.context.step;
+
+        if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
+          return {
+            currentProcessorSourceField: getSourceField(step),
+            currentStepId: stepRef.id,
+            stepIds: allStepIds,
+          };
+        }
+      }
+
+      return {
+        currentProcessorSourceField: undefined,
+        currentStepId: undefined,
+        stepIds: allStepIds,
+      };
+    }
+  );
+
+  const processorsMetrics = useSimulatorSelector(
+    (snapshot) => snapshot.context.simulation?.processors_metrics
+  );
 
   const docViewsRegistry = useDocViewerSetup(true);
 
@@ -338,26 +377,60 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       : [];
 
   // Convert patterns to DraftGrokExpression instances for field analysis
-  // Kind of annoying we have to do this here when the Provider will also do this, but
-  // this will change when we allow grok expressions to overwrite the configured field in the UI.
   const grokExpressions = useGrokExpressions(grokPatterns);
 
-  // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change)
-  // we defer to the standard preview table showing all columns
-  const grokMode =
+  // Determine if the grok processor is active (has a from field)
+  const isGrokProcessorActive =
     draftProcessor?.processor &&
     'action' in draftProcessor.processor &&
     draftProcessor.processor.action === 'grok' &&
-    !isEmpty(draftProcessor.processor.from) &&
-    !grokExpressions.some((grokExpression: DraftGrokExpression) => {
-      const fieldName = (draftProcessor.processor as GrokProcessor).from;
-      return Array.from(grokExpression.getFields().values()).some(
-        (field: FieldDefinition) => field.name === fieldName
-      );
-    });
+    !isEmpty(draftProcessor.processor.from);
 
-  const grokField = grokMode ? (draftProcessor.processor as GrokProcessor).from : undefined;
-  const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
+  // Get the source field for the grok processor
+  const grokSourceField = isGrokProcessorActive
+    ? (draftProcessor.processor as GrokProcessor).from
+    : undefined;
+  const validGrokSourceField =
+    grokSourceField && allColumns.includes(grokSourceField) ? grokSourceField : undefined;
+
+  // Check if the grok expression overwrites the source field (non-additive pattern)
+  const grokOverwritesSourceField = useMemo(() => {
+    if (!validGrokSourceField || grokExpressions.length === 0) return false;
+    return grokExpressionOverwritesSourceField(grokExpressions, validGrokSourceField);
+  }, [grokExpressions, validGrokSourceField]);
+
+  // Check if any preceding processor has touched the grok source field
+  const precedingProcessorTouchedGrokField = useMemo(() => {
+    if (!validGrokSourceField) return false;
+    return hasPrecedingProcessorTouchedField(
+      stepIds,
+      currentStepId,
+      processorsMetrics,
+      validGrokSourceField
+    );
+  }, [stepIds, currentStepId, processorsMetrics, validGrokSourceField]);
+
+  /**
+   * Grok mode enables the special highlighting preview for grok patterns.
+   *
+   * We enable grok mode when:
+   * - We have a grok processor with a valid source field
+   * - AND one of:
+   *   - The grok pattern is additive (doesn't overwrite the source field), OR
+   *   - The grok pattern overwrites the source field BUT no preceding processor has touched it
+   *     (in this case, we can safely use the original pre-transformation value for highlighting)
+   *
+   * We DISABLE grok mode when:
+   * - The grok pattern overwrites the source field AND a preceding processor touched the field
+   *   (in this case, we can't show correct highlighting - the original value doesn't reflect
+   *   preceding transformations, and the current value has been overwritten by grok)
+   */
+  const grokMode =
+    isGrokProcessorActive &&
+    validGrokSourceField !== undefined &&
+    !(grokOverwritesSourceField && precedingProcessorTouchedGrokField);
+
+  const validGrokField = grokMode ? validGrokSourceField : undefined;
 
   const validCurrentProcessorSourceField =
     currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
@@ -408,6 +481,22 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     () => (validGrokField ? [validGrokField] : undefined),
     [validGrokField]
   );
+
+  /**
+   * Map from preview document to the original (pre-transformation) value of the grok field.
+   * This is needed when the grok pattern extracts into the same field it reads from (e.g., message → message).
+   * We use a WeakMap keyed by the document object reference for O(1) lookup in renderCellValue.
+   *
+   * We only create this map when grok mode is active AND the grok expression overwrites the source field.
+   * When the grok expression is additive (doesn't overwrite the source field), the current document value
+   * is correct for highlighting and we don't need the original values.
+   */
+  const originalGrokFieldValues = useMemo(() => {
+    if (!grokMode || !validGrokField || !originalSamples) return undefined;
+    if (!grokOverwritesSourceField) return undefined;
+
+    return createOriginalGrokFieldValuesMap(previewDocuments, originalSamples, validGrokField);
+  }, [grokMode, validGrokField, originalSamples, previewDocuments, grokOverwritesSourceField]);
 
   const previewColumns = grokColumns ?? availableColumns;
 
@@ -481,17 +570,24 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const renderCellValue = useMemo(
     () =>
-      grokMode
+      grokMode && validGrokField
         ? (document: SampleDocument, columnId: string) => {
-            const value = document[columnId];
-            if (typeof value === 'string' && columnId === validGrokField) {
+            // Use the original (pre-transformation) value for the grok field.
+            // This ensures highlighting works even when grok extracts into the same field it reads from.
+            const value = getGrokFieldDisplayValue(
+              document,
+              columnId,
+              validGrokField,
+              originalGrokFieldValues
+            );
+
+            if (typeof value === 'string') {
               return <GrokSampleWithContext sample={value} />;
-            } else {
-              return <>&nbsp;</>;
             }
+            return <>&nbsp;</>;
           }
         : undefined,
-    [grokMode, validGrokField]
+    [grokMode, originalGrokFieldValues, validGrokField]
   );
 
   const hits = useMemo(() => {
@@ -503,8 +599,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const docViewerContext = useMemo(
     () => ({
-      originalSample:
-        originalSamples && currentDoc ? originalSamples[currentDoc.index].document : undefined,
+      originalSample: getOriginalSampleDocument(originalSamples, currentDoc?.index),
     }),
     [currentDoc, originalSamples]
   );

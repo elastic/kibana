@@ -134,27 +134,39 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
       };
 
       const invalidateApiKeys = async (apiKeys: ApiKey[]) => {
-        // Get admin credentials in order to invalidate the API key
-        for (const apiKey of apiKeys) {
-          const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
+        if (apiKeys.length === 0) {
+          return;
+        }
 
-          const response = await apiClient.post('internal/security/api_key/invalidate', {
-            headers: {
-              'kbn-xsrf': 'some-xsrf-token',
-              'x-elastic-internal-origin': 'kibana',
-              ...adminCookieHeader,
-            },
-            body: {
-              apiKeys: [{ id: apiKey.id, name: apiKey.name }],
-              isAdmin: true,
-            },
-            responseType: 'json',
-          });
+        // Get admin credentials once for all invalidations
+        const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
 
-          if (response.statusCode !== 200) {
-            log.info(`Failed to invalidate API key: ${apiKey.name}`);
-          } else {
-            log.info(`Invalidated API key: ${apiKey.name}`);
+        // Batch invalidate all API keys in a single request (API supports up to 1000 keys)
+        const response = await apiClient.post('internal/security/api_key/invalidate', {
+          headers: {
+            'kbn-xsrf': 'some-xsrf-token',
+            'x-elastic-internal-origin': 'kibana',
+            ...adminCookieHeader,
+          },
+          body: {
+            apiKeys: apiKeys.map((apiKey) => ({ id: apiKey.id, name: apiKey.name })),
+            isAdmin: true,
+          },
+          responseType: 'json',
+        });
+
+        if (response.statusCode !== 200) {
+          log.info(`Failed to invalidate ${apiKeys.length} API keys`);
+        } else {
+          const invalidatedCount = response.body?.itemsInvalidated?.length || 0;
+          const errorCount = response.body?.errors?.length || 0;
+          log.info(
+            `Invalidated ${invalidatedCount} API keys${
+              errorCount > 0 ? ` (${errorCount} errors)` : ''
+            }`
+          );
+          if (errorCount > 0) {
+            log.debug(`API key invalidation errors: ${JSON.stringify(response.body.errors)}`);
           }
         }
       };

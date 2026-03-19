@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-histogram'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/unified-histogram'
+  title: '@kbn/unified-histogram'
   description: Moon project for @kbn/unified-histogram
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-unified-histogram
+  sourceRoot: src/platform/packages/shared/kbn-unified-histogram
 dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/expressions-plugin'
@@ -51,6 +50,7 @@ dependsOn:
   - '@kbn/chart-expressions-common'
   - '@kbn/lens-common'
   - '@kbn/control-group-renderer'
+  - '@kbn/controls-schemas'
 tags:
   - shared-browser
   - package
@@ -65,14 +65,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

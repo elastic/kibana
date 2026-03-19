@@ -111,6 +111,7 @@
       "_cat/transforms/{transform_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-transforms",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cat-transforms",
     "availability": {
       "stack": true,
       "serverless": true

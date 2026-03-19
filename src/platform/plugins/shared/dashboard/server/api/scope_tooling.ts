@@ -9,16 +9,13 @@
 
 import { isDashboardSection } from '../../common';
 import { embeddableService } from '../kibana_services';
-import type { DashboardPanel, DashboardState } from './types';
+import type { DashboardPanel, DashboardState, DashboardPinnedPanel } from './types';
 
-export function stripUnmappedKeys(dashboardState: DashboardState) {
+export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
   const warnings: string[] = [];
   const { pinned_panels, panels, ...rest } = dashboardState;
-  if (pinned_panels) {
-    warnings.push(`Dropped unmapped key 'pinned_panels' from dashboard`);
-  }
 
-  function isMappedPanelType(panel: DashboardPanel) {
+  function isMappedPanelType(panel: DashboardPanel | DashboardPinnedPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
     if (transforms?.throwOnUnmappedPanel) {
       try {
@@ -69,42 +66,14 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
       };
     });
 
+  const mappedPinnedPanels = (pinned_panels ?? []).filter(isMappedPanelType);
+
   return {
     data: {
       ...rest,
       panels: mappedPanels,
-    },
+      ...(pinned_panels && { pinned_panels: mappedPinnedPanels }),
+    } as DashboardState,
     warnings,
   };
-}
-
-export function throwOnUnmappedKeys(dashboardState: DashboardState) {
-  if (dashboardState.pinned_panels) {
-    throw new Error('pinned_panels key is not supported by dashboard REST endpoints.');
-  }
-
-  function throwOnUnmappedPanelKeys(panel: DashboardPanel) {
-    const transforms = embeddableService?.getTransforms(panel.type);
-    const panelSchema = transforms?.schema;
-
-    if (!panelSchema) {
-      throw new Error(
-        `Panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
-      );
-    }
-
-    if ((panel.config as { enhancements?: unknown }).enhancements) {
-      throw new Error(
-        'enhancements panel config key is not supported by dashboard REST endpoints.'
-      );
-    }
-  }
-
-  dashboardState.panels?.forEach((panel) => {
-    if (isDashboardSection(panel)) {
-      panel.panels.forEach(throwOnUnmappedPanelKeys);
-    } else {
-      throwOnUnmappedPanelKeys(panel);
-    }
-  });
 }

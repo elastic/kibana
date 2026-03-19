@@ -91,7 +91,7 @@ export function BreakdownChart({
       ? getResponseTimeTickFormatter(getDurationFormatter(maxY))
       : asPercentBound;
 
-  const timeZone = getTimeZone(core.uiSettings);
+  const timeZone = getTimeZone(core?.uiSettings);
 
   return (
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus} id={id}>

@@ -26,7 +26,9 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -41,7 +43,7 @@ import type { UrlTracker } from './build_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { defaultCustomizationContext } from './customizations/defaults';
 import {
-  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,
+  ACTION_ADD_DISCOVER_SESSION_PANEL,
   ACTION_VIEW_SAVED_SEARCH,
   LEGACY_LOG_STREAM_EMBEDDABLE,
 } from './embeddable/constants';
@@ -57,7 +59,6 @@ import type {
   DiscoverStart,
   DiscoverStartPlugins,
 } from './types';
-import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
 import type { DiscoverEBTContextProps, DiscoverEBTManager } from './ebt_manager';
 import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_manager_registrations';
 import type { ProfileProviderSharedServices, ProfilesManager } from './context_awareness';
@@ -240,16 +241,29 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+    plugins.cps?.cpsManager?.registerAppAccess('discover', () => ProjectRoutingAccess.EDITABLE);
+
     plugins.uiActions.addTriggerActionAsync(
-      'CONTEXT_MENU_TRIGGER',
+      ON_OPEN_PANEL_MENU,
       ACTION_VIEW_SAVED_SEARCH,
       async () => {
         const { ViewSavedSearchAction } = await getEmbeddableServices();
         return new ViewSavedSearchAction(core.application, this.locator!);
       }
     );
-    plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
-    plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
+
+    plugins.uiActions.addTriggerActionAsync(
+      ADD_PANEL_TRIGGER,
+      ACTION_ADD_DISCOVER_SESSION_PANEL,
+      async () => {
+        const { AddDiscoverSessionPanelAction } = await getEmbeddableServices();
+        return new AddDiscoverSessionPanelAction(
+          core.application,
+          this.locator!,
+          plugins.embeddable
+        );
+      }
+    );
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 

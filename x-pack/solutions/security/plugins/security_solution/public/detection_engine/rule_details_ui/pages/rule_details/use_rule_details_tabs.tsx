@@ -16,6 +16,7 @@ import type { NavTab } from '../../../../common/components/navigation/types';
 import { useRuleExecutionSettings } from '../../../rule_monitoring';
 
 export enum RuleDetailTabs {
+  overview = 'overview',
   alerts = 'alerts',
   exceptions = 'rule_exceptions',
   endpointExceptions = 'endpoint_exceptions',
@@ -24,6 +25,7 @@ export enum RuleDetailTabs {
 }
 
 export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
+  [RuleDetailTabs.overview]: i18n.OVERVIEW_TAB,
   [RuleDetailTabs.alerts]: i18n.ALERTS_TAB,
   [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
   [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
@@ -46,6 +48,12 @@ export const useRuleDetailsTabs = ({
 }: UseRuleDetailsTabsProps) => {
   const ruleDetailTabs = useMemo(
     (): Record<RuleDetailTabs, NavTab> => ({
+      [RuleDetailTabs.overview]: {
+        id: RuleDetailTabs.overview,
+        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.overview],
+        disabled: rule == null,
+        href: `/rules/id/${ruleId}/${RuleDetailTabs.overview}`,
+      },
       [RuleDetailTabs.alerts]: {
         id: RuleDetailTabs.alerts,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.alerts],

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLMessage, ESQLSource } from '../../../../types';
+import type { ESQLMessage, ESQLSource } from '@elastic/esql/types';
 import type { ICommandContext } from '../../../registry/types';
 import { sourceExists } from '../sources';
 import { errors } from '../errors';
@@ -18,7 +18,10 @@ function hasWildcard(name: string) {
 
 export function validateSources(sources: ESQLSource[], context?: ICommandContext) {
   const messages: ESQLMessage[] = [];
-  const sourcesMap = new Set<string>(context?.sources?.map((source) => source.name) || []);
+  const sourcesMap = new Set<string>([
+    ...(context?.sources?.map((source) => source.name) ?? []),
+    ...(context?.views?.map((view) => view.name) ?? []),
+  ]);
 
   for (const source of sources) {
     if (source.incomplete) {

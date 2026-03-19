@@ -48,10 +48,10 @@
         "label": "ApiKeyForm",
         "description": [],
         "signature": [
-          "({ hasTitle }: ApiKeyFormProps) => React.JSX.Element"
+          "({ hasTitle, minWidth }: ApiKeyFormProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/components/api_key_form.tsx",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -61,13 +61,13 @@
             "id": "def-public.ApiKeyForm.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ hasTitle = true }",
+            "label": "{ hasTitle = true, minWidth }",
             "description": [],
             "signature": [
               "ApiKeyFormProps"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/components/api_key_form.tsx",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 55,
             "deprecated": false,
             "trackAdoption": false,

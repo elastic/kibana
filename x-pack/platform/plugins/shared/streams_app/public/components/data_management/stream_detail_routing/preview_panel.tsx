@@ -12,6 +12,7 @@ import {
   EuiIcon,
   EuiLoadingElastic,
   EuiProgress,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -34,15 +35,40 @@ import {
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
+import { useQueryStreamHint } from '../../../hooks/use_query_stream_hint';
+import { QueryStreamHintCallout } from '../../query_streams/query_stream_hint_callout';
 import { RowSelectionContext } from '../shared/preview_table';
 import { useQueryStreamCreation } from './query_stream_creation_context';
 
 export function PreviewPanel() {
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
   const queryStreamCreation = useQueryStreamCreation();
-  const { definition } = routingSnapshot.context;
-  const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
+
+  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const canCreateRoutingRules = useStreamsRoutingSelector((snapshot) =>
+    snapshot.can({ type: 'routingRule.create' })
+  );
+  const isQueryModeCreating = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { queryMode: 'creating' } })
+  );
+  const isQueryModeIdle = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { queryMode: 'idle' } })
+  );
+  const isIngestModeIdle = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { ingestMode: 'idle' } })
+  );
+  const isEditingOrReordering = useStreamsRoutingSelector(
+    (snapshot) =>
+      snapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
+      snapshot.matches({ ready: { ingestMode: 'reorderingRules' } })
+  );
+  const isCreatingOrReviewingOrEditingSuggestion = useStreamsRoutingSelector(
+    (snapshot) =>
+      snapshot.matches({ ready: { ingestMode: 'creatingNewRule' } }) ||
+      snapshot.matches({ ready: { ingestMode: 'reviewSuggestedRule' } }) ||
+      snapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } })
+  );
+
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
 
   const documents = selectPreviewDocuments(samplesSnapshot.context);
@@ -51,7 +77,7 @@ export function PreviewPanel() {
 
   let content;
 
-  if (routingSnapshot.matches({ ready: { queryMode: 'creating' } })) {
+  if (isQueryModeCreating) {
     content = (
       <QueryStreamPreviewPanel
         streamName={definition.stream.name}
@@ -60,20 +86,13 @@ export function PreviewPanel() {
         isLoading={queryStreamCreation.isLoading}
       />
     );
-  } else if (routingSnapshot.matches({ ready: { queryMode: 'idle' } })) {
+  } else if (isQueryModeIdle) {
     content = <QueryModeIdlePanel />;
-  } else if (routingSnapshot.matches({ ready: { ingestMode: 'idle' } })) {
+  } else if (isIngestModeIdle) {
     content = <SamplePreviewPanel enableActions={canCreateRoutingRules && !maxNestingLevel} />;
-  } else if (
-    routingSnapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
-    routingSnapshot.matches({ ready: { ingestMode: 'reorderingRules' } })
-  ) {
+  } else if (isEditingOrReordering) {
     content = <EditingPanel />;
-  } else if (
-    routingSnapshot.matches({ ready: { ingestMode: 'creatingNewRule' } }) ||
-    routingSnapshot.matches({ ready: { ingestMode: 'reviewSuggestedRule' } }) ||
-    routingSnapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } })
-  ) {
+  } else if (isCreatingOrReviewingOrEditingSuggestion) {
     content = <SamplePreviewPanel enableActions />;
   }
 
@@ -343,6 +362,7 @@ const QueryStreamPreviewPanel = ({
   const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
   const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
   const hasDocuments = !isEmpty(documents);
+  const queryStreamHint = useQueryStreamHint(documentsError);
 
   const [sorting, setSorting] = useState<{
     fieldName?: string;
@@ -390,7 +410,17 @@ const QueryStreamPreviewPanel = ({
             })}
           </h2>
         }
-        body={documentsError.message}
+        body={
+          <>
+            <p>{documentsError.message}</p>
+            {queryStreamHint && (
+              <>
+                <EuiSpacer size="s" />
+                <QueryStreamHintCallout hint={queryStreamHint} />
+              </>
+            )}
+          </>
+        }
       />
     );
   } else if (!hasDocuments) {

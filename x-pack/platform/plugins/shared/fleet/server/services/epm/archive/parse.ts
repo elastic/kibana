@@ -119,6 +119,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'assets',
   'data_streams',
   'license',
+  'requires',
   'type',
   'categories',
   'conditions',
@@ -133,6 +134,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'format_version',
   'discovery',
   'var_groups',
+  'deprecated',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);

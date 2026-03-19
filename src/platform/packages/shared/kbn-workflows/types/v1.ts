@@ -115,6 +115,8 @@ export interface EsWorkflowExecution {
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
   /** IDs of all step executions, enables O(1) mget lookup instead of search */
   stepExecutionIds?: string[];
+  /** Caller-supplied execution metadata, separate from workflow inputs */
+  metadata?: Record<string, unknown>;
 }
 
 export interface ProviderInput {
@@ -140,6 +142,8 @@ export interface EsWorkflowStepExecution {
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;
+  /** Whether this step execution belongs to a test run of the workflow. */
+  isTestRun?: boolean;
   startedAt: string;
   finishedAt?: string;
   executionTimeMs?: number;
@@ -280,6 +284,7 @@ export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
 export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
+  workflowId: z.string().optional(), // Optional to allow for test step runs for unsaved workflows
   stepId: z.string(),
   contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
@@ -393,6 +398,11 @@ export interface ConnectorInstance {
   name: string;
   isPreconfigured: boolean;
   isDeprecated: boolean;
+  config?: ConnectorInstanceConfig;
+}
+
+export interface ConnectorInstanceConfig {
+  taskType?: string;
 }
 
 export interface ConnectorTypeInfo {
@@ -410,17 +420,20 @@ export type CompletionFn = () => Promise<
   Array<{ label: string; value: string; detail?: string; documentation?: string }>
 >;
 
+export type StepStabilityLevel = 'stable' | 'beta' | 'tech_preview';
+
 export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
-  connectorIdRequired?: boolean;
-  connectorId?: z.ZodType;
+  hasConnectorId?: 'required' | 'optional' | false;
   outputSchema: z.ZodType;
   configSchema?: z.ZodObject;
   summary: string | null;
   description: string | null;
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
+  /** API stability level derived from the OpenAPI `x-state` field */
+  stability?: StepStabilityLevel;
   examples?: ConnectorExamples;
   // Rich property handlers for completions, validation and decorations
   editorHandlers?: {
@@ -476,6 +489,13 @@ export interface StepPropertyHandler<T = unknown> {
    * Provides a unified interface for search, resolution, and decoration of entity references.
    */
   selection?: PropertySelectionHandler<Exclude<T, undefined>>;
+  /**
+   * Connector ID selection configuration for the property.
+   * Used to resolve connector IDs for custom steps.
+   *
+   * **Note**: This handler is currently only supported for the `connector-id` property in the config schema.
+   */
+  connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
 export interface PropertySelectionHandler<T = unknown> {
@@ -527,7 +547,7 @@ export interface SelectionDetails {
   }>;
 }
 
-export interface PropertyValidationContext {
+export interface SelectionContext {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
   /** The property path ("config" or "input") */
@@ -536,7 +556,18 @@ export interface PropertyValidationContext {
   propertyKey: string;
 }
 
-export type SelectionContext = PropertyValidationContext;
+export interface ConnectorIdSelectionHandler {
+  /**
+   * The action type IDs to search for.
+   */
+  connectorTypes: string[];
+  /**
+   * Whether to disable creation of a new connector from the connector ID selection.
+   * If false (default), creation from the connector ID selection will be disabled.
+   * If true, creation from the connector ID selection will be enabled for the first type in the `connectorTypes` list.
+   */
+  enableCreation?: boolean;
+}
 
 export interface ConnectorExamples {
   params?: Record<string, string>;

@@ -60,8 +60,9 @@ import {
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
-import { stepCreateAlertingRules } from './steps/step_create_alerting_rules';
+import { stepCreateAlertingAssets } from './steps/step_create_alerting_assets';
 import { cleanupEsqlViewsStep, stepInstallEsqlViews } from './steps/step_install_esql_views';
+import { stepResolveDependencies } from './steps/step_resolve_dependencies';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
@@ -86,14 +87,21 @@ export interface InstallContext extends StateContext<StateNames> {
   // output values
   esReferences?: EsAssetReference[];
   kibanaAssetPromise?: Promise<KibanaAssetReference[]>;
+  isDependency?: boolean;
+  skipDependencyCheck?: boolean;
 }
 /**
  * This data structure defines the sequence of the states and the transitions
  */
 export const regularStatesDefinition: StateMachineStates<StateNames> = {
   create_restart_installation: {
-    nextState: INSTALL_STATES.INSTALL_PRECHECK,
+    nextState: INSTALL_STATES.RESOLVE_DEPENDENCIES,
     onTransition: stepCreateRestartInstallation,
+    onPostTransition: updateLatestExecutedState,
+  },
+  resolve_dependencies: {
+    onTransition: stepResolveDependencies,
+    nextState: INSTALL_STATES.INSTALL_PRECHECK,
     onPostTransition: updateLatestExecutedState,
   },
   install_precheck: {
@@ -167,11 +175,11 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   resolve_kibana_promise: {
     onTransition: stepResolveKibanaPromise,
-    nextState: INSTALL_STATES.CREATE_ALERTING_RULES,
+    nextState: INSTALL_STATES.CREATE_ALERTING_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },
-  create_alerting_rules: {
-    onTransition: stepCreateAlertingRules,
+  create_alerting_assets: {
+    onTransition: stepCreateAlertingAssets,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
   },
@@ -245,6 +253,7 @@ export async function _stateMachineInstallPackage(
     // we need to clean up latest_executed_state or it won't be refreshed
     await cleanupLatestExecutedState(context);
   }
+
   const installStates: StateMachineDefinition<StateNames> = {
     // inject initial state inside context
     context: { ...context, initialState },

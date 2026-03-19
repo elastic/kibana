@@ -84,7 +84,7 @@ export function TracesInDiscoverCallout() {
 
   const discoverHref = useMemo(() => {
     if (!tracesIndex) return undefined;
-    return share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
+    return share?.url?.locators?.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
       timeRange: {
         from: rangeFrom,
         to: rangeTo,
@@ -93,7 +93,7 @@ export function TracesInDiscoverCallout() {
         esql: getEsqlQuery(environment, tracesIndex),
       },
     });
-  }, [share.url.locators, tracesIndex, environment, rangeFrom, rangeTo]);
+  }, [share?.url?.locators, tracesIndex, environment, rangeFrom, rangeTo]);
 
   if (dismissedCallout || !discoverHref || currentSolutionNavId !== 'oblt') {
     return null;

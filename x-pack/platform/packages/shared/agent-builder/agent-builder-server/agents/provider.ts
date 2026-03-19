@@ -24,6 +24,7 @@ import type {
   ScopedRunner,
   ToolProvider,
   WritableToolResultStore,
+  WritableSkillsStore,
   AttachmentsService,
   PromptManager,
   ConversationStateManager,
@@ -32,6 +33,7 @@ import type {
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
+import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 
 export type AgentHandlerFn = (
@@ -117,6 +119,11 @@ export interface AgentHandlerContext {
    */
   resultStore: WritableToolResultStore;
   /**
+   * Skills store to populate with filtered skills during execution.
+   * Backs the skills volume in the virtual filesystem.
+   */
+  skillsStore: WritableSkillsStore;
+  /**
    * Attachment state manager to manage conversation attachments during execution.
    */
   attachmentStateManager: AttachmentStateManager;
@@ -136,6 +143,10 @@ export interface AgentHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+  /**
+   * Hooks service for agent lifecycle interception.
+   */
+  hooks: AgentBuilderHooks;
   /**
    * File store to access data from the agent's virtual filesystem
    */

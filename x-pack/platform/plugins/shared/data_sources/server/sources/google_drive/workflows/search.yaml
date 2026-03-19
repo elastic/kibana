@@ -24,7 +24,7 @@ inputs:
 steps:
   - name: search_files
     type: google_drive.searchFiles
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= google_drive-stack-connector-id %>
     with:
       query: "${{inputs.query}}"
       pageSize: ${{inputs.pageSize}}

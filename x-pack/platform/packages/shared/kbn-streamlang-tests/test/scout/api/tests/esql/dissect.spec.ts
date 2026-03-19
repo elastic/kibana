@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { DissectProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { expectDefined } from '../../../utils';
@@ -14,7 +15,7 @@ import { streamlangApiTest as apiTest } from '../..';
 apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
   apiTest(
     'should correctly parse a log line with the dissect processor',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect';
       const streamlangDSL: StreamlangDSL = {
@@ -51,7 +52,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
 
   apiTest(
     'should ignore dissected fields when ignore_missing is true',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-ignore-missing';
       const streamlangDSL: StreamlangDSL = {
@@ -105,7 +106,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
 
   apiTest(
     'should filter the document out when ignore_missing is false',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-fail-missing';
       const streamlangDSL: StreamlangDSL = {
@@ -132,7 +133,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
 
   apiTest(
     'should use append_separator',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-append-separator';
       const streamlangDSL: StreamlangDSL = {
@@ -159,7 +160,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
 
   apiTest(
     'should not dissect when where is false',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-where-false';
       const streamlangDSL: StreamlangDSL = {
@@ -212,7 +213,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
   // `verification_exception: Found 1 problem line 1:1: Column [log.severity] has conflicting data types: [LONG] and [KEYWORD]`
   apiTest(
     'should handle field type mismatches gracefully',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-field-type-mismatch';
       const streamlangDSL: StreamlangDSL = {
@@ -314,7 +315,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
   // This test is flaky on Serverless, it's skipped there for now and needs to be investigated.
   apiTest(
     'should dissect only when both ignore_missing and where conditions match',
-    { tag: ['@ess'] },
+    { tag: tags.stateful.classic },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-ignore-missing-where';
       const streamlangDSL: StreamlangDSL = {
@@ -400,7 +401,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
 
   apiTest(
     'should handle an exhaustive dissect pattern with modifiers and mixed documents',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-exhaustive';
       const pattern =
@@ -508,7 +509,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
 
   apiTest(
     'should not be able to retain ingested precision if field is mapped as long',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-dissect-precision';
       const streamlangDSL: StreamlangDSL = {
@@ -547,7 +548,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
 
   apiTest(
     'should reject Mustache template syntax {{ and {{{',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [

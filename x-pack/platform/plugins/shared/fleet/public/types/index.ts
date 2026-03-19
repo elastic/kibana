@@ -130,6 +130,7 @@ export type {
   PackageSpecCategory,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  ReviewUpgradeResponse,
   GetDownloadSourceResponse,
   PostDownloadSourceRequest,
   PutDownloadSourceRequest,
@@ -161,6 +162,7 @@ export type {
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
   CloudConnectorSecretReference,
+  ComponentHealth,
 } from '../../common/types';
 export {
   entries,

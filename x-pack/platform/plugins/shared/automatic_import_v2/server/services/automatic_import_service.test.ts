@@ -166,13 +166,59 @@ describe('AutomaticImportSetupService', () => {
       const [updateData, expectedVersion] = mockUpdateIntegration.mock.calls[0];
       expect(expectedVersion).toBe('1.2.3');
       expect(updateData.integration_id).toBe('integration-123');
-      expect(updateData.status).toBe('approved');
       expect(updateData.last_updated_by).toBe('approver-user');
       expect(updateData.last_updated_at).toEqual(expect.any(String));
+      expect(updateData.status).toBe('approved');
       expect(updateData.metadata).toEqual(expect.objectContaining({ version: '0.0.1' }));
 
-      // Ensure we don't pass a versionUpdate argument explicitly.
+      expect(updateData.changelog).toEqual([
+        {
+          version: '1.2.3',
+          changes: [{ description: 'Initial release of t', type: 'enhancement', link: '' }],
+        },
+      ]);
+
       expect(mockUpdateIntegration.mock.calls[0]).toHaveLength(2);
+    });
+
+    it('should prepend changelog entry on subsequent approvals', async () => {
+      const existingChangelog = [
+        {
+          version: '1.0.0',
+          changes: [{ description: 'Initial release of t', type: 'enhancement', link: '' }],
+        },
+      ];
+      const mockGetIntegration = jest.fn().mockResolvedValue({
+        integration_id: 'integration-123',
+        created_by: 'creator',
+        status: 'approved',
+        metadata: { title: 't', description: 'd', version: '1.0.0' },
+        changelog: existingChangelog,
+      });
+      const mockGetAllDataStreams = jest
+        .fn()
+        .mockResolvedValue([{ job_info: { status: 'completed' } }]);
+      const mockUpdateIntegration = jest.fn().mockResolvedValue({});
+
+      (service as any).savedObjectService = {
+        getIntegration: mockGetIntegration,
+        getAllDataStreams: mockGetAllDataStreams,
+        updateIntegration: mockUpdateIntegration,
+      };
+
+      await service.approveIntegration({
+        integrationId: 'integration-123',
+        authenticatedUser: { username: 'approver-user' } as any,
+        version: '1.1.0',
+      });
+
+      const [updateData] = mockUpdateIntegration.mock.calls[0];
+      expect(updateData.changelog).toHaveLength(2);
+      expect(updateData.changelog[0]).toEqual({
+        version: '1.1.0',
+        changes: [{ description: 'Updated t', type: 'enhancement', link: '' }],
+      });
+      expect(updateData.changelog[1]).toEqual(existingChangelog[0]);
     });
 
     it('should not approve integration with no data streams', async () => {
@@ -432,6 +478,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 5 });
       const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
       const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -441,10 +488,16 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
 
+      expect(mockUpdateStatus).toHaveBeenCalledWith(
+        'data-stream-456',
+        'integration-123',
+        'deleting'
+      );
       expect(mockRemoveTask).toHaveBeenCalledWith({
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
@@ -465,6 +518,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
       const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
       const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
       const options = { force: true };
 
       (service as any).samplesIndexService = {
@@ -475,6 +529,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient, options);
@@ -498,6 +553,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
       const mockRemoveTask = jest.fn().mockRejectedValue(new Error('Task removal failed'));
       const mockDeleteSavedObject = jest.fn();
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -507,6 +563,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await expect(
@@ -521,6 +578,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockRejectedValue(new Error('Sample deletion failed'));
       const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
       const mockDeleteSavedObject = jest.fn();
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -530,6 +588,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await expect(
@@ -545,6 +604,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSavedObject = jest
         .fn()
         .mockRejectedValue(new Error('Saved object deletion failed'));
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -554,6 +614,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await expect(
@@ -573,6 +634,9 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSavedObject = jest.fn().mockImplementation(async () => {
         executionOrder.push('deleteSavedObject');
       });
+      const mockUpdateStatus = jest.fn().mockImplementation(async () => {
+        executionOrder.push('updateStatus');
+      });
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -582,11 +646,17 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
 
-      expect(executionOrder).toEqual(['removeTask', 'deleteSamples', 'deleteSavedObject']);
+      expect(executionOrder).toEqual([
+        'updateStatus',
+        'removeTask',
+        'deleteSamples',
+        'deleteSavedObject',
+      ]);
     });
   });
 
@@ -788,6 +858,12 @@ describe('AutomaticImportSetupService', () => {
         inference: {
           getChatModel: jest.fn().mockResolvedValue({}),
         },
+        fieldsMetadata: {
+          getClient: jest.fn().mockResolvedValue({
+            find: jest.fn().mockResolvedValue({ toPlain: () => ({}) }),
+            getByName: jest.fn(),
+          }),
+        },
       };
 
       const coreSetupMock = {
@@ -835,12 +911,13 @@ describe('AutomaticImportSetupService', () => {
         dataStreamId: 'test-datastream',
         ingestPipeline: expect.any(Object),
         pipelineDocs: expect.any(Array),
+        fieldMapping: expect.any(Array),
         status: 'completed',
       });
     });
 
-    it('should handle errors during task execution and not update SavedObject', async () => {
-      const mockUpdateDataStream = jest.fn();
+    it('should mark data stream as failed when task execution errors', async () => {
+      const mockUpdateDataStream = jest.fn().mockResolvedValue(undefined);
       const mockGetDataStream = jest.fn().mockResolvedValue({
         attributes: {
           data_stream_id: 'test-datastream',
@@ -871,7 +948,6 @@ describe('AutomaticImportSetupService', () => {
         state: { task_status: 'pending' },
       };
 
-      // Mock core setup and plugins to simulate error
       const mockCoreStart = {
         elasticsearch: {
           client: {
@@ -885,6 +961,12 @@ describe('AutomaticImportSetupService', () => {
       const mockPluginsStart = {
         inference: {
           getChatModel: jest.fn().mockRejectedValue(new Error('Agent invocation failed')),
+        },
+        fieldsMetadata: {
+          getClient: jest.fn().mockResolvedValue({
+            find: jest.fn().mockResolvedValue({ toPlain: () => ({}) }),
+            getByName: jest.fn(),
+          }),
         },
       };
 
@@ -916,10 +998,100 @@ describe('AutomaticImportSetupService', () => {
 
       const result = (await taskRunner.run()) as any;
 
-      // Verify that updateDataStreamSavedObjectAttributes was NOT called on error
-      expect(mockUpdateDataStream).not.toHaveBeenCalled();
+      expect(mockUpdateDataStream).toHaveBeenCalledTimes(1);
+      expect(mockUpdateDataStream).toHaveBeenCalledWith({
+        integrationId: 'test-integration',
+        dataStreamId: 'test-datastream',
+        status: 'failed',
+      });
       expect(result.state.task_status).toBe('failed');
       expect(result.error).toBeDefined();
+    });
+
+    it('should throw unrecoverable error for non-recoverable failures (e.g. connector not found)', async () => {
+      const mockUpdateDataStream = jest.fn().mockResolvedValue(undefined);
+
+      const mockSavedObjectService = {
+        updateDataStreamSavedObjectAttributes: mockUpdateDataStream,
+      };
+
+      const taskManagerService = (service as any).taskManagerService;
+      (taskManagerService as any).automaticImportSavedObjectService = mockSavedObjectService;
+
+      const registeredTasks = mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0];
+      const taskDefinition = registeredTasks['autoImport-dataStream-task'];
+      const createTaskRunner = taskDefinition.createTaskRunner;
+
+      const mockTaskInstance = {
+        id: 'test-task-id',
+        params: {
+          integrationId: 'test-integration',
+          dataStreamId: 'test-datastream',
+          connectorId: 'invalid-connector',
+        },
+        state: { task_status: 'pending' },
+      };
+
+      const connectorNotFoundError = Object.assign(
+        new Error("No connector found for id 'invalid-connector'"),
+        { statusCode: 404 }
+      );
+
+      const mockCoreStart = {
+        elasticsearch: {
+          client: {
+            asScoped: jest.fn().mockReturnValue({
+              asCurrentUser: {},
+            }),
+          },
+        },
+      };
+
+      const mockPluginsStart = {
+        inference: {
+          getChatModel: jest.fn().mockRejectedValue(connectorNotFoundError),
+        },
+        fieldsMetadata: {
+          getClient: jest.fn().mockResolvedValue({
+            find: jest.fn().mockResolvedValue({ toPlain: () => ({}) }),
+            getByName: jest.fn(),
+          }),
+        },
+      };
+
+      const coreSetupMock = {
+        getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
+      };
+
+      (taskManagerService as any).agentService = {
+        invokeAutomaticImportAgent: jest.fn(),
+      };
+
+      const taskRunner = createTaskRunner({
+        taskInstance: mockTaskInstance as any,
+        fakeRequest: {} as any,
+        abortController: new AbortController(),
+      });
+
+      const originalRunTask = (taskManagerService as any).runTask;
+      (taskManagerService as any).runTask = jest
+        .fn()
+        .mockImplementation(async (taskInstance, core, savedObjectService) => {
+          return originalRunTask.call(
+            taskManagerService,
+            taskInstance,
+            coreSetupMock,
+            savedObjectService
+          );
+        });
+
+      await expect(taskRunner.run()).rejects.toThrow('No connector found');
+
+      expect(mockUpdateDataStream).toHaveBeenCalledWith({
+        integrationId: 'test-integration',
+        dataStreamId: 'test-datastream',
+        status: 'failed',
+      });
     });
   });
 });

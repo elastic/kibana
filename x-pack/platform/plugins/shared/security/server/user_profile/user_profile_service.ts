@@ -31,6 +31,7 @@ import type {
 } from '../../common';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { securityTelemetry } from '../otel/instrumentation';
 import { getPrintableSessionId, type Session } from '../session_management';
 
 const KIBANA_DATA_ROOT = 'kibana';
@@ -149,9 +150,9 @@ export class UserProfileService {
     let activationRetriesLeft = ACTIVATION_MAX_RETRIES;
     do {
       try {
-        const response = await clusterClient.asInternalUser.security.activateUserProfile(
-          activateRequest
-        );
+        const response = await clusterClient.asInternalUser.security.activateUserProfile({
+          ...activateRequest,
+        });
 
         this.logger.debug(`Successfully activated profile for "${response.user.username}".`);
 
@@ -188,13 +189,38 @@ export class UserProfileService {
   }
 
   /**
-   * See {@link UserProfileServiceStart} for documentation.
+   * Determines the type of authorization from the Authorization header.
+   * @param authHeader The Authorization header value
+   * @returns The type of authorization ('basic', 'apikey', or null if neither)
    */
-  private async getCurrent<D extends UserProfileData>(
-    clusterClient: IClusterClient,
+  private getAuthHeaderType(authHeader: string | string[] | undefined): 'basic' | 'apikey' | null {
+    if (!authHeader || typeof authHeader !== 'string') {
+      return null;
+    }
+
+    const normalizedHeader = authHeader.trim().toLowerCase();
+
+    if (normalizedHeader.startsWith('basic ')) {
+      return 'basic';
+    }
+
+    if (normalizedHeader.startsWith('apikey ')) {
+      return 'apikey';
+    }
+
+    return null;
+  }
+
+  /**
+   * Retrieves the current user profile ID from a session-authenticated request.
+   * @param session Session service instance
+   * @param request The HTTP request
+   * @returns The profile ID if found, null otherwise
+   */
+  private async getCurrentUserProfileIdViaSession(
     session: PublicMethodsOf<Session>,
-    { request, dataPath }: UserProfileGetCurrentParams
-  ) {
+    request: UserProfileGetCurrentParams['request']
+  ): Promise<{ profileId?: string; sessionId?: string }> {
     let userSession;
     try {
       userSession = await session.get(request);
@@ -204,7 +230,11 @@ export class UserProfileService {
     }
 
     if (userSession.error) {
-      return null;
+      this.logger.debug(`Retrieved user session has error: ${userSession.error.message}`);
+      return {
+        profileId: undefined,
+        sessionId: undefined,
+      };
     }
 
     if (!userSession.value.userProfileId) {
@@ -213,33 +243,179 @@ export class UserProfileService {
           userSession.value.sid
         )}].`
       );
+    }
+
+    return {
+      profileId: userSession.value.userProfileId ?? undefined,
+      sessionId: userSession.value.sid,
+    };
+  }
+
+  /**
+   * Activates the user profile from a Basic auth authenticated request.
+   * @param clusterClient The cluster client
+   * @param request The HTTP request
+   * @returns The activated profile
+   */
+  private async activateProfileViaBasicAuth(
+    clusterClient: IClusterClient,
+    request: UserProfileGetCurrentParams['request']
+  ): Promise<UserProfileWithSecurity | undefined> {
+    const authHeader = request.headers.authorization as string;
+    const base64Credentials = authHeader.trim().substring('basic '.length);
+    const [username, password] = Buffer.from(base64Credentials, 'base64').toString().split(':');
+    if (!username || !password) {
+      throw new Error(`Malformed basic credentials in Authorization header.`);
+    }
+
+    const activatedProfile = await this.activate(clusterClient, {
+      type: 'password',
+      username,
+      password,
+    });
+
+    return activatedProfile;
+  }
+
+  /**
+   * Retrieves the user profile ID from an API key authenticated request by retrieving the API Key itself.
+   * @param clusterClient The cluster client
+   * @param request The HTTP request
+   * @returns The profile ID if found, undefined otherwise
+   */
+  private async getCurrentUserProfileIdViaApiKey(
+    clusterClient: IClusterClient,
+    request: UserProfileGetCurrentParams['request']
+  ): Promise<string | undefined> {
+    try {
+      const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
+        with_profile_uid: true,
+      });
+
+      if (response.api_keys && response.api_keys.length > 0) {
+        return response.api_keys[0].profile_uid;
+      } else {
+        this.logger.debug(
+          `No API keys were returned from query, cannot retrieve associated profile id.`
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to retrieve API key for user profile retrieval: ${getDetailedErrorMessage(error)}`
+      );
+    }
+  }
+
+  private recordGetCurrentSuccess(params: {
+    profileActivationRequired?: boolean;
+    apiKeyRetrievalRequired?: boolean;
+  }) {
+    securityTelemetry.recordGetCurrentProfileInvocation({
+      profileActivationRequired: params.profileActivationRequired,
+      apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
+      outcome: 'success',
+    });
+  }
+
+  private recordGetCurrentFailure(params: {
+    profileActivationRequired?: boolean;
+    apiKeyRetrievalRequired?: boolean;
+  }) {
+    securityTelemetry.recordGetCurrentProfileInvocation({
+      profileActivationRequired: params.profileActivationRequired,
+      apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
+      outcome: 'failure',
+    });
+  }
+
+  /**
+   * See {@link UserProfileServiceStart} for documentation.
+   */
+  private async getCurrent<D extends UserProfileData>(
+    clusterClient: IClusterClient,
+    session: PublicMethodsOf<Session>,
+    { request, dataPath }: UserProfileGetCurrentParams
+  ) {
+    if (request.auth.isAuthenticated === false) {
+      throw new Error('Request to get current user profile is not authenticated.');
+    }
+
+    let profileId: string | undefined;
+    let sessionId: string | undefined;
+    let profileActivationRequired: boolean | undefined;
+    let apiKeyRetrievalRequired: boolean | undefined;
+
+    if (await session.getSID(request)) {
+      this.logger.debug(`Request to get current user profile is authenticated via session.`);
+      ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
+    } else {
+      const authType = this.getAuthHeaderType(request.headers.authorization);
+
+      if (authType === 'basic') {
+        profileActivationRequired = true;
+
+        this.logger.debug(
+          `Request to get current user profile is authenticated via Basic credentials.`
+        );
+
+        let activatedProfile: UserProfileWithSecurity | undefined;
+        try {
+          activatedProfile = await this.activateProfileViaBasicAuth(clusterClient, request);
+        } catch (error) {
+          this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
+          this.logger.debug(
+            `Failed to activate profile via basic credentials: ${getDetailedErrorMessage(error)}`
+          );
+          throw error;
+        }
+
+        // It is not possible to select/filter profile data when activating, so unless the dataPath is empty,
+        // we will need to re-fetch the profile like in the other cases (session, API key).
+        if (activatedProfile && !dataPath) {
+          this.recordGetCurrentSuccess({ profileActivationRequired, apiKeyRetrievalRequired });
+          return activatedProfile;
+        }
+        profileId = activatedProfile?.uid;
+      } else if (authType === 'apikey') {
+        apiKeyRetrievalRequired = true;
+        this.logger.debug(`Request to get current user profile is authenticated via API key.`);
+        profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
+      }
+    }
+
+    if (!profileId) {
+      this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
       return null;
     }
 
     let body;
     try {
       body = await clusterClient.asInternalUser.security.getUserProfile({
-        uid: userSession.value.userProfileId,
+        uid: profileId,
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       });
     } catch (error) {
+      this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
       this.logger.error(
-        `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
-          userSession.value.sid
-        )}]: ${getDetailedErrorMessage(error)}`
+        `Failed to retrieve user profile for the current user${
+          sessionId ? ` [sid=${getPrintableSessionId(sessionId)}]` : ''
+        }: ${getDetailedErrorMessage(error)}`
       );
       throw error;
     }
 
     if (body.profiles.length === 0) {
+      this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
       this.logger.error(
-        `The user profile for the current user [sid=${getPrintableSessionId(
-          userSession.value.sid
-        )}] is not found.`
+        `The user profile for the current user${
+          sessionId ? ` [sid=${getPrintableSessionId(sessionId)}]` : ''
+        } is not found.`
       );
       throw new Error(`User profile is not found.`);
     }
 
+    this.recordGetCurrentSuccess({ profileActivationRequired, apiKeyRetrievalRequired });
+    this.logger.debug(`Returning current user profile.`);
     return parseUserProfileWithSecurity<D>(body.profiles[0]);
   }
 

@@ -16,11 +16,19 @@ import { initializeSelectionsManager } from '../options_list_control/selections_
 import type { OptionsListComponentApi } from '../options_list_control/types';
 import { initializeTemporayStateManager } from '../options_list_control/temporay_state_manager';
 import { initializeEditorStateManager } from '../options_list_control/editor_state_manager';
+import { initializeLabelManager } from '../../control_labels';
 
 export const getOptionsListContextMock = () => {
   const editorStateManager = initializeEditorStateManager({});
   const selectionsManager = initializeSelectionsManager({});
   const temporaryStateManager = initializeTemporayStateManager();
+
+  const fieldName$ = new BehaviorSubject<string>('field');
+  const labelManager = initializeLabelManager(
+    { title: 'Test', fieldName: 'field' },
+    { fieldName$ },
+    'fieldName'
+  );
   const field$ = new BehaviorSubject<DataViewField | undefined>({
     type: 'string',
   } as DataViewField);
@@ -30,15 +38,15 @@ export const getOptionsListContextMock = () => {
       ...editorStateManager.api,
       ...selectionsManager.api,
       ...temporaryStateManager.api,
+      ...labelManager.api,
       uuid: 'testControl',
       field$,
-      fieldName$: new BehaviorSubject<string>('field'),
+      fieldName$,
       sort$,
       setSort: (next: OptionsListSortingType | undefined) => {
         sort$.next(next);
       },
       parentApi: {},
-      allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
       loadMoreSubject: new Subject<void>(),

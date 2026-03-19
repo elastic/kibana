@@ -85,13 +85,13 @@ const nestedSchema = s.object({
     path: s.string(),
     query: s.object({
       bool: s.object({
-        filter: s.arrayOf(termValueSchema),
+        filter: s.arrayOf(termValueSchema, { maxSize: 100 }),
       }),
     }),
   }),
 });
 
-const arraySchema = s.arrayOf(s.oneOf([nestedSchema, rangeSchema]));
+const arraySchema = s.arrayOf(s.oneOf([nestedSchema, rangeSchema]), { maxSize: 100 });
 
 // TODO: it would be great if we could recursively build the schema since the aggregation have be nested
 // For more details see how the types are defined in the elasticsearch javascript client:
@@ -110,14 +110,14 @@ const boolSchema = s.object({
 const orderSchema = s.oneOf([
   sortOrderSchema,
   s.recordOf(s.string(), sortOrderSchema),
-  s.arrayOf(s.recordOf(s.string(), sortOrderSchema)),
+  s.arrayOf(s.recordOf(s.string(), sortOrderSchema), { maxSize: 100 }),
 ]);
 
 const termsSchema = s.object({
   field: s.maybe(s.string()),
   collect_mode: s.maybe(s.string()),
-  exclude: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
-  include: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
+  exclude: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string(), { maxSize: 100 })])),
+  include: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string(), { maxSize: 100 })])),
   execution_hint: s.maybe(s.string()),
   missing: s.maybe(s.oneOf([s.number(), s.string(), s.boolean()])),
   min_doc_count: s.maybe(s.number({ min: 1 })),
@@ -127,7 +127,7 @@ const termsSchema = s.object({
 });
 
 const multiTermsSchema = s.object({
-  terms: s.arrayOf(termsSchema),
+  terms: s.arrayOf(termsSchema, { maxSize: 100 }),
   size: s.maybe(s.number()),
   shard_size: s.maybe(s.number()),
   show_term_doc_count_error: s.maybe(s.boolean()),
@@ -170,7 +170,8 @@ const compositeSchema = s.object({
     s.recordOf(
       s.string(),
       s.oneOf([s.object({ terms: termsSchema }), s.object({ histogram: histogramSchema })])
-    )
+    ),
+    { maxSize: 100 }
   ),
 });
 
@@ -178,7 +179,9 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
   date_range: s.object({
     field: s.string(),
     format: s.string(),
-    ranges: s.arrayOf(s.object({ from: s.maybe(s.string()), to: s.maybe(s.string()) })),
+    ranges: s.arrayOf(s.object({ from: s.maybe(s.string()), to: s.maybe(s.string()) }), {
+      maxSize: 100,
+    }),
   }),
   filter: s.oneOf([termSchema, existsSchema]) as unknown as ObjectType,
   filters: s.object({

@@ -13,9 +13,11 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '@kbn/security-solution-navigation';
+import { ProductTier } from '../common/product';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -105,8 +107,22 @@ export class SecuritySolutionServerlessPlugin
 
     // This setting is only registered in complete and ease tiers. Adding it to the project settings list while in the essentials tier causes an error.
     // This is a temporary UI setting to enable workflows, it's planned to be removed on 9.4.0 release.
-    if (this.config.productTypes.some((productType) => productType.product_tier !== 'essentials')) {
+    if (
+      this.config.productTypes.some(
+        (productType) => productType.product_tier !== ProductTier.essentials
+      )
+    ) {
       projectSettings.push(WORKFLOWS_UI_SETTING_ID);
+    }
+
+    // Agent Builder is only enabled for Security projects in complete and EASE (search_ai_lake) tiers.
+    // Allowlisting this setting for essentials causes a dev-mode startup failure because the setting is not registered.
+    const aiTier = getSecurityAiSocProductTier(this.config, this.logger);
+    if (
+      (aiTier === ProductTier.complete || aiTier === ProductTier.searchAiLake) &&
+      !projectSettings.includes(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+    ) {
+      projectSettings.push(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
     }
 
     // Setup project uiSettings whitelisting

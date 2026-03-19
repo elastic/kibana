@@ -5,7 +5,6 @@
     "types": [
       "node",
       "cheerio",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
@@ -23,6 +22,7 @@
     "security_solution_cypress/cypress/**/*",
     "security_solution_api_integration/**/*",
     "security_solution_endpoint/**/*",
+    "security-solution-evals/**/*",
     "*/packages/**/*",
     "*/*/packages/**/*"
   ],
@@ -59,7 +59,6 @@
     "@kbn/repo-info",
     "@kbn/serverless-security-settings",
     "@kbn/rison",
-    "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
     "@kbn/connector-schemas",
     "@kbn/cloud-security-posture-graph",

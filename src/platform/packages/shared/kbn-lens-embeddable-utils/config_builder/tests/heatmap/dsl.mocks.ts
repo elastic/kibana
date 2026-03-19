@@ -101,7 +101,7 @@ export const simple: LensAttributes = {
   ],
 } satisfies LensAttributes;
 
-export const withXAndYAxes: LensAttributes = {
+export const withXAndYAxes = {
   title: 'Lens Heatmap - DSL - With X and Y Axes',
   description: 'Count of records with timestamp on x-axis and extension.keyword on y-axis',
   state: {
@@ -196,7 +196,6 @@ export const withXAndYAxes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error
       indexpattern: {
         layers: {},
       },
@@ -218,7 +217,24 @@ export const withXAndYAxes: LensAttributes = {
   ],
 } satisfies LensAttributes;
 
-export const withDynamicColors: LensAttributes = {
+export const withSortPredicates = {
+  ...withXAndYAxes,
+  title: 'Lens Heatmap - DSL - With Sort Predicates',
+  description: 'Heatmap with x-axis ascending and y-axis descending sort',
+  state: {
+    ...withXAndYAxes.state,
+    visualization: {
+      ...withXAndYAxes.state.visualization,
+      gridConfig: {
+        ...withXAndYAxes.state.visualization.gridConfig,
+        xSortPredicate: 'asc',
+        ySortPredicate: 'desc',
+      },
+    },
+  },
+} satisfies LensAttributes;
+
+export const withDynamicColors = {
   title: 'Lens Heatmap - DSL - With Dynamic Colors',
   description: 'Count of records with timestamp on x-axis and extension.keyword on y-axis',
   state: {
@@ -230,6 +246,7 @@ export const withDynamicColors: LensAttributes = {
         isVisible: true,
         position: 'right',
         type: 'heatmap_legend',
+        shouldTruncate: false,
       },
       gridConfig: {
         type: 'heatmap_grid',
@@ -371,7 +388,6 @@ export const withDynamicColors: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error
       indexpattern: {
         layers: {},
       },
@@ -392,3 +408,215 @@ export const withDynamicColors: LensAttributes = {
     },
   ],
 } satisfies LensAttributes;
+
+export const defaultColorByValueAttributes: LensAttributes = {
+  description: '',
+  state: {
+    visualization: {
+      shape: 'heatmap',
+      layerId: '4153c826-5f82-4fb5-942b-5947250e8b58',
+      layerType: 'data',
+      legend: {
+        isVisible: true,
+        position: 'right',
+        type: 'heatmap_legend',
+      },
+      gridConfig: {
+        type: 'heatmap_grid',
+        isCellLabelVisible: false,
+        isYAxisLabelVisible: true,
+        isXAxisLabelVisible: true,
+        isYAxisTitleVisible: false,
+        isXAxisTitleVisible: false,
+      },
+      valueAccessor: '756ec9bf-a53b-4b87-b9d4-02b8ae209460',
+      xAccessor: 'edf4ef67-7e54-4a9e-ab15-b72970b606d1',
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '4153c826-5f82-4fb5-942b-5947250e8b58': {
+            columns: {
+              'edf4ef67-7e54-4a9e-ab15-b72970b606d1': {
+                label: 'timestamp',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                isBucketed: true,
+                params: {
+                  // @ts-expect-error
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                  dropPartials: false,
+                },
+              },
+              '756ec9bf-a53b-4b87-b9d4-02b8ae209460': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: [
+              'edf4ef67-7e54-4a9e-ab15-b72970b606d1',
+              '756ec9bf-a53b-4b87-b9d4-02b8ae209460',
+            ],
+            incompleteColumns: {},
+            sampling: 1,
+          },
+        },
+      },
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  title: 'testing color by value palette',
+  version: 2,
+  visualizationType: 'lnsHeatmap',
+  references: [
+    {
+      type: 'index-pattern',
+      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      name: 'indexpattern-datasource-layer-4153c826-5f82-4fb5-942b-5947250e8b58',
+    },
+  ],
+};
+
+export const selectorColorByValueAttributes: LensAttributes = {
+  description: '',
+  state: {
+    visualization: {
+      shape: 'heatmap',
+      layerId: '4153c826-5f82-4fb5-942b-5947250e8b58',
+      layerType: 'data',
+      legend: {
+        isVisible: true,
+        position: 'right',
+        type: 'heatmap_legend',
+      },
+      gridConfig: {
+        type: 'heatmap_grid',
+        isCellLabelVisible: false,
+        isYAxisLabelVisible: true,
+        isXAxisLabelVisible: true,
+        isYAxisTitleVisible: false,
+        isXAxisTitleVisible: false,
+      },
+      valueAccessor: '756ec9bf-a53b-4b87-b9d4-02b8ae209460',
+      xAccessor: 'edf4ef67-7e54-4a9e-ab15-b72970b606d1',
+      palette: {
+        type: 'palette',
+        name: 'status',
+        params: {
+          name: 'status',
+          continuity: 'above',
+          reverse: false,
+          stops: [
+            {
+              color: '#24c292',
+              stop: 0,
+            },
+            {
+              color: '#aee8d2',
+              stop: 20,
+            },
+            {
+              color: '#fcd883',
+              stop: 40,
+            },
+            {
+              color: '#ffc9c2',
+              stop: 60,
+            },
+            {
+              color: '#f6726a',
+              stop: 80,
+            },
+          ],
+          rangeMin: 0,
+          rangeMax: null,
+        },
+        accessor: '756ec9bf-a53b-4b87-b9d4-02b8ae209460',
+      },
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '4153c826-5f82-4fb5-942b-5947250e8b58': {
+            columns: {
+              'edf4ef67-7e54-4a9e-ab15-b72970b606d1': {
+                label: 'timestamp',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                isBucketed: true,
+                params: {
+                  // @ts-expect-error
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                  dropPartials: false,
+                },
+              },
+              '756ec9bf-a53b-4b87-b9d4-02b8ae209460': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: [
+              'edf4ef67-7e54-4a9e-ab15-b72970b606d1',
+              '756ec9bf-a53b-4b87-b9d4-02b8ae209460',
+            ],
+            incompleteColumns: {},
+            sampling: 1,
+          },
+        },
+      },
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  title: 'testing color by value palette',
+  version: 2,
+  visualizationType: 'lnsHeatmap',
+  references: [
+    {
+      type: 'index-pattern',
+      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      name: 'indexpattern-datasource-layer-4153c826-5f82-4fb5-942b-5947250e8b58',
+    },
+  ],
+};

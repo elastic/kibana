@@ -8,11 +8,12 @@
 import { expect } from '@kbn/scout/api';
 import type { RedactProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { tags } from '@kbn/scout';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Redact Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should redact IP address with default prefix/suffix', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-redact-ip-basic';
@@ -220,11 +221,15 @@ apiTest.describe(
       expect(ingestedDocs).toHaveLength(2);
 
       // Production doc should have IP redacted
-      const prodDoc = ingestedDocs.find((d: any) => d.environment === 'production');
+      const prodDoc = ingestedDocs.find(
+        (d: Record<string, unknown>) => d.environment === 'production'
+      );
       expect(prodDoc).toStrictEqual(expect.objectContaining({ message: 'Connection from <ip>' }));
 
       // Development doc should keep original IP
-      const devDoc = ingestedDocs.find((d: any) => d.environment === 'development');
+      const devDoc = ingestedDocs.find(
+        (d: Record<string, unknown>) => d.environment === 'development'
+      );
       expect(devDoc).toStrictEqual(
         expect.objectContaining({ message: 'Connection from 192.168.1.2' })
       );

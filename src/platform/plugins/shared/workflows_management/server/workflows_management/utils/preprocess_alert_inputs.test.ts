@@ -544,6 +544,77 @@ describe('preprocessAlertInputs', () => {
     });
 
     describe('fetchAlerts edge cases', () => {
+      it('should use expandFlattenedAlert when formatAlert is not available', async () => {
+        // Create a context where the rule type registry doesn't have a formatAlert function
+        const mockRuleTypeRegistryWithoutFormat = new Map();
+        mockRuleTypeRegistryWithoutFormat.set('unknown-rule-type', {
+          id: 'unknown-rule-type',
+          name: 'Unknown Rule Type',
+          // No alerts.formatAlert function
+        });
+
+        const contextWithoutFormat = {
+          core: Promise.resolve({
+            elasticsearch: {
+              client: {
+                asCurrentUser: mockEsClient,
+              },
+            },
+          }),
+          alerting: Promise.resolve({
+            listTypes: jest.fn(() => mockRuleTypeRegistryWithoutFormat),
+          }),
+        } as any;
+
+        // Alert with flat ECS-style keys
+        const alertSource = {
+          '@timestamp': '2024-01-01T00:00:00Z',
+          'kibana.alert.rule.uuid': 'rule-uuid-123',
+          'kibana.alert.rule.name': 'Test Rule',
+          'kibana.alert.rule.tags': ['tag1'],
+          'kibana.alert.rule.consumer': 'test-consumer',
+          'kibana.alert.rule.producer': 'test-producer',
+          'kibana.alert.rule.rule_type_id': 'unknown-rule-type',
+          'kibana.alert.status': 'active',
+        };
+
+        mockEsClient.mget = jest.fn().mockResolvedValue({
+          docs: [
+            {
+              found: true,
+              _id: 'alert-1',
+              _index: '.alerts-test-default',
+              _source: alertSource,
+            },
+          ],
+        });
+
+        const inputs = {
+          event: {
+            triggerType: 'alert',
+            alertIds: [{ _id: 'alert-1', _index: '.alerts-test-default' }],
+          },
+        };
+
+        const result = await preprocessAlertInputs(
+          inputs,
+          contextWithoutFormat,
+          'default',
+          mockLogger
+        );
+
+        // Verify the alert was expanded from flat ECS keys to nested objects
+        const event = result.event as { alerts: Array<Record<string, unknown>> };
+        expect(event.alerts.length).toBe(1);
+        const alert = event.alerts[0];
+
+        // Check that flat keys were expanded to nested structure
+        expect(alert).toHaveProperty('kibana');
+        const kibana = alert.kibana as { alert: { status: string; rule: { name: string } } };
+        expect(kibana.alert.status).toBe('active');
+        expect(kibana.alert.rule.name).toBe('Test Rule');
+      });
+
       it('should handle mixed found/not found documents', async () => {
         const alertSource = createMockAlertSource();
 

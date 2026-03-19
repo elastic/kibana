@@ -14,9 +14,25 @@ const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 
 require('@kbn/setup-node-env');
-// we send an empty process.argv argument, as playwright uses the same --config
-// flag as kibana, leading it to not read from kibana.{dev.}yml
-require('../../../../../../../src/cli/kibana/apm')('playwright', []);
+
+// Build synthetic argv from the TRACING_EXPORTERS env var when set.
+// This allows CI (and local users) to configure trace exporters without a kibana.dev.yml.
+// The argv overrides take priority over kibana.dev.yml via applyConfigOverrides.
+const argv = [];
+const tracingExporters = process.env.TRACING_EXPORTERS;
+if (tracingExporters) {
+  JSON.parse(tracingExporters); // validate parseable JSON; throws early if malformed
+  argv.push(
+    '--telemetry.enabled=true',
+    '--telemetry.tracing.enabled=true',
+    '--telemetry.tracing.sample_rate=1',
+    `--telemetry.tracing.exporters=${tracingExporters}`
+  );
+}
+
+// we send an empty process.argv argument (or our synthetic overrides), as playwright
+// uses the same --config flag as kibana, leading it to not read from kibana.{dev.}yml
+require('../../../../../../../src/cli/kibana/apm')('playwright', argv);
 
 registerInstrumentations({
   instrumentations: [

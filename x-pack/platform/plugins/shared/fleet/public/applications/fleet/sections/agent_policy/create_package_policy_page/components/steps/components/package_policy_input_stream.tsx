@@ -24,6 +24,7 @@ import {
   EuiButtonEmpty,
   useIsWithinMinBreakpoint,
   EuiAccordion,
+  EuiIconTip,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
@@ -60,6 +61,7 @@ import { useIndexTemplateExists } from '../../datastream_hooks';
 
 import type { RegistryPolicyInputOnlyTemplate } from '../../../../../../../../../common/types/models/epm';
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
+import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
@@ -80,6 +82,7 @@ interface Props {
   forceShowErrors?: boolean;
   isEditPage?: boolean;
   totalStreams?: number;
+  showDescriptionColumn?: boolean;
   varGroupSelections?: Record<string, string>;
 }
 
@@ -93,10 +96,17 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     forceShowErrors,
     isEditPage,
     totalStreams,
+    showDescriptionColumn = true,
     varGroupSelections = {},
   }) => {
     const { docLinks } = useStartServices();
     const { isAgentlessEnabled } = useAgentless();
+    const { enableVarGroups } = ExperimentalFeaturesService.get();
+
+    const pkgVarGroups =
+      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
+    const streamVarGroups =
+      enableVarGroups && packageInputStream.var_groups ? packageInputStream.var_groups : undefined;
 
     const {
       params: { packagePolicyId },
@@ -158,20 +168,17 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     }, [isDefaultDatastream, containerRef]);
 
     // Determine if this stream has its own var_groups (stream-level) or should use package-level
-    const hasStreamLevelVarGroups =
-      packageInputStream.var_groups && packageInputStream.var_groups.length > 0;
+    const hasStreamLevelVarGroups = streamVarGroups && streamVarGroups.length > 0;
 
     // Use stream-level var_groups if present, otherwise fall back to package-level
-    const effectiveVarGroups = hasStreamLevelVarGroups
-      ? packageInputStream.var_groups
-      : packageInfo.var_groups;
+    const effectiveVarGroups = hasStreamLevelVarGroups ? streamVarGroups : pkgVarGroups;
 
     // Stream-level var group selections - derives from policy, initializes defaults, handles changes
     const {
       selections: streamVarGroupSelections,
       handleSelectionChange: handleStreamVarGroupSelectionChange,
     } = useVarGroupSelections({
-      varGroups: hasStreamLevelVarGroups ? packageInputStream.var_groups : undefined,
+      varGroups: hasStreamLevelVarGroups ? streamVarGroups : undefined,
       savedSelections: packagePolicyInputStream.var_group_selections,
       isAgentlessEnabled,
       onSelectionsChange: updatePackagePolicyInputStream,
@@ -235,10 +242,31 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
     const flexWidth = isBiggerScreen ? 7 : 5;
 
+    // Stream-level deprecation (must be after all hooks)
+    const isDeprecatedStream = !!packageInputStream.deprecated;
+    const hasDeprecatedVars = (packageInputStream.vars || []).some((v) => !!v.deprecated);
+    const showStreamDeprecationIcon = isDeprecatedStream || hasDeprecatedVars;
+    const streamDeprecationTooltip = isDeprecatedStream
+      ? packageInputStream.deprecated?.description ||
+        i18n.translate('xpack.fleet.createPackagePolicy.stepConfigure.deprecatedStreamTooltip', {
+          defaultMessage: 'This data stream is deprecated.',
+        })
+      : i18n.translate(
+          'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedStreamVarsTooltip',
+          {
+            defaultMessage: 'This data stream contains deprecated variables.',
+          }
+        );
+
+    // Hide deprecated streams entirely on new installations
+    if (!isEditPage && isDeprecatedStream) {
+      return null;
+    }
+
     return (
       <>
         <EuiFlexGrid
-          columns={2}
+          columns={showDescriptionColumn ? 2 : 1}
           data-test-subj={`streamOptions.inputStreams.${packageInputStream.data_stream.dataset}`}
         >
           <ScrollAnchor ref={containerRef} />
@@ -253,18 +281,34 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                 >
                   {packageInfo.type !== 'input' && shouldShowStreamsToggles && (
                     <EuiFlexItem grow={false}>
-                      <EuiSwitch
-                        data-test-subj="streamOptions.switch"
-                        label={packageInputStream.title}
-                        disabled={packagePolicyInputStream.keep_enabled}
-                        checked={packagePolicyInputStream.enabled}
-                        onChange={(e) => {
-                          const enabled = e.target.checked;
-                          updatePackagePolicyInputStream({
-                            enabled,
-                          });
-                        }}
-                      />
+                      <EuiFlexGroup alignItems="center" gutterSize="s">
+                        <EuiFlexItem grow={false}>
+                          <EuiSwitch
+                            data-test-subj="streamOptions.switch"
+                            label={packageInputStream.title}
+                            disabled={packagePolicyInputStream.keep_enabled}
+                            checked={packagePolicyInputStream.enabled}
+                            onChange={(e) => {
+                              const enabled = e.target.checked;
+                              updatePackagePolicyInputStream({
+                                enabled,
+                              });
+                            }}
+                          />
+                        </EuiFlexItem>
+                        {showStreamDeprecationIcon && (
+                          <EuiFlexItem grow={false}>
+                            <span data-test-subj="streamOptions.deprecatedIcon">
+                              <EuiIconTip
+                                type="warning"
+                                color="warning"
+                                position="top"
+                                content={streamDeprecationTooltip}
+                              />
+                            </span>
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   )}
                   {packageInputStream.data_stream.release &&
@@ -329,7 +373,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
             <EuiFlexGroup direction="column" gutterSize="m">
               {/* Stream-level Var Group Selectors */}
               {hasStreamLevelVarGroups &&
-                packageInputStream.var_groups?.map((varGroup) => (
+                streamVarGroups?.map((varGroup) => (
                   <EuiFlexItem key={varGroup.name}>
                     <VarGroupSelector
                       varGroup={varGroup}
