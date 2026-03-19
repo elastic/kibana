@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { storageKeys } from '../../../storage_keys';
 import { getSidebarViewForRoute, getAgentIdFromPath } from '../../../route_config';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -19,13 +20,15 @@ import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id'
 import { ConversationSidebarView } from './views/conversation_view';
 import { AgentSettingsSidebarView } from './views/agent_settings_view';
 import { ManageSidebarView } from './views/manage_view';
+import { SidebarHeader } from './shared/sidebar_header';
+import { appPaths } from '../../../utils/app_paths';
 
 const SIDEBAR_WIDTH = 300;
 
 export const UnifiedSidebar: React.FC = () => {
   const location = useLocation();
   const sidebarView = getSidebarViewForRoute(location.pathname);
-  const agentIdFromPath = getAgentIdFromPath(location.pathname);
+  const agentIdFromPath = getAgentIdFromPath(location.pathname) ?? agentBuilderDefaultAgentId;
   const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.agentId);
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const validateAgentId = useValidateAgentId();
@@ -36,6 +39,11 @@ export const UnifiedSidebar: React.FC = () => {
       setStoredAgentId(agentIdFromPath);
     }
   }, [isAgentsFetched, agentIdFromPath, validateAgentId, setStoredAgentId]);
+
+  const getNavigationPath = useCallback(
+    (newAgentId: string) => appPaths.agent.root({ agentId: newAgentId }),
+    []
+  );
 
   const sidebarStyles = css`
     width: ${SIDEBAR_WIDTH}px;
@@ -60,6 +68,11 @@ export const UnifiedSidebar: React.FC = () => {
       role="navigation"
       aria-label="Agent Builder navigation"
     >
+      <SidebarHeader
+        sidebarView={sidebarView}
+        agentId={agentIdFromPath}
+        getNavigationPath={getNavigationPath}
+      />
       <EuiFlexGroup css={sidebarContentStyles}>
         {sidebarView === 'conversation' && <ConversationSidebarView />}
         {sidebarView === 'agentSettings' && (

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom-v5-compat';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../utils/app_paths';
 import { getAgentIdFromPath, getAgentSettingsNavItems } from '../../../../route_config';
-import { AgentSelector } from '../agent_selector';
 
 const labels = {
   back: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.back', {
@@ -30,7 +30,7 @@ interface AgentSettingsSidebarViewProps {
 }
 
 export const AgentSettingsSidebarView: React.FC<AgentSettingsSidebarViewProps> = ({ pathname }) => {
-  const agentId = getAgentIdFromPath(pathname) ?? 'elastic-ai-agent';
+  const agentId = getAgentIdFromPath(pathname) ?? agentBuilderDefaultAgentId;
   const { euiTheme } = useEuiTheme();
 
   const linkStyles = css`
@@ -47,11 +47,6 @@ export const AgentSettingsSidebarView: React.FC<AgentSettingsSidebarViewProps> =
     color: ${euiTheme.colors.primaryText};
   `;
 
-  const getNavigationPath = useCallback(
-    (newAgentId: string) => pathname.replace(`/agents/${agentId}`, `/agents/${newAgentId}`),
-    [pathname, agentId]
-  );
-
   const navItems = useMemo(() => {
     return getAgentSettingsNavItems(agentId);
   }, [agentId]);
@@ -65,10 +60,6 @@ export const AgentSettingsSidebarView: React.FC<AgentSettingsSidebarViewProps> =
           <EuiText size="s">{labels.back}</EuiText>
         </Link>
       </EuiFlexItem>
-
-      <EuiHorizontalRule margin="s" />
-
-      <AgentSelector agentId={agentId} getNavigationPath={getNavigationPath} />
 
       <EuiHorizontalRule margin="s" />
 

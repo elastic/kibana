@@ -1,0 +1,122 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { useNavigate } from 'react-router-dom-v5-compat';
+
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+
+import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
+import { appPaths } from '../../../../utils/app_paths';
+import { AgentAvatar } from '../../../common/agent_avatar';
+import { AgentSelector } from './agent_selector';
+
+// Exported so index.tsx can use this for the scrollable area top offset.
+// TODO: replace with a ResizeObserver once the layout stabilises
+export const HEADER_HEIGHT = 120;
+
+const labels = {
+  customizeAgent: i18n.translate('xpack.agentBuilder.sidebar.header.customizeAgent', {
+    defaultMessage: 'Customize agent',
+  }),
+  manageComponents: i18n.translate('xpack.agentBuilder.sidebar.header.manageComponents', {
+    defaultMessage: 'Manage components',
+  }),
+  back: i18n.translate('xpack.agentBuilder.sidebar.header.back', {
+    defaultMessage: 'Back',
+  }),
+  toggleSidebar: i18n.translate('xpack.agentBuilder.sidebar.header.toggleSidebar', {
+    defaultMessage: 'Toggle sidebar',
+  }),
+};
+
+interface SidebarHeaderProps {
+  sidebarView: 'conversation' | 'agentSettings' | 'manage';
+  agentId: string;
+  getNavigationPath: (newAgentId: string) => string;
+}
+
+export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
+  sidebarView,
+  agentId,
+  getNavigationPath,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const navigate = useNavigate();
+  const { agents } = useAgentBuilderAgents();
+  const currentAgent = agents.find((a) => a.id === agentId);
+
+  const headerStyles = css`
+    padding: ${euiTheme.size.base} ${euiTheme.size.l};
+    flex-grow: 0;
+  `;
+
+  const sidebarToggle = (
+    <EuiFlexItem grow={false}>
+      <EuiButtonIcon
+        iconType="transitionLeftOut"
+        aria-label={labels.toggleSidebar}
+        color="text"
+        size="s"
+      />
+    </EuiFlexItem>
+  );
+
+  const renderTitle = () => {
+    if (sidebarView === 'conversation') {
+      return (
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            {currentAgent && (
+              <AgentAvatar agent={currentAgent} size="l" color="subdued" shape="circle" />
+            )}
+          </EuiFlexItem>
+          {sidebarToggle}
+        </EuiFlexGroup>
+      );
+    }
+    if (sidebarView === 'agentSettings' || sidebarView === 'manage') {
+      return (
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="arrowLeft"
+              iconSide="left"
+              size="s"
+              flush="both"
+              color="text"
+              onClick={() => navigate(appPaths.root)}
+            >
+              {sidebarView === 'agentSettings' ? labels.customizeAgent : labels.manageComponents}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {sidebarToggle}
+        </EuiFlexGroup>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <EuiFlexGroup direction="column" css={headerStyles}>
+      {renderTitle()}
+      {sidebarView === 'conversation' && (
+        <EuiFlexItem grow={false}>
+          <AgentSelector agentId={agentId} getNavigationPath={getNavigationPath} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};

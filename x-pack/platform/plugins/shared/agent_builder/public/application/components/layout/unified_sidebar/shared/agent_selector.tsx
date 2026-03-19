@@ -12,8 +12,8 @@ import { EuiFlexItem, EuiText, EuiSelect, EuiLoadingSpinner } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
-import { storageKeys } from '../../../storage_keys';
+import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
+import { storageKeys } from '../../../../storage_keys';
 
 const labels = {
   agentLabel: i18n.translate('xpack.agentBuilder.sidebar.agentSelector.agentLabel', {

@@ -26,7 +26,7 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({ label, href, onClick }
     height: 100%;
     text-decoration: none;
     color: inherit;
-    padding: ${euiTheme.size.base + 6}px ${euiTheme.size.base}px;
+    padding: 22px ${euiTheme.size.l};
 
     &:focus-visible {
       outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
