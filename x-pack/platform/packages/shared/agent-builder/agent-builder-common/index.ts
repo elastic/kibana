@@ -16,6 +16,7 @@ export {
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
+  platformStreamsSigEventsTools,
   attachmentTools,
   filestoreTools,
   defaultAgentToolIds,
@@ -97,11 +98,18 @@ export {
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
 export { type UserIdAndName } from './base/users';
 export { EsResourceType } from './base/resources';
+export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
   AgentType,
   AgentVisibility,
+  VISIBILITY_ICON,
+  VISIBILITY_BADGE_COLOR,
   AgentExecutionErrorCode,
+  isAgentOwner,
+  canChangeAgentVisibility,
+  hasAgentReadAccess,
+  hasAgentWriteAccess,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
@@ -177,15 +185,10 @@ export {
 } from './chat';
 export {
   type PublicSkillDefinition,
+  type PublicSkillSummary,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
   type SkillReferencedContent,
-  type SkillSelection,
-  allSkillsSelectionWildcard,
-  allBuiltInSkillsSelection,
-  skillMatchSelection,
-  hasSkillSelectionWildcard,
-  getExplicitSkillIds,
   skillCreateRequestSchema,
   skillUpdateRequestSchema,
   validateSkillId,

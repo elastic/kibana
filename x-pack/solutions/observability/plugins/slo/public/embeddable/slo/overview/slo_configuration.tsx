@@ -141,10 +141,10 @@ function SingleSloConfiguration({ onCreate, onCancel }: SingleConfigurationProps
 
 function GroupSloConfiguration({ onCreate, onCancel, initialInput }: GroupConfigurationProps) {
   const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
-    group_by: initialInput?.group_filters?.group_by ?? 'status',
-    filters: initialInput?.group_filters?.filters ?? [],
-    kql_query: initialInput?.group_filters?.kql_query ?? '',
-    groups: initialInput?.group_filters?.groups ?? [],
+    group_by: initialInput?.group_filters.group_by ?? 'status',
+    filters: initialInput?.group_filters.filters ?? [],
+    kql_query: initialInput?.group_filters.kql_query ?? '',
+    groups: initialInput?.group_filters.groups ?? [],
   });
 
   const onConfirmClick = () =>

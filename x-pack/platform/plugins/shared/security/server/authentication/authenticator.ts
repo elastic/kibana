@@ -9,6 +9,7 @@ import { performance } from 'perf_hooks';
 
 import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -104,6 +105,7 @@ export interface AuthenticatorOptions {
   getServerBaseURL: () => string;
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
+  userActivity: UserActivityServiceStart;
 }
 
 /** @internal */
@@ -944,6 +946,21 @@ export class Authenticator {
             authenticationType: provider.type,
           })
         );
+        const { username } = authenticationResult.user;
+        this.options.userActivity.trackUserAction({
+          message: `User logged in via ${provider.type} provider "${provider.name}".`,
+          event: { action: 'log_in_user', type: 'start' },
+          object: {
+            id: userProfileId ?? username,
+            name: username,
+            type: 'user',
+            tags: [],
+          },
+          metadata: {
+            authenticationProvider: provider.name,
+            authenticationType: provider.type,
+          },
+        });
       }
     } else if (authenticationResult.shouldUpdateState()) {
       newSessionValue = await this.session.update(request, {
@@ -979,6 +996,21 @@ export class Authenticator {
     if (isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
       auditLogger.log(userLogoutEvent(sessionValue));
+
+      this.options.userActivity.trackUserAction({
+        message: `User logged out via ${sessionValue.provider.type} provider "${sessionValue.provider.name}".`,
+        event: { action: 'log_out_user', type: 'end' },
+        object: {
+          id: sessionValue.userProfileId ?? sessionValue.username,
+          name: sessionValue.username,
+          type: 'user',
+          tags: [],
+        },
+        metadata: {
+          authenticationProvider: sessionValue.provider.name,
+          authenticationType: sessionValue.provider.type,
+        },
+      });
     }
 
     await this.session.invalidate(request, { match: 'current' });
@@ -1099,9 +1131,14 @@ export class Authenticator {
    * provider in the chain (default) is assumed.
    */
   private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
-    const sessionExpired =
-      request.url.searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) ===
-      LogoutReason.SESSION_EXPIRED;
+    const sessionExpiredReasons: string[] = [
+      LogoutReason.SESSION_EXPIRED,
+      LogoutReason.SESSION_IDLE_TIMEOUT,
+      LogoutReason.SESSION_LIFESPAN_TIMEOUT,
+    ];
+    const sessionExpired = sessionExpiredReasons.includes(
+      request.url.searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) ?? ''
+    );
 
     if (this.options.customLogoutURL && !sessionExpired) {
       return this.options.customLogoutURL;

@@ -122,7 +122,7 @@ describe('AutomaticImportSavedObjectService', () => {
         expect(result.id).toBe('test-integration-1');
         expect(result.attributes.created_by).toBe('test-user');
         expect(result.attributes.metadata?.created_at).toBeDefined();
-        expect(result.attributes.metadata?.version).toBe('0.0.0');
+        expect(result.attributes.metadata?.version).toBe('0.1.0');
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-integration-1');
       });
@@ -220,7 +220,7 @@ describe('AutomaticImportSavedObjectService', () => {
           integrationParams,
           authenticatedUser
         );
-        expect(created.attributes.metadata?.version).toBe('0.0.0');
+        expect(created.attributes.metadata?.version).toBe('0.1.0');
 
         // First update
         const firstUpdate = await savedObjectService.updateIntegration({ ...updateData }, '0.0.1');
@@ -1198,6 +1198,101 @@ describe('AutomaticImportSavedObjectService', () => {
           status: TASK_STATUSES.completed,
         })
       ).rejects.toThrow('Data stream non-existent-ds not found');
+    });
+
+    it('should update status to failed without ingestPipeline and preserve existing result', async () => {
+      const integrationId = 'test-status-only-integration';
+      const dataStreamId = 'test-status-only-ds';
+
+      await savedObjectService.insertIntegration(
+        { ...mockIntegrationParams, integrationId },
+        authenticatedUser
+      );
+
+      await savedObjectService.insertDataStream(
+        {
+          ...mockDataStreamParams,
+          integrationId,
+          dataStreamId,
+          jobInfo: {
+            jobId: 'test-job',
+            jobType: 'autoImport-dataStream-task',
+            status: TASK_STATUSES.pending,
+          },
+        },
+        authenticatedUser
+      );
+
+      const existingPipeline = {
+        name: 'partial-pipeline',
+        processors: [{ set: { field: 'partial', value: true } }],
+      };
+      await savedObjectService.updateDataStreamSavedObjectAttributes({
+        integrationId,
+        dataStreamId,
+        ingestPipeline: existingPipeline,
+        status: TASK_STATUSES.processing,
+      });
+
+      const beforeFail = await savedObjectService.getDataStream(dataStreamId, integrationId);
+      expect(beforeFail.attributes.job_info.status).toBe(TASK_STATUSES.processing);
+      expect(beforeFail.attributes.result?.ingest_pipeline).toEqual(existingPipeline);
+
+      await savedObjectService.updateDataStreamSavedObjectAttributes({
+        integrationId,
+        dataStreamId,
+        status: TASK_STATUSES.failed,
+      });
+
+      const afterFail = await savedObjectService.getDataStream(dataStreamId, integrationId);
+      expect(afterFail.attributes.job_info.status).toBe(TASK_STATUSES.failed);
+      expect(afterFail.attributes.result?.ingest_pipeline).toEqual(existingPipeline);
+
+      await savedObjectsClient.delete(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        `${integrationId}-${dataStreamId}`
+      );
+      await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId);
+    });
+
+    it('should update status to failed without ingestPipeline when no prior result exists', async () => {
+      const integrationId = 'test-fail-no-result-integration';
+      const dataStreamId = 'test-fail-no-result-ds';
+
+      await savedObjectService.insertIntegration(
+        { ...mockIntegrationParams, integrationId },
+        authenticatedUser
+      );
+
+      await savedObjectService.insertDataStream(
+        {
+          ...mockDataStreamParams,
+          integrationId,
+          dataStreamId,
+          jobInfo: {
+            jobId: 'test-job',
+            jobType: 'autoImport-dataStream-task',
+            status: TASK_STATUSES.pending,
+          },
+        },
+        authenticatedUser
+      );
+
+      await savedObjectService.updateDataStreamSavedObjectAttributes({
+        integrationId,
+        dataStreamId,
+        status: TASK_STATUSES.failed,
+      });
+
+      const afterFail = await savedObjectService.getDataStream(dataStreamId, integrationId);
+      expect(afterFail.attributes.job_info.status).toBe(TASK_STATUSES.failed);
+      expect(afterFail.attributes.result).toBeUndefined();
+
+      await savedObjectsClient.delete(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        `${integrationId}-${dataStreamId}`
+      );
+      await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId);
     });
   });
 });

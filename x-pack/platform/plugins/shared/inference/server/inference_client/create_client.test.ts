@@ -6,6 +6,7 @@
  */
 
 import { createClient } from './create_client';
+import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -48,6 +49,7 @@ describe('createClient', () => {
       const expectedResult = Symbol('expected') as any;
       createInferenceClientMock.mockReturnValue(expectedResult);
       const anonymizationRulesPromise = Promise.resolve([]);
+      const endpointIdCache = new InferenceEndpointIdCache();
 
       const result = createClient({
         request,
@@ -56,6 +58,7 @@ describe('createClient', () => {
         esClient: mockEsClient,
         anonymizationRulesPromise,
         regexWorker,
+        endpointIdCache,
       });
 
       expect(createInferenceClientMock).toHaveBeenCalledTimes(1);
@@ -68,6 +71,7 @@ describe('createClient', () => {
           esClient: mockEsClient,
           anonymizationRulesPromise,
           regexWorker,
+          endpointIdCache,
         })
       );
 
@@ -88,6 +92,7 @@ describe('createClient', () => {
         esClient: mockEsClient,
         anonymizationRulesPromise: Promise.resolve([]),
         regexWorker,
+        endpointIdCache: new InferenceEndpointIdCache(),
       });
 
       // type check on client.chatComplete
@@ -107,6 +112,8 @@ describe('createClient', () => {
       const bindClientResult = Symbol('bindClientResult') as any;
       bindClientMock.mockReturnValue(bindClientResult);
 
+      const endpointIdCache = new InferenceEndpointIdCache();
+
       const result = createClient({
         request,
         actions,
@@ -117,6 +124,7 @@ describe('createClient', () => {
         esClient: mockEsClient,
         anonymizationRulesPromise,
         regexWorker,
+        endpointIdCache,
       });
 
       expect(createInferenceClientMock).toHaveBeenCalledTimes(1);
@@ -129,6 +137,7 @@ describe('createClient', () => {
           esClient: mockEsClient,
           anonymizationRulesPromise,
           regexWorker,
+          endpointIdCache,
         })
       );
 
@@ -155,6 +164,7 @@ describe('createClient', () => {
         esClient: mockEsClient,
         anonymizationRulesPromise: Promise.resolve([]),
         regexWorker,
+        endpointIdCache: new InferenceEndpointIdCache(),
       });
 
       // type check on client.chatComplete

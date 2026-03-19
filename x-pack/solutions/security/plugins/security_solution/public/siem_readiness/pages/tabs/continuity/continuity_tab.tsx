@@ -9,7 +9,6 @@ import React, { useMemo, useCallback } from 'react';
 import {
   EuiSpacer,
   EuiLoadingSpinner,
-  EuiCallOut,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
 import type { PipelineStats } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
@@ -34,26 +33,21 @@ import {
   getContinuityCaseTags,
 } from './continuity_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
+import {
+  getFailureRateString,
+  isCriticalFailureRateFromString,
+} from '../../../hooks/visibility_status_utils';
 import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const DATA_CONTINUITY_CASE_TAGS = ['siem-readiness', 'data-continuity', 'ingest-pipelines'];
-// Extended PipelineStats with computed fields and Record<string, unknown> for CategoryAccordionTable
 
 export interface PipelineInfoWithStatus extends PipelineStats, Record<string, unknown> {
   failureRate: string;
   status: 'healthy' | 'critical';
 }
 
-export const getDocInjectionFailRate = (failedDocsCount: number, docsCount: number): string => {
-  return docsCount > 0 ? ((failedDocsCount / docsCount) * 100).toFixed(1) : '0.0';
-};
-
-export const isCriticalFailureRate = (failureRate: string): boolean => {
-  return Number(failureRate) >= 1;
-};
-
-export const getDocInjectionStatus = (failureRate: string): 'healthy' | 'critical' => {
-  return isCriticalFailureRate(failureRate) ? 'critical' : 'healthy';
+const getDocInjectionStatus = (failureRate: string): 'healthy' | 'critical' => {
+  return isCriticalFailureRateFromString(failureRate) ? 'critical' : 'healthy';
 };
 
 export const getIngestPipelineUrl = (basePath: string, pipelineName: string): string => {
@@ -94,7 +88,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     const categoryPipelinesMap = new Map<string, PipelineInfoWithStatus[]>();
 
     pipelinesData.forEach((pipeline) => {
-      const failureRate = getDocInjectionFailRate(pipeline.failedDocsCount, pipeline.docsCount);
+      const failureRate = getFailureRateString(pipeline.failedDocsCount, pipeline.docsCount);
 
       const pipelineWithStats: PipelineInfoWithStatus = {
         ...pipeline,
@@ -131,6 +125,15 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
     return result;
   }, [pipelinesData, indexToCategoryMap, activeCategories]);
+
+  // Check if any matched pipelines exist ignoring activeCategories filter (for hasUnfilteredData prop)
+  const hasUnfilteredData = useMemo(() => {
+    if (!pipelinesData?.length) return false;
+
+    return pipelinesData.some((pipeline) =>
+      pipeline.indices.some((indexName) => indexToCategoryMap.has(indexName))
+    );
+  }, [pipelinesData, indexToCategoryMap]);
 
   // Check if any pipeline has failures
   const hasDocCriticalFailures = useMemo(() => {
@@ -230,7 +233,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
             href={getIngestPipelineUrl(basePath, pipelineName)}
             target="_blank"
           >
-            {isCriticalFailureRate(item.failureRate)
+            {isCriticalFailureRateFromString(item.failureRate)
               ? i18n.translate(
                   'xpack.securitySolution.siemReadiness.continuity.action.viewFailure',
                   {
@@ -256,8 +259,8 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     const totalPipelines = category.items.length;
     const totalDocs = category.items.reduce((sum, p) => sum + p.docsCount, 0);
     const totalFailed = category.items.reduce((sum, p) => sum + p.failedDocsCount, 0);
-    const overallFailureRate = getDocInjectionFailRate(totalFailed, totalDocs);
-    const isCritical = isCriticalFailureRate(overallFailureRate);
+    const overallFailureRate = getFailureRateString(totalFailed, totalDocs);
+    const isCritical = isCriticalFailureRateFromString(overallFailureRate);
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -350,57 +353,6 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
   }
 
-  if (!pipelinesData || pipelinesData.length === 0) {
-    return (
-      <>
-        <EuiSpacer size="l" />
-        <EuiCallOut
-          announceOnMount
-          title={i18n.translate('xpack.securitySolution.siemReadiness.continuity.noData.title', {
-            defaultMessage: 'No pipeline data available',
-          })}
-          color="warning"
-          iconType="warning"
-        >
-          <p>
-            {i18n.translate('xpack.securitySolution.siemReadiness.continuity.noData.description', {
-              defaultMessage:
-                'No ingest pipeline statistics were found. This could mean no data has been ingested yet.',
-            })}
-          </p>
-        </EuiCallOut>
-      </>
-    );
-  }
-
-  if (categorizedPipelines.length === 0) {
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.securitySolution.siemReadiness.continuity.noCategoryData.title',
-            {
-              defaultMessage: 'No data available',
-            }
-          )}
-          color="primary"
-          iconType="iInCircle"
-          announceOnMount
-        >
-          <p>
-            {i18n.translate(
-              'xpack.securitySolution.siemReadiness.continuity.noCategoryData.description',
-              {
-                defaultMessage: 'No pipeline data found for the selected categories.',
-              }
-            )}
-          </p>
-        </EuiCallOut>
-      </>
-    );
-  }
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -484,6 +436,8 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         defaultSortField="docsCount"
         defaultSortDirection="desc"
         storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
+        isFilterActive={activeCategories.length < CATEGORY_ORDER.length && hasUnfilteredData}
+        hasUnfilteredData={hasUnfilteredData}
       />
     </>
   );

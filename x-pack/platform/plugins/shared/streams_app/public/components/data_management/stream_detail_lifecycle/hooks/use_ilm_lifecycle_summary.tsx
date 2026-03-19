@@ -543,7 +543,7 @@ export const useIlmLifecycleSummary = ({
 
       {uiState.isEditLifecycleFlyoutOpen && uiState.editFlyoutInitialPhases && (
         <EditIlmPhasesFlyout
-          initialPhases={uiState.editFlyoutInitialPhases}
+          initialPhases={uiState.previewPhases ?? uiState.editFlyoutInitialPhases}
           selectedPhase={uiState.editingPhase}
           setSelectedPhase={(phase) => dispatchUi({ type: 'setEditingPhase', payload: phase })}
           onChange={(next, meta) => {

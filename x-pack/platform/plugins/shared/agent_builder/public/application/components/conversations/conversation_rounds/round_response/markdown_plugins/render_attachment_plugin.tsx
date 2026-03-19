@@ -20,6 +20,37 @@ import type { AttachmentsService } from '../../../../../../services';
 import { createTagParser } from './utils';
 import { InlineAttachmentWithActions } from '../attachments/inline_attachment_with_actions';
 
+interface ResolveAttachmentVersionParams {
+  explicitVersion: string | number | undefined;
+  attachmentId: string;
+  attachmentRefs: AttachmentVersionRef[] | undefined;
+  currentVersion: number;
+}
+
+/**
+ * Resolves the version to use for an attachment.
+ * Priority: explicit version > highest version from refs > current_version
+ */
+export const resolveAttachmentVersion = ({
+  explicitVersion,
+  attachmentId,
+  attachmentRefs,
+  currentVersion,
+}: ResolveAttachmentVersionParams): number => {
+  if (explicitVersion !== undefined) {
+    return typeof explicitVersion === 'string' ? parseInt(explicitVersion, 10) : explicitVersion;
+  }
+
+  const highestRefVersion = attachmentRefs
+    ?.filter((r) => r.attachment_id === attachmentId)
+    .reduce<number | undefined>(
+      (max, r) => (max === undefined || r.version > max ? r.version : max),
+      undefined
+    );
+
+  return highestRefVersion ?? currentVersion;
+};
+
 /**
  * Parser for <render_attachment> tags in markdown.
  * Converts HTML/text nodes containing render_attachment tags into structured AST nodes.
@@ -89,15 +120,12 @@ export const createRenderAttachmentRenderer = ({
       return null;
     }
 
-    // Resolve version: explicit > from refs > current_version
-    let versionToUse: number;
-    if (explicitVersion !== undefined) {
-      versionToUse =
-        typeof explicitVersion === 'string' ? parseInt(explicitVersion, 10) : explicitVersion;
-    } else {
-      const refVersion = attachmentRefs?.find((r) => r.attachment_id === attachmentId)?.version;
-      versionToUse = refVersion ?? attachment.current_version;
-    }
+    const versionToUse = resolveAttachmentVersion({
+      explicitVersion,
+      attachmentId,
+      attachmentRefs,
+      currentVersion: attachment.current_version,
+    });
 
     const versionData = attachment.versions.find((v) => v.version === versionToUse);
 
@@ -118,6 +146,7 @@ export const createRenderAttachmentRenderer = ({
         attachmentsService={attachmentsService}
         isSidebar={isSidebar}
         screenContext={screenContext}
+        version={versionToUse}
       />
     );
   };

@@ -24,7 +24,6 @@ import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
 
-export const EUI_FLYOUT_BODY_OVERFLOW_CLASS = 'euiFlyoutBody__overflow';
 export const FULL_TRACE_WATERFALL_RENDER_DELAY_MS = 150;
 
 export interface FullScreenWaterfallProps {
@@ -131,7 +130,10 @@ export const FullScreenWaterfall = ({
     };
   }, []);
 
-  const [scrollElement, setScrollElement] = useState<Element | null>(null);
+  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
+  const scrollContainerRef = useCallback((node: HTMLDivElement | null) => {
+    setScrollElement(node);
+  }, []);
 
   // TODO: Remove this deferred-mount workaround once EUI exposes a prop to
   // disable the flyout open animation at mount time.
@@ -166,23 +168,6 @@ export const FullScreenWaterfall = ({
 
   const minWidth = euiTheme.base * 30;
 
-  /**
-   * Obtains the EUI flyout scroll container for the trace waterfall embeddable.
-   *
-   * This pattern is necessary because:
-   * - EUI components don't expose refs, requiring a wrapper div with closest()
-   * - scrollElement must be available before the embeddable initializes (conditional render below)
-   *
-   *
-   * TODO: Once the EUI team implements a scrollRef prop (or exposes refs on EUIFlyoutBody, Issue: 2564 in kibana-team repository),
-   * we can replace this workaround with a direct ref usage.
-   */
-  const waterfallContainerRef = useCallback((node: HTMLDivElement | null) => {
-    if (node) {
-      setScrollElement(node.closest(`.${EUI_FLYOUT_BODY_OVERFLOW_CLASS}`) ?? null);
-    }
-  }, []);
-
   if (!FullTraceWaterfall) {
     return null;
   }
@@ -206,27 +191,20 @@ export const FullScreenWaterfall = ({
           <h2 id={traceWaterfallTitleId}>{traceWaterfallTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {/* TODO: This is a workaround for layout issues when using hidePanelChrome outside of Dashboard.
-          The PresentationPanel applies flex styles (.embPanel__content) that cause width: 0 in non-Dashboard contexts.
-          This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
-          Issue: https://github.com/elastic/kibana/issues/248307
-          */}
-        <div ref={waterfallContainerRef}>
-          {isWaterfallReady && scrollElement && serviceName ? (
-            <FullTraceWaterfall
-              traceId={traceId}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              serviceName={serviceName}
-              scrollElement={scrollElement}
-              onNodeClick={onNodeClick}
-              onErrorClick={onErrorClick}
-            />
-          ) : serviceName ? (
-            <EuiSkeletonText lines={4} />
-          ) : null}
-        </div>
+      <EuiFlyoutBody scrollContainerRef={scrollContainerRef}>
+        {isWaterfallReady && scrollElement ? (
+          <FullTraceWaterfall
+            traceId={traceId}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            serviceName={serviceName}
+            scrollElement={scrollElement}
+            onNodeClick={onNodeClick}
+            onErrorClick={onErrorClick}
+          />
+        ) : (
+          <EuiSkeletonText lines={4} />
+        )}
       </EuiFlyoutBody>
 
       {docId && activeFlyoutType ? (

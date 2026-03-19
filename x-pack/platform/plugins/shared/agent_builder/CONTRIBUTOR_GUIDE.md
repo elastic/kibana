@@ -411,7 +411,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   ),
 
   // Customize buttons based on viewport context
-  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas }) => {
+  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, setPreviewBadgeState, openSidebarConversation }) => {
     const buttons = [];
 
     if (isSidebar) {
@@ -439,6 +439,25 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
       });
     }
 
+    // openSidebarConversation is {undefined} when already in the sidebar
+    if (openSidebarConversation) {
+      buttons.push({
+        label: 'Continue in sidebar',
+        icon: 'discuss',
+        type: ActionButtonType.SECONDARY,
+        handler: openSidebarConversation,
+      });
+    }
+    // Optional: if preview happens outside canvas, keep inline badge state in sync
+    buttons.push({
+      label: 'Preview',
+      icon: 'eye',
+      type: ActionButtonType.SECONDARY,
+      handler: () => {
+        setPreviewBadgeState?.('previewing');
+      },
+    });
+
     return buttons;
   },
 };
@@ -451,12 +470,48 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isSidebar`** - `true` when rendered in the sidebar (constrained width)
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
+- **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
+
+#### Opening the sidebar from attachments
+
+When an attachment is rendered inline in the full-screen Agent Builder experience, you can use `openSidebarConversation` to open the conversation in the sidebar on demand. This is useful when an action button navigates the user away from the full-screen experience (e.g., navigating to Discover or Dashboards). By calling `openSidebarConversation` after navigation, the user can continue the conversation in the sidebar while viewing the destination page.
+
+```tsx
+getActionButtons: ({ attachment, openSidebarConversation }) => {
+  const buttons = [];
+
+  buttons.push({
+    label: 'Open in Discover',
+    icon: 'discoverApp',
+    type: ActionButtonType.PRIMARY,
+    handler: async () => {
+      // Navigate to Discover (this leaves the full-screen Agent Builder)
+      await discoverLocator.navigate({ query: { esql: attachment.data.query } });
+      // Open the sidebar so the conversation remains accessible
+      openSidebarConversation?.();
+    },
+  });
+
+  return buttons;
+},
+```
+
+The callback handles setting the correct conversation context in localStorage before opening the sidebar, ensuring the sidebar loads the same conversation. It is `undefined` when already in the sidebar context.
+- **`setPreviewBadgeState`** - Optional callback to control inline preview badge state when preview is driven outside the canvas
+
+`setPreviewBadgeState` accepts:
+
+- **`none`** - regular inline state
+- **`preview_available`** - show "Preview Only" badge
+- **`previewing`** - show "You're previewing this" badge and hide inline action buttons
 
 #### Dynamic canvas buttons with registerActionButtons
 
 For canvas content that needs to register buttons dynamically (e.g., a "Save" button that depends on runtime state like an API being available), use the `registerActionButtons` callback passed as the second argument to `renderCanvasContent`.
 
 The `getActionButtons` function provides **static** buttons. The `registerActionButtons` callback allows canvas content to add **dynamic** buttons that are merged with the static ones.
+
+The callbacks object also exposes `closeCanvas`, which allows canvas content to close the flyout from within attachment UI actions (for example after an "Edit in app" navigation).
 
 ```tsx
 import React, { useEffect, useState } from 'react';
@@ -473,7 +528,7 @@ interface MyCanvasContentProps extends AttachmentRenderProps<MyAttachment> {
 
 const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
   attachment,
-  callbacks: { registerActionButtons, updateOrigin },
+  callbacks: { registerActionButtons, updateOrigin, closeCanvas },
 }) => {
   const [api, setApi] = useState<MyApi | undefined>();
 
@@ -509,6 +564,23 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
     <MyCanvasContent {...props} callbacks={callbacks} />
   ),
 };
+```
+
+#### Closing the canvas from canvas content
+
+Use `closeCanvas` when an action inside `renderCanvasContent` should dismiss the flyout.
+
+```tsx
+renderCanvasContent: (props, { closeCanvas }) => (
+  <EuiButton
+    onClick={async () => {
+      await locator.navigate({ /* ... */ });
+      closeCanvas();
+    }}
+  >
+    Edit in app
+  </EuiButton>
+);
 ```
 
 #### Linking by-value attachments to persistent storage with updateOrigin
@@ -580,6 +652,26 @@ The `origin` parameter accepts any shape - it will be validated by the attachmen
 }
 ```
 
+#### Updating origin from outside attachment context
+
+If you need to update an attachment's origin from outside the `getActionButtons` context (e.g., from a different plugin or component that has the conversation and attachment IDs), you can use the `updateAttachmentOrigin` API from the `agentBuilder` plugin's start contract:
+
+```ts
+// In your plugin
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    // Update an attachment's origin directly
+    await agentBuilder.updateAttachmentOrigin(
+      conversationId,
+      attachmentId,
+      { saved_object_id: savedObjectId }
+    );
+  }
+}
+```
+
+This is useful when the save operation happens outside the attachment's UI, such as when a separate "Save to library" workflow completes asynchronously. It is your responsibility to pass the `conversationId` and `attachmentId` to your plugin when navigating away from the chat - how you do this is up to you (e.g., URL parameters, local storage, or other mechanisms).
+
 ## Registering skills
 
 **Note**: Skills are currently an experimental feature. You need to enable the `agentBuilder:experimentalFeatures` uiSetting to enable and use them.
@@ -647,3 +739,248 @@ agentBuilder.skills.register({
   ],
 });
 ```
+
+## Semantic Metadata Layer (SML) — Developer Guide
+
+### 1. What is SML?
+
+The **Semantic Metadata Layer** is an indexing and search subsystem inside
+Agent Builder. It allows solutions to expose their Kibana assets
+(visualizations, dashboards, saved searches, …) so the AI agent can find and
+attach them to a conversation.
+
+#### High-level architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Solution plugin (e.g. agent_builder_platform)               │
+│  ┌────────────────────────────┐                              │
+│  │  SmlTypeDefinition         │ ← you provide this           │
+│  │  • id                      │                              │
+│  │  • list()                  │                              │
+│  │  • getSmlData()            │                              │
+│  │  • toAttachment()          │                              │
+│  └────────────────────────────┘                              │
+└──────────────────────────────────────────────────────────────┘
+                          │
+                          │ agentBuilder.sml.registerType(...)
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  agent_builder plugin (server)                               │
+│                                                              │
+│  ┌──────────────┐    ┌──────────────┐    ┌───────────────┐  │
+│  │ Type Registry │───▶│   Crawler    │───▶│  ES Indices   │  │
+│  └──────────────┘    │ (Task Mgr)   │    │ .chat-sml-*   │  │
+│                      └──────────────┘    └───────────────┘  │
+│                                                 │            │
+│                                                 ▼            │
+│  ┌──────────────┐    ┌──────────────────────────────────┐   │
+│  │  sml_search  │◀───│  SmlService.search()              │   │
+│  │  sml_attach  │    │  (space + permission filtering)   │   │
+│  └──────────────┘    └──────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+#### Key concepts
+
+| Concept | Description |
+|---|---|
+| **SML Type** | A category of content you expose (e.g. `visualization`, `dashboard`). You implement `SmlTypeDefinition`. |
+| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlData()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
+| **SML Document** | A single indexed chunk stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
+| **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
+| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert an SML search result into a conversation attachment (e.g. a rendered Lens visualization). |
+| **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link SML documents back to their source. |
+
+#### Data flow
+
+1. **Crawl**: The crawler runs on a configurable interval (default 10 min).
+   For each registered SML type it calls `list()` to enumerate items, detects
+   changes via timestamps, and calls `getSmlData()` for new/updated items.
+2. **Index**: Results are written to the `.chat-sml-data` system index.
+   Crawler state (which items have been seen) is stored in a separate
+   `.chat-sml-crawler-state` index.
+3. **Search**: When the AI agent calls `sml_search`, the SML service queries
+   the data index, filtering by the user's current space and checking Kibana
+   privileges against each result's `permissions` array.
+4. **Attach**: When the AI agent calls `sml_attach`, the service resolves
+   the saved object via your `toAttachment()` hook and adds the result as a
+   conversation attachment.
+
+#### Security model
+
+- The crawler runs with **internal credentials** (`asInternalUser`) — it indexes
+  content from all spaces.
+- Access control is enforced at **query time**: results are filtered by space
+  and by Kibana feature privileges (the `permissions` array you set in
+  `getSmlData`).
+
+---
+
+### 2. How to add a new SML type
+
+#### Step 1: Implement `SmlTypeDefinition`
+
+Create a file in your plugin (e.g.
+`server/sml_types/my_asset.ts`). You need to implement four things:
+
+```typescript
+import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+
+export const myAssetSmlType: SmlTypeDefinition = {
+  // Unique identifier — lowercase, alphanumeric, hyphens, underscores.
+  // Must match /^[a-z][a-z0-9_-]*$/
+  id: 'my-asset',
+
+  // Optional: how often the crawler re-indexes this type.
+  // Defaults to '10m' if omitted.
+  fetchFrequency: () => '30m',
+
+  // Yield pages of items to consider for indexing.
+  // Called by the crawler with internal credentials.
+  async *list(context) {
+    // Use createPointInTimeFinder for efficient pagination
+    const finder = context.savedObjectsClient.createPointInTimeFinder({
+      type: 'my-saved-object-type',
+      perPage: 1000,
+      namespaces: ['*'],  // all spaces
+      fields: ['title'],  // only fetch fields needed for the list
+    });
+
+    try {
+      for await (const response of finder.find()) {
+        yield response.saved_objects.map((so) => ({
+          id: so.id,
+          updatedAt: so.updated_at ?? new Date().toISOString(),
+          spaces: so.namespaces ?? [],
+        }));
+      }
+    } finally {
+      await finder.close();
+    }
+  },
+
+  // Fetch the full data for a single item to index.
+  // Return undefined to skip the item (e.g. if it was deleted).
+  getSmlData: async (originId, context) => {
+    try {
+      const so = await context.savedObjectsClient.get('my-saved-object-type', originId);
+      const attrs = so.attributes as { title?: string; description?: string };
+
+      return {
+        chunks: [
+          {
+            type: 'my-asset',
+            title: attrs.title ?? originId,
+            content: [attrs.title, attrs.description].filter(Boolean).join('\n'),
+            // Kibana feature privileges required to access this item.
+            // Users without these privileges won't see the item in search results.
+            permissions: ['saved_object:my-saved-object-type/get'],
+          },
+        ],
+      };
+    } catch {
+      return undefined;
+    }
+  },
+
+  // Convert an SML document back into a conversation attachment.
+  // Called when the AI agent wants to "attach" a search result.
+  toAttachment: async (item, context) => {
+    const resolveResult = await context.savedObjectsClient.resolve(
+      'my-saved-object-type',
+      item.origin_id
+    );
+    if ((resolveResult.saved_object as { error?: unknown }).error) {
+      return undefined;
+    }
+
+    return {
+      type: 'my-asset',
+      data: {
+        title: resolveResult.saved_object.attributes.title,
+        // ... whatever data the attachment renderer needs
+      },
+    };
+  },
+};
+```
+
+#### Step 2: Register the type during plugin setup
+
+In your plugin's `setup` method:
+
+```typescript
+import { myAssetSmlType } from './sml_types/my_asset';
+
+export class MyPlugin implements Plugin {
+  setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
+    agentBuilder.sml.registerType(myAssetSmlType);
+  }
+}
+```
+
+That's it. The Agent Builder crawler will automatically pick up your type and
+start indexing on the configured interval.
+
+#### Key implementation notes
+
+##### `list()` — Use `AsyncIterable` for memory safety
+
+The `list` hook must return an `AsyncIterable<SmlListItem[]>`. Each yielded
+array is one "page" of items. The crawler processes pages with O(page_size)
+memory, so even types with millions of items won't cause OOM.
+
+Use `createPointInTimeFinder` with `namespaces: ['*']` to enumerate across
+all spaces. The crawler indexes everything; access control happens at query time.
+
+##### `getSmlData()` — Chunks and permissions
+
+You can return multiple chunks per item (e.g. if a dashboard has multiple
+panels). Each chunk gets its own document in the SML index.
+
+The `permissions` array should list the Kibana saved object privileges
+required to access the underlying asset. Common patterns:
+
+- `['saved_object:lens/get']` for Lens visualizations
+- `['saved_object:dashboard/get']` for dashboards
+- `['saved_object:search/get']` for saved searches
+
+Users without the listed privileges won't see the item in `sml_search` results.
+
+##### `toAttachment()` — Resolving saved objects
+
+Use `savedObjectsClient.resolve()` instead of `get()` when possible — it
+handles saved object aliasing (e.g. after a space migration).
+
+Return `undefined` if the item can no longer be resolved. The `sml_attach`
+tool will report a per-item error to the AI agent without failing the entire
+call.
+
+##### `fetchFrequency` — Choose an appropriate interval
+
+- High-churn data (alerts, logs): `5m`–`10m`
+- Medium-churn (visualizations, dashboards): `30m`–`1h`
+- Low-churn (index patterns, static config): `1h`–`4h`
+
+The default is `10m` if you don't specify `fetchFrequency`.
+
+#### Real-world example: Visualizations
+
+The visualization SML type is registered in
+`x-pack/platform/plugins/shared/agent_builder_platform/server/sml_types/visualization.ts`.
+
+It:
+- Lists all `lens` saved objects across all spaces
+- Extracts title, description, chart type, and ES|QL query as searchable content
+- Sets `permissions: ['saved_object:lens/get']`
+- Converts results back to Lens API format for the attachment renderer
+- Uses a 1-hour crawl interval
+
+```typescript
+// Registration (in agent_builder_platform plugin setup):
+setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
+```
+
+The full implementation is ~130 lines and serves as the reference for new types.
+

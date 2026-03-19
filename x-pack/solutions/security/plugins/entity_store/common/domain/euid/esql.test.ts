@@ -76,44 +76,46 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
   });
 
   describe('user', () => {
-    it('returns filter with equality on user.email and entity.namespace when present (event.module sets namespace)', () => {
+    it('returns filter with user.email and source clause when event.module is present (whenClause expands to sourceMatchesAny)', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
         event: { module: 'okta' },
       });
 
-      expect(result).toBe('((user.email == "alice@example.com") AND (entity.namespace == "okta"))');
+      expect(result).toBe(
+        '((user.email == "alice@example.com") AND (((event.module == "okta") OR STARTS_WITH(data_stream.dataset, "okta")) OR ((event.module == "entityanalytics_okta") OR STARTS_WITH(data_stream.dataset, "entityanalytics_okta"))))'
+      );
     });
 
-    it('returns filter with entity.namespace fallback when user.email is present but no source (event.module/data_stream.dataset) is set', () => {
+    it('returns filter with user.email and unknown source clause when no event.module or data_stream.dataset', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
       });
 
       expect(result).toBe(
-        '((user.email == "alice@example.com") AND (entity.namespace == "unknown"))'
+        '((user.email == "alice@example.com") AND ((event.module IS NULL OR event.module == "") AND (data_stream.dataset IS NULL OR data_stream.dataset == "")))'
       );
     });
 
-    it('returns filter with equality on user.name and entity.namespace and null/empty checks on higher-ranked identity fields when user.name is present', () => {
+    it('returns filter with user.name and source clause (event.module whenClause) and null/empty checks on higher-ranked identity fields', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { name: 'alice' },
         event: { module: 'azure' },
       });
 
       expect(result).toBe(
-        '((user.name == "alice") AND (entity.namespace == "entra_id") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == "") AND (user.domain IS NULL OR user.domain == ""))'
+        '((user.name == "alice") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == "") AND (user.domain IS NULL OR user.domain == "") AND (((event.module == "azure") OR STARTS_WITH(data_stream.dataset, "azure")) OR ((event.module == "entityanalytics_entra_id") OR STARTS_WITH(data_stream.dataset, "entityanalytics_entra_id"))))'
       );
     });
 
-    it('returns filter with equality on user.id and entity.namespace and null/empty check on higher-ranked identity field when only user.id is present', () => {
+    it('returns filter with user.id and source clause (event.module whenClause) and null/empty check on user.email', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { id: 'user-id-42' },
         event: { module: 'o365' },
       });
 
       expect(result).toBe(
-        '((user.id == "user-id-42") AND (entity.namespace == "microsoft_365") AND (user.email IS NULL OR user.email == ""))'
+        '((user.id == "user-id-42") AND (user.email IS NULL OR user.email == "") AND (((event.module == "o365") OR STARTS_WITH(data_stream.dataset, "o365")) OR ((event.module == "o365_metrics") OR STARTS_WITH(data_stream.dataset, "o365_metrics"))))'
       );
     });
 
@@ -121,23 +123,47 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       expect(getEuidEsqlFilterBasedOnDocument('user', {})).toBeUndefined();
     });
 
-    it('precedence: uses user.email and entity.namespace when both user.email and user.id are present', () => {
+    it('precedence: uses user.email and source clause when both user.email and user.id are present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com', id: 'user-42' },
         event: { module: 'entityanalytics_okta' },
       });
 
-      expect(result).toBe('((user.email == "alice@example.com") AND (entity.namespace == "okta"))');
+      expect(result).toBe(
+        '((user.email == "alice@example.com") AND (((event.module == "okta") OR STARTS_WITH(data_stream.dataset, "okta")) OR ((event.module == "entityanalytics_okta") OR STARTS_WITH(data_stream.dataset, "entityanalytics_okta"))))'
+      );
     });
 
-    it('returns filter for user.name and user.domain when name and domain present', () => {
+    it('returns filter for user.name and user.domain with source clause (single value from whenClause)', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { name: 'jane', domain: 'corp.com' },
         event: { module: 'entityanalytics_ad' },
       });
 
       expect(result).toBe(
-        '((user.name == "jane") AND (user.domain == "corp.com") AND (entity.namespace == "active_directory") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == ""))'
+        '((user.name == "jane") AND (user.domain == "corp.com") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == "") AND ((event.module == "entityanalytics_ad") OR STARTS_WITH(data_stream.dataset, "entityanalytics_ad")))'
+      );
+    });
+
+    it('returns filter with single value source clause when event.module has no whenClause match (e.g. aws)', () => {
+      const result = getEuidEsqlFilterBasedOnDocument('user', {
+        user: { email: 'romulo@elastic.co' },
+        event: { module: 'aws' },
+      });
+
+      expect(result).toBe(
+        '((user.email == "romulo@elastic.co") AND ((event.module == "aws") OR STARTS_WITH(data_stream.dataset, "aws")))'
+      );
+    });
+
+    it('returns filter with source clause from first chunk of data_stream.dataset when event.module is missing', () => {
+      const result = getEuidEsqlFilterBasedOnDocument('user', {
+        user: { email: 'romulo@elastic.co' },
+        data_stream: { dataset: 'aws.cloudtrail' },
+      });
+
+      expect(result).toBe(
+        '((user.email == "romulo@elastic.co") AND ((event.module == "aws") OR STARTS_WITH(data_stream.dataset, "aws")))'
       );
     });
   });

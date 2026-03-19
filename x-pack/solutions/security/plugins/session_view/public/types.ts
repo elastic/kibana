@@ -80,7 +80,8 @@ export interface SessionViewDeps {
   investigatedAlertId?: string;
   // Callback to open the alerts flyout
   loadAlertDetails?: (
-    alertUuid: string,
+    alertId: string,
+    alertIndex: string,
     // Callback used when alert flyout panel is closed
     handleOnAlertDetailsClosed: () => void
   ) => void;

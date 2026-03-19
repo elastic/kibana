@@ -35,15 +35,16 @@ export const ProjectPickerSettings = ({ onResetToDefaults }: ProjectPickerSettin
             closePopover();
           },
         },
-        {
-          isSeparator: true as const,
-        },
-        {
-          name: strings.getManageCrossProjectSearchLabel(),
-          icon: 'gear',
-          'data-test-subj': 'projectPickerManageSettingsMenuItem',
-          onClick: closePopover, // TODO: redirect to CPS management - UI not ready yet
-        },
+        // TODO: Enable this when cloud CPS management link is ready: https://github.com/elastic/kibana/issues/257859
+        // {
+        //   isSeparator: true as const,
+        // },
+        // {
+        //   name: strings.getManageCrossProjectSearchLabel(),
+        //   icon: 'gear',
+        //   'data-test-subj': 'projectPickerManageSettingsMenuItem',
+        //   onClick: closePopover, // TODO: redirect to CPS management - UI not ready yet
+        // },
       ],
     },
   ];

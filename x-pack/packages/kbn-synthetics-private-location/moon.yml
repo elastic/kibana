@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/synthetics-private-location'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/actionable-obs-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/synthetics-private-location'
+  title: '@kbn/synthetics-private-location'
   description: Moon project for @kbn/synthetics-private-location
   channel: ''
   owner: '@elastic/actionable-obs-team'
-  metadata:
-    sourceRoot: x-pack/packages/kbn-synthetics-private-location
+  sourceRoot: x-pack/packages/kbn-synthetics-private-location
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/dev-utils'
@@ -35,14 +34,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
