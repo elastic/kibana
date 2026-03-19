@@ -340,6 +340,7 @@ export class DiscoverApp {
       await this.waitForDocTableRendered();
     }
   }
+
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);
