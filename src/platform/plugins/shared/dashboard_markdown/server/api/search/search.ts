@@ -22,7 +22,7 @@ export async function search(
     type: MARKDOWN_SAVED_OBJECT_TYPE,
     searchFields: ['title^3', 'description'],
     fields: ['description', 'title'],
-    search: searchQuery.search,
+    search: searchQuery.query,
     perPage: searchQuery.per_page,
     page: searchQuery.page ? +searchQuery.page : undefined,
     defaultSearchOperator: 'AND',
