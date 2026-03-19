@@ -4983,6 +4983,21 @@ Object {
     "subActionParams": Object {
       "additionalProperties": false,
       "properties": Object {
+        "alertStates": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "new": Object {
+              "type": "boolean",
+            },
+            "ongoing": Object {
+              "type": "boolean",
+            },
+            "recovered": Object {
+              "type": "boolean",
+            },
+          },
+          "type": "object",
+        },
         "inputs": Object {},
         "spaceId": Object {
           "type": "string",

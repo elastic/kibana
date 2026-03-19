@@ -3,6 +3,7 @@
 exports[`Summary Transform Generator for 'Occurrences' SLO generates the correct transform for a 30days rolling SLO 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
     "version": 3.6,
@@ -251,6 +252,7 @@ Object {
 exports[`Summary Transform Generator for 'Occurrences' SLO generates the correct transform for a monthly calendar aligned SLO 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
     "version": 3.6,
@@ -499,6 +501,7 @@ Object {
 exports[`Summary Transform Generator for 'Occurrences' SLO generates the correct transform for a weekly calendar aligned SLO 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
     "version": 3.6,

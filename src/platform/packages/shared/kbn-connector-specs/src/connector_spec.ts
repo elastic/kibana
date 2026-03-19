@@ -67,6 +67,7 @@ export interface ConnectorMetadata {
     | 'generativeAIForSearchPlayground'
     | 'endpointSecurity'
     | 'workflows'
+    | 'agentBuilder'
   >;
 }
 
@@ -94,11 +95,14 @@ export interface AuthContext {
   sslSettings: SSLSettings;
 }
 
+export type AuthMode = 'per-user' | 'shared';
+
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  authMode?: AuthMode;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
