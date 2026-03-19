@@ -12,6 +12,7 @@ import { registerChatCompletionsRoute } from './chat_completions';
 import { registerConversationRoutes } from './conversations';
 import { registerModelsRoute } from './models';
 import { registerSetupRoute } from './setup';
+import { registerSessionRoutes } from './sessions';
 import { registerSkillRoutes } from './skills';
 
 export const registerRoutes = ({
@@ -29,5 +30,6 @@ export const registerRoutes = ({
   registerConversationRoutes({ router, coreSetup, logger });
   registerModelsRoute({ router, coreSetup, logger });
   registerSetupRoute({ router, coreSetup, logger, cloud });
+  registerSessionRoutes({ router, coreSetup, logger });
   registerSkillRoutes({ router, coreSetup, logger });
 };

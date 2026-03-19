@@ -13,7 +13,10 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { Runner, HooksServiceStart } from '@kbn/agent-builder-server';
+import type { Runner, HooksServiceStart, ScopedRunner } from '@kbn/agent-builder-server';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
@@ -41,6 +44,15 @@ export interface RunnerFactoryDeps {
   hooks: HooksServiceStart;
 }
 
+export interface ScopedRunnerWithAttachments {
+  runner: ScopedRunner;
+  attachmentStateManager: AttachmentStateManager;
+}
+
 export interface RunnerFactory {
   getRunner(): Runner;
+  createScopedRunnerWithAttachments(opts: {
+    request: KibanaRequest;
+    attachments: VersionedAttachment[];
+  }): Promise<ScopedRunnerWithAttachments>;
 }

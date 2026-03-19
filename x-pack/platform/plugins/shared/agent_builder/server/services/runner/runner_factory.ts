@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { RunnerFactoryDeps } from './types';
-import type { RunnerFactory } from './types';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { RunnerFactoryDeps, RunnerFactory, ScopedRunnerWithAttachments } from './types';
 import { createModelProviderFactory } from './model_provider';
-import { createRunner, type CreateRunnerDeps } from './runner';
+import { createRunner, createScopedRunner, type CreateRunnerDeps } from './runner';
+import { createStore } from './store';
+import { createConversationStateManager, createToolManager } from './utils';
+import { createPromptManager } from './utils/prompts';
 
 export class RunnerFactoryImpl implements RunnerFactory {
   private readonly deps: RunnerFactoryDeps;
@@ -19,6 +24,41 @@ export class RunnerFactoryImpl implements RunnerFactory {
 
   getRunner() {
     return createRunner(this.createRunnerDeps());
+  }
+
+  async createScopedRunnerWithAttachments({
+    request,
+    attachments,
+  }: {
+    request: KibanaRequest;
+    attachments: VersionedAttachment[];
+  }): Promise<ScopedRunnerWithAttachments> {
+    const runnerDeps = this.createRunnerDeps();
+    const { modelProviderFactory, ...otherDeps } = runnerDeps;
+
+    const { resultStore, filestore, skillsStore } = createStore({});
+    const attachmentStateManager = createAttachmentStateManager(attachments, {
+      getTypeDefinition: otherDeps.attachmentsService.getTypeDefinition,
+    });
+    const stateManager = createConversationStateManager();
+    const promptManager = createPromptManager({});
+    const toolManager = createToolManager();
+    const modelProvider = modelProviderFactory({ request });
+
+    const runner = createScopedRunner({
+      ...otherDeps,
+      modelProvider,
+      request,
+      resultStore,
+      skillsStore,
+      attachmentStateManager,
+      stateManager,
+      promptManager,
+      filestore,
+      toolManager,
+    });
+
+    return { runner, attachmentStateManager };
   }
 
   private createRunnerDeps(): CreateRunnerDeps {

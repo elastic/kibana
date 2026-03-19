@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { RunnerFactory, RunnerFactoryDeps } from './types';
+export type { RunnerFactory, RunnerFactoryDeps, ScopedRunnerWithAttachments } from './types';
 export { RunnerFactoryImpl } from './runner_factory';

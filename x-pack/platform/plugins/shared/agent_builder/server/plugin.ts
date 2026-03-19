@@ -339,6 +339,74 @@ export class AgentBuilderPlugin
             source: 'user',
           });
         },
+        executeSkillToolWithAttachments: async ({
+          request,
+          skillId,
+          toolId,
+          toolParams,
+          attachments,
+        }) => {
+          const { runner: scopedRunner, attachmentStateManager } =
+            await runnerFactory.createScopedRunnerWithAttachments({
+              request,
+              attachments,
+            });
+
+          // Try registry tool first
+          const toolRegistry = await tools.getRegistry({ request });
+          const existsInRegistry = await toolRegistry.has(toolId);
+          if (existsInRegistry) {
+            const result = await scopedRunner.runTool({
+              toolId,
+              toolParams,
+              source: 'user',
+            });
+            return { ...result, attachments: attachmentStateManager.getAll() };
+          }
+
+          // Look up inline tools from the skill
+          const skillRegistry = await skills.getRegistry({ request });
+          const skill = await skillRegistry.get(skillId);
+          if (!skill) {
+            throw createSkillNotFoundError({ skillId });
+          }
+
+          const inlineTools = (await skill.getInlineTools?.()) ?? [];
+          const inlineTool = inlineTools.find((t) => t.id === toolId);
+          if (!inlineTool) {
+            throw createToolNotFoundError({
+              toolId,
+              customMessage: `Tool '${toolId}' not found in skill '${skillId}'`,
+            });
+          }
+
+          const definitions = tools.getToolDefinitions();
+          const definitionMap = definitions
+            .filter((def) => !isDisabledDefinition(def))
+            .reduce((map, def) => {
+              map[def.toolType] = def as ToolTypeDefinition | BuiltinToolTypeDefinition;
+              return map;
+            }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
+
+          const spaceId = spaces?.spacesService?.getSpaceId(request) ?? 'default';
+          const cache = new ToolAvailabilityCache();
+          const definition = definitionMap[inlineTool.type as ToolType];
+
+          const converted = { ...inlineTool, tags: [] as string[] };
+          const internalTool = convertTool({
+            tool: converted as any,
+            definition,
+            context: { spaceId, request },
+            cache,
+          });
+
+          const result = await scopedRunner.runInternalTool({
+            tool: internalTool,
+            toolParams,
+            source: 'user',
+          });
+          return { ...result, attachments: attachmentStateManager.getAll() };
+        },
       },
       skills: {
         getRegistry: skills.getRegistry.bind(skills),

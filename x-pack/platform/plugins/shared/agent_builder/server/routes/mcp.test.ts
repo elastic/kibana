@@ -7,7 +7,11 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { registerMCPRoutes, filterToolsByNamespace } from './mcp';
+import {
+  registerMCPRoutes,
+  filterToolsByNamespace,
+  filterAttachmentDependentTools,
+} from './mcp';
 import type { RouteDependencies } from './types';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -135,6 +139,32 @@ describe('filterToolsByNamespace', () => {
     const filtered = filterToolsByNamespace(allTools, ',,,');
     expect(filtered).toHaveLength(2);
     expect(filtered).toEqual(allTools);
+  });
+});
+
+describe('filterAttachmentDependentTools', () => {
+  it('excludes the create_visualization tool', () => {
+    const tools = [
+      createMockTool('platform.core.search'),
+      createMockTool('platform.core.create_visualization'),
+      createMockTool('platform.core.generate_esql'),
+    ];
+    const filtered = filterAttachmentDependentTools(tools);
+    expect(filtered).toHaveLength(2);
+    expect(filtered.map((t) => t.id)).toEqual([
+      'platform.core.search',
+      'platform.core.generate_esql',
+    ]);
+  });
+
+  it('returns all tools when none are attachment-dependent', () => {
+    const tools = [
+      createMockTool('platform.core.search'),
+      createMockTool('platform.core.generate_esql'),
+    ];
+    const filtered = filterAttachmentDependentTools(tools);
+    expect(filtered).toHaveLength(2);
+    expect(filtered).toEqual(tools);
   });
 });
 

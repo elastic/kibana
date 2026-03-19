@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { RunToolFn, RunAgentFn, RunToolReturn } from '@kbn/agent-builder-server';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -126,6 +127,17 @@ export interface ToolsStart {
     toolId: string;
     toolParams: Record<string, unknown>;
   }) => Promise<RunToolReturn>;
+  /**
+   * Execute a tool within a skill context, seeded with initial attachments.
+   * Returns the tool result and the updated attachment state after execution.
+   */
+  executeSkillToolWithAttachments: (opts: {
+    request: KibanaRequest;
+    skillId: string;
+    toolId: string;
+    toolParams: Record<string, unknown>;
+    attachments: VersionedAttachment[];
+  }) => Promise<RunToolReturn & { attachments: VersionedAttachment[] }>;
 }
 
 export interface AgentsSetup {
