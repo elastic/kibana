@@ -101,7 +101,7 @@ export const GetWorkflowInsightsRequestSchema = {
     from: schema.maybe(schema.number()),
     ids: schema.maybe(arrayWithNonEmptyString('ids')),
     categories: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('endpoint')]))),
-    types: schema.maybe(schema.arrayOf(insightTypeOneOf)),
+    types: schema.maybe(schema.arrayOf(insightTypeOneOf, { maxSize: 20 })),
     sourceTypes: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('llm-connector')]))),
     sourceIds: schema.maybe(arrayWithNonEmptyString('sourceId')),
     targetTypes: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('endpoint')]))),
