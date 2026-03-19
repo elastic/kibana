@@ -662,7 +662,9 @@ export class TaskRunner<
         runDate: this.runDate,
       });
 
-      if (executionMetrics) {
+      // In case of non-success outcome framework calculated metrics could be incomplete
+      // Instead of including numbers without clear interpretation omit them
+      if (executionMetrics && lastRun.outcome === 'succeeded') {
         this.ruleMonitoring.addFrameworkMetrics({
           total_search_duration_ms: executionMetrics.totalSearchDurationMs,
         });

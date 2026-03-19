@@ -466,7 +466,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               frozen_indices_queried_count: frozenIndicesQueriedCount,
               suppressed_alerts: suppressedAlertsCount,
               gap_duration_s: remainingGap ? Math.round(remainingGap.asSeconds()) : undefined,
-              gap_range: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
+              gap_range: gap,
             });
 
             const createdSignalsCount = result.createdSignals.length;

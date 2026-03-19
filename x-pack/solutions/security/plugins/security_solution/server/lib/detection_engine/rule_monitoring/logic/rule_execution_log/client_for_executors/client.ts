@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omitBy } from 'lodash';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import type {
@@ -104,7 +105,7 @@ export function createRuleExecutionLogClientForExecutors(
       metricName: Metric,
       value: ConsumerExecutionMetrics[Metric]
     ): void {
-      if (this.closed() || value === undefined) {
+      if (this.closed() || !value) {
         return;
       }
 
@@ -116,7 +117,7 @@ export function createRuleExecutionLogClientForExecutors(
         return;
       }
 
-      ruleMonitoringService.setMetrics(metrics);
+      ruleMonitoringService.setMetrics(omitBy(metrics, (value) => !value));
     },
 
     logExecutionResult(args: ExecutionResult): void {
