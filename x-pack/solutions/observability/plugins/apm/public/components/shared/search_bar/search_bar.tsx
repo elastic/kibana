@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
+import { css } from '@emotion/react';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { ApmDatePicker } from '../date_picker/apm_date_picker';
 import { ApmEnvironmentFilter } from '../environment_filter';
 import { TimeComparison } from '../time_comparison';
 import { TransactionTypeSelect } from '../transaction_type_select';
 import { UnifiedSearchBar } from '../unified_search_bar';
+import { useSecondaryFiltersWidthStyle } from './use_secondary_filters_width_style';
 
 interface Props {
   hidden?: boolean;
@@ -36,96 +37,88 @@ export function SearchBar({
   searchBarBoolFilter,
 }: Props) {
   const { isMedium } = useBreakpoints();
-  const [isQueryDirty, setIsQueryDirty] = useState(false);
-  const [pendingKuery, setPendingKuery] = useState<string | undefined>();
-  const submitActionRef = useRef<() => void>();
-  const handleDirtyStateChange = useCallback((isDirty: boolean, draftKuery?: string) => {
-    setIsQueryDirty(isDirty);
-    setPendingKuery(draftKuery);
-  }, []);
+  const hasSecondaryFilters =
+    showTransactionTypeSelector || showEnvironmentFilter || showTimeComparison;
+
+  const { secondaryFiltersWidthStyle, setSearchBarContainerRef } = useSecondaryFiltersWidthStyle({
+    isMedium,
+    enabled: showUnifiedSearchBar && showQueryInput,
+  });
 
   if (hidden) {
     return null;
   }
 
   return (
-    <EuiFlexItem>
-      <EuiFlexGroup
-        gutterSize="s"
-        direction={isMedium ? 'column' : 'row'}
-        alignItems={isMedium ? 'stretch' : 'center'}
-        justifyContent="spaceBetween"
-        wrap={!isMedium}
-      >
-        {showTransactionTypeSelector && (
-          <EuiFlexItem grow={false}>
-            <TransactionTypeSelect
-              compressed
-              fullWidth={isMedium}
-              cssOverride={!isMedium ? { minWidth: 0, maxWidth: '125px' } : undefined}
-            />
-          </EuiFlexItem>
-        )}
+    <div ref={setSearchBarContainerRef}>
+      {showUnifiedSearchBar && (
+        <EuiFlexItem>
+          <UnifiedSearchBar
+            placeholder={searchBarPlaceholder}
+            boolFilter={searchBarBoolFilter}
+            showQueryInput={showQueryInput}
+            showDatePicker
+            showSubmitButton
+          />
+        </EuiFlexItem>
+      )}
+      {showUnifiedSearchBar && hasSecondaryFilters && <EuiSpacer size="s" />}
+      {showUnifiedSearchBar && hasSecondaryFilters && (
+        <EuiFlexGroup gutterSize="none" justifyContent="flexStart" responsive={false}>
+          <EuiFlexItem grow={false} style={secondaryFiltersWidthStyle}>
+            <EuiFlexGrid
+              columns={!isMedium ? 3 : 1}
+              gutterSize="s"
+              css={css`
+                width: 100%;
+                max-width: 100%;
+              `}
+            >
+              {showTransactionTypeSelector && (
+                <EuiFlexItem>
+                  <TransactionTypeSelect compressed fullWidth />
+                </EuiFlexItem>
+              )}
 
-        {showUnifiedSearchBar && (
-          <EuiFlexItem>
-            <UnifiedSearchBar
-              placeholder={searchBarPlaceholder}
-              boolFilter={searchBarBoolFilter}
-              showQueryInput={showQueryInput}
-              showDatePicker={false}
-              showSubmitButton={false}
-              onDirtyStateChange={handleDirtyStateChange}
-              submitActionRef={submitActionRef}
-            />
-          </EuiFlexItem>
-        )}
+              {showEnvironmentFilter && (
+                <EuiFlexItem>
+                  <ApmEnvironmentFilter compressed fullWidth />
+                </EuiFlexItem>
+              )}
 
-        <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-          <EuiFlexGroup
-            gutterSize="s"
-            direction={isMedium ? 'column' : 'row'}
-            alignItems={isMedium ? 'stretch' : 'center'}
-            wrap={!isMedium}
-          >
+              {showTimeComparison && (
+                <EuiFlexItem>
+                  <TimeComparison compressed fullWidth />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGrid>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {!showUnifiedSearchBar && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGrid columns={!isMedium ? 3 : 1} gutterSize="s">
+            {showTransactionTypeSelector && (
+              <EuiFlexItem>
+                <TransactionTypeSelect compressed fullWidth />
+              </EuiFlexItem>
+            )}
+
             {showEnvironmentFilter && (
-              <EuiFlexItem grow={false}>
-                <ApmEnvironmentFilter
-                  compressed
-                  fullWidth={isMedium}
-                  cssOverride={
-                    isMedium
-                      ? undefined
-                      : {
-                          minWidth: 0,
-                          maxWidth: '150px',
-                        }
-                  }
-                />
+              <EuiFlexItem>
+                <ApmEnvironmentFilter compressed fullWidth />
               </EuiFlexItem>
             )}
 
             {showTimeComparison && (
-              <EuiFlexItem grow={false}>
-                <TimeComparison compressed />
+              <EuiFlexItem>
+                <TimeComparison compressed fullWidth />
               </EuiFlexItem>
             )}
-
-            <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-              <ApmDatePicker
-                compressed
-                pendingKuery={pendingKuery}
-                submitActionRef={submitActionRef}
-                updateButtonProps={{
-                  fill: false,
-                  'data-test-subj': 'querySubmitButton',
-                  ...(isQueryDirty && { needsUpdate: true, showTooltip: false }),
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+          </EuiFlexGrid>
+        </>
+      )}
+    </div>
   );
 }

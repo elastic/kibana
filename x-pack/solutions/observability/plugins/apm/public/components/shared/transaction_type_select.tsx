@@ -67,7 +67,7 @@ export function TransactionTypeSelect({
         hideLabel
           ? undefined
           : i18n.translate('xpack.apm.transactionTypeSelect.label', {
-              defaultMessage: 'Type',
+              defaultMessage: 'Transaction type',
             })
       }
       aria-label={i18n.translate(

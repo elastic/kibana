@@ -79,7 +79,7 @@ export function ServiceGroupTemplate({
     </EuiFlexGroup>
   );
 
-  const tabs = useTabs(serviceGroupContextTab);
+  const tabs = useTabs(serviceGroupContextTab, isAllServices);
   const selectedTab = tabs?.find(({ isSelected }) => isSelected);
 
   // this is only used for building the breadcrumbs for the service group page
@@ -173,7 +173,7 @@ type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   breadcrumbLabel?: string;
 };
 
-function useTabs(selectedTab: ServiceGroupContextTab['key']) {
+function useTabs(selectedTab: ServiceGroupContextTab['key'], isAllServices?: boolean) {
   const router = useApmRouter();
   const {
     query,
@@ -209,6 +209,7 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
         defaultMessage: 'Service groups',
       }),
       href: router.link('/service-groups', { query: linkQuery }),
+      hidden: isAllServices === false,
     },
   ];
 
