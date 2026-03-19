@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { ResolverCellActionRenderer } from '../../resolver/types';
 import { DocumentHeader } from './header';
@@ -30,10 +30,12 @@ export interface DocumentFlyoutProps {
 export const DocumentFlyout: FC<DocumentFlyoutProps> = memo(({ hit, renderCellActions }) => {
   return (
     <>
-      <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m" grow={false}>
+      <EuiFlyoutHeader hasBorder>
         <DocumentHeader hit={hit} />
-      </EuiPanel>
-      <OverviewTab hit={hit} renderCellActions={renderCellActions} />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <OverviewTab hit={hit} renderCellActions={renderCellActions} />
+      </EuiFlyoutBody>
     </>
   );
 });

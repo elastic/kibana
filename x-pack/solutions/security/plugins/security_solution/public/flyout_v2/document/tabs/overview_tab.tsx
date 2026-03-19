@@ -35,7 +35,12 @@ export interface OverviewTabProps {
  */
 export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) => {
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} aria-label={OVERVIEW_ARIA_LABEL}>
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="none"
+      aria-label={OVERVIEW_ARIA_LABEL}
+    >
       <AboutSection hit={hit} />
       <EuiHorizontalRule margin="m" />
       <InvestigationSection hit={hit} />
