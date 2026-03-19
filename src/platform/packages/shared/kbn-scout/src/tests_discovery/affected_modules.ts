@@ -17,12 +17,19 @@ import type { ModuleDiscoveryInfo } from './types';
  * Build a map of directory path -> @kbn/ module ID from the root package.json.
  * Used to resolve Scout module roots to their @kbn/ identifiers.
  */
+interface RootPackageJson {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+}
+
 export const buildModuleIdLookup = (): Map<string, string> => {
   const packageJsonPath = path.join(REPO_ROOT, 'package.json');
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+  const packageJson = JSON.parse(
+    fs.readFileSync(packageJsonPath, 'utf-8')
+  ) as RootPackageJson;
   const allDependencies: Record<string, string> = {
-    ...packageJson.dependencies,
-    ...packageJson.devDependencies,
+    ...(packageJson.dependencies ?? {}),
+    ...(packageJson.devDependencies ?? {}),
   };
 
   const lookup = new Map<string, string>();
@@ -62,7 +69,8 @@ export const readAffectedModules = (filePath: string, log: ToolingLog): Set<stri
 
     return new Set<string>(parsed);
   } catch (error) {
-    log.warning(`Failed to read affected modules file '${filePath}': ${error}`);
+    const message = error instanceof Error ? error.message : String(error);
+    log.warning(`Failed to read affected modules file '${filePath}': ${message}`);
     return null;
   }
 };
@@ -110,11 +118,11 @@ export const filterModulesByAffectedModules = (
     }
   }
 
+  const DROPPED_LOG_LIMIT = 20;
   log.info(
     `Selective testing: keeping ${kept.length} module(s), dropping ${dropped.length} unaffected module(s)`
   );
-
-  if (dropped.length > 0 && dropped.length <= 20) {
+  if (dropped.length > 0 && dropped.length <= DROPPED_LOG_LIMIT) {
     log.info(`Dropped modules: ${dropped.join(', ')}`);
   }
 
