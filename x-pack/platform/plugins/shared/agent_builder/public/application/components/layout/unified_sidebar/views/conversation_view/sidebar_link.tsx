@@ -18,15 +18,27 @@ interface SidebarLinkProps {
 export const SidebarLink: React.FC<SidebarLinkProps> = ({ label, href, onClick }) => {
   const { euiTheme } = useEuiTheme();
 
+  const wrapperStyles = css`
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: ${euiTheme.size.base};
+  `;
+
   const linkStyles = css`
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: 100%;
     text-decoration: none;
     color: inherit;
-    padding: 22px ${euiTheme.size.l};
+    padding: 6px ${euiTheme.size.s};
+    border-radius: ${euiTheme.border.radius.medium};
+
+    &:hover {
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      text-decoration: none;
+    }
 
     &:focus-visible {
       outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
@@ -35,16 +47,18 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({ label, href, onClick }
   `;
 
   return (
-    <a href={href} onClick={onClick} css={linkStyles}>
-      <EuiText size="s">{label}</EuiText>
-      <EuiIcon
-        type="arrowRight"
-        size="s"
-        aria-hidden={true}
-        css={css`
-          color: ${euiTheme.colors.textDisabled};
-        `}
-      />
-    </a>
+    <div css={wrapperStyles}>
+      <a href={href} onClick={onClick} css={linkStyles}>
+        <EuiText size="s">{label}</EuiText>
+        <EuiIcon
+          type="arrowRight"
+          size="s"
+          aria-hidden={true}
+          css={css`
+            color: ${euiTheme.colors.textDisabled};
+          `}
+        />
+      </a>
+    </div>
   );
 };
