@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENTRY_LEADER_ENTITY_ID } from '../constants/field_names';
+import { ENTRY_LEADER_ENTITY_ID } from '../../../../flyout_v2/document/constants/field_names';
 import type { GetFieldsData } from './use_get_fields_data';
 import { getField } from '../utils';
 
