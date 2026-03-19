@@ -1,5 +1,5 @@
 {
-  "sha1": "db4a1a041c5b7cace9e39ddbc67db53b089d5a57",
+  "sha1": "b81d601625ea5169fba0b48b402d649e050342ab",
   "tests": [
     {
       "id": "bd77233fbb28a70-b95459eaf733782",
@@ -115,8 +115,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_auto_detect.spec.ts",
-        "line": 25,
-        "column": 7
+        "line": 28,
+        "column": 9
       }
     },
     {
@@ -131,8 +131,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_auto_detect.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 49,
+        "column": 9
       }
     },
     {
@@ -147,8 +147,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_auto_detect.spec.ts",
-        "line": 55,
-        "column": 7
+        "line": 61,
+        "column": 9
       }
     },
     {
@@ -259,8 +259,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_otel_host.spec.ts",
-        "line": 25,
-        "column": 7
+        "line": 28,
+        "column": 9
       }
     },
     {
@@ -275,8 +275,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_otel_host.spec.ts",
-        "line": 49,
-        "column": 7
+        "line": 52,
+        "column": 9
       }
     },
     {
@@ -291,8 +291,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_otel_kubernetes.spec.ts",
-        "line": 25,
-        "column": 7
+        "line": 28,
+        "column": 9
       }
     }
   ]
