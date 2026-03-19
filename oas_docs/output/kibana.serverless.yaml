@@ -24220,60 +24220,27 @@ paths:
                           type: object
                           properties:
                             agent_download_target_directory:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_download_timeout:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_internal:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_limits_go_max_procs:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_files_interval:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_files_keepfiles:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_files_rotateeverybytes:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_level:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_metrics_period:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_to_files:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_monitoring_runtime_experimental:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -24727,30 +24694,28 @@ paths:
                                                   vars:
                                                     additionalProperties:
                                                       anyOf:
-                                                        - anyOf:
-                                                            - type: string
-                                                            - type: number
-                                                            - type: boolean
-                                                            - items:
-                                                                type: string
-                                                              maxItems: 100
-                                                              type: array
-                                                            - items:
-                                                                type: number
-                                                              maxItems: 100
-                                                              type: array
-                                                            - additionalProperties: false
-                                                              type: object
-                                                              properties:
-                                                                id:
-                                                                  type: string
-                                                                isSecretRef:
-                                                                  type: boolean
-                                                              required:
-                                                                - id
-                                                                - isSecretRef
-                                                        - enum:
-                                                            - null
+                                                        - type: string
+                                                        - type: number
+                                                        - type: boolean
+                                                        - items:
+                                                            type: string
+                                                          maxItems: 100
+                                                          type: array
+                                                        - items:
+                                                            type: number
+                                                          maxItems: 100
+                                                          type: array
+                                                        - additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            id:
+                                                              type: string
+                                                            isSecretRef:
+                                                              type: boolean
+                                                          required:
+                                                            - id
+                                                            - isSecretRef
+                                                      nullable: true
                                                     description: Input/stream level variable. Refer to the integration documentation for more information.
                                                     type: object
                                               description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -24758,30 +24723,28 @@ paths:
                                             vars:
                                               additionalProperties:
                                                 anyOf:
-                                                  - anyOf:
-                                                      - type: string
-                                                      - type: number
-                                                      - type: boolean
-                                                      - items:
-                                                          type: string
-                                                        maxItems: 100
-                                                        type: array
-                                                      - items:
-                                                          type: number
-                                                        maxItems: 100
-                                                        type: array
-                                                      - additionalProperties: false
-                                                        type: object
-                                                        properties:
-                                                          id:
-                                                            type: string
-                                                          isSecretRef:
-                                                            type: boolean
-                                                        required:
-                                                          - id
-                                                          - isSecretRef
-                                                  - enum:
-                                                      - null
+                                                  - type: string
+                                                  - type: number
+                                                  - type: boolean
+                                                  - items:
+                                                      type: string
+                                                    maxItems: 100
+                                                    type: array
+                                                  - items:
+                                                      type: number
+                                                    maxItems: 100
+                                                    type: array
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      id:
+                                                        type: string
+                                                      isSecretRef:
+                                                        type: boolean
+                                                    required:
+                                                      - id
+                                                      - isSecretRef
+                                                nullable: true
                                               description: Input/stream level variable. Refer to the integration documentation for more information.
                                               type: object
                                         description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -24917,30 +24880,28 @@ paths:
                                         type: object
                                       - additionalProperties:
                                           anyOf:
-                                            - anyOf:
-                                                - type: string
-                                                - type: number
-                                                - type: boolean
-                                                - items:
-                                                    type: string
-                                                  maxItems: 100
-                                                  type: array
-                                                - items:
-                                                    type: number
-                                                  maxItems: 100
-                                                  type: array
-                                                - additionalProperties: false
-                                                  type: object
-                                                  properties:
-                                                    id:
-                                                      type: string
-                                                    isSecretRef:
-                                                      type: boolean
-                                                  required:
-                                                    - id
-                                                    - isSecretRef
-                                            - enum:
-                                                - null
+                                            - type: string
+                                            - type: number
+                                            - type: boolean
+                                            - items:
+                                                type: string
+                                              maxItems: 100
+                                              type: array
+                                            - items:
+                                                type: number
+                                              maxItems: 100
+                                              type: array
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                id:
+                                                  type: string
+                                                isSecretRef:
+                                                  type: boolean
+                                              required:
+                                                - id
+                                                - isSecretRef
+                                          nullable: true
                                         description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
                                         x-oas-optional: true
@@ -25094,60 +25055,27 @@ paths:
                   type: object
                   properties:
                     agent_download_target_directory:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_download_timeout:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_internal:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_limits_go_max_procs:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_files_interval:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_files_keepfiles:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_files_rotateeverybytes:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_level:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_metrics_period:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_to_files:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_monitoring_runtime_experimental:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                 agent_features:
                   items:
                     additionalProperties: false
@@ -25364,60 +25292,27 @@ paths:
                         type: object
                         properties:
                           agent_download_target_directory:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_download_timeout:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_internal:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_limits_go_max_procs:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_interval:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_keepfiles:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_rotateeverybytes:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_level:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_metrics_period:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_to_files:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_monitoring_runtime_experimental:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                       agent_features:
                         items:
                           additionalProperties: false
@@ -25871,30 +25766,28 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - anyOf:
-                                                          - type: string
-                                                          - type: number
-                                                          - type: boolean
-                                                          - items:
-                                                              type: string
-                                                            maxItems: 100
-                                                            type: array
-                                                          - items:
-                                                              type: number
-                                                            maxItems: 100
-                                                            type: array
-                                                          - additionalProperties: false
-                                                            type: object
-                                                            properties:
-                                                              id:
-                                                                type: string
-                                                              isSecretRef:
-                                                                type: boolean
-                                                            required:
-                                                              - id
-                                                              - isSecretRef
-                                                      - enum:
-                                                          - null
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                      - items:
+                                                          type: string
+                                                        maxItems: 100
+                                                        type: array
+                                                      - items:
+                                                          type: number
+                                                        maxItems: 100
+                                                        type: array
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          id:
+                                                            type: string
+                                                          isSecretRef:
+                                                            type: boolean
+                                                        required:
+                                                          - id
+                                                          - isSecretRef
+                                                    nullable: true
                                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                                   type: object
                                             description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -25902,30 +25795,28 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - anyOf:
-                                                    - type: string
-                                                    - type: number
-                                                    - type: boolean
-                                                    - items:
-                                                        type: string
-                                                      maxItems: 100
-                                                      type: array
-                                                    - items:
-                                                        type: number
-                                                      maxItems: 100
-                                                      type: array
-                                                    - additionalProperties: false
-                                                      type: object
-                                                      properties:
-                                                        id:
-                                                          type: string
-                                                        isSecretRef:
-                                                          type: boolean
-                                                      required:
-                                                        - id
-                                                        - isSecretRef
-                                                - enum:
-                                                    - null
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - items:
+                                                    type: string
+                                                  maxItems: 100
+                                                  type: array
+                                                - items:
+                                                    type: number
+                                                  maxItems: 100
+                                                  type: array
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    id:
+                                                      type: string
+                                                    isSecretRef:
+                                                      type: boolean
+                                                  required:
+                                                    - id
+                                                    - isSecretRef
+                                              nullable: true
                                             description: Input/stream level variable. Refer to the integration documentation for more information.
                                             type: object
                                       description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -26061,30 +25952,28 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - anyOf:
-                                              - type: string
-                                              - type: number
-                                              - type: boolean
-                                              - items:
-                                                  type: string
-                                                maxItems: 100
-                                                type: array
-                                              - items:
-                                                  type: number
-                                                maxItems: 100
-                                                type: array
-                                              - additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  id:
-                                                    type: string
-                                                  isSecretRef:
-                                                    type: boolean
-                                                required:
-                                                  - id
-                                                  - isSecretRef
-                                          - enum:
-                                              - null
+                                          - type: string
+                                          - type: number
+                                          - type: boolean
+                                          - items:
+                                              type: string
+                                            maxItems: 100
+                                            type: array
+                                          - items:
+                                              type: number
+                                            maxItems: 100
+                                            type: array
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                              isSecretRef:
+                                                type: boolean
+                                            required:
+                                              - id
+                                              - isSecretRef
+                                        nullable: true
                                       description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
                                       x-oas-optional: true
@@ -26257,60 +26146,27 @@ paths:
                           type: object
                           properties:
                             agent_download_target_directory:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_download_timeout:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_internal:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_limits_go_max_procs:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_files_interval:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_files_keepfiles:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_files_rotateeverybytes:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_level:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_metrics_period:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_logging_to_files:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                             agent_monitoring_runtime_experimental:
-                              anyOf:
-                                - enum:
-                                    - null
-                                - {}
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -26764,30 +26620,28 @@ paths:
                                                   vars:
                                                     additionalProperties:
                                                       anyOf:
-                                                        - anyOf:
-                                                            - type: string
-                                                            - type: number
-                                                            - type: boolean
-                                                            - items:
-                                                                type: string
-                                                              maxItems: 100
-                                                              type: array
-                                                            - items:
-                                                                type: number
-                                                              maxItems: 100
-                                                              type: array
-                                                            - additionalProperties: false
-                                                              type: object
-                                                              properties:
-                                                                id:
-                                                                  type: string
-                                                                isSecretRef:
-                                                                  type: boolean
-                                                              required:
-                                                                - id
-                                                                - isSecretRef
-                                                        - enum:
-                                                            - null
+                                                        - type: string
+                                                        - type: number
+                                                        - type: boolean
+                                                        - items:
+                                                            type: string
+                                                          maxItems: 100
+                                                          type: array
+                                                        - items:
+                                                            type: number
+                                                          maxItems: 100
+                                                          type: array
+                                                        - additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            id:
+                                                              type: string
+                                                            isSecretRef:
+                                                              type: boolean
+                                                          required:
+                                                            - id
+                                                            - isSecretRef
+                                                      nullable: true
                                                     description: Input/stream level variable. Refer to the integration documentation for more information.
                                                     type: object
                                               description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -26795,30 +26649,28 @@ paths:
                                             vars:
                                               additionalProperties:
                                                 anyOf:
-                                                  - anyOf:
-                                                      - type: string
-                                                      - type: number
-                                                      - type: boolean
-                                                      - items:
-                                                          type: string
-                                                        maxItems: 100
-                                                        type: array
-                                                      - items:
-                                                          type: number
-                                                        maxItems: 100
-                                                        type: array
-                                                      - additionalProperties: false
-                                                        type: object
-                                                        properties:
-                                                          id:
-                                                            type: string
-                                                          isSecretRef:
-                                                            type: boolean
-                                                        required:
-                                                          - id
-                                                          - isSecretRef
-                                                  - enum:
-                                                      - null
+                                                  - type: string
+                                                  - type: number
+                                                  - type: boolean
+                                                  - items:
+                                                      type: string
+                                                    maxItems: 100
+                                                    type: array
+                                                  - items:
+                                                      type: number
+                                                    maxItems: 100
+                                                    type: array
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      id:
+                                                        type: string
+                                                      isSecretRef:
+                                                        type: boolean
+                                                    required:
+                                                      - id
+                                                      - isSecretRef
+                                                nullable: true
                                               description: Input/stream level variable. Refer to the integration documentation for more information.
                                               type: object
                                         description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -26954,30 +26806,28 @@ paths:
                                         type: object
                                       - additionalProperties:
                                           anyOf:
-                                            - anyOf:
-                                                - type: string
-                                                - type: number
-                                                - type: boolean
-                                                - items:
-                                                    type: string
-                                                  maxItems: 100
-                                                  type: array
-                                                - items:
-                                                    type: number
-                                                  maxItems: 100
-                                                  type: array
-                                                - additionalProperties: false
-                                                  type: object
-                                                  properties:
-                                                    id:
-                                                      type: string
-                                                    isSecretRef:
-                                                      type: boolean
-                                                  required:
-                                                    - id
-                                                    - isSecretRef
-                                            - enum:
-                                                - null
+                                            - type: string
+                                            - type: number
+                                            - type: boolean
+                                            - items:
+                                                type: string
+                                              maxItems: 100
+                                              type: array
+                                            - items:
+                                                type: number
+                                              maxItems: 100
+                                              type: array
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                id:
+                                                  type: string
+                                                isSecretRef:
+                                                  type: boolean
+                                              required:
+                                                - id
+                                                - isSecretRef
+                                          nullable: true
                                         description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
                                         x-oas-optional: true
@@ -27129,60 +26979,27 @@ paths:
                         type: object
                         properties:
                           agent_download_target_directory:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_download_timeout:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_internal:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_limits_go_max_procs:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_interval:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_keepfiles:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_rotateeverybytes:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_level:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_metrics_period:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_to_files:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_monitoring_runtime_experimental:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                       agent_features:
                         items:
                           additionalProperties: false
@@ -27636,30 +27453,28 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - anyOf:
-                                                          - type: string
-                                                          - type: number
-                                                          - type: boolean
-                                                          - items:
-                                                              type: string
-                                                            maxItems: 100
-                                                            type: array
-                                                          - items:
-                                                              type: number
-                                                            maxItems: 100
-                                                            type: array
-                                                          - additionalProperties: false
-                                                            type: object
-                                                            properties:
-                                                              id:
-                                                                type: string
-                                                              isSecretRef:
-                                                                type: boolean
-                                                            required:
-                                                              - id
-                                                              - isSecretRef
-                                                      - enum:
-                                                          - null
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                      - items:
+                                                          type: string
+                                                        maxItems: 100
+                                                        type: array
+                                                      - items:
+                                                          type: number
+                                                        maxItems: 100
+                                                        type: array
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          id:
+                                                            type: string
+                                                          isSecretRef:
+                                                            type: boolean
+                                                        required:
+                                                          - id
+                                                          - isSecretRef
+                                                    nullable: true
                                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                                   type: object
                                             description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -27667,30 +27482,28 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - anyOf:
-                                                    - type: string
-                                                    - type: number
-                                                    - type: boolean
-                                                    - items:
-                                                        type: string
-                                                      maxItems: 100
-                                                      type: array
-                                                    - items:
-                                                        type: number
-                                                      maxItems: 100
-                                                      type: array
-                                                    - additionalProperties: false
-                                                      type: object
-                                                      properties:
-                                                        id:
-                                                          type: string
-                                                        isSecretRef:
-                                                          type: boolean
-                                                      required:
-                                                        - id
-                                                        - isSecretRef
-                                                - enum:
-                                                    - null
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - items:
+                                                    type: string
+                                                  maxItems: 100
+                                                  type: array
+                                                - items:
+                                                    type: number
+                                                  maxItems: 100
+                                                  type: array
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    id:
+                                                      type: string
+                                                    isSecretRef:
+                                                      type: boolean
+                                                  required:
+                                                    - id
+                                                    - isSecretRef
+                                              nullable: true
                                             description: Input/stream level variable. Refer to the integration documentation for more information.
                                             type: object
                                       description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -27826,30 +27639,28 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - anyOf:
-                                              - type: string
-                                              - type: number
-                                              - type: boolean
-                                              - items:
-                                                  type: string
-                                                maxItems: 100
-                                                type: array
-                                              - items:
-                                                  type: number
-                                                maxItems: 100
-                                                type: array
-                                              - additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  id:
-                                                    type: string
-                                                  isSecretRef:
-                                                    type: boolean
-                                                required:
-                                                  - id
-                                                  - isSecretRef
-                                          - enum:
-                                              - null
+                                          - type: string
+                                          - type: number
+                                          - type: boolean
+                                          - items:
+                                              type: string
+                                            maxItems: 100
+                                            type: array
+                                          - items:
+                                              type: number
+                                            maxItems: 100
+                                            type: array
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                              isSecretRef:
+                                                type: boolean
+                                            required:
+                                              - id
+                                              - isSecretRef
+                                        nullable: true
                                       description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
                                       x-oas-optional: true
@@ -28000,60 +27811,27 @@ paths:
                   type: object
                   properties:
                     agent_download_target_directory:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_download_timeout:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_internal:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_limits_go_max_procs:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_files_interval:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_files_keepfiles:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_files_rotateeverybytes:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_level:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_metrics_period:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_logging_to_files:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     agent_monitoring_runtime_experimental:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                 agent_features:
                   items:
                     additionalProperties: false
@@ -28272,60 +28050,27 @@ paths:
                         type: object
                         properties:
                           agent_download_target_directory:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_download_timeout:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_internal:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_limits_go_max_procs:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_interval:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_keepfiles:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_rotateeverybytes:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_level:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_metrics_period:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_to_files:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_monitoring_runtime_experimental:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                       agent_features:
                         items:
                           additionalProperties: false
@@ -28779,30 +28524,28 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - anyOf:
-                                                          - type: string
-                                                          - type: number
-                                                          - type: boolean
-                                                          - items:
-                                                              type: string
-                                                            maxItems: 100
-                                                            type: array
-                                                          - items:
-                                                              type: number
-                                                            maxItems: 100
-                                                            type: array
-                                                          - additionalProperties: false
-                                                            type: object
-                                                            properties:
-                                                              id:
-                                                                type: string
-                                                              isSecretRef:
-                                                                type: boolean
-                                                            required:
-                                                              - id
-                                                              - isSecretRef
-                                                      - enum:
-                                                          - null
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                      - items:
+                                                          type: string
+                                                        maxItems: 100
+                                                        type: array
+                                                      - items:
+                                                          type: number
+                                                        maxItems: 100
+                                                        type: array
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          id:
+                                                            type: string
+                                                          isSecretRef:
+                                                            type: boolean
+                                                        required:
+                                                          - id
+                                                          - isSecretRef
+                                                    nullable: true
                                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                                   type: object
                                             description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -28810,30 +28553,28 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - anyOf:
-                                                    - type: string
-                                                    - type: number
-                                                    - type: boolean
-                                                    - items:
-                                                        type: string
-                                                      maxItems: 100
-                                                      type: array
-                                                    - items:
-                                                        type: number
-                                                      maxItems: 100
-                                                      type: array
-                                                    - additionalProperties: false
-                                                      type: object
-                                                      properties:
-                                                        id:
-                                                          type: string
-                                                        isSecretRef:
-                                                          type: boolean
-                                                      required:
-                                                        - id
-                                                        - isSecretRef
-                                                - enum:
-                                                    - null
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - items:
+                                                    type: string
+                                                  maxItems: 100
+                                                  type: array
+                                                - items:
+                                                    type: number
+                                                  maxItems: 100
+                                                  type: array
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    id:
+                                                      type: string
+                                                    isSecretRef:
+                                                      type: boolean
+                                                  required:
+                                                    - id
+                                                    - isSecretRef
+                                              nullable: true
                                             description: Input/stream level variable. Refer to the integration documentation for more information.
                                             type: object
                                       description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -28969,30 +28710,28 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - anyOf:
-                                              - type: string
-                                              - type: number
-                                              - type: boolean
-                                              - items:
-                                                  type: string
-                                                maxItems: 100
-                                                type: array
-                                              - items:
-                                                  type: number
-                                                maxItems: 100
-                                                type: array
-                                              - additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  id:
-                                                    type: string
-                                                  isSecretRef:
-                                                    type: boolean
-                                                required:
-                                                  - id
-                                                  - isSecretRef
-                                          - enum:
-                                              - null
+                                          - type: string
+                                          - type: number
+                                          - type: boolean
+                                          - items:
+                                              type: string
+                                            maxItems: 100
+                                            type: array
+                                          - items:
+                                              type: number
+                                            maxItems: 100
+                                            type: array
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                              isSecretRef:
+                                                type: boolean
+                                            required:
+                                              - id
+                                              - isSecretRef
+                                        nullable: true
                                       description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
                                       x-oas-optional: true
@@ -29257,60 +28996,27 @@ paths:
                         type: object
                         properties:
                           agent_download_target_directory:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_download_timeout:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_internal:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_limits_go_max_procs:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_interval:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_keepfiles:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_files_rotateeverybytes:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_level:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_metrics_period:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_logging_to_files:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                           agent_monitoring_runtime_experimental:
-                            anyOf:
-                              - enum:
-                                  - null
-                              - {}
+                            nullable: true
                       agent_features:
                         items:
                           additionalProperties: false
@@ -29764,30 +29470,28 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - anyOf:
-                                                          - type: string
-                                                          - type: number
-                                                          - type: boolean
-                                                          - items:
-                                                              type: string
-                                                            maxItems: 100
-                                                            type: array
-                                                          - items:
-                                                              type: number
-                                                            maxItems: 100
-                                                            type: array
-                                                          - additionalProperties: false
-                                                            type: object
-                                                            properties:
-                                                              id:
-                                                                type: string
-                                                              isSecretRef:
-                                                                type: boolean
-                                                            required:
-                                                              - id
-                                                              - isSecretRef
-                                                      - enum:
-                                                          - null
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                      - items:
+                                                          type: string
+                                                        maxItems: 100
+                                                        type: array
+                                                      - items:
+                                                          type: number
+                                                        maxItems: 100
+                                                        type: array
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          id:
+                                                            type: string
+                                                          isSecretRef:
+                                                            type: boolean
+                                                        required:
+                                                          - id
+                                                          - isSecretRef
+                                                    nullable: true
                                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                                   type: object
                                             description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -29795,30 +29499,28 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - anyOf:
-                                                    - type: string
-                                                    - type: number
-                                                    - type: boolean
-                                                    - items:
-                                                        type: string
-                                                      maxItems: 100
-                                                      type: array
-                                                    - items:
-                                                        type: number
-                                                      maxItems: 100
-                                                      type: array
-                                                    - additionalProperties: false
-                                                      type: object
-                                                      properties:
-                                                        id:
-                                                          type: string
-                                                        isSecretRef:
-                                                          type: boolean
-                                                      required:
-                                                        - id
-                                                        - isSecretRef
-                                                - enum:
-                                                    - null
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - items:
+                                                    type: string
+                                                  maxItems: 100
+                                                  type: array
+                                                - items:
+                                                    type: number
+                                                  maxItems: 100
+                                                  type: array
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    id:
+                                                      type: string
+                                                    isSecretRef:
+                                                      type: boolean
+                                                  required:
+                                                    - id
+                                                    - isSecretRef
+                                              nullable: true
                                             description: Input/stream level variable. Refer to the integration documentation for more information.
                                             type: object
                                       description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -29954,30 +29656,28 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - anyOf:
-                                              - type: string
-                                              - type: number
-                                              - type: boolean
-                                              - items:
-                                                  type: string
-                                                maxItems: 100
-                                                type: array
-                                              - items:
-                                                  type: number
-                                                maxItems: 100
-                                                type: array
-                                              - additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  id:
-                                                    type: string
-                                                  isSecretRef:
-                                                    type: boolean
-                                                required:
-                                                  - id
-                                                  - isSecretRef
-                                          - enum:
-                                              - null
+                                          - type: string
+                                          - type: number
+                                          - type: boolean
+                                          - items:
+                                              type: string
+                                            maxItems: 100
+                                            type: array
+                                          - items:
+                                              type: number
+                                            maxItems: 100
+                                            type: array
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                              isSecretRef:
+                                                type: boolean
+                                            required:
+                                              - id
+                                              - isSecretRef
+                                        nullable: true
                                       description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
                                       x-oas-optional: true
@@ -31542,30 +31242,28 @@ paths:
                             vars:
                               additionalProperties:
                                 anyOf:
-                                  - anyOf:
-                                      - type: string
-                                      - type: number
-                                      - type: boolean
-                                      - items:
-                                          type: string
-                                        maxItems: 100
-                                        type: array
-                                      - items:
-                                          type: number
-                                        maxItems: 100
-                                        type: array
-                                      - additionalProperties: false
-                                        type: object
-                                        properties:
-                                          id:
-                                            type: string
-                                          isSecretRef:
-                                            type: boolean
-                                        required:
-                                          - id
-                                          - isSecretRef
-                                  - enum:
-                                      - null
+                                  - type: string
+                                  - type: number
+                                  - type: boolean
+                                  - items:
+                                      type: string
+                                    maxItems: 100
+                                    type: array
+                                  - items:
+                                      type: number
+                                    maxItems: 100
+                                    type: array
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - id
+                                      - isSecretRef
+                                nullable: true
                               description: Input/stream level variable. Refer to the integration documentation for more information.
                               type: object
                         description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -31573,30 +31271,28 @@ paths:
                       vars:
                         additionalProperties:
                           anyOf:
-                            - anyOf:
-                                - type: string
-                                - type: number
-                                - type: boolean
-                                - items:
-                                    type: string
-                                  maxItems: 100
-                                  type: array
-                                - items:
-                                    type: number
-                                  maxItems: 100
-                                  type: array
-                                - additionalProperties: false
-                                  type: object
-                                  properties:
-                                    id:
-                                      type: string
-                                    isSecretRef:
-                                      type: boolean
-                                  required:
-                                    - id
-                                    - isSecretRef
-                            - enum:
-                                - null
+                            - type: string
+                            - type: number
+                            - type: boolean
+                            - items:
+                                type: string
+                              maxItems: 100
+                              type: array
+                            - items:
+                                type: number
+                              maxItems: 100
+                              type: array
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                isSecretRef:
+                                  type: boolean
+                              required:
+                                - id
+                                - isSecretRef
+                          nullable: true
                         description: Input/stream level variable. Refer to the integration documentation for more information.
                         type: object
                   description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -31661,30 +31357,28 @@ paths:
                 vars:
                   additionalProperties:
                     anyOf:
-                      - anyOf:
-                          - type: string
-                          - type: number
-                          - type: boolean
-                          - items:
-                              type: string
-                            maxItems: 100
-                            type: array
-                          - items:
-                              type: number
-                            maxItems: 100
-                            type: array
-                          - additionalProperties: false
-                            type: object
-                            properties:
-                              id:
-                                type: string
-                              isSecretRef:
-                                type: boolean
-                            required:
-                              - id
-                              - isSecretRef
-                      - enum:
-                          - null
+                      - type: string
+                      - type: number
+                      - type: boolean
+                      - items:
+                          type: string
+                        maxItems: 100
+                        type: array
+                      - items:
+                          type: number
+                        maxItems: 100
+                        type: array
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          isSecretRef:
+                            type: boolean
+                        required:
+                          - id
+                          - isSecretRef
+                    nullable: true
                   description: Input/stream level variable. Refer to the integration documentation for more information.
                   type: object
               required:
@@ -32102,30 +31796,28 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - anyOf:
-                                                - type: string
-                                                - type: number
-                                                - type: boolean
-                                                - items:
-                                                    type: string
-                                                  maxItems: 100
-                                                  type: array
-                                                - items:
-                                                    type: number
-                                                  maxItems: 100
-                                                  type: array
-                                                - additionalProperties: false
-                                                  type: object
-                                                  properties:
-                                                    id:
-                                                      type: string
-                                                    isSecretRef:
-                                                      type: boolean
-                                                  required:
-                                                    - id
-                                                    - isSecretRef
-                                            - enum:
-                                                - null
+                                            - type: string
+                                            - type: number
+                                            - type: boolean
+                                            - items:
+                                                type: string
+                                              maxItems: 100
+                                              type: array
+                                            - items:
+                                                type: number
+                                              maxItems: 100
+                                              type: array
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                id:
+                                                  type: string
+                                                isSecretRef:
+                                                  type: boolean
+                                              required:
+                                                - id
+                                                - isSecretRef
+                                          nullable: true
                                         description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
                                   description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -32133,30 +31825,28 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - anyOf:
-                                          - type: string
-                                          - type: number
-                                          - type: boolean
-                                          - items:
-                                              type: string
-                                            maxItems: 100
-                                            type: array
-                                          - items:
-                                              type: number
-                                            maxItems: 100
-                                            type: array
-                                          - additionalProperties: false
-                                            type: object
-                                            properties:
-                                              id:
-                                                type: string
-                                              isSecretRef:
-                                                type: boolean
-                                            required:
-                                              - id
-                                              - isSecretRef
-                                      - enum:
-                                          - null
+                                      - type: string
+                                      - type: number
+                                      - type: boolean
+                                      - items:
+                                          type: string
+                                        maxItems: 100
+                                        type: array
+                                      - items:
+                                          type: number
+                                        maxItems: 100
+                                        type: array
+                                      - additionalProperties: false
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                          isSecretRef:
+                                            type: boolean
+                                        required:
+                                          - id
+                                          - isSecretRef
+                                    nullable: true
                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
                             description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -32292,30 +31982,28 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - anyOf:
-                                    - type: string
-                                    - type: number
-                                    - type: boolean
-                                    - items:
-                                        type: string
-                                      maxItems: 100
-                                      type: array
-                                    - items:
-                                        type: number
-                                      maxItems: 100
-                                      type: array
-                                    - additionalProperties: false
-                                      type: object
-                                      properties:
-                                        id:
-                                          type: string
-                                        isSecretRef:
-                                          type: boolean
-                                      required:
-                                        - id
-                                        - isSecretRef
-                                - enum:
-                                    - null
+                                - type: string
+                                - type: number
+                                - type: boolean
+                                - items:
+                                    type: string
+                                  maxItems: 100
+                                  type: array
+                                - items:
+                                    type: number
+                                  maxItems: 100
+                                  type: array
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    isSecretRef:
+                                      type: boolean
+                                  required:
+                                    - id
+                                    - isSecretRef
+                              nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
                             x-oas-optional: true
@@ -42915,10 +42603,7 @@ paths:
                   type: object
                   properties:
                     error:
-                      anyOf:
-                        - enum:
-                            - null
-                        - {}
+                      nullable: true
                     success:
                       type: boolean
                     transformId:
@@ -45547,6 +45232,15 @@ paths:
                               type: string
                             password:
                               anyOf:
+                                - items: {}
+                                  type: array
+                                - type: boolean
+                                - type: number
+                                - type: object
+                                - type: string
+                              nullable: true
+                              oneOf:
+                                - not: {}
                                 - anyOf:
                                     - items: {}
                                       type: array
@@ -45556,20 +45250,8 @@ paths:
                                     - type: string
                                   nullable: true
                                   oneOf:
+                                    - type: string
                                     - not: {}
-                                    - anyOf:
-                                        - items: {}
-                                          type: array
-                                        - type: boolean
-                                        - type: number
-                                        - type: object
-                                        - type: string
-                                      nullable: true
-                                      oneOf:
-                                        - type: string
-                                        - not: {}
-                                - enum:
-                                    - null
                             proxy_id:
                               nullable: true
                               type: string
@@ -45713,19 +45395,16 @@ paths:
                               type: string
                             username:
                               anyOf:
-                                - anyOf:
-                                    - items: {}
-                                      type: array
-                                    - type: boolean
-                                    - type: number
-                                    - type: object
-                                    - type: string
-                                  nullable: true
-                                  oneOf:
-                                    - type: string
-                                    - not: {}
-                                - enum:
-                                    - null
+                                - items: {}
+                                  type: array
+                                - type: boolean
+                                - type: number
+                                - type: object
+                                - type: string
+                              nullable: true
+                              oneOf:
+                                - type: string
+                                - not: {}
                             version:
                               type: string
                           required:
@@ -45735,6 +45414,8 @@ paths:
                             - compression_level
                             - auth_type
                             - connection_type
+                            - username
+                            - password
                     maxItems: 10000
                     type: array
                   page:
@@ -46367,6 +46048,15 @@ paths:
                       type: string
                     password:
                       anyOf:
+                        - items: {}
+                          type: array
+                        - type: boolean
+                        - type: number
+                        - type: object
+                        - type: string
+                      nullable: true
+                      oneOf:
+                        - not: {}
                         - anyOf:
                             - items: {}
                               type: array
@@ -46376,20 +46066,8 @@ paths:
                             - type: string
                           nullable: true
                           oneOf:
+                            - type: string
                             - not: {}
-                            - anyOf:
-                                - items: {}
-                                  type: array
-                                - type: boolean
-                                - type: number
-                                - type: object
-                                - type: string
-                              nullable: true
-                              oneOf:
-                                - type: string
-                                - not: {}
-                        - enum:
-                            - null
                     proxy_id:
                       nullable: true
                       type: string
@@ -46533,19 +46211,16 @@ paths:
                       type: string
                     username:
                       anyOf:
-                        - anyOf:
-                            - items: {}
-                              type: array
-                            - type: boolean
-                            - type: number
-                            - type: object
-                            - type: string
-                          nullable: true
-                          oneOf:
-                            - type: string
-                            - not: {}
-                        - enum:
-                            - null
+                        - items: {}
+                          type: array
+                        - type: boolean
+                        - type: number
+                        - type: object
+                        - type: string
+                      nullable: true
+                      oneOf:
+                        - type: string
+                        - not: {}
                     version:
                       type: string
                   required:
@@ -46555,6 +46230,8 @@ paths:
                     - compression_level
                     - auth_type
                     - connection_type
+                    - username
+                    - password
       responses:
         '200':
           content:
@@ -47133,6 +46810,15 @@ paths:
                             type: string
                           password:
                             anyOf:
+                              - items: {}
+                                type: array
+                              - type: boolean
+                              - type: number
+                              - type: object
+                              - type: string
+                            nullable: true
+                            oneOf:
+                              - not: {}
                               - anyOf:
                                   - items: {}
                                     type: array
@@ -47142,20 +46828,8 @@ paths:
                                   - type: string
                                 nullable: true
                                 oneOf:
+                                  - type: string
                                   - not: {}
-                                  - anyOf:
-                                      - items: {}
-                                        type: array
-                                      - type: boolean
-                                      - type: number
-                                      - type: object
-                                      - type: string
-                                    nullable: true
-                                    oneOf:
-                                      - type: string
-                                      - not: {}
-                              - enum:
-                                  - null
                           proxy_id:
                             nullable: true
                             type: string
@@ -47299,19 +46973,16 @@ paths:
                             type: string
                           username:
                             anyOf:
-                              - anyOf:
-                                  - items: {}
-                                    type: array
-                                  - type: boolean
-                                  - type: number
-                                  - type: object
-                                  - type: string
-                                nullable: true
-                                oneOf:
-                                  - type: string
-                                  - not: {}
-                              - enum:
-                                  - null
+                              - items: {}
+                                type: array
+                              - type: boolean
+                              - type: number
+                              - type: object
+                              - type: string
+                            nullable: true
+                            oneOf:
+                              - type: string
+                              - not: {}
                           version:
                             type: string
                         required:
@@ -47321,6 +46992,8 @@ paths:
                           - compression_level
                           - auth_type
                           - connection_type
+                          - username
+                          - password
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -48030,6 +47703,15 @@ paths:
                             type: string
                           password:
                             anyOf:
+                              - items: {}
+                                type: array
+                              - type: boolean
+                              - type: number
+                              - type: object
+                              - type: string
+                            nullable: true
+                            oneOf:
+                              - not: {}
                               - anyOf:
                                   - items: {}
                                     type: array
@@ -48039,20 +47721,8 @@ paths:
                                   - type: string
                                 nullable: true
                                 oneOf:
+                                  - type: string
                                   - not: {}
-                                  - anyOf:
-                                      - items: {}
-                                        type: array
-                                      - type: boolean
-                                      - type: number
-                                      - type: object
-                                      - type: string
-                                    nullable: true
-                                    oneOf:
-                                      - type: string
-                                      - not: {}
-                              - enum:
-                                  - null
                           proxy_id:
                             nullable: true
                             type: string
@@ -48196,19 +47866,16 @@ paths:
                             type: string
                           username:
                             anyOf:
-                              - anyOf:
-                                  - items: {}
-                                    type: array
-                                  - type: boolean
-                                  - type: number
-                                  - type: object
-                                  - type: string
-                                nullable: true
-                                oneOf:
-                                  - type: string
-                                  - not: {}
-                              - enum:
-                                  - null
+                              - items: {}
+                                type: array
+                              - type: boolean
+                              - type: number
+                              - type: object
+                              - type: string
+                            nullable: true
+                            oneOf:
+                              - type: string
+                              - not: {}
                           version:
                             type: string
                         required:
@@ -48218,6 +47885,8 @@ paths:
                           - compression_level
                           - auth_type
                           - connection_type
+                          - username
+                          - password
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -48826,6 +48495,15 @@ paths:
                       type: string
                     password:
                       anyOf:
+                        - items: {}
+                          type: array
+                        - type: boolean
+                        - type: number
+                        - type: object
+                        - type: string
+                      nullable: true
+                      oneOf:
+                        - not: {}
                         - anyOf:
                             - items: {}
                               type: array
@@ -48835,20 +48513,8 @@ paths:
                             - type: string
                           nullable: true
                           oneOf:
+                            - type: string
                             - not: {}
-                            - anyOf:
-                                - items: {}
-                                  type: array
-                                - type: boolean
-                                - type: number
-                                - type: object
-                                - type: string
-                              nullable: true
-                              oneOf:
-                                - type: string
-                                - not: {}
-                        - enum:
-                            - null
                     proxy_id:
                       nullable: true
                       type: string
@@ -48992,25 +48658,24 @@ paths:
                       type: string
                     username:
                       anyOf:
-                        - anyOf:
-                            - items: {}
-                              type: array
-                            - type: boolean
-                            - type: number
-                            - type: object
-                            - type: string
-                          nullable: true
-                          oneOf:
-                            - type: string
-                            - not: {}
-                        - enum:
-                            - null
+                        - items: {}
+                          type: array
+                        - type: boolean
+                        - type: number
+                        - type: object
+                        - type: string
+                      nullable: true
+                      oneOf:
+                        - type: string
+                        - not: {}
                     version:
                       type: string
                   required:
                     - name
                     - compression_level
                     - connection_type
+                    - username
+                    - password
       responses:
         '200':
           content:
@@ -49589,6 +49254,15 @@ paths:
                             type: string
                           password:
                             anyOf:
+                              - items: {}
+                                type: array
+                              - type: boolean
+                              - type: number
+                              - type: object
+                              - type: string
+                            nullable: true
+                            oneOf:
+                              - not: {}
                               - anyOf:
                                   - items: {}
                                     type: array
@@ -49598,20 +49272,8 @@ paths:
                                   - type: string
                                 nullable: true
                                 oneOf:
+                                  - type: string
                                   - not: {}
-                                  - anyOf:
-                                      - items: {}
-                                        type: array
-                                      - type: boolean
-                                      - type: number
-                                      - type: object
-                                      - type: string
-                                    nullable: true
-                                    oneOf:
-                                      - type: string
-                                      - not: {}
-                              - enum:
-                                  - null
                           proxy_id:
                             nullable: true
                             type: string
@@ -49755,19 +49417,16 @@ paths:
                             type: string
                           username:
                             anyOf:
-                              - anyOf:
-                                  - items: {}
-                                    type: array
-                                  - type: boolean
-                                  - type: number
-                                  - type: object
-                                  - type: string
-                                nullable: true
-                                oneOf:
-                                  - type: string
-                                  - not: {}
-                              - enum:
-                                  - null
+                              - items: {}
+                                type: array
+                              - type: boolean
+                              - type: number
+                              - type: object
+                              - type: string
+                            nullable: true
+                            oneOf:
+                              - type: string
+                              - not: {}
                           version:
                             type: string
                         required:
@@ -49777,6 +49436,8 @@ paths:
                           - compression_level
                           - auth_type
                           - connection_type
+                          - username
+                          - password
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -50196,30 +49857,28 @@ paths:
                                         vars:
                                           additionalProperties:
                                             anyOf:
-                                              - anyOf:
-                                                  - type: string
-                                                  - type: number
-                                                  - type: boolean
-                                                  - items:
-                                                      type: string
-                                                    maxItems: 100
-                                                    type: array
-                                                  - items:
-                                                      type: number
-                                                    maxItems: 100
-                                                    type: array
-                                                  - additionalProperties: false
-                                                    type: object
-                                                    properties:
-                                                      id:
-                                                        type: string
-                                                      isSecretRef:
-                                                        type: boolean
-                                                    required:
-                                                      - id
-                                                      - isSecretRef
-                                              - enum:
-                                                  - null
+                                              - type: string
+                                              - type: number
+                                              - type: boolean
+                                              - items:
+                                                  type: string
+                                                maxItems: 100
+                                                type: array
+                                              - items:
+                                                  type: number
+                                                maxItems: 100
+                                                type: array
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  id:
+                                                    type: string
+                                                  isSecretRef:
+                                                    type: boolean
+                                                required:
+                                                  - id
+                                                  - isSecretRef
+                                            nullable: true
                                           description: Input/stream level variable. Refer to the integration documentation for more information.
                                           type: object
                                     description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -50227,30 +49886,28 @@ paths:
                                   vars:
                                     additionalProperties:
                                       anyOf:
-                                        - anyOf:
-                                            - type: string
-                                            - type: number
-                                            - type: boolean
-                                            - items:
-                                                type: string
-                                              maxItems: 100
-                                              type: array
-                                            - items:
-                                                type: number
-                                              maxItems: 100
-                                              type: array
-                                            - additionalProperties: false
-                                              type: object
-                                              properties:
-                                                id:
-                                                  type: string
-                                                isSecretRef:
-                                                  type: boolean
-                                              required:
-                                                - id
-                                                - isSecretRef
-                                        - enum:
-                                            - null
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                        - items:
+                                            type: string
+                                          maxItems: 100
+                                          type: array
+                                        - items:
+                                            type: number
+                                          maxItems: 100
+                                          type: array
+                                        - additionalProperties: false
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: string
+                                            isSecretRef:
+                                              type: boolean
+                                          required:
+                                            - id
+                                            - isSecretRef
+                                      nullable: true
                                     description: Input/stream level variable. Refer to the integration documentation for more information.
                                     type: object
                               description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -50386,30 +50043,28 @@ paths:
                               type: object
                             - additionalProperties:
                                 anyOf:
-                                  - anyOf:
-                                      - type: string
-                                      - type: number
-                                      - type: boolean
-                                      - items:
-                                          type: string
-                                        maxItems: 100
-                                        type: array
-                                      - items:
-                                          type: number
-                                        maxItems: 100
-                                        type: array
-                                      - additionalProperties: false
-                                        type: object
-                                        properties:
-                                          id:
-                                            type: string
-                                          isSecretRef:
-                                            type: boolean
-                                        required:
-                                          - id
-                                          - isSecretRef
-                                  - enum:
-                                      - null
+                                  - type: string
+                                  - type: number
+                                  - type: boolean
+                                  - items:
+                                      type: string
+                                    maxItems: 100
+                                    type: array
+                                  - items:
+                                      type: number
+                                    maxItems: 100
+                                    type: array
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - id
+                                      - isSecretRef
+                                nullable: true
                               description: Input/stream level variable. Refer to the integration documentation for more information.
                               type: object
                               x-oas-optional: true
@@ -50872,30 +50527,28 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - anyOf:
-                                          - type: string
-                                          - type: number
-                                          - type: boolean
-                                          - items:
-                                              type: string
-                                            maxItems: 100
-                                            type: array
-                                          - items:
-                                              type: number
-                                            maxItems: 100
-                                            type: array
-                                          - additionalProperties: false
-                                            type: object
-                                            properties:
-                                              id:
-                                                type: string
-                                              isSecretRef:
-                                                type: boolean
-                                            required:
-                                              - id
-                                              - isSecretRef
-                                      - enum:
-                                          - null
+                                      - type: string
+                                      - type: number
+                                      - type: boolean
+                                      - items:
+                                          type: string
+                                        maxItems: 100
+                                        type: array
+                                      - items:
+                                          type: number
+                                        maxItems: 100
+                                        type: array
+                                      - additionalProperties: false
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                          isSecretRef:
+                                            type: boolean
+                                        required:
+                                          - id
+                                          - isSecretRef
+                                    nullable: true
                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
                             description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -50903,30 +50556,28 @@ paths:
                           vars:
                             additionalProperties:
                               anyOf:
-                                - anyOf:
-                                    - type: string
-                                    - type: number
-                                    - type: boolean
-                                    - items:
-                                        type: string
-                                      maxItems: 100
-                                      type: array
-                                    - items:
-                                        type: number
-                                      maxItems: 100
-                                      type: array
-                                    - additionalProperties: false
-                                      type: object
-                                      properties:
-                                        id:
-                                          type: string
-                                        isSecretRef:
-                                          type: boolean
-                                      required:
-                                        - id
-                                        - isSecretRef
-                                - enum:
-                                    - null
+                                - type: string
+                                - type: number
+                                - type: boolean
+                                - items:
+                                    type: string
+                                  maxItems: 100
+                                  type: array
+                                - items:
+                                    type: number
+                                  maxItems: 100
+                                  type: array
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    isSecretRef:
+                                      type: boolean
+                                  required:
+                                    - id
+                                    - isSecretRef
+                              nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
                       description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -51008,30 +50659,28 @@ paths:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - anyOf:
-                              - type: string
-                              - type: number
-                              - type: boolean
-                              - items:
-                                  type: string
-                                maxItems: 100
-                                type: array
-                              - items:
-                                  type: number
-                                maxItems: 100
-                                type: array
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  id:
-                                    type: string
-                                  isSecretRef:
-                                    type: boolean
-                                required:
-                                  - id
-                                  - isSecretRef
-                          - enum:
-                              - null
+                          - type: string
+                          - type: number
+                          - type: boolean
+                          - items:
+                              type: string
+                            maxItems: 100
+                            type: array
+                          - items:
+                              type: number
+                            maxItems: 100
+                            type: array
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              isSecretRef:
+                                type: boolean
+                            required:
+                              - id
+                              - isSecretRef
+                        nullable: true
                       description: Input/stream level variable. Refer to the integration documentation for more information.
                       type: object
                   required:
@@ -51310,30 +50959,28 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - anyOf:
-                                                - type: string
-                                                - type: number
-                                                - type: boolean
-                                                - items:
-                                                    type: string
-                                                  maxItems: 100
-                                                  type: array
-                                                - items:
-                                                    type: number
-                                                  maxItems: 100
-                                                  type: array
-                                                - additionalProperties: false
-                                                  type: object
-                                                  properties:
-                                                    id:
-                                                      type: string
-                                                    isSecretRef:
-                                                      type: boolean
-                                                  required:
-                                                    - id
-                                                    - isSecretRef
-                                            - enum:
-                                                - null
+                                            - type: string
+                                            - type: number
+                                            - type: boolean
+                                            - items:
+                                                type: string
+                                              maxItems: 100
+                                              type: array
+                                            - items:
+                                                type: number
+                                              maxItems: 100
+                                              type: array
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                id:
+                                                  type: string
+                                                isSecretRef:
+                                                  type: boolean
+                                              required:
+                                                - id
+                                                - isSecretRef
+                                          nullable: true
                                         description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
                                   description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -51341,30 +50988,28 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - anyOf:
-                                          - type: string
-                                          - type: number
-                                          - type: boolean
-                                          - items:
-                                              type: string
-                                            maxItems: 100
-                                            type: array
-                                          - items:
-                                              type: number
-                                            maxItems: 100
-                                            type: array
-                                          - additionalProperties: false
-                                            type: object
-                                            properties:
-                                              id:
-                                                type: string
-                                              isSecretRef:
-                                                type: boolean
-                                            required:
-                                              - id
-                                              - isSecretRef
-                                      - enum:
-                                          - null
+                                      - type: string
+                                      - type: number
+                                      - type: boolean
+                                      - items:
+                                          type: string
+                                        maxItems: 100
+                                        type: array
+                                      - items:
+                                          type: number
+                                        maxItems: 100
+                                        type: array
+                                      - additionalProperties: false
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                          isSecretRef:
+                                            type: boolean
+                                        required:
+                                          - id
+                                          - isSecretRef
+                                    nullable: true
                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
                             description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -51500,30 +51145,28 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - anyOf:
-                                    - type: string
-                                    - type: number
-                                    - type: boolean
-                                    - items:
-                                        type: string
-                                      maxItems: 100
-                                      type: array
-                                    - items:
-                                        type: number
-                                      maxItems: 100
-                                      type: array
-                                    - additionalProperties: false
-                                      type: object
-                                      properties:
-                                        id:
-                                          type: string
-                                        isSecretRef:
-                                          type: boolean
-                                      required:
-                                        - id
-                                        - isSecretRef
-                                - enum:
-                                    - null
+                                - type: string
+                                - type: number
+                                - type: boolean
+                                - items:
+                                    type: string
+                                  maxItems: 100
+                                  type: array
+                                - items:
+                                    type: number
+                                  maxItems: 100
+                                  type: array
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    isSecretRef:
+                                      type: boolean
+                                  required:
+                                    - id
+                                    - isSecretRef
+                              nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
                             x-oas-optional: true
@@ -51907,30 +51550,28 @@ paths:
                                         vars:
                                           additionalProperties:
                                             anyOf:
-                                              - anyOf:
-                                                  - type: string
-                                                  - type: number
-                                                  - type: boolean
-                                                  - items:
-                                                      type: string
-                                                    maxItems: 100
-                                                    type: array
-                                                  - items:
-                                                      type: number
-                                                    maxItems: 100
-                                                    type: array
-                                                  - additionalProperties: false
-                                                    type: object
-                                                    properties:
-                                                      id:
-                                                        type: string
-                                                      isSecretRef:
-                                                        type: boolean
-                                                    required:
-                                                      - id
-                                                      - isSecretRef
-                                              - enum:
-                                                  - null
+                                              - type: string
+                                              - type: number
+                                              - type: boolean
+                                              - items:
+                                                  type: string
+                                                maxItems: 100
+                                                type: array
+                                              - items:
+                                                  type: number
+                                                maxItems: 100
+                                                type: array
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  id:
+                                                    type: string
+                                                  isSecretRef:
+                                                    type: boolean
+                                                required:
+                                                  - id
+                                                  - isSecretRef
+                                            nullable: true
                                           description: Input/stream level variable. Refer to the integration documentation for more information.
                                           type: object
                                     description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -51938,30 +51579,28 @@ paths:
                                   vars:
                                     additionalProperties:
                                       anyOf:
-                                        - anyOf:
-                                            - type: string
-                                            - type: number
-                                            - type: boolean
-                                            - items:
-                                                type: string
-                                              maxItems: 100
-                                              type: array
-                                            - items:
-                                                type: number
-                                              maxItems: 100
-                                              type: array
-                                            - additionalProperties: false
-                                              type: object
-                                              properties:
-                                                id:
-                                                  type: string
-                                                isSecretRef:
-                                                  type: boolean
-                                              required:
-                                                - id
-                                                - isSecretRef
-                                        - enum:
-                                            - null
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                        - items:
+                                            type: string
+                                          maxItems: 100
+                                          type: array
+                                        - items:
+                                            type: number
+                                          maxItems: 100
+                                          type: array
+                                        - additionalProperties: false
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: string
+                                            isSecretRef:
+                                              type: boolean
+                                          required:
+                                            - id
+                                            - isSecretRef
+                                      nullable: true
                                     description: Input/stream level variable. Refer to the integration documentation for more information.
                                     type: object
                               description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -52097,30 +51736,28 @@ paths:
                               type: object
                             - additionalProperties:
                                 anyOf:
-                                  - anyOf:
-                                      - type: string
-                                      - type: number
-                                      - type: boolean
-                                      - items:
-                                          type: string
-                                        maxItems: 100
-                                        type: array
-                                      - items:
-                                          type: number
-                                        maxItems: 100
-                                        type: array
-                                      - additionalProperties: false
-                                        type: object
-                                        properties:
-                                          id:
-                                            type: string
-                                          isSecretRef:
-                                            type: boolean
-                                        required:
-                                          - id
-                                          - isSecretRef
-                                  - enum:
-                                      - null
+                                  - type: string
+                                  - type: number
+                                  - type: boolean
+                                  - items:
+                                      type: string
+                                    maxItems: 100
+                                    type: array
+                                  - items:
+                                      type: number
+                                    maxItems: 100
+                                    type: array
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - id
+                                      - isSecretRef
+                                nullable: true
                               description: Input/stream level variable. Refer to the integration documentation for more information.
                               type: object
                               x-oas-optional: true
@@ -52553,30 +52190,28 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - anyOf:
-                                                - type: string
-                                                - type: number
-                                                - type: boolean
-                                                - items:
-                                                    type: string
-                                                  maxItems: 100
-                                                  type: array
-                                                - items:
-                                                    type: number
-                                                  maxItems: 100
-                                                  type: array
-                                                - additionalProperties: false
-                                                  type: object
-                                                  properties:
-                                                    id:
-                                                      type: string
-                                                    isSecretRef:
-                                                      type: boolean
-                                                  required:
-                                                    - id
-                                                    - isSecretRef
-                                            - enum:
-                                                - null
+                                            - type: string
+                                            - type: number
+                                            - type: boolean
+                                            - items:
+                                                type: string
+                                              maxItems: 100
+                                              type: array
+                                            - items:
+                                                type: number
+                                              maxItems: 100
+                                              type: array
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                id:
+                                                  type: string
+                                                isSecretRef:
+                                                  type: boolean
+                                              required:
+                                                - id
+                                                - isSecretRef
+                                          nullable: true
                                         description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
                                   description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -52584,30 +52219,28 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - anyOf:
-                                          - type: string
-                                          - type: number
-                                          - type: boolean
-                                          - items:
-                                              type: string
-                                            maxItems: 100
-                                            type: array
-                                          - items:
-                                              type: number
-                                            maxItems: 100
-                                            type: array
-                                          - additionalProperties: false
-                                            type: object
-                                            properties:
-                                              id:
-                                                type: string
-                                              isSecretRef:
-                                                type: boolean
-                                            required:
-                                              - id
-                                              - isSecretRef
-                                      - enum:
-                                          - null
+                                      - type: string
+                                      - type: number
+                                      - type: boolean
+                                      - items:
+                                          type: string
+                                        maxItems: 100
+                                        type: array
+                                      - items:
+                                          type: number
+                                        maxItems: 100
+                                        type: array
+                                      - additionalProperties: false
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                          isSecretRef:
+                                            type: boolean
+                                        required:
+                                          - id
+                                          - isSecretRef
+                                    nullable: true
                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
                             description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -52743,30 +52376,28 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - anyOf:
-                                    - type: string
-                                    - type: number
-                                    - type: boolean
-                                    - items:
-                                        type: string
-                                      maxItems: 100
-                                      type: array
-                                    - items:
-                                        type: number
-                                      maxItems: 100
-                                      type: array
-                                    - additionalProperties: false
-                                      type: object
-                                      properties:
-                                        id:
-                                          type: string
-                                        isSecretRef:
-                                          type: boolean
-                                      required:
-                                        - id
-                                        - isSecretRef
-                                - enum:
-                                    - null
+                                - type: string
+                                - type: number
+                                - type: boolean
+                                - items:
+                                    type: string
+                                  maxItems: 100
+                                  type: array
+                                - items:
+                                    type: number
+                                  maxItems: 100
+                                  type: array
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    isSecretRef:
+                                      type: boolean
+                                  required:
+                                    - id
+                                    - isSecretRef
+                              nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
                             x-oas-optional: true
@@ -53230,30 +52861,28 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - anyOf:
-                                          - type: string
-                                          - type: number
-                                          - type: boolean
-                                          - items:
-                                              type: string
-                                            maxItems: 100
-                                            type: array
-                                          - items:
-                                              type: number
-                                            maxItems: 100
-                                            type: array
-                                          - additionalProperties: false
-                                            type: object
-                                            properties:
-                                              id:
-                                                type: string
-                                              isSecretRef:
-                                                type: boolean
-                                            required:
-                                              - id
-                                              - isSecretRef
-                                      - enum:
-                                          - null
+                                      - type: string
+                                      - type: number
+                                      - type: boolean
+                                      - items:
+                                          type: string
+                                        maxItems: 100
+                                        type: array
+                                      - items:
+                                          type: number
+                                        maxItems: 100
+                                        type: array
+                                      - additionalProperties: false
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                          isSecretRef:
+                                            type: boolean
+                                        required:
+                                          - id
+                                          - isSecretRef
+                                    nullable: true
                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
                             description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -53261,30 +52890,28 @@ paths:
                           vars:
                             additionalProperties:
                               anyOf:
-                                - anyOf:
-                                    - type: string
-                                    - type: number
-                                    - type: boolean
-                                    - items:
-                                        type: string
-                                      maxItems: 100
-                                      type: array
-                                    - items:
-                                        type: number
-                                      maxItems: 100
-                                      type: array
-                                    - additionalProperties: false
-                                      type: object
-                                      properties:
-                                        id:
-                                          type: string
-                                        isSecretRef:
-                                          type: boolean
-                                      required:
-                                        - id
-                                        - isSecretRef
-                                - enum:
-                                    - null
+                                - type: string
+                                - type: number
+                                - type: boolean
+                                - items:
+                                    type: string
+                                  maxItems: 100
+                                  type: array
+                                - items:
+                                    type: number
+                                  maxItems: 100
+                                  type: array
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    isSecretRef:
+                                      type: boolean
+                                  required:
+                                    - id
+                                    - isSecretRef
+                              nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
                       description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -53366,30 +52993,28 @@ paths:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - anyOf:
-                              - type: string
-                              - type: number
-                              - type: boolean
-                              - items:
-                                  type: string
-                                maxItems: 100
-                                type: array
-                              - items:
-                                  type: number
-                                maxItems: 100
-                                type: array
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  id:
-                                    type: string
-                                  isSecretRef:
-                                    type: boolean
-                                required:
-                                  - id
-                                  - isSecretRef
-                          - enum:
-                              - null
+                          - type: string
+                          - type: number
+                          - type: boolean
+                          - items:
+                              type: string
+                            maxItems: 100
+                            type: array
+                          - items:
+                              type: number
+                            maxItems: 100
+                            type: array
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              isSecretRef:
+                                type: boolean
+                            required:
+                              - id
+                              - isSecretRef
+                        nullable: true
                       description: Input/stream level variable. Refer to the integration documentation for more information.
                       type: object
                   required:
@@ -53667,30 +53292,28 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - anyOf:
-                                                - type: string
-                                                - type: number
-                                                - type: boolean
-                                                - items:
-                                                    type: string
-                                                  maxItems: 100
-                                                  type: array
-                                                - items:
-                                                    type: number
-                                                  maxItems: 100
-                                                  type: array
-                                                - additionalProperties: false
-                                                  type: object
-                                                  properties:
-                                                    id:
-                                                      type: string
-                                                    isSecretRef:
-                                                      type: boolean
-                                                  required:
-                                                    - id
-                                                    - isSecretRef
-                                            - enum:
-                                                - null
+                                            - type: string
+                                            - type: number
+                                            - type: boolean
+                                            - items:
+                                                type: string
+                                              maxItems: 100
+                                              type: array
+                                            - items:
+                                                type: number
+                                              maxItems: 100
+                                              type: array
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                id:
+                                                  type: string
+                                                isSecretRef:
+                                                  type: boolean
+                                              required:
+                                                - id
+                                                - isSecretRef
+                                          nullable: true
                                         description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
                                   description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -53698,30 +53321,28 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - anyOf:
-                                          - type: string
-                                          - type: number
-                                          - type: boolean
-                                          - items:
-                                              type: string
-                                            maxItems: 100
-                                            type: array
-                                          - items:
-                                              type: number
-                                            maxItems: 100
-                                            type: array
-                                          - additionalProperties: false
-                                            type: object
-                                            properties:
-                                              id:
-                                                type: string
-                                              isSecretRef:
-                                                type: boolean
-                                            required:
-                                              - id
-                                              - isSecretRef
-                                      - enum:
-                                          - null
+                                      - type: string
+                                      - type: number
+                                      - type: boolean
+                                      - items:
+                                          type: string
+                                        maxItems: 100
+                                        type: array
+                                      - items:
+                                          type: number
+                                        maxItems: 100
+                                        type: array
+                                      - additionalProperties: false
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                          isSecretRef:
+                                            type: boolean
+                                        required:
+                                          - id
+                                          - isSecretRef
+                                    nullable: true
                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
                             description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -53857,30 +53478,28 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - anyOf:
-                                    - type: string
-                                    - type: number
-                                    - type: boolean
-                                    - items:
-                                        type: string
-                                      maxItems: 100
-                                      type: array
-                                    - items:
-                                        type: number
-                                      maxItems: 100
-                                      type: array
-                                    - additionalProperties: false
-                                      type: object
-                                      properties:
-                                        id:
-                                          type: string
-                                        isSecretRef:
-                                          type: boolean
-                                      required:
-                                        - id
-                                        - isSecretRef
-                                - enum:
-                                    - null
+                                - type: string
+                                - type: number
+                                - type: boolean
+                                - items:
+                                    type: string
+                                  maxItems: 100
+                                  type: array
+                                - items:
+                                    type: number
+                                  maxItems: 100
+                                  type: array
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    isSecretRef:
+                                      type: boolean
+                                  required:
+                                    - id
+                                    - isSecretRef
+                              nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
                             x-oas-optional: true
@@ -54608,30 +54227,28 @@ paths:
                                               vars:
                                                 additionalProperties:
                                                   anyOf:
-                                                    - anyOf:
-                                                        - type: string
-                                                        - type: number
-                                                        - type: boolean
-                                                        - items:
-                                                            type: string
-                                                          maxItems: 100
-                                                          type: array
-                                                        - items:
-                                                            type: number
-                                                          maxItems: 100
-                                                          type: array
-                                                        - additionalProperties: false
-                                                          type: object
-                                                          properties:
-                                                            id:
-                                                              type: string
-                                                            isSecretRef:
-                                                              type: boolean
-                                                          required:
-                                                            - id
-                                                            - isSecretRef
-                                                    - enum:
-                                                        - null
+                                                    - type: string
+                                                    - type: number
+                                                    - type: boolean
+                                                    - items:
+                                                        type: string
+                                                      maxItems: 100
+                                                      type: array
+                                                    - items:
+                                                        type: number
+                                                      maxItems: 100
+                                                      type: array
+                                                    - additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        id:
+                                                          type: string
+                                                        isSecretRef:
+                                                          type: boolean
+                                                      required:
+                                                        - id
+                                                        - isSecretRef
+                                                  nullable: true
                                                 description: Input/stream level variable. Refer to the integration documentation for more information.
                                                 type: object
                                           description: Input streams. Refer to the integration documentation to know which streams are available.
@@ -54639,30 +54256,28 @@ paths:
                                         vars:
                                           additionalProperties:
                                             anyOf:
-                                              - anyOf:
-                                                  - type: string
-                                                  - type: number
-                                                  - type: boolean
-                                                  - items:
-                                                      type: string
-                                                    maxItems: 100
-                                                    type: array
-                                                  - items:
-                                                      type: number
-                                                    maxItems: 100
-                                                    type: array
-                                                  - additionalProperties: false
-                                                    type: object
-                                                    properties:
-                                                      id:
-                                                        type: string
-                                                      isSecretRef:
-                                                        type: boolean
-                                                    required:
-                                                      - id
-                                                      - isSecretRef
-                                              - enum:
-                                                  - null
+                                              - type: string
+                                              - type: number
+                                              - type: boolean
+                                              - items:
+                                                  type: string
+                                                maxItems: 100
+                                                type: array
+                                              - items:
+                                                  type: number
+                                                maxItems: 100
+                                                type: array
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  id:
+                                                    type: string
+                                                  isSecretRef:
+                                                    type: boolean
+                                                required:
+                                                  - id
+                                                  - isSecretRef
+                                            nullable: true
                                           description: Input/stream level variable. Refer to the integration documentation for more information.
                                           type: object
                                     description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
@@ -54798,30 +54413,28 @@ paths:
                                     type: object
                                   - additionalProperties:
                                       anyOf:
-                                        - anyOf:
-                                            - type: string
-                                            - type: number
-                                            - type: boolean
-                                            - items:
-                                                type: string
-                                              maxItems: 100
-                                              type: array
-                                            - items:
-                                                type: number
-                                              maxItems: 100
-                                              type: array
-                                            - additionalProperties: false
-                                              type: object
-                                              properties:
-                                                id:
-                                                  type: string
-                                                isSecretRef:
-                                                  type: boolean
-                                              required:
-                                                - id
-                                                - isSecretRef
-                                        - enum:
-                                            - null
+                                        - type: string
+                                        - type: number
+                                        - type: boolean
+                                        - items:
+                                            type: string
+                                          maxItems: 100
+                                          type: array
+                                        - items:
+                                            type: number
+                                          maxItems: 100
+                                          type: array
+                                        - additionalProperties: false
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: string
+                                            isSecretRef:
+                                              type: boolean
+                                          required:
+                                            - id
+                                            - isSecretRef
+                                      nullable: true
                                     description: Input/stream level variable. Refer to the integration documentation for more information.
                                     type: object
                                     x-oas-optional: true

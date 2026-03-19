@@ -53,7 +53,7 @@ const processNullableOutput = (schema: OpenAPIV3.SchemaObject) => {
   const anyOf = schema.anyOf!;
   const nullableTarget = anyOf[1 - idx];
 
-  if (isReferenceObject(nullableTarget) || nullableTarget.type === undefined) {
+  if (isReferenceObject(nullableTarget)) {
     return false;
   }
 

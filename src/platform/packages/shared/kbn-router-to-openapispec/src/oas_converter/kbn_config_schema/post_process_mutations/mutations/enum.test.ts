@@ -145,7 +145,7 @@ describe('processEnum', () => {
       },
     },
     {
-      name: 'keeps the union and emits a null enum when the non-null branch has no explicit type',
+      name: 'preserves nullable output when the non-null branch has no explicit type',
       input: {
         anyOf: [
           {
@@ -166,21 +166,15 @@ describe('processEnum', () => {
         ],
       } as OpenAPIV3.SchemaObject,
       expected: {
-        anyOf: [
+        oneOf: [
           {
-            oneOf: [
-              {
-                type: 'string',
-              },
-              {
-                type: 'number',
-              },
-            ],
+            type: 'string',
           },
           {
-            enum: [null],
+            type: 'number',
           },
         ],
+        nullable: true,
       },
     },
     {
