@@ -6,6 +6,7 @@
  */
 
 import { useReducer, useMemo, useCallback } from 'react';
+import { escapeQuotes } from '@kbn/es-query';
 import type { BulkOperationParams } from '../services/rules_api';
 
 interface BulkSelectState {
@@ -179,8 +180,7 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
         // Select all, no exclusions → match-all filter
         return { filter: '' };
       }
-      // Build a KQL exclusion filter using clean field names
-      const exclusionClauses = excludedIds.map((id) => `id: "${id}"`).join(' or ');
+      const exclusionClauses = excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ');
       return { filter: `NOT (${exclusionClauses})` };
     }
 
