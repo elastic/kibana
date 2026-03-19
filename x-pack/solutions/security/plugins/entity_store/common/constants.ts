@@ -47,6 +47,7 @@ export const ENTITY_STORE_ROUTES = {
   ENTITY_MAINTAINERS_RUN: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/run/{id}`,
   ENTITY_MAINTAINERS_GET: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers`,
   ENTITY_MAINTAINERS_INIT: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/init`,
+  SEARCH_ENTITIES: `${ENTITY_STORE_BASE_ROUTE}/entities/search`,
 } as const satisfies Record<string, string>;
 
 export const getErrorMessage = (error: unknown): string => {

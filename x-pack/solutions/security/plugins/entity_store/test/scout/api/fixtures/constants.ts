@@ -44,6 +44,7 @@ export const ENTITY_STORE_ROUTES = {
   ENTITY_MAINTAINERS_RUN: (id: string) =>
     `internal/security/entity_store/entity_maintainers/run/${id}`,
   CHECK_PRIVILEGES: 'internal/security/entity_store/check_privileges',
+  SEARCH_ENTITIES: 'internal/security/entity_store/entities/search',
 } as const;
 
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];

@@ -7,7 +7,11 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import {
+  FF_ENABLE_ENTITY_STORE_V2,
+  searchEntitiesFromEntityStore,
+  useEntityStoreEuidApi,
+} from '@kbn/entity-store/public';
 import type {
   HostEntity,
   UserEntity,
@@ -15,6 +19,7 @@ import type {
 } from '../../../../../common/api/entity_analytics';
 import type { HostItem, UserItem } from '../../../../../common/search_strategy';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 
 const ENTITY_FROM_STORE_QUERY_KEY = 'ENTITY_FROM_STORE';
 
@@ -83,6 +88,10 @@ export function useEntityFromStore(
   const { entityIdentifiers, entityType, skip } = params;
   const euidApi = useEntityStoreEuidApi();
   const { fetchEntitiesList } = useEntityAnalyticsRoutes();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const {
+    services: { http },
+  } = useKibana();
 
   const hasValidIdentifiers = Object.keys(entityIdentifiers).length > 0;
   const filter = euidApi?.euid
@@ -91,9 +100,30 @@ export function useEntityFromStore(
 
   const stableIdentifiersKey = getStableEntityIdentifiersKey(entityIdentifiers);
   const queryResult = useQuery({
-    queryKey: [ENTITY_FROM_STORE_QUERY_KEY, entityType, stableIdentifiersKey, skip],
-    queryFn: async () => {
-      const response = await fetchEntitiesList({
+    queryKey: [
+      ENTITY_FROM_STORE_QUERY_KEY,
+      entityType,
+      stableIdentifiersKey,
+      skip,
+      entityStoreV2Enabled,
+    ],
+    queryFn: async ({ signal }) => {
+      if (entityStoreV2Enabled) {
+        return searchEntitiesFromEntityStore(
+          http,
+          {
+            entityTypes: [entityType],
+            filterQuery: filter ? JSON.stringify(filter) : undefined,
+            page: 1,
+            perPage: 1,
+            sortField: '@timestamp',
+            sortOrder: 'desc',
+          },
+          { signal }
+        );
+      }
+      return fetchEntitiesList({
+        signal,
         params: {
           entityTypes: [entityType],
           filterQuery: filter ? JSON.stringify(filter) : undefined,
@@ -101,7 +131,6 @@ export function useEntityFromStore(
           perPage: 1,
         },
       });
-      return response;
     },
     enabled: !skip && hasValidIdentifiers && !!filter,
   });

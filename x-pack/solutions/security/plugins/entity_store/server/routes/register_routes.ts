@@ -27,6 +27,7 @@ import {
   registerResolutionGroup,
   registerUpdate,
   registerCheckPrivileges,
+  registerSearchEntities,
 } from './apis';
 import type { EntityStorePluginRouter } from '../types';
 
@@ -39,6 +40,7 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerForceCcsExtractToUpdates(router);
   registerForceHistorySnapshot(router);
   registerCheckPrivileges(router);
+  registerSearchEntities(router);
   registerCRUDUpsert(router);
   registerCRUDUpsertBulk(router);
   registerCRUDDelete(router);
