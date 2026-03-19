@@ -146,7 +146,6 @@ test.describe(
 
     test('Tutorial cards open embedded console', async ({ pageObjects }) => {
       await pageObjects.gettingStarted.expandTutorialCards();
-
       await test.step('search basics card opens console', async () => {
         await pageObjects.gettingStarted.clickTutorialCardButton('search_basics');
 
