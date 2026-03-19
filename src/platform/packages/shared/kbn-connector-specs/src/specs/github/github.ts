@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -54,9 +56,7 @@ export const GithubConnector: ConnectorSpec = {
   },
 
   auth: {
-    types: [
-      'bearer'
-    ],
+    types: ['bearer'],
     headers: {
       Accept: 'application/vnd.github+json',
     },
@@ -83,7 +83,6 @@ export const GithubConnector: ConnectorSpec = {
   },
 
   actions: {
-
     getMe: {
       isTool: true,
       description: i18n.translate('connectorSpecs.github.actions.getMe.description', {
@@ -117,10 +116,9 @@ export const GithubConnector: ConnectorSpec = {
 
     searchRepositories: {
       isTool: true,
-      description: i18n.translate(
-        'connectorSpecs.github.actions.searchRepositories.description',
-        { defaultMessage: 'Search for GitHub repositories.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.searchRepositories.description', {
+        defaultMessage: 'Search for GitHub repositories.',
+      }),
       input: SearchRepositoriesInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -158,10 +156,9 @@ export const GithubConnector: ConnectorSpec = {
 
     searchPullRequests: {
       isTool: true,
-      description: i18n.translate(
-        'connectorSpecs.github.actions.searchPullRequests.description',
-        { defaultMessage: 'Search for pull requests across GitHub repositories.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.searchPullRequests.description', {
+        defaultMessage: 'Search for pull requests across GitHub repositories.',
+      }),
       input: SearchPullRequestsInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -222,13 +219,9 @@ export const GithubConnector: ConnectorSpec = {
 
     listPullRequests: {
       isTool: true,
-      description: i18n.translate(
-        'connectorSpecs.github.actions.listPullRequests.description',
-        {
-          defaultMessage:
-            'List pull requests in a GitHub repository. Uses cursor-based pagination.',
-        }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.listPullRequests.description', {
+        defaultMessage: 'List pull requests in a GitHub repository. Uses cursor-based pagination.',
+      }),
       input: ListPullRequestsInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -355,10 +348,9 @@ export const GithubConnector: ConnectorSpec = {
 
     getLatestRelease: {
       isTool: true,
-      description: i18n.translate(
-        'connectorSpecs.github.actions.getLatestRelease.description',
-        { defaultMessage: 'Get the latest release of a GitHub repository.' }
-      ),
+      description: i18n.translate('connectorSpecs.github.actions.getLatestRelease.description', {
+        defaultMessage: 'Get the latest release of a GitHub repository.',
+      }),
       input: GetLatestReleaseInputSchema,
       handler: async (ctx, input) => {
         return withMcpClient(ctx, async (mcp) => {

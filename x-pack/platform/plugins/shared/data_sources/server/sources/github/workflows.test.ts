@@ -97,7 +97,13 @@ describe('github workflows', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'sources.github.search_issues'),
-        inputs: { query: 'is:open label:bug', order: 'asc', sort: 'updated', page: 1, per_page: 10 },
+        inputs: {
+          query: 'is:open label:bug',
+          order: 'asc',
+          sort: 'updated',
+          page: 1,
+          per_page: 10,
+        },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { z } from '@kbn/zod/v4';
@@ -58,10 +60,7 @@ export const ListIssuesInputSchema = z.object({
   repo: z.string().min(1).describe('Repository name'),
   state: z.enum(['open', 'closed', 'all']).optional().default('open'),
   first: z.number().optional().default(10).describe('Number of results to return'),
-  after: z
-    .string()
-    .optional()
-    .describe('Cursor for pagination (endCursor from previous response)'),
+  after: z.string().optional().describe('Cursor for pagination (endCursor from previous response)'),
 });
 export type ListIssuesInput = z.infer<typeof ListIssuesInputSchema>;
 
@@ -70,10 +69,7 @@ export const ListPullRequestsInputSchema = z.object({
   repo: z.string().min(1).describe('Repository name'),
   state: z.enum(['open', 'closed', 'all']).optional().default('open'),
   first: z.number().optional().default(10).describe('Number of results to return'),
-  after: z
-    .string()
-    .optional()
-    .describe('Cursor for pagination (endCursor from previous response)'),
+  after: z.string().optional().describe('Cursor for pagination (endCursor from previous response)'),
 });
 export type ListPullRequestsInput = z.infer<typeof ListPullRequestsInputSchema>;
 
@@ -82,10 +78,7 @@ export const ListCommitsInputSchema = z.object({
   repo: z.string().min(1).describe('Repository name'),
   sha: z.string().optional().describe('Branch name or commit SHA to start listing from'),
   first: z.number().optional().default(10).describe('Number of results to return'),
-  after: z
-    .string()
-    .optional()
-    .describe('Cursor for pagination (endCursor from previous response)'),
+  after: z.string().optional().describe('Cursor for pagination (endCursor from previous response)'),
 });
 export type ListCommitsInput = z.infer<typeof ListCommitsInputSchema>;
 
@@ -93,10 +86,7 @@ export const ListBranchesInputSchema = z.object({
   owner: z.string().min(1).describe('Repository owner (user or org)'),
   repo: z.string().min(1).describe('Repository name'),
   first: z.number().optional().default(10).describe('Number of results to return'),
-  after: z
-    .string()
-    .optional()
-    .describe('Cursor for pagination (endCursor from previous response)'),
+  after: z.string().optional().describe('Cursor for pagination (endCursor from previous response)'),
 });
 export type ListBranchesInput = z.infer<typeof ListBranchesInputSchema>;
 
@@ -104,10 +94,7 @@ export const ListReleasesInputSchema = z.object({
   owner: z.string().min(1).describe('Repository owner (user or org)'),
   repo: z.string().min(1).describe('Repository name'),
   first: z.number().optional().default(10).describe('Number of results to return'),
-  after: z
-    .string()
-    .optional()
-    .describe('Cursor for pagination (endCursor from previous response)'),
+  after: z.string().optional().describe('Cursor for pagination (endCursor from previous response)'),
 });
 export type ListReleasesInput = z.infer<typeof ListReleasesInputSchema>;
 
@@ -115,10 +102,7 @@ export const ListTagsInputSchema = z.object({
   owner: z.string().min(1).describe('Repository owner (user or org)'),
   repo: z.string().min(1).describe('Repository name'),
   first: z.number().optional().default(10).describe('Number of results to return'),
-  after: z
-    .string()
-    .optional()
-    .describe('Cursor for pagination (endCursor from previous response)'),
+  after: z.string().optional().describe('Cursor for pagination (endCursor from previous response)'),
 });
 export type ListTagsInput = z.infer<typeof ListTagsInputSchema>;
 
@@ -151,7 +135,10 @@ export const GetFileContentsInputSchema = z.object({
   owner: z.string().min(1).describe('Repository owner (user or org)'),
   repo: z.string().min(1).describe('Repository name'),
   path: z.string().min(1).describe('File or directory path within the repository'),
-  ref: z.string().optional().describe('Branch name, tag, or commit SHA (defaults to default branch)'),
+  ref: z
+    .string()
+    .optional()
+    .describe('Branch name, tag, or commit SHA (defaults to default branch)'),
 });
 export type GetFileContentsInput = z.infer<typeof GetFileContentsInputSchema>;
 
