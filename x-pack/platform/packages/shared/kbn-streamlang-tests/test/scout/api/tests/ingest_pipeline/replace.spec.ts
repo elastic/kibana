@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { ReplaceProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -195,14 +196,18 @@ apiTest.describe(
       expect(ingestedDocs).toHaveLength(2);
 
       // First doc should have message replaced (where condition matched)
-      const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
-      expect(doc1?.message).toBe('An warning occurred');
-      expect(doc1?.event?.kind).toBe('test');
+      const doc1 = ingestedDocs.find(
+        (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'test'
+      );
+      expect(asDoc(doc1)?.message).toBe('An warning occurred');
+      expect(asDoc(asDoc(doc1)?.event)?.kind).toBe('test');
 
       // Second doc should keep original message (where condition not matched)
-      const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
-      expect(doc2?.message).toBe('An error occurred');
-      expect(doc2?.event?.kind).toBe('production');
+      const doc2 = ingestedDocs.find(
+        (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'production'
+      );
+      expect(asDoc(doc2)?.message).toBe('An error occurred');
+      expect(asDoc(asDoc(doc2)?.event)?.kind).toBe('production');
     });
 
     apiTest(
@@ -238,16 +243,20 @@ apiTest.describe(
         expect(ingestedDocs).toHaveLength(2);
 
         // First doc should have clean_message created (where condition matched)
-        const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
-        expect(doc1?.message).toBe('An error occurred'); // Original preserved
-        expect(doc1?.clean_message).toBe('An warning occurred'); // New field created
-        expect(doc1?.event?.kind).toBe('test');
+        const doc1 = ingestedDocs.find(
+          (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'test'
+        );
+        expect(asDoc(doc1)?.message).toBe('An error occurred'); // Original preserved
+        expect(asDoc(doc1)?.clean_message).toBe('An warning occurred'); // New field created
+        expect(asDoc(asDoc(doc1)?.event)?.kind).toBe('test');
 
         // Second doc should not have clean_message (where condition not matched)
-        const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
-        expect(doc2?.message).toBe('An error occurred');
-        expect(doc2?.clean_message).toBeUndefined();
-        expect(doc2?.event?.kind).toBe('production');
+        const doc2 = ingestedDocs.find(
+          (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'production'
+        );
+        expect(asDoc(doc2)?.message).toBe('An error occurred');
+        expect(asDoc(doc2)?.clean_message).toBeUndefined();
+        expect(asDoc(asDoc(doc2)?.event)?.kind).toBe('production');
       }
     );
 

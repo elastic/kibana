@@ -151,7 +151,7 @@ pageLoadAssetSize:
   screenshotting: 3252
   searchAssistant: 6150
   searchGettingStarted: 6678
-  searchHomepage: 7962
+  searchHomepage: 9007
   searchIndices: 9991
   searchInferenceEndpoints: 8071
   searchNavigation: 7404
@@ -182,7 +182,7 @@ pageLoadAssetSize:
   telemetryManagementSection: 5522
   timelines: 192134
   transform: 16515
-  triggersActionsUi: 112000
+  triggersActionsUi: 114000
   uiActions: 35278
   unifiedDocViewer: 14513
   unifiedSearch: 19500
