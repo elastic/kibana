@@ -11,7 +11,7 @@ import type { SortProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
-// Fails after new Scout tags applied, needs a fix
+// https://github.com/elastic/kibana/issues/258476
 apiTest.describe.skip(
   'Cross-compatibility - Sort Processor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -71,162 +71,22 @@ apiTest.describe.skip(
       expect(ingestResult[0]).toStrictEqual(
         expect.objectContaining({ tags: ['charlie', 'bravo', 'alpha'] })
       );
-    }
-  );
+    });
 
-  apiTest('should correctly sort an array in descending order', async ({ testBed, esql }) => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'sort',
-          from: 'tags',
-          order: 'desc',
-        } as SortProcessor,
-      ],
-    };
+    apiTest('should correctly sort an array to a target field', async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'sort',
+            from: 'tags',
+            to: 'sorted_tags',
+            order: 'asc',
+          } as SortProcessor,
+        ],
+      };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
-    const { query } = transpileEsql(streamlangDSL);
-
-    const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
-    await testBed.ingest('ingest-sort-desc', docs, processors);
-    const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-sort-desc');
-
-    await testBed.ingest('esql-sort-desc', docs);
-    const esqlResult = await esql.queryOnIndex('esql-sort-desc', query);
-
-    expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-    expect(ingestResult[0]).toStrictEqual(
-      expect.objectContaining({ tags: ['charlie', 'bravo', 'alpha'] })
-    );
-  });
-
-  apiTest('should correctly sort an array to a target field', async ({ testBed, esql }) => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'sort',
-          from: 'tags',
-          to: 'sorted_tags',
-          order: 'asc',
-        } as SortProcessor,
-      ],
-    };
-
-    const { processors } = transpileIngestPipeline(streamlangDSL);
-    const { query } = transpileEsql(streamlangDSL);
-
-    const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
-    await testBed.ingest('ingest-sort-target', docs, processors);
-    const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-sort-target');
-
-    await testBed.ingest('esql-sort-target', docs);
-    const esqlResult = await esql.queryOnIndex('esql-sort-target', query);
-
-    expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-    expect(ingestResult[0]).toStrictEqual(
-      expect.objectContaining({
-        tags: ['charlie', 'alpha', 'bravo'], // Original preserved
-        sorted_tags: ['alpha', 'bravo', 'charlie'], // New field created
-      })
-    );
-  });
-
-  apiTest('should sort numeric arrays', async ({ testBed, esql }) => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'sort',
-          from: 'numbers',
-          order: 'asc',
-        } as SortProcessor,
-      ],
-    };
-
-    const { processors } = transpileIngestPipeline(streamlangDSL);
-    const { query } = transpileEsql(streamlangDSL);
-
-    const docs = [{ numbers: [3, 1, 4, 1, 5, 9, 2, 6] }];
-    await testBed.ingest('ingest-sort-numeric', docs, processors);
-    const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-sort-numeric');
-
-    await testBed.ingest('esql-sort-numeric', docs);
-    const esqlResult = await esql.queryOnIndex('esql-sort-numeric', query);
-
-    expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-    expect(ingestResult[0]).toStrictEqual(
-      expect.objectContaining({ numbers: [1, 1, 2, 3, 4, 5, 6, 9] })
-    );
-  });
-
-  apiTest('should handle single element array', async ({ testBed, esql }) => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'sort',
-          from: 'tags',
-        } as SortProcessor,
-      ],
-    };
-
-    const { processors } = transpileIngestPipeline(streamlangDSL);
-    const { query } = transpileEsql(streamlangDSL);
-
-    const docs = [{ tags: ['single'] }];
-    await testBed.ingest('ingest-sort-single', docs, processors);
-    const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-sort-single');
-
-    await testBed.ingest('esql-sort-single', docs);
-    const esqlResult = await esql.queryOnIndex('esql-sort-single', query);
-
-    expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-    expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ tags: ['single'] }));
-  });
-
-  apiTest('should support conditional sort with where clause', async ({ testBed, esql }) => {
-    const streamlangDSL: StreamlangDSL = {
-      steps: [
-        {
-          action: 'sort',
-          from: 'tags',
-          order: 'asc',
-          where: {
-            field: 'should_sort',
-            eq: 'yes',
-          },
-        } as SortProcessor,
-      ],
-    };
-
-    const { processors } = transpileIngestPipeline(streamlangDSL);
-    const { query } = transpileEsql(streamlangDSL);
-
-    const docs = [
-      { tags: ['charlie', 'alpha', 'bravo'], should_sort: 'yes' },
-      { tags: ['zulu', 'xray', 'yankee'], should_sort: 'no' },
-    ];
-    await testBed.ingest('ingest-sort-conditional', docs, processors);
-    const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-sort-conditional');
-
-    await testBed.ingest('esql-sort-conditional', docs);
-    const esqlResult = await esql.queryOnIndex('esql-sort-conditional', query);
-
-    expect(ingestResult).toHaveLength(2);
-    expect(esqlResult.documents).toHaveLength(2);
-
-    const ingestDoc1 = ingestResult.find((d: Record<string, unknown>) => d.should_sort === 'yes');
-    const ingestDoc2 = ingestResult.find((d: Record<string, unknown>) => d.should_sort === 'no');
-    const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
-      (d: Record<string, unknown>) => d.should_sort === 'yes'
-    );
-    const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
-      (d: Record<string, unknown>) => d.should_sort === 'no'
-    );
-
-    expect(ingestDoc1).toStrictEqual(esqlDoc1);
-    expect(ingestDoc1).toStrictEqual(
-      expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
-    );
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
       await testBed.ingest('ingest-sort-target', docs, processors);
@@ -326,39 +186,27 @@ apiTest.describe.skip(
       expect(ingestResult).toHaveLength(2);
       expect(esqlResult.documents).toHaveLength(2);
 
-      // Document with tags should be sorted
-      const ingestDoc1 = ingestResult.find((d: Record<string, unknown>) => d.status === 'has_tags');
+      const ingestDoc1 = ingestResult.find((d: Record<string, unknown>) => d.should_sort === 'yes');
+      const ingestDoc2 = ingestResult.find((d: Record<string, unknown>) => d.should_sort === 'no');
       const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
-        (d: Record<string, unknown>) => d.status === 'has_tags'
+        (d: Record<string, unknown>) => d.should_sort === 'yes'
       );
-      const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.should_sort === 'no');
+      const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
+        (d: Record<string, unknown>) => d.should_sort === 'no'
+      );
 
       expect(ingestDoc1).toStrictEqual(esqlDoc1);
       expect(ingestDoc1).toStrictEqual(
         expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
       );
 
-      // Document without tags should pass through unchanged
-      const ingestDoc2 = ingestResult.find((d: Record<string, unknown>) => d.status === 'no_tags');
-      const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
-        (d: Record<string, unknown>) => d.status === 'no_tags'
-      );
-      expect((ingestDoc2 as Record<string, unknown>).tags).toBeUndefined();
-      expect(esqlDoc2).toStrictEqual(expect.objectContaining({ tags: null }));
-    }
-  );
+      // Both transpilers should not apply sort when condition doesn't match
+      expect(ingestDoc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
+      expect(ingestDoc2?.tags).toHaveLength(3);
+      expect(esqlDoc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
+      expect(esqlDoc2?.tags).toHaveLength(3);
+    });
 
-  // *** Template validation tests ***
-  [
-    {
-      templateType: '{{ }}',
-      from: '{{template_from}}',
-    },
-    {
-      templateType: '{{{ }}}',
-      from: '{{{template_from}}}',
-    },
-  ].forEach(({ templateType, from }) => {
     apiTest(
       'should handle ignore_missing consistently between transpilers',
       async ({ testBed, esql }) => {
@@ -390,9 +238,11 @@ apiTest.describe.skip(
         expect(esqlResult.documents).toHaveLength(2);
 
         // Document with tags should be sorted
-        const ingestDoc1 = ingestResult.find((d: any) => d.status === 'has_tags');
+        const ingestDoc1 = ingestResult.find(
+          (d: Record<string, unknown>) => d.status === 'has_tags'
+        );
         const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
-          (d: any) => d.status === 'has_tags'
+          (d: Record<string, unknown>) => d.status === 'has_tags'
         );
         expect(ingestDoc1).toStrictEqual(
           expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
@@ -402,9 +252,11 @@ apiTest.describe.skip(
         );
 
         // Document without tags should pass through unchanged
-        const ingestDoc2 = ingestResult.find((d: any) => d.status === 'no_tags');
+        const ingestDoc2 = ingestResult.find(
+          (d: Record<string, unknown>) => d.status === 'no_tags'
+        );
         const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
-          (d: any) => d.status === 'no_tags'
+          (d: Record<string, unknown>) => d.status === 'no_tags'
         );
         expect((ingestDoc2 as Record<string, unknown>).tags).toBeUndefined();
         expect(esqlDoc2).toStrictEqual(expect.objectContaining({ tags: null }));
