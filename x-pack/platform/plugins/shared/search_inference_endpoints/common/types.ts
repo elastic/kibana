@@ -11,6 +11,7 @@ export enum APIRoutes {
   GET_INFERENCE_SERVICES = 'internal/inference_endpoints/_inference/_services',
   GET_INFERENCE_SETTINGS = '/internal/search_inference_endpoints/settings',
   PUT_INFERENCE_SETTINGS = '/internal/search_inference_endpoints/settings',
+  GET_INFERENCE_FEATURES = '/internal/search_inference_endpoints/features',
 }
 
 export interface SearchInferenceEndpointsConfigType {
@@ -39,4 +40,18 @@ export interface InferenceSettingsResponse {
     updatedAt?: string;
   };
   data: InferenceSettingsAttributes;
+}
+
+export interface InferenceFeaturesResponse {
+  features: InferenceFeatureResponse[];
+}
+
+export interface InferenceFeatureResponse {
+  featureId: string;
+  parentFeatureId?: string;
+  featureName: string;
+  featureDescription: string;
+  taskType: string;
+  maxNumberOfEndpoints?: number;
+  recommendedEndpoints: string[];
 }

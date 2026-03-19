@@ -37,11 +37,11 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   manual_ingest_pipeline: { where: 'if' },
 };
 
-export function renameFields<T extends Record<string, any>>(
+export function renameFields<T extends Record<string, unknown>>(
   obj: T,
   renames: Record<string, string>
 ): T {
-  const result: Record<string, any> = {};
+  const result: Record<string, unknown> = {};
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
       const newKey = renames[key] || key;

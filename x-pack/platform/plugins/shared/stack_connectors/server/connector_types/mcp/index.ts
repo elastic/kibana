@@ -10,6 +10,7 @@ import {
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
@@ -47,6 +48,7 @@ export const getMcpConnectorType = (): SubActionConnectorType<
     GenerativeAIForSearchPlaygroundConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
     WorkflowsConnectorFeatureId,
+    AgentBuilderConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
 });

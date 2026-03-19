@@ -146,24 +146,38 @@ export const createMockEndpointAppContextService = (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     getExceptionListsClient: jest.fn().mockReturnValue(exceptionListsClient!),
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
-    getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
+    getFleetActionsClient: jest.fn(async () => fleetActionsClientMock),
     getTelemetryService: jest.fn().mockReturnValue(telemetryServiceMock),
-    getInternalResponseActionsClient: jest.fn(() => {
+    getInternalResponseActionsClient: jest.fn((_) => {
       return responseActionsClientMock.create();
     }),
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
     isServerless: jest.fn().mockReturnValue(false),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
-    getActiveSpace: jest.fn(async () => ({
+    getActiveSpace: jest.fn(async (_) => ({
       id: DEFAULT_SPACE_ID,
       name: 'default',
       disabledFeatures: [],
     })),
-    getSpaceId: jest.fn().mockReturnValue('default'),
+    getActiveSpaceId: jest.fn().mockReturnValue(DEFAULT_SPACE_ID),
+    getAccessibleSpaces: jest.fn(async (_) => [
+      {
+        id: DEFAULT_SPACE_ID,
+        name: 'default',
+        disabledFeatures: [],
+      },
+    ]),
     getReferenceDataClient: jest.fn().mockReturnValue(referenceDataMocks.createClient()),
     getServerConfigValue: jest.fn(),
     getScriptsLibraryClient: jest.fn().mockReturnValue(scriptsClient),
-  } as unknown as jest.Mocked<EndpointAppContextService>;
+  } as Omit<
+    jest.Mocked<EndpointAppContextService>,
+    | 'config'
+    | 'security'
+    | 'fleetStartServices'
+    | 'savedObjectsServiceStart'
+    | 'exceptionListsClient'
+  > as jest.Mocked<EndpointAppContextService>;
 };
 
 /**
