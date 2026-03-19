@@ -82,10 +82,8 @@ export class EnterSwitchNodeImpl implements NodeImplementation {
     successors: ReturnType<WorkflowGraph['getDirectSuccessors']>
   ): EnterCaseBranchNode[] {
     return successors
-      .filter((s: { type: string }) => s.type === 'enter-case-branch')
-      .sort(
-        (a: EnterCaseBranchNode, b: EnterCaseBranchNode) => a.index - b.index
-      ) as EnterCaseBranchNode[];
+      .filter((s): s is EnterCaseBranchNode => s.type === 'enter-case-branch')
+      .sort((a, b) => a.index - b.index);
   }
 
   private findMatchingCase(
