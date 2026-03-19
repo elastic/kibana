@@ -8,7 +8,24 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
+import type { ToolRunnableConfig } from '@langchain/core/tools';
 import type { estypes } from '@elastic/elasticsearch';
+
+import { BOILERPLATE_PIPELINE } from './pipeline_constants';
+
+const MAX_SUCCESSFUL_OUTPUTS = 2;
+const MAX_ERROR_GROUPS_DEFAULT = 5;
+const MAX_ERROR_GROUPS_ERRORS_ONLY = 10;
+const MAX_VERBOSE_SAMPLES = 2;
+const SAMPLE_TRUNCATE_LENGTH = 200;
+
+const STRIPPED_OUTPUT_FIELDS = new Set(['event.original', 'ecs.version']);
+
+interface TestPipelineToolOptions {
+  esClient: ElasticsearchClient;
+  samples: string[];
+}
 
 interface DocTemplate {
   _index: string;
@@ -19,237 +36,318 @@ interface DocTemplate {
   };
 }
 
-function formatSample(sample: string): DocTemplate {
-  return {
-    _index: 'index',
-    _id: 'id',
-    _source: { message: sample },
-  };
+const formatDoc = (sample: string): DocTemplate => ({
+  _index: 'index',
+  _id: 'id',
+  _source: { message: sample },
+});
+
+interface FailedSample {
+  sampleIndex: number;
+  sample: string;
+  error: string;
 }
 
-/**
- * Creates a lightweight pipeline simulation tool for iterative debugging.
- * Unlike validate_ingest_pipeline, this tool does NOT update agent state —
- * it simply runs the simulate API and returns results. Designed for quick
- * test-fix cycles: test a grok pattern, a kv processor, or a small chain
- * of processors against 1-3 sample docs.
- *
- * @param esClient - Elasticsearch client for simulating the pipeline
- * @param samples - Array of all available log samples (used as fallback when no docs provided)
- */
-export function testPipelineTool(
-  esClient: ElasticsearchClient,
-  samples: string[]
-): DynamicStructuredTool {
-  // Keep the schema maximally permissive so that LangChain's output parser
-  // never rejects model-generated arguments with an OUTPUT_PARSING_FAILURE.
-  // All real validation happens inside the tool function, where we can
-  // return descriptive error strings instead of crashing the agent.
+interface ErrorGroup {
+  error: string;
+  count: number;
+  exampleSample: string;
+}
+
+const groupErrors = (failedSamples: FailedSample[], maxGroups: number): ErrorGroup[] => {
+  const groups = new Map<string, { count: number; example: string }>();
+
+  for (const { error, sample } of failedSamples) {
+    const existing = groups.get(error);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      groups.set(error, { count: 1, example: sample.substring(0, SAMPLE_TRUNCATE_LENGTH) });
+    }
+  }
+
+  return [...groups.entries()]
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, maxGroups)
+    .map(([error, { count, example }]) => ({
+      error,
+      count,
+      exampleSample: example,
+    }));
+};
+
+const stripBoilerplateFields = (source: Record<string, unknown>): Record<string, unknown> => {
+  const result = { ...source };
+  for (const field of STRIPPED_OUTPUT_FIELDS) {
+    const dotIdx = field.indexOf('.');
+    if (dotIdx !== -1) {
+      const root = field.substring(0, dotIdx);
+      const child = field.substring(dotIdx + 1);
+      const rootObj = result[root];
+      if (rootObj != null && typeof rootObj === 'object' && !Array.isArray(rootObj)) {
+        const copy = { ...(rootObj as Record<string, unknown>) };
+        delete copy[child];
+        if (Object.keys(copy).length === 0) {
+          delete result[root];
+        } else {
+          result[root] = copy;
+        }
+      }
+    } else {
+      delete result[field];
+    }
+  }
+  return result;
+};
+
+const formatVerboseResults = (
+  processorResults: estypes.IngestPipelineProcessorResult[]
+): string => {
+  const lines: string[] = [];
+  for (let i = 0; i < processorResults.length; i++) {
+    const pr = processorResults[i];
+    const type = pr.processor_type ?? 'unknown';
+    const tag = pr.tag ? ` (${pr.tag})` : '';
+    const ok = pr.status === 'success';
+    const marker = ok ? '✓' : '✗';
+
+    let detail = '';
+    if (!ok && pr.error?.reason) {
+      detail = ` — ${pr.error.reason.substring(0, 200)}`;
+    }
+
+    lines.push(`  [${i}] ${type}${tag}: ${marker}${detail}`);
+
+    const isLastBeforeFailure =
+      ok && i < processorResults.length - 1 && processorResults[i + 1].status !== 'success';
+    const isLastOverall = i === processorResults.length - 1 && ok;
+
+    if (isLastBeforeFailure || isLastOverall) {
+      const src = pr.doc?._source as Record<string, unknown> | undefined;
+      if (src) {
+        const stripped = stripBoilerplateFields(src);
+        const allKeys = Object.keys(stripped);
+        const shown = allKeys.slice(0, 10);
+        if (shown.length > 0) {
+          lines.push(
+            `        output fields: ${shown.join(', ')}${
+              allKeys.length > 10 ? ` (+${allKeys.length - 10} more)` : ''
+            }`
+          );
+        }
+      }
+    }
+  }
+  return lines.join('\n');
+};
+
+export function testPipelineTool(options: TestPipelineToolOptions): DynamicStructuredTool {
+  const { esClient, samples } = options;
+
   const schema = z.object({
     processors: z
-      .any()
+      .array(z.any())
+      .min(1)
       .describe(
-        'Array of ingest processors to test. Example: [{"grok": {"field": "message", "patterns": ["%{TIMESTAMP_ISO8601:timestamp} %{GREEDYDATA:msg}"]}}]'
+        'Processor object(s) to simulate in isolation. The tool prepends the standard boilerplate ' +
+          '(ecs.version, message→event.original, remove message) then runs these processors. ' +
+          'Does NOT read the pipeline from shared state — use this to try alternate grok/kv/dissect configs ' +
+          'without committing via modify_pipeline.'
       ),
-    on_failure: z.any().optional().describe('Optional on_failure handlers for the test pipeline.'),
-    docs: z
-      .any()
+    errors_only: z
+      .boolean()
       .optional()
+      .default(false)
       .describe(
-        'Specific raw log strings to test against. If omitted, the first 3 available samples are used. Keep this small (1-5) especially when verbose is true.'
+        'When true, only returns error information (no successful output examples). ' +
+          'Use when you only need to check whether errors are resolved.'
       ),
     verbose: z
-      .any()
+      .boolean()
       .optional()
+      .default(false)
       .describe(
-        'When true, returns per-processor output for each document. Very detailed — only use with a small number of docs (1-3).'
-      ),
-    return_errors_only: z
-      .any()
-      .optional()
-      .describe(
-        'When true (default), only returns errors and failures. When false, returns full results including successful document outputs.'
+        'When true, runs a verbose simulation on a few samples showing per-processor output. ' +
+          'Use as a last resort to see exactly which processor is failing and why. ' +
+          'Adds latency — only enable when stuck debugging.'
       ),
   });
 
   return new DynamicStructuredTool({
     name: 'test_pipeline',
     description:
-      'Lightweight processor simulation for iterative debugging. ' +
-      'Pass one or more processors (not the full pipeline) and the tool wraps them into a pipeline and simulates against a small subset of docs. ' +
-      'Use this to quickly test a grok pattern, debug a kv processor, or verify a small chain of processors. ' +
-      'Supports verbose mode (per-processor step output) and return_errors_only mode (compact error-only output). ' +
-      'For final validation of the complete pipeline that persists results to state, use validate_ingest_pipeline instead.',
+      'Simulate a scratch pipeline (boilerplate + the processors you pass) against ALL log samples. ' +
+      'Does NOT read or update shared state — use when stuck on a pattern to compare candidate processors ' +
+      '(e.g. alternate grok patterns) before applying the winner with modify_pipeline. ' +
+      'Primary workflow: build step-by-step with modify_pipeline (use its TOC for feedback), ' +
+      'then validate_pipeline when the pipeline is ready.',
     schema,
-    func: async (input) => {
-      const {
-        processors: rawProcessors,
-        on_failure: rawOnFailure,
-        docs: rawDocsInput,
-        verbose: rawVerbose,
-        return_errors_only: rawErrorsOnly,
-      } = input;
+    func: async (
+      input: z.infer<typeof schema>,
+      _runManager?: CallbackManagerForToolRun,
+      _config?: ToolRunnableConfig
+    ) => {
+      const { processors: testProcessors, errors_only: errorsOnly, verbose } = input;
 
-      const verbose = rawVerbose === true || rawVerbose === 'true';
-      const errorsOnly = rawErrorsOnly !== false && rawErrorsOnly !== 'false';
-
-      let processors: unknown = rawProcessors;
-      if (typeof processors === 'string') {
-        try {
-          processors = JSON.parse(processors);
-        } catch (e) {
-          return JSON.stringify({
-            error: `Failed to parse processors JSON: ${(e as Error).message}`,
-          });
-        }
+      if (!samples || samples.length === 0) {
+        return 'No samples available for testing.';
       }
 
-      if (!Array.isArray(processors) || processors.length === 0) {
-        return JSON.stringify({
-          error:
-            'processors must be a non-empty array of processor objects. ' +
-            'Example: [{"grok": {"field": "message", "patterns": ["%{GREEDYDATA:msg}"]}}]',
-        });
-      }
-
-      let onFailure: estypes.IngestProcessorContainer[] | undefined;
-      if (rawOnFailure != null) {
-        let parsed = rawOnFailure;
-        if (typeof parsed === 'string') {
-          try {
-            parsed = JSON.parse(parsed);
-          } catch (e) {
-            return JSON.stringify({
-              error: `Failed to parse on_failure JSON: ${(e as Error).message}`,
-            });
-          }
-        }
-        if (Array.isArray(parsed)) {
-          onFailure = parsed as estypes.IngestProcessorContainer[];
-        }
-      }
-
-      let inputDocs: string[] | undefined;
-      if (rawDocsInput != null) {
-        if (Array.isArray(rawDocsInput)) {
-          inputDocs = rawDocsInput.map((d: unknown) =>
-            typeof d === 'string' ? d : JSON.stringify(d)
-          );
-        } else if (typeof rawDocsInput === 'string') {
-          inputDocs = [rawDocsInput];
-        } else {
-          return JSON.stringify({
-            error: `docs must be an array of strings, got ${typeof rawDocsInput}`,
-          });
-        }
-      }
-
-      const rawDocs: string[] = inputDocs ?? samples.slice(0, 3);
-      if (rawDocs.length === 0) {
-        return JSON.stringify({ error: 'No documents to test against.' });
-      }
-
-      const formattedDocs = rawDocs.map((doc) => formatSample(doc));
-
-      const pipeline: estypes.IngestPipeline = {
-        processors: processors as estypes.IngestProcessorContainer[],
-        ...(onFailure ? { on_failure: onFailure } : {}),
+      const scratchPipeline: estypes.IngestPipeline = {
+        processors: [...BOILERPLATE_PIPELINE.processors, ...testProcessors],
+        ...(BOILERPLATE_PIPELINE.on_failure ? { on_failure: BOILERPLATE_PIPELINE.on_failure } : {}),
       };
 
+      const docs = samples.map((sample) => formatDoc(sample));
+
+      let response: estypes.IngestSimulateResponse;
       try {
-        const response: estypes.IngestSimulateResponse = await esClient.ingest.simulate({
-          docs: formattedDocs,
-          pipeline,
-          verbose,
+        response = await esClient.ingest.simulate({
+          docs,
+          pipeline: scratchPipeline,
         });
+      } catch (simulateError) {
+        return `Pipeline simulation failed: ${(simulateError as Error).message}`;
+      }
 
-        const errors: Array<{ doc_index: number; error: string; sample_preview: string }> = [];
-        const successes: Array<{ doc_index: number; source: unknown }> = [];
+      const failedSamples: FailedSample[] = [];
+      const successfulOutputs: Array<Record<string, unknown>> = [];
+      let successfulCount = 0;
 
-        response.docs.forEach((doc, index) => {
-          if (verbose) {
-            const verboseDoc = doc as unknown as {
-              processor_results?: Array<{
-                processor_type?: string;
-                tag?: string;
-                status?: string;
-                doc?: { _source?: Record<string, unknown> };
-                error?: { type?: string; reason?: string };
-              }>;
-            };
-            if (verboseDoc.processor_results) {
-              const failedSteps = verboseDoc.processor_results.filter(
-                (step) => step.error || step.status === 'error'
-              );
-              if (failedSteps.length > 0) {
-                errors.push({
-                  doc_index: index,
-                  error: JSON.stringify(
-                    failedSteps.map((s) => ({
-                      processor: s.processor_type,
-                      tag: s.tag,
-                      error: s.error?.reason ?? s.error,
-                    }))
-                  ),
-                  sample_preview: rawDocs[index].substring(0, 200),
-                });
-              } else if (!errorsOnly) {
-                successes.push({
-                  doc_index: index,
-                  source: verboseDoc.processor_results,
-                });
-              }
-              return;
+      response.docs.forEach((doc, index) => {
+        if (!doc) {
+          failedSamples.push({
+            sampleIndex: index,
+            sample: samples[index],
+            error: 'Document was dropped by the pipeline',
+          });
+        } else if (doc.doc?._source?.error) {
+          const errorDetail =
+            typeof doc.doc._source.error === 'string'
+              ? doc.doc._source.error
+              : JSON.stringify(doc.doc._source.error);
+          failedSamples.push({
+            sampleIndex: index,
+            sample: samples[index],
+            error: errorDetail,
+          });
+        } else if (doc.doc?._source) {
+          successfulCount++;
+          if (successfulOutputs.length < MAX_SUCCESSFUL_OUTPUTS) {
+            successfulOutputs.push(
+              stripBoilerplateFields(doc.doc._source as Record<string, unknown>)
+            );
+          }
+        }
+      });
+
+      const totalSamples = samples.length;
+      const failedCount = failedSamples.length;
+      const successRate = totalSamples > 0 ? (successfulCount / totalSamples) * 100 : 0;
+
+      const lines: string[] = [
+        `Scratch pipeline: standard boilerplate + ${testProcessors.length} processor(s) you provided (not read from shared state).`,
+      ];
+
+      if (failedCount === 0) {
+        lines.push(`Test results: ALL ${totalSamples} samples succeeded (100%)`);
+      } else {
+        lines.push(
+          `Test results: ${successfulCount}/${totalSamples} succeeded (${successRate.toFixed(
+            1
+          )}%), ${failedCount} failed`
+        );
+      }
+
+      if (!errorsOnly && successfulOutputs.length > 0) {
+        lines.push('');
+        lines.push(`--- Successful output (${successfulOutputs.length} of ${successfulCount}) ---`);
+        for (const output of successfulOutputs) {
+          lines.push(JSON.stringify(output, null, 2));
+        }
+      }
+
+      if (failedCount > 0) {
+        const maxGroups = errorsOnly ? MAX_ERROR_GROUPS_ERRORS_ONLY : MAX_ERROR_GROUPS_DEFAULT;
+        const errorGroups = groupErrors(failedSamples, maxGroups);
+        const uniqueErrorCount = new Set(failedSamples.map((f) => f.error)).size;
+
+        lines.push('');
+        lines.push(
+          `--- Errors (${failedCount} failures, ${uniqueErrorCount} unique error types) ---`
+        );
+        for (const group of errorGroups) {
+          lines.push(`[${group.count}x] ${group.error}`);
+          lines.push(`  example: ${group.exampleSample}`);
+        }
+        if (uniqueErrorCount > maxGroups) {
+          lines.push(`  ... and ${uniqueErrorCount - maxGroups} more error types`);
+        }
+      }
+
+      if (verbose) {
+        const verboseIndices: number[] = [];
+
+        for (const failed of failedSamples) {
+          if (verboseIndices.length >= MAX_VERBOSE_SAMPLES) break;
+          verboseIndices.push(failed.sampleIndex);
+        }
+        if (verboseIndices.length < MAX_VERBOSE_SAMPLES && successfulCount > 0) {
+          for (
+            let i = 0;
+            i < response.docs.length && verboseIndices.length < MAX_VERBOSE_SAMPLES;
+            i++
+          ) {
+            if (
+              !verboseIndices.includes(i) &&
+              response.docs[i]?.doc?._source &&
+              !response.docs[i]?.doc?._source?.error
+            ) {
+              verboseIndices.push(i);
             }
           }
+        }
 
-          if (!doc) {
-            errors.push({
-              doc_index: index,
-              error: 'Document was dropped by the pipeline',
-              sample_preview: rawDocs[index].substring(0, 200),
+        if (verboseIndices.length > 0) {
+          const verboseDocs = verboseIndices.map((idx) => formatDoc(samples[idx]));
+
+          try {
+            const verboseResponse = await esClient.ingest.simulate({
+              docs: verboseDocs,
+              pipeline: scratchPipeline,
+              verbose: true,
             });
-          } else if (doc.doc?._source?.error) {
-            errors.push({
-              doc_index: index,
-              error:
-                typeof doc.doc._source.error === 'string'
-                  ? doc.doc._source.error
-                  : JSON.stringify(doc.doc._source.error),
-              sample_preview: rawDocs[index].substring(0, 200),
-            });
-          } else if (!errorsOnly && doc.doc?._source) {
-            successes.push({
-              doc_index: index,
-              source: doc.doc._source,
-            });
+
+            lines.push('');
+            lines.push(`--- Verbose: per-processor output (${verboseIndices.length} samples) ---`);
+
+            for (let i = 0; i < verboseResponse.docs.length; i++) {
+              const sampleIdx = verboseIndices[i];
+              const isFailing = failedSamples.some((f) => f.sampleIndex === sampleIdx);
+              const samplePreview = samples[sampleIdx].substring(0, SAMPLE_TRUNCATE_LENGTH);
+
+              lines.push('');
+              lines.push(
+                `Sample ${sampleIdx + 1} (${isFailing ? 'FAILING' : 'OK'}): ${samplePreview}${
+                  samples[sampleIdx].length > SAMPLE_TRUNCATE_LENGTH ? '...' : ''
+                }`
+              );
+
+              const processorResults = verboseResponse.docs[i]?.processor_results;
+              if (processorResults && processorResults.length > 0) {
+                lines.push(formatVerboseResults(processorResults));
+              } else {
+                lines.push('  (no processor results available)');
+              }
+            }
+          } catch (verboseError) {
+            lines.push('');
+            lines.push(`Verbose simulation failed: ${(verboseError as Error).message}`);
           }
-        });
-
-        const result: Record<string, unknown> = {
-          total_docs: rawDocs.length,
-          errors_count: errors.length,
-          success_count: rawDocs.length - errors.length,
-        };
-
-        if (errors.length > 0) {
-          result.errors = errors;
         }
-
-        if (!errorsOnly && successes.length > 0) {
-          result.successful_docs = successes;
-        }
-
-        if (errors.length === 0) {
-          result.message = `All ${rawDocs.length} test documents processed successfully.`;
-        }
-
-        return JSON.stringify(result);
-      } catch (simulateError) {
-        return JSON.stringify({
-          error: `Pipeline simulation failed: ${(simulateError as Error).message}`,
-        });
       }
+
+      return lines.join('\n');
     },
   });
 }
