@@ -95,6 +95,7 @@ const defaultContext = {
   getFieldsData: jest.fn(),
   dataFormattedForFieldBrowser: [],
   scopeId: 'test-scope-id',
+  isPreviewMode: false,
 } as ReturnType<typeof useAttackDetailsContext>;
 
 const defaultHeaderData = {
