@@ -71,10 +71,12 @@ export interface SearchEntitiesV2Result {
  * Searches the Entity Store v2 unified latest index (same semantics as
  * Security Solution EntityStoreDataClient.searchEntities when v2 is enabled).
  */
-export async function searchEntitiesV2(options: {
-  esClient: ElasticsearchClient;
-  namespace: string;
-} & SearchEntitiesV2Params): Promise<SearchEntitiesV2Result> {
+export async function searchEntitiesV2(
+  options: {
+    esClient: ElasticsearchClient;
+    namespace: string;
+  } & SearchEntitiesV2Params
+): Promise<SearchEntitiesV2Result> {
   const { esClient, namespace, entityTypes, filterQuery, page, perPage, sortField, sortOrder } =
     options;
 
@@ -92,9 +94,7 @@ export async function searchEntitiesV2(options: {
   }
 
   const entityTypeFilter =
-    entityTypes.length > 0
-      ? { terms: { 'entity.EngineMetadata.Type': entityTypes } }
-      : undefined;
+    entityTypes.length > 0 ? { terms: { 'entity.EngineMetadata.Type': entityTypes } } : undefined;
   const query =
     entityTypeFilter && parsedQuery
       ? { bool: { must: [entityTypeFilter, parsedQuery] } }
