@@ -6,7 +6,7 @@
  */
 
 import React, { type FC, useMemo, useCallback, type ReactElement, type ReactNode } from 'react';
-import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
+import { type Criteria, type EuiBasicTableColumn, EuiBasicTable, formatDate } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
 import { isRight } from 'fp-ts/Either';
@@ -26,6 +26,24 @@ import { PreviewLink } from '../../../shared/components/preview_link';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
+type CorrelationsTableRow = Record<string, unknown>;
+export type CorrelationsCustomTableColumn = EuiBasicTableColumn<CorrelationsTableRow> & {
+  /**
+   * Preserve array values for field-based custom columns.
+   * Applied only when `field` is provided.
+   */
+  preserveArray?: boolean;
+};
+
+type CorrelationsFieldColumn = Extract<
+  EuiBasicTableColumn<CorrelationsTableRow>,
+  { field: string }
+>;
+
+const isPreserveArrayFieldColumn = (
+  column: CorrelationsCustomTableColumn
+): column is CorrelationsFieldColumn & { preserveArray: true } =>
+  'field' in column && typeof column.field === 'string' && column.preserveArray === true;
 
 export interface CorrelationsDetailsAlertsTableProps {
   /**
@@ -56,6 +74,18 @@ export interface CorrelationsDetailsAlertsTableProps {
    * Data test subject string for testing
    */
   ['data-test-subj']?: string;
+  /**
+   * Optional index to query alerts from
+   */
+  indexName?: string;
+  /**
+   * Optional table columns override
+   */
+  columns?: Array<CorrelationsCustomTableColumn>;
+  /**
+   * Optional data view id to use when opening timeline.
+   */
+  timelineDataViewId?: string;
 }
 
 /**
@@ -69,6 +99,9 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
   eventId,
   noItemsMessage,
   'data-test-subj': dataTestSubj,
+  indexName,
+  columns,
+  timelineDataViewId,
 }) => {
   const {
     setPagination,
@@ -78,7 +111,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     paginationConfig,
     sorting,
     error,
-  } = usePaginatedAlerts(alertIds || []);
+  } = usePaginatedAlerts(alertIds || [], indexName);
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -94,20 +127,30 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     [setPagination, setSorting]
   );
 
+  const mappedValueFields = useMemo(() => {
+    return new Set(
+      (columns ?? []).filter(isPreserveArrayFieldColumn).map((column) => column.field)
+    );
+  }, [columns]);
+
   const mappedData = useMemo(() => {
     return data
       .map((hit) => ({ fields: hit.fields ?? {}, id: hit._id, index: hit._index }))
       .map((dataWithMeta) => {
         const res = Object.keys(dataWithMeta.fields).reduce((result, fieldName) => {
+          const fieldValue = dataWithMeta.fields?.[fieldName];
+          const shouldKeepArray = mappedValueFields.has(fieldName);
           result[fieldName] =
-            dataWithMeta.fields?.[fieldName]?.[0] || dataWithMeta.fields?.[fieldName];
+            Array.isArray(fieldValue) && !shouldKeepArray
+              ? fieldValue[0] ?? fieldValue
+              : fieldValue;
           return result;
-        }, {} as Record<string, unknown>);
+        }, {} as CorrelationsTableRow);
         res.id = dataWithMeta.id;
         res.index = dataWithMeta.index;
         return res;
       });
-  }, [data]);
+  }, [data, mappedValueFields]);
 
   const shouldUseFilters = Boolean(
     alertIds && alertIds.length && alertIds.length >= dataProviderLimit
@@ -121,10 +164,10 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     [alertIds, shouldUseFilters]
   );
 
-  const columns = useMemo(
+  const defaultColumns = useMemo<Array<EuiBasicTableColumn<CorrelationsTableRow>>>(
     () => [
       {
-        render: (row: Record<string, unknown>) => (
+        render: (row: CorrelationsTableRow) => (
           <AlertPreviewButton
             id={row.id as string}
             indexName={row.index as string}
@@ -161,7 +204,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
           />
         ),
         truncateText: true,
-        render: (row: Record<string, unknown>) => {
+        render: (row: CorrelationsTableRow) => {
           const ruleName = row[ALERT_RULE_NAME] as string;
           const ruleId = row['kibana.alert.rule.uuid'] as string;
           return (
@@ -230,6 +273,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
                 filters={filters}
                 asEmptyButton
                 iconType="timeline"
+                dataViewId={timelineDataViewId}
               >
                 {ACTION_INVESTIGATE_IN_TIMELINE}
               </InvestigateInTimelineButton>
@@ -243,7 +287,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
       }}
       data-test-subj={dataTestSubj}
     >
-      <EuiBasicTable<Record<string, unknown>>
+      <EuiBasicTable<CorrelationsTableRow>
         data-test-subj={`${dataTestSubj}Table`}
         loading={loading || alertsLoading}
         tableCaption={i18n.translate(
@@ -253,7 +297,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
           }
         )}
         items={mappedData}
-        columns={columns}
+        columns={columns ?? defaultColumns}
         pagination={paginationConfig}
         sorting={sorting}
         onChange={onTableChange}
