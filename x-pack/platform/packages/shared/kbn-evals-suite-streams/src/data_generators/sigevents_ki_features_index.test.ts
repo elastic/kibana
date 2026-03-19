@@ -6,39 +6,39 @@
  */
 
 import {
-  getSigeventsSnapshotKIsIndex,
+  getSigeventsSnapshotKIFeaturesIndex,
   SIGEVENTS_FEATURES_INDEX_PATTERN,
-} from './sigevents_kis_index';
+} from './sigevents_ki_features_index';
 
-describe('sigevents_kis_index', () => {
+describe('sigevents_ki_features_index', () => {
   it('exports the expected index pattern', () => {
     expect(SIGEVENTS_FEATURES_INDEX_PATTERN).toBe('sigevents-streams-features-*');
   });
 
   it('prefixes with sigevents-streams-features-', () => {
-    expect(getSigeventsSnapshotKIsIndex('healthy-baseline')).toBe(
+    expect(getSigeventsSnapshotKIFeaturesIndex('healthy-baseline')).toBe(
       'sigevents-streams-features-healthy-baseline'
     );
   });
 
   it('lowercases and replaces invalid characters with dashes', () => {
-    expect(getSigeventsSnapshotKIsIndex('Payment Unreachable')).toBe(
+    expect(getSigeventsSnapshotKIFeaturesIndex('Payment Unreachable')).toBe(
       'sigevents-streams-features-payment-unreachable'
     );
 
-    expect(getSigeventsSnapshotKIsIndex('A/B\\C*D?E"F<G>H|I,J#K')).toBe(
+    expect(getSigeventsSnapshotKIFeaturesIndex('A/B\\C*D?E"F<G>H|I,J#K')).toBe(
       'sigevents-streams-features-a-b-c-d-e-f-g-h-i-j-k'
     );
   });
 
   it('collapses multiple dashes and trims leading/trailing dashes', () => {
-    expect(getSigeventsSnapshotKIsIndex('---Payment---Unreachable---')).toBe(
+    expect(getSigeventsSnapshotKIFeaturesIndex('---Payment---Unreachable---')).toBe(
       'sigevents-streams-features-payment-unreachable'
     );
   });
 
   it('falls back to unknown if sanitized name is empty', () => {
-    expect(getSigeventsSnapshotKIsIndex('   ')).toBe('sigevents-streams-features-unknown');
-    expect(getSigeventsSnapshotKIsIndex('###')).toBe('sigevents-streams-features-unknown');
+    expect(getSigeventsSnapshotKIFeaturesIndex('   ')).toBe('sigevents-streams-features-unknown');
+    expect(getSigeventsSnapshotKIFeaturesIndex('###')).toBe('sigevents-streams-features-unknown');
   });
 });

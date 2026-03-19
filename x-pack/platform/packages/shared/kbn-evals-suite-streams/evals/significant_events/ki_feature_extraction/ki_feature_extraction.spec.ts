@@ -18,7 +18,7 @@ import {
   replaySignificantEventsSnapshot,
 } from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
-import { createKIExtractionEvaluators } from '../../../src/evaluators/ki_extraction_evaluators';
+import { createKIFeatureExtractionEvaluators } from '../../../src/evaluators/ki_feature_extraction_evaluators';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
@@ -29,16 +29,16 @@ import { collectSampleDocuments } from './collect_sample_documents';
 
 const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.basePathPrefix}`;
 
-evaluate.describe('KI extraction', { tag: tags.serverless.observability.complete }, () => {
+evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
-  const kiExtractionRuns = activeDatasets.flatMap((dataset) =>
-    dataset.kiExtraction.map((scenario) => ({ dataset, scenario }))
+  const kiFeatureExtractionRuns = activeDatasets.flatMap((dataset) =>
+    dataset.kiFeatureExtraction.map((scenario) => ({ dataset, scenario }))
   );
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
   evaluate.beforeAll(async ({ esClient, log }) => {
     const uniqueCatalogSources = new Map<string, GcsConfig>();
-    for (const { dataset, scenario } of kiExtractionRuns) {
+    for (const { dataset, scenario } of kiFeatureExtractionRuns) {
       const source = resolveScenarioSnapshotSource({
         scenarioId: scenario.input.scenario_id,
         datasetGcs: dataset.gcs,
@@ -53,7 +53,7 @@ evaluate.describe('KI extraction', { tag: tags.serverless.observability.complete
     }
   });
 
-  for (const { dataset, scenario } of kiExtractionRuns) {
+  for (const { dataset, scenario } of kiFeatureExtractionRuns) {
     evaluate.describe(`${dataset.id} / ${scenario.input.scenario_id}`, () => {
       let sampleDocuments: Array<SearchHit<Record<string, unknown>>> = [];
 
@@ -88,13 +88,13 @@ evaluate.describe('KI extraction', { tag: tags.serverless.observability.complete
       });
 
       evaluate(
-        'KI extraction',
+        'KI feature extraction',
         async ({ executorClient, evaluators, inferenceClient, logger, traceEsClient, log }) => {
           await executorClient.runExperiment(
             {
               dataset: {
-                name: `sigevents: KI extraction: ${scenario.input.scenario_id} (${dataset.id})`,
-                description: `[${dataset.id}] KI extraction from ${scenario.metadata.failure_domain} / ${scenario.metadata.failure_mode}`,
+                name: `sigevents: KI feature extraction: ${scenario.input.scenario_id} (${dataset.id})`,
+                description: `[${dataset.id}] KI feature extraction from ${scenario.metadata.failure_domain} / ${scenario.metadata.failure_mode}`,
                 examples: [
                   {
                     input: { sample_documents: sampleDocuments },
@@ -125,7 +125,7 @@ evaluate.describe('KI extraction', { tag: tags.serverless.observability.complete
               },
             },
             [
-              ...createKIExtractionEvaluators({
+              ...createKIFeatureExtractionEvaluators({
                 criteriaFn: evaluators.criteria.bind(evaluators),
                 criteria: scenario.output.criteria,
               }),
