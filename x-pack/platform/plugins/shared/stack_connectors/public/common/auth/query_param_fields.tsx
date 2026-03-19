@@ -42,7 +42,7 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiTitle size="xxs" data-test-subj="webhookQueryParamsText">
+      <EuiTitle size="xxs" data-test-subj="httpQueryParamsText">
         <h5>{i18n.QUERY_PARAMS_TITLE}</h5>
       </EuiTitle>
 
@@ -61,7 +61,7 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
                     <EuiButton
                       iconType="plusInCircle"
                       onClick={addItem}
-                      data-test-subj="webhookAddQueryParamButton"
+                      data-test-subj="httpAddQueryParamButton"
                     >
                       {i18n.ADD_QUERY_PARAM_BUTTON}
                     </EuiButton>
@@ -113,7 +113,7 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
                       display: 'flex',
                       flexDirection: 'column',
                     }}
-                    data-test-subj="webhookQueryParamPanel"
+                    data-test-subj="httpQueryParamPanel"
                   >
                     <EuiFlexGroup>
                       <EuiFlexItem>
@@ -146,7 +146,7 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
                           componentProps={{
                             euiFieldProps: {
                               readOnly,
-                              'data-test-subj': 'webhookQueryParamKeyInput',
+                              'data-test-subj': 'httpQueryParamKeyInput',
                             },
                           }}
                         />
@@ -166,7 +166,7 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
                           componentProps={{
                             euiFieldProps: {
                               readOnly,
-                              'data-test-subj': 'webhookQueryParamValueInput',
+                              'data-test-subj': 'httpQueryParamValueInput',
                               type: 'dual',
                             },
                           }}
@@ -178,7 +178,7 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
                           onClick={() => removeItem(item.id)}
                           iconType="minusInCircle"
                           aria-label={i18n.DELETE_QUERY_PARAM_BUTTON}
-                          data-test-subj="webhookRemoveQueryParamButton"
+                          data-test-subj="httpRemoveQueryParamButton"
                           css={{
                             marginTop: '28px',
                             background: euiTheme.colors.backgroundBaseDanger,
