@@ -17,20 +17,22 @@ import { updateCasesStepDefinition } from './steps/update_cases';
 // import { setCustomFieldStepDefinition } from './steps/set_custom_field';
 import { addCommentStepDefinition } from './steps/add_comment';
 import { findCasesStepDefinition } from './steps/find_cases';
-import { setSeverityStepDefinition } from './steps/set_severity';
-import { setStatusStepDefinition } from './steps/set_status';
-import { closeCaseStepDefinition } from './steps/close_case';
 import { deleteCasesStepDefinition } from './steps/delete_cases';
-import { assignCaseStepDefinition } from './steps/assign_case';
 import { unassignCaseStepDefinition } from './steps/unassign_case';
 import { addAlertsStepDefinition } from './steps/add_alerts';
 import { addEventsStepDefinition } from './steps/add_events';
 import { findSimilarCasesStepDefinition } from './steps/find_similar_cases';
-import { setDescriptionStepDefinition } from './steps/set_description';
-import { setTitleStepDefinition } from './steps/set_title';
 import { addObservablesStepDefinition } from './steps/add_observables';
 import { addTagsStepDefinition } from './steps/add_tags';
-import { setCategoryStepDefinition } from './steps/set_category';
+import {
+  assignCaseStepDefinition,
+  closeCaseStepDefinition,
+  setCategoryStepDefinition,
+  setDescriptionStepDefinition,
+  setSeverityStepDefinition,
+  setStatusStepDefinition,
+  setTitleStepDefinition,
+} from './steps/simple_steps';
 
 export function registerCaseWorkflowSteps(
   workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions'],
