@@ -17,7 +17,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import { apiHasAppContext } from '@kbn/presentation-publishing';
 import type { DiscoverServices } from '../build_services';
-import type { PublishesSavedSearch } from './types';
+import type { PublishesSavedSearch, PublishesSelectedTabId } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux/tab_mapping_utils';
 
@@ -64,6 +64,7 @@ export function initializeEditApi({
   parentApi?: unknown;
   partialApi: PublishesSavedSearch &
     PublishesSavedObjectId &
+    PublishesSelectedTabId &
     PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
   isEditable: () => boolean;
   getTitle: () => string | undefined;
