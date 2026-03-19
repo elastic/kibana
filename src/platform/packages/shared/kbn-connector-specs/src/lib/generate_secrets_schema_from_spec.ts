@@ -33,7 +33,7 @@ export const generateSecretsSchemaFromSpec = (
     const authTypeSpec = Object.values(authTypeSpecs).find((spec) => spec.id === schema.id);
     const authTypeMode = authTypeSpec?.authMode ?? 'shared';
 
-    if (authMode && authTypeMode !== authMode) {
+    if (authMode === 'per-user' && authTypeMode !== authMode) {
       continue;
     }
 

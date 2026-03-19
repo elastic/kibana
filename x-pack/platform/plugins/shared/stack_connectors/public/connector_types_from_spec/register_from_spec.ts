@@ -62,14 +62,13 @@ export function registerConnectorTypesFromSpecs({
 const createConnectorFields = (
   spec: ConnectorSpec,
   generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
-  generateSchema: typeof import('./generate_schema').generateSchema,
-  authorizationCodeEnabled: boolean
+  generateSchema: typeof import('./generate_schema').generateSchema
 ) => {
   const ConnectorFields = (props: { readOnly: boolean; isEdit: boolean }) => {
     const [formData] = useFormData();
 
     const dynamicSchema = useMemo(
-      () => generateSchema(spec, { authMode: formData?.authMode, authorizationCodeEnabled }),
+      () => generateSchema(spec, { authMode: formData?.authMode }),
       [formData?.authMode]
     );
 
@@ -109,12 +108,7 @@ const createConnectorTypeFromSpec = (
     },
     actionConnectorFields: lazy(() =>
       Promise.resolve({
-        default: createConnectorFields(
-          spec,
-          generateFormFields,
-          generateSchema,
-          authorizationCodeEnabled
-        ),
+        default: createConnectorFields(spec, generateFormFields, generateSchema),
       })
     ),
     actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),

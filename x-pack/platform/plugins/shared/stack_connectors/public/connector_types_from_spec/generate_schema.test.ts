@@ -100,25 +100,4 @@ describe('generateSchema', () => {
     expect(authTypes).toContain('bearer');
     expect(authTypes).not.toContain('oauth_authorization_code');
   });
-
-  it('includes oauth_authorization_code when authorizationCodeEnabled is true', () => {
-    const spec = {
-      schema: z4.object({
-        url: z4.string().min(1),
-      }),
-      auth: {
-        types: ['basic', 'bearer', 'oauth_authorization_code'],
-      },
-    } as unknown as ConnectorSpec;
-
-    const schema = generateSchema(spec, { authorizationCodeEnabled: true });
-    const jsonSchema = z4.toJSONSchema(schema) as any;
-    const authTypes = (jsonSchema.properties?.secrets?.anyOf || [])
-      .map((opt: any) => opt.properties?.authType?.const)
-      .filter(Boolean);
-
-    expect(authTypes).toContain('basic');
-    expect(authTypes).toContain('bearer');
-    expect(authTypes).toContain('oauth_authorization_code');
-  });
 });
