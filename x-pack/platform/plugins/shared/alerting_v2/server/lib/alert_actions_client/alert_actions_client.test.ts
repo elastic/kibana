@@ -57,7 +57,7 @@ describe('AlertActionsClient', () => {
       const operations = callArgs.operations ?? [];
       const docs = operations.filter((_, index) => index % 2 === 1);
       expect(operations).toHaveLength(2);
-      expect(operations[0]).toEqual({ create: { _index: '.alerting-actions' } });
+      expect(operations[0]).toEqual({ create: { _index: '.alert-actions' } });
       expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({
         group_hash: 'test-group-hash',
