@@ -827,7 +827,7 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
           }
         : {})}
       css={css`
-        inline-size: ${isChild ? '65vw' : '50vw'} !important;
+        inline-size: ${isChild ? '74vw' : '50vw'} !important;
         ${
           isChild
             ? `
@@ -836,17 +836,22 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
           [class*="euiFlyoutMenu__container"] {
             border-block-end: none !important;
           }
-          & .euiFlyoutHeader {
-            padding: 32px !important;
-          }
-          & .euiFlyoutBody__overflowContent {
-            padding: 32px !important;
-          }
-          & .euiFlyoutFooter {
-            padding: 32px !important;
-          }
         `
             : ''
+        }
+        & .euiFlyoutHeader {
+          padding-top: 32px !important;
+          padding-bottom: 0 !important;
+          padding-inline: 32px !important;
+        }
+        & .euiFlyoutBody__overflowContent {
+          padding-top: 24px !important;
+          padding-bottom: 32px !important;
+          padding-inline: 32px !important;
+        }
+        & .euiFlyoutFooter {
+          padding-block: 24px !important;
+          padding-inline: 32px !important;
         }
       `}
     >
@@ -865,20 +870,32 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiTabs>
-          <EuiTab
-            isSelected={selectedTab === 'metrics'}
-            onClick={() => setSelectedTab('metrics')}
+        <div
+          css={css`
+            margin-inline: -32px;
+            inline-size: calc(100% + 64px);
+            max-inline-size: none;
+          `}
+        >
+          <EuiTabs
+            css={css`
+              padding-inline: 32px;
+            `}
           >
-            Metrics
-          </EuiTab>
-          <EuiTab
-            isSelected={selectedTab === 'logs'}
-            onClick={() => setSelectedTab('logs')}
-          >
-            Logs
-          </EuiTab>
-        </EuiTabs>
+            <EuiTab
+              isSelected={selectedTab === 'metrics'}
+              onClick={() => setSelectedTab('metrics')}
+            >
+              Metrics
+            </EuiTab>
+            <EuiTab
+              isSelected={selectedTab === 'logs'}
+              onClick={() => setSelectedTab('logs')}
+            >
+              Logs
+            </EuiTab>
+          </EuiTabs>
+        </div>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

@@ -24,11 +24,13 @@ export const createNavigationTree = ({
   overviewAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
+  hideIngestHubDataManagement = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
+  hideIngestHubDataManagement?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -410,14 +412,8 @@ export const createNavigationTree = ({
               },
               {
                 link: 'observabilityOnboarding:ingest-hub-integrations',
-                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.integrations', {
-                  defaultMessage: 'Integrations',
-                }),
-              },
-              {
-                link: 'observabilityOnboarding:ingest-hub-api-endpoint',
-                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.apiEndpoint', {
-                  defaultMessage: 'API Endpoint',
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.dataSources', {
+                  defaultMessage: 'Data sources',
                 }),
               },
             ],
@@ -451,6 +447,26 @@ export const createNavigationTree = ({
               },
             ],
           },
+          ...(hideIngestHubDataManagement
+            ? []
+            : [
+                {
+                  id: 'ingestHub_data_management',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ingestHub.dataManagement',
+                    { defaultMessage: 'Data management' }
+                  ),
+                  children: [
+                    {
+                      link: 'observabilityOnboarding:ingest-hub-data-management',
+                      title: i18n.translate(
+                        'xpack.serverlessObservability.nav.ingestHub.streams',
+                        { defaultMessage: 'Streams' }
+                      ),
+                    },
+                  ],
+                },
+              ]),
         ],
       },
       {

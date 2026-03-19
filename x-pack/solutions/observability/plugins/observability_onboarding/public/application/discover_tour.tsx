@@ -71,12 +71,12 @@ const TOUR_STEPS: TourStepConfig[] = [
     anchorPosition: 'downCenter',
   },
   {
-    title: 'Add more data anytime',
+    title: 'Add more data and manage your integrations',
     content: (
       <EuiText size="s">
         <p>
-          Head back to <strong>Ingest Hub</strong> whenever you want to add more data sources, set
-          up metrics collection, or explore your existing integrations.
+          Head back to <strong>Ingest Hub</strong> to add data sources, set up metrics, or manage
+          your integrations in the <strong>Integrations installed</strong> section.
         </p>
       </EuiText>
     ),

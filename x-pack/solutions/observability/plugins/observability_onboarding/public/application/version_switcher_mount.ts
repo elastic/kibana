@@ -60,8 +60,8 @@ export const mountVersionSwitcherWidget = () => {
     return btn;
   };
 
-  const blockBtn = makeBtn('blockUx', 'Block UX');
-  const skipBtn = makeBtn('skipUx', 'Skip UX');
+  const blockBtn = makeBtn('blockUx', 'Block');
+  const skipBtn = makeBtn('skipUx', 'Skip');
   container.appendChild(blockBtn);
   container.appendChild(skipBtn);
 

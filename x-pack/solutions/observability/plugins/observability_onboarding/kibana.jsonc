@@ -28,6 +28,7 @@
       "cloud",
       "usageCollection",
       "streams",
+      "streamsApp",
     ],
     "requiredBundles": [
       "kibanaReact"

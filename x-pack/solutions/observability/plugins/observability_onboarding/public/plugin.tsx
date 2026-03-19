@@ -34,6 +34,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
+import type { StreamsAppPublicStart } from '@kbn/streams-app-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
@@ -55,14 +56,14 @@ import { DiscoverTour } from './application/discover_tour';
 const VERSION_OPTIONS = [
   {
     id: 'blockUx' as IngestHubVersion,
-    label: 'Block UX',
+    label: 'Block',
     title: '',
     toolTipContent: 'User lands in Kibana and is blocked and pushed to add data.',
     toolTipProps: { position: 'top' as const, className: 'onboardingSwitcherTooltip' },
   },
   {
     id: 'skipUx' as IngestHubVersion,
-    label: 'Skip UX',
+    label: 'Skip',
     title: '',
     toolTipContent: 'User lands in Kibana and is pushed to add data but can skip the flow.',
     toolTipProps: { position: 'top' as const, className: 'onboardingSwitcherTooltip' },
@@ -110,7 +111,8 @@ const VersionSwitcherNavControl: React.FC<{ navigateToApp?: (appId: string, opti
           versionStore.setVersion(id as IngestHubVersion);
           sessionStorage.removeItem('ingestHub:showDiscoverTour');
           sessionStorage.removeItem('ingestHub:dataAdded');
-          const path = id === 'blockUx' ? '/ingest-hub/integrations' : '/ingest-hub';
+          const path =
+            id === 'blockUx' ? '/ingest-hub/integrations' : '/ingest-hub';
           navigateToApp?.(PLUGIN_ID, { path });
         }}
         buttonSize="compressed"
@@ -148,6 +150,7 @@ export interface ObservabilityOnboardingPluginStartDeps {
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
   streams?: StreamsPluginStart;
+  streamsApp?: StreamsAppPublicStart;
 }
 
 export type ObservabilityOnboardingContextValue = CoreStart &
@@ -183,14 +186,8 @@ export class ObservabilityOnboardingPlugin
         },
         {
           id: 'ingest-hub-integrations',
-          title: 'Integrations',
+          title: 'Data sources',
           path: '/ingest-hub/integrations',
-          visibleIn: [],
-        },
-        {
-          id: 'ingest-hub-api-endpoint',
-          title: 'API Endpoint',
-          path: '/ingest-hub/api-endpoint',
           visibleIn: [],
         },
         {
@@ -209,6 +206,12 @@ export class ObservabilityOnboardingPlugin
           id: 'ingest-hub-rules',
           title: 'Rules & Monitors',
           path: '/ingest-hub/rules',
+          visibleIn: [],
+        },
+        {
+          id: 'ingest-hub-data-management',
+          title: 'Data management',
+          path: '/ingest-hub/data-management',
           visibleIn: [],
         },
       ],

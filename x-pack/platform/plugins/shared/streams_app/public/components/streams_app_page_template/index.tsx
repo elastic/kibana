@@ -29,10 +29,11 @@ StreamsAppPageTemplate.Header = EuiPageTemplate.Header;
 StreamsAppPageTemplate.EmptyPrompt = EuiPageTemplate.EmptyPrompt;
 StreamsAppPageTemplate.Body = ({
   noPadding,
+  grow = true,
   ...props
-}: EuiPageSectionProps & { noPadding?: boolean }) => (
+}: EuiPageSectionProps & { noPadding?: boolean; grow?: boolean }) => (
   <EuiPageTemplate.Section
-    grow
+    grow={grow}
     className={css`
       overflow-y: auto;
       ${noPadding ? 'padding: 0px;' : ''}
