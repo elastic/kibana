@@ -423,6 +423,25 @@ export class WorkflowsBaseTelemetry {
     });
   };
 
+  /**
+   * Reports a HITL workflow execution resume attempt.
+   */
+  reportWorkflowRunResumed = (params: {
+    workflowExecutionId: string;
+    workflowId?: string;
+    timeToSubmitMs?: number;
+    error?: Error;
+  }) => {
+    const { workflowExecutionId, workflowId, timeToSubmitMs, error } = params;
+    this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowRunResumed, {
+      eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowRunResumed],
+      workflowExecutionId,
+      ...(workflowId && { workflowId }),
+      ...(timeToSubmitMs !== undefined && { timeToSubmitMs }),
+      ...this.getBaseResultParams(error),
+    });
+  };
+
   // UI interaction actions
 
   /**

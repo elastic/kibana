@@ -11,6 +11,7 @@ import type { RootSchema } from '@kbn/core/public';
 import type {
   ReportWorkflowRunCancelledActionParams,
   ReportWorkflowRunInitiatedActionParams,
+  ReportWorkflowRunResumedActionParams,
   ReportWorkflowStepTestRunInitiatedActionParams,
   ReportWorkflowTestRunInitiatedActionParams,
   WorkflowExecutionEventTypes,
@@ -94,6 +95,7 @@ export interface WorkflowsTelemetryEventsMap {
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: ReportWorkflowStepTestRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: ReportWorkflowRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: ReportWorkflowRunCancelledActionParams;
+  [WorkflowExecutionEventTypes.WorkflowRunResumed]: ReportWorkflowRunResumedActionParams;
   [WorkflowUIEventTypes.WorkflowListViewed]: ReportWorkflowListViewedActionParams;
   [WorkflowUIEventTypes.WorkflowDetailViewed]: ReportWorkflowDetailViewedActionParams;
 }

@@ -11,6 +11,7 @@ import type { RootSchema } from '@kbn/core/public';
 import type {
   ReportWorkflowRunCancelledActionParams,
   ReportWorkflowRunInitiatedActionParams,
+  ReportWorkflowRunResumedActionParams,
   ReportWorkflowStepTestRunInitiatedActionParams,
   ReportWorkflowTestRunInitiatedActionParams,
 } from './types';
@@ -22,6 +23,7 @@ export const workflowExecutionEventNames = {
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: 'Workflow step test run initiated',
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: 'Workflow run initiated',
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: 'Workflow run cancelled',
+  [WorkflowExecutionEventTypes.WorkflowRunResumed]: 'Workflow run resumed',
 };
 
 const baseResultActionSchema: RootSchema<BaseResultActionParams> = {
@@ -203,9 +205,36 @@ const workflowRunCancelledSchema: RootSchema<ReportWorkflowRunCancelledActionPar
   },
 };
 
+const workflowRunResumedSchema: RootSchema<ReportWorkflowRunResumedActionParams> = {
+  ...baseResultActionSchema,
+  ...eventNameSchema,
+  workflowExecutionId: {
+    type: 'keyword',
+    _meta: {
+      description: 'The workflow execution ID being resumed',
+      optional: false,
+    },
+  },
+  workflowId: {
+    type: 'keyword',
+    _meta: {
+      description: 'The workflow ID if available',
+      optional: true,
+    },
+  },
+  timeToSubmitMs: {
+    type: 'long',
+    _meta: {
+      description: 'Time in milliseconds from when the modal was opened to when the user submitted',
+      optional: true,
+    },
+  },
+};
+
 export const workflowExecutionEventSchemas = {
   [WorkflowExecutionEventTypes.WorkflowTestRunInitiated]: workflowTestRunInitiatedSchema,
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: workflowStepTestRunInitiatedSchema,
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: workflowRunInitiatedSchema,
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: workflowRunCancelledSchema,
+  [WorkflowExecutionEventTypes.WorkflowRunResumed]: workflowRunResumedSchema,
 };

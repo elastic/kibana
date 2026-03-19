@@ -8,16 +8,18 @@
  */
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ResumeExecutionModal } from './resume_execution_modal';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 interface ResumeExecutionButtonProps {
   executionId: string;
+  workflowId?: string;
   resumeMessage?: string;
   /** When true, opens the input modal immediately on mount */
   autoOpen?: boolean;
@@ -25,22 +27,29 @@ interface ResumeExecutionButtonProps {
 
 export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   executionId,
+  workflowId,
   resumeMessage,
   autoOpen = false,
 }) => {
   const { http, notifications } = useKibana().services;
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { clearResumeParam } = useWorkflowUrlState();
+  const telemetry = useTelemetry();
   const [isModalOpen, setIsModalOpen] = useState(autoOpen);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const modalOpenedAtRef = useRef<number | null>(null);
 
   // Honour autoOpen changes (e.g. when navigated to with ?resume=true)
   useEffect(() => {
     if (autoOpen) setIsModalOpen(true);
   }, [autoOpen]);
 
-  const openModal = useCallback(() => setIsModalOpen(true), []);
+  const openModal = useCallback(() => {
+    modalOpenedAtRef.current = Date.now();
+    setIsModalOpen(true);
+  }, []);
+
   const closeModal = useCallback(() => {
     clearResumeParam();
     setIsModalOpen(false);
@@ -52,6 +61,8 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         throw new Error('HTTP service is unavailable');
       }
       setIsSubmitting(true);
+      const timeToSubmitMs =
+        modalOpenedAtRef.current != null ? Date.now() - modalOpenedAtRef.current : undefined;
       try {
         await http.post(`/api/workflowExecutions/${executionId}/resume`, {
           body: JSON.stringify({ input: stepInputs }),
@@ -62,20 +73,32 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
             { defaultMessage: 'Workflow resumed' }
           ),
         });
+        telemetry.reportWorkflowRunResumed({
+          workflowExecutionId: executionId,
+          workflowId,
+          timeToSubmitMs,
+        });
         setIsSubmitted(true);
         closeModal();
       } catch (error) {
+        const errorObj = error instanceof Error ? error : new Error(String(error));
         notifications?.toasts.addError?.(error, {
           title: i18n.translate(
             'workflowsManagement.executionDetail.resumeButton.errorNotificationTitle',
             { defaultMessage: 'Error resuming workflow' }
           ),
         });
+        telemetry.reportWorkflowRunResumed({
+          workflowExecutionId: executionId,
+          workflowId,
+          timeToSubmitMs,
+          error: errorObj,
+        });
       } finally {
         setIsSubmitting(false);
       }
     },
-    [executionId, http, notifications, closeModal]
+    [executionId, workflowId, http, notifications, telemetry, closeModal]
   );
 
   return (

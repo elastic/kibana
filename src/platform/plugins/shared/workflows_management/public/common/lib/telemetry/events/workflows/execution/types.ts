@@ -31,6 +31,10 @@ export enum WorkflowExecutionEventTypes {
    * This event tracks cancellation request attempts.
    */
   WorkflowRunCancelled = 'workflows_workflow_run_cancelled',
+  /**
+   * When a paused workflow execution is resumed from the UI (HITL resume action)
+   */
+  WorkflowRunResumed = 'workflows_workflow_run_resumed',
 }
 
 /**
@@ -131,4 +135,23 @@ export interface ReportWorkflowRunCancelledActionParams extends BaseResultAction
    * Time in milliseconds from execution start to cancellation request
    */
   timeToCancellation?: number;
+}
+
+/**
+ * Parameters for workflow execution resume telemetry (HITL).
+ */
+export interface ReportWorkflowRunResumedActionParams extends BaseResultActionParams {
+  eventName: string;
+  /**
+   * The workflow execution ID being resumed
+   */
+  workflowExecutionId: string;
+  /**
+   * The workflow ID if available
+   */
+  workflowId?: string;
+  /**
+   * Time in milliseconds from when the modal was opened to when the user submitted
+   */
+  timeToSubmitMs?: number;
 }
