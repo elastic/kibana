@@ -142,7 +142,7 @@ test.describe(
       }
     });
 
-    test('user can configure osquery response actions on a detection rule', async ({
+    test('user can configure Osquery response actions on a detection rule', async ({
       pageObjects,
       page,
     }) => {

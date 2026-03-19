@@ -164,7 +164,7 @@ apiTest.describe(
       expect(params.queries).toHaveLength(2);
     });
 
-    apiTest('updates a rule to add osquery response actions', async ({ apiClient }) => {
+    apiTest('updates a rule to add Osquery response actions', async ({ apiClient }) => {
       const ruleBody = testData.getMinimalRule();
       const createResponse = await apiClient.post(testData.API_PATHS.DETECTION_RULES, {
         headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
@@ -202,7 +202,7 @@ apiTest.describe(
       expect(getResponse.body.response_actions).toHaveLength(1);
     });
 
-    apiTest('updates a rule to remove osquery response actions', async ({ apiClient }) => {
+    apiTest('updates a rule to remove Osquery response actions', async ({ apiClient }) => {
       const ruleBody = testData.getMinimalRule({
         response_actions: [
           {
@@ -234,7 +234,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'creates a rule with multiple osquery actions of different types',
+      'creates a rule with multiple Osquery actions of different types',
       async ({ apiClient }) => {
         const ruleBody = testData.getMinimalRule({
           response_actions: [

@@ -68,7 +68,7 @@ export class ResponseActionsFormPage {
   }
 
   /**
-   * The osquery form uses react-hook-form with mode:'all' and useDebounce(500ms).
+   * The Osquery form uses react-hook-form with mode:'all' and useDebounce(500ms).
    * Validation only fires after an onChange. Setting value to non-empty then empty
    * triggers onChange('') after the debounce, surfacing the required-field error.
    */
