@@ -9,7 +9,13 @@ inputs:
   - name: search_type
     type: choice
     required: true
-    description: "The type of search to perform"
+    description: |
+      The type of GitHub search to perform:
+        searchCode - Search for code across repositories (matches file contents, filenames)
+        searchRepositories - Search for repositories by name, description, topic, language
+        searchIssues - Search for issues across repositories (supports order/sort params)
+        searchPullRequests - Search for pull requests across repositories (supports order/sort params)
+        searchUsers - Search for GitHub users by username, name, or email
     options:
       - searchCode
       - searchRepositories

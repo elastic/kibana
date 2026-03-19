@@ -9,7 +9,14 @@ inputs:
   - name: list_type
     type: choice
     required: true
-    description: "The type of resource to list"
+    description: |
+      The type of GitHub resource to list in a repository. All use cursor-based pagination (first/after):
+        listIssues - List issues (supports state filter: open, closed, all)
+        listPullRequests - List pull requests (supports state filter: open, closed, all)
+        listCommits - List commits (supports sha param to specify branch or starting commit)
+        listBranches - List branches
+        listReleases - List releases
+        listTags - List tags
     options:
       - listIssues
       - listPullRequests

@@ -9,12 +9,8 @@
  * GitHub MCP Connector (v2)
  *
  * An MCP-native v2 connector that connects to the GitHub Copilot MCP server.
- * Uses Mike's Axios-based approach: the framework's ctx.client (Axios) is
- * wrapped as a fetch adapter and passed to McpClient, so auth/SSL/proxy
- * come from Axios for free. No client registry needed.
  *
  * Auth: Bearer token (PAT or OAuth token)
- * Transport: Axios → createFetchFromAxios → StreamableHTTPClientTransport
  */
 
 import { i18n } from '@kbn/i18n';

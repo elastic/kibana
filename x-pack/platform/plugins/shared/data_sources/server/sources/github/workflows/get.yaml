@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.github.get'
-description: 'Get a specific GitHub resource by ID. Actions and inputs: resource_type (required choice), owner (required), repo (required), plus resource-specific inputs: sha (for getCommit), pullNumber (for pullRequestRead), issueNumber (for getIssue/getIssueComments), path and ref (for getFileContents). getLatestRelease requires only owner and repo.'
+description: 'Get a specific GitHub resource by ID. Actions and inputs: resource_type (required choice), owner (required), repo (required), plus resource-specific inputs: sha (for getCommit), pullNumber (for pullRequestRead), issueNumber (for getIssue/getIssueComments). getLatestRelease requires only owner and repo.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -9,12 +9,17 @@ inputs:
   - name: resource_type
     type: choice
     required: true
-    description: "The type of resource to retrieve"
+    description: |
+      The type of GitHub resource to retrieve. Each requires owner and repo, plus resource-specific inputs:
+        getCommit - Get details of a specific commit (requires sha)
+        getLatestRelease - Get the latest release for a repository (no extra inputs)
+        pullRequestRead - Read full details of a pull request (requires pull_number)
+        getIssue - Get details of a specific issue (requires issue_number)
+        getIssueComments - Get comments for a specific issue (requires issue_number)
     options:
       - getCommit
       - getLatestRelease
       - pullRequestRead
-      - getFileContents
       - getIssue
       - getIssueComments
   - name: owner
@@ -37,14 +42,6 @@ inputs:
     type: number
     required: false
     description: "Issue number. Required for getIssue and getIssueComments."
-  - name: path
-    type: string
-    required: false
-    description: "File or directory path. Required for getFileContents."
-  - name: ref
-    type: string
-    required: false
-    description: "Branch, tag, or commit SHA. Used by getFileContents. Defaults to the repository's default branch."
 steps:
   - name: if-get-commit
     type: if
@@ -81,35 +78,22 @@ steps:
                   repo: "${{inputs.repo}}"
                   pullNumber: ${{inputs.pull_number}}
             else:
-              - name: if-get-file-contents
+              - name: if-get-issue
                 type: if
-                condition: "${{ inputs.resource_type == 'getFileContents' }}"
+                condition: "${{ inputs.resource_type == 'getIssue' }}"
                 steps:
-                  - name: get-file-contents
-                    type: github.getFileContents
+                  - name: get-issue
+                    type: github.getIssue
                     connector-id: <%= github-stack-connector-id %>
                     with:
                       owner: "${{inputs.owner}}"
                       repo: "${{inputs.repo}}"
-                      path: "${{inputs.path}}"
-                      ref: "${{inputs.ref}}"
+                      issueNumber: ${{inputs.issue_number}}
                 else:
-                  - name: if-get-issue
-                    type: if
-                    condition: "${{ inputs.resource_type == 'getIssue' }}"
-                    steps:
-                      - name: get-issue
-                        type: github.getIssue
-                        connector-id: <%= github-stack-connector-id %>
-                        with:
-                          owner: "${{inputs.owner}}"
-                          repo: "${{inputs.repo}}"
-                          issueNumber: ${{inputs.issue_number}}
-                    else:
-                      - name: get-issue-comments
-                        type: github.getIssueComments
-                        connector-id: <%= github-stack-connector-id %>
-                        with:
-                          owner: "${{inputs.owner}}"
-                          repo: "${{inputs.repo}}"
-                          issueNumber: ${{inputs.issue_number}}
+                  - name: get-issue-comments
+                    type: github.getIssueComments
+                    connector-id: <%= github-stack-connector-id %>
+                    with:
+                      owner: "${{inputs.owner}}"
+                      repo: "${{inputs.repo}}"
+                      issueNumber: ${{inputs.issue_number}}
