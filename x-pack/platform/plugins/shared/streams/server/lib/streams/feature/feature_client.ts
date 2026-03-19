@@ -27,6 +27,7 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
+  FEATURE_EXCLUDED_AT,
   FEATURE_FILTER,
   FEATURE_EVIDENCE_DOC_IDS,
 } from './fields';
@@ -40,8 +41,18 @@ interface FeatureBulkIndexOperation {
 interface FeatureBulkDeleteOperation {
   delete: { id: string };
 }
+interface FeatureBulkExcludeOperation {
+  exclude: { id: string };
+}
+interface FeatureBulkRestoreOperation {
+  restore: { id: string };
+}
 
-export type FeatureBulkOperation = FeatureBulkIndexOperation | FeatureBulkDeleteOperation;
+export type FeatureBulkOperation =
+  | FeatureBulkIndexOperation
+  | FeatureBulkDeleteOperation
+  | FeatureBulkExcludeOperation
+  | FeatureBulkRestoreOperation;
 
 export const MAX_FEATURE_AGE_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 
@@ -57,10 +68,10 @@ export class FeatureClient {
   }
 
   async bulk(stream: string, operations: FeatureBulkOperation[]) {
-    const filteredOperations = await this.filterValidOperations(stream, operations);
+    const resolvedOperations = await this.filterValidOperations(stream, operations);
 
     return await this.clients.storageClient.bulk({
-      operations: filteredOperations.map((operation) => {
+      operations: resolvedOperations.map((operation) => {
         if ('index' in operation) {
           const document = toStorage(stream, operation.index.feature);
           return {
@@ -79,7 +90,13 @@ export class FeatureClient {
 
   async getFeatures(
     stream: string,
-    filters?: { type?: string[]; id?: string[]; minConfidence?: number; limit?: number }
+    filters?: {
+      type?: string[];
+      id?: string[];
+      minConfidence?: number;
+      limit?: number;
+      includeExcluded?: boolean;
+    }
   ): Promise<{ hits: Feature[]; total: number }> {
     const filterClauses: QueryDslQueryContainer[] = [
       ...termQuery(STREAM_NAME, stream),
@@ -94,6 +111,12 @@ export class FeatureClient {
         },
       },
     ];
+
+    if (!filters?.includeExcluded) {
+      filterClauses.push({
+        bool: { must_not: { exists: { field: FEATURE_EXCLUDED_AT } } },
+      });
+    }
 
     if (filters?.type?.length) {
       filterClauses.push({
@@ -176,6 +199,9 @@ export class FeatureClient {
           minimum_should_match: 1,
         },
       },
+      {
+        bool: { must_not: { exists: { field: FEATURE_EXCLUDED_AT } } },
+      },
     ];
 
     const featuresResponse = await this.clients.storageClient.search({
@@ -194,32 +220,94 @@ export class FeatureClient {
     };
   }
 
+  async getExcludedFeatures(stream: string): Promise<{ hits: Feature[]; total: number }> {
+    const featuresResponse = await this.clients.storageClient.search({
+      size: 10_000,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: [...termQuery(STREAM_NAME, stream), { exists: { field: FEATURE_EXCLUDED_AT } }],
+        },
+      },
+      sort: [{ [FEATURE_EXCLUDED_AT]: { order: 'desc' } }],
+    });
+
+    return {
+      hits: featuresResponse.hits.hits.map((hit) => fromStorage(hit._source)),
+      total: featuresResponse.hits.total.value,
+    };
+  }
+
   private async filterValidOperations(
     stream: string,
     operations: FeatureBulkOperation[]
-  ): Promise<FeatureBulkOperation[]> {
-    const deleteIds = operations.flatMap((op) => ('delete' in op ? op.delete.id : []));
+  ): Promise<Array<FeatureBulkIndexOperation | FeatureBulkDeleteOperation>> {
+    const deleteIdSet = new Set<string>();
+    const excludeIdSet = new Set<string>();
+    const restoreIdSet = new Set<string>();
+    for (const op of operations) {
+      if ('delete' in op) {
+        deleteIdSet.add(op.delete.id);
+      } else if ('exclude' in op) {
+        excludeIdSet.add(op.exclude.id);
+      } else if ('restore' in op) {
+        restoreIdSet.add(op.restore.id);
+      }
+    }
+    const idsToValidate = [...deleteIdSet, ...excludeIdSet, ...restoreIdSet];
 
-    const validDeleteIds =
-      deleteIds.length > 0
-        ? new Set(
-            (
-              await this.clients.storageClient.search({
-                size: deleteIds.length,
-                track_total_hits: false,
-                query: {
-                  bool: {
-                    filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
-                  },
+    const validHits =
+      idsToValidate.length > 0
+        ? (
+            await this.clients.storageClient.search({
+              size: idsToValidate.length,
+              track_total_hits: false,
+              query: {
+                bool: {
+                  filter: [{ terms: { _id: idsToValidate } }, ...termQuery(STREAM_NAME, stream)],
                 },
-              })
-            ).hits.hits.flatMap((hit) => hit._id ?? [])
-          )
-        : new Set<string>();
+              },
+            })
+          ).hits.hits
+        : [];
 
-    return operations.filter(
-      (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
-    );
+    const now = new Date().toISOString();
+    const validatedOps: Array<FeatureBulkIndexOperation | FeatureBulkDeleteOperation> = [];
+
+    for (const op of operations) {
+      if ('index' in op) {
+        validatedOps.push(op);
+      }
+    }
+
+    for (const hit of validHits) {
+      const id = hit._id!;
+      if (deleteIdSet.has(id)) {
+        validatedOps.push({ delete: { id } });
+      } else if (excludeIdSet.has(id)) {
+        validatedOps.push({
+          index: {
+            feature: {
+              ...fromStorage(hit._source),
+              excluded_at: now,
+            },
+          },
+        });
+      } else if (restoreIdSet.has(id)) {
+        validatedOps.push({
+          index: {
+            feature: {
+              ...fromStorage(hit._source),
+              excluded_at: undefined,
+              last_seen: now,
+              expires_at: new Date(Date.now() + MAX_FEATURE_AGE_MS).toISOString(),
+            },
+          },
+        });
+      }
+    }
+
+    return validatedOps;
   }
 
   findDuplicateFeature({
@@ -250,6 +338,7 @@ function toStorage(stream: string, feature: Feature): StoredFeature {
     [STREAM_NAME]: stream,
     [FEATURE_META]: feature.meta,
     [FEATURE_EXPIRES_AT]: feature.expires_at,
+    [FEATURE_EXCLUDED_AT]: feature.excluded_at,
     [FEATURE_TITLE]: feature.title,
     [FEATURE_FILTER]: feature.filter,
   };
@@ -272,6 +361,7 @@ function fromStorage(feature: StoredFeature): Feature {
     tags: feature[FEATURE_TAGS],
     meta: feature[FEATURE_META],
     expires_at: feature[FEATURE_EXPIRES_AT],
+    excluded_at: feature[FEATURE_EXCLUDED_AT],
     title: feature[FEATURE_TITLE],
     filter: feature[FEATURE_FILTER],
   };

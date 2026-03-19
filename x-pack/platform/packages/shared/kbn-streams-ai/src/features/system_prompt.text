@@ -364,6 +364,26 @@ Version formatting rules (important for vulnerability analysis):
 }
 ```
 
+## Excluded Features
+
+If `excluded_features` are provided in the input, the user has explicitly excluded those features.
+Do **not** regenerate any feature that represents the **exact same real-world component** as an excluded feature.
+
+**Exclusion rules:**
+- Only exclude a feature when you are **100% certain** it refers to the same real-world component
+- Features that are similar but represent different components **must** still be generated
+- Do not rely on superficial signals (naming patterns, shared type/subtype, overlapping tags)
+- Base your decision solely on whether the two features describe the identical real-world entity
+
+**Reporting ignored features:**
+For every feature you decide **not** to generate because it matches an excluded feature, include an entry in the `ignored_features` array with:
+- `feature_id`: the id you would have assigned
+- `feature_title`: the title you would have assigned
+- `excluded_feature_id`: the id of the excluded feature it matched
+- `reason`: one sentence explaining why
+
+If `excluded_features` is empty or absent, ignore this section entirely and leave `ignored_features` as an empty array.
+
 ## Output Quality Requirements
 
 - Prioritize entity identification: look for distinct system components first, then extract their dependencies, and supplement with standalone infrastructure and technology features.

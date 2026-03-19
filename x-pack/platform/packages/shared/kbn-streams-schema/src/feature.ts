@@ -43,12 +43,27 @@ export const baseFeatureSchema = z.object({
 
 export type BaseFeature = z.infer<typeof baseFeatureSchema>;
 
+// Stricter schema for LLM-identified features — makes subtype, title, evidence, tags required
+export const identifiedFeatureSchema = baseFeatureSchema
+  .omit({ subtype: true, title: true, evidence: true, tags: true })
+  .and(
+    z.object({
+      subtype: z.string(),
+      title: z.string(),
+      evidence: z.array(z.string()),
+      tags: z.array(z.string()),
+    })
+  );
+
+export type IdentifiedFeature = z.infer<typeof identifiedFeatureSchema>;
+
 export const featureSchema = baseFeatureSchema.and(
   z.object({
     uuid: z.string(),
     status: featureStatusSchema,
     last_seen: z.string(),
     expires_at: z.string().optional(),
+    excluded_at: z.string().optional(),
   })
 );
 
