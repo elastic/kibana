@@ -6,9 +6,7 @@
  */
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
-import type { ApplicationStart } from '@kbn/core-application-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import { registerAttachmentUiDefinitions } from '.';
 
 describe('registerAttachmentUiDefinitions', () => {
@@ -16,52 +14,13 @@ describe('registerAttachmentUiDefinitions', () => {
   const mockAttachments: AttachmentServiceStartContract = {
     addAttachmentType: mockAddAttachmentType,
   } as unknown as AttachmentServiceStartContract;
-  const mockApplication = {
-    navigateToApp: jest.fn(),
-  } as unknown as ApplicationStart;
-  const aiRuleCreation = new AiRuleCreationService();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('registers only the rule attachment type', () => {
-    registerAttachmentUiDefinitions({
-      attachments: mockAttachments,
-      application: mockApplication,
-      aiRuleCreation,
-    });
-
-    expect(mockAddAttachmentType).toHaveBeenCalledTimes(1);
-    expect(mockAddAttachmentType).toHaveBeenCalledWith(
-      SecurityAgentBuilderAttachments.rule,
-      expect.any(Object)
-    );
-  });
-
-  it('registers rule attachment type with correct config', () => {
-    registerAttachmentUiDefinitions({
-      attachments: mockAttachments,
-      application: mockApplication,
-      aiRuleCreation,
-    });
-
-    const ruleCall = mockAddAttachmentType.mock.calls.find(
-      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
-    );
-    expect(ruleCall).toBeDefined();
-
-    const config = ruleCall![1];
-    expect(config.getIcon()).toBe('securityApp');
-    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Security Rule');
-  });
-
   it('returns attachmentLabel when provided in rule attachment data', () => {
-    registerAttachmentUiDefinitions({
-      attachments: mockAttachments,
-      application: mockApplication,
-      aiRuleCreation,
-    });
+    registerAttachmentUiDefinitions(mockAttachments);
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
@@ -77,11 +36,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns default label when attachmentLabel is not provided', () => {
-    registerAttachmentUiDefinitions({
-      attachments: mockAttachments,
-      application: mockApplication,
-      aiRuleCreation,
-    });
+    registerAttachmentUiDefinitions(mockAttachments);
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule

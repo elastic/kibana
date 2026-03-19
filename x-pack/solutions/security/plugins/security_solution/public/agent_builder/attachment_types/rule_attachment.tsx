@@ -17,18 +17,19 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import {
-  ActionButtonType,
-  type AttachmentUIDefinition,
-  type AttachmentRenderProps,
+import type {
+  AttachmentUIDefinition,
+  AttachmentRenderProps,
+  AttachmentServiceStartContract,
 } from '@kbn/agent-builder-browser/attachments';
+import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
-import { RULES_PATH } from '../../../common/constants';
+import { RULES_PATH, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { hasCapabilities } from '../../common/lib/capabilities';
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
@@ -261,6 +262,21 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
         </>
       )}
     </EuiPanel>
+  );
+};
+
+export const registerRuleAttachment = ({
+  attachments,
+  application,
+  aiRuleCreation,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  aiRuleCreation: AiRuleCreationService;
+}): void => {
+  attachments.addAttachmentType(
+    SecurityAgentBuilderAttachments.rule,
+    createRuleAttachmentDefinition({ application, aiRuleCreation })
   );
 };
 
