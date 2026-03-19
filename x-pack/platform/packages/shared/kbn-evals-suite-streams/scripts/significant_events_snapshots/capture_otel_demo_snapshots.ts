@@ -234,40 +234,43 @@ async function processScenario(
   await deployDemo({ demoType, log, logsIndex: 'logs' });
   log.info('[2/7] Deployment complete');
 
-  // Step 3 — Accumulate baseline traffic
-  log.info('[3/7] Accumulating baseline traffic...');
-  await sleep(baselineWaitMs, log, 'baseline traffic');
+  try {
+    // Step 3 — Accumulate baseline traffic
+    log.info('[3/7] Accumulating baseline traffic...');
+    await sleep(baselineWaitMs, log, 'baseline traffic');
 
-  // Step 4 — Apply failure (if applicable)
-  if (isFailure) {
-    log.info(`[4/7] Applying failure scenario "${scenario.id}"...`);
-    await patchScenarios({ demoType, scenarioIds: [scenario.id], log });
+    // Step 4 — Apply failure (if applicable)
+    if (isFailure) {
+      log.info(`[4/7] Applying failure scenario "${scenario.id}"...`);
+      await patchScenarios({ demoType, scenarioIds: [scenario.id], log });
 
-    log.info('[4/7] Accumulating failure data...');
-    await sleep(failureWaitMs, log, 'failure data');
-  } else {
-    log.info('[4/7] Skipped (healthy baseline)');
+      log.info('[4/7] Accumulating failure data...');
+      await sleep(failureWaitMs, log, 'failure data');
+    } else {
+      log.info('[4/7] Skipped (healthy baseline)');
+    }
+
+    // Step 5 — Run feature extraction (the task generates both inferred and computed KIs)
+    // Extracted KIs will be stored as part of the snapshot
+    log.info('[5/7] Running feature extraction...');
+    await enableSignificantEvents(config, log);
+    await configureModelSelectionSettings(config, log, connectorId);
+    await triggerSigEventsKIsExtraction(config, log);
+    await waitForSigEventsKIsExtraction(config, log);
+    await logSigEventsExtractedKIs(config, log);
+    await persistSigEventsExtractedKIsForSnapshot(config, esClient, log, scenario.id);
+
+    // Step 6 — Create a snapshot of the logs and extracted features
+    log.info('[6/7] Creating GCS snapshot...');
+    await createSnapshot({ esClient, log, snapshotName: scenario.id, runId });
+  } finally {
+    log.info('[7/7] Cleaning up...');
+    await disableStreams(config, log).catch((e) => log.error(`disableStreams failed: ${e}`));
+    await cleanupSigEventsExtractedKIsData(esClient, log).catch((e) =>
+      log.error(`cleanupSigEventsExtractedKIsData failed: ${e}`)
+    );
+    await teardownDemo({ demoType, log }).catch((e) => log.error(`teardownDemo failed: ${e}`));
   }
-
-  // Step 5 — Run feature extraction (the task generates both inferred and computed KIs)
-  // Extracted KIs will be stored as part of the snapshot
-  log.info('[5/7] Running feature extraction...');
-  await enableSignificantEvents(config, log);
-  await configureModelSelectionSettings(config, log, connectorId);
-  await triggerSigEventsKIsExtraction(config, log);
-  await waitForSigEventsKIsExtraction(config, log);
-  await logSigEventsExtractedKIs(config, log);
-  await persistSigEventsExtractedKIsForSnapshot(config, esClient, log, scenario.id);
-
-  // Step 6 — Create a snapshot of the logs and extracted features
-  log.info('[6/7] Creating GCS snapshot...');
-  await createSnapshot({ esClient, log, snapshotName: scenario.id, runId });
-
-  // Step 7 — Cleanup
-  log.info('[7/7] Cleaning up...');
-  await disableStreams(config, log);
-  await cleanupSigEventsExtractedKIsData(esClient, log);
-  await teardownDemo({ demoType, log });
 
   log.info(`Scenario "${scenario.id}" — done`);
 }
