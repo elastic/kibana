@@ -62,13 +62,13 @@ function createConditionNoopProcessor({
   ];
 }
 
-function buildSimulationProcessorsFromSteps({
+async function buildSimulationProcessorsFromSteps({
   steps,
   parentCondition,
 }: {
   steps: StreamlangStep[];
   parentCondition?: Condition;
-}): NonNullable<IngestProcessorContainer>[] {
+}): Promise<NonNullable<IngestProcessorContainer>[]> {
   const processors: NonNullable<IngestProcessorContainer>[] = [];
 
   for (const step of steps) {
@@ -87,10 +87,10 @@ function buildSimulationProcessorsFromSteps({
       }
 
       processors.push(
-        ...buildSimulationProcessorsFromSteps({
+        ...(await buildSimulationProcessorsFromSteps({
           steps: nestedSteps,
           parentCondition: combinedCondition,
-        })
+        }))
       );
 
       continue;
@@ -110,9 +110,11 @@ function buildSimulationProcessorsFromSteps({
           } as StreamlangProcessorDefinition)
         : processorStep;
 
-    const transpiled = transpileIngestPipeline(
-      { steps: [stepWithCombinedWhere] } as StreamlangDSL,
-      { ignoreMalformed: true, traceCustomIdentifiers: true }
+    const transpiled = (
+      await transpileIngestPipeline({ steps: [stepWithCombinedWhere] } as StreamlangDSL, {
+        ignoreMalformed: true,
+        traceCustomIdentifiers: true,
+      })
     ).processors as NonNullable<IngestProcessorContainer>[];
 
     processors.push(...transpiled);
@@ -134,8 +136,8 @@ function buildSimulationProcessorsFromSteps({
  *
  * These processors are never exposed as steps in the UI; they exist only in the ES `_simulate` request.
  */
-export function buildSimulationProcessorsWithConditionNoops(
+export async function buildSimulationProcessorsWithConditionNoops(
   processing: StreamlangDSL
-): NonNullable<IngestProcessorContainer>[] {
-  return buildSimulationProcessorsFromSteps({ steps: processing.steps });
+): Promise<NonNullable<IngestProcessorContainer>[]> {
+  return await buildSimulationProcessorsFromSteps({ steps: processing.steps });
 }

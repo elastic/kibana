@@ -479,7 +479,7 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
         fieldsUsed.push(step.field);
         break;
       case 'enrich':
-        fieldsUsed.push(step.field, step.to);
+        fieldsUsed.push(step.to);
         break;
       case 'append':
       case 'drop_document':

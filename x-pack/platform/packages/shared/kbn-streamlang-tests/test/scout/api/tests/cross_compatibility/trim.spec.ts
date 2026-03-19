@@ -25,7 +25,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [
@@ -63,7 +63,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ message: '   test message 1   ' }, { message: '   test message 2   ' }];
@@ -96,7 +96,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [

@@ -112,7 +112,6 @@ export function extractAllFieldNames(processor: StreamlangProcessorDefinition): 
       });
       break;
     case 'enrich':
-      fields.push(processor.field);
       fields.push(processor.to);
       break;
     case 'drop_document':

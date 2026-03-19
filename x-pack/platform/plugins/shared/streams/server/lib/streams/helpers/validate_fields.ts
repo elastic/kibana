@@ -119,7 +119,7 @@ export async function validateSimulation(
       },
     ],
     pipeline: {
-      processors: transpileIngestPipeline(definition.ingest.processing).processors,
+      processors: (await transpileIngestPipeline(definition.ingest.processing)).processors,
     },
   };
   const simulationResult = await executePipelineSimulation(esClient, simulationBody);

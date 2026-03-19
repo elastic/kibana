@@ -9,12 +9,19 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EnrichProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import type { EnrichPolicyResolver } from '@kbn/streamlang/types/resolvers';
 import { streamlangApiTest as apiTest } from '../..';
 import {
   ENRICH_POLICY_NAME,
   setupEnrichIndexWithPolicy,
   teardownEnrichIndexWithPolicy,
 } from '../../utils/enrich_helpers';
+
+const mockEnrichPolicyResolver: EnrichPolicyResolver = () =>
+  Promise.resolve({
+    matchField: 'ip',
+    enrichFields: ['city', 'country'],
+  });
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Enrich Processor',
@@ -42,7 +49,9 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL, undefined, {
+        enrich: mockEnrichPolicyResolver,
+      });
 
       const docs = [{ ip: '10.0.0.1' }, { ip: '10.0.0.2' }];
       await testBed.ingest(indexName, docs, processors);
@@ -72,7 +81,9 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL, undefined, {
+          enrich: mockEnrichPolicyResolver,
+        });
 
         const docs = [{ message: 'some message' }, { message: 'some other message' }];
         await testBed.ingest(indexName, docs, processors);
@@ -103,7 +114,9 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL, undefined, {
+          enrich: mockEnrichPolicyResolver,
+        });
 
         const docs = [{ message: 'some message' }];
         const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -127,7 +140,9 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL, undefined, {
+        enrich: mockEnrichPolicyResolver,
+      });
 
       const docs = [{ ip: '10.0.0.1', location: { city: 'Test city', country: 'Test country' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -153,7 +168,9 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL, undefined, {
+        enrich: mockEnrichPolicyResolver,
+      });
 
       const docs = [{ ip: '10.0.0.1', location: { city: 'Test city', country: 'Test country' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -178,7 +195,9 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL, undefined, {
+        enrich: mockEnrichPolicyResolver,
+      });
 
       const docs = [{ ip: '10.0.0.1' }];
       await expect(async () => {

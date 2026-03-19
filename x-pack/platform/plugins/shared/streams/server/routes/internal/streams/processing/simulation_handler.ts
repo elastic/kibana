@@ -155,7 +155,7 @@ export const simulateProcessing = async ({
   }
 
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
-  const simulationData = prepareSimulationData(params, stream, streamFields);
+  const simulationData = await prepareSimulationData(params, stream, streamFields);
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
   const ingestSimulationBody = prepareIngestSimulationBody(
     simulationData,
@@ -181,7 +181,7 @@ export const simulateProcessing = async ({
   }
 
   /* 4. Extract all the documents reports and processor metrics from the simulations */
-  const { docReports, processorsMetrics } = computePipelineSimulationResult(
+  const { docReports, processorsMetrics } = await computePipelineSimulationResult(
     pipelineSimulationResult.simulation,
     ingestSimulationResult.simulation,
     simulationData.docs,
@@ -215,15 +215,18 @@ const prepareSimulationDocs = (
   }));
 };
 
-const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessorContainer[] => {
+const prepareSimulationProcessors = async (
+  processing: StreamlangDSL
+): Promise<IngestProcessorContainer[]> => {
   //
   /**
    * We want to simulate processors logic and collect data independently from the user config for simulation purposes.
    * 1. Force each processor to not ignore failures to collect all errors
    * 2. Append the error message to the `_errors` field on failure
    */
-  const transpiledIngestPipelineProcessors =
-    buildSimulationProcessorsWithConditionNoops(processing);
+  const transpiledIngestPipelineProcessors = await buildSimulationProcessorsWithConditionNoops(
+    processing
+  );
 
   return transpiledIngestPipelineProcessors.map((processor) => {
     const type = Object.keys(processor)[0];
@@ -250,7 +253,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
   });
 };
 
-const prepareSimulationData = (
+const prepareSimulationData = async (
   params: ProcessingSimulationParams,
   stream: Streams.all.Definition,
   streamFields: FieldDefinition
@@ -278,12 +281,14 @@ const prepareSimulationData = (
 
   return {
     docs: prepareSimulationDocs(documents, targetStreamName, geoPointFields),
-    processors: prepareSimulationProcessors(processing),
+    processors: await prepareSimulationProcessors(processing),
   };
 };
 
+type PreparedSimulationData = Awaited<ReturnType<typeof prepareSimulationData>>;
+
 const preparePipelineSimulationBody = (
-  simulationData: ReturnType<typeof prepareSimulationData>
+  simulationData: PreparedSimulationData
 ): IngestSimulateRequest => {
   const { docs, processors } = simulationData;
 
@@ -295,7 +300,7 @@ const preparePipelineSimulationBody = (
 };
 
 const prepareIngestSimulationBody = (
-  simulationData: ReturnType<typeof prepareSimulationData>,
+  simulationData: PreparedSimulationData,
   stream: Streams.all.Definition,
   streamIndex: IndicesIndexState,
   params: ProcessingSimulationParams
@@ -504,18 +509,18 @@ const executeIngestSimulation = async (
  * To keep this process at the O(n) complexity, we iterate over the documents and processors only once.
  * This requires a closure on the processor metrics map to keep track of the processor state while iterating over the documents.
  */
-const computePipelineSimulationResult = (
+const computePipelineSimulationResult = async (
   pipelineSimulationResult: SuccessfulPipelineSimulateResponse,
   ingestSimulationResult: SimulateIngestResponse,
   sampleDocs: Array<{ _source: FlattenRecord }>,
   processing: StreamlangDSL,
   isWiredStream: boolean,
   streamFields: FieldDefinition
-): {
+): Promise<{
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
-} => {
-  const transpiledProcessors = buildSimulationProcessorsWithConditionNoops(processing);
+}> => {
+  const transpiledProcessors = await buildSimulationProcessorsWithConditionNoops(processing);
 
   const processorsMap = initProcessorMetricsMap(transpiledProcessors);
   const conditionProcessorTags = collectConditionBlockIds(processing);

@@ -28,7 +28,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ price: 10, quantity: 5 }];
@@ -53,7 +53,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ attributes: { price: 25, quantity: 4 } }];
@@ -85,7 +85,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         // Use integer values - both engines will do integer division
@@ -122,7 +122,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       // log(e) = 1
@@ -155,7 +155,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [
@@ -189,7 +189,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [
@@ -223,7 +223,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [
@@ -281,7 +281,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         // Use values that work for all functions:
@@ -338,7 +338,7 @@ apiTest.describe(
           };
 
           // Ingest pipeline: generates error-throwing script, error at runtime
-          const { processors } = transpileIngestPipeline(streamlangDSL);
+          const { processors } = await transpileIngestPipeline(streamlangDSL);
           const { errors } = await testBed.ingest(`cross-reject-${i}`, [doc], processors);
           expect(errors.length).toBeGreaterThan(0);
           expect(errors[0].caused_by?.reason).toMatch(pattern);
@@ -380,7 +380,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ numerator: 10, denominator: 0 }];
@@ -425,7 +425,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ value: 0 }];

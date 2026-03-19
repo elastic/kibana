@@ -28,7 +28,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
@@ -61,7 +61,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [
@@ -100,7 +100,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
@@ -145,7 +145,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         };
 
         // Both transpilers should throw validation errors for Mustache templates
-        expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+        await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed'
         );
         await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
@@ -171,7 +171,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       // Test documents with different formats that should match different patterns in the list
@@ -218,7 +218,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { time: '01-01-2025' } }];
@@ -253,7 +253,7 @@ apiTest.describe('Cross-compatibility - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
       const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ log: { date: '08 avril 1999' } }];

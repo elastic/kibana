@@ -725,7 +725,6 @@ export const networkDirectionProcessorSchema = z.intersection(
 export interface EnrichProcessor extends ProcessorBaseWithWhere {
   action: 'enrich';
   policy_name: string;
-  field: string;
   to: string;
   ignore_missing?: boolean;
   override?: boolean;
@@ -734,7 +733,6 @@ export interface EnrichProcessor extends ProcessorBaseWithWhere {
 export const enrichProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('enrich'),
   policy_name: NonEmptyString,
-  field: StreamlangSourceField,
   to: StreamlangTargetField,
   ignore_missing: z.optional(z.boolean()),
   override: z.optional(z.boolean()),

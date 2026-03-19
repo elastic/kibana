@@ -29,7 +29,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Connection from 192.168.1.1 established' }];
@@ -59,7 +59,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Contact user at john.doe@example.com for details' }];
@@ -89,7 +89,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'User john@example.com connected from 10.0.0.1' }];
@@ -121,7 +121,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Request from 172.16.0.1' }];
@@ -151,7 +151,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Device MAC: 00:1A:2B:3C:4D:5E' }];
@@ -185,7 +185,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
@@ -239,7 +239,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Hello world, no IP here' }];
@@ -269,7 +269,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'User 550e8400-e29b-41d4-a716-446655440000 logged in' }];
@@ -299,7 +299,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Visited https://example.com/path?query=value today' }];
@@ -340,7 +340,7 @@ apiTest.describe(
           };
 
           // Both transpilers should reject Mustache template syntax
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+          expect(await transpileIngestPipeline(streamlangDSL)).toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
           await expect(transpileEsql(streamlangDSL)).rejects.toThrow(

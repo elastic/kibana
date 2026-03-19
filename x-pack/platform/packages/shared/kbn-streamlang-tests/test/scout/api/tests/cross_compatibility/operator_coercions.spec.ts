@@ -29,7 +29,7 @@ apiTest.describe(
             } as SetProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(dsl);
+        const { processors } = await transpileIngestPipeline(dsl);
         const { query } = await transpileEsql(dsl);
 
         const docs = [{ attributes: { flag: true } }, { attributes: { flag: 'true' } }];
@@ -72,7 +72,7 @@ apiTest.describe(
             } as SetProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(dsl);
+        const { processors } = await transpileIngestPipeline(dsl);
         const { query } = await transpileEsql(dsl);
 
         const docs = [{ attributes: { val: '450' } }, { attributes: { val: '404' } }];
@@ -116,7 +116,7 @@ apiTest.describe(
             } as SetProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(dsl);
+        const { processors } = await transpileIngestPipeline(dsl);
         const { query } = await transpileEsql(dsl);
 
         const docs = [{ attributes: { val: 450 } }, { attributes: { val: 404 } }];
@@ -153,7 +153,7 @@ apiTest.describe(
           } as SetProcessor,
         ],
       };
-      const { processors } = transpileIngestPipeline(dsl);
+      const { processors } = await transpileIngestPipeline(dsl);
       const { query } = await transpileEsql(dsl);
 
       const docs = [
@@ -191,7 +191,7 @@ apiTest.describe(
             } as SetProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(dsl);
+        const { processors } = await transpileIngestPipeline(dsl);
         const { query } = await transpileEsql(dsl);
 
         const docs = [
@@ -230,7 +230,7 @@ apiTest.describe(
             } as SetProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(dsl);
+        const { processors } = await transpileIngestPipeline(dsl);
         const { query } = await transpileEsql(dsl);
 
         const docs = [

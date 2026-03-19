@@ -12,28 +12,50 @@ import type { EnrichProcessor } from '../../../../types/processors';
 import { buildIgnoreMissingFilter } from './common';
 
 /**
- * TODO - rewrite this once enrich policy resolver is implemented
- * TODO - add support for the "override" option
+ * Converts a Streamlang EnrichProcessor into a list of ES|QL AST commands.
+ * @param processor - The EnrichProcessor to convert.
+ * @param resolver - The resolver to get the enrich policy metadata.
+ * @returns The list of ES|QL AST commands.
+ * @example
+ * Input:
+ * {
+ *   action: 'enrich',
+ *   policy_name: 'ip_location',
+ *   to: 'location',
+ *   ignore_missing: false,
+ * }
+ *
+ * Resolver:
+ * (policyName: string) => Promise<EnrichPolicyMetadata | null>
+ *
+ * Return:
+ * {
+ *   matchField: 'ip',
+ *   enrichFields: ['city', 'country'],
+ * }
+ * Output:
+ * | ENRICH ip_location ON ip WITH location.city = city, location.country = country
  */
 export const convertEnrichProcessorToESQL = async (
   processor: EnrichProcessor,
   resolver: EnrichPolicyResolver
 ): Promise<ESQLAstCommand[]> => {
+  // TODO - add support for the "override" option
   const { policy_name, to, ignore_missing = false } = processor;
   const commands: ESQLAstCommand[] = [];
 
   const policyMetadata = await resolver(policy_name);
 
   if (!policyMetadata) {
-    throw new Error(`Enrich policy ${policy_name} not found`);
+    throw new Error(`Enrich policy ${policy_name} not found through resolver`);
   }
 
-  if (!policyMetadata.matchField || policyMetadata.enrichFields.length === 0) {
-    throw new Error(`Enrich policy ${policy_name} is invalid`);
+  if (!policyMetadata.matchField) {
+    throw new Error(`Enrich policy ${policy_name} match field is required through resolver`);
   }
 
   if (!policyMetadata.enrichFields || policyMetadata.enrichFields.length === 0) {
-    throw new Error(`Enrich policy ${policy_name} has no enrich fields`);
+    throw new Error(`Enrich policy ${policy_name} has no enrich fields through resolver`);
   }
 
   const { matchField, enrichFields } = policyMetadata;

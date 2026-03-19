@@ -27,7 +27,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
@@ -74,7 +74,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
@@ -129,7 +129,7 @@ apiTest.describe(
           };
 
           // Both transpilers should throw validation errors for Mustache templates
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+          await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
           await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
@@ -151,7 +151,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [

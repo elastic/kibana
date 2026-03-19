@@ -26,10 +26,10 @@ import {
 } from './logs_default_pipeline';
 import { getProcessingPipelineName } from './name';
 
-export function generateIngestPipeline(
+export async function generateIngestPipeline(
   name: string,
   definition: Streams.all.Definition
-): IngestPutPipelineRequest {
+): Promise<IngestPutPipelineRequest> {
   const isWiredStream = Streams.WiredStream.Definition.is(definition);
   const rootStream = getRoot(definition.name);
 
@@ -77,7 +77,9 @@ export function generateIngestPipeline(
           },
         },
       },
-      ...(isWiredStream ? transpileIngestPipeline(definition.ingest.processing).processors : []),
+      ...(isWiredStream
+        ? (await transpileIngestPipeline(definition.ingest.processing)).processors
+        : []),
       {
         pipeline: {
           name: `${name}@stream.reroutes`,
@@ -99,10 +101,10 @@ export function generateIngestPipeline(
   };
 }
 
-export function generateClassicIngestPipelineBody(
+export async function generateClassicIngestPipelineBody(
   definition: Streams.ingest.all.Definition
-): Partial<IngestPutPipelineRequest> {
-  const transpiledIngestPipeline = transpileIngestPipeline(definition.ingest.processing);
+): Promise<Partial<IngestPutPipelineRequest>> {
+  const transpiledIngestPipeline = await transpileIngestPipeline(definition.ingest.processing);
   return {
     processors: transpiledIngestPipeline.processors,
     _meta: {

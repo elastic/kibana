@@ -31,7 +31,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: '55.3.244.1 GET /index.html 15824 0.043' }];
       await testBed.ingest(indexName, docs, processors);
@@ -60,7 +60,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }]; // Not including 'message' field
       await testBed.ingest(indexName, docs, processors);
@@ -85,7 +85,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }]; // 'message' field is missing
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -105,7 +105,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'not_an_ip' }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -123,7 +123,7 @@ apiTest.describe(
       },
     ].forEach(({ templateFrom, description }) => {
       apiTest(`${description}`, async () => {
-        expect(() => {
+        await expect(() => {
           const streamlangDSL: StreamlangDSL = {
             steps: [
               {
@@ -136,7 +136,7 @@ apiTest.describe(
             ],
           };
           transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
+        }).rejects.toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
       });
     });
   }

@@ -31,7 +31,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: '55.3.244.1 GET /index.html 15824 0.043', client: { ip: null } }]; // Pre-map the field, ES|QL requires it
@@ -62,7 +62,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
@@ -118,7 +118,7 @@ apiTest.describe(
           };
 
           // Both transpilers should throw validation errors for Mustache templates
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+          await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
           await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
@@ -141,7 +141,7 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
         // Example log from COMMONAPACHELOG pattern
         const docs = [
@@ -188,7 +188,7 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
         const docs = [{ message: '1.2.3.4 5.6.7.8' }];
         await testBed.ingest('ingest-grok-multi', docs, processors);
@@ -217,7 +217,7 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
         const docs = [{ message: '1.2.3.4 [2025-09-13T12:34:56.789Z] OK' }];
         await testBed.ingest('ingest-grok-special', docs, processors);
@@ -251,7 +251,7 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
         const docs = [{ message: '1.2.3.4', untouched: 'preserved' }];
         await testBed.ingest('ingest-grok-source', docs, processors);
@@ -284,7 +284,7 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
         const docs = [{ message: '1.2.3.4 This is the extracted message', untouched: 'preserved' }];
 
@@ -323,7 +323,7 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         // Pre-map
@@ -405,7 +405,7 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
         const docs = [
           { id: 1, message: '1.2.3.4', flag: 'yes' },
@@ -443,7 +443,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ log: { level: 'info' } }];
@@ -474,7 +474,7 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
         const docs = [
           { message: '1.2.3.4 GET' }, // missing size
@@ -517,7 +517,7 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
         const docs = [{ message: 'no match here at all' }];
 
@@ -555,7 +555,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'I love burmese cats!' }];
@@ -591,7 +591,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'I love burmese cats!' }];
@@ -626,7 +626,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
         const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: '127.0.0.1 [Jan 11, 2011]' }];

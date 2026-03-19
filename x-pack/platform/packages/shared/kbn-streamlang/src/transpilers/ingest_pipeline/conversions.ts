@@ -6,6 +6,11 @@
  */
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import {
+  getStreamlangResolverForProcessor,
+  type EnrichPolicyResolver,
+  type StreamlangResolverOptions,
+} from '../../../types/resolvers';
 import type { IngestPipelineProcessor } from '../../../types/processors/ingest_pipeline_processors';
 
 import type { StreamlangProcessorDefinition } from '../../../types/processors';
@@ -25,12 +30,14 @@ import { processJoinProcessor } from './processors/join_processor';
 import { processConcatProcessor } from './processors/concat_processor';
 import { processSortProcessor } from './processors/sort_processor';
 import { processJsonExtractProcessor } from './processors/json_extract_processor';
+import { processEnrichProcessor } from './processors/enrich_processor';
 
-export function convertStreamlangDSLActionsToIngestPipelineProcessors(
+export async function convertStreamlangDSLActionsToIngestPipelineProcessors(
   actionSteps: StreamlangProcessorDefinition[],
-  transpilationOptions?: IngestPipelineTranspilationOptions
-): IngestProcessorContainer[] {
-  return actionSteps.flatMap((actionStep) => {
+  transpilationOptions?: IngestPipelineTranspilationOptions,
+  resolverOptions?: StreamlangResolverOptions
+): Promise<IngestProcessorContainer[]> {
+  const processors = actionSteps.flatMap((actionStep) => {
     const renames = processorFieldRenames[actionStep.action] || {};
     const { action, ...rest } = actionStep;
 
@@ -109,6 +116,15 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
       ];
     }
 
+    if (action === 'enrich') {
+      return processEnrichProcessor(
+        processorWithCompiledConditions as Parameters<typeof processEnrichProcessor>[0],
+        getStreamlangResolverForProcessor(actionStep, resolverOptions) as EnrichPolicyResolver
+      );
+    }
+
     return applyPreProcessing(action, processorWithCompiledConditions as IngestPipelineProcessor);
   });
+
+  return Promise.all(processors);
 }
