@@ -3969,6 +3969,12 @@ export function updatePackageInputs(
       originalInput.policy_template = update.policy_template;
     }
 
+    // `deprecated` and `migrate_from` are package schema fields, not user-configured state.
+    // They must be unconditionally synced from the new package definition so they are cleared
+    // when the new package version no longer declares them.
+    originalInput.deprecated = update.deprecated;
+    originalInput.migrate_from = update.migrate_from;
+
     if (update.vars || originalInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
       const mergedVars = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
@@ -4008,8 +4014,10 @@ export function updatePackageInputs(
           if (stream.migrate_from) {
             const counter = streamMigrateFromCounters[stream.migrate_from] ?? 0;
             streamMigrateFromCounters[stream.migrate_from] = counter + 1;
-            const oldInputForStream = basePackagePolicy.inputs.find(
-              (i) => i.type === stream.migrate_from
+            const oldInputForStream = findInputForMigration(
+              basePackagePolicy.inputs,
+              stream.migrate_from,
+              update.policy_template
             );
             const oldStream = oldInputForStream?.streams[counter];
             if (oldStream) {
@@ -4026,6 +4034,9 @@ export function updatePackageInputs(
         if (originalStream?.enabled === undefined) {
           originalStream.enabled = stream.enabled;
         }
+
+        // Sync migrate_from from the new package schema — package-owned field, not user-configured.
+        originalStream.migrate_from = stream.migrate_from;
 
         if (stream.vars || originalStream.vars) {
           // streams wont match for input pkgs
@@ -4312,6 +4323,25 @@ export function sendUpdatePackagePolicyTelemetryEvent(
 }
 
 /**
+ * Finds an input in `inputs` matching `type`, preferring a match on `policyTemplate`. Falls back
+ * to an entry with no `policy_template` set to handle older stored policies where that field was
+ * not reliably populated. Returns undefined when no match is found.
+ */
+function findInputForMigration(
+  inputs: NewPackagePolicyInput[],
+  type: string,
+  policyTemplate: string | undefined
+): NewPackagePolicyInput | undefined {
+  if (policyTemplate) {
+    return (
+      inputs.find((i) => i.type === type && i.policy_template === policyTemplate) ??
+      inputs.find((i) => i.type === type && !i.policy_template)
+    );
+  }
+  return inputs.find((i) => i.type === type);
+}
+
+/**
  * Applies input-level `migrate_from` migration when a new input type explicitly replaces an old
  * one.
  *
@@ -4330,14 +4360,19 @@ function applyInputLevelMigration(
     return undefined;
   }
 
-  const originalInputToMigrate = allBaseInputs.find((i) => i.type === update.migrate_from);
+  const originalInputToMigrate = findInputForMigration(
+    allBaseInputs,
+    update.migrate_from,
+    update.policy_template
+  );
   if (!originalInputToMigrate) {
     return undefined;
   }
 
   // Ensure the old input doesn't linger in inputs when it has no policy_template
   // (inputs with a policy_template are already removed by the filter above)
-  const staleIdx = inputs.findIndex((i) => i.type === update.migrate_from);
+  const foundStale = findInputForMigration(inputs, update.migrate_from, update.policy_template);
+  const staleIdx = foundStale ? inputs.indexOf(foundStale) : -1;
   if (staleIdx !== -1) inputs.splice(staleIdx, 1);
 
   // Merge old input vars into the new input: seed with old values, keep new schema as the
@@ -4440,7 +4475,11 @@ function applyStreamLevelMigration(
       // each stream with migrate_from is matched positionally to the corresponding old stream in the specified input type.
       const counter = streamMigrateFromCounters[newStream.migrate_from] ?? 0;
       streamMigrateFromCounters[newStream.migrate_from] = counter + 1;
-      const oldInputForStream = allBaseInputs.find((i) => i.type === newStream.migrate_from);
+      const oldInputForStream = findInputForMigration(
+        allBaseInputs,
+        newStream.migrate_from,
+        update.policy_template
+      );
       oldStream = oldInputForStream?.streams[counter];
       if (oldStream) {
         streamMigrationOccurred = true;

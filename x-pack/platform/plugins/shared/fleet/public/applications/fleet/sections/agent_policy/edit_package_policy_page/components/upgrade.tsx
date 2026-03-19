@@ -150,11 +150,7 @@ const ReadyToUpgradeCallOut = ({
   );
 };
 
-const InputMigrationCallout = ({
-  migratedInputs,
-}: {
-  migratedInputs: Array<{ from: string; to: string }>;
-}) => (
+const InputMigrationCallout = () => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.inputMigrationTitle', {
       defaultMessage: 'Input type migration',
@@ -183,10 +179,9 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
   const [currentPackagePolicy, proposedUpgradePackagePolicy] = dryRunData[0].diff || [];
   const isReadyForUpgrade = currentPackagePolicy && !dryRunData[0].hasErrors;
 
-  const migratedInputs = (proposedUpgradePackagePolicy?.inputs ?? [])
-    .filter((i) => i.migrate_from)
-    .map((i) => ({ from: i.migrate_from!, to: i.type }));
-  const hasMigratedInputs = migratedInputs.length > 0;
+  const hasMigratedInputs = (proposedUpgradePackagePolicy?.inputs ?? []).some(
+    (input) => !!input.migrate_from
+  );
 
   return (
     <>
@@ -195,6 +190,7 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
           <EuiFlyout
             onClose={() => setIsPreviousVersionFlyoutOpen(false)}
             maxWidth={MAX_FLYOUT_WIDTH}
+            aria-label="Previous version configuration flyout"
           >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="m">
@@ -237,7 +233,7 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
       {hasMigratedInputs && (
         <>
           <EuiSpacer size="m" />
-          <InputMigrationCallout migratedInputs={migratedInputs} />
+          <InputMigrationCallout />
         </>
       )}
     </>

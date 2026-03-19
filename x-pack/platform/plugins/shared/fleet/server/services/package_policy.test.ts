@@ -8315,6 +8315,137 @@ describe('Package policy service', () => {
         expect(celInput?.vars?.url.value).toBe('http://example.com');
       });
 
+      it('migrates each cel input from its own policy_template httpjson input in a multi-template package', () => {
+        // Two policy templates each having an httpjson input that migrates to cel.
+        // The cel input for template_1 must pick up template_1's httpjson vars, and
+        // the cel input for template_2 must pick up template_2's httpjson vars.
+        const basePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'test-package', title: 'Test Package', version: '0.0.1' },
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'text', value: 'http://template1.example.com' },
+                interval: { type: 'text', value: '10s' },
+              },
+              streams: [],
+            },
+            {
+              type: 'httpjson',
+              policy_template: 'template_2',
+              enabled: false,
+              vars: {
+                url: { type: 'text', value: 'http://template2.example.com' },
+                interval: { type: 'text', value: '30s' },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.2',
+          latestVersion: '0.0.2',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'cel',
+                  title: 'CEL',
+                  description: 'CEL Input',
+                  migrate_from: 'httpjson',
+                  vars: [
+                    { name: 'url', type: 'text' },
+                    { name: 'interval', type: 'text' },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'template_2',
+              title: 'Template 2',
+              description: 'Template 2',
+              inputs: [
+                {
+                  type: 'cel',
+                  title: 'CEL',
+                  description: 'CEL Input',
+                  migrate_from: 'httpjson',
+                  vars: [
+                    { name: 'url', type: 'text' },
+                    { name: 'interval', type: 'text' },
+                  ],
+                },
+              ],
+            },
+          ],
+          assets: {},
+        } as unknown as PackageInfo;
+
+        const inputsOverride: InputsOverride[] = [
+          {
+            type: 'cel',
+            policy_template: 'template_1',
+            enabled: false,
+            migrate_from: 'httpjson',
+            vars: {
+              url: { type: 'text', value: 'http://new-default.com' },
+              interval: { type: 'text', value: '60s' },
+            },
+            streams: [],
+          } as unknown as InputsOverride,
+          {
+            type: 'cel',
+            policy_template: 'template_2',
+            enabled: false,
+            migrate_from: 'httpjson',
+            vars: {
+              url: { type: 'text', value: 'http://new-default.com' },
+              interval: { type: 'text', value: '60s' },
+            },
+            streams: [],
+          } as unknown as InputsOverride,
+        ];
+
+        const result = updatePackageInputs(basePolicy, packageInfo, inputsOverride, false);
+
+        // Both old httpjson inputs should have been removed
+        expect(result.inputs.filter((i) => i.type === 'httpjson')).toHaveLength(0);
+
+        const celT1 = result.inputs.find(
+          (i) => i.type === 'cel' && i.policy_template === 'template_1'
+        );
+        const celT2 = result.inputs.find(
+          (i) => i.type === 'cel' && i.policy_template === 'template_2'
+        );
+
+        // Each cel input must carry vars and enabled state from its OWN template's httpjson input
+        expect(celT1?.vars?.url.value).toBe('http://template1.example.com');
+        expect(celT1?.vars?.interval.value).toBe('10s');
+        expect(celT1?.enabled).toBe(true);
+
+        expect(celT2?.vars?.url.value).toBe('http://template2.example.com');
+        expect(celT2?.vars?.interval.value).toBe('30s');
+        expect(celT2?.enabled).toBe(false);
+      });
+
       describe('null-value variable migration priority', () => {
         // Build a base policy where the old httpjson input has a mix of:
         //  - a value the user explicitly set (url)
@@ -9425,6 +9556,174 @@ describe('Package policy service', () => {
           (s) => s.data_stream.dataset === 'test_package.application'
         );
         expect(appStream?.vars?.batch_size?.value).toBe('500');
+      });
+    });
+
+    describe('when re-upgrading to a package version that removes deprecated/migrate_from', () => {
+      it('clears deprecated and migrate_from on an existing input when new package no longer declares them', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'test-package', title: 'Test Package', version: '0.0.1' },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              // Simulates a policy stored after a previous upgrade that added these fields
+              deprecated: { description: 'Use cel input instead' },
+              migrate_from: 'httpjson',
+              vars: { path: { type: 'text', value: '/var/log/logfile.log' } },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.2',
+          latestVersion: '0.0.2',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  // New package version no longer marks the input as deprecated or migrate_from
+                  vars: [{ name: 'path', type: 'text' }],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: InputsOverride[] = [
+          {
+            type: 'logs',
+            policy_template: 'template_1',
+            enabled: true,
+            // No deprecated, no migrate_from in the new package definition
+            vars: { path: { type: 'text', value: '/var/log/new-default.log' } },
+            streams: [],
+          } as unknown as InputsOverride,
+        ];
+
+        const result = updatePackageInputs(basePackagePolicy, packageInfo, inputsOverride, false);
+
+        const logsInput = result.inputs.find((i) => i.type === 'logs');
+        expect(logsInput).toBeDefined();
+        expect(logsInput?.deprecated).toBeUndefined();
+        expect(logsInput?.migrate_from).toBeUndefined();
+        // User-configured var should still be preserved
+        expect(logsInput?.vars?.path?.value).toBe('/var/log/logfile.log');
+      });
+
+      it('clears migrate_from on an existing stream when new package no longer declares it', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'test-package', title: 'Test Package', version: '0.0.1' },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.logs', type: 'logs' },
+                  // Simulates a stream stored with migrate_from from a previous upgrade
+                  migrate_from: 'httpjson',
+                  vars: { tags: { type: 'text', value: 'user-tag' } },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.2',
+          latestVersion: '0.0.2',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [{ type: 'logs', title: 'Log', description: 'Log Input', vars: [] }],
+            },
+          ],
+          data_streams: [
+            {
+              dataset: 'test_package.logs',
+              type: 'logs',
+              title: 'Logs',
+              release: 'experimental' as any,
+              package: 'test-package',
+              path: 'logs',
+              streams: [
+                {
+                  input: 'logs',
+                  title: 'Logs',
+                  vars: [{ name: 'tags', type: 'text' }],
+                  template_path: 'agent.yml',
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: InputsOverride[] = [
+          {
+            type: 'logs',
+            policy_template: 'template_1',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test_package.logs', type: 'logs' },
+                // New package version stream no longer declares migrate_from
+                vars: { tags: { type: 'text', value: 'default-tag' } },
+              },
+            ],
+          } as unknown as InputsOverride,
+        ];
+
+        const result = updatePackageInputs(basePackagePolicy, packageInfo, inputsOverride, false);
+
+        const logsInput = result.inputs.find((i) => i.type === 'logs');
+        const logsStream = logsInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.logs'
+        );
+        expect(logsStream?.migrate_from).toBeUndefined();
+        // User-configured var should still be preserved
+        expect(logsStream?.vars?.tags?.value).toBe('user-tag');
       });
     });
   });
