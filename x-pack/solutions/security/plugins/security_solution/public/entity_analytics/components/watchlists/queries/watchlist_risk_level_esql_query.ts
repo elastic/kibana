@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-import { RiskScoreFields } from '../../../../../common/search_strategy';
-import { getWatchlistJoin } from './helpers';
-
-export const getWatchlistRiskLevelsQueryBody = (namespace: string, watchlistId?: string) => `
-| WHERE ${RiskScoreFields.userName} IS NOT NULL
-${watchlistId ? getWatchlistJoin(watchlistId, namespace) : ''}
-| STATS count = COUNT_DISTINCT(${RiskScoreFields.userName}) BY ${RiskScoreFields.userRisk}
-| RENAME ${RiskScoreFields.userRisk} AS level`;
-
 export const getWatchlistRiskLevelsQueryBodyV2 = (watchlistName?: string) => `
 | WHERE  entity.EngineMetadata.Type IN ("user", "host", "service")${
   watchlistName ? ` AND entity.attributes.watchlists == "${watchlistName}"` : ''

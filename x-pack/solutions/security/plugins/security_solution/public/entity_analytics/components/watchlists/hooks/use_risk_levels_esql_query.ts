@@ -15,16 +15,12 @@ import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useEsqlGlobalFilterQuery } from '../../../../common/hooks/esql/use_esql_global_filter';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useGetDefaultRiskIndex } from '../../../hooks/use_get_default_risk_index';
 import type { WatchlistRiskLevelsQueryResult } from './types';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
-import {
-  getWatchlistRiskLevelsQueryBody,
-  getWatchlistRiskLevelsQueryBodyV2,
-} from '../queries/watchlist_risk_level_esql_query';
+import { getWatchlistRiskLevelsQueryBodyV2 } from '../queries/watchlist_risk_level_esql_query';
 import { PREBUILT_WATCHLIST_NAMES } from '../../../../../common/entity_analytics/watchlists/constants';
 
-export const useWatchlistRiskLevelsQuery = ({
+export const useRiskLevelsEsqlQuery = ({
   watchlistId,
   skip,
   spaceId,
@@ -33,24 +29,17 @@ export const useWatchlistRiskLevelsQuery = ({
   skip?: boolean;
   spaceId: string;
 }) => {
-  const { data, uiSettings } = useKibana().services;
-  const isEntityStoreV2Enabled = uiSettings.get<boolean>('securitySolution:entityStoreEnableV2');
+  const { data } = useKibana().services;
 
-  const v1Index = useGetDefaultRiskIndex(true); // only latest
-  const v2Index = `.entities.v2.latest.security_${spaceId}`;
-  const index = isEntityStoreV2Enabled ? v2Index : v1Index;
+  const index = `.entities.v2.latest.security_${spaceId}`;
 
   const filterQuery = useEsqlGlobalFilterQuery();
 
   const watchlistName = watchlistId
     ? PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId
-    : undefined;
-  const query = isEntityStoreV2Enabled
-    ? `FROM ${index} ${getWatchlistRiskLevelsQueryBodyV2(watchlistName)}`
-    : `FROM ${index} ${getWatchlistRiskLevelsQueryBody(spaceId, watchlistId)}`;
+    : undefined; // This is using a map due to name formatting adhering to indexPattern naming conventions
+  const query = `FROM ${index} ${getWatchlistRiskLevelsQueryBodyV2(watchlistName)}`;
 
-  // eslint-disable-next-line no-console
-  console.log('query', query);
   const {
     data: riskEngineStatus,
     isFetching: isStatusLoading,
