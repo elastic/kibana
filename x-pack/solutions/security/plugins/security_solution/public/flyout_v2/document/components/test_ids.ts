@@ -9,8 +9,8 @@ import { PREFIX } from '../../../flyout/shared/test_ids';
 
 /* Header */
 
-export const HEADER_TITLE_TEST_ID = `${PREFIX}HeaderTitle` as const;
-export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}HeaderTitleLink` as const;
+export const HEADER_TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
+export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
 
 /* About */
 
