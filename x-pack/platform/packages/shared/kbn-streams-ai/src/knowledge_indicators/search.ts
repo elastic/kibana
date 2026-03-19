@@ -16,7 +16,7 @@ import type {
 } from './types';
 import { featureToKnowledgeIndicatorFeature, queryLinkToKnowledgeIndicatorQuery } from './mappers';
 
-export const DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT = 50;
+export const DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT = 20;
 
 interface NormalizedParams {
   searchText: string | undefined;
