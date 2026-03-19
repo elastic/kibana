@@ -11,7 +11,7 @@ import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, filter, map, pairwise } from 'rxjs';
 
-import type { UseEuiTheme } from '@elastic/eui';
+import { type UseEuiTheme, transparentize } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, euiCanAnimate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -348,7 +348,7 @@ const styles = {
             touchAction: 'none',
             '&:hover': {
               cursor: 'move',
-              backgroundColor: euiTheme.colors.lightestShade,
+              backgroundColor: `${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)}`,
             },
           }),
       '.kbnGridLayout--deleteSectionIcon': {
