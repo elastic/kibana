@@ -10,11 +10,13 @@ import type { Logger } from '@kbn/core/server';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { BaseFeature } from '@kbn/streams-schema';
+import { isDuplicateFeature } from '@kbn/streams-schema';
 import { identifyFeatures } from './identify_features';
 import { sumTokens } from '../helpers/sum_tokens';
 
 const DEFAULT_MAX_ITERATIONS = 5;
 const DOCUMENTS_BATCH_SIZE = 20;
+const MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 
 const mergeArrays = (a: string[] = [], b: string[] = []) => uniq([...a, ...b]);
 
@@ -22,9 +24,9 @@ function mergeFeature(existing: BaseFeature, incoming: BaseFeature): BaseFeature
   const mergedEvidence = mergeArrays(existing.evidence, incoming.evidence);
   const mergedEvidenceDocIds = mergeArrays(existing.evidence_doc_ids, incoming.evidence_doc_ids);
   const mergedTags = mergeArrays(existing.tags, incoming.tags);
-  const mergedMeta = { ...(incoming.meta ?? {}), ...(existing.meta ?? {}) };
-  const mergedProperties = { ...(incoming.properties ?? {}), ...(existing.properties ?? {}) };
-  const confidence = Math.max(existing.confidence, incoming.confidence);
+  const mergedMeta = { ...(existing.meta ?? {}), ...(incoming.meta ?? {}) };
+  const mergedProperties = { ...(existing.properties ?? {}), ...(incoming.properties ?? {}) };
+  const confidence = Math.round((existing.confidence + incoming.confidence) / 2);
   const filter = incoming.filter ?? existing.filter;
 
   const mergedFeature = {
@@ -96,11 +98,13 @@ export async function identifyFeaturesIteratively({
     }
 
     const batch = batches[i];
-    const previousFeatures = Array.from(featuresMap.values());
+    const previousFeatures = Array.from(featuresMap.values())
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, MAX_PREVIOUSLY_IDENTIFIED_FEATURES);
 
     logger.debug(
       `Iteration ${i + 1}/${effectiveMaxIterations}: processing ${batch.length} documents, ${
-        previousFeatures.length
+        featuresMap.size
       } features accumulated so far`
     );
 
@@ -124,13 +128,16 @@ export async function identifyFeaturesIteratively({
     let newFeatureCount = 0;
     let updatedFeatureCount = 0;
     for (const feature of iterationFeatures) {
-      const existing = featuresMap.get(feature.id);
-      if (!existing) {
+      const duplicateEntry = Array.from(featuresMap.entries()).find(([, existing]) =>
+        isDuplicateFeature(existing, feature)
+      );
+      if (duplicateEntry) {
+        const [duplicateId, duplicateFeature] = duplicateEntry;
+        updatedFeatureCount++;
+        featuresMap.set(duplicateId, mergeFeature(duplicateFeature, feature));
+      } else {
         newFeatureCount++;
         featuresMap.set(feature.id, feature);
-      } else {
-        updatedFeatureCount++;
-        featuresMap.set(feature.id, mergeFeature(existing, feature));
       }
     }
 
