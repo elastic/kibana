@@ -7,15 +7,44 @@
 
 import { Parser } from '@elastic/esql';
 
-const DURATION_RE = /^(\d+)(ms|s|m|h|d|w)$/;
+const DURATION_RE = /^(\d+)(ms|s|m|h|d|w|y)$/;
+
+const DURATION_UNIT_TO_MS: Record<string, number> = {
+  ms: 1,
+  s: 1_000,
+  m: 60_000,
+  h: 3_600_000,
+  d: 86_400_000,
+  w: 604_800_000,
+  y: 31_536_000_000,
+};
+
+function parseDurationToMs(value: string): number {
+  const match = DURATION_RE.exec(value);
+  if (!match) return NaN;
+  return parseInt(match[1], 10) * DURATION_UNIT_TO_MS[match[2]];
+}
 
 /**
- * Validate a duration string format (e.g., "5m", "1h", "30s", "250ms")
+ * Validate a duration string format (e.g., "5m", "1h", "30s", "250ms", "1y")
  * @returns Error message if invalid, undefined if valid
  */
 export function validateDuration(value: string): string | void {
   if (!DURATION_RE.test(value)) {
-    return `Invalid duration "${value}". Expected format like "5m", "1h", "30s", "250ms"`;
+    return `Invalid duration "${value}". Expected format like "5m", "1h", "30s", "250ms", "1y"`;
+  }
+}
+
+/**
+ * Validate that a duration string does not exceed a maximum duration.
+ * Both values must be valid duration strings.
+ * @returns Error message if exceeded, undefined if valid
+ */
+export function validateMaxDuration(value: string, max: string): string | void {
+  const valueMs = parseDurationToMs(value);
+  const maxMs = parseDurationToMs(max);
+  if (!isNaN(valueMs) && !isNaN(maxMs) && valueMs > maxMs) {
+    return `Duration "${value}" exceeds the maximum allowed value of "${max}"`;
   }
 }
 
