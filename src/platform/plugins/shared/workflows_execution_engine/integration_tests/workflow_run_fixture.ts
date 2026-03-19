@@ -14,11 +14,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { StepExecutionRepositoryMock, WorkflowExecutionRepositoryMock } from './mocks';
-import {
-  createScopedActionsClientMock,
-  createUnsecuredActionsClientMock,
-  getMockedConnectorResult,
-} from './mocks/actions_plugin.mock';
+import { ScopedActionsClientMock, UnsecuredActionsClientMock } from './mocks/actions_plugin.mock';
 import { TaskManagerMock } from './mocks/task_manager.mock';
 import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { resumeWorkflow } from '../server/execution_functions';
@@ -41,8 +37,8 @@ export class WorkflowRunFixture {
   } as unknown as Logger;
   // Create shared execute mock so tests can verify calls regardless of which client is used
   private readonly sharedExecuteMock = jest.fn();
-  public readonly unsecuredActionsClientMock = createUnsecuredActionsClientMock();
-  public readonly scopedActionsClientMock = createScopedActionsClientMock();
+  public readonly unsecuredActionsClientMock = new UnsecuredActionsClientMock();
+  public readonly scopedActionsClientMock = new ScopedActionsClientMock();
   public readonly actionsClientMock = jest.mocked<ActionsPluginStartContract>({
     getUnsecuredActionsClient: jest.fn().mockReturnValue(this.unsecuredActionsClientMock),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(this.scopedActionsClientMock),
@@ -79,13 +75,13 @@ export class WorkflowRunFixture {
 
     // Wire both clients to use the same shared execute mock with normalized parameters
     this.unsecuredActionsClientMock.execute = this.sharedExecuteMock.mockImplementation((options) =>
-      getMockedConnectorResult(options.id, options.params)
+      this.unsecuredActionsClientMock.returnMockedConnectorResult(options)
     );
     this.scopedActionsClientMock.execute = this.sharedExecuteMock.mockImplementation((options) => {
       const normalizedOptions = { ...options, id: options.actionId };
       this.sharedExecuteMock.mock.calls[this.sharedExecuteMock.mock.calls.length - 1][0] =
         normalizedOptions;
-      return getMockedConnectorResult(options.actionId, options.params);
+      return this.scopedActionsClientMock.returnMockedConnectorResult(options);
     });
 
     this.dependencies.actions = this.actionsClientMock;

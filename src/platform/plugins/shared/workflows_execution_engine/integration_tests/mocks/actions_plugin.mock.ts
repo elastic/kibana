@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable max-classes-per-file */
+
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import { createPartialMock } from './create_partial_mock';
 
 export const FakeConnectors = {
   slack1: {
@@ -57,7 +58,7 @@ export const FakeConnectors = {
   },
 };
 
-export async function getMockedConnectorResult(
+async function getMockedConnectorResult(
   id: string,
   params: Record<string, any>
 ): Promise<ActionTypeExecutorResult<unknown>> {
@@ -125,24 +126,40 @@ export async function getMockedConnectorResult(
   throw new Error(`Connector with id ${id} not found in mock`);
 }
 
-export const createUnsecuredActionsClientMock = (): jest.Mocked<IUnsecuredActionsClient> =>
-  createPartialMock<IUnsecuredActionsClient>({
-    getAll: jest
-      .fn()
-      .mockResolvedValue(Object.values(FakeConnectors) as ConnectorWithExtraFindData[]),
-    execute: jest
-      .fn()
-      .mockImplementation((options) => getMockedConnectorResult(options.id, options.params)),
-    bulkEnqueueExecution: jest.fn().mockResolvedValue(undefined),
-  });
+export class UnsecuredActionsClientMock implements IUnsecuredActionsClient {
+  getAll = jest
+    .fn()
+    .mockResolvedValue(Object.values(FakeConnectors) as ConnectorWithExtraFindData[]);
+  execute = jest.fn().mockImplementation((options) => this.returnMockedConnectorResult(options));
+  bulkEnqueueExecution = jest.fn().mockResolvedValue(undefined);
 
-export const createScopedActionsClientMock = (): jest.Mocked<ActionsClient> =>
-  createPartialMock<ActionsClient>({
-    getAll: jest
-      .fn()
-      .mockResolvedValue(Object.values(FakeConnectors) as ConnectorWithExtraFindData[]),
-    execute: jest
-      .fn()
-      .mockImplementation((options) => getMockedConnectorResult(options.actionId, options.params)),
-    bulkEnqueueExecution: jest.fn().mockResolvedValue(undefined),
-  });
+  public async returnMockedConnectorResult({
+    id,
+    params,
+  }: {
+    id: string;
+    params: Record<string, any>;
+    spaceId: string;
+    requesterId: string;
+  }): Promise<ActionTypeExecutorResult<unknown>> {
+    return getMockedConnectorResult(id, params);
+  }
+}
+
+export class ScopedActionsClientMock implements Partial<ActionsClient> {
+  getAll = jest
+    .fn()
+    .mockResolvedValue(Object.values(FakeConnectors) as ConnectorWithExtraFindData[]);
+  execute = jest.fn().mockImplementation((options) => this.returnMockedConnectorResult(options));
+  bulkEnqueueExecution = jest.fn().mockResolvedValue(undefined);
+
+  public async returnMockedConnectorResult({
+    actionId,
+    params,
+  }: {
+    actionId: string;
+    params: Record<string, any>;
+  }): Promise<ActionTypeExecutorResult<unknown>> {
+    return getMockedConnectorResult(actionId, params);
+  }
+}
