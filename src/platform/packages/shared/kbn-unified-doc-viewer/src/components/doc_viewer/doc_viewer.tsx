@@ -68,10 +68,23 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerProps>(
       }));
 
     const [storedInitialTabId, setInitialTabId] = useLocalStorage<string>(INITIAL_TAB);
-    const [selectedTabId, setSelectedTabId] = useState<string | undefined>(
-      initialTabId ? getFullTabId(initialTabId) : storedInitialTabId
-    );
+    const [selectedTabId, setSelectedTabId] = useState<string | undefined>(() => {
+      if (!tabs.length) return undefined;
+
+      const candidate = initialTabId ? getFullTabId(initialTabId) : storedInitialTabId;
+      return candidate && tabs.some(({ id }) => id === candidate) ? candidate : tabs[0].id;
+    });
+
     const selectedTab = selectedTabId ? tabs.find(({ id }) => id === selectedTabId) : undefined;
+
+    // If the available tabs change (e.g. switching profiles) and the selected tab becomes invalid
+    // fall back to the first available tab, so state and callbacks stay in sync with the UI
+    useEffect(() => {
+      if (!tabs.length) return;
+      if (selectedTabId && tabs.some(({ id }) => id === selectedTabId)) return;
+
+      setSelectedTabId(tabs[0].id);
+    }, [selectedTabId, tabs]);
 
     useEffect(() => {
       onUpdateSelectedTabId?.(selectedTabId ? getOriginalTabId(selectedTabId) : undefined);

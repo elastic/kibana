@@ -276,9 +276,31 @@ describe('<DocViewer />', () => {
       />
     );
 
-    expect(onUpdateSelectedTabId).toHaveBeenCalledWith(undefined);
+    expect(onUpdateSelectedTabId).toHaveBeenCalledWith('test1');
     await userEvent.click(screen.getByTestId('docViewerTab-test2'));
     expect(onUpdateSelectedTabId).toHaveBeenCalledWith('test2');
+  });
+
+  test('should call onUpdateSelectedTabId with the first available tab when local storage tab is unavailable', () => {
+    const onUpdateSelectedTabId = jest.fn();
+    const registry = new DocViewsRegistry();
+    registry.add({ id: 'test1', order: 10, title: 'Tab 1', render: jest.fn() });
+    registry.add({ id: 'test2', order: 20, title: 'Tab 2', render: jest.fn() });
+
+    mockTestInitialLocalStorageValue = 'kbn_doc_viewer_tab_test3';
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        onUpdateSelectedTabId={onUpdateSelectedTabId}
+      />
+    );
+
+    expect(onUpdateSelectedTabId).toHaveBeenCalledWith('test1');
+
+    mockTestInitialLocalStorageValue = undefined;
   });
 
   test('should call onInitialDocViewerStateChange when tab state changes', () => {

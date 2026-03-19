@@ -17,22 +17,21 @@ export enum FlyoutViewedContent {
   SPAN_DETAIL = 'span_detail',
 }
 
-export enum FlyoutViewedTabId {
-  OVERVIEW = 'overview',
-  TABLE = 'table',
-  JSON = 'json',
-}
-
 export interface FlyoutViewedEvent {
   content: FlyoutViewedContent;
-  tabId?: FlyoutViewedTabId;
+  tabId?: string;
 }
 
 export const reportFlyoutViewedEvent = (
-  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>,
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'> | undefined,
   { content, tabId }: FlyoutViewedEvent
 ) => {
-  analytics.reportEvent(FLYOUT_VIEWED_EVENT_TYPE, tabId ? { content, tabId } : { content });
+  if (!analytics) return;
+
+  analytics.reportEvent(FLYOUT_VIEWED_EVENT_TYPE, {
+    content,
+    tabId,
+  });
 };
 
 export const registerFlyoutViewedEvent = (analytics: AnalyticsServiceSetup) => {
@@ -51,7 +50,7 @@ export const registerFlyoutViewedEvent = (analytics: AnalyticsServiceSetup) => {
         type: 'keyword',
         _meta: {
           description:
-            'The active tab within the flyout. Expected values: overview, table, json. Omitted for flyouts without tabs.',
+            'The active tab identifier within the flyout. Values are content-specific (e.g. doc_view_table, doc_view_source, doc_view_logs_overview, overview, table, json). Omitted for flyouts without tabs.',
           optional: true,
         },
       },

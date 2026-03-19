@@ -9,15 +9,11 @@
 
 import { useEffect } from 'react';
 import { getUnifiedDocViewerServices } from '../plugin';
-import {
-  reportFlyoutViewedEvent,
-  type FlyoutViewedContent,
-  type FlyoutViewedTabId,
-} from './flyout_viewed_event';
+import { reportFlyoutViewedEvent, type FlyoutViewedContent } from './flyout_viewed_event';
 
 export interface TrackFlyoutViewedParams {
   content?: FlyoutViewedContent;
-  tabId?: FlyoutViewedTabId;
+  tabId?: string;
 }
 
 export const useTrackFlyoutViewed = ({ content, tabId }: TrackFlyoutViewedParams) => {

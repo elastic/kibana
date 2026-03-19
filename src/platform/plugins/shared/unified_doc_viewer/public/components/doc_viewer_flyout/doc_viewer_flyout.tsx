@@ -35,22 +35,7 @@ import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
-import {
-  FlyoutViewedContent,
-  FlyoutViewedTabId,
-  reportFlyoutViewedEvent,
-} from '../../analytics/flyout_viewed_event';
-
-const mapDocViewerTabIdToFlyoutViewedTabId = (tabId: string): FlyoutViewedTabId => {
-  switch (tabId) {
-    case 'doc_view_table':
-      return FlyoutViewedTabId.TABLE;
-    case 'doc_view_source':
-      return FlyoutViewedTabId.JSON;
-    default:
-      return FlyoutViewedTabId.OVERVIEW;
-  }
-};
+import { FlyoutViewedContent, reportFlyoutViewedEvent } from '../../analytics/flyout_viewed_event';
 
 export interface UnifiedDocViewerFlyoutProps
   extends Pick<
@@ -285,7 +270,7 @@ export function UnifiedDocViewerFlyout({
 
       reportFlyoutViewedEvent(analytics, {
         content: flyoutViewedContent,
-        tabId: mapDocViewerTabIdToFlyoutViewedTabId(tabId),
+        tabId,
       });
     },
     [analytics, flyoutViewedContent, onUpdateSelectedTabId]
