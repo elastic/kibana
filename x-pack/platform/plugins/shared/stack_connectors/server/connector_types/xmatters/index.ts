@@ -17,6 +17,7 @@ import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type {
   ActionParamsType,
@@ -55,6 +56,7 @@ export function getConnectorType(): XmattersConnectorType {
       AlertingConnectorFeatureId,
       SecurityConnectorFeatureId,
       WorkflowsConnectorFeatureId,
+      AgentBuilderConnectorFeatureId,
     ],
     validate: {
       config: {
