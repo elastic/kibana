@@ -95,6 +95,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // O11Y
   'observability.log-search',
+  'observability.rca',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];

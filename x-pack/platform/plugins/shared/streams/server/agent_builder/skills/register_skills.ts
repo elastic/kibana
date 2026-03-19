@@ -7,22 +7,21 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import type { GetScopedClients } from '../routes/types';
-import type { StreamsServer } from '../types';
-import { registerAgentBuilderTools } from './tools/register_tools';
-import { registerAgentBuilderSkills } from './skills/register_skills';
+import type { StreamsServer } from '../../types';
+import { createRcaSkill } from './rca';
 
-export const registerStreamsAgentBuilder = ({
+export const registerAgentBuilderSkills = ({
   agentBuilder,
-  getScopedClients,
   server,
   logger,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
-}) => {
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
-  registerAgentBuilderSkills({ agentBuilder, server, logger });
+}): void => {
+  const streamsSkills = [createRcaSkill()];
+
+  for (const skill of streamsSkills) {
+    agentBuilder.skills.register(skill);
+  }
 };
