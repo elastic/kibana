@@ -61,6 +61,7 @@ export class ProposalManager {
   private mouseMoveDisposable: monaco.IDisposable | null = null;
   private contentChangeDisposable: monaco.IDisposable | null = null;
   private mouseMoveRafId: ReturnType<typeof requestAnimationFrame> | null = null;
+  private sortedProposals: Array<{ id: string; startLine: number; endLine: number }> = [];
 
   /**
    * Guard flag: true while proposeChange / rejectProposal / revertAllSilently
@@ -100,18 +101,12 @@ export class ProposalManager {
       const lineNumber = e.target.position?.lineNumber;
       if (lineNumber == null) return;
 
-      // Request animation frame acting as a debounce
       if (this.mouseMoveRafId != null) cancelAnimationFrame(this.mouseMoveRafId);
       this.mouseMoveRafId = requestAnimationFrame(() => {
         this.mouseMoveRafId = null;
-        for (const [id, proposal] of this.proposals.entries()) {
-          const decoEnd = proposal.startLine + proposal.newContentLineCount - 1;
-          if (lineNumber >= proposal.startLine && lineNumber <= decoEnd) {
-            if (this.focusedProposalId !== id) {
-              this.focusProposal(id);
-            }
-            return;
-          }
+        const id = this.findProposalAtLine(lineNumber);
+        if (id != null && this.focusedProposalId !== id) {
+          this.focusProposal(id);
         }
       });
     });
@@ -198,6 +193,7 @@ export class ProposalManager {
       newContentLineCount,
     });
 
+    this.rebuildSortedIndex();
     this.editor.revealLineInCenter(change.startLine);
     this.focusedProposalId = this.getSortedProposalIds()[0] ?? null;
     this.updatePillVisibility();
@@ -459,9 +455,37 @@ export class ProposalManager {
   }
 
   private getSortedProposalIds(): string[] {
-    return Array.from(this.proposals.entries())
-      .sort(([, a], [, b]) => a.startLine - b.startLine)
-      .map(([id]) => id);
+    return this.sortedProposals.map((entry) => entry.id);
+  }
+
+  private rebuildSortedIndex(): void {
+    this.sortedProposals = Array.from(this.proposals.entries())
+      .map(([id, p]) => ({
+        id,
+        startLine: p.startLine,
+        endLine: p.startLine + p.newContentLineCount - 1,
+      }))
+      .sort((a, b) => a.startLine - b.startLine);
+  }
+
+  // Binary search to find the proposal at the given line number
+  private findProposalAtLine(lineNumber: number): string | null {
+    const arr = this.sortedProposals;
+    let lo = 0;
+    let hi = arr.length - 1;
+
+    while (lo <= hi) {
+      const mid = Math.floor((lo + hi) / 2);
+      const entry = arr[mid];
+      if (lineNumber < entry.startLine) {
+        hi = mid - 1;
+      } else if (lineNumber > entry.endLine) {
+        lo = mid + 1;
+      } else {
+        return entry.id;
+      }
+    }
+    return null;
   }
 
   private focusProposal(proposalId: string): void {
@@ -765,5 +789,6 @@ export class ProposalManager {
     });
 
     this.proposals.delete(proposalId);
+    this.rebuildSortedIndex();
   }
 }
