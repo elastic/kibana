@@ -450,17 +450,11 @@ export class RulesPage {
    * Saves the rule by clicking save and confirming
    */
   async saveRule() {
-    for (const btn of await this.page.locator('.euiToast__closeButton').all()) {
-      await btn.click().catch(() => {});
-    }
-    // Wait for all toasts to fully disappear before clicking save to avoid pointer event interception
-    await expect(this.page.locator('.euiToast')).toHaveCount(0, { timeout: SHORTER_TIMEOUT });
-
-    // Scroll the save button into view to ensure it's accessible
-    await this.ruleSaveButton.scrollIntoViewIfNeeded();
-
-    // Click the save button
-    await this.ruleSaveButton.click();
+    // The rule preview chart polls continuously, alternating between a loading overlay
+    // (kbnMountWrapper) and a danger toast. Both intercept pointer events on the footer
+    // save button. Using focus + keyboard bypasses pointer-event interception entirely.
+    await this.ruleSaveButton.focus();
+    await this.page.keyboard.press('Enter');
 
     await expect(this.confirmModalButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.confirmModalButton.click();
