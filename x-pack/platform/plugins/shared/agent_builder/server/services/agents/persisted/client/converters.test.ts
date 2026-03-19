@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentType, AgentVisibility } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, AgentType, AgentVisibility } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentProperties } from './storage';
 import type { Document } from './converters';
@@ -117,6 +117,17 @@ describe('fromEs', () => {
     const definition = fromEs(document);
 
     expect(definition.configuration.skill_ids).toEqual(['skill-1', 'skill-2']);
+    expect(definition.configuration.enable_elastic_capabilities).toBe(true);
+  });
+
+  it('defaults enable_elastic_capabilities to true for default agent when missing', () => {
+    const document = getSampleDoc();
+    document._source!.id = agentBuilderDefaultAgentId;
+    // @ts-ignore testing missing field
+    delete document._source!.config!.enable_elastic_capabilities;
+
+    const definition = fromEs(document);
+
     expect(definition.configuration.enable_elastic_capabilities).toBe(true);
   });
 
