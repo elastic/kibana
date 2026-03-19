@@ -95,8 +95,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
   let transformHelper: TransformHelper;
 
-  // Failing see https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests/builds/8735
-  describe.skip('Health Scan', function () {
+  describe('Health Scan', function () {
+    // Failing see https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests/builds/8735
+    this.tags(['skipMKI']);
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       transformHelper = createTransformHelper(getService);
