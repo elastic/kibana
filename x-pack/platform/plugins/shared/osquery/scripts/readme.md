@@ -112,6 +112,64 @@ node x-pack/platform/plugins/shared/osquery/scripts/create_actions \
 
 ---
 
+## Compliance Data Seeder (`seed_compliance_data.sh`)
+
+Seeds realistic endpoint compliance findings and score history into Elasticsearch for development and demo of the Endpoint Compliance Monitoring feature.
+
+**Prerequisites:**
+- Elasticsearch running (default: `localhost:9200`)
+- Kibana started with the feature flag: `xpack.osquery.experimentalFeatures.endpointComplianceMonitoring: true`
+
+```bash
+# Default: 8 hosts, 3 days of history
+./x-pack/platform/plugins/shared/osquery/scripts/seed_compliance_data.sh
+
+# Custom fleet size and history depth
+./x-pack/platform/plugins/shared/osquery/scripts/seed_compliance_data.sh --hosts 20 --days 7
+
+# Clean existing data and re-seed
+./x-pack/platform/plugins/shared/osquery/scripts/seed_compliance_data.sh --clean
+
+# With API key auth
+ES_URL=https://my-cluster.es.cloud:443 ES_API_KEY=abc123 \
+  ./x-pack/platform/plugins/shared/osquery/scripts/seed_compliance_data.sh
+```
+
+### What it creates
+
+| Data stream | Content |
+|---|---|
+| `logs-endpoint_compliance.findings-default` | Individual compliance check results (pass/fail/N/A) per host per rule |
+| `logs-endpoint_compliance.scores-default` | Aggregated benchmark scores over time |
+| `endpoint_compliance.findings_latest-default` | Latest finding per rule+host (populated by transform, ~60s delay) |
+
+### Seeded benchmarks
+
+| Benchmark | Platform | Rules |
+|---|---|---|
+| CIS macOS 15.0 Sequoia | macOS | 10 |
+| CIS Windows 11 Enterprise | Windows | 10 |
+| CIS Ubuntu Linux 22.04 LTS | Linux | 10 |
+
+### Options
+
+| Option | Default | Description |
+|---|---|---|
+| `--hosts` | 8 | Number of simulated hosts (distributed across macOS/Windows/Linux) |
+| `--days` | 3 | Days of historical data (evaluations every 6 hours) |
+| `--clean` | false | Delete all compliance data before seeding |
+
+### Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `ES_URL` | `http://localhost:9200` | Elasticsearch URL |
+| `ES_API_KEY` | — | API key auth (takes precedence) |
+| `ES_USERNAME` | `elastic` | Basic auth username |
+| `ES_PASSWORD` | `changeme` | Basic auth password |
+
+---
+
 ## Schema Formatter (`schema_formatter/`)
 
 Extracts only the currently used fields from osquery schema files (manually curated selection). Output goes to `public/editor/osquery_schema`.
