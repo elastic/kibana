@@ -24,6 +24,8 @@ import type {
   InputOnlyRegistryDataStream,
   InstallablePackage,
   NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackagePolicyInput,
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
@@ -90,10 +92,76 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
     title: policyTemplate.title,
     description: policyTemplate.description,
     ...(policyTemplate.deprecated ? { deprecated: policyTemplate.deprecated } : {}),
+    // Propagate dynamic_signal_types from input-only template into the normalized RegistryInput
+    // so downstream helpers (registryInputAllowsDynamicSignalTypes, etc.) work uniformly
+    // regardless of whether the source is an input-only or composable integration package.
+    ...(policyTemplate.dynamic_signal_types !== undefined
+      ? { dynamic_signal_types: policyTemplate.dynamic_signal_types }
+      : {}),
   };
 
   return [input];
 };
+
+/**
+ * Returns the `RegistryInput` definition for a given policy template and input type.
+ * - Input-only templates: the single synthesized RegistryInput (from template fields).
+ * - Integration templates: the matching entry from `inputs[]`.
+ */
+export function getPolicyTemplateInputDefinition(
+  policyTemplate: RegistryPolicyTemplate,
+  inputType?: string
+): RegistryInput | undefined {
+  if (isInputOnlyPolicyTemplate(policyTemplate)) {
+    const [def] = getNormalizedInputs(policyTemplate);
+    return def;
+  }
+  if (!inputType) return undefined;
+  return (policyTemplate.inputs ?? []).find((input) => input.type === inputType);
+}
+
+/**
+ * Returns true when the given RegistryInput is an OTel collector input whose
+ * data stream signal type is dynamic (determined at runtime by the agent).
+ */
+export function registryInputAllowsDynamicSignalTypes(input: RegistryInput): boolean {
+  return input.type === OTEL_COLLECTOR_INPUT_TYPE && input.dynamic_signal_types === true;
+}
+
+/**
+ * Returns true when the given package policy input corresponds to a registry input
+ * that allows undefined data_stream.type (i.e. dynamic_signal_types).
+ *
+ * Works for both:
+ *   - Input-only packages (policy template with top-level `input` key)
+ *   - Composable integration packages (policy template with `inputs[]`)
+ */
+export function packagePolicyInputAllowsUndefinedDataStreamType(
+  packageInfo: PackageInfo,
+  packagePolicyInput: Pick<NewPackagePolicyInput | PackagePolicyInput, 'type' | 'policy_template'>
+): boolean {
+  const templates = packageInfo.policy_templates ?? [];
+  for (const template of templates) {
+    if (isInputOnlyPolicyTemplate(template)) {
+      if (template.input === packagePolicyInput.type) {
+        const def = getPolicyTemplateInputDefinition(template);
+        return def ? registryInputAllowsDynamicSignalTypes(def) : false;
+      }
+    } else {
+      if (
+        packagePolicyInput.policy_template &&
+        template.name !== packagePolicyInput.policy_template
+      ) {
+        continue;
+      }
+      const def = getPolicyTemplateInputDefinition(template, packagePolicyInput.type);
+      if (def) {
+        return registryInputAllowsDynamicSignalTypes(def);
+      }
+    }
+  }
+  return false;
+}
 
 export function getNormalizedDataStreams(
   packageInfo: { type: 'input' } & (PackageInfo | InstallablePackage),

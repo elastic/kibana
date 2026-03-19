@@ -33,15 +33,15 @@ import { useQuery } from '@kbn/react-query';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
-  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../../../../../../../common/constants';
 
 import { sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
-  isInputOnlyPolicyTemplate,
   mapPackageReleaseToIntegrationCardRelease,
+  getPolicyTemplateInputDefinition,
+  registryInputAllowsDynamicSignalTypes,
 } from '../../../../../../../../../common/services';
 
 import type {
@@ -59,7 +59,6 @@ import { useAgentless } from '../../../single_page_layout/hooks/setup_technology
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
-import type { RegistryPolicyInputOnlyTemplate } from '../../../../../../../../../common/types/models/epm';
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
@@ -125,15 +124,16 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     const customDataStreamTypeVar = packagePolicyInputStream.vars?.[DATA_STREAM_TYPE_VAR_NAME];
 
-    // Check if package uses dynamic_signal_types
+    // Check if this specific stream's input allows dynamic signal types.
+    // Works for both input-only packages and composable integration packages
+    // (integration templates with nested OTel inputs).
     const dynamicSignalTypes = useMemo(() => {
-      const inputOnlyTemplate = packageInfo?.policy_templates?.find(
-        (template) =>
-          isInputOnlyPolicyTemplate(template) && template.input === OTEL_COLLECTOR_INPUT_TYPE
-      ) as RegistryPolicyInputOnlyTemplate | undefined;
-
-      return inputOnlyTemplate?.dynamic_signal_types === true;
-    }, [packageInfo?.policy_templates]);
+      const inputType = packageInputStream.input;
+      return (packageInfo?.policy_templates ?? []).some((template) => {
+        const inputDef = getPolicyTemplateInputDefinition(template, inputType);
+        return inputDef ? registryInputAllowsDynamicSignalTypes(inputDef) : false;
+      });
+    }, [packageInfo?.policy_templates, packageInputStream.input]);
 
     const customDataStreamTypeVarValue =
       customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';

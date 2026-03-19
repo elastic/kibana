@@ -32,6 +32,7 @@ import { PackagePolicyRequestError } from '../../errors';
 import type { FullAgentPolicyInput, PackagePolicy, TemplateAgentPolicyInput } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
 import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
+import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
 
 import { extractSignalTypesFromPipelines } from './otel_collector';
 
@@ -116,10 +117,9 @@ export function storedPackagePoliciesToAgentPermissions(
       return connectorServicePermissions(packagePolicy.id);
     }
 
-    // For input packages with dynamic_signal_types, skip the dataStreams check
-    // as permissions will be determined dynamically from pipelines
-    const isDynamicInput =
-      (pkg as PackageInfo & { type?: string }).type === 'input' && hasDynamicSignalTypes(pkg);
+    // For packages that have any dynamic_signal_types input (input-only or composable integration),
+    // skip the dataStreams check — permissions will be determined dynamically from OTel pipelines.
+    const isDynamicInput = hasDynamicSignalTypes(pkg);
 
     const dataStreams = getNormalizedDataStreams(pkg);
     if (!isDynamicInput && (!dataStreams || dataStreams.length === 0)) {
@@ -152,12 +152,10 @@ export function storedPackagePoliciesToAgentPermissions(
         break;
 
       default:
-        // - Input packages with dynamic_signal_types produce data for signal types defined in the pipelines;
-        //   grant index permissions for each signal type pattern (e.g., logs-*-*, metrics-*-*) from agentInputs
-        if (
-          (pkg as PackageInfo & { type?: string }).type === 'input' &&
-          hasDynamicSignalTypes(pkg)
-        ) {
+        // - Packages with dynamic_signal_types (input-only or composable integration) produce data
+        //   for signal types defined in OTel pipelines; grant index permissions per signal type
+        //   pattern (e.g., logs-*-*, metrics-*-*) derived from agentInputs pipelines.
+        if (isDynamicInput) {
           const otelcolPipelines = agentInputs?.find((i) => i.type === OTEL_COLLECTOR_INPUT_TYPE)
             ?.streams?.[0]?.service?.pipelines;
 
@@ -196,6 +194,10 @@ export function storedPackagePoliciesToAgentPermissions(
 
               const dataStreams_: DataStreamMeta[] = [];
               const isOtelInput = input.type === OTEL_COLLECTOR_INPUT_TYPE;
+              const inputAllowsDynamic = packagePolicyInputAllowsUndefinedDataStreamType(
+                pkg,
+                input
+              );
               input.streams
                 .filter((s) => s.enabled)
                 .forEach((stream) => {
@@ -204,7 +206,11 @@ export function storedPackagePoliciesToAgentPermissions(
                   }
 
                   if (!stream.data_stream.type) {
-                    // Should never happen for non-dynamic packages if preflightCheckPackagePolicy ran
+                    if (inputAllowsDynamic) {
+                      // Dynamic signal types input — type is resolved at runtime, skip
+                      return;
+                    }
+                    // Should never happen for non-dynamic inputs if preflightCheckPackagePolicy ran
                     throw new PackagePolicyRequestError(
                       `[data_stream.type]: unexpected undefined stream type for non-dynamic package "${pkg.name}"`
                     );

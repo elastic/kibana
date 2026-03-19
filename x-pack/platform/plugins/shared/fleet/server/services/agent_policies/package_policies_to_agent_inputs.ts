@@ -35,7 +35,7 @@ import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '..
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
 import { FleetError } from '../../errors';
-import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
+import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -90,12 +90,16 @@ export const storedPackagePolicyToAgentInputs = (
       ...getFullInputStreams(input),
     };
 
-    // Guard: undefined data_stream.type is only valid for dynamic_signal_types packages
+    // Guard: undefined data_stream.type is only valid for inputs that allow dynamic signal types.
+    // Checked per-input so mixed packages (some dynamic, some static) are handled correctly.
     if (fullInput.streams) {
+      const inputAllowsDynamic =
+        packageInfo !== undefined &&
+        packagePolicyInputAllowsUndefinedDataStreamType(packageInfo, input);
       for (const stream of fullInput.streams) {
         if (stream.data_stream?.type === undefined) {
-          if (hasDynamicSignalTypes(packageInfo)) {
-            // For dynamic packages, type is determined at runtime — strip the undefined key
+          if (inputAllowsDynamic) {
+            // For dynamic inputs, type is determined at runtime — strip the undefined key
             const { type: _type, ...restDataStream } = stream.data_stream ?? {};
             stream.data_stream = restDataStream as FullAgentPolicyInputStream['data_stream'];
           } else {

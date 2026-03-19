@@ -30,7 +30,7 @@ import {
   CustomPackagePolicyNotAllowedForAgentlessError,
   PackagePolicyValidationError,
 } from '../../errors';
-import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
+import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
 import { licenseService } from '../license';
 import { outputService } from '../output';
 
@@ -64,11 +64,16 @@ export async function preflightCheckPackagePolicy(
     throw new PackagePolicyContentPackageError('Cannot create policy for content only packages');
   }
 
-  // Guard: streams without data_stream.type are only valid for dynamic_signal_types packages
+  // Guard: streams without data_stream.type are only valid for inputs that allow
+  // dynamic signal types (OTel collector with dynamic_signal_types: true).
+  // Checked per-input so mixed packages (some dynamic, some static) are handled correctly.
   if (packageInfo) {
-    const isDynamic = hasDynamicSignalTypes(packageInfo);
-    if (!isDynamic) {
-      for (const input of packagePolicy.inputs) {
+    for (const input of packagePolicy.inputs) {
+      const inputAllowsDynamic = packagePolicyInputAllowsUndefinedDataStreamType(
+        packageInfo,
+        input
+      );
+      if (!inputAllowsDynamic) {
         for (const stream of input.streams ?? []) {
           if (!stream.data_stream?.type) {
             throw new PackagePolicyValidationError(

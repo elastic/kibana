@@ -23,6 +23,9 @@ import {
   getNormalizedDataStreams,
   filterPolicyTemplatesTiles,
   hasMultipleEnabledPolicyTemplates,
+  getPolicyTemplateInputDefinition,
+  registryInputAllowsDynamicSignalTypes,
+  packagePolicyInputAllowsUndefinedDataStreamType,
 } from './policy_template';
 
 describe('isInputOnlyPolicyTemplate', () => {
@@ -438,6 +441,263 @@ describe('getNormalizedDataStreams', () => {
     const useApmVar = result[0].streams![0].vars?.find((v) => v.name === 'use_apm');
     expect(useApmVar).toBeDefined();
     expect(useApmVar?.default).toEqual(true);
+  });
+});
+
+describe('getNormalizedInputs - dynamic_signal_types propagation', () => {
+  it('should propagate dynamic_signal_types from input-only template into the returned RegistryInput', () => {
+    const template: RegistryPolicyInputOnlyTemplate = {
+      input: 'otelcol',
+      name: 'otel-dynamic',
+      template_path: 'some/path.hbl',
+      title: 'OTel Dynamic',
+      description: 'OTel with dynamic signal types',
+      dynamic_signal_types: true,
+    };
+    const [normalized] = getNormalizedInputs(template);
+    expect(normalized.type).toEqual('otelcol');
+    expect(normalized.dynamic_signal_types).toEqual(true);
+  });
+
+  it('should not include dynamic_signal_types when it is not set on input-only template', () => {
+    const template: RegistryPolicyInputOnlyTemplate = {
+      input: 'logfile',
+      name: 'logfile-template',
+      type: 'logs',
+      template_path: 'some/path.hbl',
+      title: 'Logfile',
+      description: 'Logfile input',
+    };
+    const [normalized] = getNormalizedInputs(template);
+    expect(normalized.dynamic_signal_types).toBeUndefined();
+  });
+
+  it('should return integration inputs as-is including dynamic_signal_types', () => {
+    const template: RegistryPolicyIntegrationTemplate = {
+      name: 'composable-otel',
+      title: 'Composable OTel',
+      description: 'Composable integration with OTel input',
+      inputs: [
+        {
+          type: 'otelcol',
+          title: 'OTel Collector',
+          description: 'OTel Collector input',
+          dynamic_signal_types: true,
+        },
+        {
+          type: 'logfile',
+          title: 'Logfile',
+          description: 'Regular logfile input',
+        },
+      ],
+    };
+    const result = getNormalizedInputs(template);
+    expect(result).toHaveLength(2);
+    expect(result[0].dynamic_signal_types).toEqual(true);
+    expect(result[1].dynamic_signal_types).toBeUndefined();
+  });
+});
+
+describe('registryInputAllowsDynamicSignalTypes', () => {
+  it('returns true for OTel collector input with dynamic_signal_types: true', () => {
+    expect(
+      registryInputAllowsDynamicSignalTypes({
+        type: 'otelcol',
+        title: 'OTel',
+        description: 'OTel',
+        dynamic_signal_types: true,
+      })
+    ).toBe(true);
+  });
+
+  it('returns false for OTel collector input without dynamic_signal_types', () => {
+    expect(
+      registryInputAllowsDynamicSignalTypes({
+        type: 'otelcol',
+        title: 'OTel',
+        description: 'OTel',
+      })
+    ).toBe(false);
+  });
+
+  it('returns false for non-OTel input even with dynamic_signal_types: true', () => {
+    expect(
+      registryInputAllowsDynamicSignalTypes({
+        type: 'logfile',
+        title: 'Logfile',
+        description: 'Logfile',
+        dynamic_signal_types: true,
+      })
+    ).toBe(false);
+  });
+});
+
+describe('getPolicyTemplateInputDefinition', () => {
+  it('returns the synthesized RegistryInput for an input-only template', () => {
+    const template: RegistryPolicyInputOnlyTemplate = {
+      input: 'otelcol',
+      name: 'otel',
+      template_path: 'some/path.hbl',
+      title: 'OTel',
+      description: 'OTel input',
+      dynamic_signal_types: true,
+    };
+    const def = getPolicyTemplateInputDefinition(template);
+    expect(def).toBeDefined();
+    expect(def!.type).toEqual('otelcol');
+    expect(def!.dynamic_signal_types).toEqual(true);
+  });
+
+  it('returns the matching input from integration template by inputType', () => {
+    const template: RegistryPolicyIntegrationTemplate = {
+      name: 'composable',
+      title: 'Composable',
+      description: 'desc',
+      inputs: [
+        {
+          type: 'otelcol',
+          title: 'OTel',
+          description: 'OTel',
+          dynamic_signal_types: true,
+        },
+        { type: 'logfile', title: 'Logfile', description: 'Logfile' },
+      ],
+    };
+    const def = getPolicyTemplateInputDefinition(template, 'otelcol');
+    expect(def).toBeDefined();
+    expect(def!.dynamic_signal_types).toEqual(true);
+  });
+
+  it('returns undefined for integration template when inputType is not found', () => {
+    const template: RegistryPolicyIntegrationTemplate = {
+      name: 'composable',
+      title: 'Composable',
+      description: 'desc',
+      inputs: [{ type: 'logfile', title: 'Logfile', description: 'Logfile' }],
+    };
+    expect(getPolicyTemplateInputDefinition(template, 'otelcol')).toBeUndefined();
+  });
+
+  it('returns undefined for integration template when no inputType is provided', () => {
+    const template: RegistryPolicyIntegrationTemplate = {
+      name: 'composable',
+      title: 'Composable',
+      description: 'desc',
+      inputs: [{ type: 'logfile', title: 'Logfile', description: 'Logfile' }],
+    };
+    expect(getPolicyTemplateInputDefinition(template)).toBeUndefined();
+  });
+});
+
+describe('packagePolicyInputAllowsUndefinedDataStreamType', () => {
+  const basePackageInfo = {
+    name: 'test-pkg',
+    version: '1.0.0',
+    title: 'Test',
+    description: 'Test',
+    release: 'ga' as const,
+    format_version: '1.0.0',
+    owner: { github: 'elastic' },
+    status: 'not_installed' as const,
+  } as PackageInfo;
+
+  it('returns true for input-only package with dynamic OTel input', () => {
+    const pkg: PackageInfo = {
+      ...basePackageInfo,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'otelcol',
+          name: 'otel',
+          template_path: 'path.hbl',
+          title: 'OTel',
+          description: 'OTel',
+          dynamic_signal_types: true,
+        },
+      ],
+    } as any;
+    expect(
+      packagePolicyInputAllowsUndefinedDataStreamType(pkg, {
+        type: 'otelcol',
+        policy_template: undefined,
+      })
+    ).toBe(true);
+  });
+
+  it('returns false for input-only package with non-dynamic input', () => {
+    const pkg: PackageInfo = {
+      ...basePackageInfo,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'logfile',
+          type: 'logs',
+          name: 'logfile',
+          template_path: 'path.hbl',
+          title: 'Logfile',
+          description: 'Logfile',
+        },
+      ],
+    } as any;
+    expect(packagePolicyInputAllowsUndefinedDataStreamType(pkg, { type: 'logfile' })).toBe(false);
+  });
+
+  it('returns true for composable integration package with dynamic OTel nested input', () => {
+    const pkg: PackageInfo = {
+      ...basePackageInfo,
+      type: 'integration',
+      policy_templates: [
+        {
+          name: 'composable-otel',
+          title: 'Composable OTel',
+          description: 'desc',
+          inputs: [
+            {
+              type: 'otelcol',
+              title: 'OTel',
+              description: 'OTel',
+              dynamic_signal_types: true,
+            },
+            { type: 'logfile', title: 'Logfile', description: 'Logfile' },
+          ],
+        },
+      ],
+    } as any;
+    expect(
+      packagePolicyInputAllowsUndefinedDataStreamType(pkg, {
+        type: 'otelcol',
+        policy_template: 'composable-otel',
+      })
+    ).toBe(true);
+  });
+
+  it('returns false for composable integration package when the logfile input is checked', () => {
+    const pkg: PackageInfo = {
+      ...basePackageInfo,
+      type: 'integration',
+      policy_templates: [
+        {
+          name: 'composable-otel',
+          title: 'Composable OTel',
+          description: 'desc',
+          inputs: [
+            {
+              type: 'otelcol',
+              title: 'OTel',
+              description: 'OTel',
+              dynamic_signal_types: true,
+            },
+            { type: 'logfile', title: 'Logfile', description: 'Logfile' },
+          ],
+        },
+      ],
+    } as any;
+    expect(
+      packagePolicyInputAllowsUndefinedDataStreamType(pkg, {
+        type: 'logfile',
+        policy_template: 'composable-otel',
+      })
+    ).toBe(false);
   });
 });
 

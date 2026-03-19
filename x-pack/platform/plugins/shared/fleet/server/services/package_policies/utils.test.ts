@@ -233,6 +233,100 @@ describe('Package Policy Utils', () => {
         )
       ).resolves.not.toThrow();
     });
+
+    it('should not throw for a composable integration with a dynamic OTel nested input and undefined data_stream.type', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const policyWithMixedInputs = {
+        ...testPolicy,
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            policy_template: 'composable-otel',
+            // undefined type is allowed for this input
+            streams: [{ id: 'stream-otel', enabled: true, data_stream: { dataset: 'otel.ds' } }],
+          },
+          {
+            type: 'logfile',
+            enabled: true,
+            policy_template: 'composable-otel',
+            streams: [
+              { id: 'stream-log', enabled: true, data_stream: { type: 'logs', dataset: 'my.ds' } },
+            ],
+          },
+        ],
+      };
+      await expect(
+        preflightCheckPackagePolicy(
+          soClient,
+          policyWithMixedInputs as any,
+          {
+            name: 'composable-integration',
+            type: 'integration',
+            policy_templates: [
+              {
+                name: 'composable-otel',
+                title: 'Composable OTel',
+                description: 'desc',
+                inputs: [
+                  {
+                    type: 'otelcol',
+                    title: 'OTel',
+                    description: 'OTel',
+                    dynamic_signal_types: true,
+                  },
+                  { type: 'logfile', title: 'Logfile', description: 'Logfile' },
+                ],
+              },
+            ],
+          } as any
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it('should throw for a composable integration when a non-dynamic input has undefined data_stream.type', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const policyWithBadLogfileInput = {
+        ...testPolicy,
+        inputs: [
+          {
+            type: 'logfile',
+            enabled: true,
+            policy_template: 'composable-otel',
+            // type is missing — not allowed for logfile
+            streams: [{ id: 'stream-log', enabled: true, data_stream: { dataset: 'my.ds' } }],
+          },
+        ],
+      };
+      await expect(
+        preflightCheckPackagePolicy(
+          soClient,
+          policyWithBadLogfileInput as any,
+          {
+            name: 'composable-integration',
+            type: 'integration',
+            policy_templates: [
+              {
+                name: 'composable-otel',
+                title: 'Composable OTel',
+                description: 'desc',
+                inputs: [
+                  {
+                    type: 'otelcol',
+                    title: 'OTel',
+                    description: 'OTel',
+                    dynamic_signal_types: true,
+                  },
+                  { type: 'logfile', title: 'Logfile', description: 'Logfile' },
+                ],
+              },
+            ],
+          } as any
+        )
+      ).rejects.toThrowError(
+        '[data_stream.type]: required for stream in package "composable-integration"'
+      );
+    });
   });
 });
 
