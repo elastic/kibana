@@ -54,7 +54,8 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
   return {
     type: TIME_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState;
+      const state = { ...DEFAULT_TIME_SLIDER_STATE, ...initialState };
+
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(parentApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);

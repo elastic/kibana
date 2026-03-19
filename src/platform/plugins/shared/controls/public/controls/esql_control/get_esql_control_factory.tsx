@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { pick } from 'lodash';
 
-import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_ESQL_OPTIONS_LIST_STATE, ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { apiHasPinnedPanels, initializeUnsavedChanges } from '@kbn/presentation-publishing';
@@ -32,7 +32,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
   return {
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState;
+      const state = { ...DEFAULT_ESQL_OPTIONS_LIST_STATE, ...initialState };
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const setDataLoading = (loading: boolean | undefined) => dataLoading$.next(loading);

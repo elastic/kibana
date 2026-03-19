@@ -18,7 +18,7 @@ import {
   initializeUnsavedChanges,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 
@@ -43,7 +43,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
   return {
     type: RANGE_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState;
+      const state = { ...DEFAULT_RANGE_SLIDER_STATE, ...initialState };
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
