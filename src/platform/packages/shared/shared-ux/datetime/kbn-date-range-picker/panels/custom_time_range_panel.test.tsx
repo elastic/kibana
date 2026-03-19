@@ -69,6 +69,8 @@ const TestHarness = ({
       defaultValue={defaultValue}
       onChange={onChange}
       onPresetSave={onPresetSave}
+      settings={{ roundRelativeTime: false }}
+      onSettingsChange={() => {}}
     >
       <DateRangePickerPanelNavigationProvider defaultPanelId="main" panelDescriptors={[]}>
         <CurrentTextProbe />
@@ -200,17 +202,17 @@ describe('CustomTimeRangePanel', () => {
         target: { value: '15' },
       });
 
-      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m to now');
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m - now');
     });
 
     it('emits the literal "now" in the input for the Now type', () => {
-      // Default: start=RELATIVE 15m, end=NOW. Switching start to Now produces "now to now".
+      // Default: start=RELATIVE 15m, end=NOW. Switching start to Now produces "now - now".
       renderCustomTimeRangePanel({ defaultValue: '-15m' });
       openCustomPanel();
 
       fireEvent.click(within(getStartFieldset()).getByText('Now'));
 
-      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('now to now');
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('now - now');
     });
 
     it('updates the panel UI when the input text changes to a valid range', () => {
@@ -218,7 +220,7 @@ describe('CustomTimeRangePanel', () => {
       openCustomPanel();
 
       fireEvent.change(screen.getByLabelText('Set picker text'), {
-        target: { value: 'now-30m to now' },
+        target: { value: 'now-30m - now' },
       });
 
       expect(within(getStartFieldset()).getByLabelText('Count')).toHaveValue(30);
@@ -268,7 +270,7 @@ describe('CustomTimeRangePanel', () => {
       expect(onPresetSave).toHaveBeenCalledWith({
         start: 'now-15m',
         end: 'now',
-        label: '-15m to now',
+        label: '-15m - now',
       });
     });
   });
