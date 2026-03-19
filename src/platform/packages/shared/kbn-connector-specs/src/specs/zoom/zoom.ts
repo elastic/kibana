@@ -93,8 +93,7 @@ export const Zoom: ConnectorSpec = {
     id: '.zoom',
     displayName: 'Zoom',
     description: i18n.translate('core.kibanaConnectorSpecs.zoom.metadata.description', {
-      defaultMessage:
-        'Access meetings, recordings, transcripts, and participants in Zoom',
+      defaultMessage: 'Access meetings, recordings, transcripts, and participants in Zoom',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
