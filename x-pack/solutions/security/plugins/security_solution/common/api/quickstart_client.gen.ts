@@ -202,6 +202,10 @@ import type {
   GetEndpointSuggestionsResponse,
 } from './endpoint/suggestions/get_suggestions.gen';
 import type {
+  CreateWorkflowInsightRequestBodyInput,
+  CreateWorkflowInsightResponse,
+  GetPendingWorkflowInsightsRequestQueryInput,
+  GetPendingWorkflowInsightsResponse,
   GetWorkflowInsightsRequestQueryInput,
   GetWorkflowInsightsResponse,
   UpdateWorkflowInsightRequestParamsInput,
@@ -1029,6 +1033,19 @@ For detailed information on Kibana actions and alerting, and additional API call
         ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createWorkflowInsight(props: CreateWorkflowInsightProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateWorkflowInsight`);
+    return this.kbnClient
+      .request<CreateWorkflowInsightResponse>({
+        path: '/internal/api/endpoint/workflow_insights',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -1917,6 +1934,20 @@ finalize it.
         path: '/api/note',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getPendingWorkflowInsights(props: GetPendingWorkflowInsightsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetPendingWorkflowInsights`);
+    return this.kbnClient
+      .request<GetPendingWorkflowInsightsResponse>({
+        path: '/internal/api/endpoint/workflow_insights/pending',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
 
@@ -3548,6 +3579,9 @@ export interface CreateWatchlistEntitySourceProps {
   params: CreateWatchlistEntitySourceRequestParamsInput;
   body: CreateWatchlistEntitySourceRequestBodyInput;
 }
+export interface CreateWorkflowInsightProps {
+  body: CreateWorkflowInsightRequestBodyInput;
+}
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
@@ -3695,6 +3729,9 @@ export interface GetEntityStoreStatusProps {
 }
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
+}
+export interface GetPendingWorkflowInsightsProps {
+  query: GetPendingWorkflowInsightsRequestQueryInput;
 }
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
