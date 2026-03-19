@@ -42,6 +42,7 @@ export const useFetchAlerts = ({
   from,
   size,
   sort,
+  index,
 }: UseAlertsQueryParams): UseAlertsQueryResult => {
   const QUERY_KEY = `useFetchAlerts`;
 
@@ -56,7 +57,7 @@ export const useFetchAlerts = ({
     SearchResponse<Record<string, unknown>, Record<string, AggregationsAggregate>>,
     unknown
   >(
-    [QUERY_KEY, alertIds, from, size, sort],
+    [QUERY_KEY, alertIds, from, size, sort, index],
     async ({ signal }) =>
       findAlerts({
         signal,
@@ -64,6 +65,7 @@ export const useFetchAlerts = ({
         from,
         size,
         sort,
+        index,
       }),
     {
       keepPreviousData: true,
