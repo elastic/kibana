@@ -110,6 +110,11 @@ describe('RuleEditorPanel', () => {
   });
 
   it('catches errors thrown by child components', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(VisualRuleEditor.prototype, 'render').mockImplementationOnce(() => {
+      throw new Error('Something awful happened here.');
+    });
+
     const props = {
       rawRules: {},
       onChange: jest.fn(),
@@ -117,8 +122,6 @@ describe('RuleEditorPanel', () => {
       validateForm: false,
     };
     const wrapper = renderView(props);
-
-    wrapper.find(VisualRuleEditor).simulateError(new Error('Something awful happened here.'));
 
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
