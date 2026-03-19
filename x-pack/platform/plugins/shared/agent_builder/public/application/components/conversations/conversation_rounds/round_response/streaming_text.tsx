@@ -75,7 +75,6 @@ export const StreamingText = ({
       content={displayedText}
       steps={steps}
       conversationAttachments={conversationAttachments}
-      attachmentRefs={attachmentRefs}
       conversationId={conversationId}
     />
   );

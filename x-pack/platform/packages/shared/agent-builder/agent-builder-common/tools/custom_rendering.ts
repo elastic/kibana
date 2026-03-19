@@ -32,8 +32,8 @@ export const dashboardElement = {
 };
 
 export interface RenderAttachmentElementAttributes {
-  attachmentId?: string;
-  version?: number | string;
+  attachmentId: string;
+  version: number | string;
 }
 
 export const renderAttachmentElement = {

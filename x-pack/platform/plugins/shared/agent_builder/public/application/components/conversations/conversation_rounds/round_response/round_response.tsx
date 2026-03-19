@@ -56,7 +56,6 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
           content={message}
           steps={steps}
           conversationAttachments={conversationAttachments}
-          attachmentRefs={attachmentRefs}
           conversationId={conversationId}
         />
       ) : (
@@ -64,7 +63,6 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
           content={message}
           steps={steps}
           conversationAttachments={conversationAttachments}
-          attachmentRefs={attachmentRefs}
           conversationId={conversationId}
         />
       )}

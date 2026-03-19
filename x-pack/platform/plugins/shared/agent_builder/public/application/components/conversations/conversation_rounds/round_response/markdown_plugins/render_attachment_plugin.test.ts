@@ -5,134 +5,101 @@
  * 2.0.
  */
 
-import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import { resolveAttachmentVersion } from './render_attachment_plugin';
+import { renderAttachmentTagParser, resolveAttachmentVersion } from './render_attachment_plugin';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
+
+const createMockAttachment = (versions: number[] = [1, 3, 2]) =>
+  ({
+    id: 'attachment-1',
+    type: 'dashboard',
+    versions: versions.map((version) => ({ version })),
+    current_version: Math.max(...versions, 0),
+    active: true,
+  } as VersionedAttachment);
+
+const mockAttachment = createMockAttachment();
 
 describe('resolveAttachmentVersion', () => {
-  const attachmentId = 'attachment-1';
-  const currentVersion = 1;
-
-  describe('when explicitVersion is provided', () => {
-    it('returns the explicit version as a number', () => {
-      const result = resolveAttachmentVersion({
-        explicitVersion: 5,
-        attachmentId,
-        attachmentRefs: undefined,
-        currentVersion,
-      });
-
-      expect(result).toBe(5);
+  it('returns explicit numeric version', () => {
+    const result = resolveAttachmentVersion({
+      explicitVersion: 5,
+      attachment: mockAttachment,
     });
 
-    it('parses a string explicit version to a number', () => {
-      const result = resolveAttachmentVersion({
-        explicitVersion: '3',
-        attachmentId,
-        attachmentRefs: undefined,
-        currentVersion,
-      });
-
-      expect(result).toBe(3);
-    });
-
-    it('ignores attachmentRefs when explicit version is provided', () => {
-      const attachmentRefs: AttachmentVersionRef[] = [{ attachment_id: attachmentId, version: 10 }];
-
-      const result = resolveAttachmentVersion({
-        explicitVersion: 2,
-        attachmentId,
-        attachmentRefs,
-        currentVersion,
-      });
-
-      expect(result).toBe(2);
-    });
+    expect(result).toBe(5);
   });
 
-  describe('when explicitVersion is undefined', () => {
-    it('returns currentVersion when attachmentRefs is undefined', () => {
-      const result = resolveAttachmentVersion({
-        explicitVersion: undefined,
-        attachmentId,
-        attachmentRefs: undefined,
-        currentVersion: 7,
-      });
-
-      expect(result).toBe(7);
+  it('parses explicit string version', () => {
+    const result = resolveAttachmentVersion({
+      explicitVersion: '3',
+      attachment: mockAttachment,
     });
 
-    it('returns currentVersion when attachmentRefs is empty', () => {
-      const result = resolveAttachmentVersion({
-        explicitVersion: undefined,
-        attachmentId,
-        attachmentRefs: [],
-        currentVersion: 4,
-      });
+    expect(result).toBe(3);
+  });
 
-      expect(result).toBe(4);
+  it('returns undefined for invalid version string', () => {
+    const result = resolveAttachmentVersion({
+      explicitVersion: 'abc',
+      attachment: mockAttachment,
     });
 
-    it('returns currentVersion when no refs match the attachmentId', () => {
-      const attachmentRefs: AttachmentVersionRef[] = [
-        { attachment_id: 'other-attachment', version: 99 },
-      ];
+    expect(result).toBeUndefined();
+  });
 
-      const result = resolveAttachmentVersion({
-        explicitVersion: undefined,
-        attachmentId,
-        attachmentRefs,
-        currentVersion: 3,
-      });
-
-      expect(result).toBe(3);
+  it('returns undefined for non-positive explicit version', () => {
+    const zeroVersion = resolveAttachmentVersion({
+      explicitVersion: 0,
+      attachment: mockAttachment,
+    });
+    const negativeVersion = resolveAttachmentVersion({
+      explicitVersion: -1,
+      attachment: mockAttachment,
     });
 
-    it('returns the ref version when there is a single matching ref', () => {
-      const attachmentRefs: AttachmentVersionRef[] = [{ attachment_id: attachmentId, version: 5 }];
+    expect(zeroVersion).toBeUndefined();
+    expect(negativeVersion).toBeUndefined();
+  });
 
-      const result = resolveAttachmentVersion({
-        explicitVersion: undefined,
-        attachmentId,
-        attachmentRefs,
-        currentVersion: 1,
-      });
-
-      expect(result).toBe(5);
+  it('falls back to highest attachment version when explicit version is missing', () => {
+    const result = resolveAttachmentVersion({
+      explicitVersion: undefined as unknown as string | number,
+      attachment: createMockAttachment([2, 7, 4]),
     });
 
-    it('returns the highest version when multiple refs match the attachmentId', () => {
-      const attachmentRefs: AttachmentVersionRef[] = [
-        { attachment_id: attachmentId, version: 2 },
-        { attachment_id: attachmentId, version: 8 },
-        { attachment_id: attachmentId, version: 5 },
-      ];
+    expect(result).toBe(7);
+  });
 
-      const result = resolveAttachmentVersion({
-        explicitVersion: undefined,
-        attachmentId,
-        attachmentRefs,
-        currentVersion: 1,
-      });
-
-      expect(result).toBe(8);
+  it('returns undefined when explicit version is missing and attachment has no versions', () => {
+    const result = resolveAttachmentVersion({
+      explicitVersion: undefined as unknown as string | number,
+      attachment: createMockAttachment([]),
     });
 
-    it('only considers refs matching the attachmentId when finding the highest version', () => {
-      const attachmentRefs: AttachmentVersionRef[] = [
-        { attachment_id: 'other-attachment', version: 100 },
-        { attachment_id: attachmentId, version: 3 },
-        { attachment_id: attachmentId, version: 7 },
-        { attachment_id: 'another-attachment', version: 50 },
-      ];
+    expect(result).toBeUndefined();
+  });
+});
 
-      const result = resolveAttachmentVersion({
-        explicitVersion: undefined,
-        attachmentId,
-        attachmentRefs,
-        currentVersion: 1,
-      });
+describe('renderAttachmentTagParser', () => {
+  it('maps version attribute to renderer version prop', () => {
+    const parser = renderAttachmentTagParser();
+    const tree = {
+      type: 'root',
+      children: [
+        {
+          type: 'html',
+          value: `<${renderAttachmentElement.tagName} ${renderAttachmentElement.attributes.attachmentId}="dash-1" ${renderAttachmentElement.attributes.version}="2"/>`,
+        },
+      ],
+    };
 
-      expect(result).toBe(7);
+    parser(tree as any);
+
+    expect(tree.children[0]).toMatchObject({
+      type: renderAttachmentElement.tagName,
+      attachmentId: 'dash-1',
+      version: '2',
     });
   });
 });
