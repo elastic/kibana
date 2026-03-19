@@ -7,7 +7,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 
-import { getDocumentTitle } from './title';
+import { getDocumentTitle } from './get_header_title';
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({

@@ -12,7 +12,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
-import { getDocumentTitle } from '../utils/title';
+import { getDocumentTitle } from '../utils/get_header_title';
 import { HEADER_TITLE_TEST_ID, HEADER_TITLE_LINK_TEST_ID } from './test_ids';
 
 export interface HeaderTitleProps {
