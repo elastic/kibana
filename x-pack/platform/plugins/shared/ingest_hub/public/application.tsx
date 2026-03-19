@@ -6,14 +6,17 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import type { ScopedHistory } from '@kbn/core/public';
 import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Router } from '@kbn/shared-ux-router';
 import type { IngestFlow } from './types';
 import { IngestFlowCategory } from './components/ingest_flow_category';
 import { IngestFlowFlyout } from './components/ingest_flow_flyout';
 
 interface IngestHubAppProps {
   ingestFlows: IngestFlow[];
+  history: ScopedHistory;
 }
 
 const groupByCategory = (flows: IngestFlow[]): Map<string, IngestFlow[]> => {
@@ -26,7 +29,7 @@ const groupByCategory = (flows: IngestFlow[]): Map<string, IngestFlow[]> => {
   return grouped;
 };
 
-export const IngestHubApp: React.FC<IngestHubAppProps> = ({ ingestFlows }) => {
+export const IngestHubApp: React.FC<IngestHubAppProps> = ({ ingestFlows, history }) => {
   const [selectedFlowId, setSelectedFlowId] = useState<string | null>(null);
 
   const categorizedFlows = useMemo(() => groupByCategory(ingestFlows), [ingestFlows]);
@@ -41,22 +44,28 @@ export const IngestHubApp: React.FC<IngestHubAppProps> = ({ ingestFlows }) => {
   }, []);
 
   return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Header
-        pageTitle={i18n.translate('xpack.ingestHub.pageTitle', {
-          defaultMessage: 'Ingest Hub',
-        })}
-      />
-      <EuiPageTemplate.Section>
-        {[...categorizedFlows.entries()].map(([category, flows]) => (
-          <Fragment key={category}>
-            <IngestFlowCategory category={category} flows={flows} onFlowClick={setSelectedFlowId} />
-            <EuiSpacer size="xl" />
-          </Fragment>
-        ))}
-      </EuiPageTemplate.Section>
+    <Router history={history}>
+      <EuiPageTemplate>
+        <EuiPageTemplate.Header
+          pageTitle={i18n.translate('xpack.ingestHub.pageTitle', {
+            defaultMessage: 'Ingest Hub',
+          })}
+        />
+        <EuiPageTemplate.Section>
+          {[...categorizedFlows.entries()].map(([category, flows]) => (
+            <Fragment key={category}>
+              <IngestFlowCategory
+                category={category}
+                flows={flows}
+                onFlowClick={setSelectedFlowId}
+              />
+              <EuiSpacer size="xl" />
+            </Fragment>
+          ))}
+        </EuiPageTemplate.Section>
 
-      {selectedFlow && <IngestFlowFlyout flow={selectedFlow} onClose={handleCloseFlyout} />}
-    </EuiPageTemplate>
+        {selectedFlow && <IngestFlowFlyout flow={selectedFlow} onClose={handleCloseFlyout} />}
+      </EuiPageTemplate>
+    </Router>
   );
 };

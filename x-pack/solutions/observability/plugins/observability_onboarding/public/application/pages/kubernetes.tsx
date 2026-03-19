@@ -12,8 +12,14 @@ import { KubernetesPanel } from '../quickstart_flows/kubernetes';
 import { PageTemplate } from './template';
 import { CustomHeader } from '../header';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
+import { useFlowBreadcrumb } from '../shared/use_flow_breadcrumbs';
 
 export const KubernetesPage = () => {
+  useFlowBreadcrumb({
+    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8s', {
+      defaultMessage: 'Kubernetes: Logs & Metrics',
+    }),
+  });
   const metricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );

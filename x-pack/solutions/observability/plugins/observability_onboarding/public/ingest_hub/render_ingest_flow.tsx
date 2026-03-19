@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
-import { createMemoryHistory } from 'history';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { Router } from '@kbn/shared-ux-router';
 import type { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import type { ObservabilityOnboardingPluginStartDeps } from '../plugin';
 import { createCallApi } from '../services/rest/create_call_api';
@@ -37,11 +35,9 @@ export const createIngestFlowComponent = (
 
   return () => (
     <KibanaContextProvider services={services}>
-      <Router history={createMemoryHistory()}>
-        <PerformanceContextProvider>
-          <Content />
-        </PerformanceContextProvider>
-      </Router>
+      <PerformanceContextProvider>
+        <Content />
+      </PerformanceContextProvider>
     </KibanaContextProvider>
   );
 };

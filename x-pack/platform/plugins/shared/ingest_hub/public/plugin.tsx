@@ -90,7 +90,7 @@ export class IngestHubPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await startServicesPromise;
         const isEnabled = coreStart.featureFlags.getBooleanValue(INGEST_HUB_ENABLED_FLAG, false);
-        const { element } = params;
+        const { element, history } = params;
 
         if (!isEnabled) {
           coreStart.application.navigateToApp('discover');
@@ -98,7 +98,9 @@ export class IngestHubPlugin
         }
 
         ReactDOM.render(
-          coreStart.rendering.addContext(<IngestHubApp ingestFlows={this.ingestFlows} />),
+          coreStart.rendering.addContext(
+            <IngestHubApp ingestFlows={this.ingestFlows} history={history} />
+          ),
           element
         );
         return () => ReactDOM.unmountComponentAtNode(element);
