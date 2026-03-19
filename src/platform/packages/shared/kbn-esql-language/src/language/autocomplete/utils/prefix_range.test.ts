@@ -56,23 +56,23 @@ describe('computePrefixRange', () => {
 
   describe('dot-field combining', () => {
     it('event.data in WHERE', () => {
-      expectPrefix('FROM a | WHERE event.data', 'event.data', 'dot-field-combining');
+      expectPrefix('FROM a | WHERE event.data', 'event.data', 'compound-prefix');
     });
 
     it('event.data.fi in KEEP', () => {
-      expectPrefix('FROM a | KEEP event.data.fi', 'event.data.fi', 'dot-field-combining');
+      expectPrefix('FROM a | KEEP event.data.fi', 'event.data.fi', 'compound-prefix');
     });
 
     it('event.duration inside function call', () => {
-      expectPrefix('FROM a | EVAL ROUND(event.duration', 'event.duration', 'dot-field-combining');
+      expectPrefix('FROM a | EVAL ROUND(event.duration', 'event.duration', 'compound-prefix');
     });
 
     it('backtick-quoted field with dot', () => {
-      expectPrefix('FROM a | KEEP `my field`.na', '`my field`.na', 'dot-field-combining');
+      expectPrefix('FROM a | KEEP `my field`.na', '`my field`.na', 'compound-prefix');
     });
 
     it('trailing dot after dotted field keeps the dotted prefix', () => {
-      expectPrefix('FROM a | KEEP event.data.', 'event.data.', 'dot-field-combining');
+      expectPrefix('FROM a | KEEP event.data.', 'event.data.', 'compound-prefix');
     });
   });
 
@@ -172,6 +172,17 @@ describe('attachReplacementRanges', () => {
     expect(result[0].rangeToReplace).toEqual({ start: 20, end: 27 });
     // NULLS LAST has no overlap with "NULLS F", falls back to last-token range
     expect(result[1].rangeToReplace).toEqual({ start: 26, end: 27 });
+  });
+
+  it('does not use overlap range for single-token field suggestions', () => {
+    const suggestions = [makeSuggestion('event.dataset'), makeSuggestion('tags')];
+    const result = attachReplacementRanges(
+      'FROM a | FUSE linear KEY BY agent.keyword, event.dat',
+      suggestions
+    );
+
+    expect(result[0].rangeToReplace).toEqual({ start: 43, end: 52 });
+    expect(result[1].rangeToReplace).toEqual({ start: 43, end: 52 });
   });
 
   it('falls back to prefix range when no overlap exists', () => {

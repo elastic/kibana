@@ -14,6 +14,7 @@ import { getOverlapRange } from '../../../commands/definitions/utils/shared';
 const NON_WHITESPACE_REGEX = /\S/;
 const ONLY_WHITESPACE_REGEX = /^\s+$/;
 const STARTS_WITH_WORD_CHAR = /^\w/;
+const CONTAINS_WHITESPACE_REGEX = /\s/;
 
 interface LexerToken {
   text: string;
@@ -21,7 +22,7 @@ interface LexerToken {
   stop: number;
 }
 
-type PrefixClassification = 'token-based' | 'dot-field-combining' | 'fallback-required';
+type PrefixClassification = 'token-based' | 'compound-prefix' | 'fallback-required';
 
 export interface PrefixResult {
   prefix: string;
@@ -29,83 +30,34 @@ export interface PrefixResult {
   classification: PrefixClassification;
 }
 
-/** Determines the typed prefix and its replacement range using ANTLR lexer tokens. */
+/**
+ * Resolves the prefix currently under the cursor and the text range that should
+ * be replaced if a suggestion is accepted.
+ */
 export function computePrefixRange(query: string): PrefixResult {
   const tokens = getVisibleLexerTokens(query);
 
   if (tokens.length === 0) {
-    return {
-      prefix: '',
-      range: { start: query.length, end: query.length },
-      classification: 'fallback-required',
-    };
+    return createEmptyPrefixResult(query, 'fallback-required');
   }
 
   const lastToken = tokens[tokens.length - 1];
-  const { text: lastText, start: lastStart, stop: lastStop } = lastToken;
-  const lastTokenEnd = lastStop + 1;
+  const lastTokenEnd = lastToken.stop + 1;
 
   // "WHERE x IS N" → the lexer tokenizes up to "IS", leaving " N" as unrecognized text (gap = 2)
   const gap = query.length - lastTokenEnd;
 
   // the user is typing something the lexer can't parse yet (e.g. a partial keyword like "N" for "NOT NULL")
   if (gap > 0) {
-    const textAfterLastToken = query.substring(lastTokenEnd);
-    const isJustWhitespace = ONLY_WHITESPACE_REGEX.test(textAfterLastToken);
-
-    if (!isJustWhitespace) {
-      const range = getTrailingNonWhitespaceRange(query, lastTokenEnd);
-
-      return {
-        prefix: query.substring(range.start, range.end),
-        range,
-        classification: 'fallback-required',
-      };
-    }
-
-    return {
-      prefix: '',
-      range: { start: query.length, end: query.length },
-      classification: 'token-based',
-    };
+    return getPrefixResultFromUnparsedTrailingText(query, lastTokenEnd);
   }
 
   // Structural delimiters like ( ) , . = are not valid prefixes — cursor is in an empty position
-  if (!STARTS_WITH_WORD_CHAR.test(lastText[0])) {
-    if (lastText === '.') {
-      const trailingDotPrefix = getTrailingDotFieldPrefix(query, tokens);
-
-      if (trailingDotPrefix) {
-        return {
-          ...trailingDotPrefix,
-          classification: 'dot-field-combining',
-        };
-      }
-    }
-
-    return {
-      prefix: '',
-      range: { start: query.length, end: query.length },
-      classification: 'token-based',
-    };
+  if (!STARTS_WITH_WORD_CHAR.test(lastToken.text[0])) {
+    return getPrefixResultAfterDelimiter(query, tokens);
   }
 
-  // Walk backwards through adjacent dot-separated tokens (e.g. event.data.field)
-  const compoundStart = walkBackDotChain(tokens, tokens.length - 1, lastStart);
-
-  if (compoundStart < lastStart) {
-    return {
-      prefix: query.substring(compoundStart, lastTokenEnd),
-      range: { start: compoundStart, end: lastTokenEnd },
-      classification: 'dot-field-combining',
-    };
-  }
-
-  return {
-    prefix: lastText,
-    range: { start: lastStart, end: lastTokenEnd },
-    classification: 'token-based',
-  };
+  return getPrefixResultFromLastToken(query, tokens, lastToken, lastTokenEnd);
 }
 
 // =============================================
@@ -125,7 +77,7 @@ export function attachReplacementRanges(
   const prefixResult = computePrefixRange(innerText);
   const { prefix, range } = prefixResult;
   const hasExistingColumnMatch = Boolean(prefix && context?.columns.has(prefix));
-  const shouldPreferContinuationSuggestions =
+  const prefixMatchesExistingColumn =
     hasExistingColumnMatch &&
     suggestions.some((suggestion) => suggestion.requiresExistingColumnMatch);
 
@@ -137,7 +89,7 @@ export function attachReplacementRanges(
       return [];
     }
 
-    if (shouldPreferContinuationSuggestions && !requiresExistingColumnMatch) {
+    if (prefixMatchesExistingColumn && !requiresExistingColumnMatch) {
       return [];
     }
 
@@ -154,7 +106,9 @@ export function attachReplacementRanges(
       return [resolvedSuggestion];
     }
 
-    const overlapRange = getOverlapRange(innerText, suggestion.text);
+    const overlapRange = CONTAINS_WHITESPACE_REGEX.test(suggestion.text)
+      ? getOverlapRange(innerText, suggestion.text)
+      : undefined;
     const effectiveRange = overlapRange ?? { start: range.start, end: range.end };
 
     return [
@@ -209,6 +163,76 @@ function getTrailingNonWhitespaceRange(
   };
 }
 
+/** Builds an empty-prefix result anchored at the current cursor position. */
+function createEmptyPrefixResult(
+  query: string,
+  classification: PrefixClassification
+): PrefixResult {
+  return {
+    prefix: '',
+    range: { start: query.length, end: query.length },
+    classification,
+  };
+}
+
+/** Uses the lexer gap to recover partially typed text the lexer could not tokenize yet. */
+function getPrefixResultFromUnparsedTrailingText(
+  query: string,
+  lastTokenEnd: number
+): PrefixResult {
+  const textAfterLastToken = query.substring(lastTokenEnd);
+
+  if (ONLY_WHITESPACE_REGEX.test(textAfterLastToken)) {
+    return createEmptyPrefixResult(query, 'token-based');
+  }
+
+  const range = getTrailingNonWhitespaceRange(query, lastTokenEnd);
+
+  return {
+    prefix: query.substring(range.start, range.end),
+    range,
+    classification: 'fallback-required',
+  };
+}
+
+/** Handles positions after delimiters, including a trailing dot that continues a field path. */
+function getPrefixResultAfterDelimiter(query: string, tokens: LexerToken[]): PrefixResult {
+  const trailingDotPrefix = getTrailingDotFieldPrefix(query, tokens);
+
+  if (trailingDotPrefix) {
+    return {
+      ...trailingDotPrefix,
+      classification: 'compound-prefix',
+    };
+  }
+
+  return createEmptyPrefixResult(query, 'token-based');
+}
+
+/** Resolves a normal token prefix, expanding it if it belongs to a dotted field chain. */
+function getPrefixResultFromLastToken(
+  query: string,
+  tokens: LexerToken[],
+  lastToken: LexerToken,
+  lastTokenEnd: number
+): PrefixResult {
+  const compoundStart = walkBackDotChain(tokens, tokens.length - 1, lastToken.start);
+
+  if (compoundStart < lastToken.start) {
+    return {
+      prefix: query.substring(compoundStart, lastTokenEnd),
+      range: { start: compoundStart, end: lastTokenEnd },
+      classification: 'compound-prefix',
+    };
+  }
+
+  return {
+    prefix: lastToken.text,
+    range: { start: lastToken.start, end: lastTokenEnd },
+    classification: 'token-based',
+  };
+}
+
 /** Extends a trailing dot into a dotted field prefix (e.g. event.data.). */
 function getTrailingDotFieldPrefix(query: string, tokens: LexerToken[]) {
   if (tokens.length < 2) {
@@ -216,6 +240,11 @@ function getTrailingDotFieldPrefix(query: string, tokens: LexerToken[]) {
   }
 
   const dotToken = tokens[tokens.length - 1];
+
+  if (dotToken.text !== '.') {
+    return;
+  }
+
   const previousToken = tokens[tokens.length - 2];
 
   if (

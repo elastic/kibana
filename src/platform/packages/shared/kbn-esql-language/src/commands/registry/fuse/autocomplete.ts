@@ -39,17 +39,6 @@ enum FusePosition {
   WITH = 'with',
 }
 
-const COMMA_SEPARATOR = /,/;
-const WHITESPACE = /\s+/;
-
-function getTrailingKeyByFragment(innerText: string): string {
-  const segments = innerText.split(COMMA_SEPARATOR);
-  const trailingSegment = segments[segments.length - 1] ?? '';
-  const words = trailingSegment.trim().split(WHITESPACE);
-
-  return words[words.length - 1] ?? '';
-}
-
 function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePosition {
   const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
 
@@ -180,7 +169,7 @@ async function keyByAutocomplete(
     (await callbacks?.getByType?.(ESQL_STRING_TYPES, alreadyUsedFields, {
       openSuggestions: true,
     })) ?? [];
-  const prefix = getTrailingKeyByFragment(innerText);
+  const prefix = findFinalWord(innerText);
 
   if (prefix && columnExists(prefix, context)) {
     const finalSuggestions = fuseArgumentsAutocomplete(command).map((s) => ({
