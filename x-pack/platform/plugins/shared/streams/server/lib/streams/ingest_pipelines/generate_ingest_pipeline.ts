@@ -18,7 +18,9 @@ import type {
   IngestPutPipelineRequest,
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { transpileIngestPipeline } from '@kbn/streamlang';
+import { createStreamlangResolverOptions } from '../resolvers';
 import { ASSET_VERSION } from '../../../../common/constants';
 import {
   getLogsOtelPipelineProcessors,
@@ -28,7 +30,8 @@ import { getProcessingPipelineName } from './name';
 
 export async function generateIngestPipeline(
   name: string,
-  definition: Streams.all.Definition
+  definition: Streams.all.Definition,
+  esClient: ElasticsearchClient
 ): Promise<IngestPutPipelineRequest> {
   const isWiredStream = Streams.WiredStream.Definition.is(definition);
   const rootStream = getRoot(definition.name);
@@ -78,7 +81,13 @@ export async function generateIngestPipeline(
         },
       },
       ...(isWiredStream
-        ? (await transpileIngestPipeline(definition.ingest.processing)).processors
+        ? (
+            await transpileIngestPipeline(
+              definition.ingest.processing,
+              undefined,
+              createStreamlangResolverOptions(esClient)
+            )
+          ).processors
         : []),
       {
         pipeline: {
@@ -102,9 +111,14 @@ export async function generateIngestPipeline(
 }
 
 export async function generateClassicIngestPipelineBody(
-  definition: Streams.ingest.all.Definition
+  definition: Streams.ingest.all.Definition,
+  esClient: ElasticsearchClient
 ): Promise<Partial<IngestPutPipelineRequest>> {
-  const transpiledIngestPipeline = await transpileIngestPipeline(definition.ingest.processing);
+  const transpiledIngestPipeline = await transpileIngestPipeline(
+    definition.ingest.processing,
+    undefined,
+    createStreamlangResolverOptions(esClient)
+  );
   return {
     processors: transpiledIngestPipeline.processors,
     _meta: {

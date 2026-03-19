@@ -47,6 +47,7 @@ import {
   type StreamsMappingProperties,
 } from '@kbn/streams-schema/src/fields';
 import { validateStreamlang, type StreamlangDSL } from '@kbn/streamlang';
+import type { StreamlangResolverOptions } from '@kbn/streamlang/types/resolvers';
 import { mapValues, uniq, uniqBy, omit, isEmpty } from 'lodash';
 import {
   normalizeGeoPointsInObject,
@@ -54,6 +55,7 @@ import {
 } from '../../../../lib/streams/helpers/normalize_geo_points';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
+import { createStreamlangResolverOptions } from '../../../../lib/streams/resolvers';
 import { buildSimulationProcessorsWithConditionNoops } from './simulation_condition_noops';
 
 export interface ProcessingSimulationParams {
@@ -154,8 +156,16 @@ export const simulateProcessing = async ({
     };
   }
 
+  const streamlangResolverOptions: StreamlangResolverOptions =
+    createStreamlangResolverOptions(esClient);
+
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
-  const simulationData = await prepareSimulationData(params, stream, streamFields);
+  const simulationData = await prepareSimulationData(
+    params,
+    stream,
+    streamFields,
+    streamlangResolverOptions
+  );
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
   const ingestSimulationBody = prepareIngestSimulationBody(
     simulationData,
@@ -187,7 +197,8 @@ export const simulateProcessing = async ({
     simulationData.docs,
     params.body.processing,
     Streams.WiredStream.Definition.is(stream),
-    streamFields
+    streamFields,
+    streamlangResolverOptions
   );
 
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
@@ -216,7 +227,8 @@ const prepareSimulationDocs = (
 };
 
 const prepareSimulationProcessors = async (
-  processing: StreamlangDSL
+  processing: StreamlangDSL,
+  resolverOptions?: StreamlangResolverOptions
 ): Promise<IngestProcessorContainer[]> => {
   //
   /**
@@ -225,7 +237,8 @@ const prepareSimulationProcessors = async (
    * 2. Append the error message to the `_errors` field on failure
    */
   const transpiledIngestPipelineProcessors = await buildSimulationProcessorsWithConditionNoops(
-    processing
+    processing,
+    resolverOptions
   );
 
   return transpiledIngestPipelineProcessors.map((processor) => {
@@ -256,7 +269,8 @@ const prepareSimulationProcessors = async (
 const prepareSimulationData = async (
   params: ProcessingSimulationParams,
   stream: Streams.all.Definition,
-  streamFields: FieldDefinition
+  streamFields: FieldDefinition,
+  resolverOptions?: StreamlangResolverOptions
 ) => {
   const { body } = params;
   const { processing, documents } = body;
@@ -281,7 +295,7 @@ const prepareSimulationData = async (
 
   return {
     docs: prepareSimulationDocs(documents, targetStreamName, geoPointFields),
-    processors: await prepareSimulationProcessors(processing),
+    processors: await prepareSimulationProcessors(processing, resolverOptions),
   };
 };
 
@@ -515,12 +529,16 @@ const computePipelineSimulationResult = async (
   sampleDocs: Array<{ _source: FlattenRecord }>,
   processing: StreamlangDSL,
   isWiredStream: boolean,
-  streamFields: FieldDefinition
+  streamFields: FieldDefinition,
+  resolverOptions?: StreamlangResolverOptions
 ): Promise<{
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
 }> => {
-  const transpiledProcessors = await buildSimulationProcessorsWithConditionNoops(processing);
+  const transpiledProcessors = await buildSimulationProcessorsWithConditionNoops(
+    processing,
+    resolverOptions
+  );
 
   const processorsMap = initProcessorMetricsMap(transpiledProcessors);
   const conditionProcessorTags = collectConditionBlockIds(processing);

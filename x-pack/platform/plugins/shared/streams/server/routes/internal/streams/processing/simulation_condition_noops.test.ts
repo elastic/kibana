@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Condition, StreamlangDSL } from '@kbn/streamlang';
+import type { Condition, EnrichProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { conditionToPainless } from '@kbn/streamlang';
+import type { StreamlangResolverOptions } from '@kbn/streamlang/types/resolvers';
 import { buildSimulationProcessorsWithConditionNoops } from './simulation_condition_noops';
 
 describe('buildSimulationProcessorsWithConditionNoops', () => {
@@ -110,5 +111,36 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
 
     const childSetIf = processors[2]!.set?.if;
     expect(childSetIf).toBe(conditionToPainless({ and: [parentCondition, childCondition] }));
+  });
+
+  it('transpiles enrich steps when an enrich policy resolver is provided', async () => {
+    const enrichResolverOptions: StreamlangResolverOptions = {
+      enrich: async () =>
+        Promise.resolve({
+          matchField: 'source.ip',
+          enrichFields: ['city'],
+        }),
+    };
+
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          action: 'enrich',
+          policy_name: 'test-policy',
+          to: 'geo',
+        } as EnrichProcessor,
+      ],
+    };
+
+    const processors = await buildSimulationProcessorsWithConditionNoops(
+      dsl,
+      enrichResolverOptions
+    );
+
+    expect(processors).toHaveLength(1);
+    expect(processors[0]).toHaveProperty('enrich');
+    expect(processors[0]!.enrich?.policy_name).toBe('test-policy');
+    expect(processors[0]!.enrich?.field).toBe('source.ip');
+    expect(processors[0]!.enrich?.target_field).toBe('geo');
   });
 });

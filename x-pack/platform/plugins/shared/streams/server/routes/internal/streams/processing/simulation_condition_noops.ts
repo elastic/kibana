@@ -8,6 +8,7 @@
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition, StreamlangDSL, StreamlangProcessorDefinition } from '@kbn/streamlang';
 import { conditionToPainless, isConditionBlock, transpileIngestPipeline } from '@kbn/streamlang';
+import type { StreamlangResolverOptions } from '@kbn/streamlang/types/resolvers';
 
 type StreamlangStep = StreamlangDSL['steps'][number];
 
@@ -65,9 +66,11 @@ function createConditionNoopProcessor({
 async function buildSimulationProcessorsFromSteps({
   steps,
   parentCondition,
+  resolverOptions,
 }: {
   steps: StreamlangStep[];
   parentCondition?: Condition;
+  resolverOptions?: StreamlangResolverOptions;
 }): Promise<NonNullable<IngestProcessorContainer>[]> {
   const processors: NonNullable<IngestProcessorContainer>[] = [];
 
@@ -90,6 +93,7 @@ async function buildSimulationProcessorsFromSteps({
         ...(await buildSimulationProcessorsFromSteps({
           steps: nestedSteps,
           parentCondition: combinedCondition,
+          resolverOptions,
         }))
       );
 
@@ -111,10 +115,14 @@ async function buildSimulationProcessorsFromSteps({
         : processorStep;
 
     const transpiled = (
-      await transpileIngestPipeline({ steps: [stepWithCombinedWhere] } as StreamlangDSL, {
-        ignoreMalformed: true,
-        traceCustomIdentifiers: true,
-      })
+      await transpileIngestPipeline(
+        { steps: [stepWithCombinedWhere] } as StreamlangDSL,
+        {
+          ignoreMalformed: true,
+          traceCustomIdentifiers: true,
+        },
+        resolverOptions
+      )
     ).processors as NonNullable<IngestProcessorContainer>[];
 
     processors.push(...transpiled);
@@ -137,7 +145,11 @@ async function buildSimulationProcessorsFromSteps({
  * These processors are never exposed as steps in the UI; they exist only in the ES `_simulate` request.
  */
 export async function buildSimulationProcessorsWithConditionNoops(
-  processing: StreamlangDSL
+  processing: StreamlangDSL,
+  resolverOptions?: StreamlangResolverOptions
 ): Promise<NonNullable<IngestProcessorContainer>[]> {
-  return await buildSimulationProcessorsFromSteps({ steps: processing.steps });
+  return await buildSimulationProcessorsFromSteps({
+    steps: processing.steps,
+    resolverOptions,
+  });
 }
