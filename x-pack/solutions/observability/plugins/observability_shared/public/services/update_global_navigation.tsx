@@ -64,7 +64,7 @@ export function updateGlobalNavigation({
           }
           return null;
         case 'alerts_v2':
-          if (someVisible) {
+          if (someVisible && capabilities.alertingVTwo) {
             return {
               ...link,
               visibleIn: ['sideNav', 'globalSearch'],

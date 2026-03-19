@@ -681,8 +681,8 @@ export const createDefinition = (
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
         showAlertingV2:
-          (coreStart.application.capabilities.alertingVTwo as { uiEnabled?: boolean } | undefined)
-            ?.uiEnabled ?? false,
+          (coreStart.application.capabilities.alertingVTwo as { enabled?: boolean })?.enabled ??
+          false,
       })
     )
   ),

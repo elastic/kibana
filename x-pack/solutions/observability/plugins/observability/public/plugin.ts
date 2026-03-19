@@ -423,9 +423,9 @@ export class Plugin
               const isAlertingV2Enabled =
                 (
                   coreStart.application.capabilities.alertingVTwo as
-                    | { uiEnabled?: boolean }
+                    | { enabled?: boolean }
                     | undefined
-                )?.uiEnabled ?? false;
+                )?.enabled ?? false;
 
               const chatExperience$ =
                 coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
