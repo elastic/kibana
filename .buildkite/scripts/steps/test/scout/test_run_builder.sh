@@ -55,7 +55,7 @@ else
   fi
 
   AFFECTED_MODULES_FILE=""
-  if [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]]; then
+  if [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]] && [[ "${SELECTIVE_TESTING_ENABLED:-}" == "true" ]]; then
     mkdir -p .scout
     AFFECTED_MODULES_FILE=".scout/affected_modules.json"
     .buildkite/pipeline-utils/affected-packages/list_affected \
