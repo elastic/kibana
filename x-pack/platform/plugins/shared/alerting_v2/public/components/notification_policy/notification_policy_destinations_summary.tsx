@@ -79,7 +79,7 @@ export const NotificationPolicyDestinationsSummary = ({
       button={
         <EuiBadge
           color="hollow"
-          iconType="briefcase"
+          iconType="workflow"
           onClick={() => setIsPopoverOpen((value) => !value)}
           onClickAriaLabel={i18n.translate(
             'xpack.alertingV2.notificationPolicy.destinationsSummary.openPopoverAriaLabel',
