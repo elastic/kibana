@@ -457,12 +457,9 @@ export function useEsqlDataCascadeRowHeaderComponents(
                                   .map(
                                     (value) =>
                                       value ||
-                                      i18n.translate(
-                                        'discover.dataCascade.row.action.noValue',
-                                        {
-                                          defaultMessage: '(blank)',
-                                        }
-                                      )
+                                      i18n.translate('discover.dataCascade.row.action.noValue', {
+                                        defaultMessage: '(blank)',
+                                      })
                                   )
                                   .join(', ')
                               : '-'}
