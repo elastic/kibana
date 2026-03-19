@@ -59,6 +59,7 @@ export class ProposalManager {
   private pillElements = new Map<string, HTMLDivElement>();
 
   private mouseMoveDisposable: monaco.IDisposable | null = null;
+  private cursorPositionDisposable: monaco.IDisposable | null = null;
   private contentChangeDisposable: monaco.IDisposable | null = null;
   private mouseMoveRafId: ReturnType<typeof requestAnimationFrame> | null = null;
   private sortedProposals: Array<{ id: string; startLine: number; endLine: number }> = [];
@@ -109,6 +110,15 @@ export class ProposalManager {
           this.focusProposal(id);
         }
       });
+    });
+
+    this.cursorPositionDisposable = editor.onDidChangeCursorPosition((e) => {
+      if (!this.hasPendingProposals()) return;
+      const { lineNumber } = e.position;
+      const id = this.findProposalAtLine(lineNumber);
+      if (id != null && this.focusedProposalId !== id) {
+        this.focusProposal(id);
+      }
     });
 
     const model = editor.getModel();
@@ -374,6 +384,8 @@ export class ProposalManager {
       cancelAnimationFrame(this.mouseMoveRafId);
       this.mouseMoveRafId = null;
     }
+    this.cursorPositionDisposable?.dispose();
+    this.cursorPositionDisposable = null;
     this.contentChangeDisposable?.dispose();
     this.contentChangeDisposable = null;
 
@@ -413,9 +425,11 @@ export class ProposalManager {
 
     const bar = document.createElement('div');
     bar.className = 'wfDiffBulkBar';
+    bar.setAttribute('data-test-subj', 'wfDiffBulkBar');
 
     const acceptAllBtn = document.createElement('button');
     acceptAllBtn.className = 'wfDiffAcceptBtn';
+    acceptAllBtn.setAttribute('data-test-subj', 'wfDiffAcceptAllButton');
     acceptAllBtn.appendChild(parseSvgIcon(ICON_SVG_CHECK));
     const acceptAllLabel = document.createElement('span');
     acceptAllLabel.textContent = 'Accept all';
@@ -433,6 +447,7 @@ export class ProposalManager {
 
     const rejectAllBtn = document.createElement('button');
     rejectAllBtn.className = 'wfDiffDeclineBtn';
+    rejectAllBtn.setAttribute('data-test-subj', 'wfDiffDeclineAllButton');
     rejectAllBtn.appendChild(parseSvgIcon(ICON_SVG_CROSS));
     const rejectAllLabel = document.createElement('span');
     rejectAllLabel.textContent = 'Decline all';
@@ -480,7 +495,7 @@ export class ProposalManager {
     }
   }
 
-  private getSortedProposalIds(): string[] {
+  getSortedProposalIds(): string[] {
     return this.sortedProposals.map((entry) => entry.id);
   }
 
@@ -668,6 +683,7 @@ export class ProposalManager {
 
     const pill = document.createElement('div');
     pill.className = 'wfDiffButtonsPill';
+    pill.setAttribute('data-test-subj', 'wfDiffProposalPill');
     pill.style.display = 'none';
 
     const navSection = document.createElement('div');
@@ -675,6 +691,7 @@ export class ProposalManager {
 
     const upButton = document.createElement('button');
     upButton.className = 'wfDiffNavBtn';
+    upButton.setAttribute('data-test-subj', 'wfDiffNavUpButton');
     upButton.appendChild(parseSvgIcon(ICON_SVG_ARROW_UP));
     upButton.addEventListener('mousedown', (e) => e.stopPropagation());
     upButton.addEventListener('click', (e) => {
@@ -691,6 +708,7 @@ export class ProposalManager {
 
     const downButton = document.createElement('button');
     downButton.className = 'wfDiffNavBtn';
+    downButton.setAttribute('data-test-subj', 'wfDiffNavDownButton');
     downButton.appendChild(parseSvgIcon(ICON_SVG_ARROW_DOWN));
     downButton.addEventListener('mousedown', (e) => e.stopPropagation());
     downButton.addEventListener('click', (e) => {
@@ -704,6 +722,7 @@ export class ProposalManager {
 
     const acceptButton = document.createElement('button');
     acceptButton.className = 'wfDiffAcceptBtn';
+    acceptButton.setAttribute('data-test-subj', 'wfDiffAcceptButton');
     acceptButton.appendChild(parseSvgIcon(ICON_SVG_CHECK));
     const acceptLabel = document.createElement('span');
     acceptLabel.textContent = 'Accept';
@@ -721,6 +740,7 @@ export class ProposalManager {
 
     const declineButton = document.createElement('button');
     declineButton.className = 'wfDiffDeclineBtn';
+    declineButton.setAttribute('data-test-subj', 'wfDiffDeclineButton');
     declineButton.appendChild(parseSvgIcon(ICON_SVG_CROSS));
     const declineLabel = document.createElement('span');
     declineLabel.textContent = 'Decline';

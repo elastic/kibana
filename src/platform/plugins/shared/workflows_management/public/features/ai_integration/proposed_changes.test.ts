@@ -82,6 +82,7 @@ const createMockEditor = () => {
     createDecorationsCollection: jest.fn().mockReturnValue(decorationsCollection),
     deltaDecorations: jest.fn().mockReturnValue([]),
     onMouseMove: jest.fn().mockReturnValue({ dispose: jest.fn() }),
+    onDidChangeCursorPosition: jest.fn().mockReturnValue({ dispose: jest.fn() }),
     /** Simulate an external model change (e.g. undo) by firing content change listeners */
     _simulateExternalContentChange: () => {
       contentChangeListeners.forEach((l) => l());
@@ -537,6 +538,7 @@ describe('ProposalManager', () => {
         createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
         deltaDecorations: jest.fn(() => []),
         onMouseMove: jest.fn(() => ({ dispose: jest.fn() })),
+        onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
       } as any;
     };
 

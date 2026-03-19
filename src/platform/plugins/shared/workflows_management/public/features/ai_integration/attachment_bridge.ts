@@ -186,6 +186,24 @@ export class AttachmentBridge {
     });
   }
 
+  /**
+   * Inject a simulated YAML change for testing purposes. Creates a
+   * workflow:yaml_changed payload from the current model content and
+   * processes it through the same pipeline as real LLM tool responses.
+   */
+  injectYamlChange(afterYaml: string): void {
+    const editor = this.editorRef?.current;
+    const model = editor?.getModel();
+    if (!model) return;
+
+    this.handleYamlChanged({
+      proposalId: `simulated-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      beforeYaml: model.getValue(),
+      afterYaml,
+      workflowId: this.workflowId,
+    });
+  }
+
   stop(): void {
     this.subscription?.unsubscribe();
     this.subscription = null;
