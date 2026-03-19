@@ -10,6 +10,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { ALERT_RULE_NAME, EVENT_KIND } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash';
+import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
 
 const DEFAULT_DOCUMENT_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.right.header.headerTitle',
@@ -60,13 +61,13 @@ export const getDocumentTitle = (hit: DataTableRecord): string => {
   const eventKind = getFieldValue(hit, EVENT_KIND) as string | undefined;
 
   // Security alert (signal): use rule name
-  if (eventKind === 'signal') {
+  if (eventKind === EventKind.signal) {
     const ruleName = getFieldValue(hit, ALERT_RULE_NAME) as string | undefined;
     return ruleName ?? DEFAULT_DOCUMENT_TITLE;
   }
 
   // Event with known category: use mapped field value
-  if (eventKind === 'event') {
+  if (eventKind === EventKind.event) {
     const eventCategory = getFieldValue(hit, 'event.category') as string | undefined;
     if (eventCategory) {
       const fieldName = EVENT_CATEGORY_TO_FIELD[eventCategory];
@@ -78,7 +79,7 @@ export const getDocumentTitle = (hit: DataTableRecord): string => {
   }
 
   // External alert
-  if (eventKind === 'alert') {
+  if (eventKind === EventKind.alert) {
     return EXTERNAL_ALERT_TITLE;
   }
 
