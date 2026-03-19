@@ -73,12 +73,6 @@ export const MainNavigation = () => {
     permissions.writeLiveQueries ||
     (permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks));
 
-  const isSubRoute = useMemo(() => {
-    const segments = location.pathname.split('/').filter(Boolean);
-
-    return segments.length > 1;
-  }, [location.pathname]);
-
   if (isHistoryEnabled) {
     const topBar = (
       <div css={topBarCss}>
@@ -106,10 +100,6 @@ export const MainNavigation = () => {
         </EuiFlexGroup>
       </div>
     );
-
-    if (isSubRoute) {
-      return topBar;
-    }
 
     return (
       <>
