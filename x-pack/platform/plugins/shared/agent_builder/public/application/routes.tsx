@@ -8,11 +8,11 @@
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useMemo } from 'react';
 
+import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { AppLayout } from './components/layout/app_layout';
 import { RootRedirect } from './components/redirects/root_redirect';
 import { LegacyConversationRedirect } from './components/redirects/legacy_conversation_redirect';
 import { allRoutes } from './route_config';
-import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useExperimentalFeatures } from './hooks/use_experimental_features';
 import { useKibana } from './hooks/use_kibana';
 
