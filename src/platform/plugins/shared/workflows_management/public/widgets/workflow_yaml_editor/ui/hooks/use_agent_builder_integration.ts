@@ -96,24 +96,22 @@ export const useAgentBuilderIntegration = ({
     });
     attachmentBridgeRef.current = bridge;
 
-    if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).__wfTestBridge = {
-        injectYamlChange: (afterYaml: string) => bridge.injectYamlChange(afterYaml),
-        getEditorValue: () => editorRef.current?.getModel()?.getValue() ?? '',
-        revealNextProposal: () => {
-          const sorted = manager.getSortedProposalIds();
-          const proposal =
-            sorted.length > 0
-              ? manager.getPendingProposals().find((p) => p.proposalId === sorted[0])
-              : undefined;
-          if (proposal && editorRef.current) {
-            editorRef.current.setPosition({ lineNumber: proposal.startLine, column: 1 });
-            editorRef.current.revealLineInCenter(proposal.startLine);
-          }
-        },
-      };
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__wfTestBridge = {
+      injectYamlChange: (afterYaml: string) => bridge.injectYamlChange(afterYaml),
+      getEditorValue: () => editorRef.current?.getModel()?.getValue() ?? '',
+      revealNextProposal: () => {
+        const sorted = manager.getSortedProposalIds();
+        const proposal =
+          sorted.length > 0
+            ? manager.getPendingProposals().find((p) => p.proposalId === sorted[0])
+            : undefined;
+        if (proposal && editorRef.current) {
+          editorRef.current.setPosition({ lineNumber: proposal.startLine, column: 1 });
+          editorRef.current.revealLineInCenter(proposal.startLine);
+        }
+      },
+    };
 
     const buildAttachment = (yaml: string) =>
       buildWorkflowAttachment({
@@ -168,10 +166,8 @@ export const useAgentBuilderIntegration = ({
       unsubAllResolved();
       tracker.clearAll();
       trackerRef.current = null;
-      if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (window as any).__wfTestBridge;
-      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).__wfTestBridge;
     };
   }, [isEditorMounted, editorRef, agentBuilder, attachmentId, workflowId]);
 
