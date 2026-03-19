@@ -2307,29 +2307,29 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@5.23.0", "@elastic/apm-rum-core@^5.23.0":
-  version "5.23.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.23.0.tgz#45f463afc14272de83af3a41e369a677b54334b6"
-  integrity sha512-kQnKwf6EaHfNvOrL66SOJuoAp8xuCdqAGb/bnxiKsFu1DKYOglJiW5Su4wSjQp82rTP7Vt2X1RZbu+7lURLX9Q==
+"@elastic/apm-rum-core@5.25.1", "@elastic/apm-rum-core@^5.25.1":
+  version "5.25.1"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.25.1.tgz#518b0e4b2c9b73f9457cfbe911ac1938ed53a32f"
+  integrity sha512-XfdPHc3Tj/L2uI12H+8ofh02SdCJQV5favGeWc6zL16S92hKpLdHWBF29JNH8hz+KpXOYzgkWFa74vqSe7q+QA==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@2.0.6":
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-2.0.6.tgz#9e9d06cbd9c6ad0d9f65a3b6d2bcaccd75211075"
-  integrity sha512-aOk6Dt8fuy7iBlEmzyi7DN0XO+ucr0SjHZdxZmLL/o2O4dOvvBdfuwEBPxFKI6QbNgxb2ZS4QRMGHqGu7bgmhA==
+"@elastic/apm-rum-react@2.0.9":
+  version "2.0.9"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-2.0.9.tgz#d700c3ae1e287bbaabb01d476be598f16c4c60c9"
+  integrity sha512-5WbyeCNR0Xbnv+4c+iJgoQmocPRv2cGLm2Hwi5lFL8bzegHVDvbP8gultY+QN4hGh2paMQR1qNcOLdbXM92lGw==
   dependencies:
-    "@elastic/apm-rum" "^5.17.0"
+    "@elastic/apm-rum" "^5.17.3"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@5.17.0", "@elastic/apm-rum@^5.17.0":
-  version "5.17.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.17.0.tgz#5f1927f28e1b45cac53c504457e5be76d37f0f79"
-  integrity sha512-e1qz79MQfSBUTlsKcAGbCyn21iARSJA6t300BGATIn+h41EMhFTgKGLT+Nk3kvQ548mx596FrOQsHLg6E/OmeQ==
+"@elastic/apm-rum@5.17.3", "@elastic/apm-rum@^5.17.3":
+  version "5.17.3"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.17.3.tgz#29de4189c9e07b067c59e5e34882cedfce940e42"
+  integrity sha512-6DrYDbLCh9Oa52Q3Dfy/ho2wilmrF4rLnVyWKeLq3a049Mxm7aVQ4jN9Y9yS66d9OpvSTGgPNDmSaP4bTXBdZQ==
   dependencies:
-    "@elastic/apm-rum-core" "^5.23.0"
+    "@elastic/apm-rum-core" "^5.25.1"
 
 "@elastic/app-search-javascript@^8.1.2":
   version "8.1.2"
