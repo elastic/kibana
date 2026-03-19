@@ -17,12 +17,6 @@
       "tags": ["tag"],
       "severity": "low",
       "risk_score": 21
-    },
-    {
-      "rule_id": "sample-deprecated-rule-id",
-      "version": 1,
-      "name": "Sample deprecated rule",
-      "deprecated": true
     }
   ]
 }
