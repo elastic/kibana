@@ -25,7 +25,7 @@ steps:
       JOURNEYS_GROUP: streams
       PERFORMANCE_ENABLE_TELEMETRY: true
     agents:
-      queue: kb-static-ubuntu
+      queue: kb-static-scalability-2
     depends_on: build
     key: tests
     timeout_in_minutes: 180
