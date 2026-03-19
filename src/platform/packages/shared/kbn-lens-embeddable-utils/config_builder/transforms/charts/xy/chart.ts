@@ -184,7 +184,7 @@ export function buildVisualizationAPI(
     type: 'xy',
     ...convertLegendToAPIFormat(config.legend),
     ...convertFittingToAPIFormat(config),
-    ...convertAxisSettingsToAPIFormat(config),
+    ...convertAxisSettingsToAPIFormat(config, layers),
     ...(decorations ? { decorations } : {}),
     layers: buildXYLayerAPI(config, layers, adHocDataViews, references, internalReferences),
   };
@@ -247,8 +247,25 @@ function convertXExtent(extent: AxisExtentConfig | undefined): {
   return {};
 }
 
-function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axis'> | {} {
+function convertAxisSettingsToAPIFormat(
+  config: XYLensState,
+  layers: Record<string, DataSourceStateLayer>
+): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
+
+  let xAxisScale: string | undefined;
+  const firstLayer = config.layers[0];
+  const dataSourceLayer = layers[firstLayer.layerId];
+  if (isTextBasedLayer(dataSourceLayer) && isLensStateDataLayer(firstLayer)) {
+    const xColumn = dataSourceLayer.columns.find((c) => c.columnId === firstLayer.xAccessor);
+    if (xColumn?.meta?.type === 'date') {
+      xAxisScale = 'temporal';
+    } else if (xColumn?.meta?.type === 'number') {
+      xAxisScale = 'linear';
+    } else {
+      xAxisScale = 'ordinal';
+    }
+  }
 
   const xAxis: XAxisType = stripUndefined({
     title:
@@ -277,6 +294,7 @@ function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axi
             ([_, value]) => value === config.labelsOrientation?.x
           )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined)
         : undefined,
+    scale: xAxisScale,
   });
   if (Object.keys(xAxis).length) {
     axis.x = xAxis;
