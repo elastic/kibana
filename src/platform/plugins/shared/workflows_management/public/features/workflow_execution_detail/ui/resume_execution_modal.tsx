@@ -21,7 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -50,7 +50,15 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   const modalTitleId = useGeneratedHtmlId();
 
   const [inputsJson, setInputsJson] = useState<string>('{}');
-  const [isJsonValid, setIsJsonValid] = useState<boolean>(true);
+
+  const isJsonValid = useMemo(() => {
+    try {
+      JSON.parse(inputsJson);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [inputsJson]);
 
   const jsonSchema = useMemo(() => z.toJSONSchema(DEFAULT_SCHEMA, { target: 'draft-7' }), []);
 
@@ -80,15 +88,6 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
     },
     [jsonSchema]
   );
-
-  useEffect(() => {
-    try {
-      JSON.parse(inputsJson);
-      setIsJsonValid(true);
-    } catch {
-      setIsJsonValid(false);
-    }
-  }, [inputsJson]);
 
   const handleInputChange = useCallback((value: string) => {
     setInputsJson(value);
