@@ -24,9 +24,35 @@ export class EnterSwitchNodeImpl implements NodeImplementation {
 
   public async run(): Promise<void> {
     this.stepExecutionRuntime.startStep();
+    const successors = this.getValidatedSuccessors();
+    const renderedExpression = this.evaluateExpression();
+    const caseBranches = this.getCaseBranches(successors);
+    const matchingCase = this.findMatchingCase(caseBranches, renderedExpression);
 
+    if (matchingCase) {
+      this.workflowContextLogger.logDebug(
+        `Switch expression "${this.node.configuration.expression}" evaluated to "${renderedExpression}" for step ${this.node.stepId}. Matched case ${matchingCase.index}.`
+      );
+      this.setStepStateAndNavigate(
+        { matchedValue: renderedExpression, matchedIndex: matchingCase.index },
+        matchingCase.id
+      );
+      return;
+    }
+
+    const defaultBranch = this.getDefaultBranch(successors);
+    if (defaultBranch) {
+      this.setStepStateAndNavigate({ matchedValue: undefined, matchedIndex: -1 }, defaultBranch.id);
+      return;
+    }
+    this.setStepStateAndNavigate(
+      { matchedValue: undefined, matchedIndex: -1 },
+      this.node.exitNodeId
+    );
+  }
+
+  private getValidatedSuccessors(): ReturnType<WorkflowGraph['getDirectSuccessors']> {
     const successors = this.workflowGraph.getDirectSuccessors(this.node.id);
-
     const allowedTypes = new Set(['enter-case-branch', 'enter-default-branch']);
     const invalidSuccessors = successors.filter((s: { type: string }) => !allowedTypes.has(s.type));
     if (invalidSuccessors.length > 0) {
@@ -38,70 +64,56 @@ export class EnterSwitchNodeImpl implements NodeImplementation {
           .join(', ')}.`
       );
     }
+    return successors;
+  }
 
+  private evaluateExpression(): string {
     const { expression } = this.node.configuration;
     const renderedExpression =
       this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(expression);
-
     this.stepExecutionRuntime.setInput({
       rawExpression: expression,
       expression: renderedExpression,
     });
+    return renderedExpression;
+  }
 
-    const caseBranches = successors
+  private getCaseBranches(
+    successors: ReturnType<WorkflowGraph['getDirectSuccessors']>
+  ): EnterCaseBranchNode[] {
+    return successors
       .filter((s: { type: string }) => s.type === 'enter-case-branch')
       .sort(
         (a: EnterCaseBranchNode, b: EnterCaseBranchNode) => a.index - b.index
       ) as EnterCaseBranchNode[];
+  }
 
-    const matchingCase = caseBranches.find((c) => {
+  private findMatchingCase(
+    caseBranches: EnterCaseBranchNode[],
+    renderedExpression: string
+  ): EnterCaseBranchNode | undefined {
+    return caseBranches.find((c) => {
       const renderedMatch =
         typeof c.match === 'string'
           ? this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(c.match)
           : c.match;
       return String(renderedMatch) === String(renderedExpression);
     });
+  }
 
-    if (matchingCase) {
-      const renderedMatchedValue =
-        typeof matchingCase.match === 'string'
-          ? this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-              matchingCase.match
-            )
-          : matchingCase.match;
-      this.workflowContextLogger.logDebug(
-        `Switch expression "${expression}" evaluated to "${renderedExpression}" for step ${this.node.stepId}. Matched case "${renderedMatchedValue}" (raw: "${matchingCase.match}").`
-      );
-      this.stepExecutionRuntime.setCurrentStepState({
-        matchedValue: matchingCase.match,
-        matchedIndex: matchingCase.index,
-      });
-      this.wfExecutionRuntimeManager.navigateToNode(matchingCase.id);
-      return;
-    }
+  private getDefaultBranch(
+    successors: ReturnType<WorkflowGraph['getDirectSuccessors']>
+  ): { id: string } | undefined {
+    return successors.find((s: { type: string }) => s.type === 'enter-default-branch') as
+      | { id: string }
+      | undefined;
+  }
 
-    const defaultBranch = successors.find(
-      (s: { type: string }) => s.type === 'enter-default-branch'
-    );
-    if (defaultBranch) {
-      this.workflowContextLogger.logDebug(
-        `Switch expression "${expression}" evaluated to "${renderedExpression}" for step ${this.node.stepId}. No case matched. Going to default branch.`
-      );
-      this.stepExecutionRuntime.setCurrentStepState({
-        matchedValue: undefined,
-        matchedIndex: -1,
-      });
-      this.wfExecutionRuntimeManager.navigateToNode(defaultBranch.id);
-      return;
-    }
-
-    this.workflowContextLogger.logDebug(
-      `Switch expression "${expression}" evaluated to "${renderedExpression}" for step ${this.node.stepId}. No case matched and no default branch. Exiting switch.`
-    );
-    this.stepExecutionRuntime.setCurrentStepState({
-      matchedValue: undefined,
-      matchedIndex: -1,
-    });
-    this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
+  private setStepStateAndNavigate(
+    state: { matchedValue: unknown; matchedIndex: number },
+    targetNodeId: string
+  ): void {
+    this.stepExecutionRuntime.setCurrentStepState(state);
+    this.wfExecutionRuntimeManager.navigateToNode(targetNodeId);
   }
 }

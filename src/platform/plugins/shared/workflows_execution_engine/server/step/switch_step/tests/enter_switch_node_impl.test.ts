@@ -230,13 +230,6 @@ describe('EnterSwitchNodeImpl', () => {
         matchedIndex: -1,
       });
     });
-
-    it('should log debug message for default branch', async () => {
-      await impl.run();
-      expect(workflowContextLoggerMock.logDebug).toHaveBeenCalledWith(
-        expect.stringContaining('No case matched. Going to default branch')
-      );
-    });
   });
 
   describe('no match and no default', () => {
@@ -269,13 +262,6 @@ describe('EnterSwitchNodeImpl', () => {
     it('should navigate to exit node when no case matches and no default', async () => {
       await impl.run();
       expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('exitSwitch_testStep');
-    });
-
-    it('should log debug message for exiting switch', async () => {
-      await impl.run();
-      expect(workflowContextLoggerMock.logDebug).toHaveBeenCalledWith(
-        expect.stringContaining('No case matched and no default branch. Exiting switch')
-      );
     });
   });
 
