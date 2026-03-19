@@ -37,6 +37,12 @@ const dividerCss = ({ euiTheme }: UseEuiTheme) => ({
   borderLeft: euiTheme.border.thin,
 });
 
+const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
+  padding: `0 ${euiTheme.size.l}`,
+  flex: 1,
+  minWidth: 0,
+});
+
 const PackDetailsPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
@@ -66,17 +72,22 @@ const PackDetailsPageComponent = () => {
     [data]
   );
 
+  const backLink = useMemo(
+    () => (
+      <EuiButtonEmpty iconType="arrowLeft" {...packsListProps} flush="left" size="xs">
+        <FormattedMessage
+          id="xpack.osquery.packDetails.viewAllPackListTitle"
+          defaultMessage="View all packs"
+        />
+      </EuiButtonEmpty>
+    ),
+    [packsListProps]
+  );
+
   const LeftColumn = useMemo(
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...packsListProps} flush="left" size="xs">
-            <FormattedMessage
-              id="xpack.osquery.packDetails.viewAllPackListTitle"
-              defaultMessage="View all packs"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        <EuiFlexItem>{backLink}</EuiFlexItem>
         <EuiFlexItem>
           <EuiText>
             <h1>
@@ -101,7 +112,7 @@ const PackDetailsPageComponent = () => {
         )}
       </EuiFlexGroup>
     ),
-    [data?.description, data?.name, packsListProps]
+    [backLink, data?.description, data?.name]
   );
 
   const RightColumn = useMemo(
@@ -168,6 +179,45 @@ const PackDetailsPageComponent = () => {
       permissions,
     ]
   );
+
+  if (queryHistoryRework) {
+    return (
+      <div css={fullWidthContentCss}>
+        <EuiSpacer size="l" />
+        {backLink}
+        <EuiSpacer size="m" />
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <h1>
+                <FormattedMessage
+                  id="xpack.osquery.packDetails.pageTitle"
+                  defaultMessage="{queryName} details"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    queryName: data?.name,
+                  }}
+                />
+              </h1>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{RightColumn}</EuiFlexItem>
+        </EuiFlexGroup>
+        {data?.description && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText color="subdued" size="s">
+              {data.description}
+            </EuiText>
+          </>
+        )}
+        <EuiSpacer size="l" />
+        {data && (
+          <PackQueriesStatusTable agentIds={agentIds} packName={data.name} data={queriesArray} />
+        )}
+      </div>
+    );
+  }
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>

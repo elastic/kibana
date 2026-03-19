@@ -120,7 +120,7 @@ const PackName = React.memo(PackNameComponent);
 const PacksTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { push } = useHistory();
-  const newPackLinkProps = useRouterNavigate('packs/new');
+  const newPackLinkProps = useRouterNavigate('packs/add');
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = usePersistedPageSize();
