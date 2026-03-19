@@ -30,7 +30,7 @@ export type CreateWorkflowInsightRequestBodyInput = z.input<
 export type CreateWorkflowInsightResponse = z.infer<typeof CreateWorkflowInsightResponse>;
 export const CreateWorkflowInsightResponse = z.object({
   executionId: z.string(),
-  conversationId: z.string(),
+  conversationId: z.string().optional(),
 });
 export type GetPendingWorkflowInsightsRequestQuery = z.infer<
   typeof GetPendingWorkflowInsightsRequestQuery
@@ -48,7 +48,7 @@ export const GetPendingWorkflowInsightsResponse = z.object({
     z.object({
       executionId: z.string(),
       status: z.string(),
-      conversationId: z.string(),
+      conversationId: z.string().optional(),
       insightType: z.string(),
       '@timestamp': z.string(),
     })

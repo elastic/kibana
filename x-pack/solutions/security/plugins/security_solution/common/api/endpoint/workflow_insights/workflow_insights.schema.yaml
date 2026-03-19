@@ -129,7 +129,6 @@ paths:
                 type: object
                 required:
                   - executionId
-                  - conversationId
                 properties:
                   executionId:
                     type: string
@@ -286,7 +285,6 @@ paths:
                       required:
                         - executionId
                         - status
-                        - conversationId
                         - insightType
                         - '@timestamp'
                       properties:

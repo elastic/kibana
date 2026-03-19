@@ -62,7 +62,7 @@ const createInsightsRouteHandler = (
     context,
     request,
     response
-  ): Promise<IKibanaResponse<{ executionId: string; conversationId: string }>> => {
+  ): Promise<IKibanaResponse<{ executionId: string; conversationId?: string }>> => {
     const { automaticTroubleshootingSkill } = endpointContext.experimentalFeatures;
 
     if (!automaticTroubleshootingSkill) {
@@ -89,7 +89,7 @@ const createInsightsRouteHandler = (
         return response.ok({
           body: {
             executionId: existing.executionId,
-            conversationId: existing.agentParams.conversationId ?? '',
+            conversationId: existing.agentParams.conversationId,
           },
         });
       }
