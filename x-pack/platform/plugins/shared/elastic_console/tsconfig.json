@@ -28,6 +28,7 @@
     "@kbn/dashboard-agent-common",
     "@kbn/lens-embeddable-utils",
     "@kbn/core-feature-flags-server",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/lock-manager"
   ]
 }

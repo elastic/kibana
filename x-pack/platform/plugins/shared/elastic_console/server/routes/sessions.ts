@@ -21,28 +21,95 @@ import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachmentData, AttachmentPanel } from '@kbn/dashboard-agent-common';
 import { isLensAttachmentPanel, isGenericAttachmentPanel } from '@kbn/dashboard-agent-common';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import {
+  LockManagerService,
+  isLockAcquisitionError,
+} from '@kbn/lock-manager';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
 import { createSessionStorage } from '../lib/session_storage';
 import { isElasticConsoleEnabled } from './is_enabled';
 
 /**
- * Per-session mutex to serialize tool executions.
- * Prevents parallel tool calls from overwriting each other's attachment state.
+ * Retry a callback that uses `LockManagerService.withLock`.
+ * If the lock is already held, waits briefly and retries.
  */
-const sessionLocks = new Map<string, Promise<unknown>>();
-
-const withSessionLock = async <T>(sessionId: string, fn: () => Promise<T>): Promise<T> => {
-  const previous = sessionLocks.get(sessionId) ?? Promise.resolve();
-  const current = previous.then(fn, fn);
-  sessionLocks.set(sessionId, current);
-  try {
-    return await current;
-  } finally {
-    // Clean up if this is still the latest promise in the chain
-    if (sessionLocks.get(sessionId) === current) {
-      sessionLocks.delete(sessionId);
+const withRetryLock = async <T>(
+  lockManager: LockManagerService,
+  lockId: string,
+  fn: () => Promise<T>,
+  { maxRetries = 10, retryDelayMs = 500 }: { maxRetries?: number; retryDelayMs?: number } = {}
+): Promise<T> => {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await lockManager.withLock(lockId, fn);
+    } catch (error) {
+      if (isLockAcquisitionError(error) && attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+        continue;
+      }
+      throw error;
     }
   }
+  // unreachable, but satisfies TS
+  throw new Error(`Failed to acquire lock "${lockId}" after ${maxRetries} retries`);
+};
+
+/**
+ * Merge attachment changes from a tool execution into the current session state.
+ *
+ * When multiple tool calls run in parallel, each starts with a snapshot of the
+ * session's attachments and may add, update, or delete entries independently.
+ * At write-back time we re-read the freshest session state and merge:
+ *
+ * - New attachments (IDs that didn't exist in the pre-execution snapshot) are added.
+ * - Attachments that existed before AND in the tool result are taken from the tool
+ *   result (the tool may have updated them).
+ * - Attachments that exist in the fresh session state but were NOT in the
+ *   pre-execution snapshot (i.e. created by a sibling parallel call) are preserved.
+ * - Attachments that were in the pre-execution snapshot but are missing from the
+ *   tool result were deleted by the tool — they stay deleted.
+ */
+const mergeAttachments = (
+  preExecutionAttachments: VersionedAttachment[],
+  toolResultAttachments: VersionedAttachment[],
+  freshSessionAttachments: VersionedAttachment[]
+): VersionedAttachment[] => {
+  const preExecIds = new Set(preExecutionAttachments.map((a) => a.id));
+  const toolResultById = new Map(toolResultAttachments.map((a) => [a.id, a]));
+  const deletedByTool = new Set(
+    preExecutionAttachments
+      .filter((a) => !toolResultById.has(a.id))
+      .map((a) => a.id)
+  );
+
+  const merged: VersionedAttachment[] = [];
+  const seen = new Set<string>();
+
+  // Walk the fresh session state: keep attachments from sibling calls,
+  // apply tool's version for attachments it touched, drop deletions.
+  for (const att of freshSessionAttachments) {
+    if (deletedByTool.has(att.id)) {
+      continue; // tool deleted this attachment
+    }
+    const toolVersion = toolResultById.get(att.id);
+    if (toolVersion) {
+      // Tool had this attachment — use the tool's (possibly updated) version
+      merged.push(toolVersion);
+    } else {
+      // Attachment created by a sibling parallel call — preserve it
+      merged.push(att);
+    }
+    seen.add(att.id);
+  }
+
+  // Add new attachments created by this tool that aren't in the fresh session yet
+  for (const att of toolResultAttachments) {
+    if (!seen.has(att.id)) {
+      merged.push(att);
+    }
+  }
+
+  return merged;
 };
 
 const getSpace = (basePath: string): string => {
@@ -132,8 +199,9 @@ const convertAttachmentPanelToStoredPanel = (
         }>) {
           lensReferences.push(ref);
         }
-        // Remove references from attributes — they go at the SO level
-        delete attrs.references;
+        // Keep references in attributes — the Lens embeddable expects them
+        // during deserialization (injectLensReferences maps over them).
+        // They are also stored prefixed at the SO level for the dashboard.
       }
 
       return {
@@ -246,6 +314,8 @@ export const registerSessionRoutes = ({
   coreSetup: CoreSetup<ElasticConsoleStartDependencies, ElasticConsolePluginStart>;
   logger: Logger;
 }) => {
+  const lockManager = new LockManagerService(coreSetup, logger);
+
   // Create a new session
   router.post(
     {
@@ -454,55 +524,70 @@ export const registerSessionRoutes = ({
           return response.notFound();
         }
 
-        // Serialize tool executions per session to prevent parallel calls
-        // from overwriting each other's attachment state.
-        return await withSessionLock(request.params.sessionId, async () => {
-          const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
-          const storage = createSessionStorage({ esClient, logger });
+        const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
+        const storage = createSessionStorage({ esClient, logger });
 
-          const basePath = coreStart.http.basePath.get(request);
-          const space = getSpace(basePath);
-          const username = await getCurrentUser(coreStart, request);
+        const basePath = coreStart.http.basePath.get(request);
+        const space = getSpace(basePath);
+        const username = await getCurrentUser(coreStart, request);
 
-          // Load session
-          const sessionResult = await storage.get({ id: request.params.sessionId });
+        // Load session snapshot before execution
+        const sessionResult = await storage.get({ id: request.params.sessionId });
 
-          if (
-            !sessionResult.found ||
-            sessionResult._source?.space !== space ||
-            sessionResult._source?.user_name !== username
-          ) {
-            return response.notFound();
+        if (
+          !sessionResult.found ||
+          sessionResult._source?.space !== space ||
+          sessionResult._source?.user_name !== username
+        ) {
+          return response.notFound();
+        }
+
+        const preExecutionAttachments = (sessionResult._source?.attachments ??
+          []) as VersionedAttachment[];
+
+        // Execute tool with the current session attachments
+        const result = await agentBuilder.tools.executeSkillToolWithAttachments({
+          request,
+          skillId: request.body.skill_id,
+          toolId: request.body.tool_id,
+          toolParams: request.body.tool_params,
+          attachments: preExecutionAttachments,
+        });
+
+        // Serialize the write-back phase with a distributed lock so that
+        // parallel tool calls don't overwrite each other's attachment additions.
+        // Inside the lock: re-read → merge → write (atomic from other writers' perspective).
+        const sessionId = request.params.sessionId;
+        await withRetryLock(
+          lockManager,
+          `elastic_console/session/${sessionId}/write_back`,
+          async () => {
+            const freshResult = await storage.get({ id: sessionId });
+            const freshAttachments = (freshResult._source?.attachments ??
+              []) as VersionedAttachment[];
+
+            const mergedAttachments = mergeAttachments(
+              preExecutionAttachments,
+              result.attachments,
+              freshAttachments
+            );
+
+            await storage.index({
+              id: sessionId,
+              document: {
+                ...(freshResult._source ?? sessionResult._source),
+                attachments: mergedAttachments as unknown[],
+                updated_at: new Date().toISOString(),
+              },
+            });
           }
+        );
 
-          const sessionAttachments = (sessionResult._source?.attachments ??
-            []) as VersionedAttachment[];
-
-          // Execute tool with session attachments
-          const result = await agentBuilder.tools.executeSkillToolWithAttachments({
-            request,
-            skillId: request.body.skill_id,
-            toolId: request.body.tool_id,
-            toolParams: request.body.tool_params,
-            attachments: sessionAttachments,
-          });
-
-          // Persist updated attachments back to the session
-          await storage.index({
-            id: request.params.sessionId,
-            document: {
-              ...sessionResult._source,
-              attachments: result.attachments as unknown[],
-              updated_at: new Date().toISOString(),
-            },
-          });
-
-          return response.ok({
-            body: {
-              results: result.results,
-              attachments: summarizeAttachments(result.attachments),
-            },
-          });
+        return response.ok({
+          body: {
+            results: result.results,
+            attachments: summarizeAttachments(result.attachments),
+          },
         });
       } catch (error) {
         logger.error(`Execute session tool error: ${error.message}`);
