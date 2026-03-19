@@ -203,6 +203,7 @@ describe('oauthCallbackRoute', () => {
       spaceId: 'default',
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
     });
 
     const [, handler] = registerRoute();
@@ -231,6 +232,7 @@ describe('oauthCallbackRoute', () => {
       spaceId: 'default',
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
     });
 
     const [, handler] = registerRoute();
@@ -297,6 +299,7 @@ describe('oauthCallbackRoute', () => {
       spaceId: 'default',
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
     };
     mockOAuthStateClientInstance.get.mockResolvedValue(mockOAuthState);
 
@@ -390,6 +393,7 @@ describe('oauthCallbackRoute', () => {
       spaceId: 'default',
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
     };
     mockOAuthStateClientInstance.get.mockResolvedValue(mockOAuthState);
 
@@ -436,6 +440,7 @@ describe('oauthCallbackRoute', () => {
       spaceId: 'default',
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
     };
     mockOAuthStateClientInstance.get.mockResolvedValue(mockOAuthState);
 
@@ -462,6 +467,67 @@ describe('oauthCallbackRoute', () => {
       headers: {
         location:
           'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&error=OAuth+authorization+failed',
+      },
+    });
+  });
+
+  it('rejects callback when createdBy does not match the current user', async () => {
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id',
+      state: 'valid-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
+      spaceId: 'default',
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'different-profile-uid',
+    });
+
+    const [, handler] = registerRoute();
+    const context = createMockContext();
+    const req = httpServerMock.createKibanaRequest({
+      query: { code: 'auth-code', state: 'valid-state' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(mockRequestOAuthAuthorizationCodeToken).not.toHaveBeenCalled();
+    expect(mockConnectorTokenClientInstance.createWithRefreshToken).not.toHaveBeenCalled();
+    expect(res.redirected).toHaveBeenCalledWith({
+      headers: {
+        location: expect.stringContaining('oauth_authorization=error'),
+      },
+    });
+  });
+
+  it('rejects callback when oauth_state has no createdBy', async () => {
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id',
+      state: 'valid-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
+      spaceId: 'default',
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+    });
+
+    const [, handler] = registerRoute();
+    const context = createMockContext();
+    const req = httpServerMock.createKibanaRequest({
+      query: { code: 'auth-code', state: 'valid-state' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(mockRequestOAuthAuthorizationCodeToken).not.toHaveBeenCalled();
+    expect(mockConnectorTokenClientInstance.createWithRefreshToken).not.toHaveBeenCalled();
+    expect(res.redirected).toHaveBeenCalledWith({
+      headers: {
+        location: expect.stringContaining('oauth_authorization=error'),
       },
     });
   });
