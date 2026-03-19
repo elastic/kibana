@@ -17,13 +17,12 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { WithHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, fullWidthFormContentCss } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { PackForm } from '../../../packs/form';
 import { usePack } from '../../../packs/use_pack';
@@ -32,15 +31,6 @@ import { useCopyPack } from '../../../packs/use_copy_pack';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-
-const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
-  padding: `0 ${euiTheme.size.l}`,
-  flex: 1,
-  minWidth: 0,
-  maxWidth: 1200,
-  margin: '0 auto',
-  width: '100%',
-});
 
 const EditPackPageComponent = () => {
   const confirmModalTitleId = useGeneratedHtmlId();
@@ -215,7 +205,7 @@ const EditPackPageComponent = () => {
   if (queryHistoryRework) {
     if (error) {
       return (
-        <div css={fullWidthContentCss}>
+        <div css={fullWidthFormContentCss}>
           <EuiSpacer size="l" />
           {backLink}
           <EuiSpacer size="m" />
@@ -236,7 +226,7 @@ const EditPackPageComponent = () => {
     }
 
     return (
-      <div css={fullWidthContentCss}>
+      <div css={fullWidthFormContentCss}>
         <EuiSpacer size="l" />
         {backLink}
         <EuiSpacer size="m" />

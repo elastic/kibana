@@ -6,24 +6,14 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { WithHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, fullWidthFormContentCss } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { PackForm } from '../../../packs/form';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
-
-const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
-  padding: `0 ${euiTheme.size.l}`,
-  flex: 1,
-  minWidth: 0,
-  maxWidth: 1200,
-  margin: '0 auto',
-  width: '100%',
-});
 
 const AddPackPageComponent = () => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
@@ -44,7 +34,7 @@ const AddPackPageComponent = () => {
 
   if (isHistoryEnabled) {
     return (
-      <div css={fullWidthContentCss}>
+      <div css={fullWidthFormContentCss}>
         <EuiSpacer size="l" />
         {backLink}
         <EuiSpacer size="m" />

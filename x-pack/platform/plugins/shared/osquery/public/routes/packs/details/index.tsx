@@ -22,7 +22,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
-import { WithHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, fullWidthContentCss } from '../../../components/layouts';
 import { usePack } from '../../../packs/use_pack';
 import { useCopyPack } from '../../../packs/use_copy_pack';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
@@ -35,12 +35,6 @@ const dividerCss = ({ euiTheme }: UseEuiTheme) => ({
   width: 0,
   height: '100%',
   borderLeft: euiTheme.border.thin,
-});
-
-const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
-  padding: `0 ${euiTheme.size.l}`,
-  flex: 1,
-  minWidth: 0,
 });
 
 const PackDetailsPageComponent = () => {

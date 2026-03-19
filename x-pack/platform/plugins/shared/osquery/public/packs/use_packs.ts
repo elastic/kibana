@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { sanitizeSearch } from '../common/sanitize_search';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
 
@@ -17,13 +18,6 @@ export interface UsePacksResponse {
   total: number;
   data: PackSavedObject[];
 }
-
-const sanitizeSearch = (value: string | undefined): string | undefined => {
-  if (!value) return undefined;
-  const sanitized = value.replace(/[*?\\{}()|"<>]/g, '').trim();
-
-  return sanitized || undefined;
-};
 
 export const usePacks = ({
   isLive = false,

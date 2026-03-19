@@ -6,11 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { WithHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, fullWidthContentCss } from '../../../components/layouts';
 import { PacksTable as PacksTableLegacy } from '../../../packs/packs_table';
 import { AddPackButton } from '../../../packs/add_pack_button';
 import { LoadIntegrationAssetsButton } from './load_integration_assets';
@@ -19,12 +18,6 @@ import { useAssetsStatus } from '../../../assets/use_assets_status';
 import { usePacks } from '../../../packs/use_packs';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 import { PacksTable } from './packs_table';
-
-const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
-  padding: `0 ${euiTheme.size.l}`,
-  flex: 1,
-  minWidth: 0,
-});
 
 const PacksPageComponent = () => {
   const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
