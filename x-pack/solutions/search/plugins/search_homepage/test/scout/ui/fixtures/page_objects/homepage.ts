@@ -115,7 +115,7 @@ export class Homepage {
   }
 
   async getKibanaVersionBadge() {
-    return this.page.testSubj.locator('homepage-kibana-version');
+    return this.page.testSubj.locator('kibana-version-badge');
   }
 
   // Body Links methods

@@ -19,12 +19,7 @@ export const SearchHomepageVersionBadge: React.FC<SearchHomepageVersionBadgeProp
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiLink
-          data-test-subj="homepage-kibana-version"
-          color="text"
-          target="_blank"
-          href={docLink}
-        >
+        <EuiLink data-test-subj="kibana-version-badge" color="text" target="_blank" href={docLink}>
           {kibanaVersion}
         </EuiLink>
       </EuiFlexItem>

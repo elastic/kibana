@@ -41,7 +41,7 @@ export class GettingStarted {
   }
 
   async getKibanaVersionBadge() {
-    return this.page.testSubj.locator('homepage-kibana-version');
+    return this.page.testSubj.locator('kibana-version-badge');
   }
 
   async getEndpointValueField() {
