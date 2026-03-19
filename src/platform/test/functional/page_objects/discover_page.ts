@@ -1151,5 +1151,14 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  /**
+   * Returns the ID of the first tab in the Discover session
+   * @returns The ID of the first tab in the Discover session
+   */
+  public async getFirstTabId() {
+    const tabEls = await this.testSubjects.findAll('*unifiedTabs_tab_');
+    return (await tabEls[0].getAttribute('data-test-subj'))?.replace('unifiedTabs_tab_', '');
+  }
+
   /** Discover Embeddable helper methods end   */
 }
