@@ -12,6 +12,7 @@
 
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest } from '@kbn/workflows';
+import type { KibanaStep } from '@kbn/workflows/spec/schema';
 import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
@@ -24,7 +25,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 // Extend BaseStep for kibana-specific properties
 export interface KibanaActionStep extends BaseStep {
   type: string; // e.g., 'kibana.createCase'
-  with?: Record<string, any>;
+  configuration: KibanaStep;
 }
 
 /**
@@ -48,15 +49,15 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
 
   public getInput() {
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
-    const stepWith = this.step.with || (this.step as any).configuration?.with || {};
+    const stepWith = this.step.configuration?.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
     // Support both direct step types (kibana.createCase) and atomic+configuration pattern
-    const stepType = this.step.type || (this.step as any).configuration?.type;
+    const stepType = this.step.configuration.type;
     // Use rendered inputs if provided, otherwise fall back to raw step.with or configuration.with
-    const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
+    const stepWith = withInputs || this.step.configuration.with;
     // Extract meta params (not forwarded as HTTP request params)
     const {
       use_server_info = false,

@@ -25,6 +25,7 @@ import type {
   LoopBreakNode,
   LoopContinueNode,
   WaitForInputGraphNode,
+  WaitGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowGraph,
@@ -40,6 +41,7 @@ import {
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { CustomStepImpl } from './custom_step_impl';
 import { DataSetStepImpl } from './data_set_step';
+import type { ElasticsearchActionStep } from './elasticsearch_action_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { LoopBreakNodeImpl, LoopContinueNodeImpl } from './flow_control_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
@@ -49,6 +51,7 @@ import {
   ExitConditionBranchNodeImpl,
   ExitIfNodeImpl,
 } from './if_step';
+import type { KibanaActionStep } from './kibana_action_step';
 import { KibanaActionStepImpl } from './kibana_action_step';
 import type { NodeImplementation } from './node_implementation';
 import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './on_failure/continue_step';
@@ -105,8 +108,7 @@ export class NodesFactory {
         tags: ['step-factory', 'elasticsearch', 'internal-action'],
       });
       return new ElasticsearchActionStepImpl(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        node as any,
+        node as unknown as ElasticsearchActionStep,
         stepExecutionRuntime,
         this.workflowRuntime,
         this.workflowLogger
@@ -119,8 +121,7 @@ export class NodesFactory {
         tags: ['step-factory', 'kibana', 'internal-action'],
       });
       return new KibanaActionStepImpl(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        node as any,
+        node as unknown as KibanaActionStep,
         stepExecutionRuntime,
         this.workflowRuntime,
         this.workflowLogger
@@ -296,8 +297,7 @@ export class NodesFactory {
         return new ExitIfNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'wait':
         return new WaitStepImpl(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          node as any,
+          node as WaitGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger
