@@ -8,16 +8,11 @@
  */
 
 import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
-import {
-  appendToESQLQuery,
-  getLimitFromESQLQuery,
-  hasTransformationalCommand,
-  sanitazeESQLInput,
-} from '@kbn/esql-utils';
+import { hasTransformationalCommand, getLimitFromESQLQuery } from '../query_parsing_helpers';
+import { appendToESQLQuery } from './utils';
+import { sanitazeESQLInput } from '../sanitaze_input';
 
 const METRICS_INFO_SUFFIX = ' | METRICS_INFO';
-
-// TODO: This should be moved to the esql-utils package
 
 /**
  * Appends "| METRICS_INFO" to an ES|QL query if it has no transformational commands.
