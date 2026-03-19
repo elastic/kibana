@@ -7,8 +7,8 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { INTEGRATION_CONFIGS } from '../../../../server/lib/entity_analytics/entity_store/maintainers/accesses/integrations';
-import { MAINTAINER_ID } from '../../../../server/lib/entity_analytics/entity_store/maintainers/accesses/constants';
+import { INTEGRATION_CONFIGS } from '../../../../server/lib/entity_analytics/maintainers/accesses/integrations';
+import { MAINTAINER_ID } from '../../../../server/lib/entity_analytics/maintainers/accesses/constants';
 import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
