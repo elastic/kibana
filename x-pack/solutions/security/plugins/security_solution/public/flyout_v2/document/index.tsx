@@ -27,17 +27,15 @@ export interface DocumentFlyoutProps {
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
-export const DocumentFlyout: FC<DocumentFlyoutProps> = memo(
-  ({ hit, renderCellActions }) => {
-    return (
-      <>
-        <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m" grow={false}>
-          <DocumentHeader hit={hit} />
-        </EuiPanel>
-        <OverviewTab hit={hit} renderCellActions={renderCellActions} />
-      </>
-    );
-  }
-);
+export const DocumentFlyout: FC<DocumentFlyoutProps> = memo(({ hit, renderCellActions }) => {
+  return (
+    <>
+      <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m" grow={false}>
+        <DocumentHeader hit={hit} />
+      </EuiPanel>
+      <OverviewTab hit={hit} renderCellActions={renderCellActions} />
+    </>
+  );
+});
 
 DocumentFlyout.displayName = 'DocumentFlyout';

@@ -191,9 +191,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               services,
               store,
               history,
-              children: (
-                <DocumentFlyout hit={hit} renderCellActions={analyzerCellActionRenderer} />
-              ),
+              children: <DocumentFlyout hit={hit} renderCellActions={analyzerCellActionRenderer} />,
             }),
             {
               ownFocus: false,
