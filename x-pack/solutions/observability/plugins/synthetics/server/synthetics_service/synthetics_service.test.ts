@@ -361,6 +361,48 @@ describe('SyntheticsService', () => {
       );
     });
 
+    it('closes the PIT finder before fetching output and syncing monitors', async () => {
+      const { service, locations } = getMockedService();
+      const events: string[] = [];
+      const close = jest.fn(async () => {
+        events.push('close');
+      });
+
+      serverMock.encryptedSavedObjects = {
+        getClient: jest.fn().mockReturnValue({
+          createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockReturnValue({
+            close,
+            find: jest.fn().mockReturnValue({
+              async *[Symbol.asyncIterator]() {
+                yield {
+                  saved_objects: [
+                    {
+                      attributes: getFakePayload([locations[0]]),
+                    },
+                  ],
+                };
+              },
+            }),
+          }),
+        }),
+      } as unknown as SyntheticsServerSetup['encryptedSavedObjects'];
+
+      jest.spyOn(service, 'getOutput').mockImplementation(async () => {
+        events.push('getOutput');
+        return { hosts: ['es'], api_key: 'i:k' };
+      });
+
+      jest.spyOn(service.apiClient, 'syncMonitors').mockImplementation(async ({ location }) => {
+        events.push(`sync:${location.id}`);
+        return [];
+      });
+
+      await service.pushConfigs(ALL_SPACES_ID);
+
+      expect(close).toHaveBeenCalledTimes(1);
+      expect(events).toEqual(['close', 'getOutput', `sync:${locations[0].id}`]);
+    });
+
     it.each([
       [true, 'Cannot sync monitors with the Synthetics service. License is expired.'],
       [
