@@ -42,7 +42,6 @@ export const LookbackWindowField = () => {
             defaultMessage: 'Lookback Window',
           })}
           isInvalid={!!error}
-          error={error?.message}
           fullWidth
         >
           <LookbackWindow {...field} errors={error?.message} />

@@ -59,7 +59,6 @@ export const ScheduleField = () => {
             </>
           }
           isInvalid={!!error}
-          error={error?.message}
         >
           <RuleSchedule {...field} errors={error?.message} />
         </EuiFormRow>
