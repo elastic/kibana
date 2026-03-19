@@ -24,11 +24,13 @@ export const createNavigationTree = ({
   overviewAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
+  hideIngestHubDataManagement = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
+  hideIngestHubDataManagement?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -388,6 +390,84 @@ export const createNavigationTree = ({
         }),
         link: 'observabilityOnboarding',
         icon: 'plusInCircle',
+      },
+      {
+        id: 'ingestHub',
+        title: i18n.translate('xpack.serverlessObservability.nav.ingestHub', {
+          defaultMessage: 'Ingest Hub',
+        }),
+        link: 'observabilityOnboarding:ingest-hub',
+        renderAs: 'panelOpener',
+        icon: 'logstashInput',
+        children: [
+          {
+            id: 'ingestHub_main',
+            title: '',
+            children: [
+              {
+                link: 'observabilityOnboarding:ingest-hub',
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.getStarted', {
+                  defaultMessage: 'Get started',
+                }),
+              },
+              {
+                link: 'observabilityOnboarding:ingest-hub-integrations',
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.dataSources', {
+                  defaultMessage: 'Data sources',
+                }),
+              },
+            ],
+          },
+          {
+            id: 'ingestHub_migration',
+            title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.migration', {
+              defaultMessage: 'Migration',
+            }),
+            children: [
+              {
+                link: 'observabilityOnboarding:ingest-hub-platform-migration',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.nav.ingestHub.platformMigration',
+                  {
+                    defaultMessage: 'Platform Migration',
+                  }
+                ),
+              },
+              {
+                link: 'observabilityOnboarding:ingest-hub-dashboards',
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.dashboards', {
+                  defaultMessage: 'Dashboards',
+                }),
+              },
+              {
+                link: 'observabilityOnboarding:ingest-hub-rules',
+                title: i18n.translate('xpack.serverlessObservability.nav.ingestHub.rules', {
+                  defaultMessage: 'Rules & Monitors',
+                }),
+              },
+            ],
+          },
+          ...(hideIngestHubDataManagement
+            ? []
+            : [
+                {
+                  id: 'ingestHub_data_management',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ingestHub.dataManagement',
+                    { defaultMessage: 'Data management' }
+                  ),
+                  children: [
+                    {
+                      link: 'observabilityOnboarding:ingest-hub-data-management',
+                      title: i18n.translate(
+                        'xpack.serverlessObservability.nav.ingestHub.streams',
+                        { defaultMessage: 'Streams' }
+                      ),
+                    },
+                  ],
+                },
+              ]),
+        ],
       },
       {
         id: 'devTools',

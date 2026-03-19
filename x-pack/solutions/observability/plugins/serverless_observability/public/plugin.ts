@@ -9,7 +9,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import type { Subscription } from 'rxjs';
-import { combineLatest, distinctUntilChanged, map, of } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, of, merge, fromEvent } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { createNavigationTree } from './navigation_tree';
@@ -49,16 +49,38 @@ export class ServerlessObservabilityPlugin
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
+    const INGEST_HUB_VERSION_KEY = 'ingestHub:activeVersion';
+    const getIngestHubVersion = () => {
+      try {
+        return typeof sessionStorage !== 'undefined'
+          ? sessionStorage.getItem(INGEST_HUB_VERSION_KEY)
+          : null;
+      } catch {
+        return null;
+      }
+    };
+    const ingestHubVersion$ =
+      typeof window === 'undefined'
+        ? of(getIngestHubVersion())
+        : merge(
+            of(getIngestHubVersion()),
+            fromEvent<CustomEvent<string>>(window, 'ingestHubVersionChange').pipe(
+              map((e) => e.detail)
+            )
+          );
+
     const navigationTree$ = combineLatest([
       setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
       chatExperience$,
+      ingestHubVersion$,
     ]).pipe(
-      map(([{ status }, chatExperience]) => {
+      map(([streamsStatus, chatExperience, ingestHubVersion]) => {
         return createNavigationTree({
-          streamsAvailable: status === 'enabled',
+          streamsAvailable: streamsStatus.status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
+          hideIngestHubDataManagement: ingestHubVersion === 'skipUx',
         });
       })
     );
