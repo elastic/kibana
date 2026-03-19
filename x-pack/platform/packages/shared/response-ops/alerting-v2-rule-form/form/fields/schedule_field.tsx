@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { MAX_DURATION, validateMaxDuration } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -21,6 +22,19 @@ export const ScheduleField = () => {
     <Controller
       control={control}
       name="schedule.every"
+      rules={{
+        validate: (value) => {
+          if (!value) return true;
+          const error = validateMaxDuration(value, MAX_DURATION);
+          if (error) {
+            return i18n.translate('xpack.alertingV2.ruleForm.schedule.everyMaxError', {
+              defaultMessage: 'Schedule cannot exceed {max}.',
+              values: { max: MAX_DURATION },
+            });
+          }
+          return true;
+        },
+      }}
       render={({ field, fieldState: { error } }) => (
         <EuiFormRow
           id={SCHEDULE_ROW_ID}
