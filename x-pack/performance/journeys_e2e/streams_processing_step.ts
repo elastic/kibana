@@ -27,11 +27,11 @@ export const journey = new Journey({
       timeout: 30000,
     });
   })
-  .step('Configure grok processor', async ({ page }) => {
+  .step('Configure grok processor', async ({ page, inputDelays }) => {
     const comboBox = page.locator(subj('streamsAppProcessorFieldSelectorComboFieldText'));
     const comboInput = comboBox.locator('input[role="combobox"]');
     await comboInput.click();
-    await comboInput.pressSequentially('body.text', { delay: 50 });
+    await comboInput.pressSequentially('body.text', { delay: inputDelays.TYPING });
 
     const option = page.locator(subj('autocomplete-suggestion-body.text'));
     try {
