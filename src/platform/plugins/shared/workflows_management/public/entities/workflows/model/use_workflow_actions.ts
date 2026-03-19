@@ -11,11 +11,11 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   RunStepCommand,
-  RunWorkflowCommand,
   RunWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowListDto,
 } from '@kbn/workflows';
+import { useRunWorkflow } from '@kbn/workflows-ui';
 import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -226,17 +226,7 @@ export function useWorkflowActions() {
     },
   });
 
-  const runWorkflow = useMutation<
-    RunWorkflowResponseDto,
-    HttpError,
-    RunWorkflowCommand & { id: string; triggerTab?: WorkflowTriggerTab }
-  >({
-    mutationKey: ['POST', 'workflows', 'id', 'run'],
-    mutationFn: ({ id, inputs }) => {
-      return http.post(`/api/workflows/${id}/run`, {
-        body: JSON.stringify({ inputs }),
-      });
-    },
+  const runWorkflow = useRunWorkflow<{ triggerTab?: WorkflowTriggerTab }>({
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 
@@ -273,9 +263,9 @@ export function useWorkflowActions() {
 
   const runIndividualStep = useMutation<RunWorkflowResponseDto, HttpError, RunStepCommand>({
     mutationKey: ['POST', 'workflows', 'stepId', 'run'],
-    mutationFn: ({ stepId, contextOverride, workflowYaml }) => {
+    mutationFn: ({ stepId, contextOverride, workflowYaml, workflowId }) => {
       return http.post(`/api/workflows/testStep`, {
-        body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
+        body: JSON.stringify({ stepId, contextOverride, workflowYaml, workflowId }),
       });
     },
     onSuccess: ({ workflowExecutionId }, variables) => {

@@ -56,6 +56,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointRunScript: false,
 
   /**
+   * Support for Automated Endpoint `runscript` (from rules)
+   * Release: 9.4
+   */
+  responseActionsEndpointAutomatedRunScript: false,
+
+  /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
    * Release: 9.4
    */
@@ -92,14 +98,23 @@ export const allowedExperimentalValues = Object.freeze({
   entityThreatHuntingEnabled: false,
 
   /**
+   * Enables the lead generation pipeline for Entity Analytics.
+   * When enabled, the lead generation engine, observation modules,
+   * API routes, and persistence indices are activated.
+   */
+  leadGenerationEnabled: false,
+
+  /**
+   * Enables lead generation details: the "i" icon on lead cards/list items
+   * and the "How this lead was generated" flyout.
+   * Requires `leadGenerationEnabled` to also be true.
+   */
+  leadGenerationDetailsEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
-
-  /**
-   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
-   */
-  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
 
   /**
    * Enables the storing of gaps in the event log
@@ -230,6 +245,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
+
+  /**
+   * Uses entity store v2 for entity analytics skill
+   */
+  entityAnalyticsEntityStoreV2: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

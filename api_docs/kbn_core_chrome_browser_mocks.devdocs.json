@@ -15,7 +15,7 @@
         "label": "chromeServiceMock",
         "description": [],
         "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-        "lineNumber": 126,
+        "lineNumber": 123,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -28,10 +28,12 @@
             "label": "create",
             "description": [],
             "signature": [
-              "() => jest.Mocked<ChromeServiceContract>"
+              "() => jest.Mocked<",
+              "ChromeServiceContract",
+              ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-            "lineNumber": 127,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -59,7 +61,7 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-            "lineNumber": 128,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -87,7 +89,7 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-            "lineNumber": 129,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

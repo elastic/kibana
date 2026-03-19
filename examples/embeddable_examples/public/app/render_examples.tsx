@@ -71,7 +71,7 @@ export const RenderExamples = () => {
         reload$.next();
       },
       getSerializedStateForChild: () => ({
-        timeRange: undefined,
+        time_range: undefined,
       }),
       timeRange$,
       setTimeRange: (timeRange: TimeRange | undefined) => {

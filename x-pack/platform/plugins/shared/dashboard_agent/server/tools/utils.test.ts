@@ -8,8 +8,7 @@
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/core/server';
-import type { AttachmentPanel } from '@kbn/dashboard-agent-common';
-import { resolvePanelsFromAttachments, upsertMarkdownPanel } from './manage_dashboard/utils';
+import { resolvePanelsFromAttachments } from './manage_dashboard/utils';
 
 const createMockLogger = (): Logger =>
   ({
@@ -65,7 +64,7 @@ describe('resolvePanelsFromAttachments', () => {
     });
 
     const result = await resolvePanelsFromAttachments({
-      attachmentIds: ['viz-1'],
+      attachmentInputs: [{ attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments,
       logger: createMockLogger(),
     });
@@ -90,7 +89,7 @@ describe('resolvePanelsFromAttachments', () => {
     });
 
     const result = await resolvePanelsFromAttachments({
-      attachmentIds: ['unsupported-1'],
+      attachmentInputs: [{ attachmentId: 'unsupported-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments,
       logger: createMockLogger(),
     });
@@ -106,7 +105,7 @@ describe('resolvePanelsFromAttachments', () => {
 
   it('collects per-attachment failures without failing the whole operation', async () => {
     const result = await resolvePanelsFromAttachments({
-      attachmentIds: ['missing-id'],
+      attachmentInputs: [{ attachmentId: 'missing-id', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments: createAttachmentManager({}),
       logger: createMockLogger(),
     });
@@ -118,85 +117,5 @@ describe('resolvePanelsFromAttachments', () => {
         identifier: 'missing-id',
       }),
     ]);
-  });
-});
-
-describe('upsertMarkdownPanel', () => {
-  it('adds a markdown panel when one does not exist', () => {
-    const existingPanels: AttachmentPanel[] = [
-      {
-        type: 'lens',
-        panelId: 'panel-1',
-        visualization: { type: 'Metric' },
-      },
-    ];
-
-    const result = upsertMarkdownPanel(existingPanels, '# Summary');
-
-    expect(result.changedPanel).toBeDefined();
-    expect(result.panels).toHaveLength(2);
-    expect(result.panels[0]).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
-      rawConfig: { content: '# Summary' },
-    });
-  });
-
-  it('updates existing markdown panel content in place', () => {
-    const existingPanels: AttachmentPanel[] = [
-      {
-        type: 'DASHBOARD_MARKDOWN',
-        panelId: 'markdown-1',
-        rawConfig: { content: '# Old summary' },
-      },
-      {
-        type: 'lens',
-        panelId: 'panel-1',
-        visualization: { type: 'Metric' },
-      },
-    ];
-
-    const result = upsertMarkdownPanel(existingPanels, '# New summary');
-
-    expect(result.changedPanel).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
-      panelId: 'markdown-1',
-      rawConfig: { content: '# New summary' },
-    });
-    expect(result.panels[0]).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
-      panelId: 'markdown-1',
-      rawConfig: { content: '# New summary' },
-    });
-    expect(result.panels[1]).toEqual(existingPanels[1]);
-  });
-
-  it('does not change panels when markdown content is unchanged', () => {
-    const existingPanels: AttachmentPanel[] = [
-      {
-        type: 'DASHBOARD_MARKDOWN',
-        panelId: 'markdown-1',
-        rawConfig: { content: '# Summary' },
-      },
-    ];
-
-    const result = upsertMarkdownPanel(existingPanels, '# Summary');
-
-    expect(result.changedPanel).toBeUndefined();
-    expect(result.panels).toEqual(existingPanels);
-  });
-
-  it('does not change panels when markdown content is not provided', () => {
-    const existingPanels: AttachmentPanel[] = [
-      {
-        type: 'lens',
-        panelId: 'panel-1',
-        visualization: { type: 'Metric' },
-      },
-    ];
-
-    const result = upsertMarkdownPanel(existingPanels);
-
-    expect(result.changedPanel).toBeUndefined();
-    expect(result.panels).toEqual(existingPanels);
   });
 });

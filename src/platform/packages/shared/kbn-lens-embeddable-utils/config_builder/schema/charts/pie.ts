@@ -161,7 +161,7 @@ export const pieStateSchemaNoESQL = schema.object(
 /**
  * Pie/donut chart configuration for ES|QL queries
  */
-const pieStateSchemaESQL = schema.object(
+export const pieStateSchemaESQL = schema.object(
   {
     type: pieTypeSchema,
     ...sharedPanelInfoSchema,

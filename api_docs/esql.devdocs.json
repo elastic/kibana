@@ -132,7 +132,7 @@
         "label": "ESQLMenu",
         "description": [],
         "signature": [
-          "(props: { hideHistory?: boolean | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; }) => React.JSX.Element"
+          "(props: { hideHistory?: boolean | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/shared/esql/public/lazy_esql_menu.tsx",
         "lineNumber": 38,
@@ -342,7 +342,7 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-        "lineNumber": 1496,
+        "lineNumber": 1482,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -410,7 +410,9 @@
           "\nBuilds the ESQLCallbacks required by the ES|QL validation API\n({@link validateQuery} from @kbn/esql-language) for server-side usage.\n\nUses the Elasticsearch client directly instead of going through\nKibana HTTP routes, unlike the client-side callbacks in @kbn/esql-utils."
         ],
         "signature": [
-          "({ client, }: BuildServerESQLCallbacksOptions) => ",
+          "({ client, }: ",
+          "BuildServerESQLCallbacksOptions",
+          ") => ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -458,8 +460,8 @@
       "tags": [],
       "label": "EsqlServerPluginSetup",
       "description": [],
-      "path": "src/platform/plugins/shared/esql/server/plugin.ts",
-      "lineNumber": 17,
+      "path": "src/platform/plugins/shared/esql/server/types.ts",
+      "lineNumber": 13,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -475,8 +477,8 @@
             "() => ",
             "ESQLExtensionsRegistry"
           ],
-          "path": "src/platform/plugins/shared/esql/server/plugin.ts",
-          "lineNumber": 18,
+          "path": "src/platform/plugins/shared/esql/server/types.ts",
+          "lineNumber": 14,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,

@@ -159,7 +159,7 @@ export const treemapStateSchemaNoESQL = schema.object(
   }
 );
 
-const treemapStateSchemaESQL = schema.object(
+export const treemapStateSchemaESQL = schema.object(
   {
     type: schema.literal('treemap'),
     ...sharedPanelInfoSchema,
