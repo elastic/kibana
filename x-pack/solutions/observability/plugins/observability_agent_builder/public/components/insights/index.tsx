@@ -83,15 +83,20 @@ export function createLogAIInsight(
 export const createLogsAIInsightRenderer =
   (LogAIInsightRender: ReturnType<typeof createLogAIInsight>) =>
   ({ doc }: ObservabilityLogsAiInsightFeatureRenderDeps) => {
-    const mappedDoc = useMemo<LogAiInsightDocument>(
-      () => ({
-        fields: Object.entries(doc.flattened).map(([field, value]) => ({
-          field,
-          value: Array.isArray(value) ? value : [value],
-        })),
-      }),
-      [doc]
-    );
+    const mappedDoc = useMemo<LogAiInsightDocument>(() => {
+      const fields = Object.entries(doc.flattened).map(([field, value]) => ({
+        field,
+        value: Array.isArray(value) ? value : [value],
+      }));
+      const raw = doc.raw as Record<string, unknown>;
+      if (raw._id !== undefined) {
+        fields.push({ field: '_id', value: [raw._id] });
+      }
+      if (raw._index !== undefined) {
+        fields.push({ field: '_index', value: [raw._index] });
+      }
+      return { fields };
+    }, [doc]);
 
     return <LogAIInsightRender key={doc.id} doc={mappedDoc} />;
   };

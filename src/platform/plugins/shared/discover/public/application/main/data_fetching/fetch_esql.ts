@@ -127,11 +127,25 @@ export function fetchEsql({
               (col) => !injectedMetadataFields.includes(col.id)
             );
             esqlHeaderWarning = table.warning ?? undefined;
+            // Make injected metadata fields non-enumerable so Object.keys() skips them
+            // in grid/sidebar column detection, while still accessible via direct property
+            // access for features like Log AI Insight.
             finalData = rows.map((row, idx) => {
+              let raw = row;
+              if (injectedMetadataFields.length > 0) {
+                raw = { ...row };
+                for (const field of injectedMetadataFields) {
+                  if (field in raw) {
+                    const value = raw[field];
+                    delete raw[field];
+                    Object.defineProperty(raw, field, { value, enumerable: false });
+                  }
+                }
+              }
               const record: DataTableRecord = {
                 id: String(idx),
-                raw: row,
-                flattened: row,
+                raw,
+                flattened: raw,
               };
 
               return scopedProfilesManager.resolveDocumentProfile({ record });

@@ -44,19 +44,19 @@ describe('fetchEsql', () => {
 
   it('resolves with returned records', async () => {
     const hits = [
-      { _id: '1', foo: 'bar' },
-      { _id: '2', foo: 'baz' },
+      { name: 'one', foo: 'bar' },
+      { name: 'two', foo: 'baz' },
     ] as unknown as EsHitRecord[];
     const records = hits.map((hit, i) => ({
       id: String(i),
       raw: hit,
       flattened: hit,
     }));
-    mockExpressionResult(['_id', 'foo'], hits);
+    mockExpressionResult(['name', 'foo'], hits);
     const resolveDocumentProfileSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
     expect(await fetchEsql(fetchEsqlMockProps)).toEqual({
       records,
-      esqlQueryColumns: ['_id', 'foo'],
+      esqlQueryColumns: ['name', 'foo'],
       esqlHeaderWarning: undefined,
       interceptedWarnings: [],
     });
@@ -65,7 +65,7 @@ describe('fetchEsql', () => {
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: records[1] });
   });
 
-  it('should filter injected metadata columns from esqlQueryColumns but keep them in row data', async () => {
+  it('should hide injected metadata from enumerable properties but keep accessible', async () => {
     const hits = [
       { _id: 'doc1', _index: 'logs-1', message: 'hello' },
       { _id: 'doc2', _index: 'logs-1', message: 'world' },
@@ -73,8 +73,9 @@ describe('fetchEsql', () => {
     mockExpressionResult([col('_id'), col('_index'), col('message')], hits);
     const result = await fetchEsql(fetchEsqlMockProps);
     expect(result.esqlQueryColumns).toEqual([col('message')]);
-    expect(result.records[0].raw).toHaveProperty('_id', 'doc1');
-    expect(result.records[0].raw).toHaveProperty('_index', 'logs-1');
+    expect(Object.keys(result.records[0].raw)).toEqual(['message']);
+    expect(result.records[0].raw._id).toBe('doc1');
+    expect(result.records[0].raw._index).toBe('logs-1');
   });
 
   it('should not filter metadata columns that the user explicitly requested', async () => {
@@ -85,6 +86,7 @@ describe('fetchEsql', () => {
       query: { esql: 'from * metadata _id' },
     });
     expect(result.esqlQueryColumns).toEqual([col('_id'), col('message')]);
+    expect(Object.keys(result.records[0].raw)).toContain('_id');
   });
 
   it('should use inputTimeRange if provided', () => {
