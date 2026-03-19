@@ -131,35 +131,4 @@ export interface VisualizationAttachmentData {
   time_range?: { from: string; to: string };
 }
 
-const graphNodeSchema = z.looseObject({
-  id: z.string().min(1),
-  position: z.object({
-    x: z.number(),
-    y: z.number(),
-  }),
-  data: z.looseObject({
-    label: z.string(),
-  }),
-});
-
-const graphEdgeSchema = z.looseObject({
-  id: z.string().min(1),
-  source: z.string().min(1),
-  target: z.string().min(1),
-  type: z.string().min(1),
-  label: z.string().optional(),
-  markerEnd: z.enum(['arrow']).optional(),
-});
-
-export const graphAttachmentDataSchema = z.looseObject({
-  nodes: z.array(graphNodeSchema).min(1),
-  edges: z.array(graphEdgeSchema),
-  title: z.string().optional(),
-  description: z.string().optional(),
-});
-
-export type GraphNode = z.infer<typeof graphNodeSchema>;
-export type GraphEdge = z.infer<typeof graphEdgeSchema>;
-export type GraphAttachmentData = z.infer<typeof graphAttachmentDataSchema>;
-
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

@@ -21,16 +21,12 @@ export {
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
   visualizationAttachmentDataSchema,
-  graphAttachmentDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type TimeRange,
   screenContextTimeRangeSchema,
   type EsqlAttachmentData,
   type VisualizationAttachmentData,
-  type GraphAttachmentData,
-  type GraphNode,
-  type GraphEdge,
 } from './attachment_types';
 
 export type {
