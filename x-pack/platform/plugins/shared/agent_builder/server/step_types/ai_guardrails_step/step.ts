@@ -199,6 +199,14 @@ export const getAiGuardrailsStepDefinition = (
             'Guardrail LLM evaluation failed',
             err instanceof Error ? err : new Error(String(err))
           );
+          if (onFail === 'monitor') {
+            return {
+              output: {
+                pass: true,
+                reason: 'System error ignored due to monitor mode',
+              },
+            };
+          }
           return {
             output: {
               pass: false,

@@ -148,4 +148,17 @@ describe('getAiGuardrailsStepDefinition (ai.guardrails)', () => {
     expect(result.output?.pass).toBe(false);
     expect(result.output?.abort).toBe(true);
   });
+
+  it('LLM failure in monitor mode ignores error and returns pass true', async () => {
+    const err = new Error('500');
+    mockInvoke.mockRejectedValue(err);
+    const step = getAiGuardrailsStepDefinition(mockCoreSetup as any);
+    const result = await step.handler(
+      createContext({ message: 'x', on_fail: 'monitor', checks: defaultChecks })
+    );
+    expect(mockLogger.warn).toHaveBeenCalledWith('Guardrail LLM evaluation failed', err);
+    expect(result.output?.pass).toBe(true);
+    expect(result.output?.reason).toBe('System error ignored due to monitor mode');
+    expect(result.output?.abort).toBeFalsy();
+  });
 });
