@@ -219,21 +219,34 @@ export class ProposalManager {
 
     this.isInternalEdit = true;
     this.editor.pushUndoStop();
-    model.pushEditOperations(
-      null,
-      [
-        {
-          range: new monaco.Range(
-            proposal.startLine,
-            1,
-            proposal.undoEndLine,
-            proposal.undoEndColumn
-          ),
-          text: proposal.originalContent,
-        },
-      ],
-      () => null
-    );
+    if (proposal.newContentLineCount === 0) {
+      model.pushEditOperations(
+        null,
+        [
+          {
+            range: new monaco.Range(proposal.startLine, 1, proposal.startLine, 1),
+            text: `${proposal.originalContent}\n`,
+          },
+        ],
+        () => null
+      );
+    } else {
+      model.pushEditOperations(
+        null,
+        [
+          {
+            range: new monaco.Range(
+              proposal.startLine,
+              1,
+              proposal.undoEndLine,
+              proposal.undoEndColumn
+            ),
+            text: proposal.originalContent,
+          },
+        ],
+        () => null
+      );
+    }
     this.editor.pushUndoStop();
     this.isInternalEdit = false;
 
@@ -259,7 +272,7 @@ export class ProposalManager {
   }
 
   rejectAll(): void {
-    const ids = Array.from(this.proposals.keys());
+    const ids = Array.from(this.proposals.keys()).reverse();
     for (const id of ids) {
       this.rejectProposal(id);
     }
@@ -280,27 +293,40 @@ export class ProposalManager {
     this.isInternalEdit = true;
     this.editor.pushUndoStop();
 
-    const ids = Array.from(this.proposals.keys());
+    const ids = Array.from(this.proposals.keys()).reverse();
     const reverted: string[] = [];
 
     for (const id of ids) {
       const proposal = this.proposals.get(id);
       if (proposal) {
-        model.pushEditOperations(
-          null,
-          [
-            {
-              range: new monaco.Range(
-                proposal.startLine,
-                1,
-                proposal.undoEndLine,
-                proposal.undoEndColumn
-              ),
-              text: proposal.originalContent,
-            },
-          ],
-          () => null
-        );
+        if (proposal.newContentLineCount === 0) {
+          model.pushEditOperations(
+            null,
+            [
+              {
+                range: new monaco.Range(proposal.startLine, 1, proposal.startLine, 1),
+                text: `${proposal.originalContent}\n`,
+              },
+            ],
+            () => null
+          );
+        } else {
+          model.pushEditOperations(
+            null,
+            [
+              {
+                range: new monaco.Range(
+                  proposal.startLine,
+                  1,
+                  proposal.undoEndLine,
+                  proposal.undoEndColumn
+                ),
+                text: proposal.originalContent,
+              },
+            ],
+            () => null
+          );
+        }
 
         this.clearProposal(id);
         reverted.push(id);

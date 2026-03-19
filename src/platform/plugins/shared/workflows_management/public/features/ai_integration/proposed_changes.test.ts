@@ -453,4 +453,354 @@ describe('ProposalManager', () => {
       expect(onReject).not.toHaveBeenCalled();
     });
   });
+
+  describe('rejectAll and revertAllSilently line-shift correctness', () => {
+    /**
+     * Mock editor backed by a real mutable text buffer.
+     * pushEditOperations applies range-based edits to the underlying lines
+     * array, so tests can verify model content after reject/revert.
+     */
+    const createRealisticMockEditor = (initialContent: string) => {
+      const lines = initialContent.split('\n');
+      let zoneCounter = 0;
+
+      const model = {
+        getLineCount: jest.fn(() => lines.length),
+        getLineMaxColumn: jest.fn((ln: number) => {
+          if (ln < 1 || ln > lines.length) return 1;
+          return lines[ln - 1].length + 1;
+        }),
+        getValueInRange: jest.fn(
+          (range: {
+            startLineNumber: number;
+            startColumn: number;
+            endLineNumber: number;
+            endColumn: number;
+          }) => {
+            const {
+              startLineNumber: sln,
+              startColumn: sc,
+              endLineNumber: eln,
+              endColumn: ec,
+            } = range;
+            if (sln === eln) return lines[sln - 1].substring(sc - 1, ec - 1);
+            const parts = [lines[sln - 1].substring(sc - 1)];
+            for (let i = sln; i < eln - 1; i++) parts.push(lines[i]);
+            parts.push(lines[eln - 1].substring(0, ec - 1));
+            return parts.join('\n');
+          }
+        ),
+        getValue: jest.fn(() => lines.join('\n')),
+        pushEditOperations: jest.fn((_s: unknown, ops: any[], cb: () => null) => {
+          for (const { range: r, text } of ops) {
+            const sln = Math.max(1, Math.min(r.startLineNumber, lines.length));
+            const eln = Math.max(sln, Math.min(r.endLineNumber, lines.length));
+            const before = lines[sln - 1].substring(0, r.startColumn - 1);
+            const after = lines[eln - 1].substring(r.endColumn - 1);
+            lines.splice(sln - 1, eln - sln + 1, ...(before + (text ?? '') + after).split('\n'));
+          }
+          cb();
+          return null;
+        }),
+        getLanguageId: jest.fn(() => 'yaml'),
+        getOptions: jest.fn(() => ({ tabSize: 2 })),
+        onDidChangeContent: jest.fn(() => ({ dispose: jest.fn() })),
+      };
+
+      return {
+        getDomNode: jest.fn(() => ({
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+        })),
+        getModel: jest.fn(() => model),
+        getOption: jest.fn(() => ({
+          fontFamily: 'monospace',
+          fontSize: 14,
+          lineHeight: 20,
+          letterSpacing: 0,
+          fontWeight: 'normal',
+        })),
+        getLayoutInfo: jest.fn(() => ({
+          contentLeft: 64,
+          contentWidth: 800,
+          verticalScrollbarWidth: 10,
+        })),
+        getPosition: jest.fn(() => ({ lineNumber: 1 })),
+        revealLineInCenter: jest.fn(),
+        pushUndoStop: jest.fn(),
+        changeViewZones: jest.fn((cb: any) => {
+          cb({
+            addZone: jest.fn(() => `zone-${zoneCounter++}`),
+            removeZone: jest.fn(),
+          });
+        }),
+        createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+        deltaDecorations: jest.fn(() => []),
+        onMouseMove: jest.fn(() => ({ dispose: jest.fn() })),
+      } as any;
+    };
+
+    describe('rejectAll', () => {
+      it('restores original content after a single replace proposal (baseline)', () => {
+        const original = 'line1\nline2\nline3';
+        const editor = createRealisticMockEditor(original);
+        manager.initialize(editor);
+
+        manager.proposeChange({
+          proposalId: 'rep-2',
+          type: 'replace',
+          startLine: 2,
+          endLine: 2,
+          newText: 'replaced\n',
+        });
+
+        manager.rejectAll();
+
+        expect(editor.getModel().getValue()).toBe(original);
+      });
+
+      it('restores original content after delete-then-replace proposals', () => {
+        const original = 'line1\nline2\nline3\nline4\nline5';
+        const editor = createRealisticMockEditor(original);
+        manager.initialize(editor);
+
+        // Delete line 2 → ["line1", "line3", "line4", "line5"]
+        manager.proposeChange({
+          proposalId: 'del-2',
+          type: 'delete',
+          startLine: 2,
+          endLine: 2,
+          newText: '',
+        });
+        // Replace line 3 (was "line4", shifted up) → ["line1", "line3", "replaced", "line5"]
+        manager.proposeChange({
+          proposalId: 'rep-3',
+          type: 'replace',
+          startLine: 3,
+          endLine: 3,
+          newText: 'replaced\n',
+        });
+
+        manager.rejectAll();
+
+        expect(editor.getModel().getValue()).toBe(original);
+      });
+
+      it('restores original content after two insert proposals', () => {
+        const original = 'line1\nline2\nline3';
+        const editor = createRealisticMockEditor(original);
+        manager.initialize(editor);
+
+        // Insert before line 2 → ["line1", "inserted_a", "line2", "line3"]
+        manager.proposeChange({
+          proposalId: 'ins-2',
+          type: 'insert',
+          startLine: 2,
+          newText: 'inserted_a\n',
+        });
+        // Insert before line 4 → ["line1", "inserted_a", "line2", "inserted_b", "line3"]
+        manager.proposeChange({
+          proposalId: 'ins-4',
+          type: 'insert',
+          startLine: 4,
+          newText: 'inserted_b\n',
+        });
+
+        manager.rejectAll();
+
+        expect(editor.getModel().getValue()).toBe(original);
+      });
+
+      it('restores original content after replace-then-delete proposals', () => {
+        const original = 'line1\nline2\nline3\nline4\nline5';
+        const editor = createRealisticMockEditor(original);
+        manager.initialize(editor);
+
+        // Replace line 2 → ["line1", "replaced_line2", "line3", "line4", "line5"]
+        manager.proposeChange({
+          proposalId: 'rep-2',
+          type: 'replace',
+          startLine: 2,
+          endLine: 2,
+          newText: 'replaced_line2\n',
+        });
+        // Delete line 4 → ["line1", "replaced_line2", "line3", "line5"]
+        manager.proposeChange({
+          proposalId: 'del-4',
+          type: 'delete',
+          startLine: 4,
+          endLine: 4,
+          newText: '',
+        });
+
+        manager.rejectAll();
+
+        expect(editor.getModel().getValue()).toBe(original);
+      });
+
+      it('restores original content after two consecutive delete proposals', () => {
+        const original = 'line1\nline2\nline3\nline4\nline5';
+        const editor = createRealisticMockEditor(original);
+        manager.initialize(editor);
+
+        // Delete line 2 → ["line1", "line3", "line4", "line5"]
+        manager.proposeChange({
+          proposalId: 'del-2',
+          type: 'delete',
+          startLine: 2,
+          endLine: 2,
+          newText: '',
+        });
+        // Delete line 3 (was "line4") → ["line1", "line3", "line5"]
+        manager.proposeChange({
+          proposalId: 'del-3',
+          type: 'delete',
+          startLine: 3,
+          endLine: 3,
+          newText: '',
+        });
+
+        manager.rejectAll();
+
+        expect(editor.getModel().getValue()).toBe(original);
+      });
+
+      it('restores original content with mixed insert, delete, and replace proposals', () => {
+        const original = 'line1\nline2\nline3\nline4\nline5\nline6';
+        const editor = createRealisticMockEditor(original);
+        manager.initialize(editor);
+
+        // Insert before line 1 → ["inserted", "line1", ..., "line6"]
+        manager.proposeChange({
+          proposalId: 'ins-1',
+          type: 'insert',
+          startLine: 1,
+          newText: 'inserted\n',
+        });
+        // Delete line 4 (was "line3") → ["inserted", "line1", "line2", "line4", "line5", "line6"]
+        manager.proposeChange({
+          proposalId: 'del-4',
+          type: 'delete',
+          startLine: 4,
+          endLine: 4,
+          newText: '',
+        });
+        // Replace line 5 (was "line5") → ["inserted", "line1", "line2", "line4", "replaced", "line6"]
+        manager.proposeChange({
+          proposalId: 'rep-5',
+          type: 'replace',
+          startLine: 5,
+          endLine: 5,
+          newText: 'replaced\n',
+        });
+
+        manager.rejectAll();
+
+        expect(editor.getModel().getValue()).toBe(original);
+      });
+
+      it('correctly undoes a single delete proposal', () => {
+        const original = 'line1\nline2\nline3';
+        const editor = createRealisticMockEditor(original);
+        manager.initialize(editor);
+
+        // Delete line 2 → ["line1", "line3"]
+        manager.proposeChange({
+          proposalId: 'del-2',
+          type: 'delete',
+          startLine: 2,
+          endLine: 2,
+          newText: '',
+        });
+
+        manager.rejectAll();
+
+        expect(editor.getModel().getValue()).toBe(original);
+      });
+    });
+
+    describe('revertAllSilently', () => {
+      it('restores original content after delete-then-replace proposals', () => {
+        const original = 'line1\nline2\nline3\nline4\nline5';
+        const editor = createRealisticMockEditor(original);
+        manager.initialize(editor);
+
+        manager.proposeChange({
+          proposalId: 'del-2',
+          type: 'delete',
+          startLine: 2,
+          endLine: 2,
+          newText: '',
+        });
+        manager.proposeChange({
+          proposalId: 'rep-3',
+          type: 'replace',
+          startLine: 3,
+          endLine: 3,
+          newText: 'replaced\n',
+        });
+
+        manager.revertAllSilently();
+
+        expect(editor.getModel().getValue()).toBe(original);
+      });
+
+      it('restores original content with mixed proposals', () => {
+        const original = 'line1\nline2\nline3\nline4\nline5\nline6';
+        const editor = createRealisticMockEditor(original);
+        manager.initialize(editor);
+
+        manager.proposeChange({
+          proposalId: 'ins-1',
+          type: 'insert',
+          startLine: 1,
+          newText: 'inserted\n',
+        });
+        manager.proposeChange({
+          proposalId: 'del-4',
+          type: 'delete',
+          startLine: 4,
+          endLine: 4,
+          newText: '',
+        });
+        manager.proposeChange({
+          proposalId: 'rep-5',
+          type: 'replace',
+          startLine: 5,
+          endLine: 5,
+          newText: 'replaced\n',
+        });
+
+        manager.revertAllSilently();
+
+        expect(editor.getModel().getValue()).toBe(original);
+      });
+
+      it('returns all reverted proposal ids', () => {
+        const original = 'line1\nline2\nline3';
+        const editor = createRealisticMockEditor(original);
+        manager.initialize(editor);
+
+        manager.proposeChange({
+          proposalId: 'ins-2',
+          type: 'insert',
+          startLine: 2,
+          newText: 'inserted\n',
+        });
+        manager.proposeChange({
+          proposalId: 'rep-3',
+          type: 'replace',
+          startLine: 3,
+          endLine: 3,
+          newText: 'replaced\n',
+        });
+
+        const reverted = manager.revertAllSilently();
+
+        expect(reverted).toHaveLength(2);
+        expect(reverted).toContain('ins-2');
+        expect(reverted).toContain('rep-3');
+      });
+    });
+  });
 });
