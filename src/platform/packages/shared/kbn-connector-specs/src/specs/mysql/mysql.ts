@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Pool as Mysql2Pool } from 'mysql2/promise';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { assertReadOnly, escapeLikePattern } from '../../lib/generic_db_connector';
 import {
+  type DescribeTableInput,
   DescribeTableInputSchema,
   ListDatabasesInputSchema,
-  ListTablesInputSchema,
-  QueryInputSchema,
-  SearchRowsInputSchema,
-  type DescribeTableInput,
   type ListTablesInput,
+  ListTablesInputSchema,
   type QueryInput,
+  QueryInputSchema,
   type SearchRowsInput,
+  SearchRowsInputSchema,
 } from './types';
 
 export const MysqlConnector: ConnectorSpec = {
@@ -34,18 +35,13 @@ export const MysqlConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  auth: {
-    types: ['bearer'],
-  },
-
   schema: z.object({
     host: z
       .string()
       .min(1)
       .describe(
         i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.description', {
-          defaultMessage:
-            'The MySQL HTTP proxy host — must include the protocol (http:// or https://)',
+          defaultMessage: 'The MySQL server hostname or IP address',
         })
       )
       .meta({
@@ -53,11 +49,9 @@ export const MysqlConnector: ConnectorSpec = {
         label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.label', {
           defaultMessage: 'Host',
         }),
-        placeholder: 'https://your-mysql-proxy.example.com',
+        placeholder: 'mysql.example.com',
         helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.helpText', {
-          defaultMessage:
-            'The URL of the MySQL HTTP proxy, including protocol ' +
-            '(for example, https://proxy.example.com). Use http:// for local development only.',
+          defaultMessage: 'The hostname or IP address of the MySQL server (no protocol prefix).',
         }),
       }),
     port: z.coerce
@@ -67,7 +61,7 @@ export const MysqlConnector: ConnectorSpec = {
       .max(65535)
       .describe(
         i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.description', {
-          defaultMessage: 'The MySQL HTTP proxy port',
+          defaultMessage: 'The MySQL server port',
         })
       )
       .meta({
@@ -75,9 +69,9 @@ export const MysqlConnector: ConnectorSpec = {
         label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.label', {
           defaultMessage: 'Port',
         }),
-        placeholder: '8080',
+        placeholder: '3306',
         helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.helpText', {
-          defaultMessage: 'The port number for the MySQL HTTP proxy (default: 8080)',
+          defaultMessage: 'The port number of the MySQL server (default: 3306)',
         }),
       }),
     database: z
@@ -111,7 +105,7 @@ export const MysqlConnector: ConnectorSpec = {
         label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.label', {
           defaultMessage: 'Username',
         }),
-        placeholder: 'root',
+        placeholder: 'kibana_reader',
         helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.username.helpText', {
           defaultMessage: 'The MySQL user to authenticate as',
         }),
@@ -141,19 +135,18 @@ export const MysqlConnector: ConnectorSpec = {
       isTool: false,
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) =>
-        executeQuery(ctx, input.sql, ctx.config?.database as string, input.maxRows ?? 100),
+        getClient().runReadonlyQuery(
+          ctx,
+          input.sql,
+          ctx.config?.database as string,
+          input.maxRows ?? 100
+        ),
     },
 
     listDatabases: {
       isTool: false,
       input: ListDatabasesInputSchema,
-      handler: async (ctx) => {
-        const response = await ctx.client.post(`${buildBaseUrl(ctx)}/query`, {
-          ...resolveCredentials(ctx),
-          sql: 'SHOW DATABASES',
-        });
-        return response.data;
-      },
+      handler: async (ctx) => getClient().runQuery(ctx, 'SHOW DATABASES'),
     },
 
     listTables: {
@@ -161,12 +154,7 @@ export const MysqlConnector: ConnectorSpec = {
       input: ListTablesInputSchema,
       handler: async (ctx, input: ListTablesInput) => {
         const db = resolveDatabase(input.database, ctx);
-        const response = await ctx.client.post(`${buildBaseUrl(ctx)}/query`, {
-          ...resolveCredentials(ctx),
-          sql: `SHOW TABLES FROM ${quoteIdentifier(db)}`,
-          database: db,
-        });
-        return response.data;
+        return getClient().runQuery(ctx, `SHOW TABLES FROM ${quoteIdentifier(db)}`);
       },
     },
 
@@ -175,12 +163,10 @@ export const MysqlConnector: ConnectorSpec = {
       input: DescribeTableInputSchema,
       handler: async (ctx, input: DescribeTableInput) => {
         const db = resolveDatabase(input.database, ctx);
-        const response = await ctx.client.post(`${buildBaseUrl(ctx)}/query`, {
-          ...resolveCredentials(ctx),
-          sql: `DESCRIBE ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}`,
-          database: db,
-        });
-        return response.data;
+        return getClient().runQuery(
+          ctx,
+          `DESCRIBE ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}`
+        );
       },
     },
 
@@ -195,8 +181,8 @@ export const MysqlConnector: ConnectorSpec = {
           .join(' OR ');
         const sql =
           `SELECT * FROM ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}` +
-          ` WHERE ${whereClause} LIMIT ${Math.floor(input.maxRows ?? 50)}`;
-        return executeQuery(ctx, sql, db, input.maxRows ?? 50);
+          ` WHERE ${whereClause}`;
+        return getClient().runReadonlyQuery(ctx, sql, db, input.maxRows ?? 50);
       },
     },
   },
@@ -207,16 +193,8 @@ export const MysqlConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       try {
-        const baseUrl = buildBaseUrl(ctx);
-        const response = await ctx.client.post(`${baseUrl}/query`, {
-          ...resolveCredentials(ctx),
-          sql: 'SELECT 1',
-        });
-        return {
-          ok: true,
-          message:
-            `Successfully connected to MySQL at ${baseUrl}: ` + JSON.stringify(response.data),
-        };
+        await getClient().runQuery(ctx, 'SELECT 1');
+        return { ok: true, message: `Successfully connected to MySQL` };
       } catch (error) {
         return { ok: false, message: error.message };
       }
@@ -225,55 +203,95 @@ export const MysqlConnector: ConnectorSpec = {
 };
 
 // ---------------------------------------------------------------------------
+// MysqlClient
+//
+// Encapsulates connection pooling and query execution.  Not exported — the
+// rest of this file accesses the singleton instance through `getClient()`.
+//
+// Pools are keyed by a config fingerprint and live for the Kibana process
+// lifetime.  mysql2 handles idle-connection cleanup internally.  If a
+// connector's credentials change the old pool is orphaned but harmless —
+// its connections will fail authentication on next use.
+// ---------------------------------------------------------------------------
+
+class MysqlClient {
+  private static readonly MAX_POOLS = 10;
+  private readonly pools = new Map<string, Mysql2Pool>();
+
+  async runQuery(ctx: ActionContext, sql: string): Promise<unknown[]> {
+    const [rows] = await this.getPool(ctx).query(sql);
+    return rows as unknown[];
+  }
+
+  async runReadonlyQuery(
+    ctx: ActionContext,
+    sql: string,
+    database: string | undefined,
+    maxRows: number
+  ): Promise<unknown[]> {
+    assertReadOnly(sql);
+    const conn = await this.getPool(ctx).getConnection();
+    try {
+      if (database) await conn.query(`USE ${quoteIdentifier(database)}`);
+      const [rows] = await conn.execute(`SELECT * FROM (${sql}) AS _q LIMIT ?`, [maxRows]);
+      return rows as unknown[];
+    } finally {
+      conn.release();
+    }
+  }
+
+  private getPool(ctx: ActionContext): Mysql2Pool {
+    const host = ctx.config?.host as string;
+    const port = ctx.config?.port as number;
+    const username = ctx.config?.username as string;
+    const password = ctx.config?.password as string;
+
+    const key = `${host}:${port}:${username}:${Buffer.from(password).toString('base64')}`;
+    let pool = this.pools.get(key);
+    if (!pool) {
+      if (this.pools.size >= MysqlClient.MAX_POOLS) {
+        const [oldestKey] = this.pools.keys();
+        if (oldestKey) {
+          ctx.log.info(`[mysql] Pool cache full (${MysqlClient.MAX_POOLS}), evicting oldest pool`);
+          this.pools.get(oldestKey)?.end();
+          this.pools.delete(oldestKey);
+        }
+      }
+      ctx.log.info(`[mysql] Creating connection pool for ${host}:${port} (user: ${username})`);
+      // require() is intentionally deferred here — this method only executes
+      // server-side (action handlers). A top-level import would cause
+      // "require is not defined" in browser bundles.
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const lib: typeof import('mysql2/promise') = require('mysql2/promise');
+      pool = lib.createPool({
+        host,
+        port,
+        user: username,
+        password,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+      });
+      this.pools.set(key, pool);
+    }
+    return pool;
+  }
+}
+
+// Module-level singleton — Node.js executes this once per process.
+const _client = new MysqlClient();
+const getClient = () => _client;
+
+// ---------------------------------------------------------------------------
 // MySQL-specific utilities
 // ---------------------------------------------------------------------------
 
 /**
  * Quote a MySQL identifier (table, column, or database name) with backticks,
  * escaping any embedded backtick characters.
- * Note: MySQL uses backticks; this is not portable to other SQL dialects.
  */
 const quoteIdentifier = (identifier: string): string => `\`${identifier.replace(/`/g, '``')}\``;
 
-/**
- * Execute a read-only SQL query via the HTTP proxy. Shared by the `query` and
- * `searchRows` actions so both go through the same validation and transport.
- */
-const executeQuery = async (
-  ctx: ActionContext,
-  sql: string,
-  database: string | undefined,
-  maxRows: number
-) => {
-  assertReadOnly(sql);
-  const response = await ctx.client.post(`${buildBaseUrl(ctx)}/query`, {
-    ...resolveCredentials(ctx),
-    sql,
-    database,
-    maxRows,
-  });
-  return response.data;
-};
-
-// ---------------------------------------------------------------------------
-// HTTP connector helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Build the base URL for the HTTP proxy from connector config.
- * Expects config.host to include the protocol (http:// or https://).
- */
-const buildBaseUrl = (ctx: ActionContext): string => {
-  const host = (ctx.config?.host as string).trim();
-  const port = ctx.config?.port as number;
-  return `${host}:${port}`;
-};
-
-/**
- * Resolve the target database, preferring the per-action override then the
- * connector-level default. Throws rather than silently producing a bogus
- * identifier if neither is set.
- */
 const resolveDatabase = (inputDb: string | undefined, ctx: ActionContext): string => {
   const db = inputDb ?? (ctx.config?.database as string | undefined);
   if (!db) {
@@ -283,12 +301,3 @@ const resolveDatabase = (inputDb: string | undefined, ctx: ActionContext): strin
   }
   return db;
 };
-
-/**
- * Extract credentials from connector config to include in each request to the
- * HTTP proxy.
- */
-const resolveCredentials = (ctx: ActionContext) => ({
-  username: ctx.config?.username as string,
-  password: ctx.config?.password as string,
-});

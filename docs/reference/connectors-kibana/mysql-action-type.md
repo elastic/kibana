@@ -1,7 +1,7 @@
 ---
 navigation_title: "MySQL"
 type: reference
-description: "Connect to a MySQL database through an HTTP proxy to search and query data from Workplace AI conversations."
+description: "Connect directly to a MySQL database to search and query data from Workplace AI conversations."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,27 +9,30 @@ applies_to:
 
 # MySQL connector [mysql-action-type]
 
-The MySQL connector enables you to connect to a MySQL database to search and query your data from Workplace AI conversations.
+The MySQL connector enables you to connect directly to a MySQL database to search and query your data from chat conversations.
 
 ## Create connectors in {{kib}} [define-mysql-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. 
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [mysql-connector-configuration]
 
 MySQL connectors have the following configuration properties:
 
 Host
-:   The hostname, IP address, or URL of the MySQL HTTP proxy (for example, `https://your-mysql-proxy.example.com`, `192.168.1.1`, `localhost`).
+:   The hostname or IP address of the MySQL server (for example, `mysql.example.com`, `192.168.1.1`, `localhost`). Do not include a protocol prefix.
 
 Port
-:   The port number for the MySQL HTTP proxy (default: 8080).
+:   The port number of the MySQL server (default: 3306).
 
 Database
 :   The name of the default database to query.
 
-Bearer Token
-:   An authentication token for connecting to the MySQL server.
+Username
+:   The MySQL user to authenticate as.
+
+Password
+:   The password for the MySQL user.
 
 
 ## Test connectors [mysql-action-configuration]
@@ -66,40 +69,51 @@ Search Rows
 
 ## Requirements [mysql-requirements]
 
-The MySQL connector communicates with MySQL through an **HTTP proxy or gateway** that exposes a REST API in front of your database. Direct MySQL protocol (port 3306) is not supported.
+The MySQL connector connects directly to MySQL over the native MySQL protocol (default port 3306). Your MySQL server must be network-accessible from your Kibana instance.
 
 To use the MySQL connector, you need:
 
-1. An HTTP proxy or gateway that exposes your MySQL server as a REST API (for example, a custom middleware, [mysql2http](https://github.com/example/mysql2http), or a similar tool).
-2. A bearer token that grants read access to the databases you want to query through the proxy.
-3. The proxy must be accessible from your Kibana instance over HTTPS.
+1. A MySQL server accessible from your Kibana instance.
+2. A MySQL user with access to the databases you want to query.
+3. The server hostname, port, database name, and credentials.
 
-## Security and read-only enforcement [mysql-security]
+## Database user permissions [mysql-security]
 
-The MySQL connector enforces read-only access at the application level by rejecting any SQL that does not begin with a read-only keyword (`SELECT`, `SHOW`, `DESCRIBE`, `EXPLAIN`, or `WITH`) and by blocking multi-statement input.
+The permissions you grant to the MySQL user determine what the connector can do. Configure them to match your intended use case.
 
-Because the connector communicates through an HTTP proxy rather than maintaining a persistent MySQL connection, it cannot set `SESSION TRANSACTION READ ONLY` directly. To add a second layer of enforcement at the database level, configure your proxy to connect to MySQL using a dedicated read-only user:
+### Read-only chat use case (recommended)
+
+For chat conversations, where the goal is to query and explore data, use a dedicated user with only `SELECT` access. This is the recommended configuration and provides the strongest protection against unintended modifications.
 
 ```sql
--- Create a read-only user and grant only SELECT on the target databases
-CREATE USER 'kibana_readonly'@'%' IDENTIFIED BY '<password>';
-GRANT SELECT ON my_database.* TO 'kibana_readonly'@'%';
+-- Create a read-only user and grant SELECT on the target databases
+CREATE USER 'kibana_reader'@'%' IDENTIFIED BY '<password>';
+GRANT SELECT ON my_database.* TO 'kibana_reader'@'%';
 FLUSH PRIVILEGES;
 ```
 
-If your proxy supports session initialization hooks, you can also configure it to issue the following statement on every new connection:
+The connector also enforces read-only access at the application level by rejecting any SQL that does not begin with a read-only keyword (`SELECT`, `SHOW`, `DESCRIBE`, `EXPLAIN`, or `WITH`) and by blocking multi-statement input. Using a least-privilege database user adds a second, independent layer of enforcement.
+
+You can further restrict the user to connections from your Kibana host's IP address:
 
 ```sql
-SET SESSION TRANSACTION READ ONLY;
+CREATE USER 'kibana_reader'@'<kibana-host-ip>' IDENTIFIED BY '<password>';
 ```
 
-Using a least-privilege MySQL user is the recommended approach and provides the strongest guarantee against unintended writes.
+### Broader access
 
-## Get API credentials [mysql-api-credentials]
+If your use case requires write access or access across multiple databases, grant the appropriate privileges to the MySQL user. Scope permissions as narrowly as possible for your use case.
 
-To obtain credentials:
+```sql
+-- Example: grant read/write access to a specific database
+GRANT SELECT, INSERT, UPDATE, DELETE ON my_database.* TO 'kibana_user'@'%';
+FLUSH PRIVILEGES;
+```
 
-1. Deploy or identify the HTTP proxy that wraps your MySQL server.
-2. Create a dedicated read-only MySQL user and grant it `SELECT` access to the target databases (see [Security and read-only enforcement](#mysql-security)).
-3. Generate or retrieve a bearer token that the proxy accepts for authentication.
-4. Note the proxy host (URL, hostname, or IP), port, and the default database name.
+## Get connection details [mysql-api-credentials]
+
+To configure the connector:
+
+1. Identify the hostname or IP address of your MySQL server.
+2. Create a MySQL user with the appropriate permissions for your use case (see [Database user permissions](#mysql-security)).
+3. Note the server port (default: 3306) and the default database name.
