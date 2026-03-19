@@ -218,6 +218,7 @@ export const createSavedObjectsSerializerMock = (): SavedObjectsSerializerMock =
 
 export const createCasesClientMockArgs = () => {
   return {
+    esClient: { search: jest.fn() } as unknown as import('@kbn/core/server').ElasticsearchClient,
     services: {
       alertsService: createAlertServiceMock(),
       attachmentService: createAttachmentServiceMock(),

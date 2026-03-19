@@ -21,6 +21,7 @@ export class UnifiedAttachmentTypeRegistry extends AttachmentTypeRegistry<Unifie
       telemetry: attachmentType.telemetry || ((state, stats) => stats),
       inject: attachmentType.inject || identity,
       extract: attachmentType.extract || ((state) => ({ state, references: [] })),
+      getObservables: attachmentType.getObservables,
     };
 
     super.register(item);

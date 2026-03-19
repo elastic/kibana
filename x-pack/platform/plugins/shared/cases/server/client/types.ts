@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -51,6 +51,7 @@ export interface CasesServices {
  */
 export interface CasesClientArgs {
   readonly services: CasesServices;
+  readonly esClient: ElasticsearchClient;
   readonly user: User;
   readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   readonly logger: Logger;

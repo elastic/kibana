@@ -36,3 +36,8 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
 };
 
 export type { CasesServerSetup, CasesServerStart } from './types';
+export type { GetAttachmentDataContext } from './attachment_framework/types';
+export {
+  getObservablesFromFlattedEcs,
+  type FlattedEcsData,
+} from './common/utils/get_observables_from_ecs';

@@ -18,16 +18,6 @@ import { allCasesPermissions } from '../../../../cases_test_utils';
 
 jest.mock('../../../../common/lib/kibana');
 
-jest.mock('@kbn/cases-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/cases-plugin/public');
-  return {
-    ...actual,
-    useCasesContext: () => ({
-      features: { events: { enabled: true } },
-    }),
-  };
-});
-
 const refetch = jest.fn();
 const submit = jest.fn();
 const open = jest.fn().mockImplementation(() => {
@@ -60,14 +50,6 @@ const defaultProps = {
   refetch,
 };
 
-const mockObservable = [
-  {
-    typeKey: 'observable-type-hostname',
-    value: 'test-host',
-    description: 'Auto extracted observable',
-  },
-];
-
 const addToNewCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const addToExistingCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const useKibanaMock = useKibana as jest.Mock;
@@ -99,7 +81,7 @@ describe('useAddToCaseActions', () => {
           helpers: {
             getRuleIdFromEvent: () => null,
             canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
-            getObservablesFromEcs: jest.fn().mockReturnValue(mockObservable),
+            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
@@ -130,17 +112,18 @@ describe('useAddToCaseActions', () => {
     expect(result.current.addToCaseActionItems.length).toEqual(2);
   });
 
-  it('should call useCasesAddToNewCaseFlyout with attachments only when step is not active', () => {
+  it('should call useCasesAddToNewCaseFlyout with attachments only when step is not active', async () => {
     const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });
-    act(() => {
-      result.current.handleAddToNewCaseClick();
+    await act(async () => {
+      await result.current.handleAddToNewCaseClick();
     });
-    expect(open).toHaveBeenCalledWith({
-      attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
-      observables: mockObservable,
-    });
+    expect(open).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
+      })
+    );
   });
 
   it('should not prefill useCasesAddToNewCaseFlyout with tour step when step is not active', () => {
@@ -202,5 +185,32 @@ describe('useAddToCaseActions', () => {
     addToExistingCase.mock.calls[0][0].onSuccess();
 
     expect(refetch).toHaveBeenCalled();
+  });
+
+  it('should open flyout with event attachments without observables (added server-side on creation)', async () => {
+    const eventProps = {
+      ...defaultProps,
+      ecsData: { _id: 'event-123', _index: 'logs-*' },
+      nonEcsData: [] as typeof defaultProps.nonEcsData,
+    };
+    const { result } = renderHook(() => useAddToCaseActions(eventProps), {
+      wrapper: TestProviders,
+    });
+
+    await act(async () => {
+      await result.current.handleAddToNewCaseClick();
+    });
+
+    expect(open).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            type: 'securityEvent',
+            attachmentId: 'event-123',
+            metadata: { index: 'logs-*' },
+          }),
+        ],
+      })
+    );
   });
 });

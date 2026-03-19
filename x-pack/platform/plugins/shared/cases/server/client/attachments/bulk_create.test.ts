@@ -6,13 +6,14 @@
  */
 
 import { comment, actionComment, mockCases, mockCaseUnifiedAttachments } from '../../mocks';
-import { createCasesClientMockArgs } from '../mocks';
+import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import {
   MAX_COMMENT_LENGTH,
   MAX_BULK_CREATE_ATTACHMENTS,
   MAX_USER_ACTIONS_PER_CASE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
+import { EVENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { bulkCreate } from './bulk_create';
 import {
   createAttachmentServiceMock,
@@ -25,6 +26,7 @@ describe('bulkCreate', () => {
   const caseId = 'test-case';
 
   const clientArgs = createCasesClientMockArgs();
+  const casesClient = createCasesClientMock();
   const userActionService = createUserActionServiceMock();
   const caseService = createCaseServiceMock();
   const attachmentService = createAttachmentServiceMock();
@@ -40,14 +42,14 @@ describe('bulkCreate', () => {
   it('throws with excess fields', async () => {
     await expect(
       // @ts-expect-error: excess attribute
-      bulkCreate({ attachments: [{ ...comment, foo: 'bar' }], caseId }, clientArgs)
+      bulkCreate({ attachments: [{ ...comment, foo: 'bar' }], caseId }, clientArgs, casesClient)
     ).rejects.toThrow('invalid keys "foo"');
   });
 
   it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, async () => {
     const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(comment);
 
-    await expect(bulkCreate({ attachments, caseId }, clientArgs)).rejects.toThrow(
+    await expect(bulkCreate({ attachments, caseId }, clientArgs, casesClient)).rejects.toThrow(
       `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
     );
   });
@@ -58,7 +60,7 @@ describe('bulkCreate', () => {
     });
 
     await expect(
-      bulkCreate({ attachments: [comment, comment], caseId }, clientArgs)
+      bulkCreate({ attachments: [comment, comment], caseId }, clientArgs, casesClient)
     ).rejects.toThrow(
       `The case with id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
     );
@@ -71,7 +73,11 @@ describe('bulkCreate', () => {
         .toString();
 
       await expect(
-        bulkCreate({ attachments: [{ ...comment, comment: longComment }], caseId }, clientArgs)
+        bulkCreate(
+          { attachments: [{ ...comment, comment: longComment }], caseId },
+          clientArgs,
+          casesClient
+        )
       ).rejects.toThrow(
         `Failed while bulk creating attachment to case id: test-case error: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
       );
@@ -79,7 +85,7 @@ describe('bulkCreate', () => {
 
     it('should throw an error if the comment is an empty string', async () => {
       await expect(
-        bulkCreate({ attachments: [{ ...comment, comment: '' }], caseId }, clientArgs)
+        bulkCreate({ attachments: [{ ...comment, comment: '' }], caseId }, clientArgs, casesClient)
       ).rejects.toThrow(
         'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
       );
@@ -87,7 +93,11 @@ describe('bulkCreate', () => {
 
     it('should throw an error if the description is a string with empty characters', async () => {
       await expect(
-        bulkCreate({ attachments: [{ ...comment, comment: '  ' }], caseId }, clientArgs)
+        bulkCreate(
+          { attachments: [{ ...comment, comment: '  ' }], caseId },
+          clientArgs,
+          casesClient
+        )
       ).rejects.toThrow(
         'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
       );
@@ -103,7 +113,8 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate(
           { attachments: [{ ...actionComment, comment: longComment }], caseId },
-          clientArgs
+          clientArgs,
+          casesClient
         )
       ).rejects.toThrow(
         `Failed while bulk creating attachment to case id: test-case error: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
@@ -112,7 +123,11 @@ describe('bulkCreate', () => {
 
     it('should throw an error if the comment is an empty string', async () => {
       await expect(
-        bulkCreate({ attachments: [{ ...actionComment, comment: '' }], caseId }, clientArgs)
+        bulkCreate(
+          { attachments: [{ ...actionComment, comment: '' }], caseId },
+          clientArgs,
+          casesClient
+        )
       ).rejects.toThrow(
         'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
       );
@@ -120,7 +135,11 @@ describe('bulkCreate', () => {
 
     it('should throw an error if the description is a string with empty characters', async () => {
       await expect(
-        bulkCreate({ attachments: [{ ...actionComment, comment: '  ' }], caseId }, clientArgs)
+        bulkCreate(
+          { attachments: [{ ...actionComment, comment: '  ' }], caseId },
+          clientArgs,
+          casesClient
+        )
       ).rejects.toThrow(
         'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
       );
@@ -156,7 +175,7 @@ describe('bulkCreate', () => {
     ];
 
     await expect(
-      bulkCreate({ attachments: unifiedAttachments, caseId }, clientArgs)
+      bulkCreate({ attachments: unifiedAttachments, caseId }, clientArgs, casesClient)
     ).resolves.toBeDefined();
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
@@ -166,5 +185,88 @@ describe('bulkCreate', () => {
         ]),
       })
     );
+  });
+
+  describe('event attachments (fetch-based observables)', () => {
+    it('adds observables from fetched event document and dummy when creating', async () => {
+      clientArgs.unifiedAttachmentTypeRegistry.register({
+        id: EVENT_ATTACHMENT_TYPE,
+        schemaValidator: (metadata: unknown) => {
+          if (metadata != null && typeof metadata === 'object') {
+            const m = metadata as Record<string, unknown>;
+            if (m.index != null && typeof m.index !== 'string') {
+              throw new Error('metadata.index must be a string');
+            }
+          }
+        },
+      });
+      userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+
+      const theCase = { ...mockCases[0], id: caseId };
+      caseService.getCase.mockResolvedValue(theCase);
+      caseService.patchCase.mockResolvedValue(theCase);
+      caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 1,
+        per_page: 1,
+        page: 1,
+      });
+      attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+      );
+      attachmentService.bulkCreate.mockResolvedValue({
+        saved_objects: [mockCaseUnifiedAttachments[0]],
+      });
+      casesClient.cases.bulkAddObservables.mockResolvedValue(theCase as never);
+
+      (clientArgs.esClient.search as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'ev-123',
+              _index: 'logs-*',
+              fields: {
+                'host.name': ['test-host.example.com'],
+                'source.ip': ['192.168.1.1'],
+              },
+            },
+          ],
+        },
+      });
+
+      const eventAttachment = {
+        type: EVENT_ATTACHMENT_TYPE as const,
+        attachmentId: 'ev-123',
+        metadata: { index: 'logs-*' },
+        owner: SECURITY_SOLUTION_OWNER,
+      };
+
+      await bulkCreate({ attachments: [eventAttachment], caseId }, clientArgs, casesClient);
+
+      expect(clientArgs.esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: 'logs-*',
+          query: { ids: { values: ['ev-123'] } },
+        })
+      );
+      expect(casesClient.cases.bulkAddObservables).toHaveBeenCalledWith({
+        caseId,
+        observables: expect.arrayContaining([
+          expect.objectContaining({
+            typeKey: 'observable-type-hostname',
+            value: 'dummy-from-event-registry',
+            description: 'Dummy observable (event attachment type)',
+          }),
+          expect.objectContaining({
+            typeKey: 'observable-type-hostname',
+            value: 'test-host.example.com',
+          }),
+          expect.objectContaining({
+            typeKey: 'observable-type-ipv4',
+            value: '192.168.1.1',
+          }),
+        ]),
+      });
+    });
   });
 });

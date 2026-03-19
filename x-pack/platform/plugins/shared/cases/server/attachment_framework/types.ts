@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
+import type { ObservablePost } from '../../common/types/api';
+
+export interface GetAttachmentDataContext {
+  esClient: ElasticsearchClient;
+  attachmentId: string;
+  metadata?: Record<string, unknown>;
+}
 import type {
   UnifiedAttachmentPayload,
   UnifiedReferenceAttachmentPayload,
@@ -49,11 +57,15 @@ export type UnifiedAttachmentState = Pick<UnifiedAttachmentPayload, 'type' | 'me
 
 export interface UnifiedAttachmentType
   extends ExternalReferenceAttachmentType,
-    Omit<PersistableState<UnifiedAttachmentState>, 'migrations'> {}
+    Omit<PersistableState<UnifiedAttachmentState>, 'migrations'> {
+  getObservables?: (context: GetAttachmentDataContext) => Promise<ObservablePost[]>;
+}
 
 export interface UnifiedAttachmentTypeSetup
   extends ExternalReferenceAttachmentType,
-    Omit<PersistableStateDefinition<UnifiedAttachmentState>, 'migrations'> {}
+    Omit<PersistableStateDefinition<UnifiedAttachmentState>, 'migrations'> {
+  getObservables?: (context: GetAttachmentDataContext) => Promise<ObservablePost[]>;
+}
 
 export interface AttachmentFramework {
   registerExternalReference: (

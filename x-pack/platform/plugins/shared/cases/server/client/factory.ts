@@ -158,6 +158,7 @@ export class CasesClientFactory {
 
     return createCasesClient({
       services,
+      esClient: scopedClusterClient,
       unsecuredSavedObjectsClient,
       user: userInfo,
       logger: this.logger,

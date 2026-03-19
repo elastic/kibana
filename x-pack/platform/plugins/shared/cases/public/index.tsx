@@ -34,4 +34,5 @@ export type {
   CommonAttachmentTabViewProps,
 } from './client/attachment_framework/types';
 export { AttachmentActionType } from './client/attachment_framework/types';
+export { getObservablesFromEcs } from './client/helpers/get_observables_from_ecs';
 export { useCasesContext } from './components/cases_context/use_cases_context';
