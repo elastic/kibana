@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -54,6 +55,10 @@ const iconsListCss = {
   paddingLeft: '10px',
 };
 
+const actionsGroupCss = {
+  alignItems: 'center',
+};
+
 export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
   ({ actionId, agentIds, queryIds, addToTimeline, isScheduled }) => {
     const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' } as const), []);
@@ -71,6 +76,73 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
     const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
     const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
+    if (isHistoryEnabled) {
+      return (
+        <>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="m"
+            justifyContent="spaceBetween"
+            alignItems="center"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.osquery.liveQueryActionResults.results"
+                    defaultMessage="Query results"
+                  />
+                </h1>
+              </EuiText>
+            </EuiFlexItem>
+            {actionId && (
+              <EuiFlexItem grow={false} css={actionsGroupCss}>
+                <EuiFlexGroup gutterSize="m" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <AddToCaseWrapper
+                      actionId={actionId}
+                      agentIds={agentIds}
+                      isIcon={false}
+                      size="m"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <AddToTimelineButton
+                      field="action_id"
+                      value={queryIds}
+                      addToTimeline={addToTimeline}
+                      size="m"
+                    />
+                  </EuiFlexItem>
+                  {showAddTags && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="m"
+                        iconType="tag"
+                        color="primary"
+                        onClick={handleOpenFlyout}
+                        data-test-subj="add-tags-button"
+                      >
+                        {ADD_TAGS_LABEL}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer size={'l'} />
+          {isFlyoutOpen && actionId && (
+            <AddTagsFlyout
+              actionId={actionId}
+              currentTags={liveQueryDetails?.tags ?? EMPTY_TAGS}
+              onClose={handleCloseFlyout}
+            />
+          )}
+        </>
+      );
+    }
+
     return (
       <>
         <EuiSpacer size={'l'} />
@@ -79,7 +151,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
             <EuiText>
               <h2>
                 <FormattedMessage
-                  id="xpack.osquery.liveQueryActionResults.results"
+                  id="xpack.osquery.liveQueryActionResults.resultsHeading"
                   defaultMessage="Results"
                 />
               </h2>
@@ -130,13 +202,6 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size={'l'} />
-        {isFlyoutOpen && actionId && (
-          <AddTagsFlyout
-            actionId={actionId}
-            currentTags={liveQueryDetails?.tags ?? EMPTY_TAGS}
-            onClose={handleCloseFlyout}
-          />
-        )}
       </>
     );
   }
