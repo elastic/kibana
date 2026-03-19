@@ -59,7 +59,7 @@ export const RULE_TYPE_MODAL_TEST_SUBJECTS = {
 export const LOGS_TAB_TEST_SUBJECTS = {
   LOGS_TAB: 'logsTab',
   EVENT_LOG_TABLE: 'ruleEventLogListTable',
-  RULE_DETAILS: 'ruleDetails',
+  RULE_DETAILS: 'ruleDetailsTitle',
 } as const;
 
 /**

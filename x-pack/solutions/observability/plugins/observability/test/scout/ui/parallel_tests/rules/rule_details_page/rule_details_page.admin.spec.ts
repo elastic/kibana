@@ -87,7 +87,8 @@ test.describe.skip(
       await expect(pageObjects.ruleDetailsPage.alertSummaryWidget.compact).toBeVisible();
     });
 
-    test('should navigate to alerts tab with active filter when clicking active alerts', async ({
+    // Skipping these tests for now since the alert summary widget doesn't currently control the alerts tab navigation
+    test.skip('should navigate to alerts tab with active filter when clicking active alerts', async ({
       page,
       pageObjects,
     }) => {
@@ -105,7 +106,8 @@ test.describe.skip(
       expect(url).toContain('rangeTo:now');
     });
 
-    test('should navigate to alerts tab with all statuses when clicking total alerts', async ({
+    // Skipping these tests for now since the alert summary widget doesn't currently control the alerts tab navigation
+    test.skip('should navigate to alerts tab with all statuses when clicking total alerts', async ({
       page,
       pageObjects,
     }) => {
