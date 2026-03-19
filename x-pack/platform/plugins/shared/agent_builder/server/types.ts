@@ -37,6 +37,7 @@ import type { SkillRegistry } from './services/skills/skill_registry';
 import type { AgentExecutionService } from './services/execution';
 import type { ModelProviderFactoryFn } from './services/runner/model_provider';
 import type { SmlTypeDefinition, SmlIndexAttachmentParams } from './services/sml';
+import type { PluginsServiceSetup } from './services/plugins';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -166,6 +167,14 @@ export interface SmlSetup {
   registerType: (definition: SmlTypeDefinition) => void;
 }
 
+export interface PluginsSetup {
+  /**
+   * Register a built-in plugin to be available in agentBuilder.
+   * Built-in plugins are read-only and registered programmatically by solution teams.
+   */
+  register: PluginsServiceSetup['register'];
+}
+
 /**
  * Setup contract of the agentBuilder plugin.
  */
@@ -190,6 +199,10 @@ export interface AgentBuilderPluginSetup {
    * Skills setup contract, which can be used to register skills.
    */
   skills: SkillsSetup;
+  /**
+   * Plugins setup contract, which can be used to register built-in plugins.
+   */
+  plugins: PluginsSetup;
   /**
    * SML (Semantic Metadata Layer) setup contract.
    * Used to register content types for discovery and search.

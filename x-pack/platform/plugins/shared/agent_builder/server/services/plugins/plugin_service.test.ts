@@ -399,6 +399,7 @@ describe('PluginsService', () => {
 
   describe('deletePlugin', () => {
     it('deletes associated skills by plugin name, then deletes the plugin', async () => {
+      mockClient.has.mockResolvedValue(true);
       mockClient.get.mockResolvedValue(
         createMockPersistedPlugin({ id: 'plugin-1', name: 'my-plugin' })
       );
@@ -412,12 +413,12 @@ describe('PluginsService', () => {
       expect(mockClient.delete).toHaveBeenCalledWith('plugin-1');
     });
 
-    it('propagates errors from client.get', async () => {
-      mockClient.get.mockRejectedValue(new Error('Not found'));
+    it('propagates errors when plugin is not found', async () => {
+      mockClient.has.mockResolvedValue(false);
 
       await expect(
         start.deletePlugin({ request: mockRequest, pluginId: 'missing-id' })
-      ).rejects.toThrow('Not found');
+      ).rejects.toThrow(/not found/i);
 
       expect(mockSkillClient.deleteByPluginId).not.toHaveBeenCalled();
       expect(mockClient.delete).not.toHaveBeenCalled();
