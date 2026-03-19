@@ -41,7 +41,11 @@ const BREAKDOWN_ACCESSOR = 'breakdown';
 const METRIC_ACCESSOR_PREFIX = 'y';
 const REFERENCE_LINE_ACCESSOR_PREFIX = 'threshold';
 
-export function getValueColumns(layer: unknown, i: number) {
+export function getValueColumns(
+  layer: unknown,
+  i: number,
+  xAxisScale?: 'temporal' | 'ordinal' | 'linear'
+) {
   if (!isAPIXYLayer(layer) || !isAPIesqlXYLayer(layer)) {
     return [];
   }
@@ -53,8 +57,12 @@ export function getValueColumns(layer: unknown, i: number) {
       ...layer.thresholds.map((t, index) => getValueColumn(`referenceLine${index}`, t, 'number')),
     ];
   }
+  const xColumnType =
+    xAxisScale === 'temporal' ? 'date' : xAxisScale === 'linear' ? 'number' : undefined;
   return [
-    ...(layer.x ? [getValueColumn(getAccessorNameForXY(layer, X_ACCESSOR), layer.x)] : []),
+    ...(layer.x
+      ? [getValueColumn(getAccessorNameForXY(layer, X_ACCESSOR), layer.x, xColumnType)]
+      : []),
     ...layer.y.map((y, index) =>
       getValueColumn(getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index), y, 'number')
     ),
