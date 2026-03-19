@@ -52,6 +52,7 @@ dependsOn:
   - '@kbn/cloud-connect-plugin'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-security-server'
+  - '@kbn/inference-common'
 tags:
   - plugin
   - prod
