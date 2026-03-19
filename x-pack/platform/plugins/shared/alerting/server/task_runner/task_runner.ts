@@ -575,6 +575,7 @@ export class TaskRunner<
         consumer: runRuleParams.rule.consumer,
         revision: runRuleParams.rule.revision,
         uuid:
+          this.ruleType.solution === 'security' &&
           typeof runRuleParams.rule.params.ruleId === 'string'
             ? runRuleParams.rule.params.ruleId
             : undefined,
