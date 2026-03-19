@@ -1,5 +1,5 @@
 {
-  "sha1": "f8059930a102f522454747bbce9a26b18058f6ea",
+  "sha1": "f9f1314f0f67b572c2fd6cbc04d115a623534a3d",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -66,7 +66,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
-        "line": 42,
+        "line": 43,
         "column": 14
       }
     },
@@ -88,7 +88,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 14
       }
     },
@@ -110,7 +110,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
-        "line": 83,
+        "line": 84,
         "column": 14
       }
     },
@@ -132,7 +132,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts",
-        "line": 116,
+        "line": 117,
         "column": 14
       }
     },
@@ -528,7 +528,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 43,
+        "line": 54,
         "column": 14
       }
     },
@@ -550,7 +550,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 76,
+        "line": 83,
         "column": 14
       }
     },
@@ -572,7 +572,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 133,
+        "line": 124,
         "column": 14
       }
     },
@@ -594,7 +594,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 188,
+        "line": 163,
         "column": 14
       }
     },
@@ -616,7 +616,29 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 283,
+        "line": 230,
+        "column": 14
+      }
+    },
+    {
+      "id": "df7f704800ddfee-e8ad6dbd660a203",
+      "title": "Traces in Discover - Explore from APM Transaction Detail - Waterfall size warning \"view in Discover\" link opens traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
+        "line": 256,
         "column": 14
       }
     },
@@ -638,7 +660,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 313,
+        "line": 301,
         "column": 14
       }
     },
@@ -1171,6 +1193,50 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/red_metrics_charts.spec.ts",
         "line": 88,
+        "column": 14
+      }
+    },
+    {
+      "id": "53f97d0c42b6e9b-126381863b66a98",
+      "title": "Traces in Discover - Waterfall flyout usage child flyout loads the correct document data for each waterfall item",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
+        "line": 56,
+        "column": 14
+      }
+    },
+    {
+      "id": "53f97d0c42b6e9b-287bab24f344d0f",
+      "title": "Traces in Discover - Waterfall flyout usage Open in Discover from child flyout sections navigates to the correct data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
+        "line": 190,
         "column": 14
       }
     }

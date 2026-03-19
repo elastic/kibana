@@ -7,10 +7,14 @@
 
 export { Streams } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
-export { Ingest } from './src/models/ingest';
-export { WiredIngest } from './src/models/ingest/wired';
-export { ClassicIngest } from './src/models/ingest/classic';
-export { Query } from './src/models/query';
+export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
+export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
+export {
+  ClassicIngest,
+  ClassicStream,
+  ClassicIngestUpsertRequest,
+} from './src/models/ingest/classic';
+export { Query, QueryStream } from './src/models/query';
 export {
   ESQL_VIEW_PREFIX,
   getEsqlViewName,
@@ -107,6 +111,7 @@ export {
   type EsqlQuery,
   esqlQuerySchema,
   type StreamQuery,
+  type QueryLink,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
@@ -243,3 +248,6 @@ export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
+
+export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
+export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';

@@ -18,6 +18,8 @@ import { ApiPrivileges } from '@kbn/core-security-server';
 import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
+import { InferenceFeatureRegistry } from './inference_feature_registry';
+import { getForFeature } from './inference_endpoints';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -45,10 +47,12 @@ export class SearchInferenceEndpointsPlugin
   private readonly logger: Logger;
   private readonly config: SearchInferenceEndpointsConfig;
   private dynamicConnectorsPoller?: DynamicConnectorsPoller;
+  private readonly featureRegistry: InferenceFeatureRegistry;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfig>();
+    this.featureRegistry = new InferenceFeatureRegistry(this.logger);
   }
 
   public setup(
@@ -63,14 +67,14 @@ export class SearchInferenceEndpointsPlugin
 
     core.savedObjects.registerType(createInferenceSettingsSavedObjectType());
 
-    defineRoutes({ logger: this.logger, router });
+    defineRoutes({ logger: this.logger, router, featureRegistry: this.featureRegistry });
 
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
       minimumLicense: 'enterprise',
       name: PLUGIN_NAME,
-      order: 2,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      order: 4000,
+      category: DEFAULT_APP_CATEGORIES.management,
       app: [],
       catalogue: [],
       management: {
@@ -101,7 +105,11 @@ export class SearchInferenceEndpointsPlugin
       },
     });
 
-    return {};
+    return {
+      features: {
+        register: this.featureRegistry.register.bind(this.featureRegistry),
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: SearchInferenceEndpointsPluginStartDependencies) {
@@ -118,7 +126,22 @@ export class SearchInferenceEndpointsPlugin
       this.dynamicConnectorsPoller.start();
     }
 
-    return {};
+    const featureRegistry = this.featureRegistry;
+
+    return {
+      features: {
+        get: featureRegistry.get.bind(featureRegistry),
+        getAll: featureRegistry.getAll.bind(featureRegistry),
+        register: featureRegistry.register.bind(featureRegistry),
+      },
+      endpoints: {
+        getForFeature: (featureId: string) => {
+          const esClient = core.elasticsearch.client.asInternalUser;
+          const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
+          return getForFeature(featureRegistry, soClient, esClient, featureId);
+        },
+      },
+    };
   }
 
   public stop() {

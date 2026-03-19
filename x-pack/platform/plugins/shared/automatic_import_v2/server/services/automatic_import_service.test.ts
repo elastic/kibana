@@ -916,8 +916,8 @@ describe('AutomaticImportSetupService', () => {
       });
     });
 
-    it('should handle errors during task execution and not update SavedObject', async () => {
-      const mockUpdateDataStream = jest.fn();
+    it('should mark data stream as failed when task execution errors', async () => {
+      const mockUpdateDataStream = jest.fn().mockResolvedValue(undefined);
       const mockGetDataStream = jest.fn().mockResolvedValue({
         attributes: {
           data_stream_id: 'test-datastream',
@@ -948,7 +948,6 @@ describe('AutomaticImportSetupService', () => {
         state: { task_status: 'pending' },
       };
 
-      // Mock core setup and plugins to simulate error
       const mockCoreStart = {
         elasticsearch: {
           client: {
@@ -999,10 +998,100 @@ describe('AutomaticImportSetupService', () => {
 
       const result = (await taskRunner.run()) as any;
 
-      // Verify that updateDataStreamSavedObjectAttributes was NOT called on error
-      expect(mockUpdateDataStream).not.toHaveBeenCalled();
+      expect(mockUpdateDataStream).toHaveBeenCalledTimes(1);
+      expect(mockUpdateDataStream).toHaveBeenCalledWith({
+        integrationId: 'test-integration',
+        dataStreamId: 'test-datastream',
+        status: 'failed',
+      });
       expect(result.state.task_status).toBe('failed');
       expect(result.error).toBeDefined();
+    });
+
+    it('should throw unrecoverable error for non-recoverable failures (e.g. connector not found)', async () => {
+      const mockUpdateDataStream = jest.fn().mockResolvedValue(undefined);
+
+      const mockSavedObjectService = {
+        updateDataStreamSavedObjectAttributes: mockUpdateDataStream,
+      };
+
+      const taskManagerService = (service as any).taskManagerService;
+      (taskManagerService as any).automaticImportSavedObjectService = mockSavedObjectService;
+
+      const registeredTasks = mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0];
+      const taskDefinition = registeredTasks['autoImport-dataStream-task'];
+      const createTaskRunner = taskDefinition.createTaskRunner;
+
+      const mockTaskInstance = {
+        id: 'test-task-id',
+        params: {
+          integrationId: 'test-integration',
+          dataStreamId: 'test-datastream',
+          connectorId: 'invalid-connector',
+        },
+        state: { task_status: 'pending' },
+      };
+
+      const connectorNotFoundError = Object.assign(
+        new Error("No connector found for id 'invalid-connector'"),
+        { statusCode: 404 }
+      );
+
+      const mockCoreStart = {
+        elasticsearch: {
+          client: {
+            asScoped: jest.fn().mockReturnValue({
+              asCurrentUser: {},
+            }),
+          },
+        },
+      };
+
+      const mockPluginsStart = {
+        inference: {
+          getChatModel: jest.fn().mockRejectedValue(connectorNotFoundError),
+        },
+        fieldsMetadata: {
+          getClient: jest.fn().mockResolvedValue({
+            find: jest.fn().mockResolvedValue({ toPlain: () => ({}) }),
+            getByName: jest.fn(),
+          }),
+        },
+      };
+
+      const coreSetupMock = {
+        getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
+      };
+
+      (taskManagerService as any).agentService = {
+        invokeAutomaticImportAgent: jest.fn(),
+      };
+
+      const taskRunner = createTaskRunner({
+        taskInstance: mockTaskInstance as any,
+        fakeRequest: {} as any,
+        abortController: new AbortController(),
+      });
+
+      const originalRunTask = (taskManagerService as any).runTask;
+      (taskManagerService as any).runTask = jest
+        .fn()
+        .mockImplementation(async (taskInstance, core, savedObjectService) => {
+          return originalRunTask.call(
+            taskManagerService,
+            taskInstance,
+            coreSetupMock,
+            savedObjectService
+          );
+        });
+
+      await expect(taskRunner.run()).rejects.toThrow('No connector found');
+
+      expect(mockUpdateDataStream).toHaveBeenCalledWith({
+        integrationId: 'test-integration',
+        dataStreamId: 'test-datastream',
+        status: 'failed',
+      });
     });
   });
 });

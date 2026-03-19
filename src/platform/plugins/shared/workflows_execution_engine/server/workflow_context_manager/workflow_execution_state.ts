@@ -37,8 +37,14 @@ export class WorkflowExecutionState {
   }
 
   public async load(): Promise<void> {
-    const foundSteps = await this.workflowStepExecutionRepository.searchStepExecutionsByExecutionId(
-      this.workflowExecution.id
+    if (!this.workflowExecution.stepExecutionIds) {
+      throw new Error(
+        'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
+      );
+    }
+
+    const foundSteps = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
+      this.workflowExecution.stepExecutionIds
     );
     foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
     this.buildStepIdExecutionIdIndex();
@@ -136,10 +142,6 @@ export class WorkflowExecutionState {
     await this.workflowExecutionRepository.updateWorkflowExecution({
       ...changes,
       id: this.workflowExecution.id,
-      // Include all step execution IDs sorted by execution order for O(1) mget lookup on read side
-      stepExecutionIds: Array.from(this.stepExecutions.values())
-        .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
-        .map((step) => step.id),
     });
   }
 
@@ -157,9 +159,17 @@ export class WorkflowExecutionState {
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
+      isTestRun: Boolean(this.workflowExecution.isTestRun),
     } as EsWorkflowStepExecution;
     this.stepExecutions.set(step.id as string, newStep);
     this.stepDocumentsChanges.set(step.id as string, newStep);
+    // As we are creating a new step execution, we need to update the workflow execution with the new step execution ID
+    // Due to the fact that execution and flushes are synchronous, it's safe to use incremental approach to update the step execution IDs
+    // while still keeping the order of the step execution IDs according to the global execution index
+    // At the same time it's safer because we don't rely on how many step executions are loaded in resume task.
+    this.updateWorkflowExecution({
+      stepExecutionIds: [...(this.workflowExecution.stepExecutionIds || []), step.id as string],
+    });
   }
 
   private updateStep(step: Partial<EsWorkflowStepExecution>) {
