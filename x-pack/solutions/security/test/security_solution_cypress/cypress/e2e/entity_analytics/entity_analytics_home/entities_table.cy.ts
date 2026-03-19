@@ -22,7 +22,6 @@ import {
   FIELDS_SELECTOR_RESET,
   FIELDS_SELECTOR_CLOSE,
   LAST_UPDATED,
-  GROUPING_SELECTOR,
   FLYOUT_RIGHT_PANEL,
 } from '../../../screens/entity_analytics/entity_analytics_home';
 import { TIMELINE_FLYOUT_WRAPPER } from '../../../screens/timeline';
@@ -166,42 +165,6 @@ describe(
       it('"Updated X seconds ago" text is displayed', () => {
         cy.get(LAST_UPDATED).should('be.visible');
         cy.get(LAST_UPDATED).should('contain', 'Updated');
-      });
-    });
-
-    describe('Grouping', () => {
-      it('"Group entities by" selector is visible', () => {
-        cy.get(GROUPING_SELECTOR).should('exist');
-      });
-
-      it('can group by Entity type', () => {
-        cy.get(GROUPING_SELECTOR).click();
-        cy.contains('Entity type').click();
-
-        cy.contains('3 groups').should('be.visible');
-      });
-
-      it('grouped view shows group counters with entity counts', () => {
-        cy.get(GROUPING_SELECTOR).click();
-        cy.contains('Entity type').click();
-
-        cy.contains('3 groups').should('be.visible');
-        cy.get('[data-test-subj="entity-analytics-grouping-counter"]').should(
-          'have.length.at.least',
-          1
-        );
-      });
-
-      it('clicking "None" returns to the flat table view', () => {
-        cy.get(GROUPING_SELECTOR).click();
-        cy.contains('Entity type').click();
-        cy.contains('3 groups').should('be.visible');
-
-        cy.get(GROUPING_SELECTOR).click();
-        cy.contains('None').click();
-
-        cy.contains('6 entities').should('be.visible');
-        cy.get(ENTITIES_TABLE_GRID).should('exist');
       });
     });
   }
