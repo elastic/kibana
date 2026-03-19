@@ -53,6 +53,7 @@ export interface IterationTelemetry {
   docsCount: number;
   featuresNew: number;
   featuresUpdated: number;
+  durationMs: number;
   tokensUsed: ChatCompletionTokenCount;
 }
 
@@ -64,6 +65,7 @@ export interface IdentifyFeaturesIterativelyOptions {
   logger: Logger;
   signal: AbortSignal;
   maxIterations?: number;
+  onIterationComplete?: (telemetry: IterationTelemetry) => void;
 }
 
 export async function identifyFeaturesIteratively({
@@ -74,6 +76,7 @@ export async function identifyFeaturesIteratively({
   logger,
   signal,
   maxIterations = DEFAULT_MAX_ITERATIONS,
+  onIterationComplete,
 }: IdentifyFeaturesIterativelyOptions): Promise<{
   features: BaseFeature[];
   tokensUsed: ChatCompletionTokenCount;
@@ -108,6 +111,7 @@ export async function identifyFeaturesIteratively({
       } features accumulated so far`
     );
 
+    const iterationStart = Date.now();
     const { features: iterationFeatures, tokensUsed } = await identifyFeatures({
       streamName,
       sampleDocuments: batch,
@@ -141,13 +145,16 @@ export async function identifyFeaturesIteratively({
       }
     }
 
-    iterationTelemetry.push({
+    const iterationEntry: IterationTelemetry = {
       iteration: i + 1,
       docsCount: batch.length,
       featuresNew: newFeatureCount,
       featuresUpdated: updatedFeatureCount,
+      durationMs: Date.now() - iterationStart,
       tokensUsed,
-    });
+    };
+    iterationTelemetry.push(iterationEntry);
+    onIterationComplete?.(iterationEntry);
 
     const cachedTokens = tokensUsed.cached ?? 0;
     logger.debug(

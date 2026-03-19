@@ -235,99 +235,16 @@ const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipe
   };
 
 const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps> = {
-  inferred_total_count: {
-    type: 'long',
-    _meta: {
-      description: 'The total number of inferred features',
-    },
-  },
-  inferred_dedup_count: {
-    type: 'long',
-    _meta: {
-      description: 'The number of inferred features after deduplication',
-    },
-  },
-  input_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of input tokens used for the identification request',
-    },
-  },
-  output_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of output tokens used for the identification request',
-    },
-  },
-  total_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The total number of tokens used for the identification request',
-    },
-  },
-  cached_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of cached tokens used for the identification request',
-      optional: true,
-    },
-  },
-  iteration_telemetry: {
-    type: 'array',
-    items: {
-      properties: {
-        iteration: { type: 'long', _meta: { description: 'Iteration number (1-based)' } },
-        docs_count: {
-          type: 'long',
-          _meta: { description: 'Number of documents used in this iteration' },
-        },
-        features_new: {
-          type: 'long',
-          _meta: { description: 'New features added in this iteration' },
-        },
-        features_updated: {
-          type: 'long',
-          _meta: { description: 'Existing features updated in this iteration' },
-        },
-        input_tokens_used: {
-          type: 'long',
-          _meta: { description: 'Input tokens used in this iteration' },
-        },
-        output_tokens_used: {
-          type: 'long',
-          _meta: { description: 'Output tokens used in this iteration' },
-        },
-        total_tokens_used: {
-          type: 'long',
-          _meta: { description: 'Total tokens used in this iteration' },
-        },
-        cached_tokens_used: {
-          type: 'long',
-          _meta: { description: 'Cached tokens used in this iteration' },
-        },
-      },
-    },
-    _meta: {
-      description: 'Per-iteration telemetry: features found, tokens used, and features updated',
-      optional: true,
-    },
-  },
-  total_duration_ms: {
-    type: 'long',
-    _meta: {
-      description: 'The total duration of the features identification task in milliseconds',
-    },
-  },
-  identification_duration_ms: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the LLM features identification in milliseconds',
-    },
-  },
-  stream_type: {
+  run_id: {
     type: 'keyword',
     _meta: {
-      description: 'The type of the stream: wired or classic',
+      description: 'UUID identifying the full identification run (shared across iterations)',
+    },
+  },
+  iteration: {
+    type: 'long',
+    _meta: {
+      description: 'Iteration number (1-based); 0 for terminal failure/cancel events',
     },
   },
   stream_name: {
@@ -336,10 +253,64 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
       description: 'The name of the Stream',
     },
   },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
   state: {
     type: 'keyword',
     _meta: {
-      description: 'The state of the features identification task (success, failure, or canceled)',
+      description: 'The state of this event (success, failure, or canceled)',
+    },
+  },
+  docs_count: {
+    type: 'long',
+    _meta: {
+      description: 'Number of documents used in this iteration',
+    },
+  },
+  features_new: {
+    type: 'long',
+    _meta: {
+      description: 'New features identified in this iteration',
+    },
+  },
+  features_updated: {
+    type: 'long',
+    _meta: {
+      description: 'Existing features updated in this iteration',
+    },
+  },
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Input tokens used in this iteration',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Output tokens used in this iteration',
+    },
+  },
+  total_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Total tokens used in this iteration',
+    },
+  },
+  cached_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Cached tokens used in this iteration',
+    },
+  },
+  duration_ms: {
+    type: 'long',
+    _meta: {
+      description: 'Duration of this iteration in milliseconds',
     },
   },
 };
