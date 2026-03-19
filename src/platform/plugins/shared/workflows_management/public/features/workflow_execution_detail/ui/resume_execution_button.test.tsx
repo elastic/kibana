@@ -23,11 +23,11 @@ jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsCapabilities: jest.fn(),
 }));
 
-// Capture the onSubmit callback exposed by StepExecuteModal so tests can trigger it.
+// Capture the onSubmit callback exposed by ResumeExecutionModal so tests can trigger it.
 let capturedOnSubmit: ((params: { stepInputs: Record<string, unknown> }) => void) | undefined;
 
-jest.mock('../../run_workflow/ui/step_execute_modal', () => ({
-  StepExecuteModal: ({
+jest.mock('./resume_execution_modal', () => ({
+  ResumeExecutionModal: ({
     onSubmit,
     onClose,
     resumeMessage,
@@ -38,7 +38,7 @@ jest.mock('../../run_workflow/ui/step_execute_modal', () => ({
   }) => {
     capturedOnSubmit = onSubmit;
     return (
-      <div data-test-subj="test-step-modal">
+      <div data-test-subj="resume-execution-modal">
         <span data-test-subj="modal-resume-message">{resumeMessage ?? ''}</span>
         <button type="button" data-test-subj="modal-close" onClick={onClose}>
           {'Close'}
@@ -112,26 +112,26 @@ describe('ResumeExecutionButton', () => {
   describe('modal', () => {
     it('modal is closed by default', () => {
       renderComponent();
-      expect(screen.queryByTestId('test-step-modal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('resume-execution-modal')).not.toBeInTheDocument();
     });
 
     it('opens modal on "Provide action" click', () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('provideActionButton'));
-      expect(screen.getByTestId('test-step-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('resume-execution-modal')).toBeInTheDocument();
     });
 
     it('opens modal immediately when autoOpen=true', () => {
       renderComponent({ autoOpen: true });
-      expect(screen.getByTestId('test-step-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('resume-execution-modal')).toBeInTheDocument();
     });
 
     it('closes modal when onClose is called', () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('provideActionButton'));
-      expect(screen.getByTestId('test-step-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('resume-execution-modal')).toBeInTheDocument();
       fireEvent.click(screen.getByTestId('modal-close'));
-      expect(screen.queryByTestId('test-step-modal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('resume-execution-modal')).not.toBeInTheDocument();
     });
 
     it('passes resumeMessage to modal', () => {
@@ -167,7 +167,7 @@ describe('ResumeExecutionButton', () => {
       });
       await waitFor(() => {
         expect(mockAddSuccess).toHaveBeenCalledTimes(1);
-        expect(screen.queryByTestId('test-step-modal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('resume-execution-modal')).not.toBeInTheDocument();
       });
     });
 
@@ -185,7 +185,7 @@ describe('ResumeExecutionButton', () => {
           apiError,
           expect.objectContaining({ title: expect.any(String) })
         );
-        expect(screen.getByTestId('test-step-modal')).toBeInTheDocument();
+        expect(screen.getByTestId('resume-execution-modal')).toBeInTheDocument();
       });
     });
 

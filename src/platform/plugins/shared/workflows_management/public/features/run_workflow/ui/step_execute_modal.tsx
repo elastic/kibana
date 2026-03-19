@@ -32,11 +32,6 @@ import { StepExecuteManualForm } from './step_execute_manual_form';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { useWorkflowsMonacoTheme } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
-const RESUME_MODE_DEFAULT: ContextOverrideData = {
-  stepContext: {},
-  schema: z.object({}).catchall(z.unknown()),
-};
-
 const STEP_INPUT_TABS = ['manual', 'historical'] as const;
 type StepInputTab = (typeof STEP_INPUT_TABS)[number];
 
@@ -57,7 +52,7 @@ const STEP_TAB_DESCRIPTIONS: Record<StepInputTab, string> = {
 };
 
 export interface StepExecuteModalProps {
-  initialcontextOverride?: ContextOverrideData;
+  initialcontextOverride: ContextOverrideData;
   onSubmit?: (params: { stepInputs: Record<string, unknown> }) => void;
   onClose: () => void;
   initialStepExecutionId?: string;
@@ -65,8 +60,6 @@ export interface StepExecuteModalProps {
   initialTab?: StepInputTab;
   stepId: string;
   workflowGraph?: WorkflowGraph;
-  mode?: 'test' | 'resume';
-  resumeMessage?: string;
 }
 
 export const StepExecuteModal = React.memo<StepExecuteModalProps>(
@@ -79,21 +72,15 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
     initialTab,
     stepId,
     workflowGraph,
-    mode = 'test',
-    resumeMessage,
   }) => {
     useWorkflowsMonacoTheme();
     const { euiTheme } = useEuiTheme();
-    const isResumeMode = mode === 'resume';
-    const contextOverride = isResumeMode
-      ? RESUME_MODE_DEFAULT
-      : initialcontextOverride ?? RESUME_MODE_DEFAULT;
     const stepContextOverride = useMemo(
-      () => contextOverride.stepContext ?? {},
-      [contextOverride.stepContext]
+      () => initialcontextOverride.stepContext ?? {},
+      [initialcontextOverride.stepContext]
     );
     const [selectedTab, setSelectedTab] = useState<StepInputTab>(
-      isResumeMode ? 'manual' : initialTab ?? (initialStepExecutionId ? 'historical' : 'manual')
+      initialTab ?? (initialStepExecutionId ? 'historical' : 'manual')
     );
     const [inputsJson, setInputsJson] = React.useState<string>(
       JSON.stringify(stepContextOverride, null, 2)
@@ -102,8 +89,8 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
     const [executionInputWarnings, setExecutionInputWarnings] = useState<string | null>(null);
 
     const contextJsonSchema = useMemo(
-      () => z.toJSONSchema(contextOverride.schema, { target: 'draft-7' }),
-      [contextOverride.schema]
+      () => z.toJSONSchema(initialcontextOverride.schema, { target: 'draft-7' }),
+      [initialcontextOverride.schema]
     );
 
     // Validate inputs on initial load and when json definition changes (same for manual and historical tabs)
@@ -123,7 +110,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
           );
         }
         if (parsedJson) {
-          const res = contextOverride.schema.safeParse(parsedJson);
+          const res = initialcontextOverride.schema.safeParse(parsedJson);
           if (!res.success) {
             setExecutionInputWarnings(
               res.error.issues
@@ -135,7 +122,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
           }
         }
       }
-    }, [contextOverride.schema, inputsJson, setExecutionInputErrors]);
+    }, [initialcontextOverride.schema, inputsJson, setExecutionInputErrors]);
 
     const modalTitleId = useGeneratedHtmlId();
 
@@ -174,31 +161,12 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
           <EuiModalHeaderTitle id={modalTitleId}>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem>
-                {isResumeMode ? (
-                  <FormattedMessage
-                    id="workflows.testStepModal.resumeTitle"
-                    defaultMessage="Provide action"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="workflows.testStepModal.title"
-                    defaultMessage='Test "{stepName}" step'
-                    values={{ stepName: stepId }}
-                  />
-                )}
+                <FormattedMessage
+                  id="workflows.testStepModal.title"
+                  defaultMessage='Test "{stepName}" step'
+                  values={{ stepName: stepId }}
+                />
               </EuiFlexItem>
-              {isResumeMode && (
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    {resumeMessage ?? (
-                      <FormattedMessage
-                        id="workflows.testStepModal.resumeDescription"
-                        defaultMessage="Provide input to resume the workflow."
-                      />
-                    )}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -212,58 +180,56 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
           `}
         >
           <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
-            {!isResumeMode && (
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  padding: 0 ${euiTheme.size.l};
-                `}
-              >
-                <EuiFlexGroup direction="row" gutterSize="m">
-                  {STEP_INPUT_TABS.map((tab) => (
-                    <EuiFlexItem key={tab}>
-                      <EuiButton
-                        color={selectedTab === tab ? 'primary' : 'text'}
-                        onClick={() => handleChangeTab(tab)}
-                        iconSide="right"
-                        contentProps={{
-                          style: {
-                            justifyContent: 'flex-start',
-                            flexDirection: 'column',
-                            alignItems: 'flex-start',
-                            textAlign: 'left',
-                          },
-                        }}
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                padding: 0 ${euiTheme.size.l};
+              `}
+            >
+              <EuiFlexGroup direction="row" gutterSize="m">
+                {STEP_INPUT_TABS.map((tab) => (
+                  <EuiFlexItem key={tab}>
+                    <EuiButton
+                      color={selectedTab === tab ? 'primary' : 'text'}
+                      onClick={() => handleChangeTab(tab)}
+                      iconSide="right"
+                      contentProps={{
+                        style: {
+                          justifyContent: 'flex-start',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          textAlign: 'left',
+                        },
+                      }}
+                      css={css`
+                        width: 100%;
+                        height: fit-content;
+                        min-height: 100%;
+                        padding: ${euiTheme.size.m};
+                      `}
+                    >
+                      <EuiRadio
+                        name={STEP_TAB_LABELS[tab]}
+                        label={STEP_TAB_LABELS[tab]}
+                        id={`test-step-tab-${tab}`}
+                        checked={selectedTab === tab}
+                        onChange={() => {}}
+                        css={{ fontWeight: euiTheme.font.weight.bold }}
+                      />
+                      <EuiText
+                        size="s"
                         css={css`
-                          width: 100%;
-                          height: fit-content;
-                          min-height: 100%;
-                          padding: ${euiTheme.size.m};
+                          text-wrap: auto;
+                          margin-left: ${euiTheme.size.l};
                         `}
                       >
-                        <EuiRadio
-                          name={STEP_TAB_LABELS[tab]}
-                          label={STEP_TAB_LABELS[tab]}
-                          id={`test-step-tab-${tab}`}
-                          checked={selectedTab === tab}
-                          onChange={() => {}}
-                          css={{ fontWeight: euiTheme.font.weight.bold }}
-                        />
-                        <EuiText
-                          size="s"
-                          css={css`
-                            text-wrap: auto;
-                            margin-left: ${euiTheme.size.l};
-                          `}
-                        >
-                          {STEP_TAB_DESCRIPTIONS[tab]}
-                        </EuiText>
-                      </EuiButton>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
+                        {STEP_TAB_DESCRIPTIONS[tab]}
+                      </EuiText>
+                    </EuiButton>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
 
             <EuiFlexItem
               css={css`
@@ -301,16 +267,12 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
           <EuiButton
             onClick={handleSubmit}
             disabled={isSubmitDisabled}
-            color={isResumeMode ? 'warning' : 'success'}
-            iconType={isResumeMode ? 'check' : 'play'}
+            color="success"
+            iconType="play"
             size="s"
             data-test-subj="workflowSubmitStepRun"
           >
-            {isResumeMode ? (
-              <FormattedMessage id="workflows.testStepModal.resumeBtn" defaultMessage="Resume" />
-            ) : (
-              <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
-            )}
+            <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>

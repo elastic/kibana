@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { ResumeExecutionModal } from './resume_execution_modal';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { StepExecuteModal } from '../../run_workflow/ui/step_execute_modal';
 
 interface ResumeExecutionButtonProps {
   executionId: string;
@@ -113,10 +113,8 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       </EuiCallOut>
 
       {isModalOpen && (
-        <StepExecuteModal
-          mode="resume"
+        <ResumeExecutionModal
           resumeMessage={resumeMessage}
-          stepId="waitForInput"
           onClose={closeModal}
           onSubmit={handleSubmit}
         />
