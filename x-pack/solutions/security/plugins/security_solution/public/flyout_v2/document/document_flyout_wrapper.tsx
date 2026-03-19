@@ -13,7 +13,7 @@ import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import type { ResolverCellActionRenderer } from '../../resolver/types';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../data_view_manager/constants';
-import { DocumentFlyout } from './index';
+import { DocumentFlyout } from '.';
 
 const DATA_VIEW_ERROR = i18n.translate(
   'xpack.securitySolution.analyzer.eventOverviewFlyout.dataViewError',

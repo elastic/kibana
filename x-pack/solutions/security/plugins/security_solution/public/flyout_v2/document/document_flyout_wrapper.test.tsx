@@ -17,10 +17,8 @@ import { DocumentFlyoutWrapper } from './document_flyout_wrapper';
 jest.mock('@kbn/unified-doc-viewer-plugin/public');
 jest.mock('../../data_view_manager/hooks/use_data_view');
 
-const mockDocumentFlyout = jest.fn((props: unknown) => (
-  <div data-test-subj="documentFlyoutStub" />
-));
-jest.mock('./index', () => ({
+const mockDocumentFlyout = jest.fn((props: unknown) => <div data-test-subj="documentFlyoutStub" />);
+jest.mock('.', () => ({
   DocumentFlyout: (props: unknown) => mockDocumentFlyout(props),
 }));
 

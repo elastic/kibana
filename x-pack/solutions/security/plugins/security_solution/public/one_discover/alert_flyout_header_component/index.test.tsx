@@ -18,7 +18,7 @@ import type { StartServices } from '../../types';
 
 const mockDocumentHeader = jest.fn((_props: unknown) => <div>{'MockDocumentHeader'}</div>);
 
-jest.mock('../../flyout_v2/document/components/document_header', () => ({
+jest.mock('../../flyout_v2/document/header', () => ({
   DocumentHeader: (props: unknown) => mockDocumentHeader(props),
 }));
 
