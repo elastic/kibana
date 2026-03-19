@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { css } from '@emotion/react';
 import * as translations from '../../../common/translations';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
@@ -35,7 +36,6 @@ import { getModelId } from '../../utils/get_model_id';
 import type { InferenceFeatureConfig } from './feature_metadata';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
-import { css } from '@emotion/react';
 
 const COLLAPSED_COUNT = 1;
 
@@ -56,6 +56,16 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const { features: registeredFeatures } = useRegisteredFeatures();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [listWidth, setListWidth] = useState<number | undefined>(undefined);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setListWidth(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const endpointDisplayMap = useMemo(
     () =>
@@ -135,7 +145,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         alignItems="baseline"
         wrap
       >
-        <EuiFlexItem css={css`min-inline-size: min(20rem, 50%);`}>
+        <EuiFlexItem
+          css={css`
+            min-inline-size: min(20rem, 50%);
+          `}
+        >
           <EuiTitle size="s">
             <h4>{feature.featureName}</h4>
           </EuiTitle>
@@ -153,7 +167,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
           )}
         </EuiFlexItem>
 
-        <EuiFlexItem css={css`min-inline-size: min(20rem, 50%);`}>
+        <EuiFlexItem
+          css={css`
+            min-inline-size: min(20rem, 50%);
+          `}
+        >
           <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
             <EuiText size="xs" color="subdued">
               <strong>{translations.SETTINGS_ASSIGNED_MODELS}</strong>
@@ -161,85 +179,105 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             <EuiSpacer size="s" />
 
             <EuiDragDropContext onDragEnd={handleDragEnd}>
-              <EuiSplitPanel.Outer hasBorder>
-                <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
-                  {visibleEndpoints.map((endpointId, index) => (
-                    <EuiDraggable
-                      key={endpointId}
-                      index={index}
-                      draggableId={endpointId}
-                      customDragHandle
-                      hasInteractiveChildren
-                    >
-                      {(provided) => (
-                        <>
-                          <EuiSplitPanel.Inner
-                            paddingSize="s"
-                            data-test-subj={`endpoint-row-${endpointId}`}
-                          >
-                            <EuiFlexGroup alignItems="center" gutterSize="s">
-                              <EuiFlexItem grow={false}>
-                                <EuiPanel
-                                  color="transparent"
-                                  paddingSize="none"
-                                  {...provided.dragHandleProps}
-                                  aria-label={i18n.translate(
-                                    'xpack.searchInferenceEndpoints.settings.dragHandle',
-                                    { defaultMessage: 'Drag to reorder' }
-                                  )}
-                                >
-                                  <EuiIcon type="grab" size="s" color="subdued" aria-hidden />
-                                </EuiPanel>
-                              </EuiFlexItem>
-                              <EuiFlexItem grow={false}>
-                                <EuiIcon
-                                  type={endpointDisplayMap.get(endpointId)?.icon ?? 'compute'}
-                                  size="m"
-                                  aria-hidden
-                                />
-                              </EuiFlexItem>
-                              <EuiFlexItem grow>
-                                <EuiToolTip
-                                  title={endpointDisplayMap.get(endpointId)?.label ?? endpointId}
-                                  content={endpointId}
-                                  position="top"
-                                >
-                                  <EuiText size="s" tabIndex={0} css={css`overflow: hidden; text-overflow: ellipsis; white-space: nowrap;`}>
-                                    <span>{endpointDisplayMap.get(endpointId)?.label ?? endpointId}</span>
-                                  </EuiText> 
-                                </EuiToolTip>
-                              </EuiFlexItem>
-                              {index === 0 && (
+              <div ref={listRef}>
+                <EuiSplitPanel.Outer hasBorder>
+                  <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
+                    {visibleEndpoints.map((endpointId, index) => (
+                      <EuiDraggable
+                        key={endpointId}
+                        index={index}
+                        draggableId={endpointId}
+                        customDragHandle
+                        hasInteractiveChildren
+                      >
+                        {(provided) => (
+                          <>
+                            <EuiSplitPanel.Inner
+                              paddingSize="s"
+                              data-test-subj={`endpoint-row-${endpointId}`}
+                            >
+                              <EuiFlexGroup alignItems="center" gutterSize="s">
                                 <EuiFlexItem grow={false}>
-                                  <EuiBadge color="hollow">
-                                    {translations.SETTINGS_DEFAULT_BADGE}
-                                  </EuiBadge>
+                                  <EuiPanel
+                                    color="transparent"
+                                    paddingSize="none"
+                                    {...provided.dragHandleProps}
+                                    aria-label={i18n.translate(
+                                      'xpack.searchInferenceEndpoints.settings.dragHandle',
+                                      { defaultMessage: 'Drag to reorder' }
+                                    )}
+                                  >
+                                    <EuiIcon type="grab" size="s" color="subdued" aria-hidden />
+                                  </EuiPanel>
                                 </EuiFlexItem>
-                              )}
-                              <EuiFlexItem grow={false}>
-                                <EuiButtonIcon
-                                  iconType="cross"
-                                  aria-label={i18n.translate('xpack.searchInferenceEndpoints.settings.removeModel', {
-                                    defaultMessage: 'Remove model',
-                                  })}
-                                  size="s"
-                                  color="text"
-                                  onClick={() => handleRemove(index)}
-                                  isDisabled={endpointIds.length <= 1}
-                                  data-test-subj={`remove-endpoint-${endpointId}`}
-                                />
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </EuiSplitPanel.Inner>
-                          {index !== visibleEndpoints.length - 1 && (
-                            <EuiHorizontalRule margin="none" />
-                          )}
-                        </>
-                      )}
-                    </EuiDraggable>
-                  ))}
-                </EuiDroppable>
-              </EuiSplitPanel.Outer>
+                                <EuiFlexItem grow={false}>
+                                  <EuiIcon
+                                    type={endpointDisplayMap.get(endpointId)?.icon ?? 'compute'}
+                                    size="m"
+                                    aria-hidden
+                                  />
+                                </EuiFlexItem>
+                                <EuiFlexItem
+                                  grow
+                                  css={css`
+                                    min-width: 0;
+                                  `}
+                                >
+                                  <EuiToolTip
+                                    title={endpointDisplayMap.get(endpointId)?.label ?? endpointId}
+                                    content={endpointId}
+                                    position="top"
+                                  >
+                                    <EuiText
+                                      size="s"
+                                      tabIndex={0}
+                                      css={css`
+                                        overflow: hidden;
+                                        text-overflow: ellipsis;
+                                        white-space: nowrap;
+                                      `}
+                                    >
+                                      <span>
+                                        {endpointDisplayMap.get(endpointId)?.label ?? endpointId}
+                                      </span>
+                                    </EuiText>
+                                  </EuiToolTip>
+                                </EuiFlexItem>
+                                {index === 0 && (
+                                  <EuiFlexItem grow={false}>
+                                    <EuiBadge color="hollow">
+                                      {translations.SETTINGS_DEFAULT_BADGE}
+                                    </EuiBadge>
+                                  </EuiFlexItem>
+                                )}
+                                <EuiFlexItem grow={false}>
+                                  <EuiButtonIcon
+                                    iconType="cross"
+                                    aria-label={i18n.translate(
+                                      'xpack.searchInferenceEndpoints.settings.removeModel',
+                                      {
+                                        defaultMessage: 'Remove model',
+                                      }
+                                    )}
+                                    size="s"
+                                    color="text"
+                                    onClick={() => handleRemove(index)}
+                                    isDisabled={endpointIds.length <= 1}
+                                    data-test-subj={`remove-endpoint-${endpointId}`}
+                                  />
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            </EuiSplitPanel.Inner>
+                            {index !== visibleEndpoints.length - 1 && (
+                              <EuiHorizontalRule margin="none" />
+                            )}
+                          </>
+                        )}
+                      </EuiDraggable>
+                    ))}
+                  </EuiDroppable>
+                </EuiSplitPanel.Outer>
+              </div>
             </EuiDragDropContext>
 
             <EuiSpacer size="xs" />
@@ -266,6 +304,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                     existingEndpointIds={endpointIds}
                     onAdd={handleAdd}
                     taskType={feature.taskType || undefined}
+                    panelWidth={listWidth}
                   />
                 </EuiFlexItem>
               )}

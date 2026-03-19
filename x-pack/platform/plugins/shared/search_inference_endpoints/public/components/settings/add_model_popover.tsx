@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -19,12 +20,14 @@ interface AddModelPopoverProps {
   existingEndpointIds: string[];
   onAdd: (endpointId: string) => void;
   taskType?: string;
+  panelWidth?: number;
 }
 
 export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
   existingEndpointIds,
   onAdd,
   taskType,
+  panelWidth,
 }) => {
   const { data: inferenceEndpoints = [] } = useQueryInferenceEndpoints();
   const [isOpen, setIsOpen] = useState(false);
@@ -86,6 +89,15 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="s"
       anchorPosition="downLeft"
+      panelProps={
+        panelWidth
+          ? {
+              css: css`
+                width: ${panelWidth}px;
+              `,
+            }
+          : undefined
+      }
     >
       <EuiSelectable
         options={options}
