@@ -399,7 +399,6 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await test.step('maximize a panel', async () => {
       await pageObjects.dashboard.maximizePanel();
     });
-
     await expect(page.locator('.dshLayout-isMaximizedPanel')).toBeVisible();
   });
 
