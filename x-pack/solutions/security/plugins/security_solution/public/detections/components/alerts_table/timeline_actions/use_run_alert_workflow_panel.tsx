@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiButton, EuiPanel, EuiFlexGroup } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   useRunWorkflow,
@@ -23,7 +23,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { AlertTriggerInput } from '@kbn/workflows-management-plugin/common/types/alert_types';
 import type { RenderingService } from '@kbn/core-rendering-browser';
-import { Loader } from '../../../../common/components/loader';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -44,6 +43,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
     services: { application, rendering },
   } = useKibana<{ application: ApplicationStart; rendering: RenderingService }>();
   const { addSuccess: workflowTriggerSuccess, addError: workflowTriggerFailed } = useAppToasts();
+  const { euiTheme } = useEuiTheme();
 
   const runWorkflow = useRunWorkflow();
   const [selectedId, setSelectedId] = React.useState<string>('');
@@ -140,8 +140,24 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
 
   return (
     <>
-      <EuiPanel paddingSize={'none'}>
-        {isLoading ? <Loader>{workflowSelector}</Loader> : workflowSelector}
+      <EuiPanel paddingSize={'none'} css={{ position: 'relative' }}>
+        {workflowSelector}
+        {isLoading && (
+          <div
+            css={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: euiTheme.colors.backgroundBasePlain,
+              opacity: 0.75,
+              zIndex: euiTheme.levels.header,
+            }}
+          >
+            <EuiLoadingSpinner size="m" />
+          </div>
+        )}
       </EuiPanel>
       <EuiButton
         data-test-subj="execute-alert-workflow-button"
