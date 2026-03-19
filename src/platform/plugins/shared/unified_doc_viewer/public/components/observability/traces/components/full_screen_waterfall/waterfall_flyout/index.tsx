@@ -26,11 +26,28 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useState } from 'react';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
+import {
+  FlyoutViewedTabId,
+  type FlyoutViewedContent,
+} from '../../../../../../analytics/flyout_viewed_event';
+import { useTrackFlyoutViewed } from '../../../../../../analytics/use_track_flyout_viewed';
 
 const tabIds = {
   OVERVIEW: 'unifiedDocViewerTracesSpanFlyoutOverview',
   TABLE: 'unifiedDocViewerTracesSpanFlyoutTable',
   JSON: 'unifiedDocViewerTracesSpanFlyoutJson',
+};
+
+const mapTabIdToFlyoutViewedTabId = (tabId: string): FlyoutViewedTabId => {
+  switch (tabId) {
+    case tabIds.TABLE:
+      return FlyoutViewedTabId.TABLE;
+    case tabIds.JSON:
+      return FlyoutViewedTabId.JSON;
+    case tabIds.OVERVIEW:
+    default:
+      return FlyoutViewedTabId.OVERVIEW;
+  }
 };
 
 const tabs = [
@@ -76,6 +93,7 @@ export interface Props {
   loading: boolean;
   dataView: DocViewRenderProps['dataView'];
   dataTestSubj?: string;
+  flyoutViewedContent?: FlyoutViewedContent;
   children: React.ReactNode;
 }
 
@@ -87,10 +105,16 @@ export function WaterfallFlyout({
   children,
   title,
   dataTestSubj,
+  flyoutViewedContent,
 }: Props) {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const flyoutTitleId = useGeneratedHtmlId();
   const flyoutId = useGeneratedHtmlId({ prefix: 'documentDetailFlyout' });
+
+  useTrackFlyoutViewed({
+    content: flyoutViewedContent,
+    tabId: mapTabIdToFlyoutViewedTabId(selectedTabId),
+  });
 
   return (
     <EuiFlyout

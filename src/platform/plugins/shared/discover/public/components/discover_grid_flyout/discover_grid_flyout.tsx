@@ -16,14 +16,19 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
+import { FlyoutViewedContent, UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
 import type { DocViewerExtensionParams } from '../../context_awareness';
 import { useProfileAccessor } from '../../context_awareness';
+import { OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID } from '../../context_awareness/profile_providers/observability/traces_document_profile/document_profile/profile';
 
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
+
+const getDocumentProfileId = (record: DataTableRecord): string | undefined => {
+  return (record as DataTableRecord & { context?: { profileId?: string } }).context?.profileId;
+};
 
 export interface DiscoverGridFlyoutProps
   extends Pick<
@@ -135,6 +140,11 @@ export function DiscoverGridFlyout({
       initialDocViewerState={initialDocViewerState}
       onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       onUpdateSelectedTabId={onUpdateSelectedTabId}
+      flyoutViewedContent={
+        getDocumentProfileId(actualHit) === OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID
+          ? FlyoutViewedContent.DOC_DETAIL
+          : undefined
+      }
       hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
     />
   );

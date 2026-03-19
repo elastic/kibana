@@ -20,7 +20,8 @@ import { DataSourceCategory, DocumentType, SolutionType } from '../../../../prof
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
 
-const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-document-profile';
+export const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID =
+  'observability-traces-document-profile';
 
 export const createObservabilityTracesDocumentProfileProvider = ({
   apmContextService,

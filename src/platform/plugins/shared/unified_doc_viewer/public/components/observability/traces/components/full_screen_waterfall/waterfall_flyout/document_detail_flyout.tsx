@@ -11,6 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
 import { WaterfallFlyout } from '.';
+import { FlyoutViewedContent } from '../../../../../../analytics/flyout_viewed_event';
 import type { TraceOverviewSections } from '../../../doc_viewer_overview/overview';
 import { spanFlyoutId, SpanFlyoutContent } from './span_flyout';
 import { logsFlyoutId, LogFlyoutContent } from './logs_flyout';
@@ -77,6 +78,7 @@ export function DocumentDetailFlyout({
       loading={data.loading}
       title={data.title}
       dataTestSubj={dataTestSubj}
+      flyoutViewedContent={type === spanFlyoutId ? FlyoutViewedContent.SPAN_DETAIL : undefined}
     >
       {data.error && <EuiCallOut announceOnMount title={data.error} color="danger" />}
       {data.hit ? (

@@ -32,8 +32,25 @@ import useObservable from 'react-use/lib/useObservable';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { DocViewerProps } from '@kbn/unified-doc-viewer';
+import { getUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
+import {
+  FLYOUT_VIEWED_EVENT_TYPE,
+  FlyoutViewedTabId,
+  type FlyoutViewedContent,
+} from '../../analytics/flyout_viewed_event';
+
+const mapDocViewerTabIdToFlyoutViewedTabId = (tabId: string): FlyoutViewedTabId => {
+  switch (tabId) {
+    case 'doc_view_table':
+      return FlyoutViewedTabId.TABLE;
+    case 'doc_view_source':
+      return FlyoutViewedTabId.JSON;
+    default:
+      return FlyoutViewedTabId.OVERVIEW;
+  }
+};
 
 export interface UnifiedDocViewerFlyoutProps
   extends Pick<
@@ -50,6 +67,7 @@ export interface UnifiedDocViewerFlyoutProps
   flyoutActions?: React.ReactNode;
   flyoutType?: 'push' | 'overlay';
   flyoutWidthLocalStorageKey?: string;
+  flyoutViewedContent?: FlyoutViewedContent;
   services: {
     toastNotifications?: ToastsStart;
     chrome: ChromeStart;
@@ -111,8 +129,10 @@ export function UnifiedDocViewerFlyout({
   onFilter,
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
+  flyoutViewedContent: flyoutViewedContentProp,
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
+  const { analytics } = getUnifiedDocViewerServices();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
   const chromeStyle = useObservable(services.chrome.getChromeStyle$(), 'classic');
   const isProjectStyle = chromeStyle === 'project';
@@ -257,6 +277,21 @@ export function UnifiedDocViewerFlyout({
   const currentFlyoutTitle = flyoutTitle ?? defaultFlyoutTitle;
   const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
 
+  const onUpdateSelectedTabIdWithTracking = useCallback(
+    (tabId: string | undefined) => {
+      onUpdateSelectedTabId?.(tabId);
+
+      if (!tabId) return;
+      if (!flyoutViewedContentProp) return;
+
+      analytics.reportEvent(FLYOUT_VIEWED_EVENT_TYPE, {
+        content: flyoutViewedContentProp,
+        tabId: mapDocViewerTabIdToFlyoutViewedTabId(tabId),
+      });
+    },
+    [analytics, flyoutViewedContentProp, onUpdateSelectedTabId]
+  );
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -330,7 +365,7 @@ export function UnifiedDocViewerFlyout({
             initialTabId={initialTabId}
             initialDocViewerState={initialDocViewerState}
             onInitialDocViewerStateChange={onInitialDocViewerStateChange}
-            onUpdateSelectedTabId={onUpdateSelectedTabId}
+            onUpdateSelectedTabId={onUpdateSelectedTabIdWithTracking}
             {...docViewRenderProps}
           />
         </EuiFlyoutBody>

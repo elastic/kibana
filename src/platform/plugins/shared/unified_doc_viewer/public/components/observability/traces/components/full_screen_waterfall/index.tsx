@@ -21,6 +21,8 @@ import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { FlyoutViewedContent } from '../../../../../analytics/flyout_viewed_event';
+import { useTrackFlyoutViewed } from '../../../../../analytics/use_track_flyout_viewed';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
 
@@ -64,6 +66,8 @@ export const FullScreenWaterfall = ({
     'observability-full-trace-waterfall'
   )?.render;
   const { euiTheme } = useEuiTheme();
+
+  useTrackFlyoutViewed({ content: FlyoutViewedContent.TIMELINE_WATERFALL });
 
   /*
    * Temporary workaround: add a native <style> tag to fix the z-index of EuiDataGrid cell popovers
