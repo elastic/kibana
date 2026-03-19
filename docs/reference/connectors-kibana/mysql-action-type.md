@@ -2,8 +2,6 @@
 navigation_title: "MySQL"
 type: reference
 description: "Connect to a MySQL database through an HTTP proxy to search and query data from Workplace AI conversations."
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/mysql-action-type.html
 applies_to:
   stack: preview 9.4
   serverless: preview

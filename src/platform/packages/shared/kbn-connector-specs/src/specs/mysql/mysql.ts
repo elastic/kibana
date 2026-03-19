@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import { assertReadOnly, escapeLikePattern } from '../generic_db/generic_db_connector';
+import { assertReadOnly, escapeLikePattern } from '../../lib/generic_db_connector';
 import {
   DescribeTableInputSchema,
   ListDatabasesInputSchema,

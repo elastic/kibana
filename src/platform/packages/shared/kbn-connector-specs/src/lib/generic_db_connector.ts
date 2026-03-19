@@ -8,8 +8,7 @@
  */
 
 /**
- * Shared utilities for database connectors that communicate via an HTTP proxy.
- * Includes SQL safety guards and HTTP connector helpers.
+ * Shared utilities for database connectors
  */
 
 // ---------------------------------------------------------------------------
