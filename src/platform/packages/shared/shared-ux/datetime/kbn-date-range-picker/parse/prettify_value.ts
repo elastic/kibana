@@ -38,9 +38,7 @@ const getDelimiterPatterns = (extraDelimiter?: string): RegExp[] => {
   const delimiters = [...PARSER_DELIMITERS, DATE_RANGE_INPUT_DELIMITER];
   if (extraDelimiter) delimiters.push(extraDelimiter);
 
-  return delimiters
-    .map(buildDelimiterPattern)
-    .filter((p): p is RegExp => p !== null);
+  return delimiters.map(buildDelimiterPattern).filter((p): p is RegExp => p !== null);
 };
 
 /**

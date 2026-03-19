@@ -44,9 +44,7 @@ describe('prettifyValue', () => {
 
   describe('mixed relative and absolute', () => {
     it('prettifies the relative start, keeps absolute end', () => {
-      expect(prettifyValue('now-1d/d to 2025-06-15T00:00:00Z')).toBe(
-        '-1d - 2025-06-15T00:00:00Z'
-      );
+      expect(prettifyValue('now-1d/d to 2025-06-15T00:00:00Z')).toBe('-1d - 2025-06-15T00:00:00Z');
     });
 
     it('keeps rounding on end bound when start is absolute', () => {
