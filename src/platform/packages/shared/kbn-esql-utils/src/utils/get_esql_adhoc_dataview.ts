@@ -82,10 +82,6 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  if (options?.createNewInstanceEvenIfCachedOneAvailable) {
-    timeFieldCache.delete(query);
-  }
-
   let timeFieldName: string | undefined;
   if (timeFieldCache.has(query)) {
     timeFieldName = await timeFieldCache.get(query);
