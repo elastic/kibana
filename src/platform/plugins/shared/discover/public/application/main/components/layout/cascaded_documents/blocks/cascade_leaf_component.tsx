@@ -31,7 +31,7 @@ interface ESQLDataCascadeLeafCellProps
       | 'showTimeCol'
       | 'dataView'
       | 'showKeyboardShortcuts'
-      | 'renderDocumentView'
+      | 'renderDocumentViewFlyout'
       | 'externalCustomRenderers'
       | 'onUpdateDataGridDensity'
     >,
@@ -196,7 +196,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     showTimeCol,
     dataView,
     showKeyboardShortcuts,
-    renderDocumentView,
+    renderDocumentViewFlyout,
     externalCustomRenderers,
     getScrollElement,
     getScrollMargin,
@@ -205,7 +205,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
-    const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
     );
@@ -221,12 +220,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     }, [cascadeDataGridDensityState, onUpdateDataGridDensity]);
 
     const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
-
-    const setExpandedDocFn = useCallback(
-      (...args: Parameters<NonNullable<UnifiedDataTableProps['setExpandedDoc']>>) =>
-        setExpandedDoc(args[0]),
-      [setExpandedDoc]
-    );
 
     const renderCustomToolbarWithElements = useMemo(
       () =>
@@ -303,11 +296,9 @@ export const ESQLDataCascadeLeafCell = React.memo(
         columns={selectedColumns}
         onSetColumns={setSelectedColumns}
         renderCustomToolbar={renderCustomToolbarWithElements}
-        expandedDoc={expandedDoc}
-        setExpandedDoc={setExpandedDocFn}
         dataGridDensityState={cascadeDataGridDensityState}
         onUpdateDataGridDensity={setCascadeDataGridDensityState}
-        renderDocumentView={renderDocumentView}
+        renderDocumentViewFlyout={renderDocumentViewFlyout}
         renderCustomGridBody={renderCustomCascadeGridBodyCallback}
         onFullScreenChange={setIsCellInFullScreenMode}
         externalCustomRenderers={externalCustomRenderers}

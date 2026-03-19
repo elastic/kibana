@@ -41,7 +41,7 @@ export interface ESQLDataCascadeProps
     | 'showTimeCol'
     | 'dataView'
     | 'showKeyboardShortcuts'
-    | 'renderDocumentView'
+    | 'renderDocumentViewFlyout'
     | 'externalCustomRenderers'
     | 'onUpdateDataGridDensity'
   > {

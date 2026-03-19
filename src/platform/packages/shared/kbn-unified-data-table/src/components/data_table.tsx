@@ -15,6 +15,7 @@ import React, {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -132,6 +133,16 @@ export enum DataLoadingState {
   loaded = 'loaded',
 }
 
+export interface DocViewerSnapshot {
+  expandedDoc: DataTableRecord | undefined;
+}
+
+export interface GetDocViewerExternalStore {
+  subscribe: (onDocViewerSnapshotChange: () => void) => () => void;
+  getSnapshot: () => DocViewerSnapshot;
+  getServerSnapshot: () => DocViewerSnapshot;
+}
+
 /**
  * Unified Data Table props
  */
@@ -174,10 +185,6 @@ interface InternalUnifiedDataTableProps {
    * Update header row height state
    */
   onUpdateHeaderRowHeight?: (headerRowHeight: number) => void;
-  /**
-   * If set, the given document is displayed in a flyout
-   */
-  expandedDoc?: DataTableRecord;
   /**
    * The used data view
    */
@@ -327,13 +334,15 @@ interface InternalUnifiedDataTableProps {
   /**
    * Callback to render DocumentView when the document is expanded
    */
-  renderDocumentView?: (
-    hit: DataTableRecord,
+  renderDocumentViewFlyout?: (
     displayedRows: DataTableRecord[],
     displayedColumns: string[],
-    expandedDocSetter: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void,
     columnsMeta?: DataTableColumnsMeta
-  ) => JSX.Element | undefined;
+  ) => {
+    externalStore: GetDocViewerExternalStore;
+    setExpandedDoc: (doc?: DataTableRecord) => void;
+  };
+
   /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
    */
@@ -545,9 +554,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
       totalHits,
       onFetchMoreRecords,
-      renderDocumentView,
-      setExpandedDoc,
-      expandedDoc,
+      renderDocumentViewFlyout: renderDocumentView,
       configRowHeight,
       showMultiFields = true,
       maxDocFieldsDisplayed = 50,
@@ -739,10 +746,21 @@ const InternalUnifiedDataTable = React.forwardRef<
       changeCurrentPageIndex,
     ]);
 
+    const docViewerHelpers = useMemo(
+      () => renderDocumentView?.(displayedRows, displayedColumns, columnsMeta),
+      [renderDocumentView, displayedRows, displayedColumns, columnsMeta]
+    );
+
+    const docViewerSnapshot = useSyncExternalStore(
+      docViewerHelpers?.externalStore.subscribe || (() => () => {}),
+      docViewerHelpers?.externalStore.getSnapshot || (() => ({ expandedDoc: undefined })),
+      docViewerHelpers?.externalStore.getServerSnapshot || (() => undefined)
+    );
+
     const unifiedDataTableContextValue = useMemo<DataTableContext>(
       () => ({
-        expanded: expandedDoc,
-        setExpanded: setExpandedDoc,
+        expanded: docViewerSnapshot?.expandedDoc,
+        setExpanded: docViewerHelpers?.setExpandedDoc,
         getRowByIndex: (index: number) => displayedRows[index],
         onFilter,
         dataView,
@@ -754,17 +772,18 @@ const InternalUnifiedDataTable = React.forwardRef<
         pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
       }),
       [
-        componentsTourSteps,
+        docViewerSnapshot?.expandedDoc,
+        docViewerHelpers?.setExpandedDoc,
+        onFilter,
         dataView,
+        selectedDocsState,
+        valueToStringConverter,
+        componentsTourSteps,
         isPlainRecord,
         isPaginationEnabled,
+        paginationObj?.pageIndex,
+        paginationObj?.pageSize,
         displayedRows,
-        expandedDoc,
-        onFilter,
-        setExpandedDoc,
-        selectedDocsState,
-        paginationObj,
-        valueToStringConverter,
       ]
     );
 
@@ -1050,12 +1069,10 @@ const InternalUnifiedDataTable = React.forwardRef<
       ]
     );
 
-    const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
-
     const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
       const { leadColumns, leadColumnsExtraContent } = getLeadControlColumns({
         rows: displayedRows,
-        canSetExpandedDoc,
+        canSetExpandedDoc: Boolean(renderDocumentView),
       });
 
       const filteredLeadColumns = leadColumns.filter((column) =>
@@ -1080,11 +1097,11 @@ const InternalUnifiedDataTable = React.forwardRef<
 
       return filteredLeadColumns;
     }, [
-      canSetExpandedDoc,
       controlColumnIds,
       displayedRows,
       externalControlColumns,
       getRowIndicator,
+      renderDocumentView,
       rowAdditionalLeadingControls,
     ]);
 
@@ -1453,15 +1470,6 @@ const InternalUnifiedDataTable = React.forwardRef<
               </p>
             </EuiScreenReaderOnly>
           )}
-          {canSetExpandedDoc &&
-            expandedDoc &&
-            renderDocumentView!(
-              expandedDoc,
-              displayedRows,
-              displayedColumns,
-              setExpandedDoc!,
-              columnsMeta
-            )}
         </span>
       </UnifiedDataTableContext.Provider>
     );

@@ -176,6 +176,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
                 css={css`
                   margin-right: 4px;
                 `}
+                aria-hidden={true}
               />
               <EuiText size="xs">
                 {i18n.translate('esqlDataGrid.openInDiscoverLabel', {
@@ -224,7 +225,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       sort={sortOrder}
       ariaLabelledBy="esqlDataGrid"
       maxDocFieldsDisplayed={100}
-      renderDocumentView={renderDocumentView}
+      renderDocumentViewFlyout={renderDocumentView}
       showFullScreenButton={false}
       configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
       rowHeightState={rowHeight}
