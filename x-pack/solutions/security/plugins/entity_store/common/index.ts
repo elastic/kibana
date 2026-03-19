@@ -31,6 +31,7 @@ const ENTITY_STORE_BASE_ROUTE = '/internal/security/entity_store';
 
 export const ENTITY_STORE_ROUTES = {
   INSTALL: `${ENTITY_STORE_BASE_ROUTE}/install`,
+  UPDATE: ENTITY_STORE_BASE_ROUTE,
   UNINSTALL: `${ENTITY_STORE_BASE_ROUTE}/uninstall`,
   STATUS: `${ENTITY_STORE_BASE_ROUTE}/status`,
   START: `${ENTITY_STORE_BASE_ROUTE}/start`,

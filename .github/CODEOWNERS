@@ -1032,6 +1032,7 @@ x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/resp
 x-pack/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/form-generator @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/oauth-hooks @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/retry-service @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/rule_form @elastic/response-ops
@@ -2371,6 +2372,7 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 # Connector Specs
 src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
+src/platform/packages/shared/kbn-connector-specs/src/get_workflow_templates* @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng

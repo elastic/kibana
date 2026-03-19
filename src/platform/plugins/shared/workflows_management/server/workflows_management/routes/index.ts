@@ -14,6 +14,7 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { registerDeleteWorkflowByIdRoute } from './delete_workflow_by_id';
 import { registerDeleteWorkflowsBulkRoute } from './delete_workflows_bulk';
+import { registerGetChildWorkflowExecutionsRoute } from './get_child_workflow_executions';
 import { registerGetConnectorsRoute } from './get_connectors';
 import { registerGetStepExecutionRoute } from './get_step_execution';
 import { registerGetWorkflowAggsRoute } from './get_workflow_aggs';
@@ -71,6 +72,7 @@ export function defineRoutes(
   registerPostTestStepRoute(deps);
   registerGetWorkflowExecutionsRoute(deps);
   registerGetWorkflowExecutionByIdRoute(deps);
+  registerGetChildWorkflowExecutionsRoute(deps);
   registerPostCancelWorkflowExecutionRoute(deps);
   registerPostResumeWorkflowExecutionRoute(deps);
   registerGetWorkflowExecutionLogsRoute(deps);
