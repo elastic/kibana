@@ -12,7 +12,10 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { baseMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
 export function getUpdateRequestBodySchema(isDashboardAppRequest: boolean) {
-  return getDashboardStateSchema(isDashboardAppRequest);
+  return getDashboardStateSchema(isDashboardAppRequest).extends({
+    meta: schema.maybe(schema.never()),
+    warnings: schema.maybe(schema.never()),
+  });
 }
 
 export function getUpdateResponseBodySchema(isDashboardAppRequest: boolean) {

@@ -140,4 +140,23 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
       '[request body.panels]: expected value of type [array] but got [Object]'
     );
   });
+
+  apiTest('validation - returns error when meta is provided', async ({ apiClient }) => {
+    const response = await apiClient.post(DASHBOARD_API_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title: 'foo',
+        meta: {},
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      "[request body.meta]: a value wasn't expected to be present"
+    );
+  });
 });

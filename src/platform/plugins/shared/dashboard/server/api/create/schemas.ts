@@ -25,7 +25,10 @@ export const createRequestParamsSchema = schema.maybe(
 );
 
 export function getCreateRequestBodySchema(isDashboardAppRequest: boolean) {
-  return getDashboardStateSchema(isDashboardAppRequest);
+  return getDashboardStateSchema(isDashboardAppRequest).extends({
+    meta: schema.maybe(schema.never()),
+    warnings: schema.maybe(schema.never()),
+  });
 }
 
 export function getCreateResponseBodySchema(isDashboardAppRequest: boolean) {

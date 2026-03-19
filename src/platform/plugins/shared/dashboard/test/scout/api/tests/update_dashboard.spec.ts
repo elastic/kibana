@@ -102,4 +102,23 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
       '[request body.panels]: expected value of type [array] but got [Object]'
     );
   });
+
+  apiTest('validation - returns error when warnings is provided', async ({ apiClient }) => {
+    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title: 'foo',
+        warnings: ['copied-from-get'],
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      "[request body.warnings]: a value wasn't expected to be present"
+    );
+  });
 });
