@@ -7,12 +7,11 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
 
 import { i18n } from '@kbn/i18n';
 
 import { SolutionViewSwitchModal } from './modal';
-import { SOLUTION_VIEW_CONFIG, SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX } from '../constants';
+import { SOLUTION_VIEW_CONFIG } from '../constants';
 import type {
   SolutionViewSwitchCalloutInternalProps,
   SolutionViewSwitchCalloutProps,
@@ -20,49 +19,20 @@ import type {
 } from '../types';
 
 export const SolutionViewSwitchCalloutInternal = ({
-  spacesManager,
-  getStartServices,
   currentSolution,
+  manageSpacesUrl,
+  updateSpace,
+  showError,
 }: SolutionViewSwitchCalloutProps & SolutionViewSwitchCalloutInternalProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { value: asyncParams } = useAsync(async () => {
-    const [{ application, notifications }] = await getStartServices();
-    return {
-      notifications,
-      manageSpacesUrl: application.getUrlForApp('management', { path: 'kibana/spaces' }),
-    };
-  }, [getStartServices]);
-
   const handleSwitch = async (selectedSolution: SupportedSolutionView) => {
-    if (!asyncParams) return;
-    const { notifications } = asyncParams;
-
     setIsLoading(true);
-
     try {
-      const activeSpace = await spacesManager.getActiveSpace();
-      const spaceId = activeSpace.id;
-
-      await spacesManager.updateSpace({
-        ...activeSpace,
-        solution: selectedSolution,
-      });
-      try {
-        localStorage.setItem(`${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}:${spaceId}`, 'true');
-      } catch {
-        // Ignore storage errors
-      }
-      window.location.reload();
+      await updateSpace(selectedSolution);
     } catch (error) {
-      const message = error?.body?.message ?? error.toString();
-      notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.spaces.solutionViewSwitch.errorSwitchingTitle', {
-          defaultMessage: 'Error switching solution view: {message}',
-          values: { message },
-        }),
-      });
+      showError(error);
     } finally {
       setIsLoading(false);
     }
@@ -97,12 +67,12 @@ export const SolutionViewSwitchCalloutInternal = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isModalOpen && asyncParams && (
+      {isModalOpen && (
         <SolutionViewSwitchModal
           currentSolution={currentSolution}
           onClose={() => setIsModalOpen(false)}
           onSwitch={handleSwitch}
-          manageSpacesUrl={asyncParams.manageSpacesUrl}
+          manageSpacesUrl={manageSpacesUrl}
           isLoading={isLoading}
         />
       )}
