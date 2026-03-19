@@ -10,6 +10,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { StepContext } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { ResumeExecutionModalProps } from './resume_execution_modal';
 import { ResumeExecutionModal } from './resume_execution_modal';
@@ -131,7 +132,7 @@ describe('ResumeExecutionModal', () => {
         ...defaultProps,
         initialcontextOverride: {
           schema,
-          stepContext: { approved: true },
+          stepContext: { approved: true } as Partial<StepContext>,
         },
       });
       fireEvent.click(screen.getByTestId('editorChangeSyntaxOkSchemaFail'));
