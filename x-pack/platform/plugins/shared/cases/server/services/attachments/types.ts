@@ -30,7 +30,8 @@ import type { ConfigType } from '../../config';
 
 export type MixSavedObjectResponse =
   | SavedObject<AttachmentPersistedAttributes>
-  | SavedObject<UnifiedAttachmentAttributes>;
+  | SavedObject<UnifiedAttachmentAttributes>
+  | { id: string; error: unknown };
 
 export interface ServiceContext {
   log: Logger;

@@ -205,7 +205,6 @@ export const push = async (
       caseService.getAllCaseComments({
         id: caseId,
         options: {
-          fields: [],
           page: 1,
           perPage: theCase?.totalComment ?? 0,
         },

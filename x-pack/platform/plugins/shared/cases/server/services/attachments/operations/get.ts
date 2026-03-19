@@ -80,11 +80,7 @@ export class AttachmentGetter {
           )
         );
 
-      // Because we always serach in 2 SO types, one will hit and the other will not
-      // filtering out the error response here
-      const merged: Array<
-        SavedObject<AttachmentPersistedAttributes> | SavedObject<UnifiedAttachmentAttributes>
-      > = response.saved_objects.filter((so) => !isSOError(so));
+      const merged = this.mergeBulkGetResults(response.saved_objects, isCaseAttachmentsEnabled);
 
       if (mode === 'legacy') {
         return this.transformAndDecodeBulkGetResponseLegacy(merged);
@@ -98,62 +94,50 @@ export class AttachmentGetter {
     }
   }
 
+  private mergeBulkGetResults(
+    savedObjects: Array<SavedObject<AttachmentAttributesV2> | { id: string; error: unknown }>,
+    isCaseAttachmentsEnabled: boolean
+  ): Array<MixSavedObjectResponse> {
+    if (!isCaseAttachmentsEnabled) {
+      return savedObjects;
+    }
+    // When FF is on we query 2 SO types per id: one may hit, one may 404. For non-existent ids
+    // both 404. We must preserve one "not found" error per id that has no hits so the client
+    // can return it.
+    const result: Array<MixSavedObjectResponse> = [];
+    for (let i = 0; i < savedObjects.length; i += 2) {
+      const pair = [savedObjects[i], savedObjects[i + 1]] as const;
+      const hit = pair.find((so) => !isSOError(so));
+      if (hit) {
+        result.push(hit);
+      } else {
+        result.push(pair[0]);
+      }
+    }
+    return result;
+  }
+
   private transformAndDecodeBulkGetResponseLegacy(
     merged: Array<MixSavedObjectResponse>
   ): BulkOptionalAttributes<AttachmentTransformedAttributes> {
     const validatedAttachments: AttachmentSavedObjectTransformed[] = [];
 
     for (const so of merged) {
-      const transformed = transformAttributesForMode({
-        attributes: so.attributes,
-        mode: 'legacy',
-      });
-      if (transformed.isUnified) {
-        throw new Error('Error transforming attachment to legacy mode');
-      }
-      const legacySo = {
-        ...so,
-        attributes: transformed.attributes,
-      } as SavedObject<AttachmentPersistedAttributes>;
-
-      const transformedAttachment = injectAttachmentAttributesAndHandleErrors(
-        legacySo,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
-      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-        transformedAttachment.attributes
-      );
-      validatedAttachments.push(
-        Object.assign(transformedAttachment, { attributes: validatedAttributes })
-      );
-    }
-
-    return {
-      saved_objects:
-        validatedAttachments as BulkOptionalAttributes<AttachmentTransformedAttributes>['saved_objects'],
-    };
-  }
-  // the return type is a mix of legacy and unified until
-  // all the attachments are migrated
-  private transformAndDecodeBulkGetResponseUnified(
-    merged: Array<MixSavedObjectResponse>
-  ): BulkOptionalAttributes<AttachmentAttributesV2> {
-    const validatedAttachments: Array<
-      SavedObject<UnifiedAttachmentAttributes> | SavedObject<AttachmentPersistedAttributes>
-    > = [];
-
-    for (const so of merged) {
-      const transformed = transformAttributesForMode({
-        attributes: so.attributes,
-        mode: 'unified',
-      });
-      if (transformed.isUnified) {
-        validatedAttachments.push(Object.assign(so, { attributes: transformed.attributes }));
+      if (isSOError(so)) {
+        validatedAttachments.push(so as AttachmentSavedObjectTransformed);
       } else {
+        const transformed = transformAttributesForMode({
+          attributes: (so as SavedObject<AttachmentAttributesV2>).attributes,
+          mode: 'legacy',
+        });
+        if (transformed.isUnified) {
+          throw new Error('Error transforming attachment to legacy mode');
+        }
         const legacySo = {
           ...so,
           attributes: transformed.attributes,
         } as SavedObject<AttachmentPersistedAttributes>;
+
         const transformedAttachment = injectAttachmentAttributesAndHandleErrors(
           legacySo,
           this.context.persistableStateAttachmentTypeRegistry
@@ -161,7 +145,6 @@ export class AttachmentGetter {
         const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
           transformedAttachment.attributes
         );
-
         validatedAttachments.push(
           Object.assign(transformedAttachment, { attributes: validatedAttributes })
         );
@@ -169,8 +152,52 @@ export class AttachmentGetter {
     }
 
     return {
-      saved_objects:
-        validatedAttachments as BulkOptionalAttributes<AttachmentAttributesV2>['saved_objects'],
+      saved_objects: validatedAttachments,
+    };
+  }
+  // the return type is a mix of legacy and unified until
+  // all the attachments are migrated
+  private transformAndDecodeBulkGetResponseUnified(
+    merged: Array<MixSavedObjectResponse>
+  ): BulkOptionalAttributes<AttachmentAttributesV2> {
+    const validatedAttachments: Array<AttachmentSavedObjectTransformedV2> = [];
+
+    for (const so of merged) {
+      if (isSOError(so)) {
+        validatedAttachments.push(so as AttachmentSavedObjectTransformedV2);
+      } else {
+        const transformed = transformAttributesForMode({
+          attributes: (so as SavedObject<AttachmentAttributesV2>).attributes,
+          mode: 'unified',
+        });
+        if (transformed.isUnified) {
+          validatedAttachments.push(
+            Object.assign(so, {
+              attributes: transformed.attributes,
+            }) as AttachmentSavedObjectTransformedV2
+          );
+        } else {
+          const legacySo = {
+            ...so,
+            attributes: transformed.attributes,
+          } as SavedObject<AttachmentPersistedAttributes>;
+          const transformedAttachment = injectAttachmentAttributesAndHandleErrors(
+            legacySo,
+            this.context.persistableStateAttachmentTypeRegistry
+          );
+          const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+            transformedAttachment.attributes
+          );
+
+          validatedAttachments.push(
+            Object.assign(transformedAttachment, { attributes: validatedAttributes })
+          );
+        }
+      }
+    }
+
+    return {
+      saved_objects: validatedAttachments,
     };
   }
 

@@ -54,7 +54,7 @@ describe('AttachmentService getter', () => {
         await expect(attachmentGetter.bulkGet(['1'], mode)).resolves.not.toThrow();
       });
 
-      it('remove error saved objects', async () => {
+      it('does not modified the error saved objects', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           // @ts-expect-error: SO client types are not correct
           saved_objects: [createUserAttachment(), createErrorSO(CASE_COMMENT_SAVED_OBJECT)],
@@ -63,7 +63,7 @@ describe('AttachmentService getter', () => {
         const res = await attachmentGetter.bulkGet(['1', '2'], mode);
 
         expect(res).toStrictEqual({
-          saved_objects: [createUserAttachment()],
+          saved_objects: [createUserAttachment(), createErrorSO(CASE_COMMENT_SAVED_OBJECT)],
         });
       });
 
@@ -92,7 +92,7 @@ describe('AttachmentService getter', () => {
 
         const res = await attachmentGetterWithFlagOn.bulkGet(['1', '2'], mode);
 
-        expect(res.saved_objects).toEqual([legacy]);
+        expect(res.saved_objects).toEqual([legacy, unifiedNotFound]);
       });
 
       it('strips excess fields', async () => {
