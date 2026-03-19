@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { clamp, compact, intersection, trim, uniq } from 'lodash';
+import { compact, intersection, uniq } from 'lodash';
 import type { Feature, QueryLink } from '@kbn/streams-schema';
 import type {
   KnowledgeIndicator,
@@ -21,7 +21,6 @@ export const DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT = 50;
 interface NormalizedParams {
   searchText: string | undefined;
   limit: number;
-  minConfidence: number | undefined;
   includeFeatures: boolean;
   includeQueries: boolean;
 }
@@ -32,30 +31,33 @@ const isFeatureIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorFea
 const isQueryIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorQuery =>
   ki.kind === 'query';
 
-const compareFeatures = (a: KnowledgeIndicatorFeature, b: KnowledgeIndicatorFeature): number => {
-  const byConfidence = (b.feature.confidence ?? 0) - (a.feature.confidence ?? 0);
-  return byConfidence !== 0 ? byConfidence : a.feature.id.localeCompare(b.feature.id);
+const compareFeatures = (
+  current: KnowledgeIndicatorFeature,
+  next: KnowledgeIndicatorFeature
+): number => {
+  const byConfidence = (next.feature.confidence ?? 0) - (current.feature.confidence ?? 0);
+  return byConfidence !== 0 ? byConfidence : current.feature.id.localeCompare(next.feature.id);
 };
 
-const compareQueries = (a: KnowledgeIndicatorQuery, b: KnowledgeIndicatorQuery): number => {
-  const byScore = (b.query.severity_score ?? -1) - (a.query.severity_score ?? -1);
-  return byScore !== 0 ? byScore : a.query.id.localeCompare(b.query.id);
+const compareQueries = (
+  current: KnowledgeIndicatorQuery,
+  next: KnowledgeIndicatorQuery
+): number => {
+  const byScore = (next.query.severity_score ?? -1) - (current.query.severity_score ?? -1);
+  return byScore !== 0 ? byScore : current.query.id.localeCompare(next.query.id);
 };
 
 function normalizeParams(params: SearchKnowledgeIndicatorsInput): NormalizedParams {
-  const searchText = trim(params.search_text ?? '') || undefined;
+  const searchText = params.search_text ? params.search_text.trim() : undefined;
   const limit =
     typeof params.limit === 'number' && params.limit > 0
       ? Math.floor(params.limit)
       : DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT;
-  const minConfidence =
-    typeof params.min_confidence === 'number' ? clamp(params.min_confidence, 0, 100) : undefined;
   const kinds = params.kind?.length ? params.kind : undefined;
 
   return {
     searchText,
     limit,
-    minConfidence,
     includeFeatures: !kinds || kinds.includes('feature'),
     includeQueries: !kinds || kinds.includes('query'),
   };
@@ -74,23 +76,16 @@ async function resolveStreamNames(
 
 async function fetchFeatureIndicators({
   streamNames,
-  minConfidence,
   limit,
   getFeatures,
   onFeatureFetchError,
 }: {
   streamNames: string[];
-  minConfidence: number | undefined;
   limit: number;
-  getFeatures: (
-    streamName: string,
-    options: { min_confidence?: number; limit?: number }
-  ) => Promise<Feature[]>;
+  getFeatures: (streamName: string, options: { limit?: number }) => Promise<Feature[]>;
   onFeatureFetchError?: (streamName: string, error: unknown) => void;
 }): Promise<KnowledgeIndicatorFeature[]> {
-  const results = await Promise.allSettled(
-    streamNames.map((name) => getFeatures(name, { min_confidence: minConfidence, limit }))
-  );
+  const results = await Promise.allSettled(streamNames.map((name) => getFeatures(name, { limit })));
 
   const indicators: KnowledgeIndicatorFeature[] = [];
   results.forEach((result, index) => {
@@ -130,10 +125,7 @@ export async function searchKnowledgeIndicators({
   params,
 }: {
   getStreamNames(): Promise<string[]>;
-  getFeatures(
-    streamName: string,
-    options: { min_confidence?: number; limit?: number }
-  ): Promise<Feature[]>;
+  getFeatures(streamName: string, options: { limit?: number }): Promise<Feature[]>;
   getQueries(streamNames: string[], search_text?: string): Promise<QueryLink[]>;
   onFeatureFetchError?: (streamName: string, error: unknown) => void;
   params: SearchKnowledgeIndicatorsInput;
@@ -148,7 +140,6 @@ export async function searchKnowledgeIndicators({
   const features = normalized.includeFeatures
     ? await fetchFeatureIndicators({
         streamNames,
-        minConfidence: normalized.minConfidence,
         limit: normalized.limit,
         getFeatures,
         onFeatureFetchError,

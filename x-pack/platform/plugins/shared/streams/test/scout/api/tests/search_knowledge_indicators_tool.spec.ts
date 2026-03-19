@@ -207,35 +207,6 @@ apiTest.describe('search_knowledge_indicators tool', { tag: ['@ess', '@svlOblt']
     expect(output.knowledge_indicators.map((ki) => ki.query?.id)).toContain(queryIdPayment);
   });
 
-  apiTest('supports min_confidence filtering for features', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asStreamsAdmin();
-
-    const res = await apiClient.post('api/agent_builder/tools/_execute', {
-      headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-      body: {
-        tool_id: TOOL_ID,
-        tool_params: {
-          streamNames: [streamName],
-          kind: ['knowledge_indicator'],
-          min_confidence: 50,
-        },
-      },
-      responseType: 'json',
-    });
-
-    expect(res.statusCode).toBe(200);
-    const output = res.body.results[0].data as {
-      knowledge_indicators: Array<{
-        kind: string;
-        feature?: { id: string; confidence: number };
-      }>;
-    };
-
-    expect(output.knowledge_indicators.every((ki) => ki.kind === 'feature')).toBe(true);
-    expect(output.knowledge_indicators.map((ki) => ki.feature?.id)).toContain('feature-high');
-    expect(output.knowledge_indicators.map((ki) => ki.feature?.id)).not.toContain('feature-low');
-  });
-
   apiTest(
     'returns an error result when Significant Events is disabled',
     async ({ apiClient, samlAuth, apiServices }) => {

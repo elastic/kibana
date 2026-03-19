@@ -154,28 +154,6 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     expect(queryClient.getQueryLinks).not.toHaveBeenCalled();
   });
 
-  it('passes min_confidence through to featureClient.getFeatures', async () => {
-    streamsClient.listStreams = jest
-      .fn()
-      .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
-
-    featureClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
-    queryClient.getQueryLinks = jest.fn().mockResolvedValue([]);
-
-    await searchKnowledgeIndicatorsToolHandler({
-      streamsClient,
-      featureClient,
-      queryClient,
-      logger,
-      params: { kind: ['feature'], min_confidence: 42, limit: 7 },
-    });
-
-    expect(featureClient.getFeatures).toHaveBeenCalledWith('logs.test', {
-      minConfidence: 42,
-      limit: 7,
-    });
-  });
-
   it('filters requested streamNames against accessible streams', async () => {
     streamsClient.listStreams = jest
       .fn()

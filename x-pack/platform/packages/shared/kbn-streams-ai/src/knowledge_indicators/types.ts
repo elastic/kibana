@@ -31,11 +31,6 @@ export interface SearchKnowledgeIndicatorsInput {
    * Optional safety cap.
    */
   limit?: number;
-
-  /**
-   * Optional confidence threshold for features.
-   */
-  min_confidence?: number;
 }
 
 export interface SearchKnowledgeIndicatorsOutput {

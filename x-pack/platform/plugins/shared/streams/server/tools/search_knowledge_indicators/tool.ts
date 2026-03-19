@@ -48,12 +48,6 @@ const searchKnowledgeIndicatorsSchema = z.object({
     .optional()
     .default(50)
     .describe('Optional safety cap for returned items.'),
-  min_confidence: z
-    .number()
-    .min(0)
-    .max(100)
-    .optional()
-    .describe('Optional confidence threshold for feature-based knowledge indicators (0..100).'),
 });
 
 export function createSearchKnowledgeIndicatorsTool({
@@ -78,7 +72,7 @@ export function createSearchKnowledgeIndicatorsTool({
 
       Use this tool to:
       - Gather domain context for a specific stream or group of streams
-      - Narrow results by \`stream_names\`, \`kind\`, \`min_confidence\`, and \`limit\`
+      - Narrow results by \`stream_names\`, \`kind\`, and \`limit\`
       - Find relevant KIs via semantic text using \`search_text\`
       - Retrieve queries-only KIs with \`kind: ['query']\`
     `,

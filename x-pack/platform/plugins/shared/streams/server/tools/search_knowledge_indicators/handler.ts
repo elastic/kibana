@@ -41,10 +41,9 @@ export async function searchKnowledgeIndicatorsToolHandler({
       const streams = await streamsClient.listStreams();
       return streams.map((stream) => stream.name);
     },
-    getFeatures: async (streamName, { min_confidence, limit }) => {
+    getFeatures: async (streamName, { limit }) => {
       // TODO: add support for semantic search to consume the search_text parameter
       const result = await featureClient.getFeatures(streamName, {
-        minConfidence: min_confidence,
         limit,
       });
       return result.hits;
