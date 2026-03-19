@@ -13,7 +13,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { analyzerCellActionRenderer } from '../../../../flyout_v2/analyzer/components/cell_actions';
-import { DocumentFlyoutContent } from '../../../../flyout_v2/document';
+import { DocumentFlyout } from '../../../../flyout_v2/document';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
@@ -120,7 +120,7 @@ const RowActionComponent = ({
           store,
           history,
           children: (
-            <DocumentFlyoutContent hit={hit} renderCellActions={analyzerCellActionRenderer} />
+            <DocumentFlyout hit={hit} renderCellActions={analyzerCellActionRenderer} />
           ),
         }),
         {

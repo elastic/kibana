@@ -18,7 +18,7 @@ import { OverviewTab } from './tabs/overview_tab';
 import { useKibana } from '../../common/lib/kibana';
 import { getRuleDetailsUrl } from '../../common/components/link_to';
 
-export interface DocumentFlyoutContentProps {
+export interface DocumentFlyoutProps {
   /**
    * The document to display
    */
@@ -33,7 +33,7 @@ export interface DocumentFlyoutContentProps {
  * Content for the document flyout, combining the header and overview tab.
  * This component resolves the rule details link via the application service.
  */
-export const DocumentFlyoutContent: FC<DocumentFlyoutContentProps> = memo(
+export const DocumentFlyout: FC<DocumentFlyoutProps> = memo(
   ({ hit, renderCellActions }) => {
     const { services } = useKibana();
 
@@ -62,4 +62,4 @@ export const DocumentFlyoutContent: FC<DocumentFlyoutContentProps> = memo(
   }
 );
 
-DocumentFlyoutContent.displayName = 'DocumentFlyoutContent';
+DocumentFlyout.displayName = 'DocumentFlyout';
