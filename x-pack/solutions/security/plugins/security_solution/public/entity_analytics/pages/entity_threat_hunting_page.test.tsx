@@ -36,8 +36,8 @@ jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
   })),
 }));
 
-jest.mock('../components/threat_hunting/combined_risk_donut_chart', () => ({
-  CombinedRiskDonutChart: () => (
+jest.mock('../components/dynamic_risk_level_panel', () => ({
+  DynamicRiskLevelPanel: () => (
     <div data-test-subj="combined-risk-donut-chart">{'Donut Chart'}</div>
   ),
 }));

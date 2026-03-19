@@ -15,6 +15,7 @@ import { PREBUILT_WATCHLIST_NAMES } from '../../../common/entity_analytics/watch
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { RiskLevelBreakdownTable } from './threat_hunting/risk_level_breakdown_table';
 import { useCombinedRiskScoreKpi } from './threat_hunting/use_combined_risk_score_kpi';
+import { useKibana } from '../../common/lib/kibana';
 
 interface DynamicRiskLevelPanelProps {
   watchlistId?: string;
@@ -27,37 +28,41 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
 }) => {
   const spaceId = useSpaceId();
   const hasWatchlist = !!watchlistId;
+  const { uiSettings } = useKibana().services;
+  const isEntityStoreV2Enabled = uiSettings.get<boolean>('securitySolution:entityStoreEnableV2');
+
+  const useLegacyCombined = !hasWatchlist && !isEntityStoreV2Enabled;
 
   // Always call both hooks, but use `skip` to prevent unnecessary network requests
-  const combinedRiskStats = useCombinedRiskScoreKpi(skip || hasWatchlist);
+  const combinedRiskStats = useCombinedRiskScoreKpi(skip || !useLegacyCombined);
   const watchlistRiskStats = useWatchlistRiskLevelsQuery({
     watchlistId: watchlistId ?? '',
-    skip: skip || !hasWatchlist,
+    skip: skip || useLegacyCombined,
     spaceId: spaceId ?? '',
   });
 
   const severityCount = useMemo(() => {
-    if (hasWatchlist) {
-      return {
-        [RiskSeverity.Critical]:
-          watchlistRiskStats.records.find((r) => r.level === RiskSeverity.Critical)?.count ?? 0,
-        [RiskSeverity.High]:
-          watchlistRiskStats.records.find((r) => r.level === RiskSeverity.High)?.count ?? 0,
-        [RiskSeverity.Moderate]:
-          watchlistRiskStats.records.find((r) => r.level === RiskSeverity.Moderate)?.count ?? 0,
-        [RiskSeverity.Low]:
-          watchlistRiskStats.records.find((r) => r.level === RiskSeverity.Low)?.count ?? 0,
-        [RiskSeverity.Unknown]:
-          watchlistRiskStats.records.find((r) => r.level === RiskSeverity.Unknown)?.count ?? 0,
-      };
+    if (useLegacyCombined) {
+      return combinedRiskStats.severityCount;
     }
-    return combinedRiskStats.severityCount;
-  }, [hasWatchlist, combinedRiskStats.severityCount, watchlistRiskStats.records]);
+    return {
+      [RiskSeverity.Critical]:
+        watchlistRiskStats.records.find((r) => r.level === RiskSeverity.Critical)?.count ?? 0,
+      [RiskSeverity.High]:
+        watchlistRiskStats.records.find((r) => r.level === RiskSeverity.High)?.count ?? 0,
+      [RiskSeverity.Moderate]:
+        watchlistRiskStats.records.find((r) => r.level === RiskSeverity.Moderate)?.count ?? 0,
+      [RiskSeverity.Low]:
+        watchlistRiskStats.records.find((r) => r.level === RiskSeverity.Low)?.count ?? 0,
+      [RiskSeverity.Unknown]:
+        watchlistRiskStats.records.find((r) => r.level === RiskSeverity.Unknown)?.count ?? 0,
+    };
+  }, [useLegacyCombined, combinedRiskStats.severityCount, watchlistRiskStats.records]);
 
-  const loading = hasWatchlist ? watchlistRiskStats.isLoading : combinedRiskStats.loading;
-  const isModuleDisabled = hasWatchlist
-    ? !watchlistRiskStats.hasEngineBeenInstalled
-    : combinedRiskStats.isModuleDisabled;
+  const loading = useLegacyCombined ? combinedRiskStats.loading : watchlistRiskStats.isLoading;
+  const isModuleDisabled = useLegacyCombined
+    ? combinedRiskStats.isModuleDisabled
+    : !watchlistRiskStats.hasEngineBeenInstalled;
 
   if (isModuleDisabled && !loading) {
     return null;

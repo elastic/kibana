@@ -16,7 +16,7 @@ export const PREBUILT_WATCHLIST_NAMES: Record<string, string> = {
   'prebuilt-priv': i18n.translate(
     'xpack.securitySolution.entityAnalytics.watchlists.prebuiltPrivName',
     {
-      defaultMessage: 'Privileged Users',
+      defaultMessage: 'Privileged User',
     }
   ),
 };

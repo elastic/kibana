@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
@@ -18,29 +18,48 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useGetDefaultRiskIndex } from '../../../hooks/use_get_default_risk_index';
 import type { WatchlistRiskLevelsQueryResult } from './types';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
-import { getWatchlistRiskLevelsQueryBody } from '../queries/watchlist_risk_level_esql_query';
+import {
+  getWatchlistRiskLevelsQueryBody,
+  getWatchlistRiskLevelsQueryBodyV2,
+} from '../queries/watchlist_risk_level_esql_query';
+import { PREBUILT_WATCHLIST_NAMES } from '../../../../../common/entity_analytics/watchlists/constants';
 
 export const useWatchlistRiskLevelsQuery = ({
   watchlistId,
   skip,
   spaceId,
 }: {
-  watchlistId: string;
-  skip: boolean;
+  watchlistId?: string;
+  skip?: boolean;
   spaceId: string;
 }) => {
-  const { data } = useKibana().services;
+  const { data, uiSettings } = useKibana().services;
+  const isEntityStoreV2Enabled = uiSettings.get<boolean>('securitySolution:entityStoreEnableV2');
 
-  const index = useGetDefaultRiskIndex(true); // only latest
+  const v1Index = useGetDefaultRiskIndex(true); // only latest
+  const v2Index = `.entities.v2.latest.security_${spaceId}`;
+  const index = isEntityStoreV2Enabled ? v2Index : v1Index;
+
   const filterQuery = useEsqlGlobalFilterQuery();
 
-  const query = `FROM ${index} ${getWatchlistRiskLevelsQueryBody(watchlistId, spaceId)}`;
+  const watchlistName = watchlistId
+    ? PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId
+    : undefined;
+  const query = isEntityStoreV2Enabled
+    ? `FROM ${index} ${getWatchlistRiskLevelsQueryBodyV2(watchlistName)}`
+    : `FROM ${index} ${getWatchlistRiskLevelsQueryBody(spaceId, watchlistId)}`;
 
+  // eslint-disable-next-line no-console
+  console.log('query', query);
   const {
     data: riskEngineStatus,
     isFetching: isStatusLoading,
     refetch: refetchEngineStatus,
   } = useRiskEngineStatus();
+
+  const isEnabled =
+    !skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
+  const queryKey = useMemo(() => ['watchlistRiskLevels', query, filterQuery], [query, filterQuery]);
 
   const {
     isRefetching,
@@ -55,7 +74,7 @@ export const useWatchlistRiskLevelsQuery = ({
     },
     SecurityAppError
   >(
-    [], // query doesn't need a key since it is only run when refetch is called
+    queryKey,
     async ({ signal }) =>
       getESQLResults({
         esqlQuery: query,
@@ -65,7 +84,7 @@ export const useWatchlistRiskLevelsQuery = ({
       }),
     {
       keepPreviousData: true,
-      enabled: false,
+      enabled: isEnabled,
       retry: 1, // retry once on failure
     }
   );
@@ -89,17 +108,15 @@ export const useWatchlistRiskLevelsQuery = ({
     };
   }, [index, query, response]);
 
-  // Fetch risk score when components mounts or when the risk engine status changes
-  useEffect(() => {
-    if (!skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED') {
-      refetch();
-    }
-  }, [riskEngineStatus, isStatusLoading, refetch, skip]);
+  const handleRefetch = () => {
+    refetchEngineStatus();
+    refetch();
+  };
 
   return {
     records: esqlResponseToRecords<WatchlistRiskLevelsQueryResult>(response),
     isLoading: isRefetching || isStatusLoading,
-    refetch: refetchEngineStatus, // refetching the status will force the risk score to be fetched,
+    refetch: handleRefetch,
     inspect,
     error,
     isRefetching,
