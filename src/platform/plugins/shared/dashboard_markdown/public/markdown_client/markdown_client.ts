@@ -32,7 +32,7 @@ export const markdownClient = {
     });
   },
   delete: async (id: string): Promise<DeleteResult> => {
-    return coreServices.http.delete(`${MARKDOWN_API_PATH}/${id}`, {
+    return coreServices.http.delete(`${MARKDOWN_API_PATH}/${encodeURIComponent(id)}`, {
       version: MARKDOWN_API_VERSION,
     });
   },
@@ -62,7 +62,7 @@ export const markdownClient = {
   },
   update: async (id: string, markdownState: MarkdownAttributes) => {
     const updateResponse = await coreServices.http.put<MarkdownUpdateResponseBody>(
-      `${MARKDOWN_API_PATH}/${id}`,
+      `${MARKDOWN_API_PATH}/${encodeURIComponent(id)}`,
       {
         version: MARKDOWN_API_VERSION,
         body: JSON.stringify(markdownState),
