@@ -33,6 +33,7 @@ import {
   setHighlightedStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
@@ -104,6 +105,9 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       return null;
     }, [workflowExecution]);
 
+    const { childExecutions, isLoading: isLoadingChildExecutions } =
+      useChildWorkflowExecutions(workflowExecution);
+
     // Derive the resume message and schema from the paused waitForInput step's config.
     const pausedStepDef = useMemo<WaitForInputStep | undefined>(() => {
       if (!workflowExecution || workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
@@ -151,20 +155,69 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       };
     }, [dispatch]);
 
-    // Find the lightweight step from the polled execution (has status/duration but no I/O)
-    const lightweightStep = useMemo(() => {
+    // Find the lightweight step from the polled execution (has status/duration but no I/O).
+    // If not found in root steps, check child workflow execution steps.
+    const {
+      lightweightStep,
+      stepExecutionId: resolvedExecutionId,
+      parentWorkflowExecution,
+    } = useMemo(() => {
       if (!selectedStepExecutionId || isPseudoStep) {
-        return undefined;
+        return {
+          lightweightStep: undefined,
+          stepExecutionId: executionId,
+          parentWorkflowExecution: undefined,
+        };
       }
-      return workflowExecution?.stepExecutions?.find((step) => step.id === selectedStepExecutionId);
-    }, [workflowExecution?.stepExecutions, selectedStepExecutionId, isPseudoStep]);
+
+      const parentStep = workflowExecution?.stepExecutions?.find(
+        (step) => step.id === selectedStepExecutionId
+      );
+      if (parentStep) {
+        return {
+          lightweightStep: parentStep,
+          stepExecutionId: executionId,
+          parentWorkflowExecution: undefined,
+        };
+      }
+
+      for (const childWorkflowExecution of childExecutions.values()) {
+        const childStep = childWorkflowExecution.stepExecutions.find(
+          (step) => step.id === selectedStepExecutionId
+        );
+        if (childStep) {
+          return {
+            lightweightStep: childStep,
+            stepExecutionId: childWorkflowExecution.executionId,
+            parentWorkflowExecution: childWorkflowExecution,
+          };
+        }
+      }
+
+      return {
+        lightweightStep: undefined,
+        stepExecutionId: executionId,
+        parentWorkflowExecution: undefined,
+      };
+    }, [
+      workflowExecution?.stepExecutions,
+      selectedStepExecutionId,
+      isPseudoStep,
+      executionId,
+      childExecutions,
+    ]);
 
     // Lazy-load full step data (with input/output) for real steps
     const { data: fullStepData, isLoading: isLoadingStepData } = useStepExecution(
-      executionId,
+      resolvedExecutionId,
       isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
       lightweightStep?.status
     );
+
+    const selectedStepChildExecution = useMemo(() => {
+      if (!selectedStepExecutionId || isPseudoStep) return undefined;
+      return childExecutions.get(selectedStepExecutionId);
+    }, [selectedStepExecutionId, isPseudoStep, childExecutions]);
 
     const selectedStepExecution = useMemo<WorkflowStepExecutionDto | undefined>(() => {
       if (!selectedStepExecutionId) {
@@ -203,6 +256,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               onClose={onClose}
               onStepExecutionClick={setSelectedStepExecutionId}
               selectedId={selectedStepExecutionId ?? null}
+              childExecutionsMap={childExecutions}
+              isLoadingChildExecutions={isLoadingChildExecutions}
             />
           }
           fixedPanelSize={sidebarWidth}
@@ -219,6 +274,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               resumeMessage={resumeMessage}
               resumeSchema={resumeSchema}
               shouldAutoResume={shouldAutoResume}
+              childWorkflowExecution={selectedStepChildExecution}
+              parentWorkflowExecution={parentWorkflowExecution}
             />
           }
           minFlexPanelSize={200}

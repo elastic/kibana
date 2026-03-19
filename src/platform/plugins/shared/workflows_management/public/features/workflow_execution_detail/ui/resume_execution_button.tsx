@@ -14,11 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { ResumeExecutionModal } from './resume_execution_modal';
 import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
-import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
+import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import { TestStepModal } from '../../run_workflow/ui/test_step_modal';
 
 interface ResumeExecutionButtonProps {
   executionId: string;
@@ -127,8 +127,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       </EuiCallOut>
 
       {isModalOpen && (
-        <TestStepModal
-          mode="resume"
+        <ResumeExecutionModal
           initialcontextOverride={contextOverride}
           resumeMessage={resumeMessage}
           onClose={closeModal}

@@ -31,6 +31,9 @@ export const platformCoreTools = {
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
+  // SML tools
+  smlSearch: platformCoreTool('sml_search'),
+  smlAttach: platformCoreTool('sml_attach'),
 } as const;
 
 export const attachmentTools = {
@@ -75,6 +78,8 @@ export const defaultAgentToolIds = [
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
   platformCoreTools.getWorkflowExecutionStatus,
+  platformCoreTools.smlSearch,
+  platformCoreTools.smlAttach,
 ];
 
 /**

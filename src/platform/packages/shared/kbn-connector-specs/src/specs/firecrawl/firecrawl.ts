@@ -86,7 +86,8 @@ export const FirecrawlConnector: ConnectorSpec = {
       defaultMessage: 'Scrape, search, map, and crawl the web via the Firecrawl API.',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
