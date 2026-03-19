@@ -23,13 +23,17 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
 import { AttackDetailsPreviewPanelKey } from '../../../attack_details/constants/panel_keys';
 
 jest.mock('../hooks/use_paginated_alerts');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../data_view_manager/hooks/use_data_view');
 jest.mock('@kbn/expandable-flyout');
+
+const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
 
 const attackIds = ['attack-id-1'];
 const scopeId = 'scopeId';
@@ -56,6 +60,9 @@ const renderRelatedAttacks = () =>
 
 describe('<RelatedAttacks />', () => {
   beforeEach(() => {
+    useAlertsPrivilegesMock.mockReturnValue({
+      hasAlertsRead: true,
+    });
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     jest.mocked(mockFlyoutApi.openPreviewPanel).mockReset();
     jest.mocked(useDataView).mockReturnValue({
