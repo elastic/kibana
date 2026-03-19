@@ -44,7 +44,7 @@ export class BulkDisableRulesRoute {
   async handle() {
     try {
       const { ids, filter } = this.request.body;
-      const params = ids ? { ids } : { filter: filter! };
+      const params = ids ? { ids } : { filter: filter ?? '' };
       const result = await this.rulesClient.bulkDisableRules(params);
       return this.response.ok({ body: result });
     } catch (e) {

@@ -5,7 +5,19 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import { buildRuleSoFilter } from './build_rule_filter';
+
+jest.mock('@kbn/es-query', () => ({
+  __esModule: true,
+  fromKueryExpression: jest.fn((...args: unknown[]) =>
+    jest.requireActual('@kbn/es-query').fromKueryExpression(...args)
+  ),
+  toKqlExpression: (...args: unknown[]) =>
+    jest.requireActual('@kbn/es-query').toKqlExpression(...args),
+}));
+
+const fromKueryExpressionMock = fromKueryExpression as jest.Mock;
 
 describe('buildRuleSoFilter', () => {
   describe('empty / match-all', () => {
@@ -105,16 +117,7 @@ describe('buildRuleSoFilter', () => {
   });
 
   describe('exhaustive function handling', () => {
-    it('throws on unsupported KQL function types', () => {
-      // Construct a synthetic AST node with an unknown function type to verify
-      // the exhaustive switch rejects it rather than silently passing through.
-      const { fromKueryExpression: parse } = jest.requireActual('@kbn/es-query');
-      const ast = parse('kind: signal');
-      ast.function = 'unknown_function';
-
-      // We can't easily inject a synthetic AST via the public API, but we can
-      // verify that valid KQL with all known function types passes without
-      // "Unsupported KQL function" errors.
+    it('does not throw for known KQL function types', () => {
       expect(() => buildRuleSoFilter('kind: signal')).not.toThrow('Unsupported KQL function');
       expect(() => buildRuleSoFilter('kind: signal AND enabled: true')).not.toThrow(
         'Unsupported KQL function'
@@ -122,6 +125,18 @@ describe('buildRuleSoFilter', () => {
       expect(() => buildRuleSoFilter('NOT kind: signal')).not.toThrow('Unsupported KQL function');
       expect(() => buildRuleSoFilter('kind: signal OR kind: alert')).not.toThrow(
         'Unsupported KQL function'
+      );
+    });
+
+    it('throws on unsupported KQL function types', () => {
+      fromKueryExpressionMock.mockImplementationOnce((...args: unknown[]) => {
+        const ast = jest.requireActual('@kbn/es-query').fromKueryExpression(...args);
+        ast.function = 'unknown_function';
+        return ast;
+      });
+
+      expect(() => buildRuleSoFilter('kind: signal')).toThrow(
+        'Unsupported KQL function "unknown_function" in filter'
       );
     });
   });
