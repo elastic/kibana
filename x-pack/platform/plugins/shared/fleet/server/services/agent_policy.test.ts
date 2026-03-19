@@ -2541,8 +2541,10 @@ describe('Agent policy', () => {
       space_ids: ['default'],
     };
     it('should not throw error when no policies with same name exist', async () => {
+      const allSpacesSoClient = createSavedObjectClientMock();
+      getAllSpacesSoClientSpy.mockReturnValue(allSpacesSoClient);
       const soClient = createSavedObjectClientMock();
-      soClient.find.mockResolvedValue({
+      allSpacesSoClient.find.mockResolvedValue({
         total: 0,
         saved_objects: [],
         page: 1,
@@ -2553,16 +2555,19 @@ describe('Agent policy', () => {
         agentPolicyService.requireUniqueName(soClient, testAgentPolicy)
       ).resolves.not.toThrow();
 
-      expect(soClient.find).toHaveBeenCalledWith({
+      expect(allSpacesSoClient.find).toHaveBeenCalledWith({
         type: AGENT_POLICY_SAVED_OBJECT_TYPE,
         searchFields: ['name'],
         search: `\"${testAgentPolicy.name}\"`,
+        namespaces: testAgentPolicy.space_ids,
       });
     });
 
     it('should not throw error when the only other policy with the same name is the current policy', async () => {
+      const allSpacesSoClient = createSavedObjectClientMock();
+      getAllSpacesSoClientSpy.mockReturnValue(allSpacesSoClient);
       const soClient = createSavedObjectClientMock();
-      soClient.find.mockResolvedValue({
+      allSpacesSoClient.find.mockResolvedValue({
         total: 1,
         saved_objects: [
           {
@@ -2581,10 +2586,11 @@ describe('Agent policy', () => {
         agentPolicyService.requireUniqueName(soClient, testAgentPolicy)
       ).resolves.not.toThrow();
 
-      expect(soClient.find).toHaveBeenCalledWith({
+      expect(allSpacesSoClient.find).toHaveBeenCalledWith({
         type: AGENT_POLICY_SAVED_OBJECT_TYPE,
         searchFields: ['name'],
         search: `\"${testAgentPolicy.name}\"`,
+        namespaces: testAgentPolicy.space_ids,
       });
     });
 
@@ -2593,8 +2599,10 @@ describe('Agent policy', () => {
         ...testAgentPolicy,
         id: 'other-agent-policy',
       };
+      const allSpacesSoClient = createSavedObjectClientMock();
+      getAllSpacesSoClientSpy.mockReturnValue(allSpacesSoClient);
       const soClient = createSavedObjectClientMock();
-      soClient.find.mockResolvedValue({
+      allSpacesSoClient.find.mockResolvedValue({
         total: 1,
         saved_objects: [
           {
@@ -2613,11 +2621,45 @@ describe('Agent policy', () => {
         agentPolicyService.requireUniqueName(soClient, testAgentPolicy)
       ).rejects.toThrow();
 
-      expect(soClient.find).toHaveBeenCalledWith({
+      expect(allSpacesSoClient.find).toHaveBeenCalledWith({
         type: AGENT_POLICY_SAVED_OBJECT_TYPE,
         searchFields: ['name'],
         search: `\"${testAgentPolicy.name}\"`,
+        namespaces: testAgentPolicy.space_ids,
       });
+    });
+
+    it('should not throw error when a same-name policy exists only in the URL space but the new policy targets a different space', async () => {
+      const singleOtherSpacePolicy = {
+        id: 'policy-in-other-space',
+        name: 'shared-name',
+        space_ids: ['other-space'],
+      };
+
+      const allSpacesSoClient = createSavedObjectClientMock();
+      getAllSpacesSoClientSpy.mockReturnValue(allSpacesSoClient);
+      const soClient = createSavedObjectClientMock();
+
+      // The internal client finds no policies in 'other-space' with this name
+      allSpacesSoClient.find.mockResolvedValue({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 10,
+      });
+
+      await expect(
+        agentPolicyService.requireUniqueName(soClient, singleOtherSpacePolicy)
+      ).resolves.not.toThrow();
+
+      // Query is scoped to 'other-space', not the URL space
+      expect(allSpacesSoClient.find).toHaveBeenCalledWith({
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        searchFields: ['name'],
+        search: `\"${singleOtherSpacePolicy.name}\"`,
+        namespaces: singleOtherSpacePolicy.space_ids,
+      });
+      expect(soClient.find).not.toHaveBeenCalled();
     });
 
     it('should query across spaces if multiple space ids are provided', async () => {

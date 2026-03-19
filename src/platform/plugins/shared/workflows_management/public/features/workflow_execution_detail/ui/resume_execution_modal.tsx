@@ -21,7 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -55,7 +55,19 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   const [inputsJson, setInputsJson] = useState<string>(
     initialcontextOverride ? JSON.stringify(initialcontextOverride.stepContext, null, 2) : '{}'
   );
-  const [isJsonValid, setIsJsonValid] = useState<boolean>(true);
+  const isJsonValid = useMemo(() => {
+    try {
+      const parsed: unknown = JSON.parse(inputsJson);
+      const schema = initialcontextOverride?.schema;
+      if (schema) {
+        return schema.safeParse(parsed).success;
+      } else {
+        return true;
+      }
+    } catch {
+      return false;
+    }
+  }, [inputsJson, initialcontextOverride?.schema]);
 
   const jsonSchema = useMemo(() => {
     if (initialcontextOverride?.rawJsonSchema) {
@@ -91,20 +103,6 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
     },
     [jsonSchema]
   );
-
-  useEffect(() => {
-    try {
-      const parsed: unknown = JSON.parse(inputsJson);
-      const schema = initialcontextOverride?.schema;
-      if (schema) {
-        setIsJsonValid(schema.safeParse(parsed).success);
-      } else {
-        setIsJsonValid(true);
-      }
-    } catch {
-      setIsJsonValid(false);
-    }
-  }, [inputsJson, initialcontextOverride?.schema]);
 
   const handleInputChange = useCallback((value: string) => {
     setInputsJson(value);
