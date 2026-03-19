@@ -131,7 +131,7 @@ function generateAdHocDataViewId(
   // But different ES|QL queries against the same index can resolve to different time fields. See: https://github.com/elastic/kibana/pull/256764
   // Including a hash of the query in the ID ensures each distinct query gets its own cached DataView, preventing stale time-field resolution.
   if (dataView.dataSourceType === 'esql' && !dataView.timeFieldName && dataView.esqlQuery) {
-    return `${base}-${sha256Sync(`${normalizeWhitespace(dataView.esqlQuery)}`)}`;
+    return `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`;
   }
   return base;
 }

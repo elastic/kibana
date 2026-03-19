@@ -247,10 +247,29 @@ describe('getESQLAdHocDataview', () => {
       expect(result2.timeFieldName).toBe('@timestamp');
       expect(http.get).toHaveBeenCalledTimes(2);
     });
+
+    it('should evict the least recently used query after reaching the cache limit', async () => {
+      const http = createMockHttp('@timestamp');
+      const firstQuery = uniqueQuery('first');
+      const recentQuery = uniqueQuery('recent');
+
+      await getESQLAdHocDataview({ dataViewsService, query: firstQuery, http });
+      await getESQLAdHocDataview({ dataViewsService, query: recentQuery, http });
+
+      for (let i = 0; i < 98; i++) {
+        await getESQLAdHocDataview({ dataViewsService, query: uniqueQuery(`fill_${i}`), http });
+      }
+
+      await getESQLAdHocDataview({ dataViewsService, query: recentQuery, http });
+      await getESQLAdHocDataview({ dataViewsService, query: uniqueQuery('overflow'), http });
+      await getESQLAdHocDataview({ dataViewsService, query: firstQuery, http });
+
+      expect(http.get).toHaveBeenCalledTimes(102);
+    });
   });
 
   describe('createNewInstanceEvenIfCachedOneAvailable', () => {
-    it('should only clear the dataview instance cache', async () => {
+    it('should clear the dataview instance cache and refresh the cached time field lookup', async () => {
       const http = createMockHttp('@timestamp');
       const query = uniqueQuery();
 
@@ -265,7 +284,7 @@ describe('getESQLAdHocDataview', () => {
       });
 
       expect(dataViewsService.clearInstanceCache).toHaveBeenCalled();
-      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledTimes(2);
     });
   });
 });
