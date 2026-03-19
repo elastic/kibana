@@ -127,7 +127,7 @@ const getUpdateSuccessToast = ({
     text: toMountPoint(
       <StatusToastContent
         summary={summary}
-        onSeeAlertsClick={() => application.navigateToUrl(alertsUrl, { forceRedirect: true })}
+        onSeeAlertsClick={() => application.navigateToUrl(alertsUrl)}
       />,
       { i18n: i18nStart, theme, userProfile }
     ),
