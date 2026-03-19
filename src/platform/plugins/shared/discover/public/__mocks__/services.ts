@@ -272,7 +272,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
     },
-    notifications: notificationServiceMock.createStartContract(),
+    notifications: {
+      toasts: notificationServiceMock.createStartContract().toasts,
+    },
     expressions: expressionsPlugin,
     savedObjectsTagging: {
       ui: {
