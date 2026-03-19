@@ -2758,12 +2758,13 @@ module.exports = {
     },
     // Custom rules for scout tests
     {
-      // Platform & Solutions
+      // Platform & Solutions (plugins and packages, excluding Scout framework's own tests)
       files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
       ],
+      excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
         '@kbn/eslint/scout_max_one_describe': 'error',
@@ -2772,6 +2773,7 @@ module.exports = {
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
         '@kbn/eslint/scout_expect_import': 'error',
+        '@kbn/eslint/scout_no_deprecated_tags': 'error',
         '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
