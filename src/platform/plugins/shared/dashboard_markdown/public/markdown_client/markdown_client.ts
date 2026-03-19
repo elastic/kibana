@@ -38,7 +38,7 @@ export const markdownClient = {
   },
   get: async (id: string): Promise<MarkdownReadResponseBody> => {
     const result = await coreServices.http
-      .get<MarkdownReadResponseBody>(`${MARKDOWN_API_PATH}/${id}`, {
+      .get<MarkdownReadResponseBody>(`${MARKDOWN_API_PATH}/${encodeURIComponent(id)}`, {
         version: MARKDOWN_API_VERSION,
       })
       .catch((e) => {
