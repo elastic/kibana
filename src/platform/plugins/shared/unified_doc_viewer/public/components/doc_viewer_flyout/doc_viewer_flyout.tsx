@@ -36,8 +36,8 @@ import { getUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 import {
-  FLYOUT_VIEWED_EVENT_TYPE,
   FlyoutViewedTabId,
+  reportFlyoutViewedEvent,
   type FlyoutViewedContent,
 } from '../../analytics/flyout_viewed_event';
 
@@ -284,7 +284,7 @@ export function UnifiedDocViewerFlyout({
       if (!tabId) return;
       if (!flyoutViewedContent) return;
 
-      analytics.reportEvent(FLYOUT_VIEWED_EVENT_TYPE, {
+      reportFlyoutViewedEvent(analytics, {
         content: flyoutViewedContent,
         tabId: mapDocViewerTabIdToFlyoutViewedTabId(tabId),
       });

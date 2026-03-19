@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core/public';
 
 export const FLYOUT_VIEWED_EVENT_TYPE = 'flyout_viewed';
 
@@ -22,6 +22,18 @@ export enum FlyoutViewedTabId {
   TABLE = 'table',
   JSON = 'json',
 }
+
+export interface FlyoutViewedEvent {
+  content: FlyoutViewedContent;
+  tabId?: FlyoutViewedTabId;
+}
+
+export const reportFlyoutViewedEvent = (
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>,
+  { content, tabId }: FlyoutViewedEvent
+) => {
+  analytics.reportEvent(FLYOUT_VIEWED_EVENT_TYPE, tabId ? { content, tabId } : { content });
+};
 
 export const registerFlyoutViewedEvent = (analytics: AnalyticsServiceSetup) => {
   analytics.registerEventType({

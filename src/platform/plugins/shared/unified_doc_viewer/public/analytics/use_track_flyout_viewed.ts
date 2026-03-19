@@ -10,7 +10,7 @@
 import { useEffect } from 'react';
 import { getUnifiedDocViewerServices } from '../plugin';
 import {
-  FLYOUT_VIEWED_EVENT_TYPE,
+  reportFlyoutViewedEvent,
   type FlyoutViewedContent,
   type FlyoutViewedTabId,
 } from './flyout_viewed_event';
@@ -26,6 +26,6 @@ export const useTrackFlyoutViewed = ({ content, tabId }: TrackFlyoutViewedParams
   useEffect(() => {
     if (!content) return;
 
-    analytics.reportEvent(FLYOUT_VIEWED_EVENT_TYPE, tabId ? { content, tabId } : { content });
+    reportFlyoutViewedEvent(analytics, { content, tabId });
   }, [analytics, content, tabId]);
 };
