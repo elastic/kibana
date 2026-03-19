@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
+import type { RunToolFn, RunAgentFn, RunToolReturn } from '@kbn/agent-builder-server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -116,6 +116,16 @@ export interface ToolsStart {
    * Return a tool registry scoped to the current user and context.
    */
   getRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
+  /**
+   * Execute a tool within a skill context.
+   * Handles both registry tools and inline (skill-bounded) tools.
+   */
+  executeSkillTool: (opts: {
+    request: KibanaRequest;
+    skillId: string;
+    toolId: string;
+    toolParams: Record<string, unknown>;
+  }) => Promise<RunToolReturn>;
 }
 
 export interface AgentsSetup {

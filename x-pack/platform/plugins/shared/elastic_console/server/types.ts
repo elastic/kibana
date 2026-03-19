@@ -8,6 +8,7 @@
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 
 export interface ElasticConsoleSetupDependencies {
   cloud?: CloudSetup;
@@ -16,6 +17,7 @@ export interface ElasticConsoleSetupDependencies {
 export interface ElasticConsoleStartDependencies {
   inference: InferenceServerStart;
   actions: ActionsPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type ElasticConsolePluginSetup = Record<string, never>;

@@ -11,6 +11,6 @@
     "configPath": ["xpack", "elasticConsole"],
     "requiredPlugins": ["inference", "actions"],
     "requiredBundles": ["kibanaReact"],
-    "optionalPlugins": ["cloud"]
+    "optionalPlugins": ["cloud", "agentBuilder"]
   }
 }

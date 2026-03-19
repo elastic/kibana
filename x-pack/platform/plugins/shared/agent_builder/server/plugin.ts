@@ -9,6 +9,8 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { createSkillNotFoundError, createToolNotFoundError } from '@kbn/agent-builder-common';
+import type { ToolType } from '@kbn/agent-builder-common';
 import type { AgentBuilderConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -36,6 +38,13 @@ import { createModelProviderFactory } from './services/runner/model_provider';
 import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+import { convertTool } from './services/tools/builtin/converter';
+import { ToolAvailabilityCache } from './services/tools/builtin/availability_cache';
+import {
+  isDisabledDefinition,
+  type ToolTypeDefinition,
+  type BuiltinToolTypeDefinition,
+} from './services/tools/tool_types/definitions';
 
 export class AgentBuilderPlugin
   implements
@@ -278,6 +287,58 @@ export class AgentBuilderPlugin
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
+        executeSkillTool: async ({ request, skillId, toolId, toolParams }) => {
+          // Try registry tool first
+          const toolRegistry = await tools.getRegistry({ request });
+          const existsInRegistry = await toolRegistry.has(toolId);
+          if (existsInRegistry) {
+            return runner.runTool({ toolId, toolParams, request, source: 'user' });
+          }
+
+          // Look up inline tools from the skill
+          const skillRegistry = await skills.getRegistry({ request });
+          const skill = await skillRegistry.get(skillId);
+          if (!skill) {
+            throw createSkillNotFoundError({ skillId });
+          }
+
+          const inlineTools = (await skill.getInlineTools?.()) ?? [];
+          const inlineTool = inlineTools.find((t) => t.id === toolId);
+          if (!inlineTool) {
+            throw createToolNotFoundError({
+              toolId,
+              customMessage: `Tool '${toolId}' not found in skill '${skillId}'`,
+            });
+          }
+
+          // Convert inline tool to InternalToolDefinition using the same pattern as createSkillToolConverter
+          const definitions = tools.getToolDefinitions();
+          const definitionMap = definitions
+            .filter((def) => !isDisabledDefinition(def))
+            .reduce((map, def) => {
+              map[def.toolType] = def as ToolTypeDefinition | BuiltinToolTypeDefinition;
+              return map;
+            }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
+
+          const spaceId = spaces?.spacesService?.getSpaceId(request) ?? 'default';
+          const cache = new ToolAvailabilityCache();
+          const definition = definitionMap[inlineTool.type as ToolType];
+
+          const converted = { ...inlineTool, tags: [] as string[] };
+          const internalTool = convertTool({
+            tool: converted as any,
+            definition,
+            context: { spaceId, request },
+            cache,
+          });
+
+          return runner.runInternalTool({
+            tool: internalTool,
+            toolParams,
+            request,
+            source: 'user',
+          });
+        },
       },
       skills: {
         getRegistry: skills.getRegistry.bind(skills),
