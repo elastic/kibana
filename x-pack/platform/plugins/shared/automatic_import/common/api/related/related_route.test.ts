@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseSuccess } from '@kbn/zod-helpers';
+import { expectParseSuccess } from '@kbn/zod-helpers/v4';
 import { RelatedRequestBody } from './related_route.gen';
 import { getRelatedRequestMock } from '../model/api_test.mock';
 

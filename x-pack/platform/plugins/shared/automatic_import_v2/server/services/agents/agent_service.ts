@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { HumanMessage } from '@langchain/core/messages';
 import { createAutomaticImportAgent } from '../../agents';
 import {
   createIngestPipelineGeneratorAgent,
@@ -114,10 +115,9 @@ export class AgentService {
     const result = await automaticImportAgent.invoke(
       {
         messages: [
-          {
-            role: 'user',
+          new HumanMessage({
             content: `You are tasked with generating an Elasticsearch ingest pipeline for the integration \`${integrationId}\` and data stream \`${dataStreamId}\`.`,
-          },
+          }),
         ],
       },
       {

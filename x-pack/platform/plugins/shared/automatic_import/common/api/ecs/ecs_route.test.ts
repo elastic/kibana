@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseSuccess } from '@kbn/zod-helpers';
+import { expectParseSuccess } from '@kbn/zod-helpers/v4';
 import { EcsMappingRequestBody } from './ecs_route.gen';
 import { getEcsMappingRequestMock } from '../model/api_test.mock';
 

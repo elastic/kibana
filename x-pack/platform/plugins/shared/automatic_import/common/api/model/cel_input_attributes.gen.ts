@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type PathOptions = z.infer<typeof PathOptions>;
 export const PathOptions = z.object({}).catchall(z.unknown());
