@@ -1,0 +1,115 @@
+version: '1'
+name: 'sources.github.get'
+description: 'Get a specific GitHub resource by ID. Actions and inputs: resource_type (required choice), owner (required), repo (required), plus resource-specific inputs: sha (for getCommit), pullNumber (for pullRequestRead), issueNumber (for getIssue/getIssueComments), path and ref (for getFileContents). getLatestRelease requires only owner and repo.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: resource_type
+    type: choice
+    required: true
+    description: "The type of resource to retrieve"
+    options:
+      - getCommit
+      - getLatestRelease
+      - pullRequestRead
+      - getFileContents
+      - getIssue
+      - getIssueComments
+  - name: owner
+    type: string
+    required: true
+    description: "Repository owner (username or organization)"
+  - name: repo
+    type: string
+    required: true
+    description: "Repository name"
+  - name: sha
+    type: string
+    required: false
+    description: "Commit SHA. Required for getCommit."
+  - name: pull_number
+    type: number
+    required: false
+    description: "Pull request number. Required for pullRequestRead."
+  - name: issue_number
+    type: number
+    required: false
+    description: "Issue number. Required for getIssue and getIssueComments."
+  - name: path
+    type: string
+    required: false
+    description: "File or directory path. Required for getFileContents."
+  - name: ref
+    type: string
+    required: false
+    description: "Branch, tag, or commit SHA. Used by getFileContents. Defaults to the repository's default branch."
+steps:
+  - name: if-get-commit
+    type: if
+    condition: "${{ inputs.resource_type == 'getCommit' }}"
+    steps:
+      - name: get-commit
+        type: github.getCommit
+        connector-id: <%= github-stack-connector-id %>
+        with:
+          owner: "${{inputs.owner}}"
+          repo: "${{inputs.repo}}"
+          sha: "${{inputs.sha}}"
+    else:
+      - name: if-get-latest-release
+        type: if
+        condition: "${{ inputs.resource_type == 'getLatestRelease' }}"
+        steps:
+          - name: get-latest-release
+            type: github.getLatestRelease
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+        else:
+          - name: if-pull-request-read
+            type: if
+            condition: "${{ inputs.resource_type == 'pullRequestRead' }}"
+            steps:
+              - name: pull-request-read
+                type: github.pullRequestRead
+                connector-id: <%= github-stack-connector-id %>
+                with:
+                  owner: "${{inputs.owner}}"
+                  repo: "${{inputs.repo}}"
+                  pullNumber: ${{inputs.pull_number}}
+            else:
+              - name: if-get-file-contents
+                type: if
+                condition: "${{ inputs.resource_type == 'getFileContents' }}"
+                steps:
+                  - name: get-file-contents
+                    type: github.getFileContents
+                    connector-id: <%= github-stack-connector-id %>
+                    with:
+                      owner: "${{inputs.owner}}"
+                      repo: "${{inputs.repo}}"
+                      path: "${{inputs.path}}"
+                      ref: "${{inputs.ref}}"
+                else:
+                  - name: if-get-issue
+                    type: if
+                    condition: "${{ inputs.resource_type == 'getIssue' }}"
+                    steps:
+                      - name: get-issue
+                        type: github.getIssue
+                        connector-id: <%= github-stack-connector-id %>
+                        with:
+                          owner: "${{inputs.owner}}"
+                          repo: "${{inputs.repo}}"
+                          issueNumber: ${{inputs.issue_number}}
+                    else:
+                      - name: get-issue-comments
+                        type: github.getIssueComments
+                        connector-id: <%= github-stack-connector-id %>
+                        with:
+                          owner: "${{inputs.owner}}"
+                          repo: "${{inputs.repo}}"
+                          issueNumber: ${{inputs.issue_number}}

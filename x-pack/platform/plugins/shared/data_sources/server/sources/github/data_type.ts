@@ -11,7 +11,7 @@ import type { DataSource } from '@kbn/data-catalog-plugin';
 export const githubDataSource: DataSource = {
   id: 'github',
   name: 'Github',
-  description: i18n.translate('xpack.dataSources.githubMcp.description', {
+  description: i18n.translate('xpack.dataSources.github.description', {
     defaultMessage:
       'Connect to GitHub via the Copilot MCP server to search and read repositories, issues, and pull requests.',
   }),
