@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
 import { WaitForInputStepDefinition } from './wait_for_input_step';
 
 describe('WaitForInputStepDefinition', () => {
-  const { getOutputSchema } = WaitForInputStepDefinition.editorHandlers!.dynamicSchema!;
+  const getOutputSchema =
+    WaitForInputStepDefinition.editorHandlers!.dynamicSchema!.getOutputSchema!;
 
   it('should return a record schema when no input schema is provided', () => {
     const result = getOutputSchema({ input: {}, config: {} });
@@ -30,13 +32,13 @@ describe('WaitForInputStepDefinition', () => {
 
   it('should return a typed schema when input.schema is a valid JSON Schema', () => {
     const jsonSchema = {
-      type: 'object',
+      type: 'object' as const,
       properties: {
-        approved: { type: 'boolean' },
-        reason: { type: 'string' },
+        approved: { type: 'boolean' as const },
+        reason: { type: 'string' as const },
       },
       required: ['approved'],
-    };
+    } satisfies JsonModelSchemaType;
     const result = getOutputSchema({ input: { schema: jsonSchema }, config: {} });
     expect(result).toBeDefined();
 
@@ -51,13 +53,13 @@ describe('WaitForInputStepDefinition', () => {
 
   it('should handle optional fields with defaults in the schema', () => {
     const jsonSchema = {
-      type: 'object',
+      type: 'object' as const,
       properties: {
-        approved: { type: 'boolean' },
-        note: { type: 'string', default: 'no comment' },
+        approved: { type: 'boolean' as const },
+        note: { type: 'string' as const, default: 'no comment' },
       },
       required: ['approved'],
-    };
+    } satisfies JsonModelSchemaType;
     const result = getOutputSchema({ input: { schema: jsonSchema }, config: {} });
 
     // Omitting optional field with default should succeed
@@ -67,7 +69,7 @@ describe('WaitForInputStepDefinition', () => {
 
   it('should fall back to record schema when fromJSONSchema returns undefined', () => {
     // A schema that fromJSONSchema can't handle (e.g. $ref)
-    const unsupportedSchema = { $ref: '#/definitions/Foo' };
+    const unsupportedSchema = { $ref: '#/definitions/Foo' } as JsonModelSchemaType;
     const result = getOutputSchema({ input: { schema: unsupportedSchema }, config: {} });
     expect(result).toBeDefined();
 

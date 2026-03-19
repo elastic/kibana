@@ -94,12 +94,17 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
 
   useEffect(() => {
     try {
-      JSON.parse(inputsJson);
-      setIsJsonValid(true);
+      const parsed: unknown = JSON.parse(inputsJson);
+      const schema = initialcontextOverride?.schema;
+      if (schema) {
+        setIsJsonValid(schema.safeParse(parsed).success);
+      } else {
+        setIsJsonValid(true);
+      }
     } catch {
       setIsJsonValid(false);
     }
-  }, [inputsJson]);
+  }, [inputsJson, initialcontextOverride?.schema]);
 
   const handleInputChange = useCallback((value: string) => {
     setInputsJson(value);

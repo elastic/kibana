@@ -10,6 +10,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { StepContext } from '@kbn/workflows';
+import { z } from '@kbn/zod/v4';
 import type { ResumeExecutionModalProps } from './resume_execution_modal';
 import { ResumeExecutionModal } from './resume_execution_modal';
 
@@ -35,6 +37,13 @@ jest.mock('@kbn/code-editor', () => ({
         type="button"
       >
         {'invalid change'}
+      </button>
+      <button
+        data-test-subj="editorChangeSyntaxOkSchemaFail"
+        onClick={() => onChange('{"wrongKey": true}')}
+        type="button"
+      >
+        {'valid json invalid schema'}
       </button>
     </div>
   ),
@@ -115,6 +124,19 @@ describe('ResumeExecutionModal', () => {
 
       fireEvent.click(screen.getByTestId('editorChangeValid'));
       expect(screen.getByTestId('workflowSubmitResume')).not.toBeDisabled();
+    });
+
+    it('should disable Resume when JSON parses but fails the resume Zod schema', () => {
+      const schema = z.object({ approved: z.boolean() });
+      renderWithProviders({
+        ...defaultProps,
+        initialcontextOverride: {
+          schema,
+          stepContext: { approved: true } as Partial<StepContext>,
+        },
+      });
+      fireEvent.click(screen.getByTestId('editorChangeSyntaxOkSchemaFail'));
+      expect(screen.getByTestId('workflowSubmitResume')).toBeDisabled();
     });
   });
 
