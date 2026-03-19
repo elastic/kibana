@@ -13,7 +13,7 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { createScenarioCriteriaLlmEvaluator } from './scenario_criteria_llm_evaluator';
 import { matchesEvidenceText } from './evidence_text_matching';
 
-export const VALID_KI_TYPES = [
+export const VALID_KI_FEATURE_TYPES = [
   'entity',
   'infrastructure',
   'technology',
@@ -21,9 +21,9 @@ export const VALID_KI_TYPES = [
   'schema',
 ] as const;
 
-export type ValidKIType = (typeof VALID_KI_TYPES)[number];
+export type ValidKIFeatureType = (typeof VALID_KI_FEATURE_TYPES)[number];
 
-export interface KIExtractionEvaluationExample {
+export interface KIFeatureExtractionEvaluationExample {
   input: {
     sample_documents: Array<SearchHit<Record<string, unknown>>>;
   };
@@ -33,30 +33,33 @@ export interface KIExtractionEvaluationExample {
     min_features?: number;
     max_features?: number;
     max_confidence?: number;
-    required_types?: ValidKIType[];
-    forbidden_types?: ValidKIType[];
+    required_types?: ValidKIFeatureType[];
+    forbidden_types?: ValidKIFeatureType[];
     expected_ground_truth: string;
     expected?: string;
   };
   metadata: Record<string, unknown> | null;
 }
 
-export interface KIIdentificationEvaluationDataset {
+export interface KIFeatureExtractionEvaluationDataset {
   name: string;
   description: string;
-  examples: KIExtractionEvaluationExample[];
+  examples: KIFeatureExtractionEvaluationExample[];
 }
 
-interface KIExtractionTaskOutput {
+interface KIFeatureExtractionTaskOutput {
   features: BaseFeature[];
   traceId?: string | null;
 }
 
-type KIExtractionOutput = BaseFeature[] | KIExtractionTaskOutput;
+type KIFeatureExtractionOutput = BaseFeature[] | KIFeatureExtractionTaskOutput;
 
-type KIExtractionEvaluator = Evaluator<KIExtractionEvaluationExample, KIExtractionOutput>;
+type KIFeatureExtractionEvaluator = Evaluator<
+  KIFeatureExtractionEvaluationExample,
+  KIFeatureExtractionOutput
+>;
 
-const getKIsFromOutput = (output: KIExtractionOutput | undefined): BaseFeature[] => {
+const getFeaturesFromOutput = (output: KIFeatureExtractionOutput | undefined): BaseFeature[] => {
   if (!output) {
     return [];
   }
@@ -72,30 +75,35 @@ const typeValidationEvaluator = {
   name: 'type_validation',
   kind: 'CODE' as const,
   evaluate: async ({ output }) => {
-    const kis = getKIsFromOutput(output);
-    if (kis.length === 0) {
-      return { score: 1, explanation: 'No KIs to validate (vacuously valid)' };
+    const features = getFeaturesFromOutput(output);
+    if (features.length === 0) {
+      return { score: 1, explanation: 'No KI features to validate (vacuously valid)' };
     }
 
-    const invalidKIs = kis.filter((ki) => !VALID_KI_TYPES.includes(ki.type as ValidKIType));
+    const invalidFeatures = features.filter(
+      (feature) => !VALID_KI_FEATURE_TYPES.includes(feature.type as unknown as ValidKIFeatureType)
+    );
 
-    const score = (kis.length - invalidKIs.length) / kis.length;
+    const score = (features.length - invalidFeatures.length) / features.length;
 
     return {
       score,
       explanation:
-        invalidKIs.length > 0
-          ? `Invalid types: ${invalidKIs
-              .map((ki) => `"${ki.id}" has type "${ki.type}"`)
-              .join('; ')} (expected one of: ${VALID_KI_TYPES.join(', ')})`
-          : 'All KIs have a valid type',
+        invalidFeatures.length > 0
+          ? `Invalid types: ${invalidFeatures
+              .map((feature) => `"${feature.id}" has type "${feature.type}"`)
+              .join('; ')} (expected one of: ${VALID_KI_FEATURE_TYPES.join(', ')})`
+          : 'All KI features have a valid type',
       details: {
-        total: kis.length,
-        invalidKIs: invalidKIs.map((ki) => ({ id: ki.id, type: ki.type })),
+        total: features.length,
+        invalidFeatures: invalidFeatures.map((feature) => ({
+          id: feature.id,
+          type: feature.type,
+        })),
       },
     };
   },
-} satisfies KIExtractionEvaluator;
+} satisfies KIFeatureExtractionEvaluator;
 
 /**
  * Parses a `field.path=value` evidence string into key-value pairs.
@@ -187,7 +195,7 @@ function isEvidenceGrounded(evidence: string, documents: Array<Record<string, un
  * documents — either as a `field.path=value` snippet matching a document field,
  * or as a direct quote appearing in any string value.
  *
- * When KIs include `evidence_doc_ids`, additionally validates that:
+ * When KI features include `evidence_doc_ids`, additionally validates that:
  * 1. All referenced `_id`s exist in the input documents.
  * 2. Evidence strings are grounded in the specific referenced docs, not just
  *    any input document.
@@ -196,7 +204,7 @@ const evidenceGroundingEvaluator = {
   name: 'evidence_grounding',
   kind: 'CODE' as const,
   evaluate: async ({ input, output }) => {
-    const kis = getKIsFromOutput(output);
+    const features = getFeaturesFromOutput(output);
     const rawDocs: Array<Record<string, unknown>> = input.sample_documents.map((hit) => ({
       _id: hit._id,
       _source: hit._source,
@@ -226,18 +234,18 @@ const evidenceGroundingEvaluator = {
     let groundedRefEvidence = 0;
     const docIdIssues: string[] = [];
 
-    for (const ki of kis) {
-      const evidenceList = ki.evidence ?? [];
+    for (const feature of features) {
+      const evidenceList = feature.evidence ?? [];
       for (const evidence of evidenceList) {
         totalEvidence++;
         if (isEvidenceGrounded(evidence, documents)) {
           groundedEvidence++;
         } else {
-          ungroundedItems.push(`KI "${ki.id}": "${evidence}"`);
+          ungroundedItems.push(`KI feature "${feature.id}": "${evidence}"`);
         }
       }
 
-      const docIds = ki.evidence_doc_ids ?? [];
+      const docIds = feature.evidence_doc_ids ?? [];
       if (docIds.length > 0) {
         const refDocs: Array<Record<string, unknown>> = [];
         for (const docId of docIds) {
@@ -247,7 +255,7 @@ const evidenceGroundingEvaluator = {
             validDocIds++;
             refDocs.push(doc);
           } else {
-            docIdIssues.push(`KI "${ki.id}": unknown doc ID "${docId}"`);
+            docIdIssues.push(`KI feature "${feature.id}": unknown doc ID "${docId}"`);
           }
         }
 
@@ -257,7 +265,9 @@ const evidenceGroundingEvaluator = {
             if (isEvidenceGrounded(evidence, refDocs)) {
               groundedRefEvidence++;
             } else {
-              docIdIssues.push(`KI "${ki.id}": evidence not in referenced docs: "${evidence}"`);
+              docIdIssues.push(
+                `KI feature "${feature.id}": evidence not in referenced docs: "${evidence}"`
+              );
             }
           }
         }
@@ -266,11 +276,11 @@ const evidenceGroundingEvaluator = {
 
     if (totalEvidence === 0) {
       return {
-        score: kis.length === 0 ? 1 : 0,
+        score: features.length === 0 ? 1 : 0,
         explanation:
-          kis.length === 0
-            ? 'No KIs, no evidence to check'
-            : 'KIs present but none have evidence arrays',
+          features.length === 0
+            ? 'No KI features, no evidence to check'
+            : 'KI features present but none have evidence arrays',
       };
     }
 
@@ -303,28 +313,28 @@ const evidenceGroundingEvaluator = {
       },
     };
   },
-} satisfies KIExtractionEvaluator;
+} satisfies KIFeatureExtractionEvaluator;
 
 /**
  * If min_features or max_features is specified in expected output,
- * verifies the KI count falls within bounds with proportional penalties.
+ * verifies the KI feature count falls within bounds with proportional penalties.
  */
-const kiCountEvaluator = {
-  name: 'ki_count',
+const kiFeatureCountEvaluator = {
+  name: 'ki_feature_count',
   kind: 'CODE' as const,
   evaluate: async ({ output, expected }) => {
-    const count = getKIsFromOutput(output).length;
+    const count = getFeaturesFromOutput(output).length;
     const { min_features = -Infinity, max_features = Infinity } = expected;
 
     const issues: string[] = [];
     let score = 1;
 
     if (count < min_features) {
-      issues.push(`Expected at least ${min_features} KIs, got ${count}`);
+      issues.push(`Expected at least ${min_features} KI feature(s), got ${count}`);
       score = min_features > 0 ? Math.max(0, count / min_features) : 0;
     }
     if (count > max_features) {
-      issues.push(`Expected at most ${max_features} KIs, got ${count}`);
+      issues.push(`Expected at most ${max_features} KI feature(s), got ${count}`);
       score = max_features > 0 ? Math.max(0, 1 - (count - max_features) / max_features) : 0;
     }
 
@@ -333,11 +343,11 @@ const kiCountEvaluator = {
       explanation:
         issues.length > 0
           ? `${issues.join('; ')} (score=${score.toFixed(2)})`
-          : `KI count ${count} is within bounds [${min_features ?? '∞'}, ${max_features ?? '∞'}]`,
+          : `KI feature count ${count} is within bounds [${min_features}, ${max_features}]`,
       details: { count, min_features, max_features },
     };
   },
-} satisfies KIExtractionEvaluator;
+} satisfies KIFeatureExtractionEvaluator;
 
 /**
  * If max_confidence is specified, verifies no KI exceeds it.
@@ -348,33 +358,36 @@ const confidenceBoundsEvaluator = {
   evaluate: async ({ output, expected }) => {
     const { max_confidence = 100 } = expected;
 
-    const kis = getKIsFromOutput(output);
-    if (kis.length === 0) {
+    const features = getFeaturesFromOutput(output);
+    if (features.length === 0) {
       return {
         score: 1,
-        explanation: 'No KIs emitted — confidence bounds satisfied trivially',
+        explanation: 'No KI features emitted — confidence bounds satisfied trivially',
       };
     }
 
-    const violations = kis.filter((ki) => ki.confidence > max_confidence);
+    const violations = features.filter((feature) => feature.confidence > max_confidence);
 
     return {
-      score: violations.length === 0 ? 1 : 1 - violations.length / kis.length,
+      score: violations.length === 0 ? 1 : 1 - violations.length / features.length,
       explanation:
         violations.length > 0
           ? `${violations.length}/${
-              kis.length
-            } KIs exceed max confidence ${max_confidence}: ${violations
-              .map((ki) => `"${ki.id}" (${ki.confidence})`)
+              features.length
+            } KI features exceed max confidence ${max_confidence}: ${violations
+              .map((feature) => `"${feature.id}" (${feature.confidence})`)
               .join(', ')}`
-          : `All KIs have confidence ≤ ${max_confidence}`,
+          : `All KI features have confidence ≤ ${max_confidence}`,
       details: {
         max_confidence,
-        violations: violations.map((ki) => ({ id: ki.id, confidence: ki.confidence })),
+        violations: violations.map((feature) => ({
+          id: feature.id,
+          confidence: feature.confidence,
+        })),
       },
     };
   },
-} satisfies KIExtractionEvaluator;
+} satisfies KIFeatureExtractionEvaluator;
 
 /**
  * If required_types or forbidden_types is specified, checks KI types accordingly.
@@ -389,8 +402,8 @@ const typeAssertionsEvaluator = {
       return { score: 1, explanation: 'No type assertions specified — skipping' };
     }
 
-    const kis = getKIsFromOutput(output);
-    const presentTypes = new Set(kis.map((ki) => ki.type));
+    const features = getFeaturesFromOutput(output);
+    const presentTypes = new Set(features.map((feature) => feature.type));
     const issues: string[] = [];
     let totalAssertions = 0;
     let passedAssertions = 0;
@@ -412,8 +425,12 @@ const typeAssertionsEvaluator = {
         if (!presentTypes.has(forbiddenType)) {
           passedAssertions++;
         } else {
-          const violating = kis.filter((ki) => ki.type === forbiddenType).map((ki) => ki.id);
-          issues.push(`Forbidden type "${forbiddenType}" found in KIs: ${violating.join(', ')}`);
+          const violating = features
+            .filter((feature) => feature.type === forbiddenType)
+            .map((feature) => feature.id);
+          issues.push(
+            `Forbidden type "${forbiddenType}" found in KI features: ${violating.join(', ')}`
+          );
         }
       }
     }
@@ -427,16 +444,16 @@ const typeAssertionsEvaluator = {
       details: { presentTypes: [...presentTypes], required_types, forbidden_types, issues },
     };
   },
-} satisfies KIExtractionEvaluator;
+} satisfies KIFeatureExtractionEvaluator;
 
-export const createKIExtractionEvaluators = (scenarioCriteria?: {
+export const createKIFeatureExtractionEvaluators = (scenarioCriteria?: {
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
   criteria: EvaluationCriterion[];
 }) => {
   const base = selectEvaluators([
     typeValidationEvaluator,
     evidenceGroundingEvaluator,
-    kiCountEvaluator,
+    kiFeatureCountEvaluator,
     confidenceBoundsEvaluator,
     typeAssertionsEvaluator,
   ]);
@@ -448,11 +465,14 @@ export const createKIExtractionEvaluators = (scenarioCriteria?: {
   const { criteriaFn, criteria } = scenarioCriteria;
   return [
     ...base,
-    createScenarioCriteriaLlmEvaluator<KIExtractionEvaluationExample, KIExtractionOutput>({
+    createScenarioCriteriaLlmEvaluator<
+      KIFeatureExtractionEvaluationExample,
+      KIFeatureExtractionOutput
+    >({
       criteriaFn: (c) =>
-        criteriaFn(c) as Evaluator<KIExtractionEvaluationExample, KIExtractionOutput>,
+        criteriaFn(c) as Evaluator<KIFeatureExtractionEvaluationExample, KIFeatureExtractionOutput>,
       criteria,
-      transformOutput: (output) => getKIsFromOutput(output),
+      transformOutput: (output) => getFeaturesFromOutput(output),
     }),
   ];
 };
