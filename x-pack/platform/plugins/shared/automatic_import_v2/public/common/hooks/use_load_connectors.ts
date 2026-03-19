@@ -6,7 +6,6 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import type { IHttpFetchError } from '@kbn/core/public';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from './use_kibana';
 import * as i18n from './translations';
@@ -21,12 +20,19 @@ interface UseLoadConnectorsResult {
 }
 
 export const useLoadConnectors = (): UseLoadConnectorsResult => {
-  const { http, notifications } = useKibana().services;
+  const { http, notifications, application } = useKibana().services;
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
 
+  const areConnectorsActionEnabled = application.capabilities.actions?.show === true;
+
   const fetchConnectors = useCallback(async () => {
+    if (!areConnectorsActionEnabled) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(undefined);
@@ -41,9 +47,6 @@ export const useLoadConnectors = (): UseLoadConnectorsResult => {
 
       setConnectors(aiConnectors);
     } catch (e) {
-      if ((e as IHttpFetchError)?.response?.status === 403) {
-        return;
-      }
       const errorMessage = e instanceof Error ? e.message : i18n.LOAD_CONNECTORS_ERROR_MESSAGE;
       setError(errorMessage);
       notifications.toasts.addDanger({
@@ -53,7 +56,7 @@ export const useLoadConnectors = (): UseLoadConnectorsResult => {
     } finally {
       setIsLoading(false);
     }
-  }, [http, notifications.toasts]);
+  }, [areConnectorsActionEnabled, http, notifications.toasts]);
 
   useEffect(() => {
     fetchConnectors();
