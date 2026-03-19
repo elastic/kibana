@@ -6,8 +6,3 @@
  */
 
 export const OSQUERY_API_VERSION = '2023-10-31';
-
-export const OSQUERY_API_HEADERS = {
-  'kbn-xsrf': 'true',
-  'elastic-api-version': OSQUERY_API_VERSION,
-} as const;
