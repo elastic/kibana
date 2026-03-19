@@ -441,6 +441,187 @@ describe('executeDashboardOperations', () => {
     expect(addedPanelIds).toHaveLength(1);
   });
 
+  describe('update_panels_from_attachments', () => {
+    const createLensPanelWithSource = (
+      panelId: string,
+      sourceAttachmentId: string,
+      gridY = 0
+    ): AttachmentPanel => ({
+      type: 'lens',
+      panelId,
+      visualization: { type: 'metric' },
+      sourceAttachmentId,
+      grid: { x: 0, y: gridY, w: 24, h: 9 },
+    });
+
+    it('updates a top-level panel from its source attachment, preserving panelId and grid', async () => {
+      const originalPanel = createLensPanelWithSource('panel-1', 'viz-att-1', 5);
+      const resolveFn = jest.fn().mockResolvedValue({
+        panels: [
+          {
+            type: 'lens',
+            panelId: 'new-generated-id',
+            visualization: { type: 'bar' },
+            sourceAttachmentId: 'viz-att-1',
+            grid: { x: 0, y: 5, w: 24, h: 9 },
+          },
+        ],
+        failures: [],
+      });
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [originalPanel],
+        },
+        operations: [{ operation: 'update_panels_from_attachments', attachmentIds: ['viz-att-1'] }],
+        logger,
+        resolvePanelsFromAttachments: resolveFn,
+        onPanelsAdded: () => {},
+        onPanelsRemoved: () => {},
+      });
+
+      expect(resolveFn).toHaveBeenCalledWith([
+        { attachmentId: 'viz-att-1', grid: { x: 0, y: 5, w: 24, h: 9 } },
+      ]);
+
+      expect(result.dashboardData.panels).toHaveLength(1);
+      const updatedPanel = result.dashboardData.panels[0];
+      expect(updatedPanel.panelId).toBe('panel-1');
+      expect(updatedPanel.grid).toEqual({ x: 0, y: 5, w: 24, h: 9 });
+      expect((updatedPanel as { visualization: unknown }).visualization).toEqual({ type: 'bar' });
+      expect((updatedPanel as { sourceAttachmentId: string }).sourceAttachmentId).toBe('viz-att-1');
+    });
+
+    it('updates a panel inside a section', async () => {
+      const sectionPanel = createLensPanelWithSource('sec-panel-1', 'viz-att-2', 0);
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [],
+          sections: [
+            {
+              sectionId: 'section-a',
+              title: 'Section A',
+              collapsed: false,
+              grid: { y: 0 },
+              panels: [sectionPanel],
+            },
+          ],
+        },
+        operations: [{ operation: 'update_panels_from_attachments', attachmentIds: ['viz-att-2'] }],
+        logger,
+        resolvePanelsFromAttachments: async () => ({
+          panels: [
+            {
+              type: 'lens',
+              panelId: 'new-id',
+              visualization: { type: 'line' },
+              sourceAttachmentId: 'viz-att-2',
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+          ],
+          failures: [],
+        }),
+        onPanelsAdded: () => {},
+        onPanelsRemoved: () => {},
+      });
+
+      const updatedPanel = result.dashboardData.sections?.[0].panels[0];
+      expect(updatedPanel?.panelId).toBe('sec-panel-1');
+      expect((updatedPanel as { visualization: unknown }).visualization).toEqual({ type: 'line' });
+    });
+
+    it('is a no-op when no panels match the attachment ID', async () => {
+      const panel = createLensPanelWithSource('panel-1', 'viz-att-1');
+      const resolveFn = jest.fn();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [panel],
+        },
+        operations: [
+          { operation: 'update_panels_from_attachments', attachmentIds: ['non-existent'] },
+        ],
+        logger,
+        resolvePanelsFromAttachments: resolveFn,
+        onPanelsAdded: () => {},
+        onPanelsRemoved: () => {},
+      });
+
+      expect(resolveFn).not.toHaveBeenCalled();
+      expect(result.dashboardData.panels).toEqual([panel]);
+    });
+
+    it('records failures when attachment resolution fails and leaves panel unchanged', async () => {
+      const panel = createLensPanelWithSource('panel-1', 'viz-att-1');
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [panel],
+        },
+        operations: [{ operation: 'update_panels_from_attachments', attachmentIds: ['viz-att-1'] }],
+        logger,
+        resolvePanelsFromAttachments: async () => {
+          throw new Error('Attachment not found');
+        },
+        onPanelsAdded: () => {},
+        onPanelsRemoved: () => {},
+      });
+
+      expect(result.dashboardData.panels[0]).toEqual(panel);
+      expect(result.failures).toEqual([
+        expect.objectContaining({
+          type: 'update_panels',
+          identifier: 'viz-att-1',
+          error: 'Attachment not found',
+        }),
+      ]);
+    });
+
+    it('emits remove+add UI events for updated panels', async () => {
+      const events: string[] = [];
+      const panel = createLensPanelWithSource('panel-1', 'viz-att-1');
+
+      await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [panel],
+        },
+        operations: [{ operation: 'update_panels_from_attachments', attachmentIds: ['viz-att-1'] }],
+        logger,
+        resolvePanelsFromAttachments: async () => ({
+          panels: [
+            {
+              type: 'lens',
+              panelId: 'new-id',
+              visualization: { type: 'bar' },
+              sourceAttachmentId: 'viz-att-1',
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+          ],
+          failures: [],
+        }),
+        onPanelsAdded: (panels) => {
+          for (const p of panels) events.push(`added:${p.panelId}`);
+        },
+        onPanelsRemoved: (panels) => {
+          for (const p of panels) events.push(`removed:${p.panelId}`);
+        },
+      });
+
+      expect(events).toEqual(['removed:panel-1', 'added:panel-1']);
+    });
+  });
+
   it('throws when add_markdown references an invalid sectionId', async () => {
     await expect(
       executeDashboardOperations({

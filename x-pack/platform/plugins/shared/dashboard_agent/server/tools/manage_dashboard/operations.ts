@@ -12,7 +12,7 @@ import type {
   DashboardAttachmentData,
   DashboardSection,
 } from '@kbn/dashboard-agent-common';
-import { panelGridSchema } from '@kbn/dashboard-agent-common';
+import { isLensAttachmentPanel, panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { GenericAttachmentPanel } from '@kbn/dashboard-agent-common';
@@ -88,6 +88,16 @@ export const removePanelsOperationSchema = z.object({
   panelIds: z.array(z.string()).min(1).describe('Panel ids to remove from the dashboard.'),
 });
 
+export const updatePanelsFromAttachmentsOperationSchema = z.object({
+  operation: z.literal('update_panels_from_attachments'),
+  attachmentIds: z
+    .array(z.string())
+    .min(1)
+    .describe(
+      'Visualization attachment IDs whose dashboard panels should be refreshed with the latest attachment data.'
+    ),
+});
+
 export const dashboardOperationSchema = z.discriminatedUnion('operation', [
   setMetadataOperationSchema,
   addMarkdownOperationSchema,
@@ -95,6 +105,7 @@ export const dashboardOperationSchema = z.discriminatedUnion('operation', [
   addSectionOperationSchema,
   removeSectionOperationSchema,
   removePanelsOperationSchema,
+  updatePanelsFromAttachmentsOperationSchema,
 ]);
 
 export type DashboardOperation = z.infer<typeof dashboardOperationSchema>;
@@ -356,6 +367,78 @@ export const executeDashboardOperations = async ({
           onPanelsRemoved(removedPanels);
           logger.debug(`Removed ${removedPanels.length} panels from dashboard`);
         }
+        break;
+      }
+
+      case 'update_panels_from_attachments': {
+        const attachmentIdSet = new Set(operation.attachmentIds);
+
+        const updatePanel = async (panel: AttachmentPanel): Promise<AttachmentPanel> => {
+          if (
+            !isLensAttachmentPanel(panel) ||
+            !panel.sourceAttachmentId ||
+            !attachmentIdSet.has(panel.sourceAttachmentId)
+          ) {
+            return panel;
+          }
+
+          try {
+            const result = await resolvePanelsFromAttachments([
+              { attachmentId: panel.sourceAttachmentId, grid: panel.grid },
+            ]);
+            failures.push(...result.failures);
+
+            if (result.panels.length === 0) {
+              return panel;
+            }
+
+            const updatedPanel = {
+              ...result.panels[0],
+              panelId: panel.panelId,
+              grid: panel.grid,
+            };
+
+            onPanelsRemoved([panel]);
+            onPanelsAdded([updatedPanel]);
+
+            return updatedPanel;
+          } catch (error) {
+            logger.error(
+              `Failed to update panel "${panel.panelId}" from attachment "${
+                panel.sourceAttachmentId
+              }": ${error instanceof Error ? error.message : String(error)}`
+            );
+            failures.push({
+              type: 'update_panels',
+              identifier: panel.sourceAttachmentId,
+              error: error instanceof Error ? error.message : String(error),
+            });
+            return panel;
+          }
+        };
+
+        const updatedTopLevelPanels: AttachmentPanel[] = [];
+        for (const panel of nextDashboardData.panels) {
+          updatedTopLevelPanels.push(await updatePanel(panel));
+        }
+
+        const updatedSections = nextDashboardData.sections
+          ? await Promise.all(
+              nextDashboardData.sections.map(async (section) => {
+                const updatedSectionPanels: AttachmentPanel[] = [];
+                for (const panel of section.panels) {
+                  updatedSectionPanels.push(await updatePanel(panel));
+                }
+                return { ...section, panels: updatedSectionPanels };
+              })
+            )
+          : undefined;
+
+        nextDashboardData = {
+          ...nextDashboardData,
+          panels: updatedTopLevelPanels,
+          sections: asOptionalSections(updatedSections),
+        };
         break;
       }
     }
