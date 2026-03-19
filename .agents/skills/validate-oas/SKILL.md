@@ -2,6 +2,7 @@
 name: validate-oas
 description: Use when you only need a quick VALID or NOT VALID result for a scoped Kibana OAS area, without detailed issue analysis.
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # Validate OAS

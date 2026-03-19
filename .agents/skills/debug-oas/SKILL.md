@@ -2,6 +2,7 @@
 name: debug-oas
 description: Use when debugging OpenAPI (OAS) issues for a specific API area in Kibana by scoping validation output with one or more --path filters.
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # Debug OAS
