@@ -13,13 +13,17 @@ import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useAttackDetailsContext } from '../../context';
 import { AttackDetailsLeftPanelKey } from '../../constants/panel_keys';
+import {
+  INSIGHTS_TAB_ID,
+  ENTITIES_TAB_ID,
+  CORRELATION_TAB_ID,
+} from '../../constants/left_panel_paths';
 import { AttackEntitiesDetails } from '../components/attack_entities_details';
-
-const ENTITIES_SUB_TAB_ID = 'entity' as const;
+import { AttackRelatedAlertsDetails } from '../components/attack_related_alerts_details';
 
 const insightsSubTabButtons: EuiButtonGroupOptionProps[] = [
   {
-    id: ENTITIES_SUB_TAB_ID,
+    id: ENTITIES_TAB_ID,
     label: (
       <FormattedMessage
         id="xpack.securitySolution.flyout.attackDetails.left.insights.entitiesButtonLabel"
@@ -27,6 +31,16 @@ const insightsSubTabButtons: EuiButtonGroupOptionProps[] = [
       />
     ),
     'data-test-subj': 'attack-details-left-insights-entities-button',
+  },
+  {
+    id: CORRELATION_TAB_ID,
+    label: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.attackDetails.left.insights.correlationsButtonLabel"
+        defaultMessage="Correlation"
+      />
+    ),
+    'data-test-subj': 'attack-details-left-insights-correlation-button',
   },
 ];
 
@@ -38,14 +52,14 @@ export const InsightsTab = memo(() => {
   const { attackId, indexName } = useAttackDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
-  const activeSubTabId = panels.left?.path?.subTab ?? ENTITIES_SUB_TAB_ID;
+  const activeSubTabId = panels.left?.path?.subTab ?? ENTITIES_TAB_ID;
 
   const onChangeSubTab = useCallback(
     (optionId: string) => {
       openLeftPanel({
         id: AttackDetailsLeftPanelKey,
         params: { attackId, indexName },
-        path: { tab: 'insights', subTab: optionId },
+        path: { tab: INSIGHTS_TAB_ID, subTab: optionId },
       });
     },
     [openLeftPanel, attackId, indexName]
@@ -67,7 +81,8 @@ export const InsightsTab = memo(() => {
         data-test-subj="attack-details-left-insights-button-group"
       />
       <EuiSpacer size="m" />
-      {activeSubTabId === ENTITIES_SUB_TAB_ID && <AttackEntitiesDetails />}
+      {activeSubTabId === ENTITIES_TAB_ID && <AttackEntitiesDetails />}
+      {activeSubTabId === CORRELATION_TAB_ID && <AttackRelatedAlertsDetails />}
     </>
   );
 });
