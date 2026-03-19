@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
-import { dataControlSchema } from './control_schema';
+import { DEFAULT_DATA_CONTROL_STATE } from './control_constants';
 
-export const rangeValueSchema = schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 });
-
-export const rangeSliderControlSchema = dataControlSchema.extends({
-  value: schema.maybe(rangeValueSchema),
-  step: schema.number({ defaultValue: DEFAULT_RANGE_SLIDER_STATE.step, min: 0 }),
-});
+export const DEFAULT_RANGE_SLIDER_STATE = {
+  ...DEFAULT_DATA_CONTROL_STATE,
+  step: 1,
+} as const;

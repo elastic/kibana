@@ -27,6 +27,8 @@ export {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
 } from './src/options_list_constants';
+export { DEFAULT_RANGE_SLIDER_STATE } from './src/range_slider_constants';
+export { DEFAULT_TIME_SLIDER_STATE } from './src/time_slider_constants';
 
 export {
   ACTION_CREATE_CONTROL,

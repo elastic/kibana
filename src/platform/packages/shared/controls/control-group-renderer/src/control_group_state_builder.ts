@@ -13,6 +13,8 @@ import {
   DEFAULT_DATA_CONTROL_STATE,
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
+  DEFAULT_RANGE_SLIDER_STATE,
+  DEFAULT_TIME_SLIDER_STATE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
@@ -73,7 +75,8 @@ export const controlGroupStateBuilder = {
           OptionsListDSLControlState,
         'type'
       >
-    >,
+    > &
+      Pick<OptionsListDSLControlState, 'data_view_id' | 'field_name'>,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {
@@ -92,14 +95,15 @@ export const controlGroupStateBuilder = {
     controlState: Omit<
       Omit<PinnedControlState, keyof RangeSliderControlState> & RangeSliderControlState,
       'type'
-    >,
+    > &
+      Pick<RangeSliderControlState, 'data_view_id' | 'field_name'>,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
-        ...DEFAULT_DATA_CONTROL_STATE,
         ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_RANGE_SLIDER_STATE,
         type: RANGE_SLIDER_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
@@ -113,6 +117,7 @@ export const controlGroupStateBuilder = {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_TIME_SLIDER_STATE,
         type: TIME_SLIDER_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         width: 'large',
