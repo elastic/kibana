@@ -8,26 +8,21 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { createToolNotFoundError, createBadRequestError, type ToolType } from '@kbn/agent-builder-common';
+import { createToolNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
 import type { ToolCreateParams } from '@kbn/agent-builder-server';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
-import type { ToolTypeUpdateParams } from '../../tool_provider';
+import type { ToolTypeUpdateParams, ToolProviderListFilters } from '../../tool_provider';
 import type { ToolStorage } from './storage';
 import { createStorage } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';
 import type { ToolDocument, ToolPersistedDefinition } from './types';
-
-export interface ToolClientListFilters {
-  types?: ToolType[];
-  tags?: string[];
-}
 
 /**
  * Client for persisted tool definitions.
  */
 export interface ToolClient {
   get(toolId: string): Promise<ToolPersistedDefinition>;
-  list(filters?: ToolClientListFilters): Promise<ToolPersistedDefinition[]>;
+  list(filters?: ToolProviderListFilters): Promise<ToolPersistedDefinition[]>;
   create(esqlTool: ToolCreateParams): Promise<ToolPersistedDefinition>;
   update(toolId: string, updates: ToolTypeUpdateParams): Promise<ToolPersistedDefinition>;
   delete(toolId: string): Promise<boolean>;
@@ -65,7 +60,7 @@ class ToolClientImpl {
     return fromEs(document);
   }
 
-  async list(filters?: ToolClientListFilters): Promise<ToolPersistedDefinition[]> {
+  async list(filters?: ToolProviderListFilters): Promise<ToolPersistedDefinition[]> {
     const filterClauses: QueryDslQueryContainer[] = [createSpaceDslFilter(this.space)];
 
     if (filters?.types && filters.types.length > 0) {
