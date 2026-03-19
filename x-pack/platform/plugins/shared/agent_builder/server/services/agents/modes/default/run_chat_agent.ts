@@ -17,11 +17,12 @@ import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ChatMessage, SerializedAttachment } from '@kbn/agent-builder-server';
+import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import {
   MAX_ATTACHMENT_DATA_CHARS,
   MAX_ATTACHMENTS,
-  MAX_CONVERSATION_HISTORY_CHARS,
   MAX_CONVERSATION_HISTORY_MESSAGES,
+  MAX_CONVERSATION_HISTORY_TOKENS,
 } from '@kbn/workflows-extensions/common';
 import type {
   ProcessedConversation,
@@ -50,38 +51,30 @@ import type { StateType } from './state';
 const chatAgentGraphName = 'default-agent-builder-agent';
 const TRUNCATE_SUFFIX = '...[truncated]';
 
-function truncateStr(str: string, maxChars: number, suffix: string): string {
-  if (str.length <= maxChars) return str;
-  return str.slice(0, maxChars - suffix.length) + suffix;
+function chatMessageToGuardrailLine(msg: ChatMessage): string {
+  const role = msg.role === 'assistant' ? 'assistant' : 'user';
+  return `[${role}]: ${msg.content ?? ''}`;
 }
 
 function buildConversationHistory(rounds: ProcessedConversationRound[]): ChatMessage[] {
   const messages: ChatMessage[] = [];
   for (const round of rounds) {
-    const userContent = truncateStr(
-      round.input.message ?? '',
-      MAX_CONVERSATION_HISTORY_CHARS,
-      TRUNCATE_SUFFIX
-    );
-    messages.push({ role: 'user', content: userContent });
+    messages.push({ role: 'user', content: round.input.message ?? '' });
     if (round.response?.message) {
-      const assistantContent = truncateStr(
-        round.response.message,
-        MAX_CONVERSATION_HISTORY_CHARS,
-        TRUNCATE_SUFFIX
-      );
-      messages.push({ role: 'assistant', content: assistantContent });
+      messages.push({ role: 'assistant', content: round.response.message });
     }
   }
   const windowed = messages.slice(-MAX_CONVERSATION_HISTORY_MESSAGES * 2);
-  let total = 0;
+  let totalTokens = 0;
   const result: ChatMessage[] = [];
   for (let i = windowed.length - 1; i >= 0; i--) {
     const msg = windowed[i];
-    const len = (msg.content?.length ?? 0) + 50;
-    if (total + len > MAX_CONVERSATION_HISTORY_CHARS && result.length > 0) break;
+    const lineTokens = estimateTokens(chatMessageToGuardrailLine(msg));
+    if (totalTokens + lineTokens > MAX_CONVERSATION_HISTORY_TOKENS && result.length > 0) {
+      break;
+    }
     result.unshift(msg);
-    total += len;
+    totalTokens += lineTokens;
   }
   return result;
 }

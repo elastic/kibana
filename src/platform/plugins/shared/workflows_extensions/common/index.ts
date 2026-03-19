@@ -14,6 +14,6 @@ export { DataMapStepTypeId } from './steps/data';
 export {
   MAX_ATTACHMENT_DATA_CHARS,
   MAX_ATTACHMENTS,
-  MAX_CONVERSATION_HISTORY_CHARS,
   MAX_CONVERSATION_HISTORY_MESSAGES,
+  MAX_CONVERSATION_HISTORY_TOKENS,
 } from './steps/ai/guardrail_context_limits';

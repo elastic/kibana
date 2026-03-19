@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
-import type { Conversation } from '@kbn/agent-builder-common';
-import { getActiveAttachments, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import type { CoreSetup } from '@kbn/core/server';
+import type { ChatMessage } from '@kbn/agent-builder-server';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
+import {
+  MAX_ATTACHMENTS,
+  MAX_CONVERSATION_HISTORY_MESSAGES,
+  MAX_CONVERSATION_HISTORY_TOKENS,
+} from '@kbn/workflows-extensions/common';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { AiGuardrailsStepCommonDefinition } from '../../../common/step_types';
-import type { InternalStartServices } from '../../services/types';
+import {
+  AiGuardrailsStepCommonDefinition,
+  type CustomPromptGuardrailConfig,
+} from '../../../common/step_types';
 import type { AgentBuilderStartDependencies } from '../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
-interface GuardrailLogger {
-  warn: (message: string, error?: Error) => void;
-}
-
-const GUARDRAIL_SYSTEM_PROMPT = `You are a guardrail evaluator. Your job is to decide whether the user message and context below are acceptable to proceed (e.g. no harmful content, no policy violations, no off-topic or inappropriate requests).
+const GUARDRAIL_BASE_PROMPT = `You are a guardrail evaluator. Your job is to decide whether the user message and context below are acceptable to proceed.
 
 Respond with JSON only. Use this exact shape:
 - If acceptable: {"pass": true}
@@ -27,181 +29,187 @@ Respond with JSON only. Use this exact shape:
 
 Do not include any other text or markdown.`;
 
-const MAX_CONTEXT_TOKENS = 100_000;
+function parseHistoryFromInput(raw: readonly unknown[] | undefined): ChatMessage[] {
+  if (!raw?.length) return [];
+  const out: ChatMessage[] = [];
+  for (const entry of raw) {
+    if (entry === null || entry === undefined || typeof entry !== 'object') continue;
+    const o = entry as Record<string, unknown>;
+    const content =
+      typeof o.content === 'string' ? o.content : o.content != null ? String(o.content) : '';
+    const role: 'user' | 'assistant' = o.role === 'assistant' ? 'assistant' : 'user';
+    out.push({ role, content });
+  }
+  return out;
+}
 
-async function formatConversationHistory(conversation: Conversation): Promise<string> {
+function formatHistoryWithinTokenBudget(messages: ChatMessage[]): string {
+  const windowed = messages.slice(-MAX_CONVERSATION_HISTORY_MESSAGES * 2);
+  let totalTokens = 0;
   const lines: string[] = [];
-  let currentTokenCount = 0;
-  const rounds = conversation.rounds ?? [];
-
-  for (let i = rounds.length - 1; i >= 0; i--) {
-    const round = rounds[i];
-    const userMsg = round.input?.message ?? '';
-    const assistantMsg = round.response?.message ?? '';
-    const roundText = [
-      userMsg ? `[user]: ${userMsg}` : '',
-      assistantMsg ? `[assistant]: ${assistantMsg}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n');
-    if (!roundText) continue;
-
-    const roundTokens = estimateTokens(roundText);
-    if (currentTokenCount + roundTokens > MAX_CONTEXT_TOKENS) break;
-
-    lines.unshift(roundText);
-    currentTokenCount += roundTokens;
+  for (let i = windowed.length - 1; i >= 0; i--) {
+    const msg = windowed[i];
+    const line =
+      msg.role === 'assistant' ? `[assistant]: ${msg.content}` : `[user]: ${msg.content}`;
+    const lineTokens = estimateTokens(line);
+    if (totalTokens + lineTokens > MAX_CONVERSATION_HISTORY_TOKENS && lines.length > 0) {
+      break;
+    }
+    lines.unshift(line);
+    totalTokens += lineTokens;
   }
-
-  let remainingTokens = MAX_CONTEXT_TOKENS - currentTokenCount;
-  const activeAttachments = getActiveAttachments(conversation.attachments ?? []);
-
-  for (const attachment of activeAttachments) {
-    const version = getLatestVersion(attachment);
-    const data = version?.data;
-    const name = attachment.description ?? attachment.id ?? attachment.type;
-
-    if (data === undefined || data === null) {
-      lines.push(`\n[Attachment ${name}]: (no content)`);
-      continue;
-    }
-
-    let attachmentStr: string;
-    try {
-      attachmentStr = typeof data === 'string' ? data : JSON.stringify(data, null, 0);
-    } catch {
-      lines.push(`\n[Attachment ${name}]: (unable to stringify)`);
-      continue;
-    }
-
-    const attachmentTokens = estimateTokens(attachmentStr);
-    if (attachmentTokens <= remainingTokens) {
-      lines.push(`\n[Attachment ${name}]:\n${attachmentStr}`);
-      remainingTokens -= attachmentTokens;
-    } else {
-      lines.push(`\n[Attachment ${name} truncated due to limits]`);
-    }
-  }
-
   return lines.join('\n');
 }
 
-async function fetchConversationContext(
-  conversationId: string,
-  getInternalServices: () => InternalStartServices,
-  request: KibanaRequest,
-  logger: GuardrailLogger
-): Promise<string | null> {
-  try {
-    const { conversations } = getInternalServices();
-    const client = await conversations.getScopedClient({ request });
-    const conversation = await client.get(conversationId);
-    return await formatConversationHistory(conversation);
-  } catch (err) {
-    logger.warn(
-      `Failed to fetch conversation for guardrail context (conversation_id=${conversationId}), proceeding with current message only.`,
-      err instanceof Error ? err : undefined
-    );
-    return null;
+function formatAttachmentsWithinBudget(
+  raw: readonly unknown[] | undefined,
+  remainingTokens: number
+): string {
+  if (!raw?.length || remainingTokens <= 0) return '';
+  const parts: string[] = [];
+  let budget = remainingTokens;
+  for (const item of raw.slice(0, MAX_ATTACHMENTS)) {
+    if (item === null || item === undefined || typeof item !== 'object') continue;
+    const o = item as Record<string, unknown>;
+    const name =
+      (typeof o.id === 'string' && o.id) || (typeof o.type === 'string' && o.type) || 'attachment';
+    const data = o.data;
+    if (data === undefined || data === null) {
+      parts.push(`\n[Attachment ${name}]: (no content)`);
+      continue;
+    }
+    let str: string;
+    try {
+      str = typeof data === 'string' ? data : JSON.stringify(data, null, 0);
+    } catch {
+      parts.push(`\n[Attachment ${name}]: (unable to stringify)`);
+      continue;
+    }
+    const t = estimateTokens(str);
+    if (t <= budget) {
+      parts.push(`\n[Attachment ${name}]:\n${str}`);
+      budget -= t;
+    } else {
+      parts.push(`\n[Attachment ${name} truncated due to limits]`);
+    }
   }
+  return parts.join('');
 }
 
 export const getAiGuardrailsStepDefinition = (
-  coreSetup: CoreSetup<AgentBuilderStartDependencies, unknown>,
-  getInternalServices: () => InternalStartServices
+  coreSetup: CoreSetup<AgentBuilderStartDependencies, unknown>
 ) =>
   createServerStepDefinition({
     ...AiGuardrailsStepCommonDefinition,
     handler: async (context) => {
-      const { message, conversation_id: conversationId, custom_rules: customRules } = context.input;
+      const {
+        message,
+        conversation_history: conversationHistory = [],
+        attachments = [],
+        previous_conversations: previousConversations,
+        on_fail: onFail = 'abort',
+        abort_message: abortMessage,
+        checks,
+      } = context.input;
 
-      let conversationBlock = '';
-      if (conversationId?.trim()) {
-        const request = context.contextManager.getFakeRequest();
-        if (request) {
-          const history = await fetchConversationContext(
-            conversationId.trim(),
-            getInternalServices,
-            request,
-            context.logger
-          );
-          if (history) {
-            conversationBlock = `## Conversation history\n\n${history}\n\n`;
-          }
-        } else {
-          context.logger.warn(
-            'No request available for conversation fetch; proceeding with current message only.'
-          );
-        }
-      }
-
-      const systemPrompt =
-        GUARDRAIL_SYSTEM_PROMPT +
-        (customRules?.trim() ? `\n\n### CUSTOM USER RULES ###\n\n${customRules.trim()}` : '');
-
-      const userMessage = `${conversationBlock}## Current message\n\n${message}`;
+      const parsedHistory = parseHistoryFromInput(conversationHistory);
+      const historySlice =
+        previousConversations != null ? parsedHistory.slice(-previousConversations) : parsedHistory;
 
       const [, { inference }] = await coreSetup.getStartServices();
-      const resolvedConnectorId = await resolveConnectorId(
-        context.config['connector-id'],
-        inference,
-        context.contextManager.getFakeRequest()
-      );
+      const request = context.contextManager.getFakeRequest();
 
-      const chatModel = await inference.getChatModel({
-        connectorId: resolvedConnectorId,
-        request: context.contextManager.getFakeRequest(),
-        chatModelOptions: { temperature: 0, maxRetries: 0 },
-      });
+      for (const check of checks) {
+        if (check.type !== 'custom_prompt') continue;
 
-      const modelInput = [
-        { role: 'system' as const, content: systemPrompt },
-        { role: 'user' as const, content: userMessage },
-      ];
+        const config = check.config as CustomPromptGuardrailConfig;
+        const checkMessages =
+          config.max_turns != null ? historySlice.slice(-config.max_turns) : historySlice;
 
-      const runnable = chatModel.withStructuredOutput(
-        {
-          type: 'object',
-          properties: {
-            pass: { type: 'boolean' },
-            reason: { type: 'string' },
-          },
-          required: ['pass'],
-        },
-        { name: 'guardrail_eval', includeRaw: true, method: 'jsonMode' as const }
-      );
+        const historyText = formatHistoryWithinTokenBudget(checkMessages);
+        const historyTokens = estimateTokens(historyText);
+        const attachmentBudget = Math.max(0, MAX_CONVERSATION_HISTORY_TOKENS - historyTokens);
+        const attachmentText = formatAttachmentsWithinBudget(attachments, attachmentBudget);
 
-      try {
-        const result = await runnable.invoke(modelInput, { signal: context.abortSignal });
-        const parsed = result.parsed as { pass?: boolean; reason?: string };
-        const pass = parsed?.pass === true;
-        const reason = typeof parsed?.reason === 'string' ? parsed.reason : undefined;
+        const conversationBlock =
+          historyText || attachmentText
+            ? `## Conversation history\n\n${historyText}${attachmentText}\n\n`
+            : '';
 
-        if (pass) {
-          return { output: { pass: true } };
-        }
+        const userMessage = `${conversationBlock}## Current message\n\n${message}`;
+        const systemPrompt = `${GUARDRAIL_BASE_PROMPT}\n\n### Check instructions ###\n\n${config.system_prompt_details}`;
 
-        return {
-          output: {
-            pass: false,
-            reason: reason ?? 'Guardrail evaluation failed.',
-            abort: true,
-            abort_message: reason ?? 'Guardrail evaluation failed.',
-          },
-        };
-      } catch (err) {
-        context.logger.warn(
-          'Guardrail LLM evaluation failed',
-          err instanceof Error ? err : new Error(String(err))
+        const resolvedConnectorId = await resolveConnectorId(
+          config.inference_id ?? context.config['connector-id'],
+          inference,
+          request!
         );
-        return {
-          output: {
-            pass: false,
-            reason: 'System error: unable to evaluate guardrails due to LLM failure.',
-            abort: true,
-            abort_message: 'System error: unable to evaluate guardrails due to LLM failure.',
+
+        const chatModel = await inference.getChatModel({
+          connectorId: resolvedConnectorId,
+          request,
+          chatModelOptions: { temperature: 0, maxRetries: 0 },
+        });
+
+        const runnable = chatModel.withStructuredOutput(
+          {
+            type: 'object',
+            properties: {
+              pass: { type: 'boolean' },
+              reason: { type: 'string' },
+            },
+            required: ['pass'],
           },
-        };
+          { name: 'guardrail_eval', includeRaw: true, method: 'jsonMode' as const }
+        );
+
+        try {
+          const modelInput = [
+            { role: 'system' as const, content: systemPrompt },
+            { role: 'user' as const, content: userMessage },
+          ];
+          const result = await runnable.invoke(modelInput, { signal: context.abortSignal });
+          const parsed = result.parsed as { pass?: boolean; reason?: string };
+          const pass = parsed?.pass === true;
+          const reason = typeof parsed?.reason === 'string' ? parsed.reason : undefined;
+
+          if (pass) continue;
+
+          if (onFail === 'abort') {
+            const failReason = reason ?? 'Guardrail evaluation failed.';
+            return {
+              output: {
+                pass: false,
+                reason: failReason,
+                abort: true,
+                abort_message: abortMessage ?? failReason,
+              },
+            };
+          }
+
+          context.logger.warn('Guardrail violation detected', { reason });
+          return {
+            output: {
+              pass: true,
+              reason: 'Violation detected but ignored due to monitor mode',
+            },
+          };
+        } catch (err) {
+          context.logger.warn(
+            'Guardrail LLM evaluation failed',
+            err instanceof Error ? err : new Error(String(err))
+          );
+          return {
+            output: {
+              pass: false,
+              reason: 'System error: unable to evaluate guardrails due to LLM failure.',
+              abort: true,
+              abort_message: 'System error: unable to evaluate guardrails due to LLM failure.',
+            },
+          };
+        }
       }
+
+      return { output: { pass: true } };
     },
   });

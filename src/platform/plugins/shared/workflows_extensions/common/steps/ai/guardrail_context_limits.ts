@@ -8,17 +8,15 @@
  */
 
 /**
- * Shared limits for guardrail context (conversation history + attachments).
- * Used when building hook context (agent_builder) and when building the LLM
- * prompt in the ai.guardrails step so values stay in sync.
+ * Shared limits for guardrail context (conversation history for hook + ai.guardrails step).
  */
 export const MAX_CONVERSATION_HISTORY_MESSAGES = 20;
 
-/** Max total character count for conversation history (e.g. 100KB). */
-export const MAX_CONVERSATION_HISTORY_CHARS = 100_000;
+/** Max estimated tokens for conversation history (hook + step prompt). */
+export const MAX_CONVERSATION_HISTORY_TOKENS = 100_000;
 
 /** Max characters per attachment's stringified data; beyond this we truncate. */
 export const MAX_ATTACHMENT_DATA_CHARS = 5000;
 
-/** Max number of attachments included in guardrail context. */
+/** Max number of attachments included in guardrail-related context. */
 export const MAX_ATTACHMENTS = 10;

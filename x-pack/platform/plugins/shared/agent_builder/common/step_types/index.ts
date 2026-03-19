@@ -23,4 +23,5 @@ export {
   type AiGuardrailsStepConfigSchema,
   type AiGuardrailsStepInputSchema,
   type AiGuardrailsStepOutputSchema,
+  type CustomPromptGuardrailConfig,
 } from './ai_guardrails_step';

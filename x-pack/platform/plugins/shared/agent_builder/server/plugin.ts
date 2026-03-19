@@ -114,9 +114,7 @@ export class AgentBuilderPlugin
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
     );
-    setupDeps.workflowsExtensions.registerStepDefinition(
-      getAiGuardrailsStepDefinition(coreSetup, getInternalServices)
-    );
+    setupDeps.workflowsExtensions.registerStepDefinition(getAiGuardrailsStepDefinition(coreSetup));
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
