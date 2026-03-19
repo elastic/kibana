@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KbnPaletteId } from '@kbn/palettes';
 import type { CategoricalColor, Color, ColorCode, GradientColor, LoopColor } from './colors';
 import type { ColorRule, RuleOthers } from './rules';
 
@@ -47,7 +46,7 @@ export interface GradientColorMode {
 }
 
 interface BaseConfig {
-  paletteId: KbnPaletteId;
+  paletteId: string;
   specialAssignments: Array<AssignmentBase<RuleOthers, CategoricalColor | ColorCode | LoopColor>>;
 }
 

@@ -228,7 +228,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
             })}
           >
             <EuiButtonIcon
-              iconType="copy"
+              iconType="copyClipboard"
               onClick={copyOutputCallback}
               data-test-subj="copyOutputButton"
               aria-label={i18n.translate('console.outputPanel.copyOutputButtonTooltipAriaLabel', {

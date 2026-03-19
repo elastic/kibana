@@ -35,6 +35,7 @@ import type { LinksLayoutType } from '../../../common/content_management';
 import { LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { focusMainFlyout } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
+import { getOrderedLinkList } from '../../lib/resolve_links';
 import { coreServices } from '../../services/kibana_services';
 import type { ResolvedLink } from '../../types';
 import { LinksStrings } from '../links_strings';
@@ -94,7 +95,7 @@ export const LinksEditor = ({
       setOrderedLinks([]);
       return;
     }
-    setOrderedLinks(initialLinks);
+    setOrderedLinks(getOrderedLinkList(initialLinks));
   }, [initialLinks]);
 
   const onDragEnd = useCallback(
@@ -102,7 +103,7 @@ export const LinksEditor = ({
       if (source && destination) {
         const newList = euiDragDropReorder(orderedLinks, source.index, destination.index).map(
           (link, i) => {
-            return link;
+            return { ...link, order: i };
           }
         );
         setOrderedLinks(newList);
@@ -124,13 +125,16 @@ export const LinksEditor = ({
           setOrderedLinks(
             orderedLinks.map((link) => {
               if (link.id === linkToEdit.id) {
-                return newLink as ResolvedLink;
+                return { ...newLink, order: linkToEdit.order } as ResolvedLink;
               }
               return link;
             })
           );
         } else {
-          setOrderedLinks([...orderedLinks, newLink as ResolvedLink]);
+          setOrderedLinks([
+            ...orderedLinks,
+            { ...newLink, order: orderedLinks.length } as ResolvedLink,
+          ]);
         }
       }
     },

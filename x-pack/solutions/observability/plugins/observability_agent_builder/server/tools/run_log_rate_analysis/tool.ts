@@ -31,12 +31,12 @@ const logRateAnalysisSchema = z.object({
   deviation: z
     .object(timeRangeSchemaRequired)
     .describe('Time range representing the time period with unusual behavior.'),
-  kqlFilter: z
-    .string()
-    .optional()
+  searchQuery: z
+    .record(z.string(), z.any())
     .describe(
-      'Optional KQL filter to narrow which documents are analyzed. Examples: "service.name: checkout", "log.level: error".'
-    ),
+      'Optional Elasticsearch query DSL filter that limits which documents are analyzed. Defaults to a match_all query.'
+    )
+    .optional(),
 });
 
 export function createRunLogRateAnalysisTool({
@@ -73,7 +73,7 @@ Do NOT use for:
       },
     },
     handler: async (toolParams, context) => {
-      const { index, timeFieldName, baseline, deviation, kqlFilter } = toolParams;
+      const { index, timeFieldName, baseline, deviation, searchQuery } = toolParams;
 
       try {
         const esClient = context.esClient.asCurrentUser;
@@ -85,7 +85,7 @@ Do NOT use for:
           timeFieldName,
           baseline,
           deviation,
-          kqlFilter,
+          searchQuery,
         });
 
         return {

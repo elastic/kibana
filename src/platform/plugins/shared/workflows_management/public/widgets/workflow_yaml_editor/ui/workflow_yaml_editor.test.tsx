@@ -50,7 +50,8 @@ jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', ()
   useYamlValidation: () => ({
     error: null,
     isLoading: false,
-    validationResults: [],
+    validateVariables: jest.fn(),
+    handleMarkersChanged: jest.fn(),
   }),
 }));
 

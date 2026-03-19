@@ -243,7 +243,7 @@ export const ContextMenu = ({
             id="copyAs"
             disabled={!window.navigator?.clipboard}
             onClick={() => onCopyAsSubmit()}
-            icon="copy"
+            icon="copyClipboard"
             css={styles.button}
           >
             <EuiFlexGroup
@@ -273,7 +273,7 @@ export const ContextMenu = ({
             data-test-subj="consoleMenuSelectLanguage"
             id="selectLanguage"
             onClick={() => setLanguageSelectorVisibility(true)}
-            icon="code"
+            icon="editorCodeBlock"
             disabled={isRequestConverterLoading}
           >
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

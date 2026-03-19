@@ -187,10 +187,10 @@ export function registerAttachmentRoutes({
                 })
               ),
               origin: schema.maybe(
-                schema.string({
+                schema.any({
                   meta: {
                     description:
-                      'Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.',
+                      'Origin/reference info for by-reference attachments (e.g. saved_object_id). When provided without data, the content is resolved once at creation time.',
                   },
                 })
               ),
@@ -709,10 +709,10 @@ export function registerAttachmentRoutes({
               }),
             }),
             body: schema.object({
-              origin: schema.string({
+              origin: schema.any({
                 meta: {
                   description:
-                    'The origin string (e.g., saved object ID for visualizations and dashboards).',
+                    'The origin reference object. Shape depends on attachment type (e.g., { saved_object_id: "..." } for visualizations).',
                 },
               }),
             }),

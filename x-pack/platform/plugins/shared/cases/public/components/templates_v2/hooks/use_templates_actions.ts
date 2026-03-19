@@ -10,6 +10,7 @@ import { dump as yamlDump, load as yamlLoad } from 'js-yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useBulkDeleteTemplates } from './use_bulk_delete_templates';
+import { useUpdateTemplate } from './use_update_template';
 import { useCreateTemplate } from './use_create_template';
 import { useBulkExportTemplates } from './use_bulk_export_templates';
 import { useCasesToast } from '../../../common/use_cases_toast';
@@ -24,6 +25,13 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
   const { showSuccessToast } = useCasesToast();
   const { mutate: bulkDeleteTemplates, isLoading: isDeleting } = useBulkDeleteTemplates({
     onSuccess: onDeleteSuccess,
+  });
+
+  const { mutate: setDefaultTemplate, isLoading: isSettingDefault } = useUpdateTemplate({
+    disableDefaultSuccessToast: true,
+    onSuccess: (data) => {
+      showSuccessToast(i18n.SUCCESS_SET_AS_DEFAULT_TEMPLATE(data.name));
+    },
   });
 
   const { mutate: cloneTemplate, isLoading: isCloning } = useCreateTemplate({
@@ -75,6 +83,16 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     [cloneTemplate, showSuccessToast]
   );
 
+  const handleSetAsDefault = useCallback(
+    (template: Template) => {
+      setDefaultTemplate({
+        templateId: template.templateId,
+        template: { isDefault: true },
+      });
+    },
+    [setDefaultTemplate]
+  );
+
   const handleExport = useCallback(
     (template: Template) => {
       bulkExportTemplates({ templateIds: [template.templateId] });
@@ -100,12 +118,14 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
   return {
     handleEdit,
     handleClone,
+    handleSetAsDefault,
     handleExport,
     handleDelete,
     confirmDelete,
     cancelDelete,
     templateToDelete,
     isDeleting,
+    isSettingDefault,
     isCloning,
     isExporting,
   };

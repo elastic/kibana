@@ -115,8 +115,6 @@ export interface EsWorkflowExecution {
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
   /** IDs of all step executions, enables O(1) mget lookup instead of search */
   stepExecutionIds?: string[];
-  /** Caller-supplied execution metadata, separate from workflow inputs */
-  metadata?: Record<string, unknown>;
 }
 
 export interface ProviderInput {
@@ -142,8 +140,6 @@ export interface EsWorkflowStepExecution {
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;
-  /** Whether this step execution belongs to a test run of the workflow. */
-  isTestRun?: boolean;
   startedAt: string;
   finishedAt?: string;
   executionTimeMs?: number;
@@ -284,7 +280,6 @@ export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
 export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
-  workflowId: z.string().optional(), // Optional to allow for test step runs for unsaved workflows
   stepId: z.string(),
   contextOverride: z.record(z.string(), z.unknown()).optional(),
 });

@@ -16,13 +16,6 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 import { AgentBuilderNavControl } from './agent_builder_nav_control';
 
-const mockCurrentAppId$ = new BehaviorSubject<string | null>(null);
-const mockChrome = {
-  sidebar: {
-    getCurrentAppId$: () => mockCurrentAppId$,
-  },
-};
-
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
@@ -54,7 +47,6 @@ describe('AgentBuilderNavControl', () => {
           openChat$,
           completeOpenChat: jest.fn(),
         },
-        chrome: mockChrome,
       },
     } as any);
 
@@ -83,7 +75,6 @@ describe('AgentBuilderNavControl', () => {
           openChat$,
           completeOpenChat: jest.fn(),
         },
-        chrome: mockChrome,
       },
     } as any);
 
@@ -115,7 +106,6 @@ describe('AgentBuilderNavControl', () => {
           openChat$,
           completeOpenChat,
         },
-        chrome: mockChrome,
       },
     } as any);
 

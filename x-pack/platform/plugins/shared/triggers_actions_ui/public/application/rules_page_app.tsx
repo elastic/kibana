@@ -60,10 +60,7 @@ const AppWithoutRouter = () => {
 
   return (
     <ConnectorProvider
-      value={{
-        services: { validateEmailAddresses, enabledEmailServices },
-        isServerless,
-      }}
+      value={{ services: { validateEmailAddresses, enabledEmailServices }, isServerless }}
     >
       <PerformanceContextProvider>
         <Routes>

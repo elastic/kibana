@@ -162,7 +162,11 @@ export function initializeFetch({
         const dataView = dataViews?.length ? dataViews[0] : undefined;
 
         setBlockingError(undefined);
-        if (!dataView || !savedSearch.searchSource) {
+        if (
+          !dataView ||
+          !savedSearch.searchSource ||
+          isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings)
+        ) {
           return;
         }
 
@@ -177,11 +181,6 @@ export function initializeFetch({
             sortDir: discoverServices.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
           }
         );
-        // Still update search source for field stats mode, but not necessarily fetch data
-        if (isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings)) {
-          api.fetchContext$.next(fetchContext);
-          return;
-        }
 
         const searchSessionId = fetchContext.searchSessionId;
         const searchSourceQuery = savedSearch.searchSource.getField('query');

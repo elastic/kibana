@@ -12,6 +12,8 @@ import { useMemo } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import useUnmount from 'react-use/lib/useUnmount';
 
+type Noop = (...args: any[]) => any;
+
 export interface DebounceOptions {
   wait?: number;
   leading?: boolean;
@@ -36,10 +38,7 @@ export interface DebounceOptions {
  * @caveat The debounce does not cancel if `options` or `wait` are changed between calls.
  */
 
-export function useDebounceFn<A extends unknown[], R>(
-  fn: (...args: A) => R,
-  options?: DebounceOptions
-) {
+export function useDebounceFn<T extends Noop>(fn: T, options?: DebounceOptions) {
   if (!isFunction(fn)) {
     throw Error(`useDebounceFn expected parameter is a function, got ${typeof fn}`);
   }
@@ -51,7 +50,7 @@ export function useDebounceFn<A extends unknown[], R>(
   const debounced = useMemo(
     () =>
       debounce(
-        (...args: A): R => {
+        (...args: Parameters<T>): ReturnType<T> => {
           return fnRef.current(...args);
         },
         wait,

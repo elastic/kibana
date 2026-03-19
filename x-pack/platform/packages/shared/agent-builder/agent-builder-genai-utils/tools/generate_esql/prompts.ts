@@ -13,21 +13,15 @@ import type { Action } from './actions';
 import { formatAction } from './actions';
 import { getEsqlInstructions } from './prompts/instructions_template';
 
-const getInstructionsWithOptions = ({
-  rowLimit,
-  disableNamedParams,
-}: {
-  rowLimit?: number;
-  disableNamedParams?: boolean;
-}): string => {
+const getInstructionsWithRowLimit = (rowLimit?: number): string => {
   if (!rowLimit) {
-    return getEsqlInstructions({ disableNamedParams });
+    return getEsqlInstructions();
   }
 
   const defaultLimit = rowLimit;
   const maxAllLimit = rowLimit;
 
-  return getEsqlInstructions({ defaultLimit, maxAllLimit, disableNamedParams });
+  return getEsqlInstructions({ defaultLimit, maxAllLimit });
 };
 
 export const createRequestDocumentationPrompt = ({
@@ -62,7 +56,7 @@ ${prompts.examples}`,
 ${nlQuery}
 </user_query>
 
-${formatResourceWithSampledValues({ resource })}
+${formatResourceWithSampledValues({ resource, indentLevel: 0 })}
 
 Now, based on that information, request documentation from the ES|QL handbook
 to help you get the right information needed to generate a query.`,
@@ -78,7 +72,6 @@ export const createGenerateEsqlPrompt = ({
   additionalInstructions,
   additionalContext,
   rowLimit,
-  disableNamedParams,
 }: {
   nlQuery: string;
   resource: ResolvedResourceWithSampling;
@@ -87,7 +80,6 @@ export const createGenerateEsqlPrompt = ({
   additionalInstructions?: string;
   additionalContext?: string;
   rowLimit?: number;
-  disableNamedParams?: boolean;
 }): BaseMessageLike[] => {
   return [
     [
@@ -107,7 +99,7 @@ ${prompts.syntax}
 
 ${prompts.examples}
 
-${getInstructionsWithOptions({ rowLimit, disableNamedParams })}
+${getInstructionsWithRowLimit(rowLimit)}
 
 ${
   additionalInstructions
@@ -133,7 +125,7 @@ ${nlQuery}
 
 ${additionalContext ? `<additional_context>\n${additionalContext}\n</<additional_context>` : ''}
 
-${formatResourceWithSampledValues({ resource })}
+${formatResourceWithSampledValues({ resource, indentLevel: 0 })}
 
 Now, based on that information, please generate the ES|QL query.`,
     ],

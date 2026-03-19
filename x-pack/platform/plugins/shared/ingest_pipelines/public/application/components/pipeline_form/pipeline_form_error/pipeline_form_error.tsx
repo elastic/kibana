@@ -74,7 +74,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
                   onClick={() => setIsShowingAllErrors(false)}
                   color="danger"
                   iconSide="right"
-                  iconType="chevronSingleUp"
+                  iconType="arrowUp"
                   data-test-subj="hideErrorsButton"
                 >
                   {i18nTexts.errors.hideErrors(hiddenErrorsCount)}
@@ -85,7 +85,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
                   onClick={() => setIsShowingAllErrors(true)}
                   color="danger"
                   iconSide="right"
-                  iconType="chevronSingleDown"
+                  iconType="arrowDown"
                   data-test-subj="showErrorsButton"
                 >
                   {i18nTexts.errors.showErrors(hiddenErrorsCount)}

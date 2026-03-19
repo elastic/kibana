@@ -227,67 +227,7 @@ describe('WorkflowExecuteHistoricalForm', () => {
     });
   });
 
-  describe('set value', () => {
-    it('should set value', () => {
-      const mockExecution = {
-        id: 'exec-1',
-        context: { inputs: {} },
-      };
-      mockUseWorkflowExecution.mockReturnValue({ data: mockExecution, isLoading: false });
-      mockUseWorkflowExecutions.mockReturnValue({
-        data: {
-          total: 1,
-          results: [
-            {
-              id: 'exec-1',
-              startedAt: '2024-01-01T00:00:00Z',
-              isTestRun: false,
-              status: ExecutionStatus.COMPLETED,
-            },
-          ],
-        },
-      });
-
-      renderWithProviders(<WorkflowExecuteHistoricalForm {...defaultProps} />);
-      const editor = screen.getByTestId('workflow-historical-json-editor');
-      fireEvent.change(editor, { target: { value: '{"valid": true}' } });
-
-      expect(defaultProps.setValue).toHaveBeenCalledWith('{"valid": true}');
-    });
-  });
-
-  describe('JSON validation', () => {
-    it('should set error when invalid JSON is entered', () => {
-      const mockExecution = {
-        id: 'exec-1',
-        context: { inputs: {} },
-      };
-      mockUseWorkflowExecution.mockReturnValue({ data: mockExecution, isLoading: false });
-      mockUseWorkflowExecutions.mockReturnValue({
-        data: {
-          total: 1,
-          results: [
-            {
-              id: 'exec-1',
-              startedAt: '2024-01-01T00:00:00Z',
-              isTestRun: false,
-              status: ExecutionStatus.COMPLETED,
-            },
-          ],
-        },
-      });
-
-      renderWithProviders(
-        <WorkflowExecuteHistoricalForm
-          {...defaultProps}
-          initialExecutionId="exec-1"
-          value="{invalid"
-        />
-      );
-
-      expect(defaultProps.setErrors).toHaveBeenCalledWith(expect.stringContaining('Invalid JSON'));
-    });
-
+  describe('JSON validation on editor change', () => {
     it('should clear errors when valid JSON is entered', () => {
       const mockExecution = {
         id: 'exec-1',
@@ -312,12 +252,50 @@ describe('WorkflowExecuteHistoricalForm', () => {
         <WorkflowExecuteHistoricalForm
           {...defaultProps}
           initialExecutionId="exec-1"
-          errors={'Invalid JSON'}
           value='{"key":"value"}'
         />
       );
 
+      const editor = screen.getByTestId('workflow-historical-json-editor');
+      fireEvent.change(editor, { target: { value: '{"valid": true}' } });
+
+      expect(defaultProps.setValue).toHaveBeenCalledWith('{"valid": true}');
       expect(defaultProps.setErrors).toHaveBeenCalledWith(null);
+    });
+
+    it('should set error when invalid JSON is entered', () => {
+      const mockExecution = {
+        id: 'exec-1',
+        context: { inputs: {} },
+      };
+      mockUseWorkflowExecution.mockReturnValue({ data: mockExecution, isLoading: false });
+      mockUseWorkflowExecutions.mockReturnValue({
+        data: {
+          total: 1,
+          results: [
+            {
+              id: 'exec-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              isTestRun: false,
+              status: ExecutionStatus.COMPLETED,
+            },
+          ],
+        },
+      });
+
+      renderWithProviders(
+        <WorkflowExecuteHistoricalForm
+          {...defaultProps}
+          initialExecutionId="exec-1"
+          value='{"key":"value"}'
+        />
+      );
+
+      const editor = screen.getByTestId('workflow-historical-json-editor');
+      fireEvent.change(editor, { target: { value: '{invalid' } });
+
+      expect(defaultProps.setValue).toHaveBeenCalledWith('{invalid');
+      expect(defaultProps.setErrors).toHaveBeenCalledWith('Invalid JSON');
     });
   });
 

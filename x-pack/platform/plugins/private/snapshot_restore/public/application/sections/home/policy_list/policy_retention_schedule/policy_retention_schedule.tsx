@@ -167,7 +167,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                           iconSide="right"
                           color="warning"
                           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                          iconType="chevronSingleDown"
+                          iconType="arrowDown"
                         >
                           <FormattedMessage
                             id="xpack.snapshotRestore.policyRetentionSchedulePanel.manageRetentionButtonLabel"
@@ -211,7 +211,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                                     defaultMessage: 'Schedule',
                                   }
                                 ),
-                                icon: 'plusCircle',
+                                icon: 'plusInCircle',
                                 onClick: () =>
                                   updateRetentionSettingsPrompt(
                                     undefined,

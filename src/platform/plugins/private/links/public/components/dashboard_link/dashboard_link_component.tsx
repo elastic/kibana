@@ -145,7 +145,6 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
   ]);
 
   const id = `dashboardLink--${link.id}`;
-  const testId = `dashboardLink--${link.title}`;
 
   return (
     <EuiListGroupItem
@@ -161,7 +160,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
         delay: 'long',
-        'data-test-subj': `${testId}--tooltip`,
+        'data-test-subj': `${id}--tooltip`,
       }}
       iconType={link.error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
@@ -173,7 +172,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
       })}
       label={linkLabel}
       external={(link.options as DashboardLink['options'])?.open_in_new_tab}
-      data-test-subj={link.error ? `${testId}--error` : `${testId}`}
+      data-test-subj={link.error ? `${id}--error` : `${id}`}
       aria-current={link.destination === parentDashboardId}
     />
   );

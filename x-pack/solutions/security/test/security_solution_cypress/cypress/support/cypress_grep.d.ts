@@ -6,26 +6,7 @@
  */
 
 declare module '@cypress/grep' {
-  export function register(): void;
-}
+  function registerCypressGrep(): void;
 
-declare module '@cypress/grep/plugin' {
-  interface CypressConfigOptions {
-    env?: Record<string, unknown>;
-    specPattern?: string | string[];
-    excludeSpecPattern?: string | string[];
-  }
-  export function plugin(config: CypressConfigOptions): CypressConfigOptions;
-}
-
-declare namespace Cypress {
-  interface SuiteConfigOverrides {
-    tags?: string | string[];
-  }
-  interface TestConfigOverrides {
-    tags?: string | string[];
-  }
-  interface Cypress {
-    grep: (grep?: string, tags?: string, burn?: string) => void;
-  }
+  export = registerCypressGrep;
 }

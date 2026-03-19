@@ -30,9 +30,7 @@ export function apmToOtelPipeline(
       // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       ...serializationTransform,
       // the exporter doesn't seem to output this metricset type
-      createFilterTransform<Record<string, unknown>>(
-        (chunk) => chunk['metricset.name'] !== 'span_breakdown'
-      ),
+      createFilterTransform((chunk) => chunk['metricset.name'] !== 'span_breakdown'),
       getIntakeDefaultsTransform(),
       getApmServerMetadataTransform(version),
       getOtelToApmSpanTransform(),

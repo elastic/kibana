@@ -31,7 +31,7 @@ export const UploadButton: FunctionComponent<Props> = ({ onClick }) => {
       isLoading={uploading}
       color={done ? 'success' : 'primary'}
       fill={true}
-      iconType={done ? 'checkCircleFill' : undefined}
+      iconType={done ? 'checkInCircleFilled' : undefined}
       disabled={Boolean(!files.length || error || done)}
       onClick={onClick}
       size="s"

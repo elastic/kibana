@@ -92,7 +92,6 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           apiUrl: pagerdutySimulatorURL,
         },
         is_connector_type_deprecated: false,
-        auth_mode: 'shared',
       });
     });
 

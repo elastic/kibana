@@ -40,10 +40,7 @@ export const getGoogleOAuthJwtAccessToken = async ({
     }
   }
 
-  if (
-    !connectorToken ||
-    (connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) <= Date.now() : false)
-  ) {
+  if (!connectorToken || Date.parse(connectorToken.expiresAt) <= Date.now()) {
     const requestTokenStart = Date.now();
 
     // Request access token with service account credentials file

@@ -144,7 +144,7 @@ export class FollowerIndexEdit extends PureComponent {
             {...reactRouterNavigate(this.props.history, `/follower_indices`)}
             color="danger"
             flush="left"
-            iconType="chevronSingleLeft"
+            iconType="arrowLeft"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexEditForm.viewFollowerIndicesButtonLabel"

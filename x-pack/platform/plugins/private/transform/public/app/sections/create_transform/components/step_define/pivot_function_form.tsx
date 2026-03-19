@@ -74,7 +74,7 @@ export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
                     {(copy: () => void) => (
                       <EuiButtonIcon
                         onClick={copy}
-                        iconType="copy"
+                        iconType="copyClipboard"
                         aria-label={copyToClipboardPivotDescription}
                       />
                     )}

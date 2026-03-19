@@ -32,7 +32,6 @@ export interface ExecuteWorkflowParams {
   workflowApi: WorkflowApi;
   waitForCompletion?: boolean;
   completionTimeoutSec?: number;
-  metadata?: Record<string, unknown>;
 }
 
 export const executeWorkflow = async ({
@@ -43,7 +42,6 @@ export const executeWorkflow = async ({
   workflowApi,
   waitForCompletion = true,
   completionTimeoutSec = DEFAULT_COMPLETION_TIMEOUT_SEC,
-  metadata,
 }: ExecuteWorkflowParams): Promise<WorkflowExecutionResult> => {
   const workflow = await workflowApi.getWorkflow(workflowId, spaceId);
 
@@ -93,9 +91,7 @@ export const executeWorkflow = async ({
         workflowForExecution,
         spaceId,
         workflowParams,
-        request,
-        undefined,
-        metadata
+        request
       );
 
       span?.setAttribute('elastic.workflow.execution_id', executionId);

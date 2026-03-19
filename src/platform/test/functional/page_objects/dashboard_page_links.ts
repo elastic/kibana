@@ -173,13 +173,17 @@ export class DashboardPageLinks extends FtrService {
     await editButton.click();
   }
 
-  public async reorderLinks(startIndex: number, steps: number, reverse = false) {
+  public async reorderLinks(linkLabel: string, startIndex: number, steps: number, reverse = false) {
     this.log.debug(
-      `move link at position ${startIndex} to ${reverse ? startIndex - steps : startIndex + steps}`
+      `move the ${linkLabel} link from ${startIndex} to ${
+        reverse ? startIndex - steps : startIndex + steps
+      }`
     );
     const linkToMove = await this.findDraggableLinkByIndex(startIndex);
     const draggableButton = await linkToMove.findByTestSubject(`panelEditorLink--dragHandle`);
-
+    expect(await draggableButton.getAttribute('data-rfd-drag-handle-draggable-id')).to.equal(
+      linkLabel
+    );
     await draggableButton.focus();
     await this.browser.pressKeys(this.browser.keys.SPACE);
 

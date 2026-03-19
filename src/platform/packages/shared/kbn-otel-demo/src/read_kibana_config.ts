@@ -51,7 +51,7 @@ export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaCo
   if (fs.existsSync(configPathToUse)) {
     const loaded = (yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<
       string,
-      unknown
+      any
     >;
     const config = unflattenObject(loaded);
     esConfigValues = config.elasticsearch || {};

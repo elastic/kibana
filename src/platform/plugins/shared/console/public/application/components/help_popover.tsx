@@ -53,7 +53,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
         target: '_blank',
         css: styles.listItem,
         extraAction: {
-          iconType: 'external',
+          iconType: 'popout',
           href: docLinks.console.guide,
           target: '_blank',
           alwaysShow: true,
@@ -70,7 +70,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
         target: '_blank',
         css: styles.listItem,
         extraAction: {
-          iconType: 'external',
+          iconType: 'popout',
           href: docLinks.query.queryDsl,
           target: '_blank',
           alwaysShow: true,

@@ -128,7 +128,6 @@ export interface VisualizationResultData {
   visualization: Record<string, unknown>;
   chart_type: SupportedChartType;
   esql: string;
-  time_range?: TimeRange;
 }
 
 export type VisualizationResult = ToolResultMixin<ToolResultType.visualization>;

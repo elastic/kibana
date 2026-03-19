@@ -15,7 +15,6 @@ import {
   generateInputsContent,
   generateInputsSnippet,
 } from './workflow_inputs_scaffolding';
-import { INPUT_STRING_PLACEHOLDER } from '../../../../../../../common/consts/placeholders';
 
 const testSchema: JsonModelSchemaType = {
   type: 'object',
@@ -34,12 +33,12 @@ describe('generateInputLines', () => {
 
   it('generates lines with snippet placeholders', () => {
     const lines = generateInputLines(testSchema, true, '  ');
-    expect(lines).toEqual([`  name: \${1:"${INPUT_STRING_PLACEHOLDER}"}`, '  count: ${2:0}']);
+    expect(lines).toEqual(['  name: ${1:"string"}', '  count: ${2:0}']);
   });
 
   it('generates lines with actual values (no snippets)', () => {
     const lines = generateInputLines(testSchema, false, '    ');
-    expect(lines).toEqual([`    name: "${INPUT_STRING_PLACEHOLDER}"`, '    count: 0']);
+    expect(lines).toEqual(['    name: "string"', '    count: 0']);
   });
 });
 
@@ -50,7 +49,7 @@ describe('generateInputsContent', () => {
 
   it('generates content with correct indentation', () => {
     const result = generateInputsContent(testSchema, 6);
-    expect(result).toBe(`\n        name: "${INPUT_STRING_PLACEHOLDER}"\n        count: 0\n`);
+    expect(result).toBe('\n        name: "string"\n        count: 0\n');
   });
 });
 
@@ -61,7 +60,7 @@ describe('generateInputsSnippet', () => {
 
   it('generates snippet with inputs header and tab-stop placeholders', () => {
     const result = generateInputsSnippet(testSchema);
-    expect(result).toBe(`\ninputs:\n  name: \${1:"${INPUT_STRING_PLACEHOLDER}"}\n  count: \${2:0}`);
+    expect(result).toBe('\ninputs:\n  name: ${1:"string"}\n  count: ${2:0}');
   });
 });
 

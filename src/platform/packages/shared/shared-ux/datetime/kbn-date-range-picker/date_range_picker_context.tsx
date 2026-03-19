@@ -28,7 +28,6 @@ import type {
   TimeRange,
   InitialFocus,
   CalendarOptions,
-  DateRangePickerSettings,
 } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
@@ -111,15 +110,6 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   isLoading: boolean;
   /** Calendar-specific options (e.g. first day of week). */
   calendarOptions?: CalendarOptions;
-  /** Current picker settings (e.g. rounding, refresh). */
-  settings: DateRangePickerSettings;
-  /** Called when the user changes a setting in the settings panel. */
-  onSettingsChange: (settings: DateRangePickerSettings) => void;
-  /**
-   * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
-   * Displayed informally in the panel footer.
-   */
-  timeZone?: string;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -158,9 +148,6 @@ export function DateRangePickerProvider({
   onInputChange,
   width = 'auto',
   calendarOptions,
-  settings = { roundRelativeTime: true },
-  onSettingsChange,
-  timeZone,
 }: PropsWithChildren<DateRangePickerProps>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -171,11 +158,7 @@ export function DateRangePickerProvider({
   const isEditingRef = useRef(isEditing);
   isEditingRef.current = isEditing;
   const [text, setText] = useState<string>(() => value ?? defaultValue ?? '');
-  const timeRange: TimeRange = useMemo(
-    () =>
-      textToTimeRange(text, { presets, dateFormat, roundRelativeTime: settings.roundRelativeTime }),
-    [text, presets, dateFormat, settings]
-  );
+  const timeRange: TimeRange = useMemo(() => textToTimeRange(text), [text]);
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
     [dateFormat, timeRange]
@@ -281,9 +264,6 @@ export function DateRangePickerProvider({
       disabled,
       isLoading,
       calendarOptions,
-      settings,
-      onSettingsChange,
-      timeZone,
     }),
     [
       text,
@@ -308,9 +288,6 @@ export function DateRangePickerProvider({
       disabled,
       isLoading,
       calendarOptions,
-      settings,
-      onSettingsChange,
-      timeZone,
     ]
   );
 

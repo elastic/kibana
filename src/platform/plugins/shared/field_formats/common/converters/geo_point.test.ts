@@ -106,17 +106,5 @@ describe('GeoPoint Format', () => {
         '<span class="ffString__emptyValue">(null)</span>'
       );
     });
-
-    test('escapes HTML characters in html context via fallback', () => {
-      const geoPointFormat = new GeoPointFormat(
-        {
-          transform: 'lat_lon_string',
-        },
-        jest.fn()
-      );
-      expect(geoPointFormat.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
-        '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
-      );
-    });
   });
 });

@@ -8,7 +8,6 @@
 import { expect } from '@kbn/scout/api';
 import type { NetworkDirectionProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -36,7 +35,7 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(asDoc(asDoc(ingestedDocs[0])?.network)?.direction).toBe('inbound');
+      expect(ingestedDocs[0]?.network.direction).toBe('inbound');
     });
 
     apiTest('should set network direction with internal networks field', async ({ testBed }) => {
@@ -66,7 +65,7 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(asDoc(asDoc(ingestedDocs[0])?.network)?.direction).toBe('inbound');
+      expect(ingestedDocs[0]?.network.direction).toBe('inbound');
     });
 
     apiTest('should set network direction with target field', async ({ testBed }) => {
@@ -91,7 +90,7 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(asDoc(ingestedDocs[0])?.test_network_direction).toBe('inbound');
+      expect(ingestedDocs[0]?.test_network_direction).toBe('inbound');
     });
 
     apiTest(
@@ -128,8 +127,8 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(2);
-        expect(asDoc(asDoc(ingestedDocs[0])?.network)?.direction).toBe('inbound');
-        expect(asDoc(asDoc(ingestedDocs[1])?.network)?.direction).toBeUndefined();
+        expect(ingestedDocs[0]?.network.direction).toBe('inbound');
+        expect(ingestedDocs[1]?.network?.direction).toBeUndefined();
       }
     );
 
@@ -160,8 +159,8 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(2);
-        expect(asDoc(asDoc(ingestedDocs[0])?.network)?.direction).toBe('inbound');
-        expect(asDoc(asDoc(ingestedDocs[1])?.network)?.direction).toBeUndefined();
+        expect(ingestedDocs[0]?.network.direction).toBe('inbound');
+        expect(ingestedDocs[1]?.network?.direction).toBeUndefined();
       }
     );
   }

@@ -7,15 +7,8 @@
 
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
 
-const yamlString = (value: string | number | undefined | null) => {
-  if (value == null) {
-    return '""';
-  }
-  if (typeof value === 'number') {
-    return String(value);
-  }
-  return JSON.stringify(value);
-};
+const yamlString = (value: string | undefined | null) =>
+  value == null ? '""' : JSON.stringify(value);
 
 const serializeTemplate = (yamlSections: string[], template: ParsedTemplate) => {
   yamlSections.push(`templateId: ${yamlString(template.templateId)}`);
@@ -53,23 +46,15 @@ const serializeTemplate = (yamlSections: string[], template: ParsedTemplate) => 
     yamlSections.push(`      control: ${yamlString(field.control)}`);
     yamlSections.push(`      type: ${yamlString(field.type)}`);
 
-    const defaultValue = field.metadata?.default;
-    const hasDefault =
-      defaultValue !== undefined &&
-      (typeof defaultValue === 'string' || typeof defaultValue === 'number');
-
     if (field.control === 'SELECT_BASIC') {
       yamlSections.push(`      metadata:`);
       yamlSections.push(`        options:`);
       for (const option of field.metadata.options) {
         yamlSections.push(`          - ${yamlString(option)}`);
       }
-      if (hasDefault) {
-        yamlSections.push(`        default: ${yamlString(defaultValue)}`);
+      if (field.metadata.default) {
+        yamlSections.push(`        default: ${yamlString(field.metadata.default)}`);
       }
-    } else if (hasDefault) {
-      yamlSections.push(`      metadata:`);
-      yamlSections.push(`        default: ${yamlString(defaultValue)}`);
     }
 
     yamlSections.push('');

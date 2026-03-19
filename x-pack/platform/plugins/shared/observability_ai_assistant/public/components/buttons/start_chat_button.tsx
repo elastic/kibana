@@ -13,7 +13,7 @@ export function StartChatButton(props: React.ComponentProps<typeof EuiButton>) {
     <EuiButton
       data-test-subj="observabilityAiAssistantStartChatButton"
       fill
-      iconType="comment"
+      iconType="discuss"
       size="s"
       {...props}
     >

@@ -276,7 +276,7 @@ export function getWebpackConfig(
           type: 'asset/source',
         },
         {
-          test: /\.(html|md|txt|tmpl|yaml|yml)$/,
+          test: /\.(html|md|txt|tmpl)$/,
           type: 'asset/source',
         },
         // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.

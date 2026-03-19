@@ -77,7 +77,7 @@ export function Basic() {
                       {items.length > 1 && (
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
-                            iconType="minusCircle"
+                            iconType="minusInCircle"
                             onClick={() => removeItem(id)}
                             aria-label="Remove item"
                           />
@@ -160,7 +160,7 @@ const MyFormComponent = () => {
                     {items.length > 1 && (
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
-                          iconType="minusCircle"
+                          iconType="minusInCircle"
                           onClick={() => removeItem(id)}
                           aria-label="Remove item"
                         />

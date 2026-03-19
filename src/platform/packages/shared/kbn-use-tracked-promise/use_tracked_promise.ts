@@ -13,7 +13,7 @@ import type { DependencyList } from 'react';
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
-interface UseTrackedPromiseArgs<Arguments extends unknown[], Result> {
+interface UseTrackedPromiseArgs<Arguments extends any[], Result> {
   createPromise: (...args: Arguments) => Promise<Result>;
   onResolve?: (result: Result) => void;
   onReject?: (value: unknown) => void;
@@ -81,7 +81,7 @@ interface UseTrackedPromiseArgs<Arguments extends unknown[], Result> {
  * 'always': they always call. The consumer is then responsible of ensuring no
  * side effects happen if the underlying component is not mounted.
  */
-export const useTrackedPromise = <Arguments extends unknown[], Result>(
+export const useTrackedPromise = <Arguments extends any[], Result>(
   {
     createPromise,
     onResolve = noOp,
@@ -124,8 +124,8 @@ export const useTrackedPromise = <Arguments extends unknown[], Result>(
   const execute = useMemo(
     () =>
       (...args: Arguments) => {
-        let rejectCancellationPromise!: (value: unknown) => void;
-        const cancellationPromise = new Promise<never>((_, reject) => {
+        let rejectCancellationPromise!: (value: any) => void;
+        const cancellationPromise = new Promise<any>((_, reject) => {
           rejectCancellationPromise = reject;
         });
 
@@ -162,6 +162,7 @@ export const useTrackedPromise = <Arguments extends unknown[], Result>(
                 cancelPreviousPendingPromises();
               }
 
+              // remove itself from the list of pending promises
               pendingPromises.current = pendingPromises.current.filter(
                 (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
               );
@@ -189,6 +190,7 @@ export const useTrackedPromise = <Arguments extends unknown[], Result>(
                   cancelPreviousPendingPromises();
                 }
 
+                // remove itself from the list of pending promises
                 pendingPromises.current = pendingPromises.current.filter(
                   (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
                 );
@@ -213,7 +215,7 @@ export const useTrackedPromise = <Arguments extends unknown[], Result>(
                 );
               }
             }
-          ) as Promise<Result>,
+          ),
         };
 
         // add the new promise to the list of pending promises
@@ -273,14 +275,16 @@ export type PromiseState<ResolvedValue, RejectedValue = unknown> =
   | PendingPromiseState<ResolvedValue>
   | SettledPromiseState<ResolvedValue, RejectedValue>;
 
-export const isRejectedPromiseState = <ResolvedValue, RejectedValue>(
-  promiseState: PromiseState<ResolvedValue, RejectedValue>
-): promiseState is RejectedPromiseState<ResolvedValue, RejectedValue> =>
-  promiseState.state === 'rejected';
+export const isRejectedPromiseState = (
+  promiseState: PromiseState<any, any>
+): promiseState is RejectedPromiseState<any, any> => promiseState.state === 'rejected';
 
 interface CancelablePromise<ResolvedValue> {
+  // reject the promise prematurely with a CanceledPromiseError
   cancel: () => void;
+  // reject the promise prematurely with a SilentCanceledPromiseError
   cancelSilently: () => void;
+  // the tracked promise
   promise: Promise<ResolvedValue>;
 }
 

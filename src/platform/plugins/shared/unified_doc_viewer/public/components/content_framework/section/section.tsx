@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { Action } from './section_actions';
 import { SectionActions } from './section_actions';
 
@@ -70,16 +69,8 @@ export function ContentFrameworkSection({
         initialIsOpen={forceState === 'open'}
         onToggle={handleToggle}
         forceState={accordionState}
-        css={css`
-          .euiAccordion__triggerWrapper {
-            flex-wrap: wrap;
-          }
-          .euiAccordion__button {
-            inline-size: auto;
-          }
-        `}
         buttonContent={
-          <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <h3>{title}</h3>
@@ -109,7 +100,15 @@ export function ContentFrameworkSection({
             ) : null}
           </EuiFlexGroup>
         }
-        extraAction={actions?.length && <SectionActions actions={actions} />}
+        extraAction={
+          actions?.length && (
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <SectionActions actions={actions} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )
+        }
       >
         <EuiSpacer size="s" />
         <EuiPanel hasBorder={hasBorder} hasShadow={false} paddingSize={hasPadding ? 's' : 'none'}>

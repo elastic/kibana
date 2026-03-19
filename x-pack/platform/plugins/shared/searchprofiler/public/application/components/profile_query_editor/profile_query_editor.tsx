@@ -145,7 +145,7 @@ export const ProfileQueryEditor = memo(() => {
             <EuiFlexItem grow={false}>
               <EuiToolTip content={tooltipContent}>
                 <EuiButtonIcon
-                  iconType={'play'}
+                  iconType={'playFilled'}
                   data-test-subj={isDisabled ? 'disabledProfileButton' : 'profileButton'}
                   disabled={isDisabled}
                   onClick={!isDisabled ? handleProfileClick : undefined}

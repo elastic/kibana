@@ -10,6 +10,7 @@
 interface OptionDisabledStateParams {
   singleSelection: boolean;
   isSelected: boolean;
+  isIntersecting: boolean;
   isAtMaxLimit: boolean;
 }
 
@@ -22,9 +23,10 @@ interface OptionDisabledStateParams {
 export const getOptionDisabledState = ({
   singleSelection,
   isSelected,
+  isIntersecting,
   isAtMaxLimit,
 }: OptionDisabledStateParams): boolean => {
   if (singleSelection) return false;
   if (isSelected) return false;
-  return isAtMaxLimit;
+  return !isIntersecting || isAtMaxLimit;
 };

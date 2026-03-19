@@ -27,7 +27,6 @@ export class TscProgressTracker {
   private completedProjects = 0;
   private builtProjects = 0;
   private skippedProjects = 0;
-  private errorCount = 0;
   private parsingProjectList = false;
   private barStarted = false;
   private readonly errorLines: string[] = [];
@@ -37,7 +36,7 @@ export class TscProgressTracker {
   private readonly bar = new SingleBar({
     barsize: 30,
     format:
-      ' Type checking [{bar}] {value}/{total} projects | {elapsed} | {built} needed to be rechecked | {errors} errors found | Checking {project}',
+      ' Type checking [{bar}] {value}/{total} projects | {elapsed} | {built} needed to be rechecked | Checking {project}',
     hideCursor: true,
     clearOnComplete: true,
   });
@@ -89,7 +88,6 @@ export class TscProgressTracker {
           status: '',
           built: 0,
           skipped: 0,
-          errors: 0,
         });
         this.barStarted = true;
       }
@@ -133,25 +131,12 @@ export class TscProgressTracker {
     const trimmed = plain.trim();
     if (trimmed.length > 0 && !isVerboseNoise(trimmed)) {
       this.errorLines.push(line);
-      if (/\berror TS\d+:/.test(plain)) {
-        this.errorCount++;
-        if (this.barStarted) {
-          this.bar.update({ errors: this.errorCount });
-        }
-      }
     }
   }
 
   /** Feed a stderr line from tsc into the tracker. */
   addStderrLine(line: string) {
     this.errorLines.push(line);
-    const plain = stripAnsi(line);
-    if (/\berror TS\d+:/.test(plain)) {
-      this.errorCount++;
-      if (this.barStarted) {
-        this.bar.update({ errors: this.errorCount });
-      }
-    }
   }
 
   /** Stop the timer and finalize the progress bar. */
@@ -179,7 +164,6 @@ export class TscProgressTracker {
       completedProjects: this.completedProjects,
       builtProjects: this.builtProjects,
       skippedProjects: this.skippedProjects,
-      errorCount: this.errorCount,
       elapsed: this.formatElapsed(),
     };
   }

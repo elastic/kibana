@@ -9,9 +9,6 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
-import { EuiProvider } from '@elastic/eui';
-import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
-import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 import { OsqueryActionResults } from './osquery_results';
 import { queryClient } from '../../query_client';
@@ -72,13 +69,9 @@ const mockKibana = (permissionType: unknown = defaultPermissions) => {
 
 const renderWithContext = (Element: React.ReactElement) =>
   render(
-    <EuiProvider>
-      <IntlProvider locale={'en'}>
-        <ExperimentalFeaturesProvider value={allowedExperimentalValues}>
-          <QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>
-        </ExperimentalFeaturesProvider>
-      </IntlProvider>
-    </EuiProvider>
+    <IntlProvider locale={'en'}>
+      <QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>
+    </IntlProvider>
   );
 
 describe('Osquery Results', () => {

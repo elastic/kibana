@@ -8,7 +8,6 @@
 import { useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
-import type { Filter } from '@kbn/es-query';
 import { useKibana } from '../common/lib/kibana';
 import type { ResultEdges, Direction, ResultsStrategyResponse } from '../../common/search_strategy';
 import { API_VERSIONS } from '../../common/constants';
@@ -29,8 +28,7 @@ interface UseAllResults {
   startDate?: string;
   limit: number;
   sort: Array<{ field: string; direction: Direction }>;
-  userKuery?: string;
-  esFilters?: Filter[];
+  kuery?: string;
   isLive?: boolean;
   scheduleId?: string;
   executionCount?: number;
@@ -43,8 +41,7 @@ export const useAllResults = ({
   startDate,
   limit,
   sort,
-  userKuery,
-  esFilters,
+  kuery,
   isLive = false,
   scheduleId,
   executionCount,
@@ -54,23 +51,10 @@ export const useAllResults = ({
 
   const isScheduled = !!scheduleId && executionCount != null;
 
-  const serializedFilters =
-    esFilters && esFilters.length > 0 ? JSON.stringify(esFilters) : undefined;
-
   return useQuery<{ data: ResultsStrategyResponse }, Error, ResultsArgs>(
     [
       'allActionResults',
-      {
-        actionId,
-        liveQueryActionId,
-        activePage,
-        limit,
-        sort,
-        userKuery,
-        serializedFilters,
-        scheduleId,
-        executionCount,
-      },
+      { actionId, liveQueryActionId, activePage, limit, sort, scheduleId, executionCount },
     ],
     () => {
       if (isScheduled) {
@@ -85,8 +69,8 @@ export const useAllResults = ({
                 sort: sort[0].field,
                 sortOrder: sort[0].direction,
               }),
-              ...(userKuery && { kuery: userKuery }),
-              ...(serializedFilters && { esFilters: serializedFilters }),
+              ...(kuery && { kuery }),
+              ...(startDate && { startDate }),
             },
           }
         );
@@ -103,8 +87,7 @@ export const useAllResults = ({
               sort: sort[0].field,
               sortOrder: sort[0].direction,
             }),
-            ...(userKuery && { kuery: userKuery }),
-            ...(serializedFilters && { esFilters: serializedFilters }),
+            ...(kuery && { kuery }),
             ...(startDate && { startDate }),
           },
         }

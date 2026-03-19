@@ -43,7 +43,7 @@ export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIn
     <>
       <EuiButton
         fill
-        iconType="plusCircle"
+        iconType="plusInCircleFilled"
         key="createIndexButton"
         data-test-subj={dataTestSubj || 'createIndexButton'}
         data-telemetry-id="idxMgmt-indexList-createIndexButton"

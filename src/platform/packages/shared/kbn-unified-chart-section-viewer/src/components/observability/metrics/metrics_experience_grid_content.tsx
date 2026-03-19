@@ -19,8 +19,7 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import type { ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
-import { getEsqlQuery } from './utils/get_esql_query';
+import type { MetricField, UnifiedMetricsGridProps } from '../../../types';
 import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
 import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
@@ -29,8 +28,7 @@ import { Pagination } from '../../pagination';
 import { usePagination } from './hooks';
 import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
-import { firstNonNullable } from '../../../common/utils';
-import { extractWhereCommand } from '../../../utils/extract_where_command';
+import { useMetricsExperienceFieldsContext } from './context/metrics_experience_fields_provider';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
@@ -38,12 +36,12 @@ export interface MetricsExperienceGridContentProps
     'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
   > {
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
-  metricItems: ParsedMetricItem[];
+  fields: MetricField[];
   isDiscoverLoading?: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
-  metricItems,
+  fields,
   services,
   discoverFetch$,
   fetchParams,
@@ -53,22 +51,18 @@ export const MetricsExperienceGridContent = ({
   histogramCss,
   isDiscoverLoading = false,
 }: MetricsExperienceGridContentProps) => {
-  const { query } = fetchParams;
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const esqlQuery = useMemo(() => getEsqlQuery(query), [query]);
-
-  const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
-
   const { searchTerm, currentPage, selectedDimensions, onPageChange } = useMetricsExperienceState();
+  const { whereStatements } = useMetricsExperienceFieldsContext();
 
   const {
     currentPageItems: currentPageFields = [],
     totalPages = 0,
     totalCount: filteredFieldsCount = 0,
   } = usePagination({
-    items: metricItems,
+    items: fields,
     pageSize: PAGE_SIZE,
     currentPage,
   }) ?? {};
@@ -79,13 +73,8 @@ export const MetricsExperienceGridContent = ({
   );
 
   const getUserMessages = useCallback(
-    (metricItem: ParsedMetricItem) =>
-      isLegacyHistogram(
-        firstNonNullable(metricItem.fieldTypes),
-        firstNonNullable(metricItem.metricTypes)
-      )
-        ? LEGACY_HISTOGRAM_USER_MESSAGES
-        : undefined,
+    (metric: MetricField) =>
+      isLegacyHistogram(metric) ? LEGACY_HISTOGRAM_USER_MESSAGES : undefined,
     []
   );
 
@@ -156,7 +145,7 @@ export const MetricsExperienceGridContent = ({
           columns={columns}
           dimensions={selectedDimensions}
           services={services}
-          metricItems={currentPageFields}
+          fields={currentPageFields}
           onBrushEnd={onBrushEnd}
           actions={actions}
           onFilter={onFilter}

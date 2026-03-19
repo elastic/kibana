@@ -26,13 +26,13 @@ const iconButtons = [
   {
     label: 'Text',
     onClick: action('onTextClick'),
-    iconType: 'text',
+    iconType: 'visText',
     title: 'Text as markdown',
   },
   {
     label: 'Control',
     onClick: action('onControlClick'),
-    iconType: 'controls',
+    iconType: 'controlsHorizontal',
   },
   {
     label: 'Link',
@@ -47,7 +47,7 @@ const iconButtons = [
   {
     label: 'Markup',
     onClick: action('onMarkupClick'),
-    iconType: 'code',
+    iconType: 'visVega',
   },
 ];
 

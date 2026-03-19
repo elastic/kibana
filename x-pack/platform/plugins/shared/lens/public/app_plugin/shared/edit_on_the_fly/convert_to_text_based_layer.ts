@@ -170,7 +170,6 @@ function buildTextBasedState(
       id: ip.id!,
       title: ip.title,
       name: ip.name,
-      timeField: ip.timeFieldName,
     })),
   };
 }

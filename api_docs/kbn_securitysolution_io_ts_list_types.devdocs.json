@@ -2919,23 +2919,6 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
-        "id": "def-common.BulkErrorErrorSchema",
-        "type": "Type",
-        "tags": [],
-        "label": "BulkErrorErrorSchema",
-        "description": [],
-        "signature": [
-          "{ status_code: number; message: string; }"
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/response/import_exceptions_schema/index.ts",
-        "lineNumber": 23,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
         "id": "def-common.BulkErrorSchema",
         "type": "Type",
         "tags": [],
@@ -2945,7 +2928,7 @@
           "{ error: { status_code: number; message: string; }; } & { id?: string | undefined; list_id?: string | undefined; item_id?: string | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/response/import_exceptions_schema/index.ts",
-        "lineNumber": 38,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4560,7 +4543,7 @@
           "{ errors: ({ error: { status_code: number; message: string; }; } & { id?: string | undefined; list_id?: string | undefined; item_id?: string | undefined; })[]; success: boolean; success_count: number; success_exception_lists: boolean; success_count_exception_lists: number; success_exception_list_items: boolean; success_count_exception_list_items: number; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/response/import_exceptions_schema/index.ts",
-        "lineNumber": 52,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6283,7 +6266,7 @@
           "<string, string, unknown>; }>]>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/response/import_exceptions_schema/index.ts",
-        "lineNumber": 25,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10210,7 +10193,7 @@
           "<number, number, unknown>; }>>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/response/import_exceptions_schema/index.ts",
-        "lineNumber": 40,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

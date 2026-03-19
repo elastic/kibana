@@ -267,7 +267,7 @@ function TraceTree() {
         scrollElement ?? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined
       }
     >
-      {({ height, onChildScroll, scrollTop, registerChild }) => (
+      {({ height, isScrolling, onChildScroll, scrollTop, registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (
             <div data-test-subj="waterfall" ref={registerChild}>
@@ -275,6 +275,7 @@ function TraceTree() {
                 ref={listRef}
                 autoHeight
                 height={height}
+                isScrolling={isScrolling}
                 onScroll={onChildScroll}
                 scrollTop={scrollTop}
                 width={width}

@@ -9,10 +9,7 @@
 
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
-  PRIMITIVE_RUNTIME_FIELD_TYPES,
-} from '../common/constants';
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../common/constants';
 import type { RuntimeType } from '../common';
 
 export const serializedFieldFormatSchema = schema.object({
@@ -20,8 +17,18 @@ export const serializedFieldFormatSchema = schema.object({
   params: schema.maybe(schema.any()),
 });
 
+export const RUNTIME_FIELD_TYPES2 = [
+  'keyword',
+  'long',
+  'double',
+  'date',
+  'ip',
+  'boolean',
+  'geo_point',
+] as const;
+
 export const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
-  PRIMITIVE_RUNTIME_FIELD_TYPES.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
+  RUNTIME_FIELD_TYPES2.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
     Type<RuntimeType>
   ]
 );

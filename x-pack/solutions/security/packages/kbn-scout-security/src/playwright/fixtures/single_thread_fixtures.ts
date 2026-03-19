@@ -27,15 +27,10 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
     {
       pageObjects,
       page,
-      config,
-    }: {
-      pageObjects: SecurityTestFixtures['pageObjects'];
-      page: SecurityTestFixtures['page'];
-      config: SecurityWorkerFixtures['config'];
-    },
+    }: { pageObjects: SecurityTestFixtures['pageObjects']; page: SecurityTestFixtures['page'] },
     use: (pageObjects: SecurityTestFixtures['pageObjects']) => Promise<void>
   ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page, config);
+    const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },
   apiServices: [

@@ -130,7 +130,6 @@ async function getAllHelper({
         isSystemAction: connector.isSystemAction,
         isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
         ...(connector.exposeConfig ? { config: connector.config } : {}),
-        authMode: connector.authMode ? connector.authMode : 'shared',
       };
     }),
   ].sort((a, b) => a.name.localeCompare(b.name));
@@ -180,20 +179,17 @@ export async function getAllSystemConnectors({
   );
 
   const transformedSystemConnectors = systemConnectors
-    .map((systemConnector) => {
-      return {
-        id: systemConnector.id,
-        actionTypeId: systemConnector.actionTypeId,
-        name: systemConnector.name,
-        isPreconfigured: systemConnector.isPreconfigured,
-        isDeprecated: isConnectorDeprecated(systemConnector),
-        isSystemAction: systemConnector.isSystemAction,
-        isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
-          systemConnector.actionTypeId
-        ),
-        authMode: systemConnector.authMode ? systemConnector.authMode : 'shared',
-      };
-    })
+    .map((systemConnector) => ({
+      id: systemConnector.id,
+      actionTypeId: systemConnector.actionTypeId,
+      name: systemConnector.name,
+      isPreconfigured: systemConnector.isPreconfigured,
+      isDeprecated: isConnectorDeprecated(systemConnector),
+      isSystemAction: systemConnector.isSystemAction,
+      isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
+        systemConnector.actionTypeId
+      ),
+    }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const connectors = await injectExtraFindData({

@@ -32,15 +32,18 @@ export const CreateIntegrationUpload = React.memo(() => {
   const [error, setError] = useState<string>();
   const [integrationName, setIntegrationName] = useState<string>();
 
-  const integrationsHref = useMemo(() => application.getUrlForApp('integrations'), [application]);
+  const createHref = useMemo(
+    () => application.getUrlForApp('integrations', { path: '/create' }),
+    [application]
+  );
 
   const onBack = useCallback(() => {
-    application.navigateToUrl(integrationsHref);
-  }, [application, integrationsHref]);
+    application.navigateToUrl(createHref);
+  }, [application, createHref]);
 
   const onClose = useCallback(() => {
-    application.navigateToUrl(integrationsHref);
-  }, [application, integrationsHref]);
+    application.navigateToUrl(createHref);
+  }, [application, createHref]);
 
   const onChangeFile = useCallback((files: FileList | null) => {
     setFile(files?.[0]);

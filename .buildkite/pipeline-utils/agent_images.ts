@@ -12,19 +12,22 @@ import type { BuildkiteAgentTargetingRule } from './buildkite';
 import { BuildkiteClient } from './buildkite';
 import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels';
 
-export const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
-export const USE_QA_IMAGE_GH_LABEL = 'ci:use-qa-image';
-export const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-prod';
-export const FIPS_140_3_IMAGE = 'family/kibana-fips-140-3-ubuntu-2404';
-export const FIPS_140_2_IMAGE = 'family/kibana-fips-140-2-ubuntu-2404';
+const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
+const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-prod';
 
 // constrain AgentImageConfig to the type that doesn't have the `queue` property
-export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
+const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
   diskSizeGb: 105,
 };
+
+const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
+const USE_FIPS_IMAGE_FOR_PR = process.env.TEST_ENABLE_FIPS_VERSION?.match(
+  new RegExp(`^${FIPS_VERSION.TWO}|${FIPS_VERSION.THREE}$`)
+);
+const USE_QA_IMAGE_FOR_PR = process.env.USE_QA_IMAGE_FOR_PR?.match(/(1|true)/i);
 
 const getFIPSImage = () => {
   let image: string;
@@ -33,14 +36,16 @@ const getFIPSImage = () => {
     process.env.TEST_ENABLE_FIPS_VERSION === FIPS_VERSION.THREE ||
     prHasFIPSLabel(FIPS_VERSION.THREE)
   ) {
-    image = FIPS_140_3_IMAGE;
+    image = 'family/kibana-fips-140-3-ubuntu-2404';
   } else {
-    image = FIPS_140_2_IMAGE;
+    image = 'family/kibana-fips-140-2-ubuntu-2404';
   }
 
   return {
-    ...DEFAULT_AGENT_IMAGE_CONFIG,
+    provider: 'gcp',
     image,
+    imageProject: ELASTIC_IMAGES_PROD_PROJECT,
+    diskSizeGb: 105,
   };
 };
 
@@ -49,15 +54,9 @@ function getAgentImageConfig(): BuildkiteAgentTargetingRule;
 function getAgentImageConfig(options: { returnYaml: true }): string;
 function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAgentTargetingRule {
   const bk = new BuildkiteClient();
-  const prLabels = process.env.GITHUB_PR_LABELS ?? '';
-  const useFipsImage = process.env.TEST_ENABLE_FIPS_VERSION?.match(
-    new RegExp(`^${FIPS_VERSION.TWO}|${FIPS_VERSION.THREE}$`)
-  );
-  const useQaImage =
-    process.env.USE_QA_IMAGE_FOR_PR?.match(/(1|true)/i) || prLabels.includes(USE_QA_IMAGE_GH_LABEL);
   let config: BuildkiteAgentTargetingRule;
 
-  if (useFipsImage || prHasFIPSLabel()) {
+  if (USE_FIPS_IMAGE_FOR_PR || prHasFIPSLabel()) {
     config = getFIPSImage();
 
     bk.setAnnotation(
@@ -66,11 +65,11 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
       '#### FIPS Agents Enabled<br />\nFIPS mode can produce new test failures. If you did not intend this remove ```TEST_ENABLE_FIPS_VERSION``` environment variable and/or the ```ci:enable-fips-<version>-agent``` Github label.'
     );
   } else {
-    config = { ...DEFAULT_AGENT_IMAGE_CONFIG };
+    config = DEFAULT_AGENT_IMAGE_CONFIG;
   }
 
-  if (useQaImage) {
-    config = { ...config, imageProject: ELASTIC_IMAGES_QA_PROJECT };
+  if (USE_QA_IMAGE_FOR_PR || GITHUB_PR_LABELS.includes('ci:use-qa-image')) {
+    config.imageProject = ELASTIC_IMAGES_QA_PROJECT;
   }
 
   if (returnYaml) {

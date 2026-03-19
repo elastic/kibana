@@ -23,9 +23,6 @@ jest.mock('./alert_reason', () => ({
 jest.mock('./alert_status', () => ({
   AlertStatus: () => <div>{'AlertStatus'}</div>,
 }));
-jest.mock('./mitre_attack', () => ({
-  MitreAttack: () => <div>{'MitreAttack'}</div>,
-}));
 
 jest.mock('../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -90,7 +87,6 @@ describe('AboutSection', () => {
       expect(getByText('AlertDescription')).toBeInTheDocument();
       expect(getByText('AlertReason')).toBeInTheDocument();
       expect(getByText('AlertStatus')).toBeInTheDocument();
-      expect(getByText('MitreAttack')).toBeInTheDocument();
     });
   });
 });

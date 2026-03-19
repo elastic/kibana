@@ -11,10 +11,8 @@ import type { Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 // Import all route registration functions
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { registerDeleteWorkflowByIdRoute } from './delete_workflow_by_id';
 import { registerDeleteWorkflowsBulkRoute } from './delete_workflows_bulk';
-import { registerGetChildWorkflowExecutionsRoute } from './get_child_workflow_executions';
 import { registerGetConnectorsRoute } from './get_connectors';
 import { registerGetStepExecutionRoute } from './get_step_execution';
 import { registerGetWorkflowAggsRoute } from './get_workflow_aggs';
@@ -24,8 +22,6 @@ import { registerGetWorkflowExecutionLogsRoute } from './get_workflow_execution_
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
 import { registerGetWorkflowJsonSchemaRoute } from './get_workflow_json_schema';
 import { registerGetWorkflowStatsRoute } from './get_workflow_stats';
-import { registerGetWorkflowStepExecutionsRoute } from './get_workflow_step_executions';
-import { registerGetWorkflowsConfigRoute } from './get_workflows_config';
 import { registerPostBulkCreateWorkflowsRoute } from './post_bulk_create_workflows';
 import { registerPostCancelWorkflowExecutionRoute } from './post_cancel_workflow_execution';
 import { registerPostCloneWorkflowRoute } from './post_clone_workflow';
@@ -45,19 +41,12 @@ export function defineRoutes(
   router: WorkflowsRouter,
   api: WorkflowsManagementApi,
   logger: Logger,
-  spaces: SpacesServiceStart,
-  getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
+  spaces: SpacesServiceStart
 ) {
-  const deps: RouteDependencies = {
-    router,
-    api,
-    logger,
-    spaces,
-  };
+  const deps: RouteDependencies = { router, api, logger, spaces };
 
   // Register all routes
   registerGetWorkflowStatsRoute(deps);
-  registerGetWorkflowsConfigRoute({ ...deps, getWorkflowExecutionEngine });
   registerGetWorkflowAggsRoute(deps);
   registerGetWorkflowByIdRoute(deps);
   registerGetConnectorsRoute(deps);
@@ -73,8 +62,6 @@ export function defineRoutes(
   registerPostTestStepRoute(deps);
   registerGetWorkflowExecutionsRoute(deps);
   registerGetWorkflowExecutionByIdRoute(deps);
-  registerGetWorkflowStepExecutionsRoute(deps);
-  registerGetChildWorkflowExecutionsRoute(deps);
   registerPostCancelWorkflowExecutionRoute(deps);
   registerPostResumeWorkflowExecutionRoute(deps);
   registerGetWorkflowExecutionLogsRoute(deps);

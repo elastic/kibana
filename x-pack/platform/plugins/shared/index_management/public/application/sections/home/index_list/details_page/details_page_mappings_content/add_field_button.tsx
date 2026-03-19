@@ -36,7 +36,7 @@ export const AddFieldButton = ({
     >
       <EuiButton
         onClick={addFieldButtonOnClick}
-        iconType="plusCircle"
+        iconType="plusInCircle"
         color={color}
         size="m"
         data-test-subj="indexDetailsMappingsAddField"

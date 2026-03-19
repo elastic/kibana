@@ -191,14 +191,8 @@ async function getDataStreamSummaryStats(
   return {
     docsCount,
     degradedDocsCount,
-    services: getTermsFromAgg(
-      serviceNamesAgg,
-      response.aggregations as Record<string, TermsAggregationResult> | undefined
-    ),
-    hosts: getTermsFromAgg(
-      hostsAgg,
-      response.aggregations as Record<string, TermsAggregationResult> | undefined
-    ),
+    services: getTermsFromAgg(serviceNamesAgg, response.aggregations),
+    hosts: getTermsFromAgg(hostsAgg, response.aggregations),
   };
 }
 
@@ -222,26 +216,15 @@ async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string
   return docCount ? sizeInBytes / docCount : 0;
 }
 
-interface TermsAggregationBucket {
-  key: string;
-}
-
-interface TermsAggregationResult {
-  buckets?: TermsAggregationBucket[];
-}
-
-function getTermsFromAgg(
-  termAgg: TermAggregation,
-  aggregations: Record<string, TermsAggregationResult> | undefined
-) {
+function getTermsFromAgg(termAgg: TermAggregation, aggregations: any) {
   if (!aggregations) {
     return {};
   }
 
   return Object.entries(termAgg).reduce((acc, [key, _value]) => {
-    const values = aggregations[key]?.buckets?.map((bucket) => bucket.key) ?? [];
+    const values = aggregations[key]?.buckets.map((bucket: any) => bucket.key) as string[];
     return { ...acc, [key]: values };
-  }, {} as Record<string, string[]>);
+  }, {});
 }
 
 function throwIfInvalidDataStreamParams(dataStream?: string) {

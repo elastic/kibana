@@ -402,7 +402,6 @@ interface ActionDocument {
   user_id?: string;
   user_profile_uid?: string;
   case_ids?: string[];
-  alert_ids?: string[];
   space_id: string;
   pack_id?: string;
   pack_name?: string;
@@ -543,8 +542,6 @@ function generateActionDocument(opts: {
   if (user) {
     action.user_id = user.userId;
     action.user_profile_uid = user.profileUid;
-  } else {
-    action.alert_ids = [uuidv4()];
   }
 
   if (opts.syntheticCases.length > 0 && Math.random() < opts.caseRatioValue) {

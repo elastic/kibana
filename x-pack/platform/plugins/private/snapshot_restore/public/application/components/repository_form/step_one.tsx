@@ -331,7 +331,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
       color="primary"
       onClick={onNext}
       fill
-      iconType="chevronSingleRight"
+      iconType="arrowRight"
       iconSide="right"
       data-test-subj="nextButton"
     >

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -445,8 +445,6 @@ export const SharedLists = React.memo(() => {
   const [displayAddExceptionItemFlyout, setDisplayAddExceptionItemFlyout] = useState(false);
   const [displayCreateSharedListFlyout, setDisplayCreateSharedListFlyout] = useState(false);
 
-  const createButtonRef = useRef<HTMLButtonElement | null>(null);
-
   const onCreateButtonClick = () => setIsCreatePopoverOpen((isOpen) => !isOpen);
   const onCloseCreatePopover = () => {
     setDisplayAddExceptionItemFlyout(false);
@@ -505,13 +503,7 @@ export const SharedLists = React.memo(() => {
             data-test-subj="manageExceptionListCreateButton"
             button={
               canEditExceptions && (
-                <EuiButton
-                  buttonRef={(node: HTMLButtonElement | null) => {
-                    createButtonRef.current = node;
-                  }}
-                  iconType={'arrowDown'}
-                  onClick={onCreateButtonClick}
-                >
+                <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
                   {i18n.CREATE_BUTTON}
                 </EuiButton>
               )
@@ -562,11 +554,7 @@ export const SharedLists = React.memo(() => {
           http={http}
           addSuccess={addSuccess}
           addError={addError}
-          handleCloseFlyout={() => {
-            setDisplayCreateSharedListFlyout(false);
-            // Without requestAnimationFrame, the flyout's cleanup resets focus before we can move it to the button.
-            requestAnimationFrame(() => createButtonRef.current?.focus());
-          }}
+          handleCloseFlyout={() => setDisplayCreateSharedListFlyout(false)}
         />
       )}
 

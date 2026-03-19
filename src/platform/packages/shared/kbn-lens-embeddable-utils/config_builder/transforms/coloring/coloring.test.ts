@@ -8,7 +8,7 @@
  */
 
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type { KbnPaletteId } from '@kbn/palettes';
+
 import type { ColorByValueType, ColorMappingType, StaticColorType } from '../../schema/color';
 import {
   fromColorByValueAPIToLensState,
@@ -23,9 +23,6 @@ import {
 import * as percentageMocks from './percentage.mocks';
 import * as absoluteMocks from './absolute.mocks';
 import * as badMaxStepsMocks from './bad_max_step.mocks';
-
-const SEMANTIC_PALETTE: KbnPaletteId = 'default';
-const CATEGORICAL_PALETTE: KbnPaletteId = 'eui_amsterdam';
 
 describe('Color util transforms', () => {
   describe('fromColorByValueAPIToLensState', () => {
@@ -480,12 +477,12 @@ describe('Color util transforms', () => {
     it('should convert legacy color palette', () => {
       const originalColorPalette: PaletteOutput = {
         type: 'palette',
-        name: SEMANTIC_PALETTE,
+        name: 'kibana_palette',
       };
 
       const result = fromColorMappingLensStateToAPI(undefined, originalColorPalette);
       expect(result).toEqual({
-        palette: `${LEGACY_PALETTE_PREFIX}${SEMANTIC_PALETTE}`,
+        palette: `${LEGACY_PALETTE_PREFIX}kibana_palette`,
         mode: 'categorical',
         mapping: [],
       });
@@ -493,7 +490,7 @@ describe('Color util transforms', () => {
 
     it('should convert categorical color mapping with empty assignments', () => {
       const originalColorMapping: ColorMapping.Config = {
-        paletteId: SEMANTIC_PALETTE,
+        paletteId: 'kibana_palette',
         specialAssignments: [],
         assignments: [],
         colorMode: { type: 'categorical' },
@@ -501,7 +498,7 @@ describe('Color util transforms', () => {
 
       const result = fromColorMappingLensStateToAPI(originalColorMapping);
       expect(result).toEqual({
-        palette: SEMANTIC_PALETTE,
+        palette: 'kibana_palette',
         mode: 'categorical',
         mapping: [],
       });
@@ -509,7 +506,7 @@ describe('Color util transforms', () => {
 
     it('should convert categorical color mapping with only special assignments', () => {
       const originalColorMapping: ColorMapping.Config = {
-        paletteId: SEMANTIC_PALETTE,
+        paletteId: 'kibana_palette',
         specialAssignments: [
           { rules: [{ type: 'other' }], color: { type: 'loop' }, touched: false },
         ],
@@ -519,7 +516,7 @@ describe('Color util transforms', () => {
 
       const result = fromColorMappingLensStateToAPI(originalColorMapping);
       expect(result).toEqual({
-        palette: SEMANTIC_PALETTE,
+        palette: 'kibana_palette',
         mode: 'categorical',
         mapping: [],
       });
@@ -527,7 +524,7 @@ describe('Color util transforms', () => {
 
     it('should convert categorical color mapping with mixed assignments', () => {
       const originalColorMapping: ColorMapping.Config = {
-        paletteId: SEMANTIC_PALETTE,
+        paletteId: 'kibana_palette',
         specialAssignments: [],
         assignments: [
           {
@@ -545,7 +542,7 @@ describe('Color util transforms', () => {
           },
           {
             rules: [{ type: 'raw', value: 'value1' }],
-            color: { type: 'categorical', colorIndex: 1, paletteId: CATEGORICAL_PALETTE },
+            color: { type: 'categorical', colorIndex: 1, paletteId: 'no_default' },
             touched: false,
           },
         ],
@@ -554,51 +551,41 @@ describe('Color util transforms', () => {
 
       const result = fromColorMappingLensStateToAPI(originalColorMapping);
       expect(result).toEqual({
-        palette: SEMANTIC_PALETTE,
+        palette: 'kibana_palette',
         mode: 'categorical',
         mapping: [
           { color: { type: 'color_code', value: '#ff0000' }, values: ['value1'] },
           { color: { type: 'color_code', value: '#00ff00' }, values: ['value2', 'value3'] },
-          {
-            color: { type: 'from_palette', palette: CATEGORICAL_PALETTE, index: 1 },
-            values: ['value1'],
-          },
+          { color: { type: 'from_palette', palette: 'no_default', index: 1 }, values: ['value1'] },
         ],
       });
     });
 
     it('should convert gradient color mapping from palette', () => {
       const originalColorMapping: ColorMapping.Config = {
-        paletteId: SEMANTIC_PALETTE,
+        paletteId: 'kibana_palette',
         specialAssignments: [],
         assignments: [],
         colorMode: {
           type: 'gradient',
-          steps: [
-            {
-              type: 'categorical',
-              colorIndex: 1,
-              paletteId: CATEGORICAL_PALETTE,
-              touched: true,
-            },
-          ],
+          steps: [{ type: 'categorical', colorIndex: 1, paletteId: 'no_default', touched: true }],
           sort: 'desc',
         },
       };
 
       const result = fromColorMappingLensStateToAPI(originalColorMapping);
       expect(result).toEqual({
-        palette: SEMANTIC_PALETTE,
+        palette: 'kibana_palette',
         mode: 'gradient',
         mapping: [],
         sort: 'desc',
-        gradient: [{ index: 1, palette: CATEGORICAL_PALETTE, type: 'from_palette' }],
+        gradient: [{ index: 1, palette: 'no_default', type: 'from_palette' }],
       });
     });
 
     it('should convert gradient color mapping from color code', () => {
       const originalColorMapping: ColorMapping.Config = {
-        paletteId: SEMANTIC_PALETTE,
+        paletteId: 'kibana_palette',
         specialAssignments: [],
         assignments: [],
         colorMode: {
@@ -614,7 +601,7 @@ describe('Color util transforms', () => {
 
       const result = fromColorMappingLensStateToAPI(originalColorMapping);
       expect(result).toEqual({
-        palette: SEMANTIC_PALETTE,
+        palette: 'kibana_palette',
         mode: 'gradient',
         mapping: [],
         sort: 'asc',
@@ -635,14 +622,14 @@ describe('Color util transforms', () => {
     it('should convert legacy color mapping', () => {
       expect(
         fromColorMappingAPIToLensState({
-          palette: `${LEGACY_PALETTE_PREFIX}${SEMANTIC_PALETTE}`,
+          palette: `${LEGACY_PALETTE_PREFIX}kibana_palette`,
           mode: 'categorical',
           mapping: [],
         })
       ).toEqual({
         palette: {
           type: 'palette',
-          name: SEMANTIC_PALETTE,
+          name: 'kibana_palette',
         },
       });
     });
@@ -650,14 +637,14 @@ describe('Color util transforms', () => {
     it('should convert empty mapping correctly', () => {
       expect(
         fromColorMappingAPIToLensState({
-          palette: SEMANTIC_PALETTE,
+          palette: 'kibana_palette',
           mode: 'categorical',
           mapping: [],
         })
       ).toEqual({
         colorMapping: {
           colorMode: { type: 'categorical' },
-          paletteId: SEMANTIC_PALETTE,
+          paletteId: 'kibana_palette',
           assignments: [],
           specialAssignments: [
             { color: { type: 'loop' }, rules: [{ type: 'other' }], touched: false },
@@ -668,7 +655,7 @@ describe('Color util transforms', () => {
 
     it('should convert gradient color mapping', () => {
       const result = fromColorMappingAPIToLensState({
-        palette: SEMANTIC_PALETTE,
+        palette: 'kibana_palette',
         mode: 'gradient',
         mapping: [],
         sort: 'desc',
@@ -676,7 +663,7 @@ describe('Color util transforms', () => {
       });
       expect(result).toEqual({
         colorMapping: {
-          paletteId: SEMANTIC_PALETTE,
+          paletteId: 'kibana_palette',
           specialAssignments: [
             {
               color: { type: 'loop' },
@@ -820,7 +807,7 @@ describe('Color util transforms', () => {
 
     it('should maintain data integrity for categorical color mapping with specific color codes', () => {
       const originalColorMapping: ColorMappingType = {
-        palette: SEMANTIC_PALETTE,
+        palette: 'kibana_palette',
         mode: 'categorical',
         mapping: [
           {
@@ -843,7 +830,7 @@ describe('Color util transforms', () => {
 
     it('should maintain data integrity for categorical color mapping with mixed assignments', () => {
       const originalColorMapping: ColorMappingType = {
-        palette: SEMANTIC_PALETTE,
+        palette: 'kibana_palette',
         mode: 'categorical',
         mapping: [
           {
@@ -869,7 +856,7 @@ describe('Color util transforms', () => {
 
     it('should maintain data integrity for gradient color mapping with mixed assignments', () => {
       const originalColorMapping: ColorMappingType = {
-        palette: SEMANTIC_PALETTE,
+        palette: 'kibana_palette',
         mode: 'gradient',
         mapping: [
           {
@@ -884,7 +871,7 @@ describe('Color util transforms', () => {
           { type: 'from_palette', index: 2, palette: 'no_default' },
         ],
         sort: 'asc',
-        unassignedColor: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 2 },
+        unassignedColor: { type: 'from_palette', palette: 'kibana_palette', index: 2 },
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);

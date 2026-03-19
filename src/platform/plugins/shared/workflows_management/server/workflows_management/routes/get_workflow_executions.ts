@@ -76,7 +76,6 @@ export function registerGetWorkflowExecutionsRoute({
               defaultValue: [],
             })
           ),
-          omitStepRuns: schema.maybe(schema.boolean()),
           page: schema.maybe(schema.number({ min: 1 })),
           size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
         }),
@@ -97,7 +96,6 @@ export function registerGetWorkflowExecutionsRoute({
             : undefined,
           page: request.query.page,
           size: request.query.size,
-          omitStepRuns: request.query.omitStepRuns,
         };
         return response.ok({
           body: await api.getWorkflowExecutions(params, spaceId),

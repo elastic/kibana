@@ -12,46 +12,52 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
-import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import { TestChromeProviders } from '../test_helpers';
 import { BreadcrumbsWithExtensionsWrapper } from './breadcrumbs_with_extensions';
-
-const renderWithChrome = (extensions: ChromeBreadcrumbsAppendExtension[]) => {
-  const chrome = chromeServiceMock.createStartContract();
-  const extensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>(extensions);
-  chrome.getBreadcrumbsAppendExtensionsWithBadges$.mockReturnValue(extensions$);
-  return {
-    extensions$,
-    ...render(
-      <TestChromeProviders chrome={chrome}>
-        <BreadcrumbsWithExtensionsWrapper>
-          <span data-test-subj="breadcrumb-child">Home</span>
-        </BreadcrumbsWithExtensionsWrapper>
-      </TestChromeProviders>
-    ),
-  };
-};
 
 describe('BreadcrumbsWithExtensionsWrapper', () => {
   it('renders children without extensions when the observable emits empty array', () => {
-    renderWithChrome([]);
+    const extensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([]);
+    render(
+      <BreadcrumbsWithExtensionsWrapper breadcrumbsAppendExtensions$={extensions$}>
+        <span data-test-subj="breadcrumb-child">Home</span>
+      </BreadcrumbsWithExtensionsWrapper>
+    );
     expect(screen.getByTestId('breadcrumb-child')).toBeInTheDocument();
   });
 
   it('renders a ReactNode-based extension alongside children', () => {
-    renderWithChrome([{ content: <span data-test-subj="react-extension">Badge</span> }]);
+    const extensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([
+      { content: <span data-test-subj="react-extension">Badge</span> },
+    ]);
+    render(
+      <BreadcrumbsWithExtensionsWrapper breadcrumbsAppendExtensions$={extensions$}>
+        <span data-test-subj="breadcrumb-child">Home</span>
+      </BreadcrumbsWithExtensionsWrapper>
+    );
     expect(screen.getByTestId('breadcrumb-child')).toBeInTheDocument();
     expect(screen.getByTestId('react-extension')).toBeInTheDocument();
   });
 
   it('renders a content extension alongside children', () => {
-    renderWithChrome([{ content: <span data-test-subj="content-extension">Badge</span> }]);
+    const extensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([
+      { content: <span data-test-subj="content-extension">Badge</span> },
+    ]);
+    render(
+      <BreadcrumbsWithExtensionsWrapper breadcrumbsAppendExtensions$={extensions$}>
+        <span data-test-subj="breadcrumb-child">Home</span>
+      </BreadcrumbsWithExtensionsWrapper>
+    );
     expect(screen.getByTestId('breadcrumb-child')).toBeInTheDocument();
     expect(screen.getByTestId('content-extension')).toBeInTheDocument();
   });
 
   it('renders updated extensions when the observable emits new values', () => {
-    const { extensions$ } = renderWithChrome([]);
+    const extensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([]);
+    render(
+      <BreadcrumbsWithExtensionsWrapper breadcrumbsAppendExtensions$={extensions$}>
+        <span>Home</span>
+      </BreadcrumbsWithExtensionsWrapper>
+    );
     expect(screen.queryByTestId('react-extension')).not.toBeInTheDocument();
 
     act(() => {

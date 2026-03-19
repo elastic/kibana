@@ -8,13 +8,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { OnboardingFlowForm } from './onboarding_flow_form';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 import { MemoryRouter } from 'react-router-dom-v5-compat';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
-import type { ObservabilityOnboardingAppServices } from '../..';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../quickstart_flows/shared/use_pricing_feature');
@@ -29,7 +27,7 @@ jest.mock('./use_custom_cards', () => ({
 }));
 
 jest.mock('../package_list/package_list', () => ({
-  PackageList: ({ list }: { list: IntegrationCardItem[] }) => (
+  PackageList: ({ list }: { list: any[] }) => (
     <div data-test-subj="package-list">
       {list.map((item, index) => (
         <div key={index} data-test-subj={`package-item-${item.id || index}`}>
@@ -65,7 +63,7 @@ describe('OnboardingFlowForm', () => {
           isCloud: false,
         },
       },
-    } as unknown as ReturnType<typeof useKibana<ObservabilityOnboardingAppServices>>);
+    } as any);
   });
 
   describe('Complete Tier (Metrics Onboarding Enabled)', () => {

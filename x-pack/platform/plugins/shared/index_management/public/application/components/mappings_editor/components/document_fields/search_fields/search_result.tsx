@@ -76,7 +76,7 @@ export const SearchResult = React.memo(
     return result.length === 0 ? (
       <EuiEmptyPrompt
         data-test-subj="mappingsEditorSearchResultEmptyPrompt"
-        iconType="magnify"
+        iconType="search"
         title={
           <h3>
             <FormattedMessage

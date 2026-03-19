@@ -16,7 +16,6 @@ import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
-  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type {
   ServiceNowPublicConfigurationBaseType,
@@ -73,7 +72,6 @@ export function getServiceNowITOMConnectorType(): ServiceNowConnectorType<
       AlertingConnectorFeatureId,
       SecurityConnectorFeatureId,
       WorkflowsConnectorFeatureId,
-      AgentBuilderConnectorFeatureId,
     ],
     validate: {
       config: {

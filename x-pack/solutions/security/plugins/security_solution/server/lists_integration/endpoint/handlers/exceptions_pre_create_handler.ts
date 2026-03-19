@@ -111,7 +111,7 @@ export const getExceptionsPreCreateItemHandler = (
         throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
       }
 
-      const spaceId = endpointAppContext.getActiveSpaceId(request);
+      const spaceId = (await endpointAppContext.getActiveSpace(request)).id;
       setArtifactOwnerSpaceId(validatedItem, spaceId);
 
       return validatedItem;

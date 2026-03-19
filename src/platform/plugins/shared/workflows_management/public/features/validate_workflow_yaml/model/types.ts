@@ -128,12 +128,6 @@ interface YamlValidationResultTriggerConditionError extends YamlValidationResult
   owner: 'trigger-condition-validation';
 }
 
-interface YamlValidationResultWorkflowOutput extends YamlValidationResultBase {
-  severity: YamlValidationErrorSeverity;
-  message: string;
-  owner: 'workflow-output-validation';
-}
-
 interface YamlValidationResultIfConditionError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
@@ -159,7 +153,6 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'custom-property-validation',
   'workflow-inputs-validation',
   'trigger-condition-validation',
-  'workflow-output-validation',
   'if-condition-validation',
 ] as const;
 
@@ -182,5 +175,4 @@ export type YamlValidationResult =
   | YamlValidationResultCustomPropertyValid
   | YamlValidationResultWorkflowInputsError
   | YamlValidationResultTriggerConditionError
-  | YamlValidationResultWorkflowOutput
   | YamlValidationResultIfConditionError;

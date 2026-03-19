@@ -11,31 +11,36 @@ import type { InferenceConnectorProviderConfig } from '@kbn/triggers-actions-ui-
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
 
-// Form overrides handle correct location for 'max_tokens' and 'headers' so we only handle adaptive_allocations.
 export const formSerializer = (data: ConnectorFormSchema) => {
-  const { providerConfig, ...restConfig } = data.config || {};
+  const providerConfig = data.config?.providerConfig as
+    | InferenceConnectorProviderConfig
+    | undefined;
   if (data && providerConfig) {
-    const { max_number_of_allocations, ...restProviderConfig } =
-      (providerConfig as InferenceConnectorProviderConfig) || {};
+    const {
+      max_number_of_allocations: maxAllocations,
+      headers,
+      ...restProviderConfig
+    } = providerConfig || {};
 
     return {
       ...data,
       config: {
-        ...restConfig,
+        ...data.config,
         providerConfig: {
           ...restProviderConfig,
-          ...(max_number_of_allocations
+          ...(maxAllocations
             ? {
                 adaptive_allocations: {
                   enabled: true,
                   min_number_of_allocations: MIN_ALLOCATIONS,
-                  ...{ max_number_of_allocations },
+                  ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
                 },
                 // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
                 num_threads: DEFAULT_NUM_THREADS,
               }
             : {}),
         },
+        ...(headers ? { headers } : {}),
       },
     };
   }
@@ -43,25 +48,27 @@ export const formSerializer = (data: ConnectorFormSchema) => {
 };
 
 export const formDeserializer = (data: ConnectorFormSchema) => {
-  const { providerConfig, taskTypeConfig, headers, ...restConfig } = data.config || {};
-
-  if (providerConfig) {
-    const { adaptive_allocations, max_tokens, ...restProviderConfig } =
-      providerConfig as InferenceConnectorProviderConfig;
-    const maxAllocations = adaptive_allocations?.max_number_of_allocations;
+  if (
+    (data.config?.providerConfig as InferenceConnectorProviderConfig | undefined)
+      ?.adaptive_allocations?.max_number_of_allocations ||
+    data.config?.headers
+  ) {
+    const { headers, ...restConfig } = data.config;
+    const maxAllocations = (
+      data.config.providerConfig as InferenceConnectorProviderConfig | undefined
+    )?.adaptive_allocations?.max_number_of_allocations;
 
     return {
       ...data,
       config: {
         ...restConfig,
         providerConfig: {
-          ...restProviderConfig,
-          ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
-        },
-        taskTypeConfig: {
-          ...(taskTypeConfig ? { ...taskTypeConfig } : {}),
+          ...(data.config.providerConfig as InferenceConnectorProviderConfig),
           ...(headers ? { headers } : {}),
-          ...(max_tokens ? { max_tokens } : {}),
+          ...(maxAllocations
+            ? // remove the adaptive_allocations from the data config as form does not expect it
+              { max_number_of_allocations: maxAllocations, adaptive_allocations: undefined }
+            : {}),
         },
       },
     };

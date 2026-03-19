@@ -9,11 +9,13 @@ import type { useAbortController } from '@kbn/react-hooks';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import {
-  assembleGrokProcessor,
+  getReviewFields,
+  getGrokProcessor,
+  mergeGrokProcessors,
   groupMessagesByPattern,
   extractGrokPatternDangerouslySlow,
+  type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
-import type { GrokProcessor } from '@kbn/streamlang';
 import { lastValueFrom } from 'rxjs';
 import { useFetchErrorToast } from '../../../../../../../hooks/use_fetch_error_toast';
 import type { Simulation } from '../../../../state_management/simulation_state_machine/types';
@@ -33,7 +35,7 @@ export interface GrokPatternSuggestionParams {
 }
 
 export interface GrokPatternSuggestionResult {
-  grokProcessor: GrokProcessor;
+  grokProcessor: GrokProcessorResult;
   simulationResult: Simulation;
 }
 
@@ -81,58 +83,66 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
       connector_id: params.connectorId,
     });
 
-    const patternGroups = groupedMessages.map((group) => ({
-      messages: group.messages,
-      nodes: extractGrokPatternDangerouslySlow(group.messages),
-    }));
+    const result = await Promise.allSettled(
+      groupedMessages.map((group) => {
+        const grokPatternNodes = extractGrokPatternDangerouslySlow(group.messages);
 
-    const groupErrors: Error[] = [];
-
-    const combinedGrokProcessor = await assembleGrokProcessor({
-      from: params.fieldName,
-      patternGroups,
-      reviewFn: async (reviewFields, reviewMessages) => {
-        try {
-          const reviewResult = await lastValueFrom(
-            streamsRepositoryClient.stream(
-              'POST /internal/streams/{name}/processing/_suggestions/grok',
-              {
-                signal: abortController.signal,
-                params: {
-                  path: { name: params.streamName },
-                  body: {
-                    connector_id: params.connectorId,
-                    sample_messages: reviewMessages,
-                    review_fields: reviewFields,
-                  },
+        // The only reason we're streaming the response here is to avoid timeout issues prevalent with long-running requests to LLMs.
+        // There is only ever going to be a single event emitted so we can safely use `lastValueFrom`.
+        return lastValueFrom(
+          streamsRepositoryClient.stream(
+            'POST /internal/streams/{name}/processing/_suggestions/grok',
+            {
+              signal: abortController.signal,
+              params: {
+                path: { name: params.streamName },
+                body: {
+                  connector_id: params.connectorId,
+                  sample_messages: group.messages.slice(0, 10),
+                  review_fields: getReviewFields(grokPatternNodes, 10),
                 },
-              }
-            )
-          );
-
+              },
+            }
+          )
+        ).then((reviewResult) => {
+          // Handle case where LLM couldn't generate suggestions
           if (reviewResult.grokProcessor === null) {
             throw new NoSuggestionsError();
           }
 
-          return reviewResult.grokProcessor;
-        } catch (error) {
-          groupErrors.push(error as Error);
-          throw error;
-        }
-      },
-    });
+          return getGrokProcessor(grokPatternNodes, reviewResult.grokProcessor);
+        });
+      })
+    );
 
-    if (!combinedGrokProcessor) {
+    const aggregateError = new AggregateError(
+      result.reduce<Error[]>((acc, settledState) => {
+        if (settledState.status === 'rejected') {
+          acc.push(settledState.reason);
+        }
+        return acc;
+      }, [])
+    );
+
+    const grokProcessors = result.reduce<GrokProcessorResult[]>((acc, settledState) => {
+      if (settledState.status === 'fulfilled') {
+        acc.push(settledState.value);
+      }
+      return acc;
+    }, []);
+
+    // If all promises failed, throw an aggregate error, otherwise ignore errors and continue with fulfilled results
+    if (grokProcessors.length === 0) {
       finishTrackingAndReport(0, [0]);
 
-      const aggregateError = new AggregateError(groupErrors);
-
-      const allNoSuggestions = groupErrors.every((error) => isNoSuggestionsError(error));
+      // Check if all errors are NoSuggestionsError - if so, throw a single NoSuggestionsError
+      const allNoSuggestions = aggregateError.errors.every((error) => isNoSuggestionsError(error));
       if (allNoSuggestions) {
         throw new NoSuggestionsError();
       }
 
-      const hasNonAbortError = groupErrors.some((error) => !isRequestAbortedError(error));
+      // Don't show error toast for abort errors - they're expected when user cancels
+      const hasNonAbortError = aggregateError.errors.some((error) => !isRequestAbortedError(error));
       if (hasNonAbortError) {
         showFetchErrorToast(aggregateError);
       }
@@ -140,6 +150,10 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
       throw aggregateError;
     }
 
+    // Combine all grok processors into a single one with fallback patterns
+    const combinedGrokProcessor = mergeGrokProcessors(grokProcessors);
+
+    // Run simulation to get fields and metrics
     const simulationResult = await streamsRepositoryClient.fetch(
       'POST /internal/streams/{name}/processing/_simulate',
       {
@@ -151,8 +165,11 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
             processing: {
               steps: [
                 {
-                  ...combinedGrokProcessor,
+                  action: 'grok',
                   customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
+                  from: params.fieldName,
+                  patterns: combinedGrokProcessor.patterns,
+                  pattern_definitions: combinedGrokProcessor.pattern_definitions,
                 },
               ],
             },

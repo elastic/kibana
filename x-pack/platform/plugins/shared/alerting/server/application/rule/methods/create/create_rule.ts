@@ -242,10 +242,6 @@ export async function createRule<Params extends RuleParams = never>(
     },
   });
 
-  if (data.enabled) {
-    ruleAttributes.lastEnabledAt = new Date(createTime).toISOString();
-  }
-
   const createdRuleSavedObject: SavedObject<RawRule> = await withSpan(
     { name: 'createRuleSavedObject', type: 'rules' },
     () =>

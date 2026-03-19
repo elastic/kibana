@@ -172,17 +172,6 @@ export interface ApmTransactionDetailsResponse {
   traceId?: string;
 }
 
-export interface SyntheticsMonitorDetailsResponse {
-  id: string;
-  name: string;
-  type: string;
-  enabled: boolean;
-  schedule: { number: string; unit: string };
-  locations: Array<{ id: string; label: string }>;
-  tags?: string[];
-  [key: string]: unknown;
-}
-
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrorDetails: (params: {
     request: KibanaRequest;
@@ -283,9 +272,4 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     start: string;
     end: string;
   }) => Promise<ApmTransactionDetailsResponse>;
-
-  syntheticsMonitorDetails: (params: {
-    request: KibanaRequest;
-    configId: string;
-  }) => Promise<SyntheticsMonitorDetailsResponse>;
 }

@@ -41,7 +41,7 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => {
               className="kbnOverviewDataAdd__actionButton"
               flush="both"
               href={addBasePath('#/tutorial_directory/sampleData')}
-              iconType="table"
+              iconType="visTable"
               size="xs"
             >
               <FormattedMessage

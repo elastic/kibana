@@ -16,11 +16,11 @@ import {
   isOrCondition,
 } from '../../../types/conditions';
 
-export function esqlLiteralFromAny(value: unknown): ESQLAstItem {
+export function esqlLiteralFromAny(value: any): ESQLAstItem {
   if (Array.isArray(value)) {
     // Let the Builder handle nested structures properly
     return Builder.expression.list.literal({
-      values: value.map((item) => esqlLiteralFromAny(item)) as ESQLSingleAstItem[],
+      values: value.map((item) => esqlLiteralFromAny(item)) as any,
     });
   }
 

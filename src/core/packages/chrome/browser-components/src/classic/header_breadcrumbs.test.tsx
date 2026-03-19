@@ -8,31 +8,35 @@
  */
 
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import React from 'react';
+import { BehaviorSubject, of } from 'rxjs';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 
 describe('HeaderBreadcrumbs', () => {
-  it('renders breadcrumbs', async () => {
-    const { rerender } = render(<HeaderBreadcrumbs breadcrumbs={[{ text: 'First' }]} />);
+  it('renders updates to the breadcrumbs$ observable', async () => {
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
+
+    render(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
 
     expect(await screen.findByLabelText('Breadcrumbs')).toHaveTextContent('First');
 
-    rerender(<HeaderBreadcrumbs breadcrumbs={[{ text: 'First' }, { text: 'Second' }]} />);
+    act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
 
     expect(await screen.findByLabelText('Breadcrumbs')).toHaveTextContent('FirstSecond');
 
-    rerender(<HeaderBreadcrumbs breadcrumbs={[]} />);
+    act(() => breadcrumbs$.next([]));
 
     expect(await screen.findByLabelText('Breadcrumbs')).toHaveTextContent('Kibana');
   });
 
   it('forces the last breadcrumb inactivity', async () => {
-    render(
-      <HeaderBreadcrumbs
-        breadcrumbs={[{ text: 'First' }, { text: 'Last', href: '/something', onClick: jest.fn() }]}
-      />
-    );
+    const breadcrumbs$ = of([
+      { text: 'First' },
+      { text: 'Last', href: '/something', onClick: jest.fn() },
+    ]);
+
+    render(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
 
     const lastBreadcrumb = await screen.findByTitle('Last');
 

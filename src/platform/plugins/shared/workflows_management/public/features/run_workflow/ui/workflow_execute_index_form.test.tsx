@@ -52,7 +52,12 @@ describe('WorkflowExecuteIndexForm', () => {
   it('renders search bar and data view picker', async () => {
     const { getByTestId } = render(
       <I18nProvider>
-        <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
+        <WorkflowExecuteIndexForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
       </I18nProvider>
     );
 
@@ -69,7 +74,12 @@ describe('WorkflowExecuteIndexForm', () => {
   it('loads data views on mount', async () => {
     render(
       <I18nProvider>
-        <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
+        <WorkflowExecuteIndexForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
       </I18nProvider>
     );
 
@@ -81,7 +91,12 @@ describe('WorkflowExecuteIndexForm', () => {
   it('refreshes fields when data view is selected', async () => {
     const { getByTestId } = render(
       <I18nProvider>
-        <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
+        <WorkflowExecuteIndexForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
       </I18nProvider>
     );
 
@@ -104,7 +119,12 @@ describe('WorkflowExecuteIndexForm', () => {
   it('triggers search on query submission', async () => {
     const { getByTestId } = render(
       <I18nProvider>
-        <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
+        <WorkflowExecuteIndexForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
       </I18nProvider>
     );
 
@@ -128,7 +148,12 @@ describe('WorkflowExecuteIndexForm', () => {
   it('fetches documents on data view selection', async () => {
     render(
       <I18nProvider>
-        <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
+        <WorkflowExecuteIndexForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
       </I18nProvider>
     );
 
@@ -148,7 +173,12 @@ describe('WorkflowExecuteIndexForm', () => {
   it('does not trigger fetch on query change without submit', async () => {
     const { getByTestId } = render(
       <I18nProvider>
-        <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
+        <WorkflowExecuteIndexForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
       </I18nProvider>
     );
 
@@ -197,7 +227,12 @@ describe('WorkflowExecuteIndexForm', () => {
 
     const { getByTestId } = render(
       <I18nProvider>
-        <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
+        <WorkflowExecuteIndexForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
       </I18nProvider>
     );
 
@@ -265,7 +300,12 @@ describe('WorkflowExecuteIndexForm', () => {
 
     const { getByTestId } = render(
       <I18nProvider>
-        <WorkflowExecuteIndexForm setValue={mockSetValue} errors={null} setErrors={mockSetErrors} />
+        <WorkflowExecuteIndexForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
       </I18nProvider>
     );
 

@@ -55,8 +55,7 @@ export const artifactListPageLabels = Object.freeze({
   ),
   getPageImportSuccessToastText: (successCount: number): string =>
     i18n.translate('xpack.securitySolution.artifactListPage.importSuccessToastText', {
-      defaultMessage:
-        '{successCount} {successCount, plural, one {artifact} other {artifacts}} imported.',
+      defaultMessage: '{successCount} items imported',
       values: { successCount },
     }),
   pageImportErrorToastTitle: i18n.translate(

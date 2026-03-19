@@ -117,7 +117,6 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
           />
           <input
             class="euiCheckbox__input emotion-euiCheckbox__input"
-            data-test-subj="mlScopeCheckbox_domain"
             id="scope_cb_domain"
             type="checkbox"
           />
@@ -232,7 +231,6 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
           <input
             checked=""
             class="euiCheckbox__input emotion-euiCheckbox__input"
-            data-test-subj="mlScopeCheckbox_domain"
             id="scope_cb_domain"
             type="checkbox"
           />

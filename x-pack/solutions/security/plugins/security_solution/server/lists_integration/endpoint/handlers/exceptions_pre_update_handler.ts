@@ -153,7 +153,7 @@ export const getExceptionsPreUpdateItemHandler = (
         if (!request) {
           throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
         }
-        const spaceId = endpointAppContextService.getActiveSpaceId(request);
+        const spaceId = (await endpointAppContextService.getActiveSpace(request)).id;
         setArtifactOwnerSpaceId(validatedItem, spaceId);
       }
 

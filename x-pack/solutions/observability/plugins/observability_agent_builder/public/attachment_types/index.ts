@@ -17,7 +17,6 @@ import {
   OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
-  OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
 } from '../../common/constants';
 
 type UnknownAttachmentWithLabel = Attachment<
@@ -58,7 +57,7 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.log.label', {
       defaultMessage: 'Log entry',
     }),
-    icon: 'pattern',
+    icon: 'logPatternAnalysis',
   },
   {
     type: OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
@@ -87,13 +86,6 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
       defaultMessage: 'Transaction',
     }),
     icon: 'merge',
-  },
-  {
-    type: OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
-    label: i18n.translate('xpack.observabilityAgentBuilder.attachments.monitor.label', {
-      defaultMessage: 'Monitor',
-    }),
-    icon: 'online',
   },
 ];
 

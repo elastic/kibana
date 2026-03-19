@@ -8,6 +8,7 @@
  */
 
 import React, { Fragment, useState, useCallback, useMemo } from 'react';
+import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
@@ -23,15 +24,18 @@ import {
   EuiPopoverFooter,
   useEuiTheme,
 } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
 
-import type { ChromeHelpMenuLink } from '@kbn/core-chrome-browser';
+import type {
+  ChromeHelpExtension,
+  ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpMenuLink,
+} from '@kbn/core-chrome-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { useIsServerless, useKibanaVersion } from '@kbn/react-env';
-import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 
 import { css } from '@emotion/react';
+import type { ChromeApplicationContext } from '../context';
 import { isModifiedOrPrevented } from './nav_link';
-import { useHelpMenu, useNavigateToUrl, useDocLinks } from './chrome_hooks';
 
 const buildDefaultContentLinks = ({
   kibanaDocLink,
@@ -62,6 +66,18 @@ const buildDefaultContentLinks = ({
   },
 ];
 
+interface Props {
+  navigateToUrl: ChromeApplicationContext['navigateToUrl'];
+  globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
+  helpExtension$: Observable<ChromeHelpExtension | undefined>;
+  helpSupportUrl$: Observable<string>;
+  defaultContentLinks$: Observable<ChromeHelpMenuLink[]>;
+  kibanaVersion: string;
+  kibanaDocLink: string;
+  docLinks: DocLinksStart;
+  isServerless: boolean;
+}
+
 const createCustomLink = (
   index: number,
   text: React.ReactNode,
@@ -78,23 +94,24 @@ const createCustomLink = (
   );
 };
 
-export const HeaderHelpMenu = () => {
-  const navigateToUrl = useNavigateToUrl();
-  const docLinks = useDocLinks();
+export const HeaderHelpMenu = ({
+  navigateToUrl,
+  globalHelpExtensionMenuLinks$,
+  helpExtension$,
+  helpSupportUrl$,
+  defaultContentLinks$,
+  kibanaVersion,
+  kibanaDocLink,
+  docLinks,
+  isServerless,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
-  const isServerless = useIsServerless();
-  const kibanaVersion = useKibanaVersion();
-  const chromeStyle = useChromeStyle();
-  const kibanaDocLink =
-    chromeStyle === 'project' ? docLinks.links.elasticStackGetStarted : docLinks.links.kibana.guide;
 
-  const {
-    menuLinks: providedDefaultContentLinks,
-    extension: helpExtension,
-    supportUrl: helpSupportUrl,
-    globalExtensionMenuLinks: globalHelpExtensionMenuLinks,
-  } = useHelpMenu();
+  const helpExtension = useObservable(helpExtension$, undefined);
+  const helpSupportUrl = useObservable(helpSupportUrl$, '');
+  const globalHelpExtensionMenuLinks = useObservable(globalHelpExtensionMenuLinks$, []);
+  const providedDefaultContentLinks = useObservable(defaultContentLinks$, []);
 
   const defaultContentLinks = useMemo(
     () =>

@@ -12,7 +12,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { isMac } from '@kbn/shared-ux-utility';
-import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from '../../types';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 
@@ -21,12 +20,11 @@ const isSemicolon = (event: KeyboardEvent) => event.code === 'Semicolon' || even
 interface AgentBuilderNavControlServices {
   agentBuilder: AgentBuilderPluginStart;
   aiAssistantManagementSelection: AgentBuilderStartDependencies['aiAssistantManagementSelection'];
-  chrome: ChromeStart;
 }
 
 export function AgentBuilderNavControl() {
   const {
-    services: { agentBuilder, aiAssistantManagementSelection, chrome },
+    services: { agentBuilder, aiAssistantManagementSelection },
   } = useKibana<AgentBuilderNavControlServices>();
 
   const { show: hasShowPrivilege } = useUiPrivileges();
@@ -35,28 +33,25 @@ export function AgentBuilderNavControl() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(true);
 
-  useEffect(() => {
-    const sub = chrome.sidebar.getCurrentAppId$().subscribe((appId) => {
-      const isOpen = appId === 'agentBuilder';
-      setIsSidebarOpen((prev) => {
-        if (prev && !isOpen) {
-          setTooltipVisible(true);
-          if (document.activeElement?.matches(':focus-visible')) {
-            buttonRef.current?.focus();
-          }
+  const sidebarOptions = useCallback(
+    () => ({
+      onClose: () => {
+        setIsSidebarOpen(false);
+        setTooltipVisible(true);
+        if (document.activeElement?.matches(':focus-visible')) {
+          buttonRef.current?.focus();
         }
-        return isOpen;
-      });
-    });
-
-    return () => sub.unsubscribe();
-  }, [chrome.sidebar]);
+      },
+    }),
+    []
+  );
 
   const handleClick = useCallback(() => {
     tooltipRef.current?.hideToolTip();
     setTooltipVisible(false);
-    agentBuilder.toggleChat();
-  }, [agentBuilder]);
+    agentBuilder.toggleChat(sidebarOptions());
+    setIsSidebarOpen((prev) => !prev);
+  }, [agentBuilder, sidebarOptions]);
 
   useEffect(() => {
     if (!hasShowPrivilege) {
@@ -65,7 +60,8 @@ export function AgentBuilderNavControl() {
 
     const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
       if (selection === AIChatExperience.Agent) {
-        agentBuilder.openChat();
+        agentBuilder.openChat(sidebarOptions());
+        setIsSidebarOpen(true);
         aiAssistantManagementSelection.completeOpenChat();
       }
     });
@@ -73,7 +69,7 @@ export function AgentBuilderNavControl() {
     return () => {
       openChatSubscription.unsubscribe();
     };
-  }, [hasShowPrivilege, agentBuilder, aiAssistantManagementSelection]);
+  }, [hasShowPrivilege, agentBuilder, aiAssistantManagementSelection, sidebarOptions]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {

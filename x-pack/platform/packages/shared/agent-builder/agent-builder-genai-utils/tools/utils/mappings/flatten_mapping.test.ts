@@ -33,31 +33,26 @@ describe('flattenMapping', () => {
     expect(flattened).toEqual([
       {
         meta: {},
-        searchable: true,
         path: 'foo',
         type: 'text',
       },
       {
         meta: {},
-        searchable: true,
         path: 'foo.bar',
         type: 'keyword',
       },
       {
         meta: {},
-        searchable: true,
         path: 'obj',
         type: 'object',
       },
       {
         meta: {},
-        searchable: true,
         path: 'obj.nested',
         type: 'object',
       },
       {
         meta: {},
-        searchable: true,
         path: 'obj.sub',
         type: 'text',
       },
@@ -85,7 +80,6 @@ describe('flattenMapping', () => {
     expect(flattened).toEqual([
       {
         meta: {},
-        searchable: true,
         path: 'bar',
         type: 'object',
       },
@@ -93,7 +87,6 @@ describe('flattenMapping', () => {
         meta: {
           other: 'other',
         },
-        searchable: true,
         path: 'bar.sub',
         type: 'text',
       },
@@ -101,7 +94,6 @@ describe('flattenMapping', () => {
         meta: {
           description: 'some desc',
         },
-        searchable: true,
         path: 'foo',
         type: 'text',
       },
@@ -142,70 +134,33 @@ describe('flattenMapping', () => {
     expect(flattened).toEqual([
       {
         meta: {},
-        searchable: true,
         path: 'body',
         type: 'text',
       },
       {
         meta: {},
-        searchable: true,
         path: 'body.keyword',
         type: 'keyword',
       },
       {
         meta: {},
-        searchable: true,
         path: 'body.semantic_elser',
         type: 'semantic_text',
       },
       {
         meta: {},
-        searchable: true,
         path: 'title',
         type: 'text',
       },
       {
         meta: {},
-        searchable: true,
         path: 'title.raw',
         type: 'keyword',
       },
       {
         meta: {},
-        searchable: true,
         path: 'title.sub',
         type: 'integer',
-      },
-    ]);
-  });
-
-  it('marks fields with index: false as not searchable', () => {
-    const mapping: MappingTypeMapping = {
-      properties: {
-        searchable_field: {
-          type: 'text',
-        },
-        non_searchable_field: {
-          type: 'text',
-          index: false,
-        },
-      },
-    };
-
-    const flattened = flattenMapping(mapping).sort((a, b) => a.path.localeCompare(b.path));
-
-    expect(flattened).toEqual([
-      {
-        meta: {},
-        searchable: false,
-        path: 'non_searchable_field',
-        type: 'text',
-      },
-      {
-        meta: {},
-        searchable: true,
-        path: 'searchable_field',
-        type: 'text',
       },
     ]);
   });
@@ -227,13 +182,11 @@ describe('flattenMapping', () => {
     expect(flattened).toEqual([
       {
         meta: {},
-        searchable: true,
         path: '_internal',
         type: 'keyword',
       },
       {
         meta: {},
-        searchable: true,
         path: 'foo',
         type: 'text',
       },

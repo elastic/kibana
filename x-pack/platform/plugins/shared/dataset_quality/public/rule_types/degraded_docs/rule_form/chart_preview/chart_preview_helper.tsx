@@ -16,8 +16,8 @@ import React from 'react';
 
 export type Maybe<T> = T | null | undefined;
 
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === 'number' && isFinite(value);
+function isFiniteNumber(value: any): value is number {
+  return isFinite(value);
 }
 
 export function asPercent(
@@ -53,12 +53,7 @@ export const TIME_LABELS = {
   }),
 };
 
-interface ChartDataPoint {
-  x: number;
-  y?: number;
-}
-
-export const getDomain = (series: Array<{ name?: string; data: ChartDataPoint[] }>) => {
+export const getDomain = (series: Array<{ name?: string; data: any[] }>) => {
   const xValues = series.flatMap((item) => item.data.map((d) => d.x));
   const yValues = series.flatMap((item) => item.data.map((d) => d.y || 0));
   return {

@@ -33,8 +33,6 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_clien
 import { ConnectorRateLimiter } from '../../../../lib/connector_rate_limiter';
 import { getConnectorType } from '../../../../fixtures';
 import { createMockInMemoryConnector } from '../../mocks';
-import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
-import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 
 const defaultConnectorTypeId = '.connector-type-id';
 const defaultConnectorId = 'connector-id';
@@ -65,7 +63,7 @@ const inMemoryMetrics = inMemoryMetricsMock.create();
 
 let actionsClient: ActionsClient;
 let actionTypeRegistry: ActionTypeRegistry;
-let authTypeRegistry: AuthTypeRegistry;
+
 const actionTypeIdFromSavedObjectMock = (actionTypeId = defaultConnectorTypeId) => {
   return {
     attributes: {
@@ -134,14 +132,12 @@ describe('getAxiosInstance()', () => {
         executor: undefined,
       })
     );
-    authTypeRegistry = authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
       connectorSavedObject
     );
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
-      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -197,7 +193,6 @@ describe('getAxiosInstance()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
-        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,

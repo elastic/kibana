@@ -21,5 +21,5 @@ export const readKibanaConfig = () => {
 
   return (yaml.load(
     fs.readFileSync(fs.existsSync(kibanaDevConfig) ? kibanaDevConfig : kibanaConfig, 'utf8')
-  ) || {}) as Record<string, unknown>;
+  ) || {}) as Record<string, any>;
 };

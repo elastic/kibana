@@ -2,12 +2,12 @@
 
 exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
 <div>
-  <div
-    aria-atomic="true"
+  <p
     aria-live="polite"
     class="emotion-euiScreenReaderOnly"
-    role="status"
-  />
+  >
+    In full screen mode, press ESC to exit.
+  </p>
   <button
     class="exitFullScreenButton emotion-euiButtonDisplay-buttonCSS-buttonCSS"
     data-test-subj="exitFullScreenModeButton"
@@ -42,12 +42,12 @@ exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
 
 exports[`<ExitFullScreenButton /> with kibana services renders custom logo 1`] = `
 <div>
-  <div
-    aria-atomic="true"
+  <p
     aria-live="polite"
     class="emotion-euiScreenReaderOnly"
-    role="status"
-  />
+  >
+    In full screen mode, press ESC to exit.
+  </p>
   <button
     class="exitFullScreenButton emotion-euiButtonDisplay-buttonCSS-buttonCSS"
     data-test-subj="exitFullScreenModeButton"
@@ -89,12 +89,12 @@ exports[`<ExitFullScreenButton /> with kibana services renders custom logo 1`] =
 
 exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
 <div>
-  <div
-    aria-atomic="true"
+  <p
     aria-live="polite"
     class="emotion-euiScreenReaderOnly"
-    role="status"
-  />
+  >
+    In full screen mode, press ESC to exit.
+  </p>
   <button
     class="exitFullScreenButton emotion-euiButtonDisplay-buttonCSS-buttonCSS"
     data-test-subj="exitFullScreenModeButton"

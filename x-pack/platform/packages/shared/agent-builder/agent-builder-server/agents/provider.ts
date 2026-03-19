@@ -24,7 +24,6 @@ import type {
   ScopedRunner,
   ToolProvider,
   WritableToolResultStore,
-  WritableSkillsStore,
   AttachmentsService,
   PromptManager,
   ConversationStateManager,
@@ -118,11 +117,6 @@ export interface AgentHandlerContext {
    * Result store to access and add tool results during execution.
    */
   resultStore: WritableToolResultStore;
-  /**
-   * Skills store to populate with filtered skills during execution.
-   * Backs the skills volume in the virtual filesystem.
-   */
-  skillsStore: WritableSkillsStore;
   /**
    * Attachment state manager to manage conversation attachments during execution.
    */

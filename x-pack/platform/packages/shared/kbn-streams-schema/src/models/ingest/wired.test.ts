@@ -88,9 +88,7 @@ describe('WiredStream', () => {
         },
       },
     ])('is not valid %s', (val) => {
-      expect(() =>
-        WiredStream.Definition.asserts(val as Parameters<typeof WiredStream.Definition.asserts>[0])
-      ).toThrow();
+      expect(() => WiredStream.Definition.asserts(val as any)).toThrow();
     });
   });
 
@@ -172,15 +170,10 @@ describe('WiredStream', () => {
           create_snapshot_repository: true,
         },
         dashboards: [],
-        rules: [],
         queries: [],
       },
     ])('is not valid', (val) => {
-      expect(
-        WiredStream.GetResponse.is(
-          val as unknown as Parameters<typeof WiredStream.GetResponse.is>[0]
-        )
-      ).toBe(false);
+      expect(WiredStream.GetResponse.is(val as any)).toBe(false);
     });
   });
 
@@ -263,9 +256,7 @@ describe('WiredStream', () => {
         ...emptyAssets,
       },
     ])('is not valid', (val) => {
-      expect(
-        WiredStream.UpsertRequest.is(val as Parameters<typeof WiredStream.UpsertRequest.is>[0])
-      ).toBe(false);
+      expect(WiredStream.UpsertRequest.is(val as any)).toBe(false);
     });
   });
 
@@ -322,11 +313,7 @@ describe('WiredStream', () => {
         },
       },
     ])('is not valid', (val) => {
-      expect(
-        WiredIngestUpsertRequest.is(
-          val as unknown as Parameters<typeof WiredIngestUpsertRequest.is>[0]
-        )
-      ).toBe(false);
+      expect(WiredIngestUpsertRequest.is(val as any)).toBe(false);
     });
   });
 });

@@ -37,20 +37,21 @@ export function mapStepsToYamlLines(yamlString: string): YamlLineMap {
     const finalLineMap: YamlLineMap = {};
 
     // Get the steps array node from the document
-    const stepsNode = doc.getIn(['steps']) as YAML.YAMLSeq | undefined;
+    const stepsNode = doc.getIn(['steps' as any]) as any;
 
     if (!stepsNode || !stepsNode.items) {
       return finalLineMap;
     }
 
+    // Helper function to recursively process steps
     function processSteps(
-      stepNodes: YAML.ParsedNode[],
+      stepNodes: any[],
       dslSteps: StreamlangStep[],
       lineMap: YamlLineMap,
       yamlValue: string,
       path: string = 'root'
     ) {
-      stepNodes.forEach((stepNode: YAML.ParsedNode, index: number) => {
+      stepNodes.forEach((stepNode: any, index: number) => {
         if (!stepNode.range) {
           return;
         }
@@ -75,15 +76,13 @@ export function mapStepsToYamlLines(yamlString: string): YamlLineMap {
         };
 
         // Handle nested condition blocks recursively
-        if (isConditionBlock(dslStep) && dslStep.condition?.steps && YAML.isMap(stepNode)) {
-          const conditionNode = stepNode.get('condition', true);
-          const nestedStepsNode =
-            YAML.isMap(conditionNode) &&
-            (conditionNode.get('steps', true) as YAML.YAMLSeq | undefined);
+        if (isConditionBlock(dslStep) && dslStep.condition?.steps) {
+          const conditionNode = stepNode.get && stepNode.get('condition');
+          const nestedStepsNode = conditionNode && conditionNode.get && conditionNode.get('steps');
 
           if (nestedStepsNode && nestedStepsNode.items) {
             processSteps(
-              nestedStepsNode.items as YAML.ParsedNode[],
+              nestedStepsNode.items,
               dslStep.condition.steps,
               lineMap,
               yamlValue,
@@ -94,7 +93,7 @@ export function mapStepsToYamlLines(yamlString: string): YamlLineMap {
       });
     }
 
-    processSteps(stepsNode.items as YAML.ParsedNode[], parsedDSL.steps, finalLineMap, yamlString);
+    processSteps(stepsNode.items, parsedDSL.steps, finalLineMap, yamlString);
 
     return finalLineMap;
   } catch (error) {

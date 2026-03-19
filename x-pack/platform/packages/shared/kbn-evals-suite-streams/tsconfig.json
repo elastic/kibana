@@ -2,7 +2,7 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node", "@kbn/ambient-common-types"]
+    "types": ["jest", "node"]
   },
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
@@ -24,8 +24,6 @@
     "@kbn/core",
     "@kbn/dissect-heuristics",
     "@kbn/inference-common",
-    "@kbn/inference-prompt-utils",
-    "@kbn/zod",
     "@kbn/es-snapshot-loader",
     "@kbn/es-errors"
   ]

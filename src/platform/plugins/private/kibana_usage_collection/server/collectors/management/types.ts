@@ -54,7 +54,6 @@ export interface UsageStats {
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
-  'agentBuilder:connectorsEnabled': boolean;
   'dataSources:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'workflows:aiAgent:enabled': boolean;

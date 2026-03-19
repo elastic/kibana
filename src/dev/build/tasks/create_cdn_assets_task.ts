@@ -108,7 +108,12 @@ export const CreateCdnAssets: Task = {
     await compressTar({
       source: assets,
       destination: config.resolveFromTarget(`kibana-${buildVersion}-cdn-assets.tar.gz`),
-      gzipLevel: 6,
+      archiverOptions: {
+        gzip: true,
+        gzipOptions: {
+          level: 9,
+        },
+      },
       createRootDirectory: true,
       rootDirectoryName: `kibana-${buildVersion}-cdn-assets`,
     });

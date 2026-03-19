@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import useObservable from 'react-use/lib/useObservable';
 import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React, { useCallback } from 'react';
 import { css, Global } from '@emotion/react';
-import { useSideNavCollapsed } from '../../shared/chrome_hooks';
+import { useChromeComponentsDeps } from '../../context';
 import { Navigation } from './navigation';
 
 export const GridLayoutProjectSideNav = () => {
-  const { isCollapsed, toggle: onToggleCollapsed } = useSideNavCollapsed();
+  const { basePath, application, project, navLinks$, sideNav } = useChromeComponentsDeps();
+
+  const isCollapsed = useObservable(sideNav.collapsed$, sideNav.initialCollapsed);
   const updateLayout = useLayoutUpdate();
   const setWidth = useCallback(
     (width: number) => {
@@ -35,7 +38,11 @@ export const GridLayoutProjectSideNav = () => {
       <Navigation
         isCollapsed={isCollapsed}
         setWidth={setWidth}
-        onToggleCollapsed={onToggleCollapsed}
+        basePath={basePath}
+        application={application}
+        navigation$={project.navigation$}
+        navLinks$={navLinks$}
+        onToggleCollapsed={sideNav.onToggleCollapsed}
       />
     </>
   );

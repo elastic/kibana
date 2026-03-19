@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { LensDatasourceId } from '@kbn/lens-common';
-
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   EuiSpacer,
@@ -138,7 +136,7 @@ export function LayerPanel(props: LayerPanelProps) {
   };
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
-  const datasourceId = datasourcePublicAPI?.datasourceId! as LensDatasourceId;
+  const datasourceId = datasourcePublicAPI?.datasourceId! as 'formBased' | 'textBased';
   let layerDatasourceState = datasourceStates?.[datasourceId]?.state;
   // try again with aliases
   if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {

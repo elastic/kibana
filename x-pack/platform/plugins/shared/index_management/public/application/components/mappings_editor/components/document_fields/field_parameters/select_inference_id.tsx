@@ -207,7 +207,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                   isReady={isSelectInferenceIdOpen}
                 >
                   <EuiButton
-                    iconType="chevronSingleDown"
+                    iconType="arrowDown"
                     iconSide="right"
                     color="text"
                     fullWidth
@@ -233,7 +233,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
             <EuiContextMenuPanel>
               <EuiContextMenuItem
                 key="createInferenceEndpointButton"
-                icon="plusCircle"
+                icon="plusInCircle"
                 size="s"
                 data-test-subj="createInferenceEndpointButton"
                 onClick={(e) => {

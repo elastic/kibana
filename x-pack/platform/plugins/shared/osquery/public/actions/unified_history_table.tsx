@@ -21,7 +21,7 @@ import {
   EuiToolTip,
   formatDate,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { QUERY_TIMEOUT } from '../../common/constants';
@@ -41,9 +41,8 @@ import { usePacks } from '../packs/use_packs';
 import { RunByColumn } from './components/run_by_column';
 import { SourceBadge } from './components/source_column';
 import { TagsColumn } from './components/tags_column';
-import { HistoryFilters } from './components/history_filters';
+import { HistoryFilters, DEFAULT_START_DATE, DEFAULT_END_DATE } from './components/history_filters';
 import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
-import { useHistoryUrlParams } from './use_history_url_params';
 
 const EMPTY_ARRAY: UnifiedHistoryRow[] = [];
 const EMPTY_TAGS: string[] = [];
@@ -61,8 +60,6 @@ interface HistoryDetailsButtonProps {
 }
 
 const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
-  const { push } = useHistory();
-
   const path = useMemo(() => {
     if (isScheduledRow(row)) {
       return pagePathGetters.history_scheduled_details({
@@ -78,17 +75,7 @@ const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
     return undefined;
   }, [row]);
 
-  const handleClick = useCallback(
-    (event: React.MouseEvent) => {
-      event.preventDefault();
-      if (path) {
-        push(path, { fromHistory: true });
-      }
-    },
-    [push, path]
-  );
-
-  const navProps = useRouterNavigate(path ?? '', handleClick);
+  const navProps = useRouterNavigate(path ?? '');
 
   const detailsText = i18n.translate(
     'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
@@ -113,22 +100,13 @@ const UnifiedHistoryTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { push } = useHistory();
 
-  const [persistedPageSize, setPersistedPageSize] = usePersistedPageSize();
-  const {
-    filters: {
-      q: searchValue,
-      sources: selectedSources,
-      runBy: selectedUserIds,
-      start: startDate,
-      end: endDate,
-      pageSize: urlPageSize,
-      tags: selectedTags,
-    },
-    setFilter,
-    setFilters,
-  } = useHistoryUrlParams();
-
-  const pageSize = urlPageSize ?? persistedPageSize;
+  const [pageSize, setPageSize] = usePersistedPageSize();
+  const [searchValue, setSearchValue] = useState('');
+  const [selectedSources, setSelectedSources] = useState<SourceFilter[]>([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState(DEFAULT_START_DATE);
+  const [endDate, setEndDate] = useState(DEFAULT_END_DATE);
 
   const { currentCursor, pageIndex, goToNextPage, goToPage, resetPagination } =
     useCursorPagination();
@@ -157,51 +135,51 @@ const UnifiedHistoryTableComponent = () => {
 
   const handleSearchSubmit = useCallback(
     (value: string) => {
-      setFilter('q', value);
+      setSearchValue(value);
       resetPagination();
     },
-    [setFilter, resetPagination]
+    [resetPagination]
   );
 
   const handleSelectedSourcesChanged = useCallback(
     (sources: SourceFilter[]) => {
-      setFilter('sources', sources);
+      setSelectedSources(sources);
       resetPagination();
     },
-    [setFilter, resetPagination]
+    [resetPagination]
   );
 
   const handleSelectedUsersChanged = useCallback(
     (userIds: string[]) => {
-      setFilter('runBy', userIds);
+      setSelectedUserIds(userIds);
       resetPagination();
     },
-    [setFilter, resetPagination]
+    [resetPagination]
   );
 
   const handleSelectedTagsChanged = useCallback(
     (newTags: string[]) => {
-      setFilter('tags', newTags);
+      setSelectedTags(newTags);
       resetPagination();
     },
-    [setFilter, resetPagination]
+    [resetPagination]
   );
 
   const handleTimeChange = useCallback(
     (start: string, end: string) => {
-      setFilters({ start, end });
+      setStartDate(start);
+      setEndDate(end);
       resetPagination();
     },
-    [setFilters, resetPagination]
+    [resetPagination]
   );
 
   const handlePageSizeChange = useCallback(
     (size: number) => {
-      setPersistedPageSize(size);
-      setFilter('pageSize', size);
+      setPageSize(size);
       resetPagination();
     },
-    [setPersistedPageSize, setFilter, resetPagination]
+    [setPageSize, resetPagination]
   );
 
   const handleNextPage = useCallback(() => {
@@ -354,7 +332,6 @@ const UnifiedHistoryTableComponent = () => {
 
       if (row.packId) {
         return push(newQueryPath, {
-          fromHistory: true,
           form: pickBy(
             {
               packId: row.packId,
@@ -371,7 +348,6 @@ const UnifiedHistoryTableComponent = () => {
       }
 
       push(newQueryPath, {
-        fromHistory: true,
         form: pickBy(
           {
             query: row.queryText,
@@ -437,21 +413,6 @@ const UnifiedHistoryTableComponent = () => {
   const columns = useMemo(
     () => [
       {
-        name: i18n.translate('xpack.osquery.liveQueryActions.table.actionsColumnTitle', {
-          defaultMessage: 'Actions',
-        }),
-        width: '120px',
-        actions: [
-          {
-            available: isPlayButtonAvailable,
-            render: renderPlayButton,
-          },
-          {
-            render: renderDetailsAction,
-          },
-        ],
-      },
-      {
         field: 'queryText',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.queryColumnTitle', {
           defaultMessage: 'Query',
@@ -461,20 +422,20 @@ const UnifiedHistoryTableComponent = () => {
         render: renderQueryColumn,
       },
       {
-        field: 'tags',
-        name: i18n.translate('xpack.osquery.liveQueryActions.table.tagsColumnTitle', {
-          defaultMessage: 'Tags',
-        }),
-        width: '100px',
-        render: renderTagsColumn,
-      },
-      {
         field: 'totalRows',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.resultsColumnTitle', {
           defaultMessage: 'Results',
         }),
         width: '120px',
         render: renderResultsColumn,
+      },
+      {
+        field: 'tags',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.tagsColumnTitle', {
+          defaultMessage: 'Tags',
+        }),
+        width: '100px',
+        render: renderTagsColumn,
       },
       {
         field: 'source',
@@ -507,6 +468,21 @@ const UnifiedHistoryTableComponent = () => {
         }),
         width: '200px',
         render: renderRunByColumn,
+      },
+      {
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        width: '120px',
+        actions: [
+          {
+            available: isPlayButtonAvailable,
+            render: renderPlayButton,
+          },
+          {
+            render: renderDetailsAction,
+          },
+        ],
       },
     ],
     [

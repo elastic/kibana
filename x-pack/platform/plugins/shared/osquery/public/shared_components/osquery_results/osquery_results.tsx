@@ -7,14 +7,17 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { QueryClientProvider } from '@kbn/react-query';
+import type { CoreStart } from '@kbn/core/public';
 
 import { EmptyPrompt } from '../../routes/components/empty_prompt';
-import { useKibana } from '../../common/lib/kibana';
+import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
+import { queryClient } from '../../query_client';
+import { KibanaRenderContextProvider } from '../../shared_imports';
+import type { StartPlugins } from '../../types';
 import type { OsqueryActionResultsProps } from './types';
 import { OsqueryResult } from './osquery_result';
-import type { ServicesWrapperProps } from '../services_wrapper';
-import ServicesWrapper from '../services_wrapper';
 
 const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   ruleName,
@@ -53,16 +56,20 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
 export const OsqueryActionResults = React.memo(OsqueryActionResultsComponent);
 
 type OsqueryActionResultsWrapperProps = {
-  services: ServicesWrapperProps['services'];
+  services: CoreStart & StartPlugins;
 } & OsqueryActionResultsProps;
 
 const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapperProps> = ({
   services,
   ...restProps
 }) => (
-  <ServicesWrapper services={services}>
-    <OsqueryActionResults {...restProps} />
-  </ServicesWrapper>
+  <KibanaRenderContextProvider {...services}>
+    <KibanaContextProvider services={services}>
+      <QueryClientProvider client={queryClient}>
+        <OsqueryActionResults {...restProps} />
+      </QueryClientProvider>
+    </KibanaContextProvider>
+  </KibanaRenderContextProvider>
 );
 
 const OsqueryActionResultsWrapper = React.memo(OsqueryActionResultsWrapperComponent);

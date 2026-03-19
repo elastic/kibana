@@ -24,13 +24,7 @@ export {
   getFormatByAccessor,
 } from './accessors';
 export { getColorCategories, getLegacyColorCategories } from './color_categories';
-export {
-  LegendSize,
-  LegendLayout,
-  LegendSizeToPixels,
-  DEFAULT_LEGEND_SIZE,
-  getLegendLayout,
-} from './legend';
+export { LegendSize, LegendLayout, LegendSizeToPixels, DEFAULT_LEGEND_SIZE } from './legend';
 
 export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
 export { isChartSizeEvent } from './types';

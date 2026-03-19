@@ -18,12 +18,10 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import { useAbortController } from '@kbn/react-hooks';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useGenAIConnectors } from '../../../../hooks/use_genai_connectors';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -65,7 +63,6 @@ export function SettingsTab() {
   const [knowledgeIndicatorExtraction, setKnowledgeIndicatorExtraction] = useState<string>('');
   const [ruleGeneration, setRuleGeneration] = useState<string>('');
   const [discovery, setDiscovery] = useState<string>('');
-  const [indexPatterns, setIndexPatterns] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
 
@@ -76,7 +73,6 @@ export function SettingsTab() {
     setKnowledgeIndicatorExtraction(toFormValue(v.connectorIdKnowledgeIndicatorExtraction));
     setRuleGeneration(toFormValue(v.connectorIdRuleGeneration));
     setDiscovery(toFormValue(v.connectorIdDiscovery));
-    setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
   }, [settingsFetch.value]);
 
   const handleSave = useCallback(async () => {
@@ -92,7 +88,6 @@ export function SettingsTab() {
               connectorIdKnowledgeIndicatorExtraction: knowledgeIndicatorExtraction,
               connectorIdRuleGeneration: ruleGeneration,
               connectorIdDiscovery: discovery,
-              indexPatterns,
             },
           },
         }
@@ -109,7 +104,6 @@ export function SettingsTab() {
     knowledgeIndicatorExtraction,
     ruleGeneration,
     discovery,
-    indexPatterns,
     settingsFetch,
   ]);
 
@@ -205,7 +199,7 @@ export function SettingsTab() {
             <EuiFormRow
               label={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.knowledgeIndicatorExtractionLabel',
-                { defaultMessage: 'Knowledge Indicator Feature extraction' }
+                { defaultMessage: 'Knowledge indicator extraction' }
               )}
               helpText={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.knowledgeIndicatorExtractionHelp',
@@ -226,12 +220,12 @@ export function SettingsTab() {
             <EuiFormRow
               label={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.ruleGenerationLabel',
-                { defaultMessage: 'Knowledge Indicator Query generation' }
+                { defaultMessage: 'Rule generation' }
               )}
               helpText={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.ruleGenerationHelp',
                 {
-                  defaultMessage: 'Model used for Knowledge Indicator Query generation.',
+                  defaultMessage: 'Model used to generate rules.',
                 }
               )}
             >
@@ -247,13 +241,12 @@ export function SettingsTab() {
             <EuiFormRow
               label={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.discoveryLabel',
-                { defaultMessage: 'Discovery & Significant Event generation' }
+                { defaultMessage: 'Discovery' }
               )}
               helpText={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.settings.discoveryHelp',
                 {
-                  defaultMessage:
-                    'Model used during Discovery phase and Significant Event generation',
+                  defaultMessage: 'Model used during Discovery.',
                 }
               )}
             >
@@ -263,28 +256,6 @@ export function SettingsTab() {
                 value={discovery}
                 onChange={(e) => setDiscovery(e.target.value)}
                 isLoading={genAiConnectors.loading}
-                style={{ minWidth: 280 }}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.indexPatternsLabel',
-                { defaultMessage: 'Index patterns' }
-              )}
-              helpText={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.indexPatternsHelp',
-                {
-                  defaultMessage:
-                    'Comma-separated list of index patterns to use for feature detection and analysis. Default: logs*',
-                }
-              )}
-            >
-              <EuiTextArea
-                data-test-subj="streams-settings-index-patterns"
-                value={indexPatterns}
-                onChange={(e) => setIndexPatterns(e.target.value)}
-                placeholder={DEFAULT_INDEX_PATTERNS}
-                rows={2}
                 style={{ minWidth: 280 }}
               />
             </EuiFormRow>

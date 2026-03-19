@@ -38,7 +38,6 @@ describe('getConnectorRoute', () => {
       actionTypeId: '2',
       name: 'action name',
       isMissingSecrets: false,
-      authMode: 'per-user',
     });
 
     const actionsClient = actionsClientMock.create();
@@ -55,7 +54,6 @@ describe('getConnectorRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "auth_mode": "per-user",
           "config": Object {},
           "connector_type_id": "2",
           "id": "1",
@@ -83,7 +81,6 @@ describe('getConnectorRoute', () => {
         is_missing_secrets: false,
         is_system_action: false,
         is_connector_type_deprecated: false,
-        auth_mode: 'per-user',
       },
     });
   });

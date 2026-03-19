@@ -80,7 +80,7 @@ const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, 
   const more: ItemDescriptor = {
     name: txtMore,
     panel: morePanelId,
-    icon: 'boxesVertical',
+    icon: 'boxesHorizontal',
     'data-test-subj': `embeddablePanelMore-${id}`,
     _order: -1,
   };

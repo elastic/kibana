@@ -68,7 +68,7 @@ export const DocumentFieldsTreeEditor = ({
         <EuiButtonEmpty
           disabled={isDisabled}
           onClick={addField}
-          iconType="plusCircle"
+          iconType="plusInCircleFilled"
           data-test-subj="addFieldButton"
         >
           {i18n.translate('xpack.idxMgmt.mappingsEditor.addFieldButtonLabel', {

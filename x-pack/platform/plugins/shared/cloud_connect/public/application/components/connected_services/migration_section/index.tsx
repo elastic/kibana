@@ -98,7 +98,7 @@ export const MigrationSection: React.FC = () => {
             color="text"
             href={docLinks.links.cloud.cloudConnect}
             target="_blank"
-            iconType="external"
+            iconType="popout"
             iconSide="right"
             onClick={() => {
               // Track telemetry for migration learn more link

@@ -71,7 +71,7 @@ export const removeLifecyclePolicyActionExtension = ({
         />
       );
     },
-    icon: 'stopFill',
+    icon: 'stopFilled',
     indexNames: [indexNames],
     buttonLabel: i18n.translate('xpack.indexLifecycleMgmt.removeIndexLifecycleActionButtonLabel', {
       defaultMessage: 'Remove lifecycle policy',
@@ -110,7 +110,7 @@ export const addLifecyclePolicyActionExtension = ({
         />
       );
     },
-    icon: 'plusCircle',
+    icon: 'plusInCircle',
     buttonLabel: i18n.translate('xpack.indexLifecycleMgmt.addLifecyclePolicyActionButtonLabel', {
       defaultMessage: 'Add lifecycle policy',
     }),

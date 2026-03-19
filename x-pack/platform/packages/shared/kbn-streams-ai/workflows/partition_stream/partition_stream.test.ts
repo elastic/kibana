@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { BoundInferenceClient, ToolCallback } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
 import { partitionStream } from '.';
 
@@ -305,7 +305,7 @@ describe('partitionStream', () => {
             },
           },
         ],
-      } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
+      } as any);
 
       const result = await partitionStream({
         ...defaultParams,
@@ -347,7 +347,7 @@ describe('partitionStream', () => {
             },
           },
         ],
-      } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
+      } as any);
 
       const result = await partitionStream({
         ...defaultParams,
@@ -392,7 +392,7 @@ describe('partitionStream', () => {
             },
           },
         ],
-      } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
+      } as any);
 
       const result = await partitionStream({
         ...defaultParams,
@@ -435,7 +435,7 @@ describe('partitionStream', () => {
             },
           },
         ],
-      } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
+      } as any);
 
       const result = await partitionStream({
         ...defaultParams,
@@ -456,7 +456,7 @@ describe('partitionStream', () => {
         },
       ]);
 
-      let capturedToolCallback: ToolCallback | null = null;
+      let capturedToolCallback: ((args: any) => Promise<unknown>) | null = null;
 
       mockClusterLogs.mockResolvedValue([
         {
@@ -470,9 +470,8 @@ describe('partitionStream', () => {
         },
       ]);
 
-      mockExecuteAsReasoningAgent.mockImplementation(async (options) => {
-        const opts = options as Parameters<typeof executeAsReasoningAgent>[0];
-        capturedToolCallback = opts.toolCallbacks.partition_logs;
+      mockExecuteAsReasoningAgent.mockImplementation((async ({ toolCallbacks }: any) => {
+        capturedToolCallback = toolCallbacks.partition_logs;
         return {
           content: '',
           toolCalls: [
@@ -487,8 +486,8 @@ describe('partitionStream', () => {
               },
             },
           ],
-        } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>;
-      });
+        };
+      }) as any);
 
       await partitionStream({
         ...defaultParams,
@@ -503,7 +502,6 @@ describe('partitionStream', () => {
       await capturedToolCallback!({
         toolCallId: 'test-call',
         function: {
-          name: 'partition_logs',
           arguments: {
             index: 'logs.test',
             partitions: [{ name: 'new-partition', condition: { field: 'level', eq: 'error' } }],

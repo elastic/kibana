@@ -11,28 +11,21 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
-import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
-import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
-import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
-import type { ChildWorkflowExecutionInfo } from '../model/use_child_workflow_executions';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
@@ -42,10 +35,6 @@ interface WorkflowStepExecutionDetailsProps {
   workflowExecutionStatus?: ExecutionStatus;
   resumeMessage?: string;
   shouldAutoResume?: boolean;
-  /** When the step is workflow.execute, the child workflow execution (to link to) */
-  childWorkflowExecution?: ChildWorkflowExecutionInfo;
-  /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
-  parentWorkflowExecution?: WorkflowExecutionLinkInfo;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
@@ -57,27 +46,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     workflowExecutionStatus,
     resumeMessage,
     shouldAutoResume = false,
-    childWorkflowExecution,
-    parentWorkflowExecution,
   }) => {
-    const { euiTheme } = useEuiTheme();
-    const workflowNav = useNavigateToExecution(
-      childWorkflowExecution
-        ? {
-            workflowId: childWorkflowExecution.workflowId,
-            executionId: childWorkflowExecution.executionId,
-          }
-        : { workflowId: '' }
-    );
-    const parentWorkflowNav = useNavigateToExecution(
-      parentWorkflowExecution
-        ? {
-            workflowId: parentWorkflowExecution.workflowId,
-            executionId: parentWorkflowExecution.executionId,
-          }
-        : { workflowId: '' }
-    );
-
     // Show data for terminal steps OR steps paused for input (they have input but no output yet)
     const isFinished = useMemo(
       () =>
@@ -88,27 +57,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
     const isTriggerPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
-    const isWorkflowExecuteStep = isExecuteSyncStepType(stepExecution?.stepType);
-
-    const handleWorkflowLinkClick = useCallback(
-      (e: React.MouseEvent) => {
-        if (childWorkflowExecution) {
-          e.preventDefault();
-          workflowNav.navigate();
-        }
-      },
-      [childWorkflowExecution, workflowNav]
-    );
-
-    const handleParentWorkflowLinkClick = useCallback(
-      (e: React.MouseEvent) => {
-        if (parentWorkflowExecution) {
-          e.preventDefault();
-          parentWorkflowNav.navigate();
-        }
-      },
-      [parentWorkflowExecution, parentWorkflowNav]
-    );
 
     // Extract trigger type from stepType (e.g., 'trigger_manual' -> 'manual')
     const triggerType = isTriggerPseudoStep
@@ -116,7 +64,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       : undefined;
 
     const hasInput = Boolean(stepExecution?.input);
-    const hasOutput = Boolean(stepExecution?.output);
     const hasError = Boolean(stepExecution?.error);
 
     const tabs = useMemo(() => {
@@ -126,12 +73,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           pseudoTabs.push({
             id: 'input',
             name: 'Input',
-          });
-        }
-        if (hasOutput) {
-          pseudoTabs.push({
-            id: 'output',
-            name: 'Output',
           });
         }
         return pseudoTabs;
@@ -146,7 +87,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           name: 'Input',
         },
       ];
-    }, [hasInput, hasOutput, hasError, isTriggerPseudoStep]);
+    }, [hasInput, hasError, isTriggerPseudoStep]);
 
     const defaultTabId =
       stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT ? 'input' : tabs[0].id;
@@ -199,47 +140,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
-          {isWorkflowExecuteStep && childWorkflowExecution && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  {getExecutionStatusIcon(euiTheme, childWorkflowExecution.status)}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3>
-                      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                      <EuiLink href={workflowNav.href} onClick={handleWorkflowLinkClick}>
-                        {`${stepExecution?.stepType}: ${childWorkflowExecution.workflowName}`}
-                      </EuiLink>
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-          {parentWorkflowExecution && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  {getExecutionStatusIcon(euiTheme, parentWorkflowExecution.status)}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3>
-                      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                      <EuiLink
-                        href={parentWorkflowNav.href}
-                        onClick={handleParentWorkflowLinkClick}
-                      >
-                        {`${parentWorkflowExecution.workflowName}: ${stepExecution?.stepId}`}
-                      </EuiLink>
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
             <EuiTabs expand>
               {tabs.map((tab) => (
@@ -264,7 +164,33 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
               ) : (
                 <>
                   {selectedTabId === 'output' && (
-                    <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+                    <>
+                      {isTriggerPseudoStep && (
+                        <>
+                          <EuiCallOut
+                            size="s"
+                            title={i18n.translate(
+                              'workflowsManagement.stepExecutionDetails.contextAccessTitle',
+                              {
+                                defaultMessage: 'Access this data in your workflow',
+                              }
+                            )}
+                            iconType="info"
+                            announceOnMount={false}
+                          >
+                            <FormattedMessage
+                              id="workflowsManagement.stepExecutionDetails.contextAccessDescription"
+                              defaultMessage="You can reference these values using {code}"
+                              values={{
+                                code: <strong>{`{{ <field> }}`}</strong>,
+                              }}
+                            />
+                          </EuiCallOut>
+                          <EuiSpacer size="m" />
+                        </>
+                      )}
+                      <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+                    </>
                   )}
                   {selectedTabId === 'input' && (
                     <>

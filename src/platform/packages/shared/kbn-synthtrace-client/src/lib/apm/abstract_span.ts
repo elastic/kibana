@@ -12,7 +12,7 @@ import { Serializable } from '../serializable';
 
 export abstract class AbstractSpan<
   TFields extends Fields,
-  TChild extends AbstractSpan<TFields, TChild>
+  TChild extends AbstractSpan<TFields, any>
 > extends Serializable<TFields> {
   protected _children: TChild[] = [];
 
@@ -26,8 +26,7 @@ export abstract class AbstractSpan<
 
   children(...children: TChild[]): this {
     for (const child of children) {
-      // Safe: subclasses always bind TChild to themselves (F-bounded polymorphism)
-      child.parent(this as unknown as TChild);
+      child.parent(this);
     }
     this._children.push(...children);
     return this;

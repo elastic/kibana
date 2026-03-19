@@ -234,21 +234,15 @@ export class LensConfigBuilder {
 
     const converter = this.apiConvertersByChart[chartType];
     const attributes = converter.fromAPItoLensState(config as any); // handle type mismatches
-    const { filters, query, references } = filtersAndQueryToLensState(
-      config,
-      attributes.references ?? []
-    );
 
     return {
       // @TODO investigate why it complains about missing type
       // type: 'lens',
       ...attributes,
-      references: [...(attributes.references ?? []), ...references],
       state: {
         ...attributes.state,
         query: { language: 'kuery', query: '' },
-        ...(query ? { query } : {}),
-        filters,
+        ...filtersAndQueryToLensState(config),
       },
     };
   }

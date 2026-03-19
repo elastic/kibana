@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
-
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
@@ -140,7 +138,7 @@ function getSuggestionForColumns(
     query,
   };
 
-  const isEsql = datasourceId === LENS_DATASOURCE_ID.TEXT_BASED;
+  const isEsql = datasourceId === 'textBased';
   // we have 2 different suggestion: with DSL we can split by only when we have a max of 2 buckets (one for the X and the other for the breakdown)
   // in ESQL we instead suggest split by with more then 1 buckets always.
   const whenToSuggestSplitBy = isEsql
@@ -280,7 +278,7 @@ function getSuggestionsForLayer({
   if (
     changeType === 'initial' &&
     xValue?.operation.dataType === 'date' &&
-    datasourceId === LENS_DATASOURCE_ID.FORM_BASED
+    datasourceId === 'formBased'
   ) {
     return buildSuggestion({ ...options, seriesType: 'line' });
   }

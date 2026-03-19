@@ -105,7 +105,7 @@ exports[`SampleDataCard installed renders with app links 1`] = `
                   </span>
                   <span
                     color="inherit"
-                    data-euiicon-type="chevronSingleDown"
+                    data-euiicon-type="arrowDown"
                   />
                 </span>
               </button>

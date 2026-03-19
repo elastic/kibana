@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import {
   EuiBasicTable,
@@ -15,7 +14,6 @@ import {
   EuiLiveAnnouncer,
   EuiSpacer,
   EuiText,
-  useEuiOverflowScroll,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,7 +47,6 @@ export const Table = () => {
   } = useDatasetQualityTable();
 
   const [liveAnnouncement, setLiveAnnouncement] = useState<string>('');
-  const overflowXScrollStyles = useEuiOverflowScroll('x');
 
   useUpdateEffect(() => {
     const fullDatasetNamesState = showFullDatasetNames
@@ -115,9 +112,6 @@ export const Table = () => {
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" css={{ height: 2 }} />
       <EuiBasicTable
-        css={css`
-          ${overflowXScrollStyles};
-        `}
         tableCaption={i18n.translate('xpack.datasetQuality.tableCaption', {
           defaultMessage: 'Dataset quality table',
         })}

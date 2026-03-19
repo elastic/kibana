@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/grok-heuristics'
   - '@kbn/zod'
   - '@kbn/inference-common'
-  - '@kbn/streamlang'
 tags:
   - shared-common
   - package

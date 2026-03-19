@@ -8,22 +8,14 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { APPROVED_TRIGGER_DEFINITIONS } from '../fixtures/approved_trigger_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Workflows Extensions - Event-Driven Trigger Definitions Approval',
-  {
-    tag: [
-      ...tags.stateful.classic,
-      ...tags.serverless.search,
-      ...tags.serverless.security.complete,
-      ...tags.serverless.observability.complete,
-      ...tags.serverless.workplaceai,
-    ],
-  },
+  { tag: ['@ess', '@svlSearch', '@svlSecurity', '@svlOblt', '@svlWorkplaceAI'] },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 

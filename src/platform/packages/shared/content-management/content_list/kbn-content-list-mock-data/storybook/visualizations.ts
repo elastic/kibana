@@ -75,7 +75,7 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
       description: 'Pie chart of orders by product category',
       visType: 'pie',
       typeTitle: 'Pie',
-      icon: 'chartPie',
+      icon: 'visPie',
       readOnly: false,
     },
     editor: {
@@ -96,7 +96,7 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
       description: 'Data table of top selling products',
       visType: 'table',
       typeTitle: 'Data Table',
-      icon: 'table',
+      icon: 'visTable',
       readOnly: false,
     },
     editor: {
@@ -118,7 +118,7 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
       description: 'Area chart of server response latencies',
       visType: 'area',
       typeTitle: 'Area',
-      icon: 'chartArea',
+      icon: 'visArea',
       readOnly: false,
     },
     editor: {
@@ -139,7 +139,7 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
       description: 'Single metric showing total alerts',
       visType: 'metric',
       typeTitle: 'Metric',
-      icon: 'chartMetric',
+      icon: 'visMetric',
       readOnly: true,
     },
     editor: {
@@ -161,7 +161,7 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
       description: 'Word cloud of popular search terms',
       visType: 'tagcloud',
       typeTitle: 'Tag Cloud',
-      icon: 'chartTagCloud',
+      icon: 'visTagCloud',
       readOnly: false,
     },
     editor: {
@@ -183,7 +183,7 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
       description: 'Advanced visualization using Vega-Lite',
       visType: 'vega',
       typeTitle: 'Vega',
-      icon: 'code',
+      icon: 'visVega',
       readOnly: false,
     },
     editor: {
@@ -204,7 +204,7 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
       description: 'This visualization has an error',
       visType: 'line',
       typeTitle: 'Line',
-      icon: 'chartLine',
+      icon: 'visLine',
       readOnly: false,
       error: 'Index pattern not found: logs-*',
     },

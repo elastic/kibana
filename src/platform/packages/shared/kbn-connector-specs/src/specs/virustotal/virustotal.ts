@@ -98,7 +98,7 @@ export const VirusTotalConnector: ConnectorSpec = {
       defaultMessage: 'File scanning, URL analysis, and threat intelligence lookups',
     }),
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows'],
   },
 
   auth: {

@@ -55,15 +55,7 @@
           },
           "<G, L>, \"cascadeRef\"> & ",
           "IDataCascadeProviderProps",
-          "<",
-          {
-            "pluginId": "@kbn/shared-ux-document-data-cascade",
-            "scope": "common",
-            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
-            "section": "def-common.GroupNode",
-            "text": "GroupNode"
-          },
-          "> & { children?: React.ReactNode; } & { ref?: React.Ref<",
+          " & { children?: React.ReactNode; } & { ref?: React.Ref<",
           {
             "pluginId": "@kbn/shared-ux-document-data-cascade",
             "scope": "common",
@@ -98,15 +90,7 @@
               },
               "<G, L>, \"cascadeRef\"> & ",
               "IDataCascadeProviderProps",
-              "<",
-              {
-                "pluginId": "@kbn/shared-ux-document-data-cascade",
-                "scope": "common",
-                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
-                "section": "def-common.GroupNode",
-                "text": "GroupNode"
-              },
-              "> & { children?: React.ReactNode; } & { ref?: React.Ref<",
+              " & { children?: React.ReactNode; } & { ref?: React.Ref<",
               {
                 "pluginId": "@kbn/shared-ux-document-data-cascade",
                 "scope": "common",
@@ -670,7 +654,7 @@
           "DataCascadeImplBaseProps<G, L> & ({ customTableHeader: (props: { availableColumns: string[]; currentSelectedColumns: string[]; onGroupSelection: (groupByColumn: string[]) => void; selectedRows: string[]; }) => React.ReactNode; tableTitleSlot?: undefined; } | { customTableHeader?: undefined; tableTitleSlot: React.FC<{}>; })"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 268,
+        "lineNumber": 272,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

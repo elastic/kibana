@@ -49,7 +49,7 @@ export const CreateArchives: Task = {
                 destination,
                 archiverOptions: {
                   zlib: {
-                    level: config.isRelease ? 9 : 6,
+                    level: 9,
                   },
                 },
                 createRootDirectory: true,
@@ -65,7 +65,12 @@ export const CreateArchives: Task = {
               fileCount: await compressTar({
                 source,
                 destination,
-                gzipLevel: config.isRelease ? 9 : 6,
+                archiverOptions: {
+                  gzip: true,
+                  gzipOptions: {
+                    level: 9,
+                  },
+                },
                 createRootDirectory: true,
                 rootDirectoryName: build.getRootDirectory(platform),
               }),

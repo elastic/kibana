@@ -92,7 +92,7 @@ export const MappingsFilter: React.FC<Props> = ({
   );
   const filterByFieldTypeButton = (
     <EuiFilterButton
-      iconType="chevronSingleDown"
+      iconType="arrowDown"
       iconSide="right"
       isDisabled={isJSONVisible}
       onClick={() => setIsFilterPopoverVisible((v) => !v)}

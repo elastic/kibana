@@ -9,7 +9,6 @@
 
 const { peggyTransform } = require('./peggy');
 const { dotTextTransform } = require('./dot_text');
-const { yamlTransform } = require('./yaml');
 const { babelTransform } = require('./babel');
 
 module.exports = {
@@ -19,8 +18,6 @@ module.exports = {
   TRANSFORMS: {
     '.peggy': peggyTransform,
     '.text': dotTextTransform,
-    '.yaml': yamlTransform,
-    '.yml': yamlTransform,
     default: babelTransform,
   },
 };

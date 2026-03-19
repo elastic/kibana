@@ -56,7 +56,7 @@ describe('getDataStreamDetails', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
   let mockESClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockDatasetQualityESClient: {
-    search: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['search']>;
+    search: jest.MockedFunction<any>;
   };
 
   beforeEach(() => {
@@ -67,9 +67,7 @@ describe('getDataStreamDetails', () => {
     };
     esClient.asCurrentUser = mockESClient;
 
-    mockCreateDatasetQualityESClient.mockReturnValue(
-      mockDatasetQualityESClient as unknown as ReturnType<typeof createDatasetQualityESClient>
-    );
+    mockCreateDatasetQualityESClient.mockReturnValue(mockDatasetQualityESClient as any);
     mockDatasetQualityPrivileges.getHasIndexPrivileges.mockResolvedValue({
       'logs-test-default': {
         monitor: true,
@@ -88,16 +86,14 @@ describe('getDataStreamDetails', () => {
         },
       ],
       datasetUserPrivileges: { datasetsPrivilages: {} },
-    } as Awaited<ReturnType<typeof getDataStreams>>);
-    mockGetFailedDocsPaginated.mockResolvedValue([{ count: 10 }] as Awaited<
-      ReturnType<typeof getFailedDocsPaginated>
-    >);
+    } as any);
+    mockGetFailedDocsPaginated.mockResolvedValue([{ count: 10 }] as any);
     mockGetDataStreamsMeteringStats.mockResolvedValue({
       'logs-test-default': {
         totalDocs: 1000,
         sizeBytes: 5000,
       },
-    } as Awaited<ReturnType<typeof getDataStreamsMeteringStats>>);
+    } as any);
 
     mockDatasetQualityESClient.search.mockResolvedValue({
       aggregations: {
@@ -119,7 +115,7 @@ describe('getDataStreamDetails', () => {
           store: { size_in_bytes: 5000 },
         },
       },
-    } as Awaited<ReturnType<typeof mockESClient.indices.stats>>);
+    } as any);
 
     mockESClient.fieldCaps.mockResolvedValue({
       fields: {
@@ -127,7 +123,7 @@ describe('getDataStreamDetails', () => {
           keyword: { type: 'keyword', aggregatable: true },
         },
       },
-    } as unknown as Awaited<ReturnType<typeof mockESClient.fieldCaps>>);
+    } as any);
   });
 
   afterEach(() => {
@@ -151,7 +147,7 @@ describe('getDataStreamDetails', () => {
       await expect(
         getDataStreamDetails({
           esClient,
-          dataStream: undefined as unknown as string,
+          dataStream: undefined as any,
           start: 1234567890,
           end: 1234567890,
           isServerless: false,
@@ -264,7 +260,7 @@ describe('getDataStreamDetails', () => {
         });
 
         const error = new Error('Not Found');
-        (error as Error & { statusCode?: number }).statusCode = 404;
+        (error as any).statusCode = 404;
         mockDatasetQualityESClient.search.mockRejectedValue(error);
 
         const result = await getDataStreamDetails({
@@ -288,9 +284,7 @@ describe('getDataStreamDetails', () => {
         });
 
         const error = new Error('Index closed');
-        (error as Error & { body?: { error?: { type?: string } } }).body = {
-          error: { type: 'index_closed_exception' },
-        };
+        (error as any).body = { error: { type: 'index_closed_exception' } };
         mockDatasetQualityESClient.search.mockRejectedValue(error);
 
         const result = await getDataStreamDetails({
@@ -314,7 +308,7 @@ describe('getDataStreamDetails', () => {
         });
 
         const error = new Error('Internal Server Error');
-        (error as Error & { statusCode?: number }).statusCode = 500;
+        (error as any).statusCode = 500;
         mockDatasetQualityESClient.search.mockRejectedValue(error);
 
         await expect(
@@ -336,7 +330,7 @@ describe('getDataStreamDetails', () => {
             totalDocs: 20,
             sizeBytes: 30,
           },
-        } as Awaited<ReturnType<typeof getDataStreamsMeteringStats>>);
+        } as any);
 
         const result = await getDataStreamDetails({
           esClient,
@@ -359,7 +353,7 @@ describe('getDataStreamDetails', () => {
               store: { size_in_bytes: 30 },
             },
           },
-        } as Awaited<ReturnType<typeof mockESClient.indices.stats>>);
+        } as any);
 
         const result = await getDataStreamDetails({
           esClient,

@@ -9,15 +9,19 @@ import { EuiComment } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { QueryClientProvider } from '@kbn/react-query';
 import { EmptyPrompt } from '../../routes/components/empty_prompt';
 import { useKibana } from '../../common/lib/kibana';
+import type { StartPlugins } from '../../types';
+import { queryClient } from '../../query_client';
 import { AlertAttachmentContext } from '../../common/contexts';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { ATTACHED_QUERY } from '../../agents/translations';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { OsqueryActionResultProps } from './types';
-import type { ServicesWrapperProps } from '../services_wrapper';
-import ServicesWrapper from '../services_wrapper';
 
 // eslint-disable-next-line react/display-name
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
@@ -62,18 +66,21 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
 );
 
 export const OsqueryActionResult = React.memo(OsqueryResultComponent);
-
 type OsqueryActionResultsWrapperProps = {
-  services: ServicesWrapperProps['services'];
+  services: CoreStart & StartPlugins;
 } & OsqueryActionResultProps;
 
 const OsqueryActionResultWrapperComponent: React.FC<OsqueryActionResultsWrapperProps> = ({
   services,
   ...restProps
 }) => (
-  <ServicesWrapper services={services}>
-    <OsqueryActionResult {...restProps} />
-  </ServicesWrapper>
+  <KibanaRenderContextProvider {...services}>
+    <KibanaContextProvider services={services}>
+      <QueryClientProvider client={queryClient}>
+        <OsqueryActionResult {...restProps} />
+      </QueryClientProvider>
+    </KibanaContextProvider>
+  </KibanaRenderContextProvider>
 );
 
 const OsqueryActionResultWrapper = React.memo(OsqueryActionResultWrapperComponent);

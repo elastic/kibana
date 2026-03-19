@@ -27,11 +27,11 @@ export const CreateWatchlistRequestBody = z.object({
   /**
    * Description of the watchlist
    */
-  description: z.string().optional(),
+  description: z.string(),
   /**
    * Risk score modifier associated with the watchlist
    */
-  riskModifier: z.number().min(0).max(2),
+  riskModifier: z.number(),
   /**
    * Indicates if the watchlist is managed by the system
    */

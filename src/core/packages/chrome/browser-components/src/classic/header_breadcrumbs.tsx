@@ -9,10 +9,17 @@
 
 import { EuiHeaderBreadcrumbs } from '@elastic/eui';
 import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { prepareBreadcrumbs } from '../shared/breadcrumb_utils';
 
-export function HeaderBreadcrumbs({ breadcrumbs }: { breadcrumbs: ChromeBreadcrumb[] }) {
+interface Props {
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+}
+
+export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
+  const breadcrumbs = useObservable(breadcrumbs$, []);
   const crumbs = prepareBreadcrumbs(breadcrumbs);
 
   return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;

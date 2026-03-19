@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-type ExtractReturnType<T> = T extends (...args: infer _A) => infer R ? R : never;
-
-export const getPlaceholderFor = <ImplementationFactory>(
+export const getPlaceholderFor = <ImplementationFactory extends (...factoryArgs: any[]) => any>(
   _implementationFactory: ImplementationFactory
-): ExtractReturnType<ImplementationFactory> =>
+): ReturnType<ImplementationFactory> =>
   (() => {
     throw new Error('Not implemented');
-  }) as ExtractReturnType<ImplementationFactory>;
+  }) as ReturnType<ImplementationFactory>;

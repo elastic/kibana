@@ -9,20 +9,24 @@
 
 import type { FC } from 'react';
 import React, { useState, useEffect, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { EuiSkipLink, EuiLiveAnnouncer, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
+import type { Observable } from 'rxjs';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import { useCustomBranding } from './chrome_hooks';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 const DEFAULT_BRAND = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/src/core/packages/rendering/server-internal/src/views/template.tsx#L35
 const SEPARATOR = ' - ';
 
 export const HeaderPageAnnouncer: FC<{
-  breadcrumbs: ChromeBreadcrumb[];
-}> = ({ breadcrumbs }) => {
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  customBranding$: Observable<CustomBranding>;
+}> = ({ breadcrumbs$, customBranding$ }) => {
   const [routeTitle, setRouteTitle] = useState('');
-  const branding = useCustomBranding()?.pageTitle || DEFAULT_BRAND;
+  const branding = useObservable(customBranding$)?.pageTitle || DEFAULT_BRAND;
+  const breadcrumbs = useObservable(breadcrumbs$, []);
   const skipLinkRef = useRef<HTMLAnchorElement | null>(null);
   const [shouldHandleTab, setShouldHandleTab] = useState<boolean>(false);
 

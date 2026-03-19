@@ -9,7 +9,6 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod/v4';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { ToolCallWithResult, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
-import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
 import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/types/index_search';
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
@@ -115,10 +114,8 @@ export type ToolReturnSummarizerFn = (
 /**
  * Built-in tool, as registered as static tool.
  */
-export interface BuiltinToolDefinition<
-  RunInput extends ZodObject<any> = ZodObject<any>,
-  TResult extends ToolResult = ToolResult
-> extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'>,
+export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
+  extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'>,
     BuiltInToolSpecificConfig {
   /**
    * built-in tool types
@@ -131,7 +128,7 @@ export interface BuiltinToolDefinition<
   /**
    * Handler to call to execute the tool.
    */
-  handler: ToolHandlerFn<z.infer<RunInput>, TResult>;
+  handler: ToolHandlerFn<z.infer<RunInput>>;
   /**
    * Optional dynamic availability configuration.
    * Refer to {@link ToolAvailabilityConfig}
@@ -146,11 +143,8 @@ export type StaticEsqlTool = StaticToolRegistrationMixin<EsqlToolDefinition>;
 export type StaticIndexSearchTool = StaticToolRegistrationMixin<IndexSearchToolDefinition>;
 export type StaticWorkflowTool = StaticToolRegistrationMixin<WorkflowToolDefinition>;
 
-export type StaticToolRegistration<
-  RunInput extends ZodObject<any> = ZodObject<any>,
-  TResult extends ToolResult = ToolResult
-> =
-  | BuiltinToolDefinition<RunInput, TResult>
+export type StaticToolRegistration<RunInput extends ZodObject<any> = ZodObject<any>> =
+  | BuiltinToolDefinition<RunInput>
   | StaticEsqlTool
   | StaticIndexSearchTool
   | StaticWorkflowTool;

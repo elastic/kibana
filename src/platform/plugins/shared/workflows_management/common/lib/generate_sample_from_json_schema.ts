@@ -8,7 +8,6 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import { INPUT_STRING_PLACEHOLDER } from '../consts/placeholders';
 
 /**
  * Generates a sample value from a JSON Schema.
@@ -21,7 +20,7 @@ export function generateSampleFromJsonSchema(schema: JSONSchema7): unknown {
 
   switch (schema.type) {
     case 'string':
-      return schema.format === 'email' ? 'user@example.com' : INPUT_STRING_PLACEHOLDER;
+      return schema.format === 'email' ? 'user@example.com' : 'string';
     case 'number':
       return 0;
     case 'integer':

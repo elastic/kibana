@@ -66,14 +66,14 @@ export class SearchInferenceEndpointsPlugin
 
     core.savedObjects.registerType(createInferenceSettingsSavedObjectType());
 
-    defineRoutes({ logger: this.logger, router, featureRegistry: this.featureRegistry });
+    defineRoutes({ logger: this.logger, router });
 
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
       minimumLicense: 'enterprise',
       name: PLUGIN_NAME,
-      order: 4000,
-      category: DEFAULT_APP_CATEGORIES.management,
+      order: 2,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       app: [],
       catalogue: [],
       management: {

@@ -96,15 +96,11 @@ function validateAdditionalFields(configObject: ConnectorTypeConfigType) {
   }
 }
 
-function validateOAuth2(
-  configObject: ConnectorTypeConfigType,
-  configurationUtilities: ActionsConfigurationUtilities
-) {
-  if (configObject.authType !== AuthType.OAuth2ClientCredentials) {
-    return;
-  }
-
-  if (!configObject.accessTokenUrl || !configObject.clientId) {
+function validateOAuth2(configObject: ConnectorTypeConfigType) {
+  if (
+    configObject.authType === AuthType.OAuth2ClientCredentials &&
+    (!configObject.accessTokenUrl || !configObject.clientId)
+  ) {
     const missingFields = [];
     if (!configObject.accessTokenUrl) {
       missingFields.push('Access Token URL (accessTokenUrl)');
@@ -122,9 +118,6 @@ function validateOAuth2(
       })
     );
   }
-
-  validateUrl(configObject.accessTokenUrl);
-  ensureUriAllowed(configObject.accessTokenUrl, configurationUtilities);
 }
 
 export function validateConnectorTypeConfig(
@@ -139,5 +132,5 @@ export function validateConnectorTypeConfig(
   validateAuthType(configObject);
   validateCertType(configObject, configurationUtilities);
   validateAdditionalFields(configObject);
-  validateOAuth2(configObject, configurationUtilities);
+  validateOAuth2(configObject);
 }

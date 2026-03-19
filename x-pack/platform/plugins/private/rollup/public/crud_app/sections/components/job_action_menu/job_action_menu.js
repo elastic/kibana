@@ -41,7 +41,7 @@ export class JobActionMenuUi extends Component {
   static defaultProps = {
     iconSide: 'right',
     anchorPosition: 'rightUp',
-    iconType: 'chevronSingleDown',
+    iconType: 'arrowDown',
     jobs: [],
   };
 

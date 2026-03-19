@@ -76,17 +76,7 @@ export const selectIsTestModalOpen = createSelector(
 
 export const selectReplayExecutionId = createSelector(
   selectDetail,
-  (detail) => detail.replay?.executionId ?? null
-);
-
-export const selectReplayStepExecutionId = createSelector(
-  selectDetail,
-  (detail) => detail.replay?.stepExecutionId ?? null
-);
-
-export const selectTestStepModalOpenStepId = createSelector(
-  selectDetail,
-  (detail) => detail.testStepModalOpenStepId ?? undefined
+  (detail) => detail.replayExecutionId
 );
 
 export const selectIsSavingYaml = createSelector(

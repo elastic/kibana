@@ -9,8 +9,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
-    "**/*.json"
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*"

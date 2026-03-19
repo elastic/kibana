@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { buildSelectableIndexAndDataStreamNames, useFetchIndices } from './use_fetch_indices';
+import { useFetchIndices } from './use_fetch_indices';
 import { useKibana } from './use_kibana';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
@@ -28,53 +28,6 @@ const createWrapper = () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
-
-describe('buildSelectableIndexAndDataStreamNames', () => {
-  it('excludes hidden indices', () => {
-    expect(
-      buildSelectableIndexAndDataStreamNames([
-        { name: 'visible', hidden: false },
-        { name: '.hidden-idx', hidden: true },
-      ])
-    ).toEqual(['visible']);
-  });
-
-  it('dedupes data stream names from multiple backing indices', () => {
-    expect(
-      buildSelectableIndexAndDataStreamNames([
-        { name: '.ds-logs-foo-2024-01-01-000001', data_stream: 'logs-foo' },
-        { name: '.ds-logs-foo-2024-02-01-000001', data_stream: 'logs-foo' },
-      ])
-    ).toEqual(['logs-foo']);
-  });
-
-  it('includes data streams when backing indices are hidden (e.g. LogsDB / standard .ds-* )', () => {
-    expect(
-      buildSelectableIndexAndDataStreamNames([
-        {
-          name: '.ds-logs-nginx.access-2025.01.01-000001',
-          hidden: true,
-          data_stream: 'logs-nginx.access-default',
-        },
-        {
-          name: '.ds-metrics-system-000001',
-          hidden: true,
-          data_stream: 'metrics-system-default',
-        },
-      ])
-    ).toEqual(['logs-nginx.access-default', 'metrics-system-default']);
-  });
-
-  it('includes standalone index names and data streams, sorted', () => {
-    expect(
-      buildSelectableIndexAndDataStreamNames([
-        { name: 'my-index' },
-        { name: '.ds-bar-000001', data_stream: 'logs-bar' },
-        { name: 'zzz-index' },
-      ])
-    ).toEqual(['logs-bar', 'my-index', 'zzz-index']);
-  });
-});
 
 describe('useFetchIndices', () => {
   const mockHttpGet = jest.fn();
@@ -101,8 +54,12 @@ describe('useFetchIndices', () => {
     expect(result.current.isLoading).toBe(true);
   });
 
-  it('should return standalone index names on success', async () => {
-    mockHttpGet.mockResolvedValue([{ name: 'index-1' }, { name: 'index-2' }, { name: 'index-3' }]);
+  it('should return indices list on success', async () => {
+    mockHttpGet.mockResolvedValue({
+      indices: [{ name: 'index-1' }, { name: 'index-2' }, { name: 'index-3' }],
+      aliases: [],
+      data_streams: [],
+    });
 
     const { result } = renderHook(() => useFetchIndices(), {
       wrapper: createWrapper(),
@@ -113,24 +70,6 @@ describe('useFetchIndices', () => {
     });
 
     expect(result.current.indices).toEqual(['index-1', 'index-2', 'index-3']);
-    expect(result.current.isError).toBe(false);
-  });
-
-  it('should return data stream names from backing indices', async () => {
-    mockHttpGet.mockResolvedValue([
-      { name: '.ds-logs-foo-000001', data_stream: 'logs-foo' },
-      { name: '.ds-logs-bar-000001', data_stream: 'logs-bar' },
-    ]);
-
-    const { result } = renderHook(() => useFetchIndices(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    expect(result.current.indices).toEqual(['logs-bar', 'logs-foo']);
     expect(result.current.isError).toBe(false);
   });
 
@@ -154,8 +93,12 @@ describe('useFetchIndices', () => {
     consoleSpy.mockRestore();
   });
 
-  it('should call Index Management indices API with version 1', async () => {
-    mockHttpGet.mockResolvedValue([]);
+  it('should use default search pattern "*" when no search provided', async () => {
+    mockHttpGet.mockResolvedValue({
+      indices: [],
+      aliases: [],
+      data_streams: [],
+    });
 
     renderHook(() => useFetchIndices(), {
       wrapper: createWrapper(),
@@ -165,14 +108,75 @@ describe('useFetchIndices', () => {
       expect(mockHttpGet).toHaveBeenCalled();
     });
 
-    expect(mockHttpGet).toHaveBeenCalledWith('/api/index_management/indices', {
-      version: '1',
-      signal: expect.any(AbortSignal),
+    expect(mockHttpGet).toHaveBeenCalledWith('/internal/index-pattern-management/resolve_index/*');
+  });
+
+  it('should add wildcard to search pattern if not present', async () => {
+    mockHttpGet.mockResolvedValue({
+      indices: [],
+      aliases: [],
+      data_streams: [],
     });
+
+    renderHook(() => useFetchIndices('logs'), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(mockHttpGet).toHaveBeenCalled();
+    });
+
+    expect(mockHttpGet).toHaveBeenCalledWith(
+      '/internal/index-pattern-management/resolve_index/logs*'
+    );
+  });
+
+  it('should not add extra wildcard if search already ends with wildcard', async () => {
+    mockHttpGet.mockResolvedValue({
+      indices: [],
+      aliases: [],
+      data_streams: [],
+    });
+
+    renderHook(() => useFetchIndices('logs*'), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(mockHttpGet).toHaveBeenCalled();
+    });
+
+    expect(mockHttpGet).toHaveBeenCalledWith(
+      '/internal/index-pattern-management/resolve_index/logs*'
+    );
+  });
+
+  it('should URL encode the search pattern', async () => {
+    mockHttpGet.mockResolvedValue({
+      indices: [],
+      aliases: [],
+      data_streams: [],
+    });
+
+    renderHook(() => useFetchIndices('logs with spaces'), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(mockHttpGet).toHaveBeenCalled();
+    });
+
+    expect(mockHttpGet).toHaveBeenCalledWith(
+      '/internal/index-pattern-management/resolve_index/logs%20with%20spaces*'
+    );
   });
 
   it('should provide refetch function', async () => {
-    mockHttpGet.mockResolvedValue([{ name: 'index-1' }]);
+    mockHttpGet.mockResolvedValue({
+      indices: [{ name: 'index-1' }],
+      aliases: [],
+      data_streams: [],
+    });
 
     const { result } = renderHook(() => useFetchIndices(), {
       wrapper: createWrapper(),

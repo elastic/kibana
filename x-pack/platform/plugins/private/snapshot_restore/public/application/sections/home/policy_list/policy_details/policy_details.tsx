@@ -206,7 +206,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                               data-test-subj="policyActionMenuButton"
                               iconSide="right"
                               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                              iconType="chevronSingleDown"
+                              iconType="arrowDown"
                               fill
                             >
                               <FormattedMessage

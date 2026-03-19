@@ -60,7 +60,7 @@ export class ContextMenu extends PureComponent {
     const followerIndexNames = followerIndices.map((index) => index.name);
     const {
       iconSide = 'right',
-      iconType = 'chevronSingleDown',
+      iconType = 'arrowDown',
       anchorPosition = 'rightUp',
       label = (
         <FormattedMessage
@@ -159,7 +159,7 @@ export class ContextMenu extends PureComponent {
           <FollowerIndexUnfollowProvider onConfirm={this.closePopover}>
             {(unfollowLeaderIndex) => (
               <EuiContextMenuItem
-                icon="chartThreshold"
+                icon="indexFlush"
                 onClick={() => unfollowLeaderIndex(followerIndexNames)}
                 data-test-subj="unfollowButton"
               >

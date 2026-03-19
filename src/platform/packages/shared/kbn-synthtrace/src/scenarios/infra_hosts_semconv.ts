@@ -10,7 +10,6 @@
 import { Serializable } from '@kbn/synthtrace-client';
 import { times } from 'lodash';
 import type { Scenario } from '../cli/scenario';
-import { getNumberOpt } from './helpers/scenario_opts_helpers';
 import { withClient } from '../lib/utils/with_client';
 
 /**
@@ -20,11 +19,8 @@ import { withClient } from '../lib/utils/with_client';
  * OTel hostmetricsreceiver emits metrics with a `state` dimension for CPU/memory,
  * and a `direction` dimension for network I/O. This scenario replicates that structure.
  */
-const scenario: Scenario<import('@kbn/synthtrace-client').Fields> = async ({
-  logger,
-  scenarioOpts,
-}) => {
-  const numHosts = getNumberOpt(scenarioOpts, 'numHosts', 2);
+const scenario: Scenario<any> = async ({ logger, scenarioOpts = { numHosts: 2 } }) => {
+  const { numHosts } = scenarioOpts;
 
   return {
     generate: ({ range, clients: { infraEsClient } }) => {

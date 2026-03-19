@@ -6,7 +6,6 @@
  */
 
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../types';
-import { isUpcomingDeprecation } from '../../screens/detail/overview/deprecation_callout';
 
 export { promoteFeaturedIntegrations } from './promote_featured_integrations';
 
@@ -26,14 +25,12 @@ export const wrapTitleWithDeprecated = ({
   defaultTitle?: string;
 }) => {
   const titleToWrap = title || integrationInfo?.title || packageInfo?.title || defaultTitle;
-  const isDeprecated =
+  const isDeprecated: boolean =
     deprecated ||
-    (!!packageInfo?.deprecated &&
-      !isUpcomingDeprecation(packageInfo.version, packageInfo.deprecated)) ||
+    !!packageInfo?.deprecated ||
     !!packageInfo?.conditions?.deprecated ||
-    (!!integrationInfo?.deprecated &&
-      !isUpcomingDeprecation(packageInfo?.version ?? '', integrationInfo.deprecated));
-
+    !!integrationInfo?.deprecated ||
+    false;
   return isDeprecated &&
     !titleToWrap.match(/ \(deprecated\)$/) &&
     !titleToWrap.match(/ \(Deprecated\)$/)

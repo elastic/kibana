@@ -8,21 +8,10 @@
 import React, { memo, type ReactElement, useCallback } from 'react';
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useAccordionState } from '../hooks/use_accordion_state';
 
 export const HEADER_TEST_ID = 'Header';
 export const CONTENT_TEST_ID = 'Content';
-
-/**
- * Chrome can fail to repaint content inside EuiAccordion's overflow:hidden childWrapper
- * after it transitions open (especially inside flyouts).
- */
-const accordionCss = css`
-  .euiAccordion__childWrapper {
-    overflow: visible;
-  }
-`;
 
 export interface ExpandableSectionProps {
   /**
@@ -87,13 +76,7 @@ export const ExpandableSection = memo(
     }, [toggle, localStorageKey, sectionId]);
 
     return (
-      <EuiAccordion
-        forceState={state}
-        onToggle={onToggle}
-        id={accordionId}
-        buttonContent={header}
-        css={accordionCss}
-      >
+      <EuiAccordion forceState={state} onToggle={onToggle} id={accordionId} buttonContent={header}>
         <EuiSpacer size="m" />
         <EuiFlexGroup
           gutterSize={gutterSize}

@@ -53,7 +53,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
   const layer = config;
   const valueAccessor = getAccessorName('value');
   const basePalette = layer.metric.color && fromColorByValueAPIToLensState(layer.metric.color);
-  const xAxisLabelRotation = getRotationFromOrientation(layer.axis?.x?.labels?.orientation);
+  const xAxisLabelRotation = getRotationFromOrientation(layer.axes?.x?.labels?.orientation);
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -61,20 +61,20 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
     shape: 'heatmap',
     valueAccessor,
     xAccessor: getAccessorName('x'),
-    ...(layer.y ? { yAccessor: getAccessorName('y') } : {}),
+    ...(layer.yAxis ? { yAccessor: getAccessorName('y') } : {}),
     gridConfig: {
       type: HEATMAP_GRID_NAME,
       isCellLabelVisible: layer.cells?.labels?.visible ?? false,
-      isXAxisLabelVisible: layer.axis?.x?.labels?.visible ?? true,
-      isXAxisTitleVisible: layer.axis?.x?.title?.visible ?? false,
-      isYAxisLabelVisible: layer.axis?.y?.labels?.visible ?? true,
-      isYAxisTitleVisible: layer.axis?.y?.title?.visible ?? false,
+      isXAxisLabelVisible: layer.axes?.x?.labels?.visible ?? true,
+      isXAxisTitleVisible: layer.axes?.x?.title?.visible ?? false,
+      isYAxisLabelVisible: layer.axes?.y?.labels?.visible ?? true,
+      isYAxisTitleVisible: layer.axes?.y?.title?.visible ?? false,
       ...stripUndefined<HeatmapGridConfigResult>({
-        xTitle: layer.axis?.x?.title?.value,
-        yTitle: layer.axis?.y?.title?.value,
+        xTitle: layer.axes?.x?.title?.value,
+        yTitle: layer.axes?.y?.title?.value,
         xAxisLabelRotation,
-        xSortPredicate: layer.axis?.x?.sort,
-        ySortPredicate: layer.axis?.y?.sort,
+        xSortPredicate: layer.axes?.x?.sort,
+        ySortPredicate: layer.axes?.y?.sort,
       }),
     },
     legend: {
@@ -105,22 +105,22 @@ function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState
 
   addLayerColumn(defaultLayer, getAccessorName('value'), metricColumns);
 
-  if (layer.x) {
+  if (layer.xAxis) {
     const columnName = getAccessorName('x');
-    const xColumn = fromBucketLensApiToLensState(
-      layer.x as LensApiBucketOperations,
+    const xAxisColumn = fromBucketLensApiToLensState(
+      layer.xAxis as LensApiBucketOperations,
       metricColumns.map((col) => ({ column: col, id: getAccessorName('value') }))
     );
-    addLayerColumn(defaultLayer, columnName, xColumn, true);
+    addLayerColumn(defaultLayer, columnName, xAxisColumn, true);
   }
 
-  if (layer.y) {
+  if (layer.yAxis) {
     const columnName = getAccessorName('y');
-    const yColumn = fromBucketLensApiToLensState(
-      layer.y as LensApiBucketOperations,
+    const yAxisColumn = fromBucketLensApiToLensState(
+      layer.yAxis as LensApiBucketOperations,
       metricColumns.map((col) => ({ column: col, id: getAccessorName('value') }))
     );
-    addLayerColumn(defaultLayer, columnName, yColumn, true);
+    addLayerColumn(defaultLayer, columnName, yAxisColumn, true);
   }
 
   return layers;
@@ -129,8 +129,8 @@ function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState
 function getValueColumns(layer: HeatmapStateESQL) {
   return [
     getValueColumn(getAccessorName('value'), layer.metric.column, 'number'),
-    ...(layer.x ? [getValueColumn(getAccessorName('x'), layer.x.column)] : []),
-    ...(layer.y ? [getValueColumn(getAccessorName('y'), layer.y.column)] : []),
+    ...(layer.xAxis ? [getValueColumn(getAccessorName('x'), layer.xAxis.column)] : []),
+    ...(layer.yAxis ? [getValueColumn(getAccessorName('y'), layer.yAxis.column)] : []),
   ];
 }
 

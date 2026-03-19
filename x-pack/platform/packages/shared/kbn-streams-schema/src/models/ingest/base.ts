@@ -5,17 +5,13 @@
  * 2.0.
  */
 import { z } from '@kbn/zod/v4';
+import type { ModelValidation } from '../validation/model_validation';
+import { modelValidation } from '../validation/model_validation';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
 import type { IngestStreamLifecycle } from './lifecycle';
 import { ingestStreamLifecycleSchema } from './lifecycle';
-import {
-  baseStreamDefinitionSchema,
-  baseStreamGetResponseSchema,
-  baseStreamUpsertDefinitionSchema,
-  baseStreamUpsertRequestSchema,
-} from '../base';
-import type { BaseStream } from '../base';
+import { BaseStream } from '../base';
 import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
 import type { FailureStore } from './failure_store';
@@ -64,23 +60,14 @@ export interface IngestBase {
   failure_store: FailureStore;
 }
 
-export const ingestBaseSchemaFields = {
-  lifecycle: ingestStreamLifecycleSchema,
-  processing: ingestStreamProcessingSchema,
-  settings: ingestStreamSettingsSchema,
-  failure_store: failureStoreSchema,
-};
-
-export const ingestBaseUpsertSchemaFields = {
-  ...ingestBaseSchemaFields,
-  processing: ingestStreamProcessingSchema.merge(
-    z.object({ updated_at: z.undefined().optional() })
-  ),
-};
-
 export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.unknown(),
-  z.object(ingestBaseSchemaFields)
+  z.object({
+    lifecycle: ingestStreamLifecycleSchema,
+    processing: ingestStreamProcessingSchema,
+    settings: ingestStreamSettingsSchema,
+    failure_store: failureStoreSchema,
+  })
 );
 
 type OmitIngestBaseUpsertProps<
@@ -95,19 +82,44 @@ export type IngestBaseUpsertRequest = OmitIngestBaseUpsertProps<IngestBase>;
 
 export const IngestBaseUpsertRequest: Validation<unknown, IngestBaseUpsertRequest> = validation(
   z.unknown(),
-  z.object(ingestBaseUpsertSchemaFields)
+  z.object({
+    lifecycle: ingestStreamLifecycleSchema,
+    processing: ingestStreamProcessingSchema.merge(
+      z.object({
+        updated_at: z.undefined().optional(),
+      })
+    ),
+    settings: ingestStreamSettingsSchema,
+    failure_store: failureStoreSchema,
+  })
 );
 
-export type IngestStreamIndexMode = 'standard' | 'time_series' | 'logsdb' | 'lookup';
+type OmitIngestBaseStreamUpsertProps<
+  T extends {
+    ingest: Omit<IngestBase, 'processing'> & {
+      processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: string };
+    };
+  }
+> = Omit<T, 'ingest'> & {
+  ingest: Omit<IngestBase, 'processing'> & {
+    processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: never };
+  };
+};
 
-const ingestStreamIndexModeSchema: z.Schema<IngestStreamIndexMode> = z.enum([
-  'standard',
-  'time_series',
-  'logsdb',
-  'lookup',
-]);
+interface IngestBaseStreamDefaults {
+  Definition: z.output<IIngestBaseStreamSchema['Definition']>;
+  Source: z.output<IIngestBaseStreamSchema['Definition']>;
+  GetResponse: {
+    stream: z.output<IIngestBaseStreamSchema['Definition']>;
+  } & z.output<IIngestBaseStreamSchema['GetResponse']>;
+  UpsertRequest: {
+    stream: OmitIngestBaseStreamUpsertProps<{} & z.output<IIngestBaseStreamSchema['Definition']>>;
+  };
+}
 
 /* eslint-disable @typescript-eslint/no-namespace */
+export type IngestStreamIndexMode = 'standard' | 'time_series' | 'logsdb' | 'lookup';
+
 export namespace IngestBaseStream {
   export interface Definition extends BaseStream.Definition {
     ingest: IngestBase;
@@ -136,32 +148,28 @@ export namespace IngestBaseStream {
   }
 }
 
-type OmitIngestBaseStreamUpsertProps<
-  T extends {
-    ingest: Omit<IngestBase, 'processing'> & {
-      processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: string };
-    };
-  }
-> = Omit<T, 'ingest'> & {
-  ingest: Omit<IngestBase, 'processing'> & {
-    processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: never };
-  };
+const ingestStreamIndexModeSchema: z.Schema<IngestStreamIndexMode> = z.enum([
+  'standard',
+  'time_series',
+  'logsdb',
+  'lookup',
+]);
+
+const IngestBaseStreamSchema = {
+  Source: z.object({}),
+  Definition: z.object({
+    ingest: IngestBase.right,
+  }),
+  GetResponse: z.object({
+    privileges: ingestStreamPrivilegesSchema,
+    index_mode: z.optional(ingestStreamIndexModeSchema),
+  }),
+  UpsertRequest: z.object({}),
 };
+type IIngestBaseStreamSchema = typeof IngestBaseStreamSchema;
 
-export const ingestBaseStreamDefinitionSchema = baseStreamDefinitionSchema.extend({
-  ingest: IngestBase.right,
-});
-
-export const ingestBaseStreamGetResponseSchema = baseStreamGetResponseSchema.extend({
-  stream: ingestBaseStreamDefinitionSchema,
-  privileges: ingestStreamPrivilegesSchema,
-  index_mode: z.optional(ingestStreamIndexModeSchema),
-});
-
-export const ingestBaseStreamUpsertDefinitionSchema = baseStreamUpsertDefinitionSchema.extend({
-  ingest: IngestBaseUpsertRequest.right,
-});
-
-export const ingestBaseStreamUpsertRequestSchema = baseStreamUpsertRequestSchema.extend({
-  stream: ingestBaseStreamUpsertDefinitionSchema,
-});
+export const IngestBaseStream: ModelValidation<BaseStream.Model, IngestBaseStream.Model> =
+  modelValidation<BaseStream.Model, IIngestBaseStreamSchema, IngestBaseStreamDefaults>(
+    BaseStream,
+    IngestBaseStreamSchema
+  );

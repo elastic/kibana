@@ -57,10 +57,6 @@ export interface PurgeInstancesAction extends BaseAction {
   items?: SLODefinitionResponse[];
 }
 
-export interface HealthScanAction extends BaseAction {
-  type: 'health_scan';
-}
-
 export type Action =
   | CloneAction
   | DeleteAction
@@ -70,5 +66,4 @@ export type Action =
   | PurgeRollupAction
   | BulkDeleteAction
   | BulkPurgeRollupAction
-  | PurgeInstancesAction
-  | HealthScanAction;
+  | PurgeInstancesAction;

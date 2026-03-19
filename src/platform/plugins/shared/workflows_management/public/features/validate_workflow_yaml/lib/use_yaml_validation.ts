@@ -22,7 +22,6 @@ import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
-import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
 import { getPropertyHandler } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
@@ -46,8 +45,6 @@ const SEVERITY_MAP = {
 export interface UseYamlValidationResult {
   error: Error | null;
   isLoading: boolean;
-  /** Custom validation results (source of truth for accordion; avoids interceptor timing issues) */
-  validationResults: YamlValidationResult[];
 }
 
 export function useYamlValidation(
@@ -55,7 +52,6 @@ export function useYamlValidation(
 ): UseYamlValidationResult {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [validationResults, setValidationResults] = useState<YamlValidationResult[]>([]);
   const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const yamlDocument = useSelector(selectYamlDocument);
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
@@ -79,20 +75,19 @@ export function useYamlValidation(
       }
 
       if (!isWorkflowTab) {
+        // clear decorations and markers
         if (decorationsCollection.current) {
           decorationsCollection.current.clear();
         }
         CUSTOM_YAML_VALIDATION_MARKER_OWNERS.forEach((owner) => {
           monaco.editor.setModelMarkers(model, owner, []);
         });
-        setValidationResults([]);
         setIsLoading(false);
         setError(null);
         return;
       }
 
       if (!yamlDocument) {
-        setValidationResults([]);
         setIsLoading(false);
         setError(new Error('Error validating: Yaml document is not loaded'));
         return;
@@ -121,11 +116,10 @@ export function useYamlValidation(
       // (e.g. during editing when the YAML doesn't fully match the workflow schema yet)
       // so that connector-id, step-name, liquid-template, custom-property, and
       // workflow-inputs validation still provide feedback.
-      const results: YamlValidationResult[] = [
+      const validationResults: YamlValidationResult[] = [
         ...validateStepNameUniqueness(yamlDocument),
         ...validateLiquidTemplate(model.getValue(), yamlDocument),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
-        ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
         ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
         ...(workflowLookup && lineCounter
           ? [
@@ -142,7 +136,7 @@ export function useYamlValidation(
       // above still provide feedback.
       if (workflowGraph && workflowDefinition) {
         const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
-        results.push(
+        validationResults.push(
           ...validateTriggerConditions(workflowDefinition, yamlDocument),
           ...validateVariablesInternal(
             variableItems,
@@ -155,15 +149,15 @@ export function useYamlValidation(
         );
       }
 
-      const { markers, decorations } = createMarkersAndDecorations(results);
+      const { markers, decorations } = createMarkersAndDecorations(validationResults);
 
       if (decorationsCollection.current) {
         decorationsCollection.current.clear();
       }
       decorationsCollection.current = editor.createDecorationsCollection(decorations);
 
-      setValidationResults(results);
       setIsLoading(false);
+      // Set markers on the model for the problems panel
       CUSTOM_YAML_VALIDATION_MARKER_OWNERS.forEach((owner) => {
         monaco.editor.setModelMarkers(
           model,
@@ -191,7 +185,6 @@ export function useYamlValidation(
   return {
     error,
     isLoading,
-    validationResults,
   };
 }
 
@@ -301,23 +294,6 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
       decorations.push({
         range: createRange(validationResult),
         options: createSelectionDecoration(validationResult),
-      });
-    } else if (validationResult.owner === 'workflow-output-validation') {
-      markers.push({
-        ...marker,
-        severity: SEVERITY_MAP[validationResult.severity],
-        message: validationResult.message,
-        source: 'workflow-output-validation',
-      });
-      decorations.push({
-        range: createRange(validationResult),
-        options: {
-          inlineClassName: `workflow-output-validation-${validationResult.severity}`,
-          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          hoverMessage: validationResult.hoverMessage
-            ? createMarkdownContent(validationResult.hoverMessage)
-            : null,
-        },
       });
     } else {
       if (validationResult.severity !== null) {

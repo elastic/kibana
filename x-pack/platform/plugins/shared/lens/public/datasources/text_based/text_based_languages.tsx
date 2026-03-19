@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
-
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -307,7 +305,7 @@ export function getTextBasedDatasource({
     return [];
   };
   const TextBasedDatasource: Datasource<TextBasedPrivateState, TextBasedPersistedState> = {
-    id: LENS_DATASOURCE_ID.TEXT_BASED,
+    id: 'textBased',
 
     checkIntegrity: () => {
       return [];
@@ -526,7 +524,7 @@ export function getTextBasedDatasource({
     onDrop,
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
       return {
-        datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
+        datasourceId: 'textBased',
 
         getTableSpec: () => {
           const layerColumns = state.layers[layerId]?.columns ?? [];

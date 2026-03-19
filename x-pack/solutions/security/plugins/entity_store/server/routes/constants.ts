@@ -6,7 +6,7 @@
  */
 
 import type { AuthzEnabled } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
@@ -22,10 +22,10 @@ export const API_VERSIONS = {
   },
 };
 
-export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
+export type LogExtractionBodyParams = z.infer<typeof LogExtractionBodyParams>;
 // timeout: intentionally excluded from LogExtractionBodyParams
 // TODO: add timeout once we have a way to set it as a task override param
-export const LogExtractionInstallParams = LogExtractionConfig.pick({
+export const LogExtractionBodyParams = LogExtractionConfig.pick({
   filter: true,
   fieldHistoryLength: true,
   additionalIndexPatterns: true,
@@ -34,29 +34,6 @@ export const LogExtractionInstallParams = LogExtractionConfig.pick({
   delay: true,
   docsLimit: true,
 }).partial();
-
-export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
-
-export const LogExtractionUpdateParams = z.object({
-  filter: z.string().optional(),
-  fieldHistoryLength: z.number().int().optional(),
-  additionalIndexPatterns: z.array(z.string()).optional(),
-  lookbackPeriod: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  frequency: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  delay: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  docsLimit: z.number().int().positive().optional(),
-});
-
-export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;
 
 export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams>;
 export const HistorySnapshotBodyParams = HistorySnapshotState.pick({

@@ -67,8 +67,9 @@ export async function enableStreams({
     }
 
     throw new Error(`Failed to enable streams: ${response.status} ${responseText}`);
-  } catch (error: unknown) {
-    if ((error as NodeJS.ErrnoException).code === 'ECONNREFUSED') {
+  } catch (error: any) {
+    // Handle connection errors (Kibana not running)
+    if (error.code === 'ECONNREFUSED') {
       log.warning(
         `Could not connect to Kibana at ${kibanaUrl}. Make sure Kibana is running before starting the OTel Demo.`
       );

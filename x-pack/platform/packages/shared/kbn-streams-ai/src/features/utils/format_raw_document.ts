@@ -14,10 +14,10 @@ export function formatRawDocument({
   maxArrayItems = 3,
   shouldNotTruncate = (_key: string) => false,
 }: {
-  hit: SearchHit<Record<string, unknown>>;
+  hit: SearchHit<Record<string, any>>;
   maxArrayItems?: number;
   shouldNotTruncate?: (key: string) => boolean;
-}): { _id?: string; fields: Record<string, unknown> } | undefined {
+}): { _id?: string; fields: Record<string, any> } | undefined {
   const fields = {
     ...(hit.fields ?? {}),
     ...getFlattenedObject(hit._source ?? {}),

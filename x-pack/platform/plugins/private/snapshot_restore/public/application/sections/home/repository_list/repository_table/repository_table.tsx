@@ -255,7 +255,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           linkToAddRepository(name)
         )}
         fill
-        iconType="plusCircle"
+        iconType="plusInCircle"
         data-test-subj="registerRepositoryButton"
       >
         <FormattedMessage

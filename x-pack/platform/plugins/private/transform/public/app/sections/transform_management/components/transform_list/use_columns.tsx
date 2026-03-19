@@ -126,9 +126,7 @@ export const useColumns = (
                   values: { transformId: item.config.id },
                 })
           }
-          iconType={
-            expandedRowItemIds.includes(item.config.id) ? 'chevronSingleDown' : 'chevronSingleRight'
-          }
+          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowDown' : 'arrowRight'}
           data-test-subj="transformListRowDetailsToggle"
         />
       ),
@@ -204,7 +202,7 @@ export const useColumns = (
           <>
             <EuiIconTip
               content={`${TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG} ${actionMsg}`}
-              type="warning"
+              type="alert"
               size="s"
               color="warning"
             />

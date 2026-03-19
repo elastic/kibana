@@ -17,11 +17,10 @@ import type {
   UnifiedHistogramFetchParams,
 } from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { ParsedMetricItem, MetricUnit, Dimension } from '../../../types';
+import type { MetricField, Dimension } from '../../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
-import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('./hooks');
@@ -47,24 +46,23 @@ const useMetricsExperienceStateMock =
 
 const usePaginationMock = hooks.usePagination as jest.MockedFunction<typeof hooks.usePagination>;
 
-const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
+const dimensions: Dimension[] = [
+  { name: 'foo', type: ES_FIELD_TYPES.KEYWORD },
+  { name: 'qux', type: ES_FIELD_TYPES.KEYWORD },
+];
 
-const metricItems: ParsedMetricItem[] = [
+const allFields: MetricField[] = [
   {
-    metricName: 'field1',
-    dataStream: 'metrics-*',
-    units: ['ms'],
-    metricTypes: ['counter'],
-    fieldTypes: [ES_FIELD_TYPES.LONG],
-    dimensionFields: [dimensions[0]],
+    name: 'field1',
+    dimensions: [dimensions[0]],
+    index: 'metrics-*',
+    type: ES_FIELD_TYPES.LONG,
   },
   {
-    metricName: 'field2',
-    dataStream: 'metrics-*',
-    units: ['ms'],
-    metricTypes: ['counter'],
-    fieldTypes: [ES_FIELD_TYPES.LONG],
-    dimensionFields: [dimensions[1]],
+    name: 'field2',
+    dimensions: [dimensions[1]],
+    index: 'metrics-*',
+    type: ES_FIELD_TYPES.LONG,
   },
 ];
 
@@ -88,7 +86,7 @@ describe('MetricsExperienceGridContent', () => {
     fetch$ = getFetch$Mock(fetchParams);
 
     defaultProps = {
-      metricItems,
+      fields: allFields,
       services: {} as any,
       discoverFetch$: fetch$,
       fetchParams,
@@ -113,7 +111,7 @@ describe('MetricsExperienceGridContent', () => {
     });
 
     usePaginationMock.mockReturnValue({
-      currentPageItems: [metricItems[0]],
+      currentPageItems: [allFields[0]],
       totalPages: 1,
       totalCount: 1,
     });
@@ -139,12 +137,9 @@ describe('MetricsExperienceGridContent', () => {
       totalCount: 0,
     });
 
-    const { getByTestId } = render(
-      <MetricsExperienceGridContent {...defaultProps} metricItems={[]} />,
-      {
-        wrapper: IntlProvider,
-      }
-    );
+    const { getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} fields={[]} />, {
+      wrapper: IntlProvider,
+    });
 
     expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
   });
@@ -152,12 +147,10 @@ describe('MetricsExperienceGridContent', () => {
   it('filters fields by search term and respects page size', () => {
     // 20 fields, 10 with "cpu" in the name
     const allFieldsSomeWithCpu = Array.from({ length: 20 }, (_, i) => ({
-      metricName: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
-      dimensionFields: [dimensions[0]],
-      dataStream: 'metrics-*',
-      units: ['ms'] as MetricUnit[],
-      metricTypes: ['counter'] as MappingTimeSeriesMetricType[],
-      fieldTypes: [ES_FIELD_TYPES.LONG] as ES_FIELD_TYPES[],
+      name: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
+      dimensions: [dimensions[0]],
+      index: 'metrics-*',
+      type: ES_FIELD_TYPES.LONG,
     }));
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -171,16 +164,16 @@ describe('MetricsExperienceGridContent', () => {
       onToggleFullscreen: jest.fn(),
     });
 
-    const cpuMetricItems = allFieldsSomeWithCpu.filter((f) => f.metricName.includes('cpu'));
+    const cpuFields = allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu'));
 
     usePaginationMock.mockReturnValue({
-      currentPageItems: cpuMetricItems.slice(0, 5),
+      currentPageItems: cpuFields.slice(0, 5),
       totalPages: 2,
-      totalCount: cpuMetricItems.length,
+      totalCount: cpuFields.length,
     });
 
     const { getByText } = render(
-      <MetricsExperienceGridContent {...defaultProps} metricItems={allFieldsSomeWithCpu} />,
+      <MetricsExperienceGridContent {...defaultProps} fields={allFieldsSomeWithCpu} />,
       {
         wrapper: IntlProvider,
       }

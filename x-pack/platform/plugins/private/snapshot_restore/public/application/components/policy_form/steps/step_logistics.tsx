@@ -229,7 +229,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             <EuiButton
               {...reactRouterNavigate(history, linkToAddRepository(currentUrl))}
               color="danger"
-              iconType="plusCircle"
+              iconType="plusInCircle"
               data-test-subj="addRepositoryButton"
             >
               <FormattedMessage

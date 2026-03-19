@@ -15,7 +15,6 @@ import {
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
-  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import {
   CONNECTOR_ID,
@@ -53,7 +52,6 @@ export function getConnectorType(): ConnectorType<
       CasesConnectorFeatureId,
       SecurityConnectorFeatureId,
       WorkflowsConnectorFeatureId,
-      AgentBuilderConnectorFeatureId,
     ],
     validate: {
       config: {

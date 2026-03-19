@@ -11,15 +11,14 @@ import type { InfraDocument } from '@kbn/synthtrace-client';
 import { infra } from '@kbn/synthtrace-client';
 import { times } from 'lodash';
 import type { Scenario } from '../cli/scenario';
-import { getNumberOpt } from './helpers/scenario_opts_helpers';
 import { withClient } from '../lib/utils/with_client';
 
 /**
  * Generates ECS-compliant infrastructure host metrics.
  * This scenario satisfies the 'ecs' schema requirement in getPreferredSchema.
  */
-const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts }) => {
-  const numHosts = getNumberOpt(scenarioOpts, 'numHosts', 2);
+const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts = { numHosts: 2 } }) => {
+  const { numHosts } = scenarioOpts;
 
   return {
     generate: ({ range, clients: { infraEsClient } }) => {

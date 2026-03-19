@@ -59,7 +59,7 @@ export const EisKnowledgeBaseCallout = ({
               size="s"
               href={docLinks?.links?.enterpriseSearch?.elasticInferenceServicePricing}
               target="_blank"
-              iconType="external"
+              iconType="popout"
               iconSide="right"
             >
               {i18n.translate('xpack.observabilityAiAssistant.eisKnowledgeBase.learnMoreButton', {

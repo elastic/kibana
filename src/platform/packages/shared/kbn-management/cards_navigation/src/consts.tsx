@@ -32,7 +32,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     description: i18n.translate('management.landing.withCardNavigation.transformDescription', {
       defaultMessage: 'Pivot your data or copy the latest documents into an entity-centric index.',
     }),
-    icon: 'chartThreshold',
+    icon: 'indexFlush',
   },
   [AppIds.INGEST_PIPELINES]: {
     category: appCategories.DATA,
@@ -57,7 +57,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
       defaultMessage:
         'Identify, analyze, and process your data using advanced analysis techniques.',
     }),
-    icon: 'mapping',
+    icon: 'indexMapping',
   },
   [AppIds.PIPELINES]: {
     category: appCategories.DATA,
@@ -65,7 +65,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
       defaultMessage:
         'Manage and view the Logstash event processing pipeline from inputs to outputs.',
     }),
-    icon: 'queue',
+    icon: 'logstashQueue',
   },
   [AppIds.DATA_QUALITY]: {
     category: appCategories.DATA,
@@ -99,14 +99,14 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     description: i18n.translate('management.landing.withCardNavigation.rulesDescription', {
       defaultMessage: 'Define when to generate alerts and notifications.',
     }),
-    icon: 'listCheck',
+    icon: 'editorChecklist',
   },
   [AppIds.CONNECTORS]: {
     category: appCategories.ALERTS,
     description: i18n.translate('management.landing.withCardNavigation.connectorsDescription', {
       defaultMessage: 'Configure connections to third party systems for use in cases and rules.',
     }),
-    icon: 'display',
+    icon: 'desktop',
   },
   [AppIds.MAINTENANCE_WINDOWS]: {
     category: appCategories.ALERTS,
@@ -146,7 +146,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     description: i18n.translate('management.landing.withCardNavigation.reportingDescription', {
       defaultMessage: 'Manage generated CSV reports.',
     }),
-    icon: 'chartPie',
+    icon: 'visPie',
   },
   [AppIds.TAGS]: {
     category: appCategories.CONTENT,

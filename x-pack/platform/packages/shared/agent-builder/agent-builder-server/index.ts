@@ -35,7 +35,6 @@ export type {
   ToolPromptManager,
   ToolStateManager,
 } from './runner';
-export { getAgentFromRunContext } from './runner';
 export type {
   ToolHandlerFn,
   ToolHandlerReturn,

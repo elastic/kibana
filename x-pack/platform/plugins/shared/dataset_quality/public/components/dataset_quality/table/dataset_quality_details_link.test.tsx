@@ -30,7 +30,7 @@ describe('DatasetQualityDetailsLink', () => {
         }
       }),
     },
-  } as unknown as BrowserUrlService;
+  } as any as BrowserUrlService;
 
   const dataStream = {
     title: 'My data stream',

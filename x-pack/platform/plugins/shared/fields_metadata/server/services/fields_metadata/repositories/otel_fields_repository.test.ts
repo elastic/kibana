@@ -71,7 +71,7 @@ describe('OtelFieldsRepository', () => {
 
       expect(() => {
         OtelFieldsRepository.create({
-          otelFields: invalidOtelFields as unknown as OtelFieldsRepositoryDeps['otelFields'],
+          otelFields: invalidOtelFields as any,
         });
       }).toThrow(/Invalid field data/);
     });
@@ -79,7 +79,7 @@ describe('OtelFieldsRepository', () => {
     it('should handle empty otel fields object', () => {
       const emptyOtelFields = {};
       const repository = OtelFieldsRepository.create({
-        otelFields: emptyOtelFields as TOtelFields,
+        otelFields: emptyOtelFields as any,
       });
 
       expect(repository).toBeInstanceOf(OtelFieldsRepository);
@@ -135,7 +135,7 @@ describe('OtelFieldsRepository', () => {
       } as const;
 
       const repository = OtelFieldsRepository.create({
-        otelFields: specialOtelFields as unknown as OtelFieldsRepositoryDeps['otelFields'],
+        otelFields: specialOtelFields as any,
       });
 
       const field = repository.getByName('field-with.special_chars');

@@ -67,7 +67,6 @@ dependsOn:
   - '@kbn/cloud-security-posture-common'
   - '@kbn/detections-response-ftr-services'
   - '@kbn/connector-schemas'
-  - '@kbn/spaces-utils'
 tags:
   - functional-tests
   - package

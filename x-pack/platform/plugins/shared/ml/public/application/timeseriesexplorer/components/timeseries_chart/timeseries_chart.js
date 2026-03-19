@@ -2010,6 +2010,7 @@ class TimeseriesChartIntl extends Component {
     return (
       <>
         <RuleEditorFlyout
+          selectedJob={this.props.selectedJob}
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
         />

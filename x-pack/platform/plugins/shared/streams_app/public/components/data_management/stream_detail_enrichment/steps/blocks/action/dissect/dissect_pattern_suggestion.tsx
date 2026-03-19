@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { UseFormSetValue, FieldValues } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
-import type { DissectProcessor } from '@kbn/streamlang';
+import type { DissectProcessorResult } from '@kbn/dissect-heuristics';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useAbortController } from '@kbn/react-hooks';
 import { isNoSuggestionsError } from '../utils/no_suggestions_error';
@@ -144,10 +144,11 @@ export const DissectPatternAISuggestions = ({
             setValue('pattern', suggestionsState.value.dissectProcessor.pattern, {
               shouldValidate: true,
             });
-            if (suggestionsState.value.dissectProcessor.append_separator) {
+            // Set append_separator if the processor uses it
+            if (suggestionsState.value.dissectProcessor.processor.dissect.append_separator) {
               setValue(
                 'append_separator',
-                suggestionsState.value.dissectProcessor.append_separator,
+                suggestionsState.value.dissectProcessor.processor.dissect.append_separator,
                 { shouldValidate: true }
               );
             }
@@ -200,7 +201,7 @@ export const DissectPatternAISuggestions = ({
 };
 
 export interface DissectPatternSuggestionProps {
-  dissectProcessor: DissectProcessor;
+  dissectProcessor: DissectProcessorResult;
   simulationResult: APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
   onAccept(): void;
   onDismiss(): void;

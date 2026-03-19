@@ -52,7 +52,4 @@ export const queryKeys = {
     all: ['plugins', 'list'] as const,
     byId: (pluginId?: string) => ['plugins', pluginId],
   },
-  connectors: {
-    all: ['connectors'] as const,
-  },
 };

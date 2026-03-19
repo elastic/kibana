@@ -207,7 +207,7 @@ export const RelationsParameter = () => {
                         <EuiButtonIcon
                           data-test-subj="removeRelationshipButton"
                           aria-label={label}
-                          iconType="minusCircle"
+                          iconType="minusInCircle"
                           color="danger"
                           onClick={() => removeItem(id)}
                         />
@@ -249,7 +249,7 @@ export const RelationsParameter = () => {
               {/* Add relation button */}
               <EuiButtonEmpty
                 onClick={addItem}
-                iconType="plusCircle"
+                iconType="plusInCircleFilled"
                 data-test-subj="addRelationButton"
               >
                 {i18n.translate(

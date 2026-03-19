@@ -9,7 +9,6 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -46,14 +45,14 @@ apiTest.describe(
       const ingestResult = await testBed.getDocsOrdered('ingest-includes-numeric');
 
       // Ingest pipeline results
-      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
+      expect(ingestResult[0].attributes).toStrictEqual(
         expect.objectContaining({ status_codes: [200, 201, 204], has_status_200: 'success' })
       );
-      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.has_status_200).toBeUndefined();
-      expect(asDoc(ingestResult[2])?.attributes).toStrictEqual(
+      expect(ingestResult[1].attributes?.has_status_200).toBeUndefined();
+      expect(ingestResult[2].attributes).toStrictEqual(
         expect.objectContaining({ status_codes: [200], has_status_200: 'success' })
       );
-      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.has_status_200).toBeUndefined();
+      expect(ingestResult[3].attributes?.has_status_200).toBeUndefined();
     });
 
     apiTest('special chars: should handle backslashes in eq condition', async ({ testBed }) => {
@@ -82,9 +81,9 @@ apiTest.describe(
       await testBed.ingest('ingest-backslash-eq', docs, processors);
       const result = await testBed.getDocsOrdered('ingest-backslash-eq');
 
-      expect(asDoc(result[0])?.matched).toBe('yes');
-      expect(asDoc(result[1])?.matched).toBeUndefined();
-      expect(asDoc(result[2])?.matched).toBeUndefined();
+      expect(result[0].matched).toBe('yes');
+      expect(result[1].matched).toBeUndefined();
+      expect(result[2].matched).toBeUndefined();
     });
 
     apiTest('special chars: should handle double quotes in eq condition', async ({ testBed }) => {
@@ -113,9 +112,9 @@ apiTest.describe(
       await testBed.ingest('ingest-quotes-eq', docs, processors);
       const result = await testBed.getDocsOrdered('ingest-quotes-eq');
 
-      expect(asDoc(result[0])?.matched).toBe('yes');
-      expect(asDoc(result[1])?.matched).toBeUndefined();
-      expect(asDoc(result[2])?.matched).toBeUndefined();
+      expect(result[0].matched).toBe('yes');
+      expect(result[1].matched).toBeUndefined();
+      expect(result[2].matched).toBeUndefined();
     });
 
     apiTest(
@@ -146,9 +145,9 @@ apiTest.describe(
         await testBed.ingest('ingest-mixed-special-eq', docs, processors);
         const result = await testBed.getDocsOrdered('ingest-mixed-special-eq');
 
-        expect(asDoc(result[0])?.matched).toBe('yes');
-        expect(asDoc(result[1])?.matched).toBeUndefined();
-        expect(asDoc(result[2])?.matched).toBeUndefined();
+        expect(result[0].matched).toBe('yes');
+        expect(result[1].matched).toBeUndefined();
+        expect(result[2].matched).toBeUndefined();
       }
     );
 
@@ -180,9 +179,9 @@ apiTest.describe(
         await testBed.ingest('ingest-backslash-contains', docs, processors);
         const result = await testBed.getDocsOrdered('ingest-backslash-contains');
 
-        expect(asDoc(result[0])?.matched).toBe('yes');
-        expect(asDoc(result[1])?.matched).toBe('yes');
-        expect(asDoc(result[2])?.matched).toBeUndefined();
+        expect(result[0].matched).toBe('yes');
+        expect(result[1].matched).toBe('yes');
+        expect(result[2].matched).toBeUndefined();
       }
     );
 
@@ -214,9 +213,9 @@ apiTest.describe(
         await testBed.ingest('ingest-backslash-startswith', docs, processors);
         const result = await testBed.getDocsOrdered('ingest-backslash-startswith');
 
-        expect(asDoc(result[0])?.matched).toBe('yes');
-        expect(asDoc(result[1])?.matched).toBe('yes');
-        expect(asDoc(result[2])?.matched).toBeUndefined();
+        expect(result[0].matched).toBe('yes');
+        expect(result[1].matched).toBe('yes');
+        expect(result[2].matched).toBeUndefined();
       }
     );
 
@@ -248,9 +247,9 @@ apiTest.describe(
         await testBed.ingest('ingest-backslash-endswith', docs, processors);
         const result = await testBed.getDocsOrdered('ingest-backslash-endswith');
 
-        expect(asDoc(result[0])?.matched).toBe('yes');
-        expect(asDoc(result[1])?.matched).toBe('yes');
-        expect(asDoc(result[2])?.matched).toBeUndefined();
+        expect(result[0].matched).toBe('yes');
+        expect(result[1].matched).toBe('yes');
+        expect(result[2].matched).toBeUndefined();
       }
     );
   }

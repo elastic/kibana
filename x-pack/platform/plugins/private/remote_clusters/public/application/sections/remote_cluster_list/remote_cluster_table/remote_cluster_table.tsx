@@ -409,7 +409,7 @@ export class RemoteClusterTable extends Component<Props, State> {
         <EuiButton
           {...reactRouterNavigate(history, '/add')}
           fill
-          iconType="plusCircle"
+          iconType="plusInCircle"
           data-test-subj="remoteClusterCreateButton"
         >
           <FormattedMessage

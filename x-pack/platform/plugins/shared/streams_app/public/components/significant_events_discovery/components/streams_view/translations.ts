@@ -25,10 +25,10 @@ export const QUERIES_COLUMN_HEADER = i18n.translate(
   }
 );
 
-export const KNOWLEDGE_INDICATORS_COLUMN_HEADER = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.knowledgeIndicatorsColumnName',
+export const FEATURES_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.featuresColumnName',
   {
-    defaultMessage: 'Knowledge Indicators',
+    defaultMessage: 'Features',
   }
 );
 

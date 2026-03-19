@@ -12,8 +12,6 @@ import { z } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import type { SlackAssistantSearchContextResponse, SlackErrorFields } from './types';
-import searchMessagesWorkflow from './workflows/search_messages.yaml';
-import sendMessageWorkflow from './workflows/send_message.yaml';
 
 const SLACK_API_BASE = 'https://slack.com/api';
 const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth support is unblocked.
@@ -476,8 +474,7 @@ export const Slack: ConnectorSpec = {
       defaultMessage: 'List public channels and send messages to Slack channels',
     }),
     minimumLicense: 'enterprise',
-    isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows'],
   },
 
   auth: {
@@ -818,6 +815,4 @@ export const Slack: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [searchMessagesWorkflow, sendMessageWorkflow],
 };

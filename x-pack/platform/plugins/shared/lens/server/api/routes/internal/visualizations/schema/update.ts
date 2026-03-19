@@ -40,4 +40,16 @@ export const lensUpdateRequestBodySchema = schema.oneOf([
   lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
 ]);
 
-export const lensUpdateResponseBodySchema = lensResponseItemSchema;
+export const lensUpdateResponseBodySchema = schema.object(
+  {
+    id: lensResponseItemSchema.getPropSchemas().id,
+    data: lensResponseItemSchema.getPropSchemas().data,
+    meta: schema.object(
+      {
+        ...lensResponseItemSchema.getPropSchemas().meta.getPropSchemas(),
+      },
+      { unknowns: 'forbid' }
+    ),
+  },
+  { unknowns: 'forbid' }
+);

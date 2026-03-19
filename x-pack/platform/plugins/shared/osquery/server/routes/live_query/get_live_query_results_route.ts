@@ -11,7 +11,6 @@ import { lastValueFrom, zip } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
-import { isFilters } from '@kbn/es-query';
 import type {
   GetLiveQueryResultsRequestQuerySchema,
   GetLiveQueryResultsRequestParamsSchema,
@@ -131,26 +130,12 @@ export const getLiveQueryResultsRoute = (
             );
           }
 
-          if (request.query.esFilters) {
-            let parsed: unknown;
-            try {
-              parsed = JSON.parse(request.query.esFilters);
-            } catch {
-              return response.badRequest({ body: { message: 'esFilters contains invalid JSON' } });
-            }
-
-            if (!isFilters(parsed)) {
-              return response.badRequest({
-                body: { message: 'esFilters must be a valid filters array' },
-              });
-            }
-          }
-
           const search = await context.search;
           const { actionDetails } = await lastValueFrom(
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
+                kuery: request.query.kuery,
                 factoryQueryType: OsqueryQueries.actionDetails,
                 spaceId,
               },
@@ -186,7 +171,6 @@ export const getLiveQueryResultsRoute = (
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.results,
                 kuery: request.query.kuery,
-                esFilters: request.query.esFilters,
                 startDate: request.query.startDate,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,

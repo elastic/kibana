@@ -28,12 +28,12 @@ jest.mock('../../chart', () => ({
 jest.mock('../../../common/utils', () => ({
   ...jest.requireActual('../../../common/utils'),
   createESQLQuery: jest.fn((params) => {
-    const { metricItem, splitAccessors = [] } = params;
+    const { metric, splitAccessors = [] } = params;
     const splitAccessorsStr =
       splitAccessors.length > 0
         ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
         : '';
-    return `FROM ${metricItem.dataStream} | STATS AVG(${metricItem.metricName}) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)${splitAccessorsStr}`;
+    return `FROM ${metric.index} | STATS AVG(${metric.name}) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)${splitAccessorsStr}`;
   }),
 }));
 
@@ -58,22 +58,18 @@ describe('MetricsGrid', () => {
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   } as unknown as UnifiedHistogramServices;
 
-  const metricItems: MetricsGridProps['metricItems'] = [
+  const fields: MetricsGridProps['fields'] = [
     {
-      metricName: 'system.cpu.utilization',
-      dataStream: 'metrics-*',
-      units: ['ms'],
-      metricTypes: ['counter'],
-      fieldTypes: [ES_FIELD_TYPES.LONG],
-      dimensionFields: [{ name: 'host.name' }],
+      name: 'system.cpu.utilization',
+      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
+      index: 'metrics-*',
+      type: ES_FIELD_TYPES.LONG,
     },
     {
-      metricName: 'system.memory.utilization',
-      dataStream: 'metrics-*',
-      units: ['ms'],
-      metricTypes: ['counter'],
-      fieldTypes: [ES_FIELD_TYPES.LONG],
-      dimensionFields: [{ name: 'host.name' }],
+      name: 'system.memory.utilization',
+      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
+      index: 'metrics-*',
+      type: ES_FIELD_TYPES.LONG,
     },
   ];
 
@@ -81,7 +77,7 @@ describe('MetricsGrid', () => {
     columns: 2,
     dimensions: [],
     discoverFetch$: undefined as unknown as UnifiedHistogramFetch$,
-    metricItems,
+    fields,
     fetchParams,
     services,
     actions,
@@ -104,7 +100,7 @@ describe('MetricsGrid', () => {
     const { getAllByTestId } = renderMetricsGrid({ columns: 3 });
 
     const charts = getAllByTestId('chart');
-    expect(charts).toHaveLength(metricItems.length);
+    expect(charts).toHaveLength(fields.length);
   });
 
   it('passes the correct size prop', () => {
@@ -112,7 +108,7 @@ describe('MetricsGrid', () => {
       <MetricsGrid
         {...defaultProps}
         columns={3}
-        dimensions={[{ name: 'host.name' }]}
+        dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
         discoverFetch$={discoverFetch$}
       />
     );
@@ -123,7 +119,7 @@ describe('MetricsGrid', () => {
       <MetricsGrid
         {...defaultProps}
         columns={4}
-        dimensions={[{ name: 'host.name' }]}
+        dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
         discoverFetch$={discoverFetch$}
       />
     );
@@ -143,15 +139,15 @@ describe('MetricsGrid', () => {
       },
     ];
 
-    const getUserMessages = jest.fn((metric: (typeof metricItems)[0]) =>
-      metric.metricName === 'system.cpu.utilization' ? messagesForCpu : undefined
+    const getUserMessages = jest.fn((metric: (typeof fields)[0]) =>
+      metric.name === 'system.cpu.utilization' ? messagesForCpu : undefined
     );
 
     renderMetricsGrid({ getUserMessages });
 
-    expect(getUserMessages).toHaveBeenCalledTimes(metricItems.length);
-    expect(getUserMessages).toHaveBeenNthCalledWith(1, metricItems[0]);
-    expect(getUserMessages).toHaveBeenNthCalledWith(2, metricItems[1]);
+    expect(getUserMessages).toHaveBeenCalledTimes(fields.length);
+    expect(getUserMessages).toHaveBeenNthCalledWith(1, fields[0]);
+    expect(getUserMessages).toHaveBeenNthCalledWith(2, fields[1]);
 
     expect(Chart).toHaveBeenNthCalledWith(
       1,
@@ -167,16 +163,16 @@ describe('MetricsGrid', () => {
 
   it('handles multiple dimensions correctly in ESQL query and chart layers', () => {
     const multipleDimensions = [
-      { name: 'host.name' },
-      { name: 'service.name' },
-      { name: 'container.id' },
+      { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+      { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
+      { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
     ];
 
     renderMetricsGrid({ dimensions: multipleDimensions });
 
     expect(createESQLQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        metricItem: expect.any(Object),
+        metric: expect.any(Object),
         splitAccessors: ['host.name', 'service.name', 'container.id'],
       })
     );
@@ -271,27 +267,23 @@ describe('MetricsGrid', () => {
 
     it('should handle vertical arrow navigation in multi-row grid', async () => {
       const user = userEvent.setup({ delay: null });
-      const multipleFields: MetricsGridProps['metricItems'] = [
-        ...metricItems,
+      const multipleFields: MetricsGridProps['fields'] = [
+        ...fields,
         {
-          metricName: 'system.disk.utilization',
-          dataStream: 'metrics-*',
-          units: ['ms'],
-          metricTypes: ['counter'],
-          fieldTypes: [ES_FIELD_TYPES.LONG],
-          dimensionFields: [{ name: 'host.name' }],
+          name: 'system.disk.utilization',
+          dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
+          index: 'metrics-*',
+          type: ES_FIELD_TYPES.LONG,
         },
         {
-          metricName: 'system.network.utilization',
-          dataStream: 'metrics-*',
-          units: ['ms'],
-          metricTypes: ['counter'],
-          fieldTypes: [ES_FIELD_TYPES.LONG],
-          dimensionFields: [{ name: 'host.name' }],
+          name: 'system.network.utilization',
+          dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
+          index: 'metrics-*',
+          type: ES_FIELD_TYPES.LONG,
         },
       ];
 
-      renderMetricsGrid({ metricItems: multipleFields });
+      renderMetricsGrid({ fields: multipleFields });
 
       const gridElement = screen.getByRole('grid');
       const gridCells = screen.getAllByRole('gridcell');

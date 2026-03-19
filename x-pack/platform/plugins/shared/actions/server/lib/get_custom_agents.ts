@@ -8,7 +8,7 @@
 import type { Agent as HttpAgent } from 'http';
 import type { Agent as HttpsAgent } from 'https';
 import type { Logger } from '@kbn/core/server';
-import type { ProxySettings, SSLSettings } from '@kbn/actions-utils';
+import type { SSLSettings } from '@kbn/actions-utils';
 import { getCustomAgents as getCustomAgentsHelper } from '@kbn/actions-utils';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 
@@ -24,11 +24,10 @@ export function getCustomAgents(
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
   url: string,
-  sslOverrides?: SSLSettings,
-  proxySettingsOverrides?: ProxySettings
+  sslOverrides?: SSLSettings
 ): CustomAgents {
   const generalSSLSettings = configurationUtilities.getSSLSettings();
-  const proxySettings = proxySettingsOverrides ?? configurationUtilities.getProxySettings();
+  const proxySettings = configurationUtilities.getProxySettings();
   const customHostSettings = configurationUtilities.getCustomHostSettings(url);
 
   return getCustomAgentsHelper({

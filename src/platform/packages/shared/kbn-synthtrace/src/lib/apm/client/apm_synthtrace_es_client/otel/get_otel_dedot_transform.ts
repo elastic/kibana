@@ -11,30 +11,27 @@ import { Transform } from 'stream';
 import type { ApmOtelFields } from '@kbn/synthtrace-client';
 import { dedot } from '@kbn/synthtrace-client';
 
-function extractAttributes(
-  obj: Record<string, unknown>,
-  attribute: string
-): Record<string, unknown> {
+function extractAttributes(obj: Record<string, any>, attribute: string) {
   return Object.entries(obj)
     .filter(([key]) => key.startsWith(attribute))
-    .reduce<Record<string, unknown>>((acc, [key, value]) => {
+    .reduce((acc, [key, value]) => {
       acc[key.replace(`${attribute}`, '')] = value;
       return acc;
-    }, {});
+    }, {} as Record<string, any>);
 }
 
-function removeAttributes(obj: Record<string, unknown>, attributes: string[]): ApmOtelFields {
+function removeAttributes(obj: Record<string, any>, attributes: string[]): ApmOtelFields {
   return Object.fromEntries(
     Object.entries(obj).filter(([key]) =>
       attributes.every((attribute) => !key.startsWith(attribute))
     )
-  ) as ApmOtelFields;
+  );
 }
 export function getOtelDedotTransform(keepFlattenedFields: boolean = false) {
   return new Transform({
     objectMode: true,
     transform(document: ApmOtelFields, encoding, callback) {
-      let target: Record<string, unknown>;
+      let target: Record<string, any>;
 
       if (keepFlattenedFields) {
         target =
@@ -51,31 +48,15 @@ export function getOtelDedotTransform(keepFlattenedFields: boolean = false) {
 
         // these remain flattened
         target.attributes = attributes;
-        const resource =
-          typeof target.resource === 'object' && target.resource !== null
-            ? (target.resource as Record<string, unknown>)
-            : {};
-        resource.attributes = resourceAttributes;
-        target.resource = resource;
-
-        const scope =
-          typeof target.scope === 'object' && target.scope !== null
-            ? (target.scope as Record<string, unknown>)
-            : {};
-        scope.attributes = scopeAttributes;
-        target.scope = scope;
+        target.resource = target.resource || {};
+        target.resource.attributes = resourceAttributes;
+        target.scope = target.scope || {};
+        target.scope.attributes = scopeAttributes;
       }
 
       delete target.meta;
-      const ts = target['@timestamp'];
-      if (
-        ts !== undefined &&
-        (typeof ts === 'string' || typeof ts === 'number' || ts instanceof Date)
-      ) {
-        const parsedTs = new Date(ts);
-        if (!Number.isNaN(parsedTs.valueOf())) {
-          target['@timestamp'] = parsedTs.toISOString();
-        }
+      if (target['@timestamp']) {
+        target['@timestamp'] = new Date(target['@timestamp']).toISOString();
       }
 
       callback(null, target);

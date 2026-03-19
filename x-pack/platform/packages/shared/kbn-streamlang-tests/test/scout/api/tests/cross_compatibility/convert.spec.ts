@@ -9,7 +9,6 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { ConvertProcessor, SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
-import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -38,7 +37,7 @@ apiTest.describe(
       await testBed.ingest('esql-convert-value', docs);
       const esqlResult = await esql.queryOnIndex('esql-convert-value', query);
 
-      expect(asDoc(asDoc(ingestResult[0])?.attributes)?.size).toBe('4096');
+      expect(ingestResult[0]?.attributes?.size).toBe('4096');
       expect(esqlResult.documentsOrdered[0]).toStrictEqual(
         expect.objectContaining({ 'attributes.size': '4096' })
       );
@@ -68,11 +67,11 @@ apiTest.describe(
         await testBed.ingest('esql-convert-value-to-target', docs);
         const esqlResult = await esql.queryOnIndex('esql-convert-value-to-target', query);
 
-        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.size).toBe(4096);
+        expect(ingestResult[0]?.attributes?.size).toBe(4096);
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
           expect.objectContaining({ 'attributes.size': 4096 })
         );
-        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.size_str).toBe('4096');
+        expect(ingestResult[0]?.attributes?.size_str).toBe('4096');
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
           expect.objectContaining({ 'attributes.size_str': '4096' })
         );
@@ -112,11 +111,11 @@ apiTest.describe(
           query
         );
 
-        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.size).toBe(4096);
+        expect(ingestResult[0]?.attributes?.size).toBe(4096);
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
           expect.objectContaining({ 'attributes.size': 4096 })
         );
-        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.size_str).toBe('4096');
+        expect(ingestResult[0]?.attributes?.size_str).toBe('4096');
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
           expect.objectContaining({ 'attributes.size_str': '4096' })
         );

@@ -8,9 +8,7 @@ The Observability Agent Builder plugin provides LLM-powered tools and insights f
 
 ## Domain-Specific Guides
 
-- **[Development Guide](./server/AGENTS.md)** (`server/AGENTS.md`) — Design principles, ECS/OTel compatibility, APM data types, parameter conventions, testing workflows, and the pre-merge checklist.
-
-- **[Data Ingestion](./DATA_INGESTION.md)** (`DATA_INGESTION.md`) — How to ingest observability data into Elasticsearch: ingestion scripts (RCAEval, OpenRCA), Synthtrace scenarios, and the OpenTelemetry Demo.
+- **[Tools](./server/tools/AGENTS.md)** (`server/tools/AGENTS.md`) — Tool design principles, ECS/OTel compatibility, APM data types, parameter conventions, testing workflows, and the pre-merge checklist for Observability tools.
 
 - **[AI Insights](./server/routes/ai_insights/AGENTS.md)** (`server/routes/ai_insights/AGENTS.md`) — Architecture of one-click AI Insights (prefetched context, hardcoded prompts), prompt design, UI integration, conversation handoff, and testing.
 

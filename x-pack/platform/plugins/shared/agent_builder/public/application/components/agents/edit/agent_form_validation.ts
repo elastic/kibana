@@ -124,8 +124,13 @@ export const agentFormSchema = z.object({
         tool_ids: z.array(z.string()),
       })
     ),
-    skill_ids: z.array(z.string()).optional(),
-    enable_elastic_capabilities: z.boolean().optional(),
+    skills: z
+      .array(
+        z.object({
+          skill_ids: z.array(z.string()),
+        })
+      )
+      .optional(),
     workflow_ids: z.array(z.string()).optional(),
   }),
 });

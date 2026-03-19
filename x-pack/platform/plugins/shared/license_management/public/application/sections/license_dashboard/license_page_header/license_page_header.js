@@ -96,7 +96,7 @@ export const LicensePageHeader = () => {
         <ActiveLicensePageHeader
           license={license}
           bottomBorder
-          iconType="checkCircleFill"
+          iconType="checkInCircleFilled"
           iconProps={{ color: 'success' }}
         />
       )}

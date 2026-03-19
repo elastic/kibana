@@ -20,21 +20,29 @@ import { getMockLinksParentApi } from '../mocks';
 
 const getLinks = (): Link[] => [
   {
+    id: '001',
+    order: 0,
     type: 'dashboardLink',
     label: '',
     destination: '999',
   },
   {
+    id: '002',
+    order: 1,
     type: 'dashboardLink',
     label: 'Dashboard 2',
     destination: '888',
   },
   {
+    id: '003',
+    order: 2,
     type: 'externalLink',
     label: 'Example homepage',
     destination: 'https://example.com',
   },
   {
+    id: '004',
+    order: 3,
     type: 'externalLink',
     destination: 'https://elastic.co',
   },
@@ -43,6 +51,7 @@ const getLinks = (): Link[] => [
 const getResolvedLinks: () => ResolvedLink[] = () => [
   {
     id: '001',
+    order: 0,
     type: 'dashboardLink',
     label: '',
     destination: '999',
@@ -51,6 +60,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
   {
     id: '002',
+    order: 1,
     type: 'dashboardLink',
     label: 'Dashboard 2',
     destination: '888',
@@ -59,6 +69,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
   {
     id: '003',
+    order: 2,
     type: 'externalLink',
     label: 'Example homepage',
     destination: 'https://example.com',
@@ -66,6 +77,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
   {
     id: '004',
+    order: 3,
     type: 'externalLink',
     destination: 'https://elastic.co',
     title: 'https://elastic.co',
@@ -74,7 +86,9 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
 
 jest.mock('../lib/resolve_links', () => {
   return {
-    ...jest.requireActual('../lib/resolve_links'),
+    serializeResolvedLinks: (resolvedLinks: ResolvedLink[]) => {
+      return resolvedLinks.map(({ title, description, error, ...linkToSave }) => linkToSave);
+    },
     resolveLinks: jest.fn().mockResolvedValue(getResolvedLinks()),
   };
 });

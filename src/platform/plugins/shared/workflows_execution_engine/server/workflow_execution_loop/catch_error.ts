@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
@@ -72,15 +71,10 @@ export async function catchError(
     }
 
     if (failedStepExecutionRuntime.stepExecutionExists()) {
-      const stepExecution = failedStepExecutionRuntime.stepExecution;
-      // A step may already be COMPLETED if workflow.output/workflow.fail finished
-      // it successfully before setting the workflow-level error (e.g., status: 'failed')
-      if (stepExecution?.status !== ExecutionStatus.COMPLETED) {
-        failedStepExecutionRuntime.failStep(
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
-        );
-      }
+      failedStepExecutionRuntime.failStep(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
+      );
     }
 
     while (

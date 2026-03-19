@@ -16,7 +16,7 @@ import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 describe('transaction metrics', () => {
-  let events: Array<Record<string, unknown>>;
+  let events: Array<Record<string, any>>;
 
   beforeEach(async () => {
     const javaService = apm.service({
@@ -71,14 +71,9 @@ describe('transaction metrics', () => {
       (event) => event['event.outcome'] === 'success'
     );
 
-    const [first, second] = metricsSetsForSuccessfulTransactions.map((event) => {
-      const ts = event['@timestamp'];
-      return (
-        typeof ts === 'string' || typeof ts === 'number' || ts instanceof Date
-          ? new Date(ts)
-          : new Date()
-      ).toISOString();
-    });
+    const [first, second] = metricsSetsForSuccessfulTransactions.map((event) =>
+      new Date(event['@timestamp']).toISOString()
+    );
 
     expect([first, second]).toEqual(['2021-01-01T00:00:00.000Z', '2021-01-01T00:01:00.000Z']);
   });

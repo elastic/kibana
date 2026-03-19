@@ -103,7 +103,7 @@ export const UserFilterPanel: FC<{}> = () => {
       <UserProfilesPopover
         button={
           <EuiFilterButton
-            iconType="chevronSingleDown"
+            iconType="arrowDown"
             iconSide="right"
             data-test-subj="userFilterPopoverButton"
             onClick={() => setPopoverOpen(!isPopoverOpen)}

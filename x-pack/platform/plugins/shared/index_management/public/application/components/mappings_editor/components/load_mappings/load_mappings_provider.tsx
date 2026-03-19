@@ -204,7 +204,7 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
         onClick={() =>
           setTotalErrorsToDisplay(showingAllErrors ? MAX_ERRORS_TO_DISPLAY : state.errors!.length)
         }
-        iconType={showingAllErrors ? 'chevronSingleUp' : 'chevronSingleDown'}
+        iconType={showingAllErrors ? 'arrowUp' : 'arrowDown'}
       >
         {showingAllErrors
           ? i18n.translate('xpack.idxMgmt.mappingsEditor.hideErrorsButtonLabel', {

@@ -202,7 +202,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
                       values: { name: snapshot },
                     }
                   )}
-                  iconType="download"
+                  iconType="importAction"
                   color="primary"
                   data-test-subj="srsnapshotListRestoreActionButton"
                   {...reactRouterNavigate(history, linkToRestoreSnapshot(repository, snapshot))}

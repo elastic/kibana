@@ -11,14 +11,11 @@ import { pipe } from 'fp-ts/pipeable';
 import { getOrElse, map } from 'fp-ts/Option';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { getProxySettings } from '@kbn/actions-utils';
-import {
-  WorkflowsConnectorFeatureId,
-  AgentBuilderConnectorFeatureId,
-} from '@kbn/actions-plugin/common';
+import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
+import { SecretConfigurationSchema } from '@kbn/connector-schemas/common/auth';
 import type { ActionParamsType } from '@kbn/connector-schemas/http';
 import {
   CONNECTOR_ID,
@@ -28,7 +25,6 @@ import {
   ParamsSchema,
 } from '@kbn/connector-schemas/http';
 import { z } from '@kbn/zod/v4';
-import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
 import type {
   HttpConnectorType,
   HttpConnectorTypeExecutorOptions,
@@ -39,7 +35,7 @@ import type { Result } from '../lib/result_type';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { isOk, promiseResult } from '../lib/result_type';
 import { getAxiosConfig } from './get_axios_config';
-import { ensureUriAllowed, validateConnectorTypeConfig } from './validations';
+import { validateConnectorTypeConfig } from './validations';
 import {
   errorResultRequestFailed,
   errorResultUnexpectedNullResponse,
@@ -58,7 +54,7 @@ const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
 const connectorTypeDefinition: Omit<HttpConnectorType, 'id' | 'validate'> = {
   minimumLicenseRequired: 'gold',
   name: CONNECTOR_NAME,
-  supportedFeatureIds: [WorkflowsConnectorFeatureId, AgentBuilderConnectorFeatureId],
+  supportedFeatureIds: [WorkflowsConnectorFeatureId],
   renderParameterTemplates,
   executor,
 };
@@ -75,31 +71,10 @@ export const getConnectorType = (): HttpConnectorType => ({
   validate: {
     config: {
       schema: ConfigSchema,
-      customValidator: (config, validatorServices) => {
-        validateConnectorTypeConfig(config, validatorServices);
-        if (config.proxyUrl) {
-          ensureUriAllowed(config.proxyUrl, validatorServices.configurationUtilities);
-        }
-        return null;
-      },
+      customValidator: validateConnectorTypeConfig,
     },
     secrets: {
-      schema: SecretsSchema,
-      customValidator: (secrets) => {
-        const { proxyUsername, proxyPassword } = secrets;
-        if ((proxyUsername && !proxyPassword) || (!proxyUsername && proxyPassword)) {
-          throw new Error('proxyUsername and proxyPassword must both be provided, or neither');
-        }
-      },
-    },
-    connector: (config, secrets) => {
-      if (config.hasProxyAuth && !config.proxyUrl) {
-        return 'proxyUrl is required when proxy authentication is enabled';
-      }
-      if (config.hasProxyAuth && (!secrets.proxyUsername || !secrets.proxyPassword)) {
-        return 'proxyUsername and proxyPassword are required when proxy authentication is enabled';
-      }
-      return null;
+      schema: SecretConfigurationSchema,
     },
     params: {
       schema: ParamsSchema,
@@ -233,15 +208,6 @@ export async function executor(
   // Merge headers: params headers take precedence over config headers
   const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
 
-  // Connector-level proxy overrides
-  const proxyOverrides = getProxySettings({
-    url: config.proxyUrl ?? undefined,
-    hasAuth: config.hasProxyAuth,
-    username: execOptions.secrets.proxyUsername ?? undefined,
-    password: execOptions.secrets.proxyPassword ?? undefined,
-    verificationMode: config.proxyVerificationMode,
-  });
-
   // Handle fetcher options
   let sslOverrides = baseSslOverrides;
   let maxRedirects: number | undefined;
@@ -272,7 +238,6 @@ export async function executor(
       data: body,
       configurationUtilities,
       sslOverrides,
-      proxyOverrides,
       connectorUsageCollector,
       keepAlive,
       maxRedirects,

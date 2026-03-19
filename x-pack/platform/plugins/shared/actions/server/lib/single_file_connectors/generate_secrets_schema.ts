@@ -18,8 +18,6 @@ export const generateSecretsSchema = (
   const settings = configUtils.getWebhookSettings();
   const isPfxEnabled = settings.ssl.pfx.enabled;
   return {
-    schema: generateSecretsSchemaFromSpec(authSpec, {
-      isPfxEnabled,
-    }),
+    schema: generateSecretsSchemaFromSpec(authSpec, { isPfxEnabled }),
   };
 };

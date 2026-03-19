@@ -9,6 +9,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   farequoteKQLFiltersSearchTestData,
   farequoteLuceneFiltersSearchTestData,
+  farequoteDataViewTestData,
 } from '../index_test_data';
 import type { TestData } from '../types';
 
@@ -138,6 +139,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await ml.testResources.deleteSavedSearches();
       await ml.testResources.deleteDataViewByTitle('ft_farequote');
+    });
+
+    describe(`with ${farequoteDataViewTestData.suiteTitle}`, function () {
+      runTests(farequoteDataViewTestData);
     });
 
     describe(`with ${farequoteLuceneFiltersSearchTestData.suiteTitle}`, function () {

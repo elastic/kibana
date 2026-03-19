@@ -21,7 +21,6 @@ import {
   deleteActionNameText,
   isDeleteActionDisabled,
   DeleteActionName,
-  getDeleteActionDisabledMessage,
 } from './delete_action_name';
 
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
@@ -81,8 +80,8 @@ export const useDeleteAction = (forceDisable: boolean) => {
     }
   };
 
-  const action: TransformListAction = useMemo(() => {
-    return {
+  const action: TransformListAction = useMemo(
+    () => ({
       name: (item: TransformListRow) => (
         <DeleteActionName
           {...{
@@ -98,15 +97,14 @@ export const useDeleteAction = (forceDisable: boolean) => {
         isTransformListRowWithStats(item) &&
         !isDeleteActionDisabled([item], forceDisable) &&
         canDeleteTransform,
-      description: (item: TransformListRow) =>
-        getDeleteActionDisabledMessage({ items: [item], canDeleteTransform, forceDisable }) ??
-        deleteActionNameText,
+      description: deleteActionNameText,
       icon: 'trash',
       type: 'icon',
       onClick: (item: TransformListRow) => openModal([item]),
       'data-test-subj': 'transformActionDelete',
-    };
-  }, [canDeleteTransform, forceDisable]);
+    }),
+    [canDeleteTransform, forceDisable]
+  );
 
   return {
     action,

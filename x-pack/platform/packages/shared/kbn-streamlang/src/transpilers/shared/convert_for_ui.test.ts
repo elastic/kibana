@@ -6,16 +6,8 @@
  */
 
 import type { StreamlangStepWithUIAttributes } from '../../../types/ui';
-import {
-  type StreamlangConditionBlock,
-  type StreamlangDSL,
-  type StreamlangStep,
-  isActionBlock,
-  isConditionBlock,
-} from '../../../types/streamlang';
+import type { StreamlangDSL } from '../../../types/streamlang';
 import { convertStepsForUI, convertUIStepsToDSL } from './convert_for_ui';
-
-type FlattenedStep = StreamlangStepWithUIAttributes;
 
 describe('convertStepsForUI', () => {
   it('flattens a simple list of steps', () => {
@@ -25,11 +17,11 @@ describe('convertStepsForUI', () => {
         { action: 'append', to: 'baz', value: [1, 2] },
       ],
     };
-    const result = convertStepsForUI(dsl) as FlattenedStep[];
+    const result = convertStepsForUI(dsl) as any;
     expect(result).toHaveLength(2);
-    expect(isActionBlock(result[0]) && result[0].action).toBe('set');
+    expect(result[0].action).toBe('set');
     expect(result[0].parentId).toBeNull();
-    expect(isActionBlock(result[1]) && result[1].action).toBe('append');
+    expect(result[1].action).toBe('append');
     expect(result[1].parentId).toBeNull();
   });
 
@@ -55,7 +47,7 @@ describe('convertStepsForUI', () => {
         { action: 'set', to: 'x', value: 'y' },
       ],
     };
-    const result = convertStepsForUI(dsl) as FlattenedStep[];
+    const result = convertStepsForUI(dsl) as any;
     // Should flatten to 5 steps: where, set, where, append, set
     expect(result).toHaveLength(5);
 
@@ -64,19 +56,19 @@ describe('convertStepsForUI', () => {
     expect(result[0].parentId).toBeNull();
 
     // set inside first where
-    expect(isActionBlock(result[1]) && result[1].action).toBe('set');
+    expect(result[1].action).toBe('set');
     expect(result[1].parentId).toBe(result[0].customIdentifier);
 
     // nested where inside first where
-    expect(isConditionBlock(result[2])).toBe(true);
+    expect(result[2]).toHaveProperty('condition');
     expect(result[2].parentId).toBe(result[0].customIdentifier);
 
     // append inside nested where
-    expect(isActionBlock(result[3]) && result[3].action).toBe('append');
+    expect(result[3].action).toBe('append');
     expect(result[3].parentId).toBe(result[2].customIdentifier);
 
     // top-level set
-    expect(isActionBlock(result[4]) && result[4].action).toBe('set');
+    expect(result[4].action).toBe('set');
     expect(result[4].parentId).toBeNull();
   });
 
@@ -154,24 +146,17 @@ describe('convertUIStepsToDSL', () => {
         parentId: null,
       },
     ];
-    const dsl = convertUIStepsToDSL(uiSteps, false);
+    const dsl = convertUIStepsToDSL(uiSteps, false) as any;
     expect(dsl.steps).toHaveLength(2); // where1 and set2 at root
     const where1 = dsl.steps[0];
-    expect(isConditionBlock(where1)).toBe(true);
-    if (!isConditionBlock(where1)) return;
+    expect(where1).toHaveProperty('condition');
     expect(where1.condition.steps).toHaveLength(2); // set1 and where2
-    const where2 = where1.condition.steps.find(
-      (s: StreamlangStep) => 'customIdentifier' in s && s.customIdentifier === 'where2'
-    ) as StreamlangConditionBlock | undefined;
+    const where2 = where1.condition.steps.find((s: any) => s.customIdentifier === 'where2');
     expect(where2).toBeDefined();
-    if (!where2) return;
     expect(where2.condition.steps).toHaveLength(1);
-    expect(isActionBlock(where2.condition.steps[0]) && where2.condition.steps[0].action).toBe(
-      'append'
-    );
-    const set2 = dsl.steps[1];
-    expect(isActionBlock(set2) && set2.action).toBe('set');
-    expect(isActionBlock(set2) && 'to' in set2 && set2.to).toBe('x');
+    expect(where2.condition.steps[0].action).toBe('append');
+    expect(dsl.steps[1].action).toBe('set');
+    expect(dsl.steps[1].to).toBe('x');
   });
 
   it('handles empty input', () => {

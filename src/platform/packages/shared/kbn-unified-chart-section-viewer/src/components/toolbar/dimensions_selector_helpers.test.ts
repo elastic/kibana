@@ -16,6 +16,7 @@ describe('dimensions_selector_helpers', () => {
         getOptionDisabledState({
           singleSelection: true,
           isSelected: false,
+          isIntersecting: false,
           isAtMaxLimit: true,
         })
       ).toBe(false);
@@ -24,6 +25,7 @@ describe('dimensions_selector_helpers', () => {
         getOptionDisabledState({
           singleSelection: true,
           isSelected: true,
+          isIntersecting: true,
           isAtMaxLimit: false,
         })
       ).toBe(false);
@@ -34,6 +36,7 @@ describe('dimensions_selector_helpers', () => {
         getOptionDisabledState({
           singleSelection: false,
           isSelected: true,
+          isIntersecting: false,
           isAtMaxLimit: true,
         })
       ).toBe(false);
@@ -42,9 +45,21 @@ describe('dimensions_selector_helpers', () => {
         getOptionDisabledState({
           singleSelection: false,
           isSelected: true,
+          isIntersecting: true,
           isAtMaxLimit: false,
         })
       ).toBe(false);
+    });
+
+    it('returns true when not intersecting in multi-selection mode', () => {
+      expect(
+        getOptionDisabledState({
+          singleSelection: false,
+          isSelected: false,
+          isIntersecting: false,
+          isAtMaxLimit: false,
+        })
+      ).toBe(true);
     });
 
     it('returns true when at max limit in multi-selection mode', () => {
@@ -52,9 +67,32 @@ describe('dimensions_selector_helpers', () => {
         getOptionDisabledState({
           singleSelection: false,
           isSelected: false,
+          isIntersecting: true,
           isAtMaxLimit: true,
         })
       ).toBe(true);
+    });
+
+    it('returns true when both not intersecting and at max limit', () => {
+      expect(
+        getOptionDisabledState({
+          singleSelection: false,
+          isSelected: false,
+          isIntersecting: false,
+          isAtMaxLimit: true,
+        })
+      ).toBe(true);
+    });
+
+    it('returns false when intersecting and not at max limit', () => {
+      expect(
+        getOptionDisabledState({
+          singleSelection: false,
+          isSelected: false,
+          isIntersecting: true,
+          isAtMaxLimit: false,
+        })
+      ).toBe(false);
     });
   });
 });

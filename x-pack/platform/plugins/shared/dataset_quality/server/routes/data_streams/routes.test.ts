@@ -65,19 +65,19 @@ describe('dataStreamDetailsRoute', () => {
             client: jest.fn(),
           },
         }),
-      },
+      } as any,
       logger: mockLogger,
       request: mockRequest,
       plugins: {
         fleet: {
-          setup: {},
+          setup: {} as any,
           start: jest.fn().mockResolvedValue({
             packageService: {
               asScoped: jest.fn().mockReturnValue({}),
             },
           }),
         },
-      },
+      } as any,
       getEsCapabilities: jest.fn(),
       params: {
         path: {
@@ -88,9 +88,7 @@ describe('dataStreamDetailsRoute', () => {
           end: 1234567900,
         },
       },
-    } as unknown as DatasetQualityRouteHandlerResources & {
-      params: { path: { dataStream: string }; query: { start: number; end: number } };
-    };
+    } as any;
 
     mockGetDataStreamDetails.mockResolvedValue({
       docsCount: 1000,
@@ -204,9 +202,7 @@ describe('dataStreamDetailsRoute', () => {
     });
 
     it('returns empty object when getDataStreamDetails returns null', async () => {
-      mockGetDataStreamDetails.mockResolvedValue(
-        null as unknown as Awaited<ReturnType<typeof getDataStreamDetails>>
-      );
+      mockGetDataStreamDetails.mockResolvedValue(null as any);
 
       const result = await handler(mockResources);
 
@@ -304,19 +300,19 @@ describe('updateFailureStoreRoute', () => {
             client: jest.fn(),
           },
         }),
-      },
+      } as any,
       logger: mockLogger,
       request: mockRequest,
       plugins: {
         fleet: {
-          setup: {},
+          setup: {} as any,
           start: jest.fn().mockResolvedValue({
             packageService: {
               asScoped: jest.fn().mockReturnValue({}),
             },
           }),
         },
-      },
+      } as any,
       getEsCapabilities: jest.fn(),
       params: {
         path: {
@@ -327,12 +323,7 @@ describe('updateFailureStoreRoute', () => {
           customRetentionPeriod: '30d',
         },
       },
-    } as unknown as DatasetQualityRouteHandlerResources & {
-      params: {
-        path: { dataStream: string };
-        body: { failureStoreEnabled: boolean; customRetentionPeriod: string | undefined };
-      };
-    };
+    } as any;
 
     mockUpdateFailureStore.mockResolvedValue({
       headers: { 'x-elastic-product': 'Elasticsearch' },

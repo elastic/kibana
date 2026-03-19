@@ -15,13 +15,14 @@ const validPipelines: ApmSynthtracePipelines[] = [
   ApmSynthtracePipelineSchema.Otel,
   ApmSynthtracePipelineSchema.Default,
 ];
-const parseApmPipeline = (value: unknown): ApmSynthtracePipelines => {
+const parseApmPipeline = (value: ApmSynthtracePipelines): ApmSynthtracePipelines => {
   if (!value) return ApmSynthtracePipelineSchema.Default;
 
-  if (validPipelines.includes(value as ApmSynthtracePipelines)) {
-    return value as ApmSynthtracePipelines;
+  if (validPipelines.includes(value)) {
+    return value;
+  } else {
+    return ApmSynthtracePipelineSchema.Default;
   }
-  return ApmSynthtracePipelineSchema.Default;
 };
 
 export interface ApmPipelineScenarioOpts {
@@ -30,7 +31,7 @@ export interface ApmPipelineScenarioOpts {
 }
 
 export const parseApmScenarioOpts = (
-  scenarioOpts: Record<string, unknown> | undefined
+  scenarioOpts: Record<string, any> | undefined
 ): ApmPipelineScenarioOpts => {
   const pipeline = parseApmPipeline(scenarioOpts?.pipeline);
   const numServices = scenarioOpts?.numServices ? Number(scenarioOpts.numServices) : undefined;

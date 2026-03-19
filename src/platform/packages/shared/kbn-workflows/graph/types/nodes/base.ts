@@ -16,7 +16,6 @@ import {
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
-  WorkflowOutputStepSchema,
 } from '../../../spec/schema';
 
 export const GraphNodeSchema = z.object({
@@ -85,10 +84,3 @@ export const WorkflowExecuteAsyncGraphNodeSchema = GraphNodeSchema.extend({
   configuration: WorkflowExecuteAsyncStepSchema,
 });
 export type WorkflowExecuteAsyncGraphNode = z.infer<typeof WorkflowExecuteAsyncGraphNodeSchema>;
-
-export const WorkflowOutputGraphNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('workflow.output'),
-  configuration: WorkflowOutputStepSchema,
-});
-export type WorkflowOutputGraphNode = z.infer<typeof WorkflowOutputGraphNodeSchema>;

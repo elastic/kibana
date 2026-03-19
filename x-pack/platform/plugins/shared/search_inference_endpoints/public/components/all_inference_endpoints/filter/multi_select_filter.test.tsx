@@ -19,24 +19,14 @@ describe('MultiSelectFilter', () => {
 
   it('should render the filter button with the provided label', () => {
     const { getByText } = render(
-      <MultiSelectFilter
-        onChange={() => {}}
-        options={options}
-        buttonLabel="Filter Options"
-        ariaLabel="Filter Options"
-      />
+      <MultiSelectFilter onChange={() => {}} options={options} buttonLabel="Filter Options" />
     );
     expect(getByText('Filter Options')).toBeInTheDocument();
   });
 
   it('should toggle the popover when the filter button is clicked', async () => {
     const { getByText, queryByText } = render(
-      <MultiSelectFilter
-        onChange={() => {}}
-        options={options}
-        buttonLabel="Filter Options"
-        ariaLabel="Filter Options"
-      />
+      <MultiSelectFilter onChange={() => {}} options={options} buttonLabel="Filter Options" />
     );
     fireEvent.click(getByText('Filter Options'));
     expect(queryByText('Option 1')).toBeInTheDocument();
@@ -48,12 +38,7 @@ describe('MultiSelectFilter', () => {
 
   it('should render the provided options', async () => {
     const { getByText } = render(
-      <MultiSelectFilter
-        onChange={() => {}}
-        options={options}
-        buttonLabel="Filter Options"
-        ariaLabel="Filter Options"
-      />
+      <MultiSelectFilter onChange={() => {}} options={options} buttonLabel="Filter Options" />
     );
 
     fireEvent.click(getByText('Filter Options'));
@@ -68,12 +53,7 @@ describe('MultiSelectFilter', () => {
   it('should call the onChange function with the updated options when an option is clicked', async () => {
     const onChange = jest.fn();
     const { getByText } = render(
-      <MultiSelectFilter
-        onChange={onChange}
-        options={options}
-        buttonLabel="Filter Options"
-        ariaLabel="Filter Options"
-      />
+      <MultiSelectFilter onChange={onChange} options={options} buttonLabel="Filter Options" />
     );
 
     fireEvent.click(getByText('Filter Options'));

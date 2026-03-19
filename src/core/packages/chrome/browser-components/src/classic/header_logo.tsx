@@ -9,12 +9,14 @@
 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React from 'react';
 import type { HTMLAttributes } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { useEuiTheme } from '@elastic/eui';
 import { LoadingIndicator } from '../shared/loading_indicator';
-import { useCustomBranding, useNavigateToUrl, useHomeHref } from '../shared/chrome_hooks';
-import { isModifiedOrPrevented } from '../shared/nav_link';
 
 const ElasticMark = ({ ...props }: HTMLAttributes<SVGElement>) => (
   <svg
@@ -30,22 +32,28 @@ const ElasticMark = ({ ...props }: HTMLAttributes<SVGElement>) => (
   </svg>
 );
 
-export function HeaderLogo() {
-  const { euiTheme } = useEuiTheme();
-  const navigateToUrl = useNavigateToUrl();
-  const homeHref = useHomeHref();
-  const customBranding = useCustomBranding();
-  const { customizedLogo, logo } = customBranding;
+function onClick(
+  event: React.MouseEvent<HTMLAnchorElement>,
+  navigateToApp: (appId: string) => void
+) {
+  if (event.isDefaultPrevented() || event.altKey || event.metaKey || event.ctrlKey) {
+    return;
+  }
+  navigateToApp('home');
+  event.preventDefault();
+}
 
-  const navigateHome = useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>) => {
-      if (!isModifiedOrPrevented(event)) {
-        event.preventDefault();
-        navigateToUrl(homeHref);
-      }
-    },
-    [homeHref, navigateToUrl]
-  );
+interface Props {
+  href: string;
+  navigateToApp: (appId: string) => void;
+  loadingCount$?: ReturnType<HttpStart['getLoadingCount$']>;
+  customBranding$: Observable<CustomBranding>;
+}
+
+export function HeaderLogo({ href, navigateToApp, loadingCount$, customBranding$ }: Props) {
+  const { euiTheme } = useEuiTheme();
+  const customBranding = useObservable(customBranding$, {});
+  const { customizedLogo, logo } = customBranding;
 
   const styles = {
     logoCss: css({
@@ -62,15 +70,15 @@ export function HeaderLogo() {
 
   return (
     <a
-      onClick={navigateHome}
+      onClick={(e) => onClick(e, navigateToApp)}
       css={styles.logoCss}
-      href={homeHref}
+      href={href}
       data-test-subj="logo"
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Elastic home',
       })}
     >
-      <LoadingIndicator customLogo={logo} />
+      <LoadingIndicator loadingCount$={loadingCount$!} customLogo={logo} />
       {customizedLogo ? (
         <img
           src={customizedLogo}

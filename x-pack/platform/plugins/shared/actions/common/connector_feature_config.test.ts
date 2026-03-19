@@ -13,9 +13,7 @@ import {
 
 describe('areValidFeatures', () => {
   it('returns true when all inputs are valid features', () => {
-    expect(
-      areValidFeatures(['alerting', 'cases', 'generativeAIForSecurity', 'agentBuilder'])
-    ).toBeTruthy();
+    expect(areValidFeatures(['alerting', 'cases', 'generativeAIForSecurity'])).toBeTruthy();
   });
 
   it('returns true when only one input and it is a valid feature', () => {
@@ -45,21 +43,8 @@ describe('getConnectorFeatureName', () => {
 describe('getConnectorCompatibility', () => {
   it('returns the compatibility list for valid feature ids', () => {
     expect(
-      getConnectorCompatibility([
-        'alerting',
-        'cases',
-        'uptime',
-        'siem',
-        'generativeAIForSecurity',
-        'agentBuilder',
-      ])
-    ).toEqual([
-      'Alerting Rules',
-      'Cases',
-      'Security Solution',
-      'Generative AI for Security',
-      'Agent Builder',
-    ]);
+      getConnectorCompatibility(['alerting', 'cases', 'uptime', 'siem', 'generativeAIForSecurity'])
+    ).toEqual(['Alerting Rules', 'Cases', 'Security Solution', 'Generative AI for Security']);
   });
 
   it('skips invalid feature ids', () => {

@@ -63,7 +63,7 @@ export const EmptyState = () => {
       actions={
         <EuiButton
           fill
-          iconType="plusCircle"
+          iconType="plusInCircle"
           data-test-subj="enrichPoliciesEmptyPromptCreateButton"
           {...reactRouterNavigate(history, '/enrich_policies/create')}
         >

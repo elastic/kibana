@@ -29,7 +29,7 @@ function validateUrl(configuredUrl: string) {
   }
 }
 
-export function ensureUriAllowed(
+function ensureUriAllowed(
   configuredUrl: string,
   configurationUtilities: ActionsConfigurationUtilities
 ) {

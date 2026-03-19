@@ -264,7 +264,7 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
           <EuiButton
             color="primary"
             iconSide="left"
-            iconType="chevronSingleLeft"
+            iconType="arrowLeft"
             data-test-subj="backButton"
             onClick={onBack}
           >
@@ -280,7 +280,7 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
             fill
             color="primary"
             iconSide="right"
-            iconType="chevronSingleRight"
+            iconType="arrowRight"
             disabled={form.isValid === false}
             data-test-subj="nextButton"
             onClick={onSubmit}

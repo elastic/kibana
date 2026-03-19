@@ -181,7 +181,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
             size="m"
             fullWidth
             color="danger"
-            iconType="minusCircle"
+            iconType="minusInCircle"
             data-test-subj="removePropmptButton"
             onClick={handleRemovePrompt}
           >
@@ -196,7 +196,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
             disabled={actionParams?.prompts?.length === ALERT_STATUSES.length}
             size="m"
             fullWidth
-            iconType="plusCircle"
+            iconType="plusInCircle"
             data-test-subj="addPrompButton"
             onClick={handleAddPrompt}
           >

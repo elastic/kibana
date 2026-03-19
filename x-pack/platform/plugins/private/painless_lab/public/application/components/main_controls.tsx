@@ -32,7 +32,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
   const items = [
     <EuiContextMenuItem
       key="walkthrough"
-      icon="external"
+      icon="popout"
       href={links.painlessWalkthrough}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
@@ -44,7 +44,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
 
     <EuiContextMenuItem
       key="api"
-      icon="external"
+      icon="popout"
       href={links.painlessAPIReference}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
@@ -56,7 +56,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
 
     <EuiContextMenuItem
       key="languageSpec"
-      icon="external"
+      icon="popout"
       href={links.painlessLangSpec}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}

@@ -78,12 +78,10 @@ export default function createAlertSeverityTests({ getService }: FtrProviderCont
         allAlertDocs.push(alertDocs[0]._source!);
 
         // Run another execution
-        await retry.try(async () => {
-          await supertest
-            .post(`${getUrlPrefix(space.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-            .set('kbn-xsrf', 'foo')
-            .expect(204);
-        });
+        await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
       }
 
       // Verify action group and previous action group are set as expected

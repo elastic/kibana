@@ -21,6 +21,5 @@ export function connectorFromSavedObject(
     isDeprecated,
     isSystemAction: false,
     isConnectorTypeDeprecated,
-    authMode: (savedObject.attributes.authMode ?? 'shared') as Connector['authMode'],
   };
 }

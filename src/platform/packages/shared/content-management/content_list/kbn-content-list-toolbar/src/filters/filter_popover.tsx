@@ -124,7 +124,7 @@ export const FilterPopover = ({
       aria-labelledby={titleId}
       button={
         <EuiFilterButton
-          iconType="chevronSingleDown"
+          iconType="arrowDown"
           iconSide="right"
           onClick={onToggle}
           data-test-subj={dataTestSubj}

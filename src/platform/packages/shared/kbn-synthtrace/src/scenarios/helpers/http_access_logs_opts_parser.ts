@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getStringOpt } from './scenario_opts_helpers';
 import { parseStringToBoolean } from './logs_scenario_opts_parser';
 
 /**
@@ -123,25 +122,13 @@ function parseMode(value: string | undefined): HttpAccessLogsMode {
  * ```
  */
 export function parseHttpAccessLogsOpts(
-  scenarioOpts: Record<string, unknown> | undefined
+  scenarioOpts: Record<string, any> | undefined
 ): HttpAccessLogsOpts {
-  const scale = parseNumber(getStringOpt(scenarioOpts, 'scale'), DEFAULT_OPTS.scale, 1);
-  const mode = parseMode(getStringOpt(scenarioOpts, 'mode'));
-  const errorRate = parseNumber(
-    getStringOpt(scenarioOpts, 'errorRate'),
-    DEFAULT_OPTS.errorRate,
-    0,
-    1
-  );
-  const attackVolume = parseNumber(
-    getStringOpt(scenarioOpts, 'attackVolume'),
-    DEFAULT_OPTS.attackVolume,
-    1
-  );
-  const isLogsDb = parseStringToBoolean(
-    getStringOpt(scenarioOpts, 'logsdb'),
-    DEFAULT_OPTS.isLogsDb
-  );
+  const scale = parseNumber(scenarioOpts?.scale, DEFAULT_OPTS.scale, 1);
+  const mode = parseMode(scenarioOpts?.mode);
+  const errorRate = parseNumber(scenarioOpts?.errorRate, DEFAULT_OPTS.errorRate, 0, 1);
+  const attackVolume = parseNumber(scenarioOpts?.attackVolume, DEFAULT_OPTS.attackVolume, 1);
+  const isLogsDb = parseStringToBoolean(scenarioOpts?.logsdb, DEFAULT_OPTS.isLogsDb);
 
   return {
     scale,

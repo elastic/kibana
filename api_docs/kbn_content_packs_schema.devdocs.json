@@ -901,13 +901,7 @@
             "signature": [
               "BaseStream",
               ".UpsertRequest<OmitWiredStreamUpsertProps<",
-              {
-                "pluginId": "@kbn/streams-schema",
-                "scope": "common",
-                "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.WiredStream",
-                "text": "WiredStream"
-              },
+              "WiredStream",
               ".Definition>>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",

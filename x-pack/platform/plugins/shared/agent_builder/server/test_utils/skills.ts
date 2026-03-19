@@ -21,7 +21,6 @@ export const createReadonlySkillProviderMock = (): ReadonlySkillProviderMock => 
     readonly: true,
     has: jest.fn(),
     get: jest.fn(),
-    bulkGet: jest.fn(),
     list: jest.fn(),
   };
 };
@@ -32,7 +31,6 @@ export const createWritableSkillProviderMock = (): WritableSkillProviderMock => 
     readonly: false,
     has: jest.fn(),
     get: jest.fn(),
-    bulkGet: jest.fn(),
     list: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),

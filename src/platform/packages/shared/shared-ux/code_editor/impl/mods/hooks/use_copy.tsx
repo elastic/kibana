@@ -24,7 +24,7 @@ export const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: str
               {(copy) => (
                 <EuiButtonIcon
                   onClick={copy}
-                  iconType="copy"
+                  iconType="copyClipboard"
                   color="text"
                   aria-label={copyButton}
                   size="xs"

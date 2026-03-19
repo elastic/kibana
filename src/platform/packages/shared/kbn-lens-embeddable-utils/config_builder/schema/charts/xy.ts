@@ -229,15 +229,6 @@ const decorationsSchema = schema.object(
   }
 );
 
-const xScaleSchema = schema.maybe(
-  schema.oneOf([schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')], {
-    meta: {
-      description:
-        'X-axis scale type. Only used in ES|QL charts. Data view based charts fall back to the X operation type.',
-    },
-  })
-);
-
 /**
  * Shared settings that apply to the entire XY chart visualization
  */
@@ -249,7 +240,6 @@ const xySharedSettings = {
           {
             ...sharedLegendSchema,
             inside: schema.maybe(schema.literal(false)),
-            layout: schema.maybe(schema.literal('list')),
             position: schema.maybe(
               schema.oneOf([
                 schema.literal('top'),
@@ -349,7 +339,6 @@ const xySharedSettings = {
           schema.object(
             {
               ...sharedAxisSchema,
-              scale: xScaleSchema,
               extent: schema.maybe(
                 schema.oneOf([
                   schema.object(
@@ -787,7 +776,6 @@ export const xyStateSchemaESQL = schema.object(
   }
 );
 
-export type XScaleSchemaType = TypeOf<typeof xScaleSchema>;
 export type XYState = TypeOf<typeof xyStateSchema>;
 export type XYStateESQL = TypeOf<typeof xyStateSchemaESQL>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;

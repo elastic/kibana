@@ -38,8 +38,7 @@ const getCreateAlertRuleWorkflow = (projectType: string | undefined) => {
 
 // Alert trigger tests run on Security and Observability (and ESS), but NOT on Elasticsearch/Search.
 // Security uses the detection engine API; Observability uses the generic alerting API.
-// Failing: See https://github.com/elastic/kibana/issues/252959
-test.describe.skip(
+test.describe(
   'Workflow execution - Alert triggers',
   {
     tag: [

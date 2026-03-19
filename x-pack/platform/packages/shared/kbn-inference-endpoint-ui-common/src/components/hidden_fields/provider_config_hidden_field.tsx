@@ -39,26 +39,3 @@ export const ProviderConfigHiddenField: React.FC<ProviderConfigHiddenFieldProps>
     }}
   />
 );
-
-export const TaskTypeConfigHiddenField: React.FC<ProviderConfigHiddenFieldProps> = ({
-  requiredProviderFormFields,
-  setRequiredProviderFormFields,
-  isSubmitting,
-}) => (
-  <UseField
-    path="config.taskTypeConfig"
-    component={HiddenField}
-    config={{
-      validations: [
-        {
-          validator: getNonEmptyValidator(
-            requiredProviderFormFields,
-            setRequiredProviderFormFields,
-            isSubmitting
-          ),
-          isBlocking: true,
-        },
-      ],
-    }}
-  />
-);

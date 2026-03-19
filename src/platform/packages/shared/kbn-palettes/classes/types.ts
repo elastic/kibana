@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { $Values } from 'utility-types';
 import type { KbnPalette } from '../constants';
 
 export type KbnPaletteType = 'categorical' | 'gradient';
 
-export type KbnPaletteId = $Values<typeof KbnPalette>;
+export type KbnPaletteId = (typeof KbnPalette)[keyof typeof KbnPalette];
 
 /**
  * Common palette definition used throughout kibana
@@ -21,7 +20,7 @@ export interface IKbnPalette {
   /**
    * Unique identifier for the palette
    */
-  id: KbnPaletteId;
+  id: string;
   /**
    * Display name of this palette.
    */

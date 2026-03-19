@@ -9,6 +9,7 @@ import React, { useMemo, useCallback } from 'react';
 import {
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiCallOut,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '@kbn/siem-readiness';
 import type { PipelineStats } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
@@ -125,15 +126,6 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
     return result;
   }, [pipelinesData, indexToCategoryMap, activeCategories]);
-
-  // Check if any matched pipelines exist ignoring activeCategories filter (for hasUnfilteredData prop)
-  const hasUnfilteredData = useMemo(() => {
-    if (!pipelinesData?.length) return false;
-
-    return pipelinesData.some((pipeline) =>
-      pipeline.indices.some((indexName) => indexToCategoryMap.has(indexName))
-    );
-  }, [pipelinesData, indexToCategoryMap]);
 
   // Check if any pipeline has failures
   const hasDocCriticalFailures = useMemo(() => {
@@ -353,6 +345,57 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
   }
 
+  if (!pipelinesData || pipelinesData.length === 0) {
+    return (
+      <>
+        <EuiSpacer size="l" />
+        <EuiCallOut
+          announceOnMount
+          title={i18n.translate('xpack.securitySolution.siemReadiness.continuity.noData.title', {
+            defaultMessage: 'No pipeline data available',
+          })}
+          color="warning"
+          iconType="warning"
+        >
+          <p>
+            {i18n.translate('xpack.securitySolution.siemReadiness.continuity.noData.description', {
+              defaultMessage:
+                'No ingest pipeline statistics were found. This could mean no data has been ingested yet.',
+            })}
+          </p>
+        </EuiCallOut>
+      </>
+    );
+  }
+
+  if (categorizedPipelines.length === 0) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.securitySolution.siemReadiness.continuity.noCategoryData.title',
+            {
+              defaultMessage: 'No data available',
+            }
+          )}
+          color="primary"
+          iconType="iInCircle"
+          announceOnMount
+        >
+          <p>
+            {i18n.translate(
+              'xpack.securitySolution.siemReadiness.continuity.noCategoryData.description',
+              {
+                defaultMessage: 'No pipeline data found for the selected categories.',
+              }
+            )}
+          </p>
+        </EuiCallOut>
+      </>
+    );
+  }
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -436,8 +479,6 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         defaultSortField="docsCount"
         defaultSortDirection="desc"
         storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
-        isFilterActive={activeCategories.length < CATEGORY_ORDER.length && hasUnfilteredData}
-        hasUnfilteredData={hasUnfilteredData}
       />
     </>
   );

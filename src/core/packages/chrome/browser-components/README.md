@@ -17,8 +17,10 @@ src/
 
 | Export | Description |
 |---|---|
-| `ChromeComponentsDeps` | External-service deps (`application`, `http`, `docLinks`, `customBranding`) passed to `ChromeComponentsProvider` — assembled by the layout layer using `Pick` from service interfaces |
-| `ChromeComponentsProvider` | Context provider; wrap the layout tree once with the assembled `ChromeComponentsDeps` |
+| `ChromeComponentsDeps` | Deps passed to `ChromeComponentsProvider` — single contract between `ChromeService` and the layout |
+| `ChromeApplicationContext` | Minimal application contract used inside `ChromeComponentsDeps`; replaces `InternalApplicationStart` to break the private-package dependency |
+| `ChromeComponentsProvider` | Context provider; wrap the layout tree once with `chrome.componentDeps` |
+| `useChromeComponentsDeps` | Hook to read `ChromeComponentsDeps` from context (use inside provider) |
 | `ClassicHeader` | Classic header; self-hydrates from context |
 | `ProjectHeader` | Project header; self-hydrates from context |
 | `GridLayoutProjectSideNav` | Project side-navigation for grid layout; self-hydrates from context |
@@ -26,18 +28,18 @@ src/
 | `HeaderTopBanner` | Top banner; self-hydrates from context |
 | `AppMenuBar` | Project app menu bar; self-hydrates from context |
 | `Sidebar` | Sidebar wrapper |
-| `useHasAppMenu` | Whether an app menu (legacy or new) is active |
+| `LoadingIndicator` | Horizontal/bar loading indicator |
 | `HeaderBreadcrumbsBadges` | Breadcrumb badge renderer, used by `browser-internal` state |
 
-## Context architecture
+## Note: `ChromeComponentsProvider` is a stepping stone
 
-- **`ChromeComponentsDeps`** contains 4 service-contract fields (`application`, `http`, `docLinks`, `customBranding`), each narrowed via `Pick` from their canonical service interface. The layout layer passes whole service objects and wraps the tree via `ChromeComponentsProvider`.
-- **Chrome-owned state** (breadcrumbs, nav controls, help menu, etc.) is accessed directly via `useChromeService()` hooks — not through `ChromeComponentsDeps`.
-- **Only hooks** (in `chrome_hooks.ts` and `header_action_menu.tsx`) call `useChromeComponentsDeps()`. Components use dedicated hooks like `useBasePath()`, `useNavigateToApp()`, `useCustomBranding()` etc.
+`ChromeComponentsProvider` / `useChromeComponentsDeps` are **temporary**. They exist as an intermediate step toward a proper `ChromeStateProvider` in a dedicated package that exposes React hooks (`useChromeStyle`, `useChromeBreadcrumbs`, etc.) so components are fully decoupled from Observable props. Once `ChromeStateProvider` exists this provider can be replaced.
+
+Progress is tracked in the Chrome & Grid Evolution epic: kibana-team#2651 (private repo).
 
 ## Internal vs public hooks boundary
 
-- Internal (`@kbn/core-chrome-browser-components`): hooks in `chrome_hooks.ts` read from `useChromeComponentsDeps()`; components use those hooks.
+- Internal (`@kbn/core-chrome-browser-components`): component wiring uses `ChromeComponentsDeps` and `useChromeComponentsDeps`.
 - Service context (`@kbn/core-chrome-browser-context`, private): `ChromeServiceProvider` + `useChromeService`.
 - Public (`@kbn/core-chrome-browser-hooks`, shared): plugin-safe hooks built on `ChromeStart` (`useChromeStyle`, `useActiveSolutionNavId`, `useHasHeaderBanner`).
 

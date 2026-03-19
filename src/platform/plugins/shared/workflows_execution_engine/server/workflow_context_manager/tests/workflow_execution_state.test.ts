@@ -32,7 +32,6 @@ describe('WorkflowExecutionState', () => {
       workflowId: 'test-workflow-id',
       status: ExecutionStatus.RUNNING,
       startedAt: '2025-08-05T20:00:00.000Z',
-      isTestRun: false,
     } as EsWorkflowExecution;
     underTest = new WorkflowExecutionState(
       fakeWorkflowExecution,
@@ -48,7 +47,6 @@ describe('WorkflowExecutionState', () => {
       workflowId: 'test-workflow-id',
       status: ExecutionStatus.RUNNING,
       startedAt: '2025-08-05T20:00:00.000Z',
-      isTestRun: false,
     } as EsWorkflowExecution);
   });
 
@@ -58,7 +56,6 @@ describe('WorkflowExecutionState', () => {
       workflowId: 'test-workflow-id',
       status: ExecutionStatus.COMPLETED,
       startedAt: '2025-08-05T20:00:00.000Z',
-      isTestRun: false,
     } as EsWorkflowExecution;
 
     underTest.updateWorkflowExecution(updatedWorkflowExecution);
@@ -103,40 +100,8 @@ describe('WorkflowExecutionState', () => {
       startedAt: '2025-08-05T20:00:00.000Z',
       stepExecutionIndex: 0,
       globalExecutionIndex: 0,
-      isTestRun: false,
     } as EsWorkflowStepExecution);
     expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
-  });
-
-  it('should set isTestRun on step execution from workflow execution', () => {
-    const workflowExecutionWithTestRun = {
-      id: 'test-workflow-execution-id',
-      workflowId: 'test-workflow-id',
-      status: ExecutionStatus.RUNNING,
-      startedAt: '2025-08-05T20:00:00.000Z',
-      isTestRun: true,
-    } as EsWorkflowExecution;
-    const stateWithTestRun = new WorkflowExecutionState(
-      workflowExecutionWithTestRun,
-      workflowExecutionRepository,
-      stepExecutionRepository
-    );
-
-    stateWithTestRun.upsertStep({
-      id: 'fake-id',
-      stepId: 'test-step',
-      status: ExecutionStatus.RUNNING,
-      startedAt: '2025-08-05T20:00:00.000Z',
-    } as EsWorkflowStepExecution);
-
-    expect(stateWithTestRun.getLatestStepExecution('test-step')).toEqual(
-      expect.objectContaining({
-        id: 'fake-id',
-        workflowRunId: 'test-workflow-execution-id',
-        workflowId: 'test-workflow-id',
-        isTestRun: true,
-      })
-    );
   });
 
   it('should create step execution with executionIndex', () => {
@@ -269,7 +234,6 @@ describe('WorkflowExecutionState', () => {
           stepId: 'test-step-execution-id',
           status: ExecutionStatus.RUNNING,
           startedAt: '2025-08-05T20:00:00.000Z',
-          isTestRun: false,
         } as EsWorkflowStepExecution),
       ]);
     });
@@ -335,7 +299,6 @@ describe('WorkflowExecutionState', () => {
           finishedAt: '2025-08-05T20:01:00.000Z',
           startedAt: '2025-08-05T20:00:00.000Z',
           executionTimeMs: 2000,
-          isTestRun: false,
         } as EsWorkflowStepExecution),
       ]);
     });

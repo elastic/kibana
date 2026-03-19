@@ -15,7 +15,7 @@ export function getDedotTransform(keepFlattenedFields: boolean = false) {
   return new Transform({
     objectMode: true,
     transform(document: ApmFields, encoding, callback) {
-      let target: Record<string, unknown>;
+      let target: Record<string, any>;
 
       if (keepFlattenedFields) {
         // no need to dedot metric events, just document.observer
@@ -37,11 +37,7 @@ export function getDedotTransform(keepFlattenedFields: boolean = false) {
 
       delete target.meta;
       if (target['@timestamp']) {
-        const ts = target['@timestamp'];
-        target['@timestamp'] =
-          typeof ts === 'string' || typeof ts === 'number' || ts instanceof Date
-            ? new Date(ts).toISOString()
-            : ts;
+        target['@timestamp'] = new Date(target['@timestamp']).toISOString();
       }
 
       callback(null, target);

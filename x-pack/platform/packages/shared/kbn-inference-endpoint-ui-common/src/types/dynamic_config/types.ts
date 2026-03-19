@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { TASK_SETTINGS, SERVICE_SETTINGS } from '../../constants';
-import { type ServiceProviderKeys } from '../../constants';
+import type { ServiceProviderKeys } from '../../constants';
 import type { FieldsConfiguration } from '../types';
 
 export interface SelectOption {
@@ -47,7 +46,6 @@ export interface ConfigProperties {
   updatable: boolean;
   type: FieldType;
   supported_task_types: string[];
-  location?: typeof SERVICE_SETTINGS | typeof TASK_SETTINGS;
 }
 
 interface ConfigEntry extends ConfigProperties {
@@ -65,7 +63,6 @@ export interface OverrideFieldsContentType {
   serverlessOnly?: boolean;
   hidden?: string[];
   additional?: FieldsConfiguration[];
-  supplementalData?: Record<string, Partial<ConfigProperties>>[];
   /** Default values to apply to existing provider configuration fields (e.g., model_id default values) */
   defaultValues?: Record<string, string | number | boolean | null>;
 }

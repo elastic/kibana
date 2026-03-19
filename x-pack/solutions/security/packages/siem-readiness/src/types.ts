@@ -86,9 +86,6 @@ export interface SiemReadinessPackageInfo {
   version: string;
   status: string;
   categories?: string[];
-  packagePoliciesInfo?: {
-    count: number;
-  };
 }
 
 export interface PipelineStats {

@@ -14,6 +14,45 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
+        "id": "def-server.AllProjectsRouting",
+        "type": "Interface",
+        "tags": [],
+        "label": "AllProjectsRouting",
+        "description": [
+          "\n{@link AsScopedOptions} variant that broadcasts requests to all CPS-connected Elasticsearch\ninstances. Use when the intent is to search or aggregate data across all available projects."
+        ],
+        "signature": [
+          "AllProjectsRouting",
+          " extends ",
+          "AsScopedOptions"
+        ],
+        "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.AllProjectsRouting.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "\"all\""
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server",
         "id": "def-server.AsScopedOptions",
         "type": "Interface",
         "tags": [],
@@ -30,14 +69,14 @@
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
             "id": "def-server.AsScopedOptions.projectRouting",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "projectRouting",
             "description": [
-              "\nControls how `project_routing` is automatically injected into Elasticsearch requests made\nthrough the scoped client.\n\n**Background**: Cross-Project Search (CPS) is a Serverless feature that allows Kibana to\ntransparently orchestrate searches across multiple Elastic projects. Kibana itself does not\nexecute the cross-project logic - it forwards requests with the appropriate `project_routing`\nheader and Elasticsearch handles execution, security enforcement, and result aggregation.\n\n**Options**:\n- `'space'`: Requests are routed to the Named Project Routing Expression (NPRE) configured\n  for the current Kibana space. Requires a {@link ScopeableUrlRequest} to be passed to\n  `asScoped` so that the space can be extracted from the URL pathname. Use this when the scope\n  of the query should match the data boundaries of the active space (e.g. alerting rules).\n\nWhen no options are passed to `asScoped`, requests are always routed to the origin project\n(i.e. the Elasticsearch instance Kibana is directly connected to).\n\n**Important**: This option only takes effect in CPS-enabled Serverless environments. In all\nother environments (stateful, non-CPS Serverless), any `project_routing` params are\nstripped from requests to avoid Elasticsearch rejections and to preserve traditional\nsingle-cluster routing behavior."
+              "\nControls how `project_routing` is automatically injected into Elasticsearch requests made\nthrough the scoped client.\n\n**Background**: Cross-Project Search (CPS) is a Serverless feature that allows Kibana to\ntransparently orchestrate searches across multiple Elastic projects. Kibana itself does not\nexecute the cross-project logic - it forwards requests with the appropriate `project_routing`\nheader and Elasticsearch handles execution, security enforcement, and result aggregation.\n\n**Options**:\n- `'origin-only'`: Requests are routed exclusively to the \"origin\" Elasticsearch instance\n  (i.e., the project that Kibana is directly connected to). Use this for administrative or\n  internal operations that must not fan out across other projects.\n- `'space'`: Requests are routed to the Named Project Routing Expression (NPRE) configured for\n  the current Kibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped`\n  so that the space can be extracted from the URL pathname. Use this when the scope of the\n  query should match the data boundaries of the active space.\n- `'all'`: Requests are broadcast to all CPS-connected Elasticsearch instances. This is the\n  broadest option and is appropriate when the intent is to search or aggregate data across\n  all connected projects.\n\n**Important**: This option only takes effect in CPS-enabled Serverless environments. In all\nother environments (stateful, non-CPS Serverless), any `project_routing` params are\nstripped from requests to avoid Elasticsearch rejections and to preserve traditional\nsingle-cluster routing behavior."
             ],
             "signature": [
-              "\"space\""
+              "\"space\" | \"all\" | \"origin-only\""
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
             "lineNumber": 20,
@@ -1213,7 +1252,7 @@
           "\nRepresents an Elasticsearch cluster API client created by the platform.\nIt allows to call API on behalf of the internal Kibana user and\nthe actual user that is derived from the request headers (via `asScoped(...)`).\n"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-        "lineNumber": 56,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2219,7 +2258,7 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 64,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2230,7 +2269,9 @@
             "type": "Function",
             "tags": [],
             "label": "asScoped",
-            "description": [],
+            "description": [
+              "\nCreates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,\nforwarding the request's authentication headers to Elasticsearch.\n\nIn CPS-enabled Serverless environments, the `opts` parameter controls how `project_routing`\nis injected into outgoing requests. See {@link AsScopedOptions} for details.\n"
+            ],
             "signature": [
               "{ (request: ",
               "ScopeableUrlRequest",
@@ -2240,12 +2281,16 @@
               "IScopedClusterClient",
               "; (request: ",
               "ScopeableRequest",
-              "): ",
+              ", opts?: ",
+              "OriginOnlyRouting",
+              " | ",
+              "AllProjectsRouting",
+              " | undefined): ",
               "IScopedClusterClient",
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 75,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2256,12 +2301,14 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "request",
-                "description": [],
+                "description": [
+                  "- A {@link ScopeableUrlRequest} whose URL is used to extract the active space"
+                ],
                 "signature": [
                   "ScopeableUrlRequest"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-                "lineNumber": 75,
+                "lineNumber": 107,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2273,12 +2320,14 @@
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
-                "description": [],
+                "description": [
+                  "- {@link SpaceNPRERouting} options with `projectRouting` set to `'space'`."
+                ],
                 "signature": [
                   "SpaceNPRERouting"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-                "lineNumber": 75,
+                "lineNumber": 107,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2294,7 +2343,7 @@
             "tags": [],
             "label": "asScoped",
             "description": [
-              "\nCreates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,\nforwarding the request's authentication headers to Elasticsearch.\n"
+              "\nCreates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,\nforwarding the request's authentication headers to Elasticsearch.\n\nIn CPS-enabled Serverless environments, the `opts` parameter controls how `project_routing`\nis injected into outgoing requests. See {@link AsScopedOptions} for details.\n"
             ],
             "signature": [
               "{ (request: ",
@@ -2305,12 +2354,16 @@
               "IScopedClusterClient",
               "; (request: ",
               "ScopeableRequest",
-              "): ",
+              ", opts?: ",
+              "OriginOnlyRouting",
+              " | ",
+              "AllProjectsRouting",
+              " | undefined): ",
               "IScopedClusterClient",
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 76,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2322,17 +2375,39 @@
                 "tags": [],
                 "label": "request",
                 "description": [
-                  "- The incoming request whose credentials authenticate Elasticsearch calls."
+                  "- The incoming {@link ScopeableRequest | request} whose credentials are used"
                 ],
                 "signature": [
                   "ScopeableRequest"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-                "lineNumber": 87,
-                "columnNumber": 12,
+                "lineNumber": 121,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-elasticsearch-server",
+                "id": "def-server.IClusterClient.asScoped.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "opts",
+                "description": [
+                  "- Optional {@link AsScopedOptions | options} to configure CPS routing behavior."
+                ],
+                "signature": [
+                  "OriginOnlyRouting",
+                  " | ",
+                  "AllProjectsRouting",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+                "lineNumber": 122,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2355,7 +2430,7 @@
           "IClusterClient"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-        "lineNumber": 90,
+        "lineNumber": 126,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2373,7 +2448,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 96,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5846,6 +5921,45 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
+        "id": "def-server.OriginOnlyRouting",
+        "type": "Interface",
+        "tags": [],
+        "label": "OriginOnlyRouting",
+        "description": [
+          "\n{@link AsScopedOptions} variant that locks routing to the origin Elasticsearch instance.\nUse for administrative or internal operations that must not fan out across CPS-connected projects."
+        ],
+        "signature": [
+          "OriginOnlyRouting",
+          " extends ",
+          "AsScopedOptions"
+        ],
+        "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.OriginOnlyRouting.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "\"origin-only\""
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server",
         "id": "def-server.SpaceNPRERouting",
         "type": "Interface",
         "tags": [],
@@ -5859,7 +5973,7 @@
           "AsScopedOptions"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-        "lineNumber": 46,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5875,7 +5989,7 @@
               "\"space\""
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 53,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
-
 import { isEqual, noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
@@ -926,7 +924,7 @@ export const LensTopNavMenu = ({
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             dispatch(
               switchAndCleanDatasource({
-                newDatasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
+                newDatasourceId: 'textBased',
                 visualizationId: visualization?.activeId,
                 currentIndexPatternId: currentIndexPattern?.id,
               })
@@ -1052,7 +1050,7 @@ export const LensTopNavMenu = ({
         if (isOnTextBasedMode) {
           dispatch(
             switchAndCleanDatasource({
-              newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
+              newDatasourceId: 'formBased',
               visualizationId: visualization?.activeId,
               currentIndexPatternId: dataView?.id,
             })
@@ -1074,7 +1072,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: dataView?.id,
           })
@@ -1110,7 +1108,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: newIndexPatternId,
           })

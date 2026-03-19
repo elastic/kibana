@@ -298,11 +298,19 @@
           },
           {
             "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-components/src/shared/chrome_hooks.ts"
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts"
           },
           {
             "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-components/src/shared/chrome_hooks.ts"
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/browser-components/src/shared/header_action_menu.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/browser-components/src/shared/header_action_menu.tsx"
           },
           {
             "plugin": "@kbn/core",

@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
+import { useChromeComponentsDeps } from '../context';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderLogo } from './header_logo';
@@ -28,10 +29,23 @@ import { HeaderNavControls } from '../shared/header_nav_controls';
 import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
-import { useClassicBreadcrumbs, useHasAppMenuConfig } from '../shared/chrome_hooks';
+import { useHasAppMenuConfig } from '../shared/chrome_hooks';
 
 export function ClassicHeader() {
-  const breadcrumbs = useClassicBreadcrumbs();
+  const {
+    config,
+    application,
+    basePath,
+    docLinks,
+    loadingCount$,
+    navControls,
+    classic,
+    breadcrumbsAppendExtensions$,
+    customBranding$,
+    helpMenu,
+    navLinks$,
+  } = useChromeComponentsDeps();
+
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const hasAppMenuConfig = useHasAppMenuConfig();
@@ -39,7 +53,7 @@ export function ClassicHeader() {
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
-  const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs={breadcrumbs} />;
+  const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={classic.breadcrumbs$} />;
 
   return (
     <>
@@ -51,22 +65,51 @@ export function ClassicHeader() {
             className="header__firstBar"
             sections={[
               {
-                items: [<HeaderPageAnnouncer breadcrumbs={breadcrumbs} />, <HeaderLogo />],
+                items: [
+                  <HeaderPageAnnouncer
+                    breadcrumbs$={classic.breadcrumbs$}
+                    customBranding$={customBranding$}
+                  />,
+                  <HeaderLogo
+                    href={config.homeHref}
+                    navigateToApp={application.navigateToApp}
+                    loadingCount$={loadingCount$}
+                    customBranding$={customBranding$}
+                  />,
+                ],
               },
               {
-                items: [
-                  <EuiShowFor sizes={['m', 'l', 'xl']}>
-                    <HeaderNavControls position="center" />
-                  </EuiShowFor>,
-                ],
+                ...(navControls.center$ && {
+                  items: [
+                    <EuiShowFor sizes={['m', 'l', 'xl']}>
+                      <HeaderNavControls navControls$={navControls.center$} />
+                    </EuiShowFor>,
+                  ],
+                }),
               },
               {
                 items: [
                   <EuiHideFor sizes={['m', 'l', 'xl']}>
-                    <HeaderNavControls position="center" />
+                    <>
+                      <HeaderNavControls navControls$={navControls.extension$} />
+                      <HeaderNavControls navControls$={navControls.center$} />
+                    </>
                   </EuiHideFor>,
-                  <HeaderHelpMenu />,
-                  <HeaderNavControls position="right" />,
+                  <EuiHideFor sizes={['xs', 's']}>
+                    <HeaderNavControls navControls$={navControls.extension$} />
+                  </EuiHideFor>,
+                  <HeaderHelpMenu
+                    isServerless={config.isServerless}
+                    globalHelpExtensionMenuLinks$={helpMenu.globalExtensionMenuLinks$}
+                    helpExtension$={helpMenu.extension$}
+                    helpSupportUrl$={helpMenu.supportUrl$}
+                    defaultContentLinks$={helpMenu.menuLinks$}
+                    kibanaDocLink={config.kibanaDocLink}
+                    docLinks={docLinks}
+                    kibanaVersion={config.kibanaVersion}
+                    navigateToUrl={application.navigateToUrl}
+                  />,
+                  <HeaderNavControls navControls$={navControls.right$} />,
                 ],
               },
             ]}
@@ -76,11 +119,19 @@ export function ClassicHeader() {
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem className="header__toggleNavButtonSection">
                 <CollapsibleNav
+                  appId$={application.currentAppId$}
                   id={navId}
+                  navLinks$={navLinks$}
+                  recentlyAccessed$={classic.recentlyAccessed$}
                   isNavOpen={isNavOpen}
+                  homeHref={config.homeHref}
+                  basePath={basePath}
+                  navigateToApp={application.navigateToApp}
+                  navigateToUrl={application.navigateToUrl}
                   closeNav={() => {
                     setIsNavOpen(false);
                   }}
+                  customNavLink$={classic.customNavLink$}
                   button={
                     <HeaderMenuButton
                       data-test-subj="toggleNavButton"
@@ -97,10 +148,14 @@ export function ClassicHeader() {
                 />
               </EuiHeaderSectionItem>
 
-              <HeaderNavControls position="left" />
+              <HeaderNavControls side="left" navControls$={navControls.left$} />
             </EuiHeaderSection>
 
-            <BreadcrumbsWithExtensionsWrapper>{Breadcrumbs}</BreadcrumbsWithExtensionsWrapper>
+            <BreadcrumbsWithExtensionsWrapper
+              breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
+            >
+              {Breadcrumbs}
+            </BreadcrumbsWithExtensionsWrapper>
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>

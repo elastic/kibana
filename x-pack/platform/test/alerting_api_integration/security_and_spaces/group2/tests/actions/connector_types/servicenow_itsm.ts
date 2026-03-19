@@ -161,7 +161,6 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             userIdentifierValue: null,
           },
           is_connector_type_deprecated: false,
-          auth_mode: 'shared',
         });
       });
 
@@ -220,7 +219,6 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             userIdentifierValue: mockServiceNowOAuth.config.userIdentifierValue,
           },
           is_connector_type_deprecated: false,
-          auth_mode: 'shared',
         });
       });
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import { UnifiedHistoryTable } from './unified_history_table';
 import { useUnifiedHistory } from './use_unified_history';
@@ -28,7 +28,6 @@ const renderWithProviders = (element: React.ReactElement) =>
   render(element, { wrapper: TestProviders });
 
 const mockPush = jest.fn();
-const mockReplace = jest.fn();
 const mockUseKibana = jest.fn();
 
 jest.mock('../common/lib/kibana', () => ({
@@ -39,12 +38,7 @@ jest.mock('../common/lib/kibana', () => ({
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    push: mockPush,
-    replace: mockReplace,
-    location: { search: '', pathname: '/history' },
-  }),
-  useLocation: () => ({ search: '', pathname: '/history' }),
+  useHistory: () => ({ push: mockPush }),
 }));
 
 jest.mock('./use_unified_history');
@@ -285,21 +279,25 @@ describe('UnifiedHistoryTable', () => {
     expect(screen.queryAllByLabelText('Run query')).toHaveLength(0);
   });
 
-  it('search submits on Enter key and updates URL', () => {
+  it('search submits on Enter key', async () => {
     mockHistory({ data: [] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
     const searchInput = screen.getByTestId('history-search-input');
     fireEvent.change(searchInput, { target: { value: 'test-search' } });
+
+    expect(useUnifiedHistoryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ kuery: undefined })
+    );
+
     fireEvent.keyDown(searchInput, { key: 'Enter' });
 
-    expect(mockReplace).toHaveBeenCalledWith(
-      expect.objectContaining({
-        pathname: '/history',
-        search: expect.stringContaining('q=test-search'),
-      })
-    );
+    await waitFor(() => {
+      expect(useUnifiedHistoryMock).toHaveBeenCalledWith(
+        expect.objectContaining({ kuery: 'test-search' })
+      );
+    });
   });
 
   it('query column shows SQL for single query', () => {

@@ -46,7 +46,7 @@ export async function getDataStreamMapping({
   const fieldMapping = fieldPresent
     ? {
         type: mapping?.type,
-        ...('ignore_above' in mapping ? { ignore_above: mapping.ignore_above } : {}),
+        ignore_above: (mapping as any)?.ignore_above,
       }
     : undefined;
 
@@ -69,7 +69,7 @@ function countFields(
   mappings: Record<PropertyName, MappingProperty>,
   captureField?: string,
   prefix = ''
-): { count: number; capturedMapping?: MappingProperty } {
+): { count: number; capturedMapping?: any } {
   let fieldCount = 0;
   let capturedMapping;
 

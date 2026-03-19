@@ -136,7 +136,7 @@ function install(options = undefined) {
       return transform(path, code, cache);
     },
     {
-      exts: ['.js', '.ts', '.tsx', '.text', '.peggy', '.yaml', '.yml'],
+      exts: ['.js', '.ts', '.tsx', '.text', '.peggy'],
       ignoreNodeModules: false,
       matcher(path) {
         if (options?.only && !match(path, options.only)) {

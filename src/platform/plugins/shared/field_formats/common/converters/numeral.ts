@@ -11,7 +11,6 @@
 import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
-import { escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MISSING_TOKEN, NAN_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { FieldFormat } from '../field_format';
@@ -81,9 +80,9 @@ export abstract class NumeralFormat extends FieldFormat {
       return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
     }
     if (typeof val === 'object' && !Array.isArray(val)) {
-      return escape(asPrettyString(val));
+      return asPrettyString(val);
     }
-    return escape(this.getConvertedValue(val));
+    return this.getConvertedValue(val);
   };
 
   textConvert: TextContextTypeConvert = (val) => {

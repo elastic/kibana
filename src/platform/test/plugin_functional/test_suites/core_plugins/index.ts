@@ -28,6 +28,5 @@ export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
     loadTestFile(require.resolve('./http_versioned'));
     loadTestFile(require.resolve('./dynamic_contract_resolving'));
     loadTestFile(require.resolve('./error_response'));
-    loadTestFile(require.resolve('./http_deprecation_warning'));
   });
 }

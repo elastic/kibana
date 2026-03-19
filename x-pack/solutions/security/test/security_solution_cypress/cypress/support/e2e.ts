@@ -7,7 +7,7 @@
 
 import './commands';
 import 'cypress-real-events/support';
-import { register as registerCypressGrep } from '@cypress/grep';
+import registerCypressGrep from '@cypress/grep';
 import {
   KNOWN_ESS_ROLE_DEFINITIONS,
   KNOWN_SERVERLESS_ROLE_DEFINITIONS,

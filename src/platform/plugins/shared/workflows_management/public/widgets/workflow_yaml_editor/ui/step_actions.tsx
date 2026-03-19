@@ -31,10 +31,10 @@ import {
 } from '../../../entities/workflows/store';
 
 export interface StepActionsProps {
-  onStepRun?: (params: { stepId: string; actionType: string }) => void;
+  onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
 }
 
-export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
+export const StepActions = React.memo<StepActionsProps>(({ onStepActionClicked }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
@@ -94,7 +94,7 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
         <EuiFlexItem grow={false}>
           <RunStepButton
             onClick={() =>
-              onStepRun?.({
+              onStepActionClicked?.({
                 stepId: focusedStepInfo.stepId as string,
                 actionType: 'run',
               })

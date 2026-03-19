@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
-
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
@@ -221,7 +219,7 @@ export function getVisualizeFieldSuggestions({
   // suggestions for visualizing textbased languages
   if (visualizeTriggerFieldContext && 'query' in visualizeTriggerFieldContext) {
     if (visualizeTriggerFieldContext.query) {
-      return suggestions.find((s) => s.datasourceId === LENS_DATASOURCE_ID.TEXT_BASED);
+      return suggestions.find((s) => s.datasourceId === 'textBased');
     }
   }
 

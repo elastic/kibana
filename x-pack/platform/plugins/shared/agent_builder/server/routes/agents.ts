@@ -40,14 +40,24 @@ const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   )
 );
 
-const SKILLS_SCHEMA = schema.arrayOf(
-  schema.string({
-    meta: { description: 'Skill ID to be available to the agent.' },
-  }),
-  {
-    maxSize: 100,
-    meta: { description: 'Array of skill IDs to be available to the agent.' },
-  }
+const SKILL_SELECTION_SCHEMA = schema.arrayOf(
+  schema.object(
+    {
+      skill_ids: schema.arrayOf(
+        schema.string({
+          meta: { description: 'Skill ID to be available to the agent.' },
+        }),
+        {
+          maxSize: 100,
+          meta: { description: 'Array of skill IDs. Use "*" to select all built-in skills.' },
+        }
+      ),
+    },
+    {
+      meta: { description: 'Skill selection configuration for the agent.' },
+    }
+  ),
+  { maxSize: 100 }
 );
 
 const VISIBILITY_DISABLED_MESSAGE =
@@ -220,15 +230,7 @@ export function registerAgentRoutes({
                     })
                   ),
                   tools: TOOL_SELECTION_SCHEMA,
-                  skill_ids: schema.maybe(SKILLS_SCHEMA),
-                  enable_elastic_capabilities: schema.maybe(
-                    schema.boolean({
-                      meta: {
-                        description:
-                          'When true, enables built-in Elastic capabilities for the agent.',
-                      },
-                    })
-                  ),
+                  skills: schema.maybe(SKILL_SELECTION_SCHEMA),
                   workflow_ids: schema.maybe(
                     schema.arrayOf(
                       schema.string({
@@ -379,15 +381,7 @@ export function registerAgentRoutes({
                       })
                     ),
                     tools: schema.maybe(TOOL_SELECTION_SCHEMA),
-                    skill_ids: schema.maybe(SKILLS_SCHEMA),
-                    enable_elastic_capabilities: schema.maybe(
-                      schema.boolean({
-                        meta: {
-                          description:
-                            'When true, enables built-in Elastic capabilities for the agent.',
-                        },
-                      })
-                    ),
+                    skills: schema.maybe(SKILL_SELECTION_SCHEMA),
                     workflow_ids: schema.maybe(
                       schema.arrayOf(
                         schema.string({

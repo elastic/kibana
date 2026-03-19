@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexItem, EuiLink, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import type { BuildThreatDescription } from './types';
 import type {
   MitreSubTechnique,
@@ -26,18 +26,21 @@ const lazyMitreConfiguration = () => {
   );
 };
 
-const threatEuiFlexGroupStyles = css`
+const ThreatEuiFlexGroupStyles = styled(EuiFlexGroup)`
   .euiFlexItem {
-    margin-bottom: 0;
+    margin-bottom: 0px;
   }
 `;
 
-const techniqueLinkItemStyles = css`
+const SubtechniqueFlexItem = styled(EuiFlexItem)`
+  margin-left: ${({ theme }) => theme.eui.euiSizeM};
+`;
+
+const TechniqueLinkItem = styled(EuiButtonEmpty)`
   .euiIcon {
     width: 8px;
     height: 8px;
   }
-
   align-self: flex-start;
 `;
 
@@ -45,7 +48,6 @@ export const ThreatEuiFlexGroup = ({
   threat,
   'data-test-subj': dataTestSubj = 'threat',
 }: BuildThreatDescription) => {
-  const { euiTheme } = useEuiTheme();
   const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
   const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
   const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
@@ -61,7 +63,7 @@ export const ThreatEuiFlexGroup = ({
   }, []);
 
   return (
-    <EuiFlexGroup direction="column" data-test-subj={dataTestSubj} css={threatEuiFlexGroupStyles}>
+    <ThreatEuiFlexGroupStyles direction="column" data-test-subj={dataTestSubj}>
       {threat.map((singleThreat, index) => {
         const tactic = tacticsOptions.find((t) => t.id === singleThreat.tactic.id);
         return (
@@ -81,18 +83,17 @@ export const ThreatEuiFlexGroup = ({
                   const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
                   return (
                     <EuiFlexItem key={myTechnique?.id ?? techniqueIndex}>
-                      <EuiButtonEmpty
+                      <TechniqueLinkItem
                         data-test-subj="threatTechniqueLink"
                         href={technique.reference}
                         target="_blank"
                         iconType={ListTreeIcon}
                         size="xs"
-                        css={techniqueLinkItemStyles}
                       >
                         {myTechnique != null
                           ? myTechnique.label
                           : `${technique.name} (${technique.id})`}
-                      </EuiButtonEmpty>
+                      </TechniqueLinkItem>
                       <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
                         {technique.subtechnique != null &&
                           technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
@@ -100,23 +101,19 @@ export const ThreatEuiFlexGroup = ({
                               (t) => t.id === subtechnique.id
                             );
                             return (
-                              <EuiFlexItem
-                                key={mySubtechnique?.id ?? subtechniqueIndex}
-                                css={{ marginLeft: euiTheme.size.m }}
-                              >
-                                <EuiButtonEmpty
+                              <SubtechniqueFlexItem key={mySubtechnique?.id ?? subtechniqueIndex}>
+                                <TechniqueLinkItem
                                   data-test-subj="threatSubtechniqueLink"
                                   href={subtechnique.reference}
                                   target="_blank"
                                   iconType={ListTreeIcon}
                                   size="xs"
-                                  css={techniqueLinkItemStyles}
                                 >
                                   {mySubtechnique != null
                                     ? mySubtechnique.label
                                     : `${subtechnique.name} (${subtechnique.id})`}
-                                </EuiButtonEmpty>
-                              </EuiFlexItem>
+                                </TechniqueLinkItem>
+                              </SubtechniqueFlexItem>
                             );
                           })}
                       </EuiFlexGroup>
@@ -127,6 +124,6 @@ export const ThreatEuiFlexGroup = ({
           </EuiFlexItem>
         );
       })}
-    </EuiFlexGroup>
+    </ThreatEuiFlexGroupStyles>
   );
 };

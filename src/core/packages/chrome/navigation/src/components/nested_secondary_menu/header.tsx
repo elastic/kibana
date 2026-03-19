@@ -43,7 +43,7 @@ export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescrib
           defaultMessage: 'Go back',
         })}
         color="text"
-        iconType="chevronSingleLeft"
+        iconType="arrowLeft"
         onClick={goBack}
       />
       {title && (

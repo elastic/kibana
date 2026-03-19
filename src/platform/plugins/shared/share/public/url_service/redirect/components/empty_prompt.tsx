@@ -55,7 +55,7 @@ export const RedirectEmptyPrompt: React.FC<ErrorProps> = ({
       body={<p data-test-subj="redirectErrorEmptyPromptBody">{body}</p>}
       actions={
         <EuiButtonEmpty
-          iconType="chevronSingleLeft"
+          iconType="arrowLeft"
           href={homeHref}
           data-test-subj="redirectErrorEmptyPromptButton"
         >

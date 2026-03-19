@@ -13,9 +13,8 @@ import type {
   LensInternalApi,
   LensRuntimeState,
   TypedLensSerializedState,
-  LensDatasourceId,
+  SupportedDatasourceId,
 } from '@kbn/lens-common';
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { isTextBasedLanguage } from '../helper';
@@ -72,7 +71,7 @@ export function prepareInlineEditPanel(
       saveUserChartTypeToSessionStorage(attributes.visualizationType);
     }
     const activeDatasourceId = (getActiveDatasourceIdFromDoc(attributes) ||
-      LENS_DATASOURCE_ID.FORM_BASED) as LensDatasourceId;
+      'formBased') as SupportedDatasourceId;
 
     const { updatePanelState, updateSuggestion } = getStateManagementForInlineEditing(
       activeDatasourceId,

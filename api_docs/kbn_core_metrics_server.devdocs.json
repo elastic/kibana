@@ -1045,7 +1045,7 @@
           "\nProtocol(s) used by the Elasticsearch Client"
         ],
         "signature": [
-          "\"none\" | \"http\" | \"https\" | \"mixed\""
+          "\"none\" | \"mixed\" | \"http\" | \"https\""
         ],
         "path": "src/core/packages/metrics/server/src/metrics.ts",
         "lineNumber": 48,

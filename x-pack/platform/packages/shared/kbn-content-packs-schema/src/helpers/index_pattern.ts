@@ -96,7 +96,7 @@ export function replaceIndexPatterns(
         name: updatedName,
       };
     },
-    field(field) {
+    field(field: any) {
       return field;
     },
   });

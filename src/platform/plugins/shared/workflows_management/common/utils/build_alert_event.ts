@@ -22,11 +22,7 @@ export function buildAlertEvent(params: {
   spaceId: string;
 }): AlertEvent {
   return {
-    alerts: [
-      ...(params.alerts.new?.data ?? []),
-      ...(params.alerts.ongoing?.data ?? []),
-      ...(params.alerts.recovered?.data ?? []),
-    ],
+    alerts: params.alerts.new.data,
     rule: {
       id: params.rule.id,
       name: params.rule.name,

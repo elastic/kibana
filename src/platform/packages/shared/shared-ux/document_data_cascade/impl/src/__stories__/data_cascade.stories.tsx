@@ -241,7 +241,7 @@ export const CascadeNestedGridImplementation: StoryObj<
     >(
       () => [
         {
-          iconType: 'chevronSingleDown',
+          iconType: 'arrowDown',
           iconSide: 'right',
           onClick: () => {
             /** Noop click handler */
@@ -515,7 +515,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
     >(
       () => [
         {
-          iconType: 'chevronSingleDown',
+          iconType: 'arrowDown',
           iconSide: 'right',
           onClick: () => {
             /** Noop click handler */
@@ -832,7 +832,7 @@ export const CascadeMultipleStatsPerRow: StoryObj<
     >(
       () => [
         {
-          iconType: 'chevronSingleDown',
+          iconType: 'arrowDown',
           iconSide: 'right',
           onClick: () => {
             /** Noop click handler */
@@ -1012,7 +1012,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
       headerTitle: (
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="radar" size="xl" />
+            <EuiIcon type="securitySignal" size="xl" />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiText>
@@ -1289,7 +1289,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
       headerTitle: (
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="radar" size="xl" />
+            <EuiIcon type="securitySignal" size="xl" />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiText>
@@ -1419,7 +1419,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
 
       return [
         {
-          iconType: 'star',
+          iconType: 'starEmpty',
           'aria-label': `favorite ${groupValue}`,
           onClick: () => {
             /** Noop Click handler for favorite */
@@ -1582,7 +1582,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="radar" size="xl" />
+                <EuiIcon type="securitySignal" size="xl" />
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
                 <EuiText>
@@ -1597,7 +1597,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
                 <EuiFlexItem alignItems="center" gutterSize="s">
                   <EuiFilterGroup>
                     <EuiFilterButton
-                      iconType="chevronSingleDown"
+                      iconType="arrowDown"
                       onClick={() => {
                         // Handle filter button click
                       }}

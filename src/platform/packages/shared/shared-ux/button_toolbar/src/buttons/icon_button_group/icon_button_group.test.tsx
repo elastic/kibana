@@ -21,7 +21,7 @@ describe('<IconButtonGroup />', () => {
           {
             label: 'Text',
             onClick: jest.fn(),
-            iconType: 'text',
+            iconType: 'visText',
           },
         ]}
       />

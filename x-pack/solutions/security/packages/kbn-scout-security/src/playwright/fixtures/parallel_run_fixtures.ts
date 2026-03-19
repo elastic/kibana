@@ -34,15 +34,13 @@ export const spaceTest = securityParallelFixtures.extend<
     {
       pageObjects,
       page,
-      config,
     }: {
       pageObjects: SecurityParallelTestFixtures['pageObjects'];
       page: SecurityParallelTestFixtures['page'];
-      config: SecurityParallelWorkerFixtures['config'];
     },
     use: (pageObjects: SecurityParallelTestFixtures['pageObjects']) => Promise<void>
   ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page, config);
+    const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },
   apiServices: [

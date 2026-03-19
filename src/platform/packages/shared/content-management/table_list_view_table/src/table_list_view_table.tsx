@@ -969,7 +969,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const renderCreateButton = useCallback(() => {
     if (createItem) {
       return (
-        <EuiButton onClick={createItem} data-test-subj="newItemButton" iconType="plusCircle" fill>
+        <EuiButton
+          onClick={createItem}
+          data-test-subj="newItemButton"
+          iconType="plusInCircleFilled"
+          fill
+        >
           <FormattedMessage
             id="contentManagement.tableList.listing.createNewItemButtonLabel"
             defaultMessage="Create {entityName}"

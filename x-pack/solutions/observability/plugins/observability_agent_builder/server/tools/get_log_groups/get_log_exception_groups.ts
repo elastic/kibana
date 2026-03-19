@@ -50,11 +50,8 @@ export async function getLogExceptionGroups({
       ...timeRangeFilter('@timestamp', { start: startMs, end: endMs }),
       ...kqlFilter(kqlFilterValue),
     ],
-    should: [
-      { term: { [EVENT_NAME]: 'exception' } },
-      { exists: { field: ERROR_EXC_TYPE } },
-      { exists: { field: ERROR_EXC_MESSAGE } },
-    ],
+    // Match OTel exception events: either event.name is "exception" or exception.type exists
+    should: [{ term: { [EVENT_NAME]: 'exception' } }, { exists: { field: ERROR_EXC_TYPE } }],
     minimum_should_match: 1,
     // Exclude documents already processed by APM (they have processor.event field)
     must_not: [{ exists: { field: PROCESSOR_EVENT } }],

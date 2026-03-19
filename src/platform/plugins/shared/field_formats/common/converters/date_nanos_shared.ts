@@ -14,7 +14,7 @@ import type { Moment } from 'moment';
 import moment from 'moment';
 import { NULL_LABEL } from '@kbn/field-formats-common';
 import { FieldFormat, FIELD_FORMAT_IDS } from '..';
-import type { TextContextTypeConvert } from '../types';
+import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
 
 interface FractPatternObject {
   length: number;
@@ -121,5 +121,14 @@ export class DateNanosFormat extends FieldFormat {
     }
 
     return this.memoizedConverter(val);
+  };
+
+  htmlConvert: HtmlContextTypeConvert = (val, options) => {
+    const missing = this.checkForMissingValueHtml(val);
+    if (missing) {
+      return missing;
+    }
+
+    return this.textConvert(val, options);
   };
 }

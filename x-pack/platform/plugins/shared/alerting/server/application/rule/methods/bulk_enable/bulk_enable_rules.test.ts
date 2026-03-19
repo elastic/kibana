@@ -180,14 +180,12 @@ describe('bulkEnableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: true,
-            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: true,
-            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
       ]),
@@ -454,16 +452,11 @@ describe('bulkEnableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: true,
-            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
       ]),
       { overwrite: true }
     );
-
-    const bulkCreateArgs = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
-    const alreadyEnabledRule = bulkCreateArgs.find((so: { id?: string }) => so.id === 'id2');
-    expect(alreadyEnabledRule?.attributes).not.toHaveProperty('lastEnabledAt');
 
     expect(result).toStrictEqual({
       errors: [],
@@ -497,16 +490,11 @@ describe('bulkEnableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: true,
-            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
       ]),
       { overwrite: true }
     );
-
-    const bulkCreateArgs = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
-    const alreadyEnabledRule = bulkCreateArgs.find((so: { id?: string }) => so.id === 'id2');
-    expect(alreadyEnabledRule?.attributes).not.toHaveProperty('lastEnabledAt');
 
     expect(result).toStrictEqual({
       errors: [],

@@ -43,7 +43,7 @@ export const ChartsFilterPopover = memo(
       () => (
         <EuiFilterButton
           data-test-subj={getTestId(`${filterName}-popoverButton`)}
-          iconType="chevronSingleDown"
+          iconType="arrowDown"
           onClick={onButtonClick}
           isSelected={isPopoverOpen}
           numFilters={numFilters}

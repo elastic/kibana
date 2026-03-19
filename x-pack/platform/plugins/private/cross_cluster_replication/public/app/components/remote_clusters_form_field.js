@@ -164,7 +164,7 @@ export class RemoteClustersFormField extends PureComponent {
               true
             )}
             size="s"
-            iconType="plusCircle"
+            iconType="plusInCircle"
             flush="left"
             data-test-subj="addButton"
           >
@@ -203,7 +203,7 @@ export class RemoteClustersFormField extends PureComponent {
               { redirect: `/data/cross_cluster_replication${currentUrl}` },
               true
             )}
-            iconType="plusCircle"
+            iconType="plusInCircle"
             color="danger"
             data-test-subj="addButton"
           >
@@ -272,7 +272,7 @@ export class RemoteClustersFormField extends PureComponent {
             { redirect: `/data/cross_cluster_replication${currentUrl}` },
             true
           )}
-          iconType="plusCircle"
+          iconType="plusInCircle"
           color="danger"
           data-test-subj="addButton"
         >

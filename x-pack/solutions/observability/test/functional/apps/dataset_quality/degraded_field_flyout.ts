@@ -65,8 +65,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
     this.onlyEsVersion('8.19 || >=9.1');
 
-    // Failing: See https://github.com/elastic/kibana/issues/255900
-    describe.skip('degraded field flyout open-close', () => {
+    describe('degraded field flyout open-close', () => {
       before(async () => {
         await synthtrace.index([
           // Ingest basic logs

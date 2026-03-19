@@ -8,8 +8,8 @@
  */
 
 import type { LensBaseLayer, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useEffect, useMemo } from 'react';
+import useAsync from 'react-use/lib/useAsync';
+import { useMemo } from 'react';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { MetricUnit } from '../../../types';
@@ -44,24 +44,21 @@ export const useChartLayersFromEsql = ({
 }: ChartLayersFromEsqlProps): ChartLayersFromEsqlResult => {
   const queryInfo = useEsqlQueryInfo({ query });
 
-  const [{ value: columns = [], loading, error }, fetchColumns] = useAsyncFn(
-    (signal: AbortSignal) =>
+  const {
+    value: columns = [],
+    loading,
+    error,
+  } = useAsync(
+    () =>
       getESQLQueryColumns({
         esqlQuery: query,
         search: services.data.search.search,
-        signal,
+        signal: abortController?.signal,
         timeRange,
       }),
-    [query, services.data.search, timeRange]
-  );
 
-  useEffect(() => {
-    const localAbortController = new AbortController();
-    fetchColumns(localAbortController.signal);
-    return () => {
-      localAbortController.abort();
-    };
-  }, [fetchColumns, abortController]);
+    [query, services.data.search, abortController, timeRange]
+  );
 
   const layers = useMemo<LensSeriesLayer[]>(() => {
     if (columns.length === 0) {

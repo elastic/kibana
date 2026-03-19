@@ -52,7 +52,7 @@ export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
         isLoading={removeFavorite.isLoading}
         title={title}
         aria-label={title}
-        iconType={isFavoriteOptimistic ? 'starFill' : 'star'}
+        iconType={isFavoriteOptimistic ? 'starFilled' : 'starEmpty'}
         onClick={() => {
           if (addFavorite.isLoading || removeFavorite.isLoading) return;
 

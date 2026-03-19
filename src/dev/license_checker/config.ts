@@ -70,7 +70,6 @@ export const LICENSE_ALLOWED = [
   'Nuclide software',
   'Python-2.0',
   '(Apache-2.0 AND MIT)',
-  'Apache-2.0 AND MIT',
   'BlueOak-1.0.0',
   'WTFPL OR CC0-1.0',
 ];

@@ -133,7 +133,7 @@ const ToolbarStandardButton = ({
     ? { color: 'primary', fill: true }
     : { color: 'text' };
 
-  const icon = iconType ?? (hasArrow ? 'chevronSingleDown' : '');
+  const icon = iconType ?? (hasArrow ? 'arrowDown' : '');
 
   return (
     <EuiButton

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import type { Validation } from './validation/validation';
-import { validation } from './validation/validation';
-import type { BaseStream } from './base';
+import type { ModelValidation } from './validation/model_validation';
+import { joinValidation } from './validation/model_validation';
+import { BaseStream } from './base';
+import { QueryStream as nQueryStream } from './query';
 import { IngestStream } from './ingest';
 import { ClassicStream as nClassicStream } from './ingest/classic';
 import { WiredStream as nWiredStream } from './ingest/wired';
-import { QueryStream as nQueryStream } from './query';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -22,7 +21,6 @@ export namespace Streams {
   export import WiredStream = nWiredStream;
   export import ClassicStream = nClassicStream;
   export import QueryStream = nQueryStream;
-
   export namespace all {
     export type Model = ingest.all.Model | QueryStream.Model;
     export type Source = ingest.all.Source | QueryStream.Source;
@@ -31,50 +29,10 @@ export namespace Streams {
     export type UpsertRequest = ingest.all.UpsertRequest | QueryStream.UpsertRequest;
   }
 
-  const allDefinitionSchema = z.union([
-    nWiredStream.Definition.right,
-    nClassicStream.Definition.right,
-    nQueryStream.Definition.right,
+  export const all: ModelValidation<BaseStream.Model, all.Model> = joinValidation(BaseStream, [
+    ingest.all,
+    QueryStream,
   ]);
-  const allSourceSchema = z.union([
-    nWiredStream.Source.right,
-    nClassicStream.Source.right,
-    nQueryStream.Source.right,
-  ]);
-  const allGetResponseSchema = z.union([
-    nWiredStream.GetResponse.right,
-    nClassicStream.GetResponse.right,
-    nQueryStream.GetResponse.right,
-  ]);
-  const allUpsertRequestSchema = z.union([
-    nWiredStream.UpsertRequest.right,
-    nClassicStream.UpsertRequest.right,
-    nQueryStream.UpsertRequest.right,
-  ]);
-
-  export const all: {
-    Definition: Validation<BaseStream.Model['Definition'], all.Definition>;
-    Source: Validation<BaseStream.Model['Definition'], all.Source>;
-    GetResponse: Validation<BaseStream.Model['GetResponse'], all.GetResponse>;
-    UpsertRequest: Validation<BaseStream.Model['UpsertRequest'], all.UpsertRequest>;
-  } = {
-    Definition: validation(
-      allDefinitionSchema as z.Schema<BaseStream.Model['Definition']>,
-      allDefinitionSchema
-    ),
-    Source: validation(
-      allSourceSchema as z.Schema<BaseStream.Model['Definition']>,
-      allSourceSchema
-    ),
-    GetResponse: validation(
-      allGetResponseSchema as z.Schema<BaseStream.Model['GetResponse']>,
-      allGetResponseSchema
-    ),
-    UpsertRequest: validation(
-      allUpsertRequestSchema as z.Schema<BaseStream.Model['UpsertRequest']>,
-      allUpsertRequestSchema
-    ),
-  };
 }
 
 Streams.ingest = IngestStream;

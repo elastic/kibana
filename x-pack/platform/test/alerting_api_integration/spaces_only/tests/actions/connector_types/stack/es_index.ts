@@ -84,7 +84,6 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index connector',
         connector_type_id: '.index',
         config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
-        auth_mode: 'shared',
       });
 
       // create connector with all config props
@@ -138,7 +137,6 @@ export default function indexTest({ getService }: FtrProviderContext) {
           refresh: true,
           executionTimeField: 'test',
         },
-        auth_mode: 'shared',
       });
     });
 

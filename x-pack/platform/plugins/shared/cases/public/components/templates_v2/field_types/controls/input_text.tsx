@@ -12,9 +12,7 @@ import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { type InputTextFieldSchema } from '../../../../../common/types/domain/template/fields';
 
-type InputTextProps = z.infer<typeof InputTextFieldSchema>;
-
-export const InputText: React.FC<InputTextProps> = ({ label, name, type }) => {
+export const InputText = ({ label, name, type }: z.infer<typeof InputTextFieldSchema>) => {
   return (
     <UseField
       key={name}

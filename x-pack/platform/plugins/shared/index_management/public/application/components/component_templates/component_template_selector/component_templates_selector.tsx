@@ -234,7 +234,7 @@ export const ComponentTemplatesSelector = ({
                   actions: [
                     {
                       label: i18nTexts.icons.remove,
-                      icon: 'minusCircle',
+                      icon: 'minusInCircle',
                       handler: (component: ComponentTemplateListItem) => {
                         setComponentsSelected((prev) => {
                           return prev.filter(({ name }) => component.name !== name);
@@ -275,7 +275,7 @@ export const ComponentTemplatesSelector = ({
             actions: [
               {
                 label: i18nTexts.icons.select,
-                icon: 'plusCircle',
+                icon: 'plusInCircle',
                 handler: (component: ComponentTemplateListItem) => {
                   setComponentsSelected((prev) => {
                     return [...prev, component];

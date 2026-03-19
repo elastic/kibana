@@ -14,7 +14,6 @@
 import type { ApmFields } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
 import type { Scenario } from '../cli/scenario';
-import { getBooleanOpt } from './helpers/scenario_opts_helpers';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 import { getExceptionTypeForIndex } from './helpers/exception_types';
@@ -24,7 +23,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
-  const withoutErrorId = getBooleanOpt(runOptions.scenarioOpts, 'withoutErrorId', false);
+  const { withoutErrorId = false } = runOptions.scenarioOpts;
 
   const severities = ['critical', 'error', 'warning', 'info', 'debug', 'trace'];
 

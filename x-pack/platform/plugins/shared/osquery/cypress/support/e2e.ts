@@ -26,7 +26,8 @@
 
 export {};
 
-import { register as registerCypressGrep } from '@cypress/grep';
+// @ts-expect-error ts(2306)  module has some interesting ways of importing, see https://github.com/cypress-io/cypress/blob/0871b03c5b21711cd23056454da8f23dcaca4950/npm/grep/README.md#support-file
+import registerCypressGrep from '@cypress/grep';
 
 registerCypressGrep();
 

@@ -13166,10 +13166,190 @@
             "section": "def-common.GenericFtrProviderContext",
             "text": "GenericFtrProviderContext"
           },
-          "<AllServices, {}, ProvidedTypeMap<AllServices>, ProvidedTypeMap<{}>>"
+          "<{ retry: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RetryService",
+            "text": "RetryService"
+          },
+          "; es: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<",
+          "default",
+          ">; kibanaServer: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          },
+          "; retryOnStale: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<{ driver: ",
+          "WebDriver",
+          "; browserType: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.Browsers",
+            "text": "Browsers"
+          },
+          "; consoleLog$: ",
+          "Observable",
+          "<{ message: string; level: string; }>; }>; find: (ctx: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<",
+          "FindService",
+          ">; testSubjects: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.TestSubjects",
+            "text": "TestSubjects"
+          },
+          "; browser: (ctx: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<BrowserService>; toasts: typeof ",
+          "ToastsService",
+          "; }, {}, ProvidedTypeMap<{ retry: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RetryService",
+            "text": "RetryService"
+          },
+          "; es: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<",
+          "default",
+          ">; kibanaServer: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          },
+          "; retryOnStale: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<{ driver: ",
+          "WebDriver",
+          "; browserType: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.Browsers",
+            "text": "Browsers"
+          },
+          "; consoleLog$: ",
+          "Observable",
+          "<{ message: string; level: string; }>; }>; find: (ctx: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<",
+          "FindService",
+          ">; testSubjects: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.TestSubjects",
+            "text": "TestSubjects"
+          },
+          "; browser: (ctx: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<BrowserService>; toasts: typeof ",
+          "ToastsService",
+          "; }>, ProvidedTypeMap<{}>>"
         ],
         "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/ftr_provider_context.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13613,7 +13793,187 @@
                     "section": "def-common.GenericFtrProviderContext",
                     "text": "GenericFtrProviderContext"
                   },
-                  "<AllServices, {}, ProvidedTypeMap<AllServices>, ProvidedTypeMap<{}>>"
+                  "<{ retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "default",
+                  ">; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ driver: ",
+                  "WebDriver",
+                  "; browserType: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.Browsers",
+                    "text": "Browsers"
+                  },
+                  "; consoleLog$: ",
+                  "Observable",
+                  "<{ message: string; level: string; }>; }>; find: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "FindService",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "default",
+                  ">; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ driver: ",
+                  "WebDriver",
+                  "; browserType: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.Browsers",
+                    "text": "Browsers"
+                  },
+                  "; consoleLog$: ",
+                  "Observable",
+                  "<{ message: string; level: string; }>; }>; find: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "FindService",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/retry_on_stale.ts",
                 "lineNumber": 17,
@@ -13675,7 +14035,187 @@
                     "section": "def-common.GenericFtrProviderContext",
                     "text": "GenericFtrProviderContext"
                   },
-                  "<AllServices, {}, ProvidedTypeMap<AllServices>, ProvidedTypeMap<{}>>"
+                  "<{ retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "default",
+                  ">; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ driver: ",
+                  "WebDriver",
+                  "; browserType: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.Browsers",
+                    "text": "Browsers"
+                  },
+                  "; consoleLog$: ",
+                  "Observable",
+                  "<{ message: string; level: string; }>; }>; find: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "FindService",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "default",
+                  ">; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ driver: ",
+                  "WebDriver",
+                  "; browserType: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.Browsers",
+                    "text": "Browsers"
+                  },
+                  "; consoleLog$: ",
+                  "Observable",
+                  "<{ message: string; level: string; }>; }>; find: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "FindService",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/remote/remote.ts",
                 "lineNumber": 16,
@@ -13727,7 +14267,187 @@
                     "section": "def-common.GenericFtrProviderContext",
                     "text": "GenericFtrProviderContext"
                   },
-                  "<AllServices, {}, ProvidedTypeMap<AllServices>, ProvidedTypeMap<{}>>"
+                  "<{ retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "default",
+                  ">; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ driver: ",
+                  "WebDriver",
+                  "; browserType: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.Browsers",
+                    "text": "Browsers"
+                  },
+                  "; consoleLog$: ",
+                  "Observable",
+                  "<{ message: string; level: string; }>; }>; find: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "FindService",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "default",
+                  ">; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ driver: ",
+                  "WebDriver",
+                  "; browserType: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.Browsers",
+                    "text": "Browsers"
+                  },
+                  "; consoleLog$: ",
+                  "Observable",
+                  "<{ message: string; level: string; }>; }>; find: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "FindService",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/find.ts",
                 "lineNumber": 543,
@@ -13800,7 +14520,187 @@
                     "section": "def-common.GenericFtrProviderContext",
                     "text": "GenericFtrProviderContext"
                   },
-                  "<AllServices, {}, ProvidedTypeMap<AllServices>, ProvidedTypeMap<{}>>"
+                  "<{ retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "default",
+                  ">; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ driver: ",
+                  "WebDriver",
+                  "; browserType: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.Browsers",
+                    "text": "Browsers"
+                  },
+                  "; consoleLog$: ",
+                  "Observable",
+                  "<{ message: string; level: string; }>; }>; find: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "FindService",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "default",
+                  ">; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ driver: ",
+                  "WebDriver",
+                  "; browserType: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.Browsers",
+                    "text": "Browsers"
+                  },
+                  "; consoleLog$: ",
+                  "Observable",
+                  "<{ message: string; level: string; }>; }>; find: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "FindService",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; toasts: typeof ",
+                  "ToastsService",
+                  "; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/browser.ts",
                 "lineNumber": 917,

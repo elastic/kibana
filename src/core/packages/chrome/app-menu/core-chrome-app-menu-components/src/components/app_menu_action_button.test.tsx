@@ -26,7 +26,7 @@ describe('AppMenuActionButton', () => {
   const splitButtonProps = {
     run: jest.fn(),
     secondaryButtonAriaLabel: 'More options',
-    secondaryButtonIcon: 'chevronSingleDown',
+    secondaryButtonIcon: 'arrowDown',
   };
 
   beforeEach(() => {

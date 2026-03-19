@@ -8,8 +8,6 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { isEmpty } from 'lodash';
 import moment from 'moment/moment';
-import type { Filter } from '@kbn/es-query';
-import { buildQueryFromFilters } from '@kbn/es-query';
 import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
 import { getQueryFilter } from '../../../../utils/build_query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
@@ -19,7 +17,6 @@ export const buildResultsQuery = ({
   actionId,
   agentId,
   kuery,
-  esFilters,
   sort,
   startDate,
   pagination: { activePage, querySize },
@@ -29,19 +26,19 @@ export const buildResultsQuery = ({
 }: ResultsRequestOptions): ISearchRequestParams => {
   const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 
-  let baseFilter: string;
+  let filter: string;
   if (scheduleId != null && executionCount != null) {
     const scheduleQuery = `schedule_id: ${scheduleId} AND osquery_meta.schedule_execution_count: ${executionCount}`;
     const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
-    baseFilter = scheduleQuery + agentQuery;
+    filter = scheduleQuery + agentQuery;
   } else {
     const actionIdQuery = `action_id: ${actionId}`;
     const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
-    baseFilter = actionIdQuery + agentQuery;
+    filter = actionIdQuery + agentQuery;
   }
 
   if (!isEmpty(kuery)) {
-    baseFilter = baseFilter + ` AND ${kuery}`;
+    filter = filter + ` AND ${kuery}`;
   }
 
   const timeRangeFilter =
@@ -57,15 +54,7 @@ export const buildResultsQuery = ({
           },
         ]
       : [];
-
-  const kqlFilterClause = getQueryFilter({ filter: baseFilter });
-
-  const parsedEsFilters: Filter[] = esFilters ? (JSON.parse(esFilters) as Filter[]) : [];
-
-  const esFilterClauses =
-    parsedEsFilters.length > 0 ? buildQueryFromFilters(parsedEsFilters, undefined).filter : [];
-
-  const filterQuery = [...timeRangeFilter, kqlFilterClause, ...esFilterClauses];
+  const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
 
   let index: string;
 

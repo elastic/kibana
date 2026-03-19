@@ -47,7 +47,6 @@ export class WorkflowRunFixture {
     getActionsClientWithRequest: jest.fn().mockResolvedValue(this.scopedActionsClientMock),
   } as unknown as ActionsPluginStartContract;
   public readonly configMock = {
-    eventDriven: { enabled: true, logEvents: true },
     logging: {
       console: true,
     },

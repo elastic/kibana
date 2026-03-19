@@ -14,29 +14,17 @@ import { useKibana } from '../../../hooks/use_kibana';
 interface UseWorkflowExecutionParams {
   executionId: string | null;
   enabled?: boolean;
-  includeInput?: boolean;
-  includeOutput?: boolean;
 }
 
-export function useWorkflowExecution({
-  executionId,
-  enabled = true,
-  includeInput,
-  includeOutput,
-}: UseWorkflowExecutionParams) {
+export function useWorkflowExecution({ executionId, enabled = true }: UseWorkflowExecutionParams) {
   const { http } = useKibana().services;
 
   return useQuery<WorkflowExecutionDto | null>({
-    queryKey: ['workflowExecution', executionId, includeInput, includeOutput],
+    queryKey: ['workflowExecution', executionId],
     queryFn: async () => {
       if (!executionId) return null;
-      const query: Record<string, boolean> = {};
-      if (includeInput != null) query.includeInput = includeInput;
-      if (includeOutput != null) query.includeOutput = includeOutput;
-
       const response = await http.get<WorkflowExecutionDto>(
-        `/api/workflowExecutions/${executionId}`,
-        { query }
+        `/api/workflowExecutions/${executionId}`
       );
       return response;
     },

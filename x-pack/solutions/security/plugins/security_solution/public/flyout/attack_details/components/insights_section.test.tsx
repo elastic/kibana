@@ -10,12 +10,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { AttackDetailsContext } from '../context';
-import {
-  INSIGHTS_CORRELATIONS_TEST_ID,
-  INSIGHTS_ENTITIES_TEST_ID,
-  INSIGHTS_SECTION_TEST_ID,
-} from '../constants/test_ids';
-import { AttackDetailsLeftPanelKey } from '../constants/panel_keys';
+import { INSIGHTS_CORRELATIONS_TEST_ID, INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
 import { InsightsSection } from './insights_section';
 import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -103,7 +98,9 @@ describe('InsightsSection', () => {
   it('renders the Insights section with test id', () => {
     renderWithEui(<InsightsSection />);
 
-    expect(screen.getByTestId(INSIGHTS_SECTION_TEST_ID)).toBeInTheDocument();
+    expect(
+      screen.getByTestId('attack-details-flyout-overview-insights-section')
+    ).toBeInTheDocument();
   });
 
   it('renders Entities overview with link that opens left panel on click', async () => {
@@ -116,36 +113,21 @@ describe('InsightsSection', () => {
     await user.click(titleLink);
 
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-      id: AttackDetailsLeftPanelKey,
+      id: 'attack-details-left',
       params: { attackId: 'attack-1', indexName: '.alerts-default' },
       path: { tab: 'insights', subTab: 'entity' },
     });
   });
 
-  it('renders Correlations overview with Related alerts count and clickable title', () => {
+  it('renders Correlations overview with Related alerts count and non-clickable title', () => {
     renderWithEui(<InsightsSection />);
 
     expect(screen.getByTestId(INSIGHTS_CORRELATIONS_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByText('Correlation')).toBeInTheDocument();
     expect(screen.getByText('Related alerts')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`)).toBeInTheDocument();
+    expect(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleText`)).toBeInTheDocument();
     expect(
-      screen.queryByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleText`)
+      screen.queryByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`)
     ).not.toBeInTheDocument();
-  });
-
-  it('renders Correlations overview title link that opens left panel on Correlation sub-tab', async () => {
-    const user = userEvent.setup();
-    renderWithEui(<InsightsSection />);
-
-    const titleLink = screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`);
-    await user.click(titleLink);
-
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-      id: AttackDetailsLeftPanelKey,
-      params: { attackId: 'attack-1', indexName: '.alerts-default' },
-      path: { tab: 'insights', subTab: 'correlation' },
-    });
   });
 });

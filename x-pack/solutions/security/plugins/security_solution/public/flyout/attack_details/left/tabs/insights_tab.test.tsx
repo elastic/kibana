@@ -10,7 +10,6 @@ import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { InsightsTab } from './insights_tab';
 import { AttackDetailsProvider } from '../../context';
-import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'default',
@@ -43,9 +42,9 @@ jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: () => ({
     openLeftPanel: jest.fn(),
   }),
-  useExpandableFlyoutState: jest.fn(() => ({
+  useExpandableFlyoutState: () => ({
     left: { path: { tab: 'insights', subTab: 'entity' } },
-  })),
+  }),
 }));
 
 jest.mock('../components/attack_entities_details', () => ({
@@ -54,32 +53,14 @@ jest.mock('../components/attack_entities_details', () => ({
   ),
 }));
 
-jest.mock('../components/attack_related_alerts_details', () => ({
-  AttackRelatedAlertsDetails: () => (
-    <div data-test-subj="attack-details-flyout-left-insights-correlation-table">
-      {'Correlation content'}
-    </div>
-  ),
-}));
-
-const defaultFlyoutState = { left: { path: { tab: 'insights', subTab: 'entity' } } };
-
-const renderInsightsTab = (overrides?: { subTab?: string }) => {
-  const state =
-    overrides?.subTab !== undefined
-      ? { left: { path: { tab: 'insights', subTab: overrides.subTab } } }
-      : defaultFlyoutState;
-  jest
-    .mocked(useExpandableFlyoutState)
-    .mockReturnValue(state as ReturnType<typeof useExpandableFlyoutState>);
-  return render(
+const renderInsightsTab = () =>
+  render(
     <TestProviders>
       <AttackDetailsProvider attackId="test-id" indexName=".alerts-security.alerts-default">
         <InsightsTab />
       </AttackDetailsProvider>
     </TestProviders>
   );
-};
 
 describe('InsightsTab', () => {
   it('renders insights button group', () => {
@@ -99,23 +80,5 @@ describe('InsightsTab', () => {
 
     expect(screen.getByTestId('attack-entities-details')).toBeInTheDocument();
     expect(screen.getByText('Attack entities details')).toBeInTheDocument();
-  });
-
-  it('renders Correlation sub-tab button', () => {
-    renderInsightsTab();
-
-    expect(
-      screen.getByTestId('attack-details-left-insights-correlation-button')
-    ).toBeInTheDocument();
-    expect(screen.getByText('Correlation')).toBeInTheDocument();
-  });
-
-  it('renders AttackRelatedAlertsDetails when correlation sub-tab is selected', () => {
-    renderInsightsTab({ subTab: 'correlation' });
-
-    expect(
-      screen.getByTestId('attack-details-flyout-left-insights-correlation-table')
-    ).toBeInTheDocument();
-    expect(screen.getByText('Correlation content')).toBeInTheDocument();
   });
 });

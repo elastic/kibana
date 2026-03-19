@@ -1,5 +1,5 @@
 {
-  "sha1": "4c219ca6e3dc090b706bf0f9fd91cf3eca1262ab",
+  "sha1": "27af78b43464b345eff2f34f5462c6c770a6a625",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -3351,42 +3351,42 @@
     {
       "id": "7ce2670a3e19b7c-cd54fa739417889",
       "title": "Query streams - Create query stream should properly handle errors for invalid query streams",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 38,
+        "line": 39,
         "column": 7
       }
     },
     {
       "id": "7ce2670a3e19b7c-aed3b1699c34c31",
       "title": "Query streams - Create query stream should properly create a root query stream",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 7
       }
     },
     {
       "id": "7ce2670a3e19b7c-0f0cfefb9e93b08",
       "title": "Query streams - Create query stream should create a query stream as a child of an ingest stream",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 7
       }
     },

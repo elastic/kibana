@@ -441,8 +441,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       describe('when service metrics are only available in the current time range', () => {
-        before(async () => {
-          await es.deleteByQuery({
+        before(async () =>
+          es.deleteByQuery({
             index: 'metrics-apm*',
             query: {
               bool: {
@@ -463,10 +463,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               },
             },
             refresh: true,
-            conflicts: 'proceed',
             expand_wildcards: ['open', 'hidden'],
-          });
-        });
+          })
+        );
 
         it('marks service transaction metrics as unavailable', async () => {
           const response = await getTimeRangeMetadata({
@@ -512,7 +511,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               },
             },
             refresh: true,
-            conflicts: 'proceed',
             expand_wildcards: ['open', 'hidden'],
           });
         });

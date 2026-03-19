@@ -58,7 +58,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
   {
     id: 'getting_started',
     label: 'Getting started',
-    iconType: 'rocket',
+    iconType: 'launch',
     href: '/getting-started',
   },
   {
@@ -94,7 +94,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
   {
     id: 'fourth_item',
     label: 'Fourth item',
-    iconType: 'rocket',
+    iconType: 'launch',
     href: '/fourth-item',
   },
   {

@@ -263,7 +263,7 @@ export const TemplateDetailsContent = ({
                   <EuiButton
                     fill
                     data-test-subj="manageTemplateButton"
-                    iconType="chevronSingleDown"
+                    iconType="arrowDown"
                     iconSide="right"
                     onClick={() => setIsPopOverOpen((prev) => !prev)}
                   >

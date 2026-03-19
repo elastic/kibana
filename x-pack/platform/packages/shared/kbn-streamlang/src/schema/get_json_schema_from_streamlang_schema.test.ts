@@ -15,30 +15,24 @@ describe('getJsonSchemaFromStreamlangSchema', () => {
   });
 
   it('has the expected top-level structure', () => {
-    const schema = getJsonSchemaFromStreamlangSchema(streamlangDSLSchema) as Record<
-      string,
-      unknown
-    >;
-    const stepsSchema = (schema.properties as Record<string, unknown>)?.steps as
-      | Record<string, unknown>
-      | undefined;
+    const schema = getJsonSchemaFromStreamlangSchema(streamlangDSLSchema) as Record<string, any>;
 
     expect(schema.$schema).toBe('http://json-schema.org/draft-07/schema#');
     expect(schema.type).toBe('object');
     expect(schema.additionalProperties).toBe(false);
     expect(schema.required).toEqual(['steps']);
-    expect(stepsSchema).toBeDefined();
-    expect(stepsSchema?.type).toBe('array');
+    expect(schema.properties.steps).toBeDefined();
+    expect(schema.properties.steps.type).toBe('array');
   });
 
   it('filters manual_ingest_pipeline for wired streams', () => {
     const defaultSchema = getJsonSchemaFromStreamlangSchema(streamlangDSLSchema) as Record<
       string,
-      unknown
+      any
     >;
     const wiredSchema = getJsonSchemaFromStreamlangSchema(streamlangDSLSchema, 'wired') as Record<
       string,
-      unknown
+      any
     >;
 
     const defaultString = JSON.stringify(defaultSchema);

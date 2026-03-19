@@ -694,11 +694,10 @@ paths:
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
-                  maximum: 2
-                  minimum: 0
                   type: number
               required:
                 - name
+                - description
                 - riskModifier
         required: true
       responses:
@@ -789,11 +788,10 @@ paths:
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
-                  maximum: 2
-                  minimum: 0
                   type: number
               required:
                 - name
+                - description
                 - riskModifier
         required: true
       responses:

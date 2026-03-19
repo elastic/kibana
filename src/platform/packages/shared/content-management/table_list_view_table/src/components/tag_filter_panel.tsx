@@ -127,7 +127,7 @@ export const TagFilterPanel: FC<{}> = ({}) => {
         aria-labelledby={titleId}
         button={
           <EuiFilterButton
-            iconType="chevronSingleDown"
+            iconType="arrowDown"
             iconSide="right"
             onClick={onFilterButtonClick}
             data-test-subj="tagFilterPopoverButton"

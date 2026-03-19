@@ -9,7 +9,6 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -185,14 +184,14 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = asDoc(ingestedDocs[0]);
+      const source = ingestedDocs[0];
       // Parent field and all nested fields removed
       expect(source?.['metadata.user']).toBeUndefined();
       expect(source?.['metadata.user.id']).toBeUndefined();
       expect(source?.['metadata.user.name']).toBeUndefined();
       // Other metadata fields kept (as nested object)
       expect(source?.metadata).toBeDefined();
-      expect(asDoc(source?.metadata)?.timestamp).toBe('2025-01-01');
+      expect(source.metadata?.timestamp).toBe('2025-01-01');
       expect(source?.message).toBe('keep-this');
     });
 
@@ -226,14 +225,14 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = asDoc(ingestedDocs[0]);
+      const source = ingestedDocs[0];
       // All foo.bar* fields removed from attributes
-      expect(asDoc(source?.attributes)?.['foo.bar']).toBeUndefined();
-      expect(asDoc(source?.attributes)?.['foo.bar.xyz']).toBeUndefined();
-      expect(asDoc(source?.attributes)?.['foo.bar.xyz2']).toBeUndefined();
-      expect(asDoc(source?.attributes)?.['foo.bar.xyz2.234']).toBeUndefined();
+      expect(source.attributes?.['foo.bar']).toBeUndefined();
+      expect(source.attributes?.['foo.bar.xyz']).toBeUndefined();
+      expect(source.attributes?.['foo.bar.xyz2']).toBeUndefined();
+      expect(source.attributes?.['foo.bar.xyz2.234']).toBeUndefined();
       // Other fields kept
-      expect(asDoc(source?.attributes)?.['foo.baz']).toBe(789);
+      expect(source.attributes['foo.baz']).toBe(789);
       expect(source?.message).toBe('keep-this');
     });
 
@@ -271,16 +270,14 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
-        const source = asDoc(ingestedDocs[0]);
-        const resource = asDoc(source?.resource);
-        const resourceAttrs = asDoc(resource?.attributes);
+        const source = ingestedDocs[0];
         // All foo.bar* fields removed from resource.attributes
-        expect(resourceAttrs?.['foo.bar']).toBeUndefined();
-        expect(resourceAttrs?.['foo.bar.xyz']).toBeUndefined();
-        expect(resourceAttrs?.['foo.bar.xyz2']).toBeUndefined();
-        expect(resourceAttrs?.['foo.bar.xyz2.234']).toBeUndefined();
+        expect(source.resource.attributes?.['foo.bar']).toBeUndefined();
+        expect(source.resource.attributes?.['foo.bar.xyz']).toBeUndefined();
+        expect(source.resource.attributes?.['foo.bar.xyz2']).toBeUndefined();
+        expect(source.resource.attributes?.['foo.bar.xyz2.234']).toBeUndefined();
         // Other fields kept
-        expect(resourceAttrs?.['foo.baz']).toBe(789);
+        expect(source.resource.attributes['foo.baz']).toBe(789);
         expect(source?.message).toBe('keep-this');
       }
     );

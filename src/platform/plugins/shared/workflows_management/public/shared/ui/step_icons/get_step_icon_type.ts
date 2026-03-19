@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { HardcodedIcons } from './hardcoded_icons';
 
 export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
   switch (triggerType) {
@@ -26,10 +24,8 @@ export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
   }
 };
 
-// Switch has good readability as it is
-// eslint-disable-next-line complexity
-export const getStepIconType = (nodeType: string): IconType => {
-  let iconType: IconType = 'info';
+export const getStepIconType = (nodeType: string): EuiIconType => {
+  let iconType: EuiIconType = 'info';
 
   switch (nodeType) {
     // built-in node types
@@ -43,16 +39,8 @@ export const getStepIconType = (nodeType: string): IconType => {
       iconType = 'database';
       break;
     case 'workflow.execute':
-      iconType = HardcodedIcons['workflow.execute'];
-      break;
     case 'workflow.executeAsync':
-      iconType = HardcodedIcons['workflow.executeAsync'];
-      break;
-    case 'workflow.output':
-      iconType = HardcodedIcons['workflow.output'];
-      break;
-    case 'workflow.fail':
-      iconType = HardcodedIcons['workflow.fail'];
+      iconType = 'link';
       break;
 
     // flow control nodes

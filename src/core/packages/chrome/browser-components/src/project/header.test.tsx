@@ -9,16 +9,17 @@
 
 import { render, screen, act } from '@testing-library/react';
 import React from 'react';
-import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
+import { ChromeComponentsProvider } from '../context';
+import { createMockChromeComponentsDeps } from '../test_helpers';
 import { ProjectHeader } from './header';
 
 describe('Header', () => {
   it('renders', async () => {
     const deps = createMockChromeComponentsDeps();
     render(
-      <TestChromeProviders deps={deps}>
+      <ChromeComponentsProvider value={deps}>
         <ProjectHeader />
-      </TestChromeProviders>
+      </ChromeComponentsProvider>
     );
 
     expect(screen.queryByTestId(/nav-header-logo/)).toBeVisible();
@@ -27,13 +28,13 @@ describe('Header', () => {
   it('renders custom branding logo', async () => {
     const deps = createMockChromeComponentsDeps();
     const { queryByTestId } = render(
-      <TestChromeProviders deps={deps}>
+      <ChromeComponentsProvider value={deps}>
         <ProjectHeader />
-      </TestChromeProviders>
+      </ChromeComponentsProvider>
     );
 
     act(() => {
-      deps.customBranding.customBranding$.next({ logo: 'foo.jpg' });
+      deps.customBranding$.next({ logo: 'foo.jpg' });
     });
 
     expect(queryByTestId(/customLogo/)).not.toBeNull();

@@ -9,10 +9,16 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { Suspense } from 'react';
+import type { Observable } from 'rxjs';
+import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
+import useObservable from 'react-use/lib/useObservable';
 import { EuiFlexGroup } from '@elastic/eui';
 import classnames from 'classnames';
 import { css } from '@emotion/react';
-import { useBreadcrumbsAppendExtensions } from './chrome_hooks';
+
+export interface Props {
+  breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
+}
 
 const styles = {
   breadcrumbsWithExtensionContainer: css`
@@ -33,8 +39,11 @@ const styles = {
   `,
 };
 
-export const BreadcrumbsWithExtensionsWrapper = ({ children }: PropsWithChildren) => {
-  const breadcrumbsAppendExtensions = useBreadcrumbsAppendExtensions();
+export const BreadcrumbsWithExtensionsWrapper = ({
+  breadcrumbsAppendExtensions$,
+  children,
+}: PropsWithChildren<Props>) => {
+  const breadcrumbsAppendExtensions = useObservable(breadcrumbsAppendExtensions$, []);
 
   return breadcrumbsAppendExtensions.length === 0 ? (
     <>{children}</>

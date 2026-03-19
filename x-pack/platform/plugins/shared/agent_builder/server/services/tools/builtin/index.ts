@@ -12,4 +12,3 @@ export {
   attachmentToolIds,
   type AttachmentToolsOptions,
 } from './attachments';
-export { createSmlTools, smlToolIds, type SmlToolsOptions } from './sml';

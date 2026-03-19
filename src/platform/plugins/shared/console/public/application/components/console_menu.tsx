@@ -130,7 +130,7 @@ export class ConsoleMenu extends Component<Props, State> {
           this.closePopover();
           this.copyAsCurl();
         }}
-        icon="copy"
+        icon="copyClipboard"
       >
         <FormattedMessage
           id="console.requestOptions.copyAsUrlButtonLabel"
@@ -141,7 +141,7 @@ export class ConsoleMenu extends Component<Props, State> {
         data-test-subj="consoleMenuAutoIndent"
         key="Auto indent"
         onClick={this.autoIndent}
-        icon="chevronLimitRight"
+        icon="arrowEnd"
       >
         <FormattedMessage
           id="console.requestOptions.autoIndentButtonLabel"

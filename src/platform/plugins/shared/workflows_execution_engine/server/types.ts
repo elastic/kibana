@@ -43,8 +43,6 @@ export interface WorkflowsExecutionEnginePluginStart {
   resumeWorkflowExecution: ResumeWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
-  isEventDrivenExecutionEnabled: () => boolean;
-  isLogTriggerEventsEnabled: () => boolean;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {

@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { defaultAgentToolIds } from '@kbn/agent-builder-common';
+import type { ToolSelection } from '@kbn/agent-builder-common';
 import { ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
 import type {
   ToolProvider,
@@ -14,8 +14,7 @@ import type {
   ScopedRunner,
   BuiltinToolDefinition,
 } from '@kbn/agent-builder-server';
-import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
-import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
@@ -30,7 +29,6 @@ import type { ProcessedConversation } from './prepare_conversation';
 export const selectTools = async ({
   conversation,
   previousDynamicToolIds,
-  filteredSkills,
   skills,
   request,
   toolProvider,
@@ -43,7 +41,6 @@ export const selectTools = async ({
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
-  filteredSkills: InternalSkillDefinition[];
   skills: SkillsService;
   request: KibanaRequest;
   toolProvider: ToolProvider;
@@ -83,13 +80,7 @@ export const selectTools = async ({
 
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
-    selection: [
-      attachmentToolSelection,
-      ...agentConfiguration.tools,
-      ...(agentConfiguration.enable_elastic_capabilities
-        ? [{ tool_ids: defaultAgentToolIds }]
-        : []),
-    ],
+    selection: [attachmentToolSelection, ...agentConfiguration.tools],
     toolProvider,
     request,
   });
@@ -114,9 +105,10 @@ export const selectTools = async ({
     request,
   });
 
+  const allSkills = await skills.list();
   const dynamicInlineTools = (
     await Promise.all(
-      filteredSkills
+      allSkills
         .filter((skill) => skill.getInlineTools !== undefined)
         .map((skill) => skill.getInlineTools!())
     )

@@ -109,7 +109,6 @@ describe('PluginsService', () => {
 
     mockSkillClient = {
       get: jest.fn(),
-      bulkGet: jest.fn(),
       list: jest.fn(),
       has: jest.fn(),
       create: jest.fn(),

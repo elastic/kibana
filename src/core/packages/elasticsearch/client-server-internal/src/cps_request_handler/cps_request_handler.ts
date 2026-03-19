@@ -39,7 +39,6 @@ export function getCpsRequestHandler(
 
     let routingType: 'injected' | 'explicit' | 'stripped' | 'none';
     let bypassReason: string | undefined;
-    let routingAccepted = false;
 
     if (cpsEnabled) {
       if (isProjectRoutingInQuery(acceptedParams)) {
@@ -49,7 +48,6 @@ export function getCpsRequestHandler(
         injectProjectRoutingQueryString(projectRouting, params);
 
         routingType = hadExplicitRouting ? 'explicit' : 'injected';
-        routingAccepted = true;
       } else if (isProjectRoutingInBody(acceptedParams)) {
         if (body?.pit) {
           // The project_routing is set by the openPit API, and thus part of the PIT context.
@@ -61,7 +59,6 @@ export function getCpsRequestHandler(
           injectProjectRoutingBody(projectRouting, params, body);
 
           routingType = hadExplicitRouting ? 'explicit' : 'injected';
-          routingAccepted = true;
         }
       } else {
         routingType = 'none';
@@ -82,7 +79,6 @@ export function getCpsRequestHandler(
     const requestId = (options as any).id ?? (options as any).requestId ?? 'unknown';
     const routingContext = {
       routingType,
-      routingAccepted,
       cpsEnabled,
       apiName: name ?? 'unknown',
       bypassReason,

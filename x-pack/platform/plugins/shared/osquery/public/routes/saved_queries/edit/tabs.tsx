@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiNotificationBadge, EuiPanel } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
+import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
@@ -14,12 +13,11 @@ import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 import type { AddToTimelineHandler } from '../../../types';
 
-const euiTabbedContentCss = ({ euiTheme }: UseEuiTheme) => ({
+const euiTabbedContentCss = {
   'div.euiTabs': {
     paddingLeft: '8px',
-    background: euiTheme.colors.body,
   },
-});
+};
 
 interface ResultTabsProps {
   actionId: string;
@@ -107,17 +105,15 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   );
 
   return (
-    <EuiPanel hasShadow={false} paddingSize="none">
-      <EuiTabbedContent
-        css={euiTabbedContentCss}
-        // TODO: extend the EuiTabbedContent component to support EuiTabs props
-        // bottomBorder={false}
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-        autoFocus="selected"
-        expand={false}
-      />
-    </EuiPanel>
+    <EuiTabbedContent
+      css={euiTabbedContentCss}
+      // TODO: extend the EuiTabbedContent component to support EuiTabs props
+      // bottomBorder={false}
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+      autoFocus="selected"
+      expand={false}
+    />
   );
 };
 

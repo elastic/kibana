@@ -17,10 +17,7 @@ export const getRouteEntriesFromPolicyConfig = (
   const entriesString = policyConfig.route_entries?.value;
   if (entriesString && entriesString.length > 0) {
     const entries: RouteEntry[] = JSON.parse(entriesString);
-    return entries.map((entry) => ({
-      ...entry,
-      namespace: entry.namespace?.trim() || undefined,
-    }));
+    return entries;
   }
 
   return [];
@@ -29,9 +26,5 @@ export const getRouteEntriesFromPolicyConfig = (
 export const getPolicyConfigValueFromRouteEntries = (routeEntries: RouteEntry[]): string => {
   // skip empty config rows
   const nonEmptyEntries = routeEntries.filter((entry) => entry.dataId && entry.datastream);
-  return JSON.stringify(
-    nonEmptyEntries.map(({ namespace, ...rest }) =>
-      namespace?.trim() ? { ...rest, namespace } : rest
-    )
-  );
+  return JSON.stringify(nonEmptyEntries);
 };

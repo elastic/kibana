@@ -11,7 +11,7 @@ import { timerange } from '@kbn/synthtrace-client';
 import type { LogDocument } from '@kbn/synthtrace-client';
 import type { SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { Readable } from 'stream';
-import { LogLevel, type Logger } from '../../lib/utils/create_logger';
+import type { Logger } from '../../lib/utils/create_logger';
 import type { ScenarioInitOptions } from '../../cli/scenario';
 import type { SynthtraceClients } from '../../cli/utils/clients_manager';
 import scenario from '../../scenarios/logs_and_metrics_custom_error_rate';
@@ -32,26 +32,19 @@ const createMockLogger = (): Logger => {
 // Helper to convert generator to array of serialized events
 async function generatorToArray(
   generator: SynthtraceGenerator<LogDocument> | Array<SynthtraceGenerator<LogDocument>> | Readable
-): Promise<Array<Record<string, unknown>>> {
+): Promise<Array<Record<string, any>>> {
   if (Array.isArray(generator)) {
     return generator.flatMap((gen) => Array.from(gen).flatMap((event) => event.serialize()));
   }
   if (generator instanceof Readable) {
-    const arr: Array<Record<string, unknown>> = [];
+    const arr: Array<Record<string, any>> = [];
     for await (const chunk of generator) {
       if (Array.isArray(chunk)) {
-        arr.push(
-          ...(chunk.flatMap((event: unknown) => {
-            const e = event as { serialize?: () => Record<string, unknown>[] };
-            return e?.serialize ? e.serialize() : ([event] as Record<string, unknown>[]);
-          }) as Record<string, unknown>[])
-        );
+        arr.push(...chunk.flatMap((event: any) => (event.serialize ? event.serialize() : [event])));
       } else if (chunk && typeof chunk === 'object' && 'serialize' in chunk) {
-        arr.push(...(chunk as { serialize: () => Record<string, unknown>[] }).serialize());
-      } else if (chunk && typeof chunk === 'object') {
-        arr.push(chunk as Record<string, unknown>);
+        arr.push(...chunk.serialize());
       } else {
-        throw new Error(`Unexpected generator chunk shape: ${typeof chunk}`);
+        arr.push(chunk);
       }
     }
     return arr;
@@ -61,13 +54,13 @@ async function generatorToArray(
 
 // Create minimal scenario options for testing
 const createScenarioOptions = (
-  scenarioOpts: Record<string, unknown>
+  scenarioOpts: Record<string, any>
 ): Partial<ScenarioInitOptions> => ({
   scenarioOpts,
   logger: createMockLogger(),
   from: 0,
   to: 0,
-  logLevel: LogLevel.info,
+  logLevel: 'info' as any,
   files: [],
   target: undefined,
   kibana: undefined,
@@ -82,22 +75,21 @@ const createScenarioOptions = (
   insecure: undefined,
 });
 
-// Create minimal clients for testing - empty mocks since generate only needs client references
-const createMockClients = (): Partial<SynthtraceClients> =>
-  ({
-    logsEsClient: {},
-    apmEsClient: {},
-    infraEsClient: {},
-    syntheticsEsClient: {},
-    streamsClient: {},
-  } as Partial<SynthtraceClients>);
+// Create minimal clients for testing
+const createMockClients = (): Partial<SynthtraceClients> => ({
+  logsEsClient: {} as any,
+  apmEsClient: {} as any,
+  infraEsClient: {} as any,
+  syntheticsEsClient: {} as any,
+  streamsClient: {} as any,
+});
 
 describe('logs_and_metrics_custom_error_rate', () => {
   const mockLogger = createMockLogger();
   const range = timerange(
     new Date('2021-01-01T00:00:00.000Z'),
     new Date('2021-01-01T00:05:00.000Z'),
-    mockLogger
+    mockLogger as any
   );
 
   it('generates logs with default error rate (50%)', async () => {

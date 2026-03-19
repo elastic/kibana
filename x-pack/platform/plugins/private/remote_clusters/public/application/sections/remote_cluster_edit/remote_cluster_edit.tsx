@@ -116,11 +116,7 @@ export const RemoteClusterEdit: React.FC<Props> = ({
           </p>
         }
         actions={
-          <EuiButton
-            {...reactRouterNavigate(history, '/list')}
-            color="danger"
-            iconType="chevronSingleLeft"
-          >
+          <EuiButton {...reactRouterNavigate(history, '/list')} color="danger" iconType="arrowLeft">
             <FormattedMessage
               id="xpack.remoteClusters.edit.viewRemoteClustersButtonLabel"
               defaultMessage="View remote clusters"

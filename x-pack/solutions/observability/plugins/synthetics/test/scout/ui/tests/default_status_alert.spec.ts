@@ -9,8 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/255548
-test.describe.skip('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
+test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
   let configId: string;
   let locationId: string;
 

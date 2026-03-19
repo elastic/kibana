@@ -13,7 +13,6 @@ import type { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { StartServices } from '../../../types';
 import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
@@ -44,11 +43,9 @@ export const flyoutProviders = ({
       <CellActionsProvider
         getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
       >
-        <NavigationProvider core={services}>
-          <Provider store={store}>
-            <ReactQueryClientProvider>{flyoutContent}</ReactQueryClientProvider>
-          </Provider>
-        </NavigationProvider>
+        <Provider store={store}>
+          <ReactQueryClientProvider>{flyoutContent}</ReactQueryClientProvider>
+        </Provider>
       </CellActionsProvider>
     </KibanaContextProvider>
   );

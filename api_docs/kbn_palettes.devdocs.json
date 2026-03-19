@@ -444,7 +444,7 @@
           "\nCommon palette definition used throughout kibana"
         ],
         "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-        "lineNumber": 17,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -452,17 +452,14 @@
           {
             "parentPluginId": "@kbn/palettes",
             "id": "def-common.IKbnPalette.id",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "id",
             "description": [
               "\nUnique identifier for the palette"
             ],
-            "signature": [
-              "\"status\" | \"severity\" | \"default\" | \"complementary\" | \"temperature\" | \"cool\" | \"warm\" | \"gray\" | \"elastic_line_optimized\" | \"neutral\" | \"eui_amsterdam\" | \"behind_text\" | \"kibana_v7_legacy\" | \"elastic_brand_2023\" | \"red\" | \"green\" | \"compare_to\" | \"log_level\" | \"eui_amsterdam_color_blind\""
-            ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-            "lineNumber": 21,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -477,7 +474,7 @@
               "\nDisplay name of this palette."
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-            "lineNumber": 25,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -495,7 +492,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-            "lineNumber": 29,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -513,7 +510,7 @@
               "\"gradient\" | \"categorical\""
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-            "lineNumber": 33,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -528,7 +525,7 @@
               "\nNumber of colors to display"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-            "lineNumber": 37,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -543,7 +540,7 @@
               "\nPalette belongs to an outdated theme set"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-            "lineNumber": 41,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -561,7 +558,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-            "lineNumber": 45,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -579,7 +576,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-            "lineNumber": 49,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -597,7 +594,7 @@
               "(n?: number | undefined) => string[]"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -613,7 +610,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-                "lineNumber": 58,
+                "lineNumber": 57,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -635,7 +632,7 @@
               "(colorIndex: number, numberOfColors?: number | undefined) => string"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-            "lineNumber": 59,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -651,7 +648,7 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-                "lineNumber": 62,
+                "lineNumber": 61,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -668,7 +665,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-                "lineNumber": 62,
+                "lineNumber": 61,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -708,10 +705,10 @@
         "label": "KbnPaletteId",
         "description": [],
         "signature": [
-          "\"status\" | \"severity\" | \"default\" | \"complementary\" | \"temperature\" | \"cool\" | \"warm\" | \"gray\" | \"elastic_line_optimized\" | \"neutral\" | \"eui_amsterdam\" | \"behind_text\" | \"kibana_v7_legacy\" | \"elastic_brand_2023\" | \"red\" | \"green\" | \"compare_to\" | \"log_level\" | \"eui_amsterdam_color_blind\""
+          "\"status\" | \"severity\" | \"default\" | \"complementary\" | \"temperature\" | \"cool\" | \"warm\" | \"gray\" | \"red\" | \"green\" | \"neutral\" | \"log_level\" | \"elastic_line_optimized\" | \"eui_amsterdam\" | \"behind_text\" | \"kibana_v7_legacy\" | \"elastic_brand_2023\" | \"compare_to\" | \"eui_amsterdam_color_blind\""
         ],
         "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-        "lineNumber": 15,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -728,7 +725,7 @@
           "\"gradient\" | \"categorical\""
         ],
         "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
-        "lineNumber": 13,
+        "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

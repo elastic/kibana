@@ -188,7 +188,7 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
   const renderEmptyResult = () => {
     return (
       <EuiEmptyPrompt
-        iconType="magnify"
+        iconType="search"
         title={
           <h3>
             <FormattedMessage

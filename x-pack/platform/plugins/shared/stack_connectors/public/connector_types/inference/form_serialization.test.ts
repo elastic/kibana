@@ -23,8 +23,9 @@ describe('formSerializer', () => {
     };
 
     const serializedData = formSerializer(formData);
-    const expectedData = {
-      actionTypeId: 'test.connector',
+
+    expect(serializedData).toEqual({
+      ...formData,
       config: {
         providerConfig: {
           other_config: 'value',
@@ -36,21 +37,15 @@ describe('formSerializer', () => {
           num_threads: 1,
         },
       },
-      isDeprecated: false,
-      secrets: {},
-    };
-
-    expect(serializedData).toEqual(expectedData);
+    });
   });
 
-  it('should leave form data with headers unchanged as they are in the correct location ', () => {
+  it('should serialize form data with headers', () => {
     const formData: ConnectorFormSchema = {
       actionTypeId: 'test.connector',
       config: {
         providerConfig: {
           other_config: 'value',
-        },
-        taskTypeConfig: {
           headers: {
             'test-header-key-1': 'test-header-value-1',
             'test-header-key-2': 'test-header-value-2',
@@ -62,7 +57,21 @@ describe('formSerializer', () => {
     };
 
     const serializedData = formSerializer(formData);
-    expect(serializedData).toEqual(formData);
+
+    expect(serializedData).toEqual({
+      actionTypeId: 'test.connector',
+      config: {
+        providerConfig: {
+          other_config: 'value',
+        },
+        headers: {
+          'test-header-key-1': 'test-header-value-1',
+          'test-header-key-2': 'test-header-value-2',
+        },
+      },
+      isDeprecated: false,
+      secrets: {},
+    });
   });
 
   it('should serialize form data with max_number_of_allocations and headers', () => {
@@ -72,8 +81,6 @@ describe('formSerializer', () => {
         providerConfig: {
           max_number_of_allocations: 5,
           other_config: 'value',
-        },
-        taskTypeConfig: {
           headers: {
             'test-header-key-1': 'test-header-value-1',
             'test-header-key-2': 'test-header-value-2',
@@ -98,11 +105,9 @@ describe('formSerializer', () => {
           },
           num_threads: 1,
         },
-        taskTypeConfig: {
-          headers: {
-            'test-header-key-1': 'test-header-value-1',
-            'test-header-key-2': 'test-header-value-2',
-          },
+        headers: {
+          'test-header-key-1': 'test-header-value-1',
+          'test-header-key-2': 'test-header-value-2',
         },
       },
       isDeprecated: false,
@@ -153,14 +158,14 @@ describe('formDeserializer', () => {
         providerConfig: {
           other_config: 'value',
           max_number_of_allocations: 10,
+          adaptive_allocations: undefined,
         },
-        taskTypeConfig: {},
       },
     });
   });
 
-  it('should deserialize previous saved object format form data with headers', () => {
-    const formDataOldFormat: ConnectorFormSchema = {
+  it('should deserialize form data with headers', () => {
+    const formData: ConnectorFormSchema = {
       actionTypeId: 'test.connector',
       config: {
         providerConfig: {
@@ -175,15 +180,13 @@ describe('formDeserializer', () => {
       secrets: {},
     };
 
-    const deserializedData = formDeserializer(formDataOldFormat);
+    const deserializedData = formDeserializer(formData);
 
     expect(deserializedData).toEqual({
-      ...formDataOldFormat,
+      ...formData,
       config: {
         providerConfig: {
           other_config: 'value',
-        },
-        taskTypeConfig: {
           headers: {
             'test-header-key-1': 'test-header-value-1',
             'test-header-key-2': 'test-header-value-2',
@@ -193,29 +196,7 @@ describe('formDeserializer', () => {
     });
   });
 
-  it('should deserialize updated saved object format form data with headers', () => {
-    const formData: ConnectorFormSchema = {
-      actionTypeId: 'test.connector',
-      config: {
-        providerConfig: {
-          other_config: 'value',
-        },
-        taskTypeConfig: {
-          headers: {
-            'test-header-key-1': 'test-header-value-1',
-            'test-header-key-2': 'test-header-value-2',
-          },
-        },
-      },
-      isDeprecated: false,
-      secrets: {},
-    };
-
-    const deserializedData = formDeserializer(formData);
-    expect(deserializedData).toEqual(formData);
-  });
-
-  it('should deserialize previous saved object format form data with adaptive_allocations and headers', () => {
+  it('should deserialize form data with adaptive_allocations and headers', () => {
     const formData: ConnectorFormSchema = {
       actionTypeId: 'test.connector',
       config: {
@@ -243,49 +224,7 @@ describe('formDeserializer', () => {
         providerConfig: {
           other_config: 'value',
           max_number_of_allocations: 10,
-        },
-        taskTypeConfig: {
-          headers: {
-            'test-header-key-1': 'test-header-value-1',
-            'test-header-key-2': 'test-header-value-2',
-          },
-        },
-      },
-    });
-  });
-
-  it('should deserialize updated saved object format form data with adaptive_allocations and headers', () => {
-    const formData: ConnectorFormSchema = {
-      actionTypeId: 'test.connector',
-      config: {
-        providerConfig: {
-          adaptive_allocations: {
-            max_number_of_allocations: 10,
-            min_number_of_allocations: 0,
-          },
-          other_config: 'value',
-        },
-        taskTypeConfig: {
-          headers: {
-            'test-header-key-1': 'test-header-value-1',
-            'test-header-key-2': 'test-header-value-2',
-          },
-        },
-      },
-      isDeprecated: false,
-      secrets: {},
-    };
-
-    const deserializedData = formDeserializer(formData);
-
-    expect(deserializedData).toEqual({
-      ...formData,
-      config: {
-        providerConfig: {
-          other_config: 'value',
-          max_number_of_allocations: 10,
-        },
-        taskTypeConfig: {
+          adaptive_allocations: undefined,
           headers: {
             'test-header-key-1': 'test-header-value-1',
             'test-header-key-2': 'test-header-value-2',
@@ -302,7 +241,6 @@ describe('formDeserializer', () => {
         providerConfig: {
           other_config: 'value',
         },
-        taskTypeConfig: {},
       },
       isDeprecated: false,
       secrets: {},

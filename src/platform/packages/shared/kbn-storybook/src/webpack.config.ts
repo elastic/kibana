@@ -33,7 +33,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
           type: 'javascript/auto',
         },
         {
-          test: /\.(html|md|txt|tmpl|yaml|yml)$/,
+          test: /\.(html|md|txt|tmpl)$/,
           type: 'asset/source',
         },
         {

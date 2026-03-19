@@ -26,5 +26,4 @@ export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'so
   integrationNamespaces?: string[];
   scheduleId?: string;
   executionCount?: number;
-  esFilters?: string;
 }

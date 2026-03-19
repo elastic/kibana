@@ -71,7 +71,7 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
       name: i18n.translate('xpack.indexLifecycleMgmt.policyFlyout.addToIndexTemplate', {
         defaultMessage: 'Add to index template',
       }),
-      icon: <EuiIcon type="plusCircle" />,
+      icon: <EuiIcon type="plusInCircle" />,
       onClick: () => setListAction({ selectedPolicy: policy, actionType: 'addIndexTemplate' }),
     },
   ];
@@ -100,7 +100,7 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
         }
       )}
       onClick={() => setShowPopover((previousBool) => !previousBool)}
-      iconType="chevronSingleUp"
+      iconType="arrowUp"
       iconSide="right"
       fill
       data-test-subj="managePolicyButton"

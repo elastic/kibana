@@ -76,7 +76,7 @@ export class AttachmentsService {
   async updateOrigin(
     conversationId: string,
     attachmentId: string,
-    origin: string
+    origin: unknown
   ): Promise<UpdateOriginResponse> {
     return await this.http.put<UpdateOriginResponse>(
       `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}/origin`,

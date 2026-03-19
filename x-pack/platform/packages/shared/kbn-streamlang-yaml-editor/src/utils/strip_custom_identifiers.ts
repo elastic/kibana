@@ -17,7 +17,8 @@ export function stripCustomIdentifiers(dsl: StreamlangDSL): StreamlangDSL {
   const stripFromSteps = (steps: StreamlangStep[]): StreamlangStep[] => {
     return steps.map((step) => {
       if (isConditionBlock(step)) {
-        const { customIdentifier: _, ...restOfStep } = step;
+        // Handle condition blocks with nested steps
+        const { customIdentifier, ...restOfStep } = step as any;
         return {
           ...restOfStep,
           condition: {
@@ -26,7 +27,8 @@ export function stripCustomIdentifiers(dsl: StreamlangDSL): StreamlangDSL {
           },
         };
       } else {
-        const { customIdentifier: _, ...restOfStep } = step;
+        // Handle action blocks
+        const { customIdentifier, ...restOfStep } = step as any;
         return restOfStep;
       }
     });

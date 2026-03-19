@@ -160,7 +160,7 @@ describe('render InstructionSet component', () => {
           {...defaultProps}
           statusCheckState={StatusCheckStates.NOT_CHECKED}
           callOut={{
-            iconType: 'warning',
+            iconType: 'alert',
             message: 'This is a callout message',
             title: 'Callout Title',
           }}

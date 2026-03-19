@@ -43,7 +43,7 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
     <EuiButton
       {...reactRouterNavigate(history, getPolicyCreatePath())}
       fill
-      iconType="plusCircle"
+      iconType="plusInCircle"
       data-test-subj="createPolicyButton"
     >
       <FormattedMessage

@@ -169,17 +169,13 @@ apiTest.describe(
         expect(ingestResult).toHaveLength(2);
         expect(esqlResult.documents).toHaveLength(2);
 
-        const ingestDoc1 = ingestResult.find(
-          (d: Record<string, unknown>) => d['event.kind'] === 'test'
-        );
-        const ingestDoc2 = ingestResult.find(
-          (d: Record<string, unknown>) => d['event.kind'] === 'production'
-        );
+        const ingestDoc1 = ingestResult.find((d: any) => d['event.kind'] === 'test');
+        const ingestDoc2 = ingestResult.find((d: any) => d['event.kind'] === 'production');
         const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
-          (d: Record<string, unknown>) => d['event.kind'] === 'test'
+          (d: any) => d['event.kind'] === 'test'
         );
         const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
-          (d: Record<string, unknown>) => d['event.kind'] === 'production'
+          (d: any) => d['event.kind'] === 'production'
         );
 
         expect(ingestDoc1).toStrictEqual(esqlDoc1);

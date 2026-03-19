@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InternalConnectorForm } from '@kbn/alerts-ui-shared';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
 
@@ -18,14 +19,7 @@ import { isEmpty } from 'lodash';
  * a serializer and deserializer so it has to be done on the form level.
  */
 
-type HttpConnectorForm = ConnectorFormSchema & {
-  __internal__?: {
-    headers?: Array<{ key: string; value: string; type: string }>;
-    hasProxy?: boolean;
-  };
-};
-
-export const formDeserializer = (data: ConnectorFormSchema): HttpConnectorForm => {
+export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorForm => {
   if (!data.actionTypeId) {
     // Hook form lib can call deserializer *also* while editing the form (indicated by actionTypeId
     // still being undefined). Changing the reference of form data subproperties causes problems
@@ -47,7 +41,6 @@ export const formDeserializer = (data: ConnectorFormSchema): HttpConnectorForm =
     },
     __internal__: {
       headers: configHeaders,
-      hasProxy: !!data?.config?.proxyUrl,
     },
   };
 };
@@ -64,36 +57,20 @@ const buildHeaderRecords = (
     }, {});
 };
 
-export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema => {
+export const formSerializer = (formData: InternalConnectorForm): ConnectorFormSchema => {
   const headers = formData?.__internal__?.headers ?? [];
   const configHeaders = buildHeaderRecords(headers, 'config');
   const secretHeaders = buildHeaderRecords(headers, 'secret');
-  // When the proxy section is not rendered (intermediate release: old connector without proxy
-  // fields in the schema), hasProxy is undefined. In that case we skip proxy fields entirely
-  // to avoid sending unknown fields to an older server schema that uses .strict().
-  const hasProxy = formData?.__internal__?.hasProxy;
-  const supportsProxy = hasProxy !== undefined;
 
   return {
     ...formData,
     config: {
       ...formData.config,
-      ...(isEmpty(configHeaders) && { headers: null }),
-      ...(supportsProxy &&
-        !hasProxy && {
-          proxyUrl: null,
-          proxyVerificationMode: undefined,
-          hasProxyAuth: false,
-        }),
+      headers: isEmpty(configHeaders) ? null : configHeaders,
     },
     secrets: {
       ...formData.secrets,
-      ...(isEmpty(secretHeaders) && { secretHeaders: undefined }),
-      ...(supportsProxy &&
-        (!hasProxy || !formData.config?.hasProxyAuth) && {
-          proxyUsername: null,
-          proxyPassword: null,
-        }),
+      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
     },
   };
 };

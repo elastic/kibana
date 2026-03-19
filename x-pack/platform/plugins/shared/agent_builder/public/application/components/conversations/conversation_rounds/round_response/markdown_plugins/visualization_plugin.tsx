@@ -90,14 +90,13 @@ export function createVisualizationRenderer({
 
     // Handle visualization result (pre-built Lens config)
     if (toolResult.type === 'visualization') {
-      const { visualization, time_range: visTimeRange } = toolResult.data;
+      const { visualization } = toolResult.data;
       return (
         <VisualizeLens
           lensConfig={visualization}
           dataViews={startDependencies.dataViews}
           lens={startDependencies.lens}
           uiActions={startDependencies.uiActions}
-          timeRange={visTimeRange}
         />
       );
     }

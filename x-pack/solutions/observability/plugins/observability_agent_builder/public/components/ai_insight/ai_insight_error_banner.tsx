@@ -19,7 +19,7 @@ export function AiInsightErrorBanner({ error, onRetry }: AiInsightErrorBannerPro
     <EuiCallOut
       announceOnMount
       color="danger"
-      iconType="warning"
+      iconType="alert"
       title={i18n.translate('xpack.observabilityAgentBuilder.aiInsight.errorTitle', {
         defaultMessage: 'Failed to generate AI insight',
       })}

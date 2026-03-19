@@ -554,7 +554,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   const button = (
     <EuiButton
       fill
-      iconType="chevronSingleDown"
+      iconType="arrowDown"
       iconSide="right"
       data-test-subj="manageDataStreamButton"
       onClick={() => setManagePopOver(!isManagePopOverOpen)}

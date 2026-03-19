@@ -63,11 +63,10 @@ export function createServerlessGenerator({
 
         index++;
 
-        const next: StreamLogDocument = {
+        const next = {
           ...hit,
           '@timestamp': simulatedTimestamp,
           _index: streamType === 'classic' ? system.name : undefined,
-          message: hit.message as string,
         };
 
         docs.push(next);

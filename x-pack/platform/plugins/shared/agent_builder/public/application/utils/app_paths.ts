@@ -25,9 +25,6 @@ export const appPaths = {
       return `/conversations/${conversationId}`;
     },
   },
-  connectors: {
-    list: '/connectors',
-  },
   tools: {
     list: '/tools',
     new: '/tools/new',

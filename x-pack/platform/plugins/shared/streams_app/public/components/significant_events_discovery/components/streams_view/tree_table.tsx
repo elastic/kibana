@@ -27,12 +27,12 @@ import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../streams_tour';
-import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
+import { FeaturesColumn } from './features_column';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
 import {
   ACTIONS_COLUMN_HEADER,
-  KNOWLEDGE_INDICATORS_COLUMN_HEADER,
+  FEATURES_COLUMN_HEADER,
   NAME_COLUMN_HEADER,
   NO_STREAMS_MESSAGE,
   ONBOARDING_STATUS_COLUMN_HEADER,
@@ -379,11 +379,11 @@ export function StreamsTreeTable({
               },
             },
             {
-              name: KNOWLEDGE_INDICATORS_COLUMN_HEADER,
+              name: FEATURES_COLUMN_HEADER,
               width: '120px',
               align: 'left',
               render: (item: TableRow) => (
-                <KnowledgeIndicatorsColumn
+                <FeaturesColumn
                   stream={item.stream}
                   streamOnboardingResult={streamOnboardingResultMap[item.stream.name]}
                 />

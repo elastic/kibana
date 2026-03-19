@@ -17,8 +17,8 @@ export type StrictOmit<T, K extends keyof T> = Omit<T, K> & {
 };
 
 export interface IModel {
-  Definition: object;
-  Source: object;
-  GetResponse: object;
-  UpsertRequest: object;
+  Definition: Record<string, any>;
+  Source: Record<string, any>;
+  GetResponse: Record<string, any>;
+  UpsertRequest: Record<string, any>;
 }

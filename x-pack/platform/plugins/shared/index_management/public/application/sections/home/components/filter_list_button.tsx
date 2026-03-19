@@ -58,7 +58,7 @@ export function FilterListButton<T extends string>({ onChange, filters }: Props<
 
   const button = (
     <EuiFilterButton
-      iconType="chevronSingleDown"
+      iconType="arrowDown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={Object.keys(filters).length}

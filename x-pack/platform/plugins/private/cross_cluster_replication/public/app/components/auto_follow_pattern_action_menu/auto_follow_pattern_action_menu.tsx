@@ -128,7 +128,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
       data-test-subj="autoFollowPatternActionMenuButton"
       aria-label={actionsAriaLabel}
       onClick={() => setShowPopover(!showPopover)}
-      iconType={arrowDirection === 'up' ? 'chevronSingleUp' : 'chevronSingleDown'}
+      iconType={arrowDirection === 'up' ? 'arrowUp' : 'arrowDown'}
       iconSide="right"
       fill
     >

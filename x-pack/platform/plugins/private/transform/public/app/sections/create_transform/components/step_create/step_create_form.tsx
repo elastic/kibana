@@ -384,7 +384,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               <EuiFlexGroup gutterSize="l">
                 <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                   <EuiCard
-                    icon={<EuiIcon size="xxl" type="listBullet" />}
+                    icon={<EuiIcon size="xxl" type="list" />}
                     title={i18n.translate('xpack.transform.stepCreateForm.transformListCardTitle', {
                       defaultMessage: 'Transforms',
                     })}

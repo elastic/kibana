@@ -44,37 +44,13 @@ const oauthClientCredentialsBodySchema = schema.object({
 
 export type OAuthClientCredentialsParams = TypeOf<typeof oauthClientCredentialsBodySchema>;
 
-const oauthAuthorizationCodeBodySchema = schema.object({
-  connectorId: schema.string(),
-  tokenUrl: schema.string(),
-  scope: schema.maybe(schema.string()),
-  config: schema.object({
-    clientId: schema.string(),
-    tokenUrl: schema.string(),
-  }),
-  secrets: schema.object({
-    clientSecret: schema.string(),
-  }),
-});
-
-export type OAuthAuthorizationCodeParams = TypeOf<typeof oauthAuthorizationCodeBodySchema>;
-
 const bodySchema = schema.object({
-  type: schema.oneOf([
-    schema.literal('jwt'),
-    schema.literal('client'),
-    schema.literal('authorization_code'),
-  ]),
+  type: schema.oneOf([schema.literal('jwt'), schema.literal('client')]),
   options: schema.conditional(
     schema.siblingRef('type'),
     schema.literal('jwt'),
     oauthJwtBodySchema,
-    schema.conditional(
-      schema.siblingRef('type'),
-      schema.literal('client'),
-      oauthClientCredentialsBodySchema,
-      oauthAuthorizationCodeBodySchema
-    )
+    oauthClientCredentialsBodySchema
   ),
 });
 

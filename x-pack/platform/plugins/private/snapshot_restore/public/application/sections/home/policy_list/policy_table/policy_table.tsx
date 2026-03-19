@@ -385,7 +385,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         key="createNewPolicy"
         {...reactRouterNavigate(history, linkToAddPolicy())}
         fill
-        iconType="plusCircle"
+        iconType="plusInCircle"
         data-test-subj="createPolicyButton"
       >
         <FormattedMessage

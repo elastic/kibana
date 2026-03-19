@@ -13,7 +13,6 @@ export const format: Format = (theCase, alerts) => {
     priority = null,
     issueType = null,
     parent = null,
-    otherFields = null,
   } = (theCase.connector.fields as ConnectorJiraTypeFields['fields']) ?? {};
   return {
     priority,
@@ -21,6 +20,5 @@ export const format: Format = (theCase, alerts) => {
     labels: theCase.tags.map((tag) => tag.replace(/\s+/g, '-')),
     issueType,
     parent,
-    otherFields,
   };
 };

@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ParsedMetricItem } from '../../types';
+import type { MetricField } from '../../types';
 import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { METRIC_TYPE_DESCRIPTIONS } from './metric_type_badge';
@@ -28,13 +28,12 @@ jest.mock('../../common/utils', () => ({
 }));
 
 describe('Metric Flyout Overview Tab', () => {
-  const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
-    metricName: 'test.metric',
-    dataStream: 'test-data-stream',
-    fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-    units: ['ms'],
-    dimensionFields: [],
-    metricTypes: ['counter'],
+  const createMockMetric = (overrides: Partial<MetricField> = {}): MetricField => ({
+    name: 'test.metric',
+    index: 'test-index',
+    type: ES_FIELD_TYPES.DOUBLE,
+    unit: 'ms',
+    dimensions: [],
     ...overrides,
   });
 
@@ -44,19 +43,16 @@ describe('Metric Flyout Overview Tab', () => {
 
   describe('basic rendering', () => {
     it('renders the tab title and description', () => {
-      const metricItem = createMockMetric();
-      const { getByText, getByTestId } = render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric();
+      const { getByText, getByTestId } = render(<OverviewTab metric={metric} />);
 
       expect(getByTestId('metricsExperienceFlyoutMetricName')).toBeInTheDocument();
-      expect(getByText(metricItem.metricName)).toBeInTheDocument();
+      expect(getByText(metric.name)).toBeInTheDocument();
     });
 
     it('renders main description list', () => {
-      const metricItem = createMockMetric({
-        dataStream: 'my-data-stream',
-        fieldTypes: [ES_FIELD_TYPES.LONG],
-      });
-      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric({ index: 'my-data-stream', type: ES_FIELD_TYPES.LONG });
+      const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDescriptionList')).toBeInTheDocument();
       expect(getByText('my-data-stream')).toBeInTheDocument();
@@ -66,16 +62,16 @@ describe('Metric Flyout Overview Tab', () => {
 
   describe('unit display', () => {
     it('renders unit when present', () => {
-      const metricItem = createMockMetric({ units: ['ms'] });
-      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric({ unit: 'ms' });
+      const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricUnitLabel')).toBeInTheDocument();
       expect(getByText('Milliseconds')).toBeInTheDocument();
     });
 
     it('does not render unit section when unit is undefined', () => {
-      const metricItem = createMockMetric({ units: [] });
-      const { queryByTestId } = render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric({ unit: undefined });
+      const { queryByTestId } = render(<OverviewTab metric={metric} />);
 
       expect(
         queryByTestId('metricsExperienceFlyoutOverviewTabMetricUnitLabel')
@@ -85,16 +81,16 @@ describe('Metric Flyout Overview Tab', () => {
 
   describe('instrument display', () => {
     it('renders instrument when present', () => {
-      const metricItem = createMockMetric({ metricTypes: ['counter'] });
-      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric({ instrument: 'counter' });
+      const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')).toBeInTheDocument();
       expect(getByText('counter')).toBeInTheDocument();
     });
 
     it('does not render instrument section when not present', () => {
-      const metricItem = createMockMetric({ metricTypes: undefined });
-      const { queryByTestId } = render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric({ instrument: undefined });
+      const { queryByTestId } = render(<OverviewTab metric={metric} />);
 
       expect(
         queryByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')
@@ -105,10 +101,8 @@ describe('Metric Flyout Overview Tab', () => {
       const instruments = ['counter', 'gauge', 'histogram'] as const;
 
       instruments.forEach((instrument) => {
-        const metricItem = createMockMetric({ metricTypes: [instrument] });
-        const { rerender, getByTestId, getByText } = render(
-          <OverviewTab metricItem={metricItem} />
-        );
+        const metric = createMockMetric({ instrument });
+        const { rerender, getByTestId, getByText } = render(<OverviewTab metric={metric} />);
 
         expect(
           getByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')
@@ -122,8 +116,8 @@ describe('Metric Flyout Overview Tab', () => {
     it.each(['gauge', 'counter', 'histogram'] as const)(
       'shows tooltip with description when hovering over %s badge',
       async (instrument) => {
-        const metricItem = createMockMetric({ metricTypes: [instrument] });
-        render(<OverviewTab metricItem={metricItem} />);
+        const metric = createMockMetric({ instrument });
+        render(<OverviewTab metric={metric} />);
 
         const badge = screen.getByText(instrument);
         await userEvent.hover(badge);
@@ -137,8 +131,8 @@ describe('Metric Flyout Overview Tab', () => {
     );
 
     it('does not show tooltip for unknown instrument type', async () => {
-      const metricItem = createMockMetric({ metricTypes: ['position'] });
-      render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric({ instrument: 'position' });
+      render(<OverviewTab metric={metric} />);
 
       const badge = screen.getByText('position');
       await userEvent.hover(badge);
@@ -151,8 +145,8 @@ describe('Metric Flyout Overview Tab', () => {
 
   describe('dimensions handling', () => {
     it('does not render dimensions section when no dimensions', () => {
-      const metricItem = createMockMetric({ dimensionFields: [] });
-      const { queryByTestId } = render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric({ dimensions: [] });
+      const { queryByTestId } = render(<OverviewTab metric={metric} />);
 
       expect(
         queryByTestId('metricsExperienceFlyoutOverviewTabDimensionsLabel')
@@ -163,13 +157,13 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('renders dimensions list when dimensions are present', () => {
-      const dimensionFields = [
-        { name: 'service.name' },
-        { name: 'host.name' },
-        { name: 'attributes.state' },
+      const dimensions = [
+        { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'attributes.state', type: ES_FIELD_TYPES.KEYWORD },
       ];
-      const metricItem = createMockMetric({ dimensionFields });
-      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric({ dimensions });
+      const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDimensionsLabel')).toBeInTheDocument();
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDimensionsList')).toBeInTheDocument();
@@ -181,11 +175,12 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('shows pagination when dimensions count is 20 or more', () => {
-      const dimensionFields = Array.from({ length: 20 }, (_, i) => ({
+      const dimensions = Array.from({ length: 20 }, (_, i) => ({
         name: `dimension.${String(i).padStart(2, '0')}`,
+        type: ES_FIELD_TYPES.KEYWORD,
       }));
-      const metricItem = createMockMetric({ dimensionFields });
-      const { getByTestId } = render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric({ dimensions });
+      const { getByTestId } = render(<OverviewTab metric={metric} />);
 
       expect(
         getByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
@@ -193,9 +188,12 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('does not show pagination when dimensions count is less than 20', () => {
-      const dimensionFields = [{ name: 'dimension.01' }, { name: 'dimension.02' }];
-      const metricItem = createMockMetric({ dimensionFields });
-      const { queryByTestId } = render(<OverviewTab metricItem={metricItem} />);
+      const dimensions = [
+        { name: 'dimension.01', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'dimension.02', type: ES_FIELD_TYPES.KEYWORD },
+      ];
+      const metric = createMockMetric({ dimensions });
+      const { queryByTestId } = render(<OverviewTab metric={metric} />);
 
       expect(
         queryByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
@@ -203,11 +201,12 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('keeps pagination visible when on last page with fewer items than page size', () => {
-      const dimensionFields = Array.from({ length: 25 }, (_, i) => ({
+      const dimensions = Array.from({ length: 25 }, (_, i) => ({
         name: `dimension.${String(i).padStart(2, '0')}`,
+        type: ES_FIELD_TYPES.KEYWORD,
       }));
-      const metricItem = createMockMetric({ dimensionFields });
-      const { getByTestId } = render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric({ dimensions });
+      const { getByTestId } = render(<OverviewTab metric={metric} />);
 
       expect(
         getByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
@@ -215,13 +214,13 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('sorts dimensions alphabetically', () => {
-      const dimensionFields = [
-        { name: 'zebra.field' },
-        { name: 'alpha.field' },
-        { name: 'beta.field' },
+      const dimensions = [
+        { name: 'zebra.field', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'alpha.field', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'beta.field', type: ES_FIELD_TYPES.KEYWORD },
       ];
-      const metricItem = createMockMetric({ dimensionFields });
-      const { container } = render(<OverviewTab metricItem={metricItem} />);
+      const metric = createMockMetric({ dimensions });
+      const { container } = render(<OverviewTab metric={metric} />);
 
       const dimensionsList = container.querySelector(
         '[data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"]'
@@ -240,9 +239,9 @@ describe('Metric Flyout Overview Tab', () => {
 
   describe('description display', () => {
     it('renders description when present', () => {
-      const metricItem = createMockMetric();
+      const metric = createMockMetric();
       const { getByTestId, getByText } = render(
-        <OverviewTab metricItem={metricItem} description="Test description" />
+        <OverviewTab metric={metric} description="Test description" />
       );
 
       expect(getByTestId('metricsExperienceFlyoutMetricDescription')).toBeInTheDocument();

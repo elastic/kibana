@@ -277,6 +277,7 @@ export type {
   ExpressionWrapperProps,
   GetStateType,
   StructuredDatasourceStates,
+  SupportedDatasourceId,
   LensByValueInput,
   TypedLensSerializedState,
   ESQLVariablesCompatibleDashboardApi,
@@ -400,5 +401,3 @@ export {
 } from './datasources/form_based/helpers';
 
 export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from './editor/constants';
-export { LENS_DATASOURCE_ID } from './embeddable/types';
-export type { LensDatasourceId } from './embeddable/types';

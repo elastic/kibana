@@ -35,9 +35,6 @@ import {
   ChromelessHeader,
   ClassicHeader,
 } from '@kbn/core-chrome-browser-components';
-import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
-import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
-
 import { ChromeService } from './chrome_service';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
@@ -241,38 +238,31 @@ describe('start', () => {
     });
   });
 
-  describe('render smoke tests', () => {
-    const buildComponentDeps = (startDeps: ReturnType<typeof defaultStartDeps>) => ({
-      application: startDeps.application,
-      http: startDeps.http,
-      docLinks: startDeps.docLinks,
-      customBranding: startDeps.customBranding,
+  describe('componentDeps', () => {
+    it('exposes componentDeps for use by the layout service', async () => {
+      const { chrome } = await start();
+      expect(chrome.componentDeps).toBeDefined();
+      expect(chrome.componentDeps.config).toBeDefined();
     });
 
     it('ClassicHeader renders within ChromeComponentsProvider', async () => {
-      const startDeps = defaultStartDeps();
-      const { chrome } = await start({ startDeps });
+      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
 
       render(
         <KibanaRenderContextProvider {...startDeps}>
-          <CoreEnvContextProvider value={coreContextMock.create().env}>
-            <ChromeServiceProvider value={{ chrome }}>
-              <ChromeComponentsProvider value={buildComponentDeps(startDeps)}>
-                <ClassicHeader />
-              </ChromeComponentsProvider>
-            </ChromeServiceProvider>
-          </CoreEnvContextProvider>
+          <ChromeComponentsProvider value={chrome.componentDeps}>
+            <ClassicHeader />
+          </ChromeComponentsProvider>
         </KibanaRenderContextProvider>
       );
     });
 
     it('ChromelessHeader renders within ChromeComponentsProvider', async () => {
-      const startDeps = defaultStartDeps();
-      await start({ startDeps });
+      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
 
       render(
         <KibanaRenderContextProvider {...startDeps}>
-          <ChromeComponentsProvider value={buildComponentDeps(startDeps)}>
+          <ChromeComponentsProvider value={chrome.componentDeps}>
             <ChromelessHeader />
           </ChromeComponentsProvider>
         </KibanaRenderContextProvider>

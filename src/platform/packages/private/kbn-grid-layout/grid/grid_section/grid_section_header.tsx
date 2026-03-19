@@ -22,7 +22,6 @@ import { deleteSection } from '../utils/section_management';
 import { DeleteGridSectionModal } from './delete_grid_section_modal';
 import { GridSectionTitle } from './grid_section_title';
 import type { CollapsibleSection } from './types';
-import type { UserInteractionEvent } from '../use_grid_layout_events/types';
 
 export interface GridSectionHeaderProps {
   sectionId: string;
@@ -175,18 +174,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     buttonRef.setAttribute('aria-expanded', `${!section.isCollapsed}`);
   }, [gridLayoutStateManager, sectionId]);
 
-  const handleSectionDragStart = useCallback(
-    (e: UserInteractionEvent) => {
-      const section = gridLayoutStateManager.gridLayout$.getValue()[sectionId];
-
-      if (section && !section.isMainSection && !section.isCollapsed) {
-        toggleIsCollapsed();
-      }
-      startDrag(e);
-    },
-    [gridLayoutStateManager, sectionId, toggleIsCollapsed, startDrag]
-  );
-
   return (
     <>
       <EuiFlexGroup
@@ -254,7 +241,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       />
                     </EuiFlexItem>
                   )}
-                  <EuiFlexItem grow={false} css={[styles.floatToRight]}>
+                  <EuiFlexItem
+                    grow={false}
+                    css={[styles.floatToRight, styles.visibleOnlyWhenCollapsed]}
+                  >
                     <EuiButtonIcon
                       iconType="move"
                       color="text"
@@ -262,9 +252,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
                         defaultMessage: 'Move section',
                       })}
-                      onMouseDown={handleSectionDragStart}
-                      onTouchStart={handleSectionDragStart}
-                      onKeyDown={handleSectionDragStart}
+                      onMouseDown={startDrag}
+                      onTouchStart={startDrag}
+                      onKeyDown={startDrag}
                       data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
                     />
                   </EuiFlexItem>
@@ -324,7 +314,7 @@ const styles = {
           transition: `opacity ${euiTheme.animation.extraFast} ease-in`,
         },
       },
-      [`&:hover .kbnGridLayout--deleteSectionIcon,
+      [`&:hover .kbnGridLayout--deleteSectionIcon, 
         &:hover .kbnGridSection--dragHandle,
         &:has(:focus-visible) .kbnGridLayout--deleteSectionIcon,
         &:has(:focus-visible) .kbnGridSection--dragHandle`]: {

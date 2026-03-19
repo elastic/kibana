@@ -9,7 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { omit } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import { DASHBOARD_LINK_TYPE } from '../../content_management';
 import type {
   ExternalLink,
@@ -23,7 +22,7 @@ export function extractReferences(links: LinksState['links']) {
 
   const newLinks = links.map((link) => {
     if (link.type === DASHBOARD_LINK_TYPE && link.destination) {
-      const refName = `link_${uuidv4()}_dashboard`;
+      const refName = `link_${link.id}_dashboard`;
       extractedReferences.push({
         name: refName,
         type: 'dashboard',

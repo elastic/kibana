@@ -13,11 +13,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ConnectorToken } from '../types';
 import * as allRetry from './retry_if_conflicts';
 
-const rootLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-const logger = {
-  ...rootLogger,
-  get: () => rootLogger,
-} as unknown as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
   return {
@@ -72,7 +68,6 @@ describe('create()', () => {
       token: 'testtokenvalue',
     });
     expect(result).toEqual({
-      id: 'shared:mock-saved-object-id',
       connectorId: '123',
       tokenType: 'access_token',
       token: 'testtokenvalue',
@@ -124,7 +119,7 @@ describe('get()', () => {
     expect(result).toEqual({
       hasErrors: false,
       connectorToken: {
-        id: 'shared:1',
+        id: '1',
         connectorId: '123',
         tokenType: 'access_token',
         token: 'testtokenvalue',
@@ -270,13 +265,12 @@ describe('update()', () => {
       errors: [],
     });
     const result = await connectorTokenClient.update({
-      id: 'shared:1',
+      id: '1',
       tokenType: 'access_token',
       token: 'testtokenvalue',
       expiresAtMillis: expiresAt,
     });
     expect(result).toEqual({
-      id: 'shared:1',
       connectorId: '123',
       tokenType: 'access_token',
       token: 'testtokenvalue',
@@ -293,89 +287,6 @@ describe('update()', () => {
         "1",
       ]
     `);
-  });
-
-  test('accepts unprefixed token ID and defaults to shared', async () => {
-    const expiresAt = new Date().toISOString();
-
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'connector_token',
-      attributes: {
-        connectorId: '123',
-        tokenType: 'access_token',
-        token: 'testtokenvalue',
-        createdAt: new Date().toISOString(),
-      },
-      references: [],
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'connector_token',
-      attributes: {
-        connectorId: '123',
-        tokenType: 'access_token',
-        token: 'newtokenvalue',
-        expiresAt,
-      },
-      references: [],
-    });
-
-    const result = await connectorTokenClient.update({
-      id: '1',
-      tokenType: 'access_token',
-      token: 'newtokenvalue',
-      expiresAtMillis: expiresAt,
-    });
-
-    // Should preserve the unprefixed ID as-is
-    expect(result).toEqual({
-      id: '1',
-      connectorId: '123',
-      tokenType: 'access_token',
-      token: 'newtokenvalue',
-      expiresAt,
-    });
-  });
-
-  test('correctly routes per-user: prefixed ID to user client', async () => {
-    const expiresAt = new Date().toISOString();
-
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: 'user-token-1',
-      type: 'user_connector_token',
-      attributes: {
-        profileUid: 'user-123',
-        connectorId: '123',
-        credentialType: 'oauth',
-        credentials: { accessToken: 'testtokenvalue' },
-        createdAt: new Date().toISOString(),
-      },
-      references: [],
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: 'user-token-1',
-      type: 'user_connector_token',
-      attributes: {
-        profileUid: 'user-123',
-        connectorId: '123',
-        credentialType: 'oauth',
-        credentials: { accessToken: 'newtokenvalue' },
-        expiresAt,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      references: [],
-    });
-
-    const result = await connectorTokenClient.update({
-      id: 'per-user:user-token-1',
-      credentials: { accessToken: 'newtokenvalue' },
-      expiresAtMillis: expiresAt,
-    });
-
-    // Should return with per-user: prefix intact
-    expect(result?.id).toBe('per-user:user-token-1');
   });
 
   test('should log error, when failed to update the connector token if there are a conflict errors', async () => {
@@ -501,7 +412,8 @@ describe('delete()', () => {
       ],
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
-    await connectorTokenClient.deleteConnectorTokens({ connectorId: '1' });
+    const result = await connectorTokenClient.deleteConnectorTokens({ connectorId: '1' });
+    expect(JSON.stringify(result)).toEqual(JSON.stringify([Symbol(), Symbol()]));
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -515,112 +427,6 @@ describe('delete()', () => {
         "token2",
       ]
     `);
-  });
-
-  describe('scope routing via authMode and profileUid', () => {
-    const sharedFindResult = {
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [
-        {
-          id: 'shared-token-1',
-          type: 'connector_token',
-          attributes: { connectorId: '123', tokenType: 'access_token' },
-          score: 1,
-          references: [],
-        },
-      ],
-    };
-
-    const userFindResult = {
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [
-        {
-          id: 'user-token-1',
-          type: 'user_connector_token',
-          attributes: { connectorId: '123', profileUid: 'user-123', credentialType: 'oauth' },
-          score: 1,
-          references: [],
-        },
-      ],
-    };
-
-    test('routes to shared client when authMode is shared', async () => {
-      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(sharedFindResult);
-
-      await connectorTokenClient.deleteConnectorTokens({ connectorId: '123', authMode: 'shared' });
-
-      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
-        'connector_token',
-        'shared-token-1'
-      );
-    });
-
-    test('routes to user client when authMode is per-user', async () => {
-      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(userFindResult);
-
-      await connectorTokenClient.deleteConnectorTokens({
-        connectorId: '123',
-        authMode: 'per-user',
-      });
-
-      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
-        'user_connector_token',
-        'user-token-1'
-      );
-    });
-
-    test('routes to user client when profileUid is provided', async () => {
-      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(userFindResult);
-
-      await connectorTokenClient.deleteConnectorTokens({
-        connectorId: '123',
-        profileUid: 'user-123',
-      });
-
-      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
-        'user_connector_token',
-        'user-token-1'
-      );
-    });
-
-    test('profileUid takes priority over authMode shared', async () => {
-      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(userFindResult);
-
-      await connectorTokenClient.deleteConnectorTokens({
-        connectorId: '123',
-        profileUid: 'user-123',
-        authMode: 'shared',
-      });
-
-      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
-        'user_connector_token',
-        'user-token-1'
-      );
-    });
-
-    test('profileUid takes priority over authMode per-user', async () => {
-      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(userFindResult);
-
-      await connectorTokenClient.deleteConnectorTokens({
-        connectorId: '123',
-        profileUid: 'user-123',
-        authMode: 'per-user',
-      });
-
-      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
-        'user_connector_token',
-        'user-token-1'
-      );
-    });
   });
 });
 
@@ -788,7 +594,7 @@ describe('updateOrReplace()', () => {
     await connectorTokenClient.updateOrReplace({
       connectorId: '1',
       token: {
-        id: 'shared:3',
+        id: '3',
         connectorId: '123',
         tokenType: 'access_token',
         token: 'testtokenvalue',

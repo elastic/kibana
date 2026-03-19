@@ -173,7 +173,7 @@ export function ProductDocSetting({
         'xpack.observabilityAiAssistantManagement.settingsPage.techPreviewAriaLabel',
         { defaultMessage: 'Technical preview' }
       )}
-      iconType="flask"
+      iconType="beaker"
       size="s"
       anchorProps={{
         style: { verticalAlign: 'middle' },

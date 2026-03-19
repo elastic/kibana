@@ -14,7 +14,7 @@
           "({ onFlyoutClose, http, toasts, isEdit, enforceAdaptiveAllocations, onSubmitSuccess, inferenceEndpoint, enableEisPromoTour, focusTrapProps, allowedTaskTypes, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
-        "lineNumber": 114,
+        "lineNumber": 127,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30,7 +30,7 @@
               "InferenceFlyoutWrapperProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
-            "lineNumber": 114,
+            "lineNumber": 127,
             "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
@@ -51,7 +51,7 @@
           "({ http, toasts, config: { allowContextWindowLength, allowTemperature, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, reenterSecretsOnEdit, enableEisPromoTour, allowedTaskTypes, }, }: InferenceServicesProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
-        "lineNumber": 124,
+        "lineNumber": 117,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -67,7 +67,7 @@
               "InferenceServicesProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
-            "lineNumber": 124,
+            "lineNumber": 117,
             "columnNumber": 78,
             "deprecated": false,
             "trackAdoption": false,
@@ -398,7 +398,7 @@
         "label": "ConfigCategoryProperties",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-        "lineNumber": 30,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -411,7 +411,7 @@
             "label": "label",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 31,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -424,7 +424,7 @@
             "label": "order",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 32,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -440,7 +440,7 @@
               "\"category\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 33,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -535,7 +535,7 @@
         "label": "ConfigProperties",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-        "lineNumber": 41,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -551,7 +551,7 @@
               "string | number | boolean | null"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -567,7 +567,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 43,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -580,7 +580,7 @@
             "label": "label",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 44,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -593,7 +593,7 @@
             "label": "required",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 45,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -606,7 +606,7 @@
             "label": "sensitive",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -619,7 +619,7 @@
             "label": "updatable",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 47,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -641,7 +641,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 48,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -657,23 +657,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 49,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/inference-endpoint-ui-common",
-            "id": "def-public.ConfigProperties.location",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "location",
-            "description": [],
-            "signature": [
-              "\"service_settings\" | \"task_settings\" | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 50,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -689,7 +673,7 @@
         "label": "Dependency",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-        "lineNumber": 18,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -702,7 +686,7 @@
             "label": "field",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 19,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -718,7 +702,7 @@
               "string | number | boolean | null"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 20,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -947,7 +931,7 @@
         "label": "OverrideFieldsContentType",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-        "lineNumber": 64,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -963,7 +947,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -979,7 +963,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1002,31 +986,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 67,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/inference-endpoint-ui-common",
-            "id": "def-public.OverrideFieldsContentType.supplementalData",
-            "type": "Array",
-            "tags": [],
-            "label": "supplementalData",
-            "description": [],
-            "signature": [
-              "Record<string, Partial<",
-              {
-                "pluginId": "@kbn/inference-endpoint-ui-common",
-                "scope": "public",
-                "docId": "kibKbnInferenceEndpointUiCommonPluginApi",
-                "section": "def-public.ConfigProperties",
-                "text": "ConfigProperties"
-              },
-              ">>[] | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 68,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1044,7 +1004,7 @@
               "Record<string, string | number | boolean | null> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 69,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1124,7 +1084,7 @@
         "label": "SelectOption",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-        "lineNumber": 12,
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1137,7 +1097,7 @@
             "label": "label",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 13,
+            "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1150,7 +1110,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 14,
+            "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1166,7 +1126,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 15,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1182,7 +1142,7 @@
         "label": "Validation",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-        "lineNumber": 36,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1198,7 +1158,7 @@
               "string | number"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 37,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1211,7 +1171,7 @@
             "label": "type",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1229,7 +1189,7 @@
         "label": "FieldType",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-        "lineNumber": 23,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1363,7 +1323,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
-        "lineNumber": 72,
+        "lineNumber": 69,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1419,91 +1379,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/inference-endpoint-ui-common",
-        "id": "def-public.PROVIDER_CONFIG",
-        "type": "string",
-        "tags": [],
-        "label": "PROVIDER_CONFIG",
-        "description": [],
-        "signature": [
-          "\"providerConfig\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-        "lineNumber": 86,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/inference-endpoint-ui-common",
-        "id": "def-public.PROVIDER_SECRETS",
-        "type": "string",
-        "tags": [],
-        "label": "PROVIDER_SECRETS",
-        "description": [],
-        "signature": [
-          "\"providerSecrets\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-        "lineNumber": 87,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/inference-endpoint-ui-common",
-        "id": "def-public.SERVICE_SETTINGS",
-        "type": "string",
-        "tags": [],
-        "label": "SERVICE_SETTINGS",
-        "description": [],
-        "signature": [
-          "\"service_settings\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-        "lineNumber": 83,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/inference-endpoint-ui-common",
-        "id": "def-public.TASK_SETTINGS",
-        "type": "string",
-        "tags": [],
-        "label": "TASK_SETTINGS",
-        "description": [],
-        "signature": [
-          "\"task_settings\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-        "lineNumber": 84,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/inference-endpoint-ui-common",
-        "id": "def-public.TASK_TYPE_CONFIG",
-        "type": "string",
-        "tags": [],
-        "label": "TASK_TYPE_CONFIG",
-        "description": [],
-        "signature": [
-          "\"taskTypeConfig\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-        "lineNumber": 85,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -1549,7 +1424,7 @@
         "label": "INTERNAL_OVERRIDE_FIELDS",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-        "lineNumber": 91,
+        "lineNumber": 86,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1562,7 +1437,7 @@
             "label": "[ServiceProviderKeys.elasticsearch]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-            "lineNumber": 92,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1578,7 +1453,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                "lineNumber": 93,
+                "lineNumber": 88,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1602,7 +1477,7 @@
                   ".INTEGER; updatable: true; }; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                "lineNumber": 94,
+                "lineNumber": 89,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1618,7 +1493,7 @@
                   "true"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                "lineNumber": 109,
+                "lineNumber": 104,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1635,7 +1510,7 @@
               "// Default model values for providers"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-            "lineNumber": 112,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1648,7 +1523,7 @@
                 "label": "defaultValues",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                "lineNumber": 113,
+                "lineNumber": 108,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1661,59 +1536,12 @@
                     "label": "model_id",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                    "lineNumber": 113,
+                    "lineNumber": 108,
                     "columnNumber": 22,
                     "deprecated": false,
                     "trackAdoption": false
                   }
                 ]
-              },
-              {
-                "parentPluginId": "@kbn/inference-endpoint-ui-common",
-                "id": "def-public.INTERNAL_OVERRIDE_FIELDS.ServiceProviderKeys.openai.supplementalData",
-                "type": "Array",
-                "tags": [],
-                "label": "supplementalData",
-                "description": [],
-                "signature": [
-                  "{ headers: { location: \"task_settings\"; }; }[]"
-                ],
-                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                "lineNumber": 114,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/inference-endpoint-ui-common",
-            "id": "def-public.INTERNAL_OVERRIDE_FIELDS.ServiceProviderKeys.anthropic",
-            "type": "Object",
-            "tags": [],
-            "label": "[ServiceProviderKeys.anthropic]",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-            "lineNumber": 122,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/inference-endpoint-ui-common",
-                "id": "def-public.INTERNAL_OVERRIDE_FIELDS.ServiceProviderKeys.anthropic.supplementalData",
-                "type": "Array",
-                "tags": [],
-                "label": "supplementalData",
-                "description": [],
-                "signature": [
-                  "{ max_tokens: { location: \"task_settings\"; }; }[]"
-                ],
-                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                "lineNumber": 123,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false
               }
             ]
           },
@@ -1725,7 +1553,7 @@
             "label": "[ServiceProviderKeys.amazonbedrock]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-            "lineNumber": 131,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1738,7 +1566,7 @@
                 "label": "defaultValues",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                "lineNumber": 132,
+                "lineNumber": 111,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1751,7 +1579,7 @@
                     "label": "model",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                    "lineNumber": 132,
+                    "lineNumber": 111,
                     "columnNumber": 22,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1768,7 +1596,7 @@
             "label": "[ServiceProviderKeys.googlevertexai]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-            "lineNumber": 134,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1781,7 +1609,7 @@
                 "label": "defaultValues",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                "lineNumber": 135,
+                "lineNumber": 114,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1794,7 +1622,7 @@
                     "label": "model_id",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                    "lineNumber": 135,
+                    "lineNumber": 114,
                     "columnNumber": 22,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1811,7 +1639,7 @@
             "label": "[ServiceProviderKeys.googleaistudio]",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-            "lineNumber": 137,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1824,7 +1652,7 @@
                 "label": "defaultValues",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                "lineNumber": 138,
+                "lineNumber": 117,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1837,7 +1665,7 @@
                     "label": "model_id",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/constants.tsx",
-                    "lineNumber": 138,
+                    "lineNumber": 117,
                     "columnNumber": 22,
                     "deprecated": false,
                     "trackAdoption": false

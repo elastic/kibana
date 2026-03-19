@@ -137,7 +137,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
                       {(copy: () => void) => (
                         <EuiButtonIcon
                           onClick={copy}
-                          iconType="copy"
+                          iconType="copyClipboard"
                           aria-label={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS}
                         />
                       )}

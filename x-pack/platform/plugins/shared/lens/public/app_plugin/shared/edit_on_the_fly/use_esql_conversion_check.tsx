@@ -13,7 +13,7 @@ import type {
   FormBasedPrivateState,
   FramePublicAPI,
   VisualizationState,
-  LensDatasourceId,
+  SupportedDatasourceId,
   TypedLensSerializedState,
   LensDocument,
 } from '@kbn/lens-common';
@@ -61,7 +61,7 @@ export const useEsqlConversionCheck = (
     activeVisualization,
   }: {
     attributes: TypedLensSerializedState['attributes'] | undefined;
-    datasourceId: LensDatasourceId;
+    datasourceId: SupportedDatasourceId;
     layerIds: string[];
     visualization: VisualizationState;
     activeVisualization: unknown;

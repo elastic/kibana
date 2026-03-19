@@ -9,17 +9,16 @@
 
 import { useMemo } from 'react';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { Dimension, ParsedMetricItem } from '../../../types';
+import type { Dimension, MetricField } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
   getLensMetricFormat,
-  firstNonNullable,
 } from '../../../common/utils';
 
 interface UseChartLayersParams {
   dimensions?: Dimension[];
-  metricItem: ParsedMetricItem;
+  metric: MetricField;
   color?: string;
   seriesType?: LensSeriesLayer['seriesType'];
   customFunction?: string;
@@ -35,24 +34,16 @@ interface UseChartLayersParams {
  */
 export const useChartLayers = ({
   dimensions = [],
-  metricItem,
+  metric,
   color,
   seriesType,
   customFunction,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
-    const type = firstNonNullable(metricItem.fieldTypes);
-    const instrument = firstNonNullable(metricItem.metricTypes);
-    const resolvedUnit = firstNonNullable(metricItem.units);
-
-    if (!type || !instrument) {
-      return [];
-    }
-
     const metricField = createMetricAggregation({
-      type,
-      instrument,
-      metricName: metricItem.metricName,
+      type: metric.type,
+      instrument: metric.instrument,
+      metricName: metric.name,
       customFunction,
     });
     const hasDimensions = dimensions.length > 0;
@@ -71,7 +62,7 @@ export const useChartLayers = ({
             label: metricField,
             compactValues: true,
             seriesColor: color,
-            ...(resolvedUnit ? getLensMetricFormat(resolvedUnit) : {}),
+            ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
           },
         ],
         breakdown: hasDimensions ? dimensions.map((dim) => dim.name) : undefined,
@@ -81,10 +72,10 @@ export const useChartLayers = ({
     color,
     customFunction,
     dimensions,
-    metricItem.fieldTypes,
-    metricItem.metricTypes,
-    metricItem.metricName,
-    metricItem.units,
+    metric.type,
+    metric.instrument,
+    metric.name,
+    metric.unit,
     seriesType,
   ]);
 };

@@ -7,7 +7,7 @@ Array [
     data-test-subj="homeAddData"
     flush="both"
     href=""
-    iconType="plusCircle"
+    iconType="plusInCircle"
   >
     Add integrations
   </EuiButtonEmpty>,
@@ -23,7 +23,7 @@ Array [
     data-test-subj="homeAddData"
     flush="both"
     href=""
-    iconType="plusCircle"
+    iconType="plusInCircle"
   >
     Add integrations
   </EuiButtonEmpty>,

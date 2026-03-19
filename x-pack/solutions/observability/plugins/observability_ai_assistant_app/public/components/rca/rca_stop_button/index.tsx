@@ -15,7 +15,7 @@ export function RootCauseAnalysisStopButton({ onClick }: { onClick: () => void }
       onClick={() => {
         onClick();
       }}
-      iconType="stopFill"
+      iconType="stopFilled"
       color="text"
     >
       {i18n.translate('xpack.observabilityAiAssistant.rca.stopAnalysisButtonLabel', {

@@ -10,7 +10,7 @@ import type { HttpFetchOptions } from '@kbn/core/public';
 export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   pathname: string;
   method?: string;
-  body?: unknown;
+  body?: any;
 };
 
 export interface ApiErrorResponse {

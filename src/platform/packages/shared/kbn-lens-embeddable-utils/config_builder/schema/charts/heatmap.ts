@@ -64,7 +64,7 @@ const heatmapSharedStateSchema = {
   ),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
-  axis: schema.maybe(
+  axes: schema.maybe(
     schema.object(
       {
         x: schema.maybe(
@@ -129,13 +129,13 @@ const heatmapSharedStateSchema = {
 };
 
 const heatmapAxesStateSchemaProps = {
-  x: bucketOperationDefinitionSchema,
-  y: schema.maybe(bucketOperationDefinitionSchema),
+  xAxis: bucketOperationDefinitionSchema,
+  yAxis: schema.maybe(bucketOperationDefinitionSchema),
 };
 
 const heatmapAxesStateESQLSchemaProps = {
-  x: esqlColumnSchema,
-  y: schema.maybe(esqlColumnSchema),
+  xAxis: esqlColumnSchema,
+  yAxis: schema.maybe(esqlColumnSchema),
 };
 
 const heatmapStateMetricOptionsSchemaProps = {

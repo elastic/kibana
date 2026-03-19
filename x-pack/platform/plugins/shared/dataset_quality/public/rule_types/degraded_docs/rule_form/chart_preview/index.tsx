@@ -66,11 +66,7 @@ export function ChartPreview({
 
   const barSeries = useMemo(() => {
     return series.flatMap((serie) =>
-      serie.data.map((point) => ({
-        ...point,
-        y: point.y ?? 0,
-        groupBy: serie.name,
-      }))
+      serie.data.map((point) => ({ ...point, groupBy: serie.name }))
     );
   }, [series]);
 
@@ -78,15 +74,7 @@ export function ChartPreview({
 
   const chartSize = 120;
 
-  const seriesWithNumericY = useMemo(
-    () =>
-      series.map((s) => ({
-        ...s,
-        data: s.data.map((d) => ({ x: d.x, y: d.y ?? 0 })),
-      })),
-    [series]
-  );
-  const { yMax, xMin, xMax } = getDomain(seriesWithNumericY);
+  const { yMax, xMin, xMax } = getDomain(series);
 
   const chartDomain = {
     max: Math.max(yMax === 0 ? 1 : yMax, Math.max(...threshold)) * 1.1, // Add 10% headroom.

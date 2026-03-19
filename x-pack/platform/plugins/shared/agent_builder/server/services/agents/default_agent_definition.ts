@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId, AgentVisibility } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  defaultAgentToolIds,
+  AgentVisibility,
+} from '@kbn/agent-builder-common';
 import type { AgentCreateRequest } from '../../../common/agents';
 
 export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
@@ -14,9 +18,6 @@ export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
   description: 'Elastic AI Agent',
   visibility: AgentVisibility.Public,
   configuration: {
-    // enable built-in skills and default set of tools for the default agent
-    enable_elastic_capabilities: true,
-    tools: [],
-    skill_ids: [],
+    tools: [{ tool_ids: [...defaultAgentToolIds] }],
   },
 });

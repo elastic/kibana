@@ -152,7 +152,7 @@ describe('resolveResource', () => {
       expect(result).toEqual({
         name: 'my-local-index',
         type: EsResourceType.index,
-        fields: [{ path: 'title', type: 'text', meta: {}, searchable: true }],
+        fields: [{ path: 'title', type: 'text', meta: {} }],
         description: 'A test index',
       });
     });

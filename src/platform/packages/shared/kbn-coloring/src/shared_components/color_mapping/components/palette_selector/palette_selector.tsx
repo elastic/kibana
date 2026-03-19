@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
 import { getAppendedTag } from '@kbn/palettes';
 import type { RootState } from '../../state/color_mapping';
 import { updatePalette } from '../../state/color_mapping';
@@ -28,7 +28,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
   const model = useSelector((state: RootState) => state.colorMapping);
 
   const switchPaletteFn = useCallback(
-    (selectedPaletteId: KbnPaletteId, preserveColorChanges: boolean) => {
+    (selectedPaletteId: string, preserveColorChanges: boolean) => {
       dispatch(
         updatePalette({
           paletteId: selectedPaletteId,
@@ -50,7 +50,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
     [dispatch, model.assignments, model.colorMode, palettes]
   );
 
-  const [preserveModalPaletteId, setPreserveModalPaletteId] = useState<KbnPaletteId | null>(null);
+  const [preserveModalPaletteId, setPreserveModalPaletteId] = useState<string | null>(null);
 
   const confirmModalTitleId = useGeneratedHtmlId();
 
@@ -118,14 +118,13 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
               type: 'fixed',
             }))}
           onChange={(selectedPaletteId) => {
-            const paletteId = selectedPaletteId as KbnPaletteId;
             const hasChanges = model.assignments.some((a) => a.touched);
             const hasGradientChanges =
               model.colorMode.type === 'gradient' && model.colorMode.steps.some((a) => a.touched);
             if (hasChanges || hasGradientChanges) {
-              setPreserveModalPaletteId(paletteId);
+              setPreserveModalPaletteId(selectedPaletteId);
             } else {
-              switchPaletteFn(paletteId, false);
+              switchPaletteFn(selectedPaletteId, false);
             }
           }}
           valueOfSelected={currentPaletteId}

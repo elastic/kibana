@@ -18,8 +18,6 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   getLazyLiveQueryField,
   getLazyOsqueryAction,
@@ -69,21 +67,6 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
 }
 
-/**
- * @internal
- */
-export interface OsqueryTimelinesStart {
-  getHoverActions: () => {
-    getAddToTimelineButton: (props: {
-      dataProvider: unknown[];
-      field: string;
-      ownFocus: boolean;
-      showTooltip: boolean;
-      startServices: { analytics: unknown; i18n: unknown; theme: unknown };
-    }) => unknown;
-  };
-}
-
 export interface StartPlugins {
   discover: DiscoverStart;
   data: DataPublicPluginStart;
@@ -93,9 +76,6 @@ export interface StartPlugins {
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
-  timelines?: OsqueryTimelinesStart;
-  uiActions?: UiActionsStart;
-  unifiedSearch?: UnifiedSearchPublicPluginStart;
   appName?: string;
 }
 

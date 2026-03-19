@@ -33,8 +33,6 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { z } from '@kbn/zod/v4';
-import type { ChildWorkflowExecutionItem } from './lib/get_child_workflow_executions';
-import type { StepExecutionListResult } from './lib/search_step_executions';
 import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
@@ -94,15 +92,6 @@ export interface WorkflowExecutionLogsDto {
 export interface GetStepExecutionParams {
   executionId: string;
   id: string;
-}
-
-export interface SearchStepExecutionsParams {
-  workflowId: string;
-  stepId?: string;
-  includeInput?: boolean;
-  includeOutput?: boolean;
-  page?: number;
-  size?: number;
 }
 
 export interface GetAvailableConnectorsParams {
@@ -221,19 +210,15 @@ export class WorkflowsManagementApi {
     spaceId: string,
     inputs: Record<string, any>,
     request: KibanaRequest,
-    triggeredBy?: string,
-    metadata?: Record<string, unknown>
+    triggeredBy?: string
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
-    const context: Record<string, unknown> = {
+    const context = {
       event,
       spaceId,
       inputs: manualInputs,
       triggeredBy,
     };
-    if (metadata) {
-      context.metadata = metadata;
-    }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       workflow,
@@ -326,7 +311,6 @@ export class WorkflowsManagementApi {
   public async testStep(
     workflowYaml: string,
     stepId: string,
-    workflowId: string | undefined,
     contextOverride: Record<string, any>,
     spaceId: string,
     request: KibanaRequest
@@ -343,7 +327,7 @@ export class WorkflowsManagementApi {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflowStep(
       {
-        id: workflowId ?? 'test-workflow',
+        id: 'test-workflow',
         name: workflowToCreate.name,
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
@@ -371,13 +355,6 @@ export class WorkflowsManagementApi {
     options?: { includeInput?: boolean; includeOutput?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId, options);
-  }
-
-  public async getChildWorkflowExecutions(
-    parentExecutionId: string,
-    spaceId: string
-  ): Promise<ChildWorkflowExecutionItem[]> {
-    return this.workflowsService.getChildWorkflowExecutions(parentExecutionId, spaceId);
   }
 
   public async getWorkflowExecutionLogs(params: {
@@ -436,13 +413,6 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     return this.workflowsService.getStepExecution(params, spaceId);
-  }
-
-  public async searchStepExecutions(
-    params: SearchStepExecutionsParams,
-    spaceId: string
-  ): Promise<StepExecutionListResult> {
-    return this.workflowsService.searchStepExecutions(params, spaceId);
   }
 
   public async cancelWorkflowExecution(

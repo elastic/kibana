@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution, WorkflowExecutionDto } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import {
-  buildContextOverride,
-  buildContextOverrideFromExecution,
-} from './build_step_context_override';
-import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
+import { buildContextOverride } from './build_step_context_override';
 
 describe('buildContextOverride', () => {
   const mockStaticData = {
@@ -93,7 +88,7 @@ describe('buildContextOverride', () => {
         steps: {
           first_step: {
             output: {
-              result: INPUT_STRING_PLACEHOLDER,
+              result: 'replace with your data',
             },
           },
         },
@@ -141,12 +136,12 @@ describe('buildContextOverride', () => {
               data: {
                 rows: {
                   '0': {
-                    name: INPUT_STRING_PLACEHOLDER,
+                    name: 'replace with your data',
                   },
                 },
               },
               meta: {
-                total: INPUT_STRING_PLACEHOLDER,
+                total: 'replace with your data',
               },
             },
           },
@@ -194,7 +189,7 @@ describe('buildContextOverride', () => {
         steps: {
           data_step: {
             output: {
-              items: INPUT_STRING_PLACEHOLDER,
+              items: 'replace with your data',
             },
           },
         },
@@ -231,9 +226,9 @@ describe('buildContextOverride', () => {
       expect(result.stepContext).toEqual({
         foreach: {
           item: {
-            name: INPUT_STRING_PLACEHOLDER,
+            name: 'replace with your data',
           },
-          index: INPUT_STRING_PLACEHOLDER,
+          index: 'replace with your data',
         },
       });
       expect(result.schema).toBeDefined();
@@ -268,9 +263,9 @@ describe('buildContextOverride', () => {
       expect(result.stepContext).toEqual({
         execution: {
           workflow: {
-            id: INPUT_STRING_PLACEHOLDER,
+            id: 'replace with your data',
           },
-          id: INPUT_STRING_PLACEHOLDER,
+          id: 'replace with your data',
         },
       });
       expect(result.schema).toBeDefined();
@@ -308,7 +303,7 @@ describe('buildContextOverride', () => {
         steps: {
           previous_step: {
             output: {
-              data: INPUT_STRING_PLACEHOLDER,
+              data: 'replace with your data',
             },
           },
         },
@@ -318,12 +313,12 @@ describe('buildContextOverride', () => {
         event: {
           payload: {
             user: {
-              id: INPUT_STRING_PLACEHOLDER,
+              id: 'replace with your data',
             },
           },
         },
         inputs: {
-          userInput: INPUT_STRING_PLACEHOLDER,
+          userInput: 'replace with your data',
         },
       });
       expect(result.schema).toBeDefined();
@@ -410,7 +405,7 @@ describe('buildContextOverride', () => {
       expect(result.stepContext).toEqual({
         inputs: {
           messageWithDefault: 'default value',
-          messageWithoutDefault: INPUT_STRING_PLACEHOLDER,
+          messageWithoutDefault: 'replace with your data',
         },
       });
       expect(result.schema).toBeDefined();
@@ -600,7 +595,7 @@ describe('buildContextOverride', () => {
       expect(result.stepContext).toEqual({
         inputs: {
           messageWithDefault: 'default value',
-          messageWithoutDefault: INPUT_STRING_PLACEHOLDER,
+          messageWithoutDefault: 'replace with your data',
         },
       });
       expect(result.schema).toBeDefined();
@@ -731,7 +726,7 @@ describe('buildContextOverride', () => {
             output: {
               items: {
                 '0': {
-                  name: INPUT_STRING_PLACEHOLDER,
+                  name: 'replace with your data',
                 },
               },
             },
@@ -793,8 +788,8 @@ describe('buildContextOverride', () => {
         steps: {
           source: {
             output: {
-              data: INPUT_STRING_PLACEHOLDER,
-              meta: INPUT_STRING_PLACEHOLDER,
+              data: 'replace with your data',
+              meta: 'replace with your data',
             },
           },
         },
@@ -835,7 +830,7 @@ describe('buildContextOverride', () => {
                   user: {
                     profile: {
                       settings: {
-                        theme: INPUT_STRING_PLACEHOLDER,
+                        theme: 'replace with your data',
                       },
                     },
                   },
@@ -880,13 +875,13 @@ describe('buildContextOverride', () => {
               matrix: {
                 '0': {
                   '1': {
-                    value: INPUT_STRING_PLACEHOLDER,
+                    value: 'replace with your data',
                   },
                 },
               },
               list: {
                 '5': {
-                  name: INPUT_STRING_PLACEHOLDER,
+                  name: 'replace with your data',
                 },
               },
             },
@@ -928,7 +923,7 @@ describe('buildContextOverride', () => {
                 'user-info': {
                   '0': {
                     profile: {
-                      name: INPUT_STRING_PLACEHOLDER,
+                      name: 'replace with your data',
                     },
                   },
                 },
@@ -938,356 +933,5 @@ describe('buildContextOverride', () => {
         },
       });
     });
-  });
-});
-
-describe('buildContextOverrideFromExecution', () => {
-  const createWorkflowExecution = (
-    overrides: Partial<WorkflowExecutionDto> & {
-      stepExecutions: WorkflowExecutionDto['stepExecutions'];
-    }
-  ): WorkflowExecutionDto =>
-    ({
-      id: 'exec-1',
-      spaceId: 'default',
-      status: 'completed',
-      isTestRun: true,
-      startedAt: '2026-01-01T00:00:00Z',
-      finishedAt: '2026-01-01T00:00:01Z',
-      error: null,
-      workflowId: 'wf-1',
-      workflowDefinition: { version: '1', name: 'test', enabled: true, triggers: [], steps: [] },
-      duration: 1000,
-      yaml: '',
-      context: {},
-      ...overrides,
-    } as WorkflowExecutionDto);
-
-  const createStepExecution = (
-    overrides: Partial<EsWorkflowStepExecution>
-  ): EsWorkflowStepExecution =>
-    ({
-      id: 'step-exec-1',
-      stepId: 'step1',
-      stepType: 'console',
-      scopeStack: [],
-      workflowRunId: 'exec-1',
-      workflowId: 'wf-1',
-      status: 'completed',
-      startedAt: '2026-01-01T00:00:00Z',
-      finishedAt: '2026-01-01T00:00:01Z',
-      topologicalIndex: 1,
-      globalExecutionIndex: 0,
-      stepExecutionIndex: 0,
-      ...overrides,
-    } as EsWorkflowStepExecution);
-
-  it('should resolve inputs.* from workflow execution context', () => {
-    const workflow = {
-      version: '1' as const,
-      name: 'test',
-      enabled: true,
-      triggers: [{ type: 'manual' as const, enabled: true }],
-      steps: [
-        {
-          name: 'log_step',
-          type: 'console' as const,
-          with: { message: '{{ inputs.foo }}' },
-        },
-      ],
-    };
-    const graph = WorkflowGraph.fromWorkflowDefinition(workflow).getStepGraph('log_step');
-    const workflowExecution = createWorkflowExecution({
-      context: { inputs: { foo: 'hello world' } },
-      stepExecutions: [],
-    });
-    const targetStep = createStepExecution({ stepId: 'log_step', globalExecutionIndex: 0 });
-
-    const result = buildContextOverrideFromExecution(graph, workflowExecution, targetStep);
-
-    expect(result.stepContext).toEqual({
-      inputs: { foo: 'hello world' },
-    });
-    expect(result.schema).toBeDefined();
-  });
-
-  it('should use context.contextOverride when present (e.g. from a past test step run)', () => {
-    const workflow = {
-      version: '1' as const,
-      name: 'test',
-      enabled: true,
-      triggers: [{ type: 'manual' as const, enabled: true }],
-      steps: [
-        {
-          name: 'log_step',
-          type: 'console' as const,
-          with: {
-            message: '{{ inputs.foo }}',
-            extra: '{{ inputs.extra }}',
-          },
-        },
-      ],
-    };
-    const graph = WorkflowGraph.fromWorkflowDefinition(workflow).getStepGraph('log_step');
-    const workflowExecution = createWorkflowExecution({
-      context: {
-        inputs: { foo: 'from-context' },
-        contextOverride: {
-          inputs: { foo: 'from-override', extra: 'from-override' },
-        },
-      },
-      stepExecutions: [],
-    });
-    const targetStep = createStepExecution({ stepId: 'log_step', globalExecutionIndex: 0 });
-
-    const result = buildContextOverrideFromExecution(graph, workflowExecution, targetStep);
-
-    expect(result.stepContext).toEqual({
-      inputs: {
-        foo: 'from-override',
-        extra: 'from-override',
-      },
-    });
-  });
-
-  it('should resolve steps.X.output from sibling step executions', () => {
-    const workflow = {
-      version: '1' as const,
-      name: 'test',
-      enabled: true,
-      triggers: [{ type: 'manual' as const, enabled: true }],
-      steps: [
-        { name: 'first', type: 'console' as const, with: { message: 'Hi' } },
-        {
-          name: 'second',
-          type: 'console' as const,
-          with: { message: '{{ steps.first.output }}' },
-        },
-      ],
-    };
-    const graph = WorkflowGraph.fromWorkflowDefinition(workflow).getStepGraph('second');
-    const workflowExecution = createWorkflowExecution({
-      context: {},
-      stepExecutions: [
-        createStepExecution({
-          stepId: 'first',
-          globalExecutionIndex: 0,
-          output: 'Hello from first',
-        }),
-        createStepExecution({
-          stepId: 'second',
-          globalExecutionIndex: 1,
-        }),
-      ],
-    });
-    const targetStep = createStepExecution({ stepId: 'second', globalExecutionIndex: 1 });
-
-    const result = buildContextOverrideFromExecution(graph, workflowExecution, targetStep);
-
-    expect(result.stepContext).toEqual({
-      steps: {
-        first: {
-          output: 'Hello from first',
-        },
-      },
-    });
-  });
-
-  it('should resolve workflow.* and execution.* from context', () => {
-    const workflow = {
-      version: '1' as const,
-      name: 'test',
-      enabled: true,
-      triggers: [{ type: 'manual' as const, enabled: true }],
-      steps: [
-        {
-          name: 'meta_step',
-          type: 'console' as const,
-          with: {
-            wfName: '{{ workflow.name }}',
-            execId: '{{ execution.id }}',
-          },
-        },
-      ],
-    };
-    const graph = WorkflowGraph.fromWorkflowDefinition(workflow).getStepGraph('meta_step');
-    const workflowExecution = createWorkflowExecution({
-      context: {
-        workflow: { id: 'wf-1', name: 'My Workflow', enabled: true, spaceId: 'default' },
-        execution: { id: 'exec-123', isTestRun: true },
-      },
-      stepExecutions: [],
-    });
-    const targetStep = createStepExecution({ stepId: 'meta_step', globalExecutionIndex: 0 });
-
-    const result = buildContextOverrideFromExecution(graph, workflowExecution, targetStep);
-
-    expect(result.stepContext).toEqual({
-      workflow: { name: 'My Workflow' },
-      execution: { id: 'exec-123' },
-    });
-  });
-
-  it('should fall back to placeholder when value is missing', () => {
-    const workflow = {
-      version: '1' as const,
-      name: 'test',
-      enabled: true,
-      triggers: [{ type: 'manual' as const, enabled: true }],
-      steps: [
-        {
-          name: 'step',
-          type: 'console' as const,
-          with: {
-            fromInput: '{{ inputs.missing }}',
-            fromStep: '{{ steps.nonexistent.output }}',
-          },
-        },
-      ],
-    };
-    const graph = WorkflowGraph.fromWorkflowDefinition(workflow).getStepGraph('step');
-    const workflowExecution = createWorkflowExecution({ context: {}, stepExecutions: [] });
-    const targetStep = createStepExecution({ stepId: 'step', globalExecutionIndex: 0 });
-
-    const result = buildContextOverrideFromExecution(graph, workflowExecution, targetStep);
-
-    expect(result.stepContext).toEqual({
-      inputs: { missing: INPUT_STRING_PLACEHOLDER },
-      steps: {
-        nonexistent: {
-          output: INPUT_STRING_PLACEHOLDER,
-        },
-      },
-    });
-  });
-
-  it('should use latest predecessor step execution when step runs multiple times (e.g. in loop)', () => {
-    const workflow = {
-      version: '1' as const,
-      name: 'test',
-      enabled: true,
-      triggers: [{ type: 'manual' as const, enabled: true }],
-      steps: [
-        { name: 'loop', type: 'foreach' as const, foreach: [1, 2, 3], steps: [] },
-        {
-          name: 'consumer',
-          type: 'console' as const,
-          with: { value: '{{ steps.loop.output }}' },
-        },
-      ],
-    };
-    const graph = WorkflowGraph.fromWorkflowDefinition(workflow).getStepGraph('consumer');
-    const workflowExecution = createWorkflowExecution({
-      context: {},
-      stepExecutions: [
-        createStepExecution({ stepId: 'loop', globalExecutionIndex: 0, output: 'first' }),
-        createStepExecution({ stepId: 'consumer', globalExecutionIndex: 1 }),
-      ],
-    });
-    const targetStep = createStepExecution({ stepId: 'consumer', globalExecutionIndex: 1 });
-
-    const result = buildContextOverrideFromExecution(graph, workflowExecution, targetStep);
-
-    expect(result.stepContext).toEqual({
-      steps: { loop: { output: 'first' } },
-    });
-  });
-
-  it('should reconstruct foreach context from scopeStack and foreach step execution', () => {
-    const workflow = {
-      version: '1' as const,
-      name: 'test',
-      enabled: true,
-      triggers: [{ type: 'manual' as const, enabled: true }],
-      steps: [
-        {
-          name: 'loop',
-          type: 'foreach' as const,
-          foreach: [10, 20, 30],
-          steps: [
-            {
-              name: 'inner',
-              type: 'console' as const,
-              with: {
-                item: '{{ foreach.item }}',
-                index: '{{ foreach.index }}',
-                total: '{{ foreach.total }}',
-              },
-            },
-          ],
-        },
-      ],
-    };
-    const graph = WorkflowGraph.fromWorkflowDefinition(workflow).getStepGraph('inner');
-    const workflowExecution = createWorkflowExecution({
-      context: {},
-      stepExecutions: [
-        createStepExecution({
-          stepId: 'loop',
-          stepType: 'foreach',
-          globalExecutionIndex: 0,
-          input: { foreach: [10, 20, 30] },
-          state: { index: 1, total: 3 },
-        }),
-        createStepExecution({
-          stepId: 'inner',
-          globalExecutionIndex: 1,
-          scopeStack: [
-            {
-              stepId: 'loop',
-              nestedScopes: [
-                { nodeId: 'enterForeach_loop', nodeType: 'enter-foreach', scopeId: '1' },
-              ],
-            },
-          ],
-        }),
-      ],
-    });
-    const targetStep = createStepExecution({
-      stepId: 'inner',
-      globalExecutionIndex: 1,
-      scopeStack: [
-        {
-          stepId: 'loop',
-          nestedScopes: [{ nodeId: 'enterForeach_loop', nodeType: 'enter-foreach', scopeId: '1' }],
-        },
-      ],
-    });
-
-    const result = buildContextOverrideFromExecution(graph, workflowExecution, targetStep);
-
-    expect(result.stepContext).toEqual({
-      foreach: {
-        item: 20,
-        index: 1,
-        total: 3,
-      },
-    });
-  });
-
-  it('should return a schema that validates the stepContext', () => {
-    const workflow = {
-      version: '1' as const,
-      name: 'test',
-      enabled: true,
-      triggers: [{ type: 'manual' as const, enabled: true }],
-      steps: [
-        {
-          name: 'step',
-          type: 'console' as const,
-          with: { message: '{{ inputs.foo }}' },
-        },
-      ],
-    };
-    const graph = WorkflowGraph.fromWorkflowDefinition(workflow).getStepGraph('step');
-    const workflowExecution = createWorkflowExecution({
-      context: { inputs: { foo: 'bar' } },
-      stepExecutions: [],
-    });
-    const targetStep = createStepExecution({ stepId: 'step', globalExecutionIndex: 0 });
-
-    const result = buildContextOverrideFromExecution(graph, workflowExecution, targetStep);
-
-    expect(() => result.schema.parse(result.stepContext)).not.toThrow();
   });
 });

@@ -107,7 +107,7 @@ interface LensAttributesOptions {
   executionCount?: number;
 }
 
-export function getLensAttributes(
+function getLensAttributes(
   logsDataView: LogsDataView,
   options: LensAttributesOptions = {}
 ): TypedLensByValueInput['attributes'] {

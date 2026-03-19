@@ -14,9 +14,6 @@ import * as Rx from 'rxjs';
 import { assertAbsolute, mkdirp, fsReadDir$ } from './fs';
 import { type DirRecord, type FileRecord, type Record, SomePath } from './fs_records';
 
-// Exclusive create + copy-on-write (reflink) when the filesystem supports it
-const COPY_FLAGS = Fs.constants.COPYFILE_EXCL + Fs.constants.COPYFILE_FICLONE;
-
 interface Options {
   /**
    * directory to copy from
@@ -76,7 +73,7 @@ export async function scanCopy(options: Options) {
         }
 
         return Rx.of(rec);
-      }, 100)
+      })
     );
 
   const handleGenericRec = async (rec: Record) => {
@@ -98,7 +95,7 @@ export async function scanCopy(options: Options) {
       await handleGenericRec(rec);
     }).pipe(
       Rx.mergeMap(() => readDir$(rec)),
-      Rx.mergeMap((ent) => (ent.type === 'dir' ? handleDir$(ent) : handleFile$(ent)), 100)
+      Rx.mergeMap((ent) => (ent.type === 'dir' ? handleDir$(ent) : handleFile$(ent)))
     );
 
   const handleFile$ = (srcRec: FileRecord): Rx.Observable<unknown> =>
@@ -110,7 +107,7 @@ export async function scanCopy(options: Options) {
           flag: 'wx',
         });
       } else {
-        await Fsp.copyFile(rec.source.abs, rec.dest.abs, COPY_FLAGS);
+        await Fsp.copyFile(rec.source.abs, rec.dest.abs, Fs.constants.COPYFILE_EXCL);
       }
 
       await handleGenericRec(rec);

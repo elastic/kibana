@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
-import {
-  buildTriggerContextFromExecution,
-  buildTriggerStepExecutionFromContext,
-} from './workflow_pseudo_step_context';
+import { buildTriggerContextFromExecution } from './workflow_pseudo_step_context';
 
 describe('buildTriggerContextFromExecution', () => {
   it('should return null when context is null', () => {
@@ -67,51 +62,5 @@ describe('buildTriggerContextFromExecution', () => {
   it('should use inputs as input when event is not present', () => {
     const result = buildTriggerContextFromExecution({ inputs: { foo: 'bar' } });
     expect(result?.input).toEqual({ foo: 'bar' });
-  });
-});
-
-describe('buildTriggerStepExecutionFromContext', () => {
-  const baseExecution: WorkflowExecutionDto = {
-    spaceId: 'default',
-    id: 'exec-1',
-    status: ExecutionStatus.COMPLETED,
-    error: null,
-    isTestRun: false,
-    startedAt: '2024-01-01T00:00:00Z',
-    finishedAt: '2024-01-01T00:01:00Z',
-    workflowId: 'wf-1',
-    workflowName: 'Test',
-    workflowDefinition: {} as WorkflowExecutionDto['workflowDefinition'],
-    stepExecutions: [],
-    duration: 60000,
-    yaml: '',
-  };
-
-  it('returns null when context is null', () => {
-    expect(
-      buildTriggerStepExecutionFromContext({
-        ...baseExecution,
-        context: null,
-      } as unknown as WorkflowExecutionDto)
-    ).toBeNull();
-  });
-
-  it('sets output from context.output when present', () => {
-    const output = { greeting: 'hello world', count: 42 };
-    const result = buildTriggerStepExecutionFromContext({
-      ...baseExecution,
-      context: { inputs: {}, output },
-    });
-    expect(result).not.toBeNull();
-    expect(result?.output).toEqual(output);
-  });
-
-  it('sets output to undefined when context has no output', () => {
-    const result = buildTriggerStepExecutionFromContext({
-      ...baseExecution,
-      context: { inputs: { key: 'value' } },
-    });
-    expect(result).not.toBeNull();
-    expect(result?.output).toBeUndefined();
   });
 });

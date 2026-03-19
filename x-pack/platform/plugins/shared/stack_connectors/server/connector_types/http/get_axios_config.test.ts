@@ -61,8 +61,6 @@ describe('getAxiosConfig', () => {
       headers: { 'Content-Type': 'application/json' },
       url: 'https://http.example.com',
       hasAuth: true,
-      hasProxyAuth: false,
-      proxyUrl: null,
     },
     secrets: {
       clientSecret: 'test-client-secret',
@@ -72,8 +70,6 @@ describe('getAxiosConfig', () => {
       crt: null,
       pfx: null,
       secretHeaders: null,
-      proxyUsername: null,
-      proxyPassword: null,
     },
     services,
     configurationUtilities: actionsConfigMock.create(),

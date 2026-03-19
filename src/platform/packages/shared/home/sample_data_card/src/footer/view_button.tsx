@@ -95,7 +95,7 @@ export const ViewButton = ({ id, name, overviewDashboard, appLinks }: Props) => 
     <EuiButton
       aria-label={viewDataButtonAriaLabel}
       onClick={togglePopover}
-      iconType="chevronSingleDown"
+      iconType="arrowDown"
       iconSide="right"
     >
       {viewDataButtonLabel}

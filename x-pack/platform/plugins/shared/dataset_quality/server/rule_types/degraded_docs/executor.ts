@@ -142,7 +142,7 @@ export const getRuleExecutor = (locatorsClient?: LocatorClient) =>
             [ALERT_EVALUATION_VALUE]: `${context.value}`,
             [ALERT_EVALUATION_THRESHOLD]:
               params.threshold?.length === 1 ? params.threshold[0] : null,
-            [ALERT_GROUPING]: groupByFields as Record<string, string>,
+            [ALERT_GROUPING]: groupByFields,
           },
         });
       }
@@ -166,7 +166,7 @@ export const getRuleExecutor = (locatorsClient?: LocatorClient) =>
         dateEnd,
         value: percentage,
         params,
-        grouping: grouping as AdditionalContext | undefined,
+        grouping,
         locatorsClient,
       });
 
@@ -177,7 +177,7 @@ export const getRuleExecutor = (locatorsClient?: LocatorClient) =>
           [ALERT_REASON]: recoveryContext.reason,
           [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
           [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
-          [ALERT_GROUPING]: grouping as Record<string, string> | undefined,
+          [ALERT_GROUPING]: grouping,
         },
       });
     }

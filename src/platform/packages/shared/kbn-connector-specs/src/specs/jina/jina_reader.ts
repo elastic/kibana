@@ -60,7 +60,7 @@ export const JinaReaderConnector: ConnectorSpec = {
     }),
     minimumLicense: 'gold',
     docsUrl: 'https://jina.ai/reader',
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows'],
   },
 
   auth: {

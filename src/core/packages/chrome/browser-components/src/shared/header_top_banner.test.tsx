@@ -10,31 +10,29 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
 import { EuiProvider } from '@elastic/eui';
 import type { ChromeUserBanner } from '@kbn/core-chrome-browser';
-import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import { TestChromeProviders } from '../test_helpers';
+import { ChromeComponentsProvider } from '../context';
+import { createMockChromeComponentsDeps } from '../test_helpers';
 import { HeaderTopBanner } from './header_top_banner';
 
 const renderBanner = (banner?: ChromeUserBanner) => {
-  const chrome = chromeServiceMock.createStartContract();
-  const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(banner);
-  chrome.getHeaderBanner$.mockReturnValue(headerBanner$);
+  const deps = createMockChromeComponentsDeps();
+  if (banner) deps.headerBanner$.next(banner);
   const result = render(
     <EuiProvider>
-      <TestChromeProviders chrome={chrome}>
+      <ChromeComponentsProvider value={deps}>
         <HeaderTopBanner />
-      </TestChromeProviders>
+      </ChromeComponentsProvider>
     </EuiProvider>
   );
-  return { ...result, headerBanner$ };
+  return { ...result, deps };
 };
 
 describe('HeaderTopBanner', () => {
   it('renders nothing when no banner is set', () => {
     const { container } = renderBanner();
-    expect(container.querySelector('[data-test-subj="headerTopBanner"]')).toBeNull();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('renders a ReactNode-based banner content', () => {
@@ -45,13 +43,13 @@ describe('HeaderTopBanner', () => {
   });
 
   it('hides the banner when the observable emits undefined', () => {
-    const { headerBanner$ } = renderBanner({
+    const { deps } = renderBanner({
       content: <span data-test-subj="banner-content">Active</span>,
     });
     expect(screen.getByTestId('banner-content')).toBeInTheDocument();
 
     act(() => {
-      headerBanner$.next(undefined);
+      deps.headerBanner$.next(undefined);
     });
 
     expect(screen.queryByTestId('banner-content')).not.toBeInTheDocument();

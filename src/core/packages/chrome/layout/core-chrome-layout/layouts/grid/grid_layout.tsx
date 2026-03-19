@@ -26,7 +26,6 @@ import {
   Sidebar,
   useHasAppMenu,
 } from '@kbn/core-chrome-browser-components';
-import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import {
   useChromeStyle,
   useIsChromeVisible,
@@ -80,17 +79,26 @@ export class GridLayout implements LayoutService {
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    const { application, overlays, http, docLinks, customBranding } = this.deps;
+    const { application, chrome, overlays, http, docLinks, customBranding } = this.deps;
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
     const debug = this.params.debug ?? false;
 
-    const componentDeps: ChromeComponentsDeps = {
-      application,
-      http,
+    // Stable reference — computed once per getComponent() call (app startup).
+    // chrome.componentDeps and service contracts are singletons that never change.
+    const componentDeps = {
+      ...chrome.componentDeps,
+      application: {
+        navigateToApp: application.navigateToApp,
+        navigateToUrl: application.navigateToUrl,
+        currentAppId$: application.currentAppId$,
+        currentActionMenu$: application.currentActionMenu$,
+      },
+      basePath: http.basePath,
       docLinks,
-      customBranding,
+      loadingCount$: http.getLoadingCount$(),
+      customBranding$: customBranding.customBranding$,
     };
 
     const GridLayoutContent = React.memo(({ debug: showDebug }: { debug: boolean }) => {

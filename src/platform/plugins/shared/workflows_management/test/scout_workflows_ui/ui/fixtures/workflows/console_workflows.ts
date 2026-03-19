@@ -83,7 +83,7 @@ steps:
     type: foreach
     foreach: '{{consts.loop_items}}'
     steps:
-      - name: test_console_step
+      - name: hello_world_step
         type: console
         with:
           message: "Test run: {{ execution.isTestRun }}, timestamp: {{foreach.item['@timestamp']}}"

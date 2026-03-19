@@ -200,6 +200,7 @@ describe('attachment tools', () => {
           ({
             id: AttachmentType.visualization,
             validate: (input: unknown) => ({ valid: true, data: input }),
+            validateOrigin: (input: unknown) => ({ valid: true, data: input }),
             format: (formattedAttachment: Attachment) => ({
               getRepresentation: () => ({
                 type: 'text',
@@ -223,7 +224,7 @@ describe('attachment tools', () => {
       const attachment = await resolveAttachmentManager.add(
         {
           type: AttachmentType.visualization,
-          origin: 'so-123',
+          origin: { saved_object_id: 'so-123' },
           description: 'Lens ref',
         },
         undefined,
@@ -231,7 +232,7 @@ describe('attachment tools', () => {
       );
 
       // Verify origin is stored on the attachment
-      expect(attachment.origin).toEqual('so-123');
+      expect(attachment.origin).toEqual({ saved_object_id: 'so-123' });
 
       // Read should return the resolved data directly — no raw_data, no re-resolve
       const tool = createAttachmentTools({

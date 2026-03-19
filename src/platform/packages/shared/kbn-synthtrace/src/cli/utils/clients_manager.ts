@@ -97,7 +97,7 @@ export class SynthtraceClientsManager {
         throw new Error(`Client factory for ${key} is not defined`);
       }
 
-      (acc as Record<string, SynthtraceClients[SynthtraceClientTypes]>)[key] = initFn();
+      (acc as any)[key] = initFn();
 
       return acc;
     }, {} as GetClientsReturn<TClient>);

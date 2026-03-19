@@ -202,17 +202,13 @@ apiTest.describe(
         expect(ingestResult).toHaveLength(2);
         expect(esqlResult.documents).toHaveLength(2);
 
-        const ingestDoc1 = ingestResult.find(
-          (d: Record<string, unknown>) => d.environment === 'production'
-        );
-        const ingestDoc2 = ingestResult.find(
-          (d: Record<string, unknown>) => d.environment === 'development'
-        );
+        const ingestDoc1 = ingestResult.find((d: any) => d.environment === 'production');
+        const ingestDoc2 = ingestResult.find((d: any) => d.environment === 'development');
         const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
-          (d: Record<string, unknown>) => d.environment === 'production'
+          (d: any) => d.environment === 'production'
         );
         const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
-          (d: Record<string, unknown>) => d.environment === 'development'
+          (d: any) => d.environment === 'development'
         );
 
         expect(ingestDoc1).toStrictEqual(esqlDoc1);

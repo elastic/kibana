@@ -29,7 +29,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.FLEET.ALL],
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
         },
       },
     })
@@ -47,7 +51,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.FLEET.ALL],
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
         },
       },
     })
@@ -65,7 +73,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.FLEET.ALL],
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
         },
       },
     })

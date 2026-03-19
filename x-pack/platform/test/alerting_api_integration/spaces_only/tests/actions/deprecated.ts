@@ -68,7 +68,6 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         is_system_action: false,
         is_missing_secrets: false,
         is_connector_type_deprecated: true,
-        auth_mode: 'shared',
       });
     });
   });

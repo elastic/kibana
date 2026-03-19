@@ -9,18 +9,19 @@
 
 import type { GenericFtrProviderContext } from '@kbn/test';
 import { GenericFtrService } from '@kbn/test';
-import type {
+import {
   RetryService,
   EsProvider,
   KibanaServerProvider,
 } from '@kbn/ftr-common-functional-services';
-import type { services as commonFunctionalUiServices } from './all';
+import { services as commonFunctionalUiServices } from './all';
 
-type AllServices = typeof commonFunctionalUiServices & {
-  retry: typeof RetryService;
-  es: typeof EsProvider;
-  kibanaServer: typeof KibanaServerProvider;
+const services = {
+  ...commonFunctionalUiServices,
+  retry: RetryService,
+  es: EsProvider,
+  kibanaServer: KibanaServerProvider,
 };
 
-export type FtrProviderContext = GenericFtrProviderContext<AllServices, {}>;
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
 export class FtrService extends GenericFtrService<FtrProviderContext> {}

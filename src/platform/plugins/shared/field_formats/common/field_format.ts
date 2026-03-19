@@ -10,7 +10,6 @@
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
-import { checkForMissingValueHtml } from './utils';
 import type {
   FieldFormatsGetConfigFn,
   FieldFormatsContentType,
@@ -228,6 +227,11 @@ export abstract class FieldFormat {
   }
 
   protected checkForMissingValueHtml(val: unknown): string | void {
-    return checkForMissingValueHtml(val);
+    if (val === '') {
+      return `<span class="ffString__emptyValue">${EMPTY_LABEL}</span>`;
+    }
+    if (val == null || val === MISSING_TOKEN) {
+      return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
+    }
   }
 }

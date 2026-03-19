@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PartitionState } from '../../schema/charts/partition';
+
 export const esqlCharts = [
   {
     title: 'basic pie',
@@ -149,10 +151,12 @@ export const esqlCharts = [
   {
     title: 'basic mosaic',
     type: 'mosaic',
-    metric: {
-      operation: 'count',
-      empty_as_null: true,
-    },
+    metrics: [
+      {
+        operation: 'count',
+        empty_as_null: true,
+      },
+    ],
     group_by: [
       {
         operation: 'terms',
@@ -413,10 +417,12 @@ export const esqlCharts = [
   {
     title: 'mosaic with multiple groups',
     type: 'mosaic',
-    metric: {
-      operation: 'count',
-      empty_as_null: true,
-    },
+    metrics: [
+      {
+        operation: 'count',
+        empty_as_null: true,
+      },
+    ],
     group_by: [
       {
         operation: 'terms',
@@ -1170,10 +1176,12 @@ export const esqlCharts = [
   {
     title: 'mosaic with color mapping',
     type: 'mosaic',
-    metric: {
-      operation: 'count',
-      empty_as_null: true,
-    },
+    metrics: [
+      {
+        operation: 'count',
+        empty_as_null: true,
+      },
+    ],
     group_by: [
       {
         operation: 'terms',
@@ -1403,10 +1411,12 @@ export const esqlCharts = [
   {
     title: 'ESQL mosaic',
     type: 'mosaic',
-    metric: {
-      operation: 'value',
-      column: 'count',
-    },
+    metrics: [
+      {
+        operation: 'value',
+        column: 'count',
+      },
+    ],
     group_by: [
       {
         operation: 'value',
@@ -1519,4 +1529,4 @@ export const esqlCharts = [
       mode: 'percentage',
     },
   },
-];
+] as Omit<PartitionState, 'ignore_global_filters' | 'sampling'>[];

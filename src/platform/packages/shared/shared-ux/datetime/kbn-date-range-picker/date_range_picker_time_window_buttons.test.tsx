@@ -24,8 +24,6 @@ function renderPicker(overrides: Partial<DateRangePickerProps> = {}) {
     defaultValue: '-15m to now',
     onChange,
     showTimeWindowButtons: true,
-    settings: { roundRelativeTime: false },
-    onSettingsChange: () => {},
     ...overrides,
   };
   const result = renderWithEuiTheme(<DateRangePicker {...props} />);

@@ -439,18 +439,13 @@ export interface ExpressionWrapperProps {
 
 export type GetStateType = () => LensRuntimeState;
 
-export const LENS_DATASOURCE_ID = {
-  FORM_BASED: 'formBased',
-  TEXT_BASED: 'textBased',
-} as const;
+export interface StructuredDatasourceStates {
+  formBased?: FormBasedPersistedState;
+  textBased?: TextBasedPersistedState;
+}
 
 /** The supported datasource identifiers */
-export type LensDatasourceId = (typeof LENS_DATASOURCE_ID)[keyof typeof LENS_DATASOURCE_ID];
-
-export interface StructuredDatasourceStates {
-  [LENS_DATASOURCE_ID.FORM_BASED]?: FormBasedPersistedState;
-  [LENS_DATASOURCE_ID.TEXT_BASED]?: TextBasedPersistedState;
-}
+export type SupportedDatasourceId = keyof StructuredDatasourceStates;
 
 /** Utility type to build typed version for each chart */
 type TypedLensAttributes<TVisType, TVisState> = Simplify<

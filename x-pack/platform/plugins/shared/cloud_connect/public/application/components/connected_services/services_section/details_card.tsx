@@ -321,7 +321,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
     if (enabled) {
       const moreActionsButton = (
         <EuiButtonIcon
-          iconType="boxesVertical"
+          iconType="boxesHorizontal"
           aria-label={i18n.translate('xpack.cloudConnect.connectedServices.service.moreActions', {
             defaultMessage: 'More actions',
           })}
@@ -378,7 +378,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                 href={serviceUrl}
                 target="_blank"
                 iconSide="right"
-                iconType="external"
+                iconType="popout"
                 onClick={() => {
                   // Track telemetry for opening service
                   if (serviceKey) {
@@ -426,7 +426,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           onClick={onEnable}
           disabled={!onEnable || isLoading}
           isLoading={isLoading}
-          iconType="external"
+          iconType="popout"
           iconSide="right"
           data-test-subj="serviceCardConnectButton"
         >

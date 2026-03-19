@@ -68,7 +68,7 @@ export const FormWizardNav = ({
           {activeStepIndex > 0 ? (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="chevronSingleLeft"
+                iconType="arrowLeft"
                 onClick={onBack}
                 data-test-subj="backButton"
                 disabled={isStepValid === false}
@@ -82,7 +82,7 @@ export const FormWizardNav = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType={isLastStep ? 'check' : 'chevronSingleRight'}
+              iconType={isLastStep ? 'check' : 'arrowRight'}
               onClick={onNext}
               iconSide={isLastStep ? 'left' : 'right'}
               disabled={isStepValid === false}

@@ -39,7 +39,6 @@ export const ExternalLinkComponent = ({
   }, [linkOptions, link.destination]);
 
   const id = `externalLink--${link.id}`;
-  const testId = `externalLink--${link.title}`;
 
   return (
     <EuiListGroupItem
@@ -54,12 +53,12 @@ export const ExternalLinkComponent = ({
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
         delay: 'long',
-        'data-test-subj': `${testId}--tooltip`,
+        'data-test-subj': `${id}--tooltip`,
       }}
       iconType={link.error ? 'warning' : undefined}
       id={id}
       label={link.label || link.destination}
-      data-test-subj={link.error ? `${testId}--error` : `${testId}`}
+      data-test-subj={link.error ? `${id}--error` : `${id}`}
       href={destination}
       onClick={async (event) => {
         if (!destination) return;

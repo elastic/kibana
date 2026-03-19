@@ -12,9 +12,7 @@ import { TextAreaField } from '@kbn/es-ui-shared-plugin/static/forms/components'
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import type { TextareaFieldSchema } from '../../../../../common/types/domain/template/fields';
 
-type TextareaProps = z.infer<typeof TextareaFieldSchema>;
-
-export const Textarea: React.FC<TextareaProps> = ({ label, name, type }) => {
+export const Textarea = ({ label, name, type }: z.infer<typeof TextareaFieldSchema>) => {
   return (
     <UseField
       key={name}

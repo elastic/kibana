@@ -8,9 +8,8 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import type { DependencyList } from 'react';
 import { render, act, waitFor } from '@testing-library/react';
-import { useAbortableAsync, type AbortableAsyncState } from './use_abortable_async';
+import { useAbortableAsync } from './use_abortable_async';
 
 // Helper component to expose hook state.
 function TestComponent<T>({
@@ -20,7 +19,7 @@ function TestComponent<T>({
 }: {
   hookFn: ({ signal }: { signal: AbortSignal }) => T | Promise<T>;
   onState: (state: ReturnType<typeof useAbortableAsync>) => void;
-  deps?: DependencyList;
+  deps?: any[];
 }) {
   const state = useAbortableAsync(hookFn, deps);
   useEffect(() => {
@@ -32,7 +31,7 @@ function TestComponent<T>({
 
 describe('useAbortableAsync', () => {
   it('should handle synchronous function', async () => {
-    let hookState!: AbortableAsyncState<unknown>;
+    let hookState: any;
     render(
       <TestComponent
         hookFn={() => 42}
@@ -48,7 +47,7 @@ describe('useAbortableAsync', () => {
   });
 
   it('should handle asynchronous success', async () => {
-    let hookState!: AbortableAsyncState<unknown>;
+    let hookState: any;
     const asyncFn = ({ signal }: { signal: AbortSignal }) =>
       new Promise<string>((resolve) => {
         const id = setTimeout(() => resolve('async result'), 10);
@@ -74,7 +73,7 @@ describe('useAbortableAsync', () => {
   });
 
   it('should handle asynchronous error', async () => {
-    let hookState!: AbortableAsyncState<unknown>;
+    let hookState: any;
     const errorFn = ({ signal }: { signal: AbortSignal }) =>
       new Promise<string>((_resolve, reject) => {
         const id = setTimeout(() => reject(new Error('fail')), 10);
@@ -98,7 +97,7 @@ describe('useAbortableAsync', () => {
   });
 
   it('should refresh and re-run the async function', async () => {
-    let hookState!: AbortableAsyncState<unknown>;
+    let hookState: any;
     let counter = 0;
     const asyncFn = ({ signal }: { signal: AbortSignal }) =>
       new Promise<number>((resolve) => {
@@ -137,7 +136,7 @@ describe('useAbortableAsync', () => {
   });
 
   it('should abort previous async function when dependencies update', async () => {
-    let hookState!: AbortableAsyncState<unknown>;
+    let hookState: any;
     let aborted = false;
     const asyncFn = ({ signal }: { signal: AbortSignal }) =>
       new Promise<string>(() => {
@@ -205,7 +204,7 @@ describe('useAbortableAsync', () => {
   });
 
   it('should not abort running promise when rerendered without dependency change', async () => {
-    let hookState!: AbortableAsyncState<unknown>;
+    let hookState: any;
     let aborted = false;
     const asyncFn = ({ signal }: { signal: AbortSignal }) =>
       new Promise<string>(() => {

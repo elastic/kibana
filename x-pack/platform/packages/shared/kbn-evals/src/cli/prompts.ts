@@ -236,8 +236,6 @@ export const readLocalEsUrl = (repoRoot: string): string | undefined => {
   }
 };
 
-const DEFAULT_SERVER_CONFIG_SET = 'evals_tracing';
-
 export const SCOUT_EVALS_ARGS = [
   'start-server',
   '--arch',
@@ -245,15 +243,5 @@ export const SCOUT_EVALS_ARGS = [
   '--domain',
   'classic',
   '--serverConfigSet',
-  DEFAULT_SERVER_CONFIG_SET,
+  'evals_tracing',
 ] as const;
-
-export const scoutEvalsArgs = (serverConfigSet?: string): string[] => [
-  'start-server',
-  '--arch',
-  'stateful',
-  '--domain',
-  'classic',
-  '--serverConfigSet',
-  serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET,
-];

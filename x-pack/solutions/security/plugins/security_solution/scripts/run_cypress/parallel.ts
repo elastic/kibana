@@ -14,7 +14,7 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
 import path from 'path';
-import { plugin as grep } from '@cypress/grep/plugin';
+import grep from '@cypress/grep/src/plugin';
 
 import { EsVersion, FunctionalTestRunner, runElasticsearch, runKibanaServer } from '@kbn/test';
 
@@ -107,8 +107,7 @@ ${JSON.stringify(argv, null, 2)}
 
       const isOpen = argv._.includes('open');
       const cypressConfigFilePath = require.resolve(`../../../../${argv.configFile}`) as string;
-      const cypressConfigModule = await import(cypressConfigFilePath);
-      const cypressConfigFile = cypressConfigModule.default ?? cypressConfigModule;
+      const cypressConfigFile = await import(cypressConfigFilePath);
 
       setDefaultToolingLoggingLevel(cypressConfigFile?.env?.TOOLING_LOG_LEVEL);
 

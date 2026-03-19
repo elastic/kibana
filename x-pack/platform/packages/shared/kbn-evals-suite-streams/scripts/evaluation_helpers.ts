@@ -36,7 +36,7 @@ export function getKibanaAuthHeaders() {
 /**
  * Parse Server-Sent Events (SSE) stream and return the last event data
  */
-export async function parseSSEStream(response: globalThis.Response): Promise<unknown> {
+export async function parseSSEStream(response: globalThis.Response): Promise<any> {
   const text = await response.text();
   const lines = text.split('\n');
   let lastData = null;
@@ -63,12 +63,7 @@ export async function fetchDocs(index: string | string[], size = 100) {
       query: { match_all: {} },
       _source: true,
     })
-    .then((res) =>
-      res.hits.hits.map(
-        (h) =>
-          flattenObject((h._source ?? {}) as Record<string, unknown>) as Record<string, unknown>
-      )
-    );
+    .then((res) => res.hits.hits.map((h: any) => flattenObject(h._source)));
 }
 
 export async function getStreams(): Promise<string[]> {
@@ -81,11 +76,7 @@ export async function getStreams(): Promise<string[]> {
     }
     throw new Error(`HTTP Response (${res.status}): ${await res.text()}`);
   });
-  return (
-    (data as { streams?: Array<{ name: string }> }).streams
-      ?.map((s) => s.name)
-      .filter((name: string) => name.startsWith('logs.')) ?? []
-  );
+  return data.streams.map((s: any) => s.name).filter((name: string) => name.startsWith('logs.'));
 }
 
 export async function getConnectors(): Promise<string[]> {
@@ -98,13 +89,10 @@ export async function getConnectors(): Promise<string[]> {
     }
     throw new Error(`HTTP Response (${res.status}): ${await res.text()}`);
   });
-  return Array.isArray(data) ? (data as Array<{ id: string }>).map((c) => c.id) : [];
+  return data.map((c: any) => c.id);
 }
 
-export function extractMessages(
-  sampleDocs: Array<Record<string, unknown>>,
-  messageField: string = MESSAGE_FIELD
-): string[] {
+export function extractMessages(sampleDocs: any[], messageField: string = MESSAGE_FIELD): string[] {
   return sampleDocs.reduce<string[]>((acc, sample) => {
     const value = get(sample, messageField);
     if (typeof value === 'string') {
@@ -116,9 +104,9 @@ export function extractMessages(
 
 export async function simulateProcessing(
   stream: string,
-  documents: Array<Record<string, unknown>>,
-  steps: Array<Record<string, unknown>>
-): Promise<Record<string, unknown>> {
+  documents: any[],
+  steps: any[]
+): Promise<any> {
   const data = await fetch(`${KIBANA_URL}/internal/streams/${stream}/processing/_simulate`, {
     method: 'POST',
     headers: getKibanaAuthHeaders(),
@@ -139,17 +127,15 @@ export async function simulateProcessing(
 
 export async function getParsingScore(
   stream: string,
-  documents: Array<Record<string, unknown>>,
-  steps: Array<Record<string, unknown>>,
+  documents: any[],
+  steps: any[],
   batchSize = 1_000
 ): Promise<number> {
   let parsedDocs = 0;
   for (let i = 0; i < documents.length; i += batchSize) {
     const batch = documents.slice(i, i + batchSize);
-    const simResult = (await simulateProcessing(stream, batch, steps)) as {
-      documents: Array<{ status?: string }>;
-    };
-    simResult.documents.forEach((doc) => {
+    const simResult = await simulateProcessing(stream, batch, steps);
+    simResult.documents.forEach((doc: any) => {
       if (doc.status === 'parsed') {
         parsedDocs++;
       }
@@ -163,8 +149,8 @@ export async function getParsingScore(
  */
 export async function analyzeExtractedFields(
   stream: string,
-  documents: Array<Record<string, unknown>>,
-  steps: Array<Record<string, unknown>>,
+  documents: any[],
+  steps: any[],
   sampleCount = 10,
   batchSize = 1_000
 ): Promise<Record<string, { uniqueCount: number; samples: string[] }>> {
@@ -172,22 +158,18 @@ export async function analyzeExtractedFields(
 
   for (let i = 0; i < documents.length; i += batchSize) {
     const batch = documents.slice(i, i + batchSize);
-    const simResult = (await simulateProcessing(stream, batch, steps)) as {
-      detected_fields: Array<{ name: string }>;
-      documents: Array<{ status?: string; value?: Record<string, unknown> }>;
-    };
-    const detectedFieldsSet = new Set<string>(simResult.detected_fields.map((f) => f.name));
-    simResult.documents.forEach((doc) => {
-      const docValue = doc.value;
-      if (doc.status === 'parsed' && docValue) {
-        Object.keys(docValue).forEach((key) => {
+    const simResult = await simulateProcessing(stream, batch, steps);
+    const detectedFieldsSet = new Set<string>(simResult.detected_fields.map((f: any) => f.name));
+    simResult.documents.forEach((doc: any) => {
+      if (doc.status === 'parsed' && doc.value) {
+        Object.keys(doc.value).forEach((key) => {
           if (!detectedFieldsSet.has(key)) {
             return;
           }
           if (!fieldValues[key]) {
             fieldValues[key] = new Set();
           }
-          const value = docValue[key];
+          const value = doc.value[key];
           if (value !== undefined && value !== null) {
             fieldValues[key].add(String(value));
           }

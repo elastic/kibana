@@ -12,9 +12,7 @@ import { NumericField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import type { InputNumberFieldSchema } from '../../../../../common/types/domain/template/fields';
 
-type InputNumberProps = z.infer<typeof InputNumberFieldSchema>;
-
-export const InputNumber: React.FC<InputNumberProps> = ({ label, name, type }) => {
+export const InputNumber = ({ label, name, type }: z.infer<typeof InputNumberFieldSchema>) => {
   return (
     <UseField
       key={name}

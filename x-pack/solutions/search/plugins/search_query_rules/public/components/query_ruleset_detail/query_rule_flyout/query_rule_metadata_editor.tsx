@@ -149,6 +149,13 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                         ),
                       },
                       {
+                        value: 'exact_fuzzy',
+                        text: i18n.translate(
+                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorExactFuzzy',
+                          { defaultMessage: 'exact fuzzy' }
+                        ),
+                      },
+                      {
                         value: 'fuzzy',
                         text: i18n.translate(
                           'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorFuzzy',

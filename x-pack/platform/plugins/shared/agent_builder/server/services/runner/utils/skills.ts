@@ -42,7 +42,7 @@ export const createSkillsService = async ({
   });
 
   return {
-    list: (options) => skillRegistry.list(options),
+    list: () => skillRegistry.list(),
     get: async (skillId) => {
       try {
         return await skillRegistry.get(skillId);
@@ -50,7 +50,6 @@ export const createSkillsService = async ({
         return undefined;
       }
     },
-    bulkGet: (ids) => skillRegistry.bulkGet(ids),
     convertSkillTool: toolConverterFn,
   };
 };

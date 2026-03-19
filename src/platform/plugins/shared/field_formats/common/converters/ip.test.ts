@@ -31,10 +31,4 @@ describe('IP Address Format', () => {
       '<span class="ffString__emptyValue">(null)</span>'
     );
   });
-
-  test('escapes HTML characters in html context via fallback', () => {
-    expect(ip.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
-      '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
-    );
-  });
 });

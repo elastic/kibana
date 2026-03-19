@@ -31,7 +31,6 @@ interface BuildVisualizationConfigResult {
   selectedChartType: SupportedChartType;
   validatedConfig: VisualizationConfig;
   esqlQuery: string;
-  timeRange?: { from: string; to: string };
 }
 
 export const buildVisualizationConfig = async ({
@@ -79,7 +78,7 @@ export const buildVisualizationConfig = async ({
     error: null,
   });
 
-  const { validatedConfig, error, currentAttempt, esqlQuery, timeRange } = finalState;
+  const { validatedConfig, error, currentAttempt, esqlQuery } = finalState;
 
   if (!validatedConfig) {
     throw new Error(
@@ -93,6 +92,5 @@ export const buildVisualizationConfig = async ({
     selectedChartType,
     validatedConfig,
     esqlQuery,
-    ...(timeRange && { timeRange }),
   };
 };

@@ -290,7 +290,7 @@ export function VisualizeESQL({
                   >
                     <EuiButtonIcon
                       size="xs"
-                      iconType={isTableVisible ? 'chartBarVerticalStack' : 'tableDensityLow'}
+                      iconType={isTableVisible ? 'visBarVerticalStacked' : 'tableDensityExpanded'}
                       onClick={() => setIsTableVisible(!isTableVisible)}
                       data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
                       aria-label={

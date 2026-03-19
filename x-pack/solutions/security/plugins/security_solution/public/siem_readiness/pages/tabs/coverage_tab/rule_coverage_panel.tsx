@@ -25,17 +25,18 @@ import { useBasePath } from '../../../../common/lib/kibana';
 import { AllRuleCoveragePanel } from './rule_coverage_panels/all_rules';
 import { MitreAttackRuleCoveragePanel } from './rule_coverage_panels/mitre_attack_rules';
 import { ViewCasesButton } from '../../components/view_cases_button';
+import { hasMissingIntegrations as checkMissingIntegrations } from '../../../hooks/visibility_status_utils';
 
 const ELASTIC_INTEGRATIONS_DOCS_URL =
   'https://www.elastic.co/guide/en/kibana/current/connect-to-elasticsearch.html';
 
 const RULE_COVERAGE_CREATE_CASE_TAGS = ['siem-readiness', 'data-rule-coverage'];
 
-const buildMissingOrDisabledIntegrationDescription = (
-  missingOrDisabledIntegrations: string[],
+const buildMissingIntegrationDescription = (
+  missingIntegration: string[],
   getCategoryUrl: (category: string) => string
 ): string => {
-  const integrationLinks = missingOrDisabledIntegrations
+  const integrationLinks = missingIntegration
     .map((row) => {
       const url = getCategoryUrl(row);
       return `- [${row}](${window.location.origin}${url})`;
@@ -43,10 +44,10 @@ const buildMissingOrDisabledIntegrationDescription = (
     .join('\n');
 
   return i18n.translate(
-    'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.missingOrDisabledIntegrationDescription',
+    'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.missingIntegrationDescription',
     {
       defaultMessage:
-        'The following rules have missing or disabled integrations, limiting visibility and detection coverage:\n\n{integrationLinks}\n\nPlease review and install or enable the necessary integrations to restore full visibility.',
+        'The following rules are missing required integrations, limiting visibility and detection coverage:\n\n{integrationLinks}\n\nPlease review and install the necessary integrations to restore full visibility.',
       values: { integrationLinks },
     }
   );
@@ -65,15 +66,15 @@ export const RuleCoveragePanel: React.FC = () => {
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getDetectionRules } = useSiemReadinessApi();
 
-  const enabledIntegrationRules = useDetectionRulesByIntegration();
+  const installedIntegrationRules = useDetectionRulesByIntegration();
 
   const caseDescription = useMemo(
     () =>
-      buildMissingOrDisabledIntegrationDescription(
-        enabledIntegrationRules.ruleIntegrationCoverage?.missingIntegrations || [],
+      buildMissingIntegrationDescription(
+        installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations || [],
         getIntegrationUrl
       ),
-    [enabledIntegrationRules.ruleIntegrationCoverage?.missingIntegrations, getIntegrationUrl]
+    [installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations, getIntegrationUrl]
   );
 
   const handleCreateCase = useCallback(() => {
@@ -81,7 +82,7 @@ export const RuleCoveragePanel: React.FC = () => {
       title: i18n.translate(
         'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.caseTitle',
         {
-          defaultMessage: 'Missing or Disabled Rule Integrations',
+          defaultMessage: 'Missing Rule Integrations',
         }
       ),
       description: caseDescription,
@@ -106,17 +107,15 @@ export const RuleCoveragePanel: React.FC = () => {
     setToggleIdSelected(optionId);
   };
 
-  const enabledIntegrationAssociatedRulesCount =
-    enabledIntegrationRules.ruleIntegrationCoverage?.coveredRules.length || 0;
+  const installedIntegrationAssociatedRulesCount =
+    installedIntegrationRules.ruleIntegrationCoverage?.coveredRules.length || 0;
 
-  const missingOrDisabledIntegrationAssociatedRulesCount =
-    (getDetectionRules.data?.data?.length || 0) - enabledIntegrationAssociatedRulesCount;
+  const missingIntegrationAssociatedRulesCount =
+    (getDetectionRules.data?.data?.length || 0) - installedIntegrationAssociatedRulesCount;
 
-  const hasMissingOrDisabledIntegrations = Boolean(
-    enabledIntegrationRules.ruleIntegrationCoverage?.missingIntegrations?.length
+  const hasMissingIntegrations = checkMissingIntegrations(
+    installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations
   );
-
-  const hasNoEnabledRules = (getDetectionRules.data?.data?.length || 0) === 0;
 
   return (
     <EuiPanel hasBorder>
@@ -137,7 +136,7 @@ export const RuleCoveragePanel: React.FC = () => {
                     </h3>
                   </EuiTitle>
                 </EuiFlexItem>
-                {hasMissingOrDisabledIntegrations && (
+                {hasMissingIntegrations && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="warning" iconType="warning" />
                   </EuiFlexItem>
@@ -170,14 +169,14 @@ export const RuleCoveragePanel: React.FC = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        {hasMissingOrDisabledIntegrations && (
+        {hasMissingIntegrations && (
           <EuiFlexItem>
             <EuiCallOut
               announceOnMount
               title={i18n.translate(
                 'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.warningTitle',
                 {
-                  defaultMessage: 'Some detection rules have missing or disabled integrations.',
+                  defaultMessage: 'Some detection rules are missing required integrations.',
                 }
               )}
               color="warning"
@@ -187,48 +186,13 @@ export const RuleCoveragePanel: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.warningDescription"
-                  defaultMessage="{count} detection rules can't run because they don't have the required data sources. Create a case to initiate a task to install or enable the integrations. View our {docs} to learn more about installing integrations."
+                  defaultMessage="{count} detection rules can't run because they don't have the required data sources. Create a case to initiate a task to install the missing integrations or click view missing integrations to install missing data. View our {docs} to learn more about installing integrations."
                   values={{
-                    count: missingOrDisabledIntegrationAssociatedRulesCount,
+                    count: missingIntegrationAssociatedRulesCount,
                     docs: (
                       <EuiLink href={ELASTIC_INTEGRATIONS_DOCS_URL} target="_blank" external>
                         {i18n.translate(
                           'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.docsLink',
-                          {
-                            defaultMessage: 'docs',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiCallOut>
-          </EuiFlexItem>
-        )}
-        {hasNoEnabledRules && (
-          <EuiFlexItem>
-            <EuiCallOut
-              announceOnMount
-              title={i18n.translate(
-                'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.noEnabledRulesTitle',
-                {
-                  defaultMessage: 'No rules are currently enabled',
-                }
-              )}
-              color="primary"
-              iconType="info"
-              size="s"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.noEnabledRulesDescription"
-                  defaultMessage="Learn more about installing and enabling rules in our {docs}."
-                  values={{
-                    docs: (
-                      <EuiLink href={ELASTIC_INTEGRATIONS_DOCS_URL} target="_blank" external>
-                        {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.noEnabledRulesDocsLink',
                           {
                             defaultMessage: 'docs',
                           }

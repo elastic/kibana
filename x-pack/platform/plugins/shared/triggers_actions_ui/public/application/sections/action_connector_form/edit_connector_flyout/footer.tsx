@@ -44,33 +44,29 @@ const FlyoutFooterComponent: React.FC<Props> = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            {showButtons && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  iconType={isSaved ? 'check' : undefined}
-                  color="primary"
-                  data-test-subj="edit-connector-flyout-save-btn"
-                  isLoading={isSaving}
-                  onClick={onClickSave}
-                  disabled={disabled}
-                >
-                  {isSaved ? (
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonSavedLabel"
-                      defaultMessage="Changes Saved"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
-                      defaultMessage="Save"
-                    />
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          {showButtons && (
+            <EuiButton
+              fill
+              iconType={isSaved ? 'check' : undefined}
+              color="primary"
+              data-test-subj="edit-connector-flyout-save-btn"
+              isLoading={isSaving}
+              onClick={onClickSave}
+              disabled={disabled}
+            >
+              {isSaved ? (
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonSavedLabel"
+                  defaultMessage="Changes Saved"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              )}
+            </EuiButton>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

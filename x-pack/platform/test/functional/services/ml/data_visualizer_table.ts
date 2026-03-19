@@ -480,11 +480,10 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
-      if (expectedExamplesCount > 0) {
-        await this.ensureDetailsOpen(fieldName);
-        await this.assertExamplesList(fieldName, expectedExamplesCount);
-        await this.ensureDetailsClosed(fieldName);
-      }
+      await this.ensureDetailsOpen(fieldName);
+
+      await this.assertExamplesList(fieldName, expectedExamplesCount);
+      await this.ensureDetailsClosed(fieldName);
     }
 
     public async assertGeoPointFieldContents(

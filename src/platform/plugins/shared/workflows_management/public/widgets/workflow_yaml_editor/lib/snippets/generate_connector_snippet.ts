@@ -134,6 +134,7 @@ export function connectorTypeRequiresConnectorId(
   dynamicConnectorTypes?: Record<string, unknown>
 ): boolean {
   // Built-in step types don't need connector-id
+  // Use isBuiltInStepType to check against the actual schema definition
   if (isBuiltInStepType(connectorType)) {
     return false;
   }

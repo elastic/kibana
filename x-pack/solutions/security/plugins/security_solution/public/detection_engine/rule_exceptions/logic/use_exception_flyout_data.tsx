@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 
-import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { Rule } from '../../rule_management/logic/types';
@@ -110,21 +110,15 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
       // throw an error here.
       if (activeSpaceId !== '' && memoDataViewId) {
         setDataViewLoading(true);
-        // We wrap dataViews.get within a try catch because we've seen errors happening with conflicting ids in the saved object api
-        try {
-          const dv = await data.dataViews.get(memoDataViewId);
-          setDataViewIndexPatterns(dv);
-          setDataViewSpec(dv.toSpec());
-        } catch (error) {
-          addWarning(error, { title: 'Failed to load data view for exceptions flyout' });
-        } finally {
-          setDataViewLoading(false);
-        }
+        const dv = await data.dataViews.get(memoDataViewId);
+        setDataViewLoading(false);
+        setDataViewIndexPatterns(dv);
+        setDataViewSpec(dv.toSpec());
       }
     };
 
     fetchSingleDataView();
-  }, [memoDataViewId, data.dataViews, setDataViewIndexPatterns, activeSpaceId, addWarning]);
+  }, [memoDataViewId, data.dataViews, setDataViewIndexPatterns, activeSpaceId]);
 
   // Fetch extended fields information
   const getExtendedFields = useCallback(

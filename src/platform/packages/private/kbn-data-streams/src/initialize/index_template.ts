@@ -81,7 +81,6 @@ export async function initializeIndexTemplate({
       template: {
         aliases: dataStream.template.aliases,
         mappings: dataStream.template.mappings,
-        lifecycle: dataStream.template.lifecycle,
         settings: dataStream.template.settings,
       },
       _meta: {

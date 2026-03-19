@@ -10,19 +10,53 @@
 import { Global, css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useIsLoading } from './chrome_hooks';
+import React, { useState, useEffect, useRef } from 'react';
+import classNames from 'classnames';
+import type { HttpStart } from '@kbn/core-http-browser';
+
+const DEBOUNCE_DELAY_MS = 250;
 
 export interface LoadingIndicatorProps {
+  loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
   customLogo?: string;
+  maxAmount?: number;
+  valueAmount?: string | number;
 }
 
-export const LoadingIndicator = ({ showAsBar = false, customLogo }: LoadingIndicatorProps) => {
-  const isLoading = useIsLoading();
+export const LoadingIndicator = ({
+  loadingCount$,
+  showAsBar = false,
+  customLogo,
+  maxAmount,
+  valueAmount,
+}: LoadingIndicatorProps) => {
+  const [visible, setVisible] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const loadingSubj = isLoading ? 'globalLoadingIndicator' : 'globalLoadingIndicator-hidden';
-  const testSubj = customLogo ? `${loadingSubj} customLogo` : loadingSubj;
+  useEffect(() => {
+    const subscription = loadingCount$.subscribe((count) => {
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        setVisible(count > 0);
+      }, DEBOUNCE_DELAY_MS);
+    });
+
+    return () => {
+      clearTimeout(timerRef.current);
+      subscription.unsubscribe();
+    };
+  }, [loadingCount$]);
+
+  const className = classNames(!visible && 'kbnLoadingIndicator-hidden');
+  const indicatorHiddenCss = !visible
+    ? css({
+        visibility: 'hidden',
+        animationPlayState: 'paused',
+      })
+    : undefined;
+
+  const testSubj = visible ? 'globalLoadingIndicator' : 'globalLoadingIndicator-hidden';
 
   const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
     defaultMessage: 'Loading content',
@@ -49,7 +83,7 @@ export const LoadingIndicator = ({ showAsBar = false, customLogo }: LoadingIndic
     />
   );
 
-  const logo = isLoading ? (
+  const logo = visible ? (
     <EuiLoadingSpinner
       size="l"
       data-test-subj={testSubj}
@@ -65,21 +99,24 @@ export const LoadingIndicator = ({ showAsBar = false, customLogo }: LoadingIndic
       <Global
         styles={{
           '.euiHeaderSectionItem .euiButtonEmpty__text': {
+            // stop global header buttons from jumping during loading state
             display: 'flex',
           },
         }}
       />
-      {showAsBar ? (
+      {!showAsBar ? (
+        logo
+      ) : (
         <EuiProgress
-          className={!isLoading ? 'kbnLoadingIndicator-hidden' : undefined}
-          css={!isLoading ? css({ visibility: 'hidden', animationPlayState: 'paused' }) : undefined}
+          className={className}
+          css={indicatorHiddenCss}
           data-test-subj={testSubj}
+          max={maxAmount}
+          value={valueAmount}
           position="fixed"
           color="accent"
           size="xs"
         />
-      ) : (
-        logo
       )}
     </>
   );

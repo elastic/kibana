@@ -36,16 +36,8 @@ export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) 
   });
 };
 
-interface FetchTotalDocsFailedMeta {
-  _event?: { origin?: DataStreamType };
-}
-
-export const fetchTotalDocsFailedNotifier = (
-  toasts: IToasts,
-  error: Error,
-  meta: FetchTotalDocsFailedMeta
-) => {
-  const dataStreamType = meta._event?.origin ?? 'unknown';
+export const fetchTotalDocsFailedNotifier = (toasts: IToasts, error: Error, meta: any) => {
+  const dataStreamType = meta._event.origin as DataStreamType;
 
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchTotalDocsFailed', {
