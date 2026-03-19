@@ -38,3 +38,5 @@ export const INFERENCE_SETTINGS_ID = 'default';
 export enum ROUTE_VERSIONS {
   v1 = '1',
 }
+
+export const DYNAMIC_CONNECTORS_POLLING_START_DELAY = 5000; // 5 seconds
