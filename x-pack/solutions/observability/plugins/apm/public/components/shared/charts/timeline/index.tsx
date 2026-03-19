@@ -85,6 +85,7 @@ export function VerticalLinesContainer({ xMax, xMin, margins, marks, height }: T
               top: 0,
               left: 0,
               right: 0,
+              pointerEvents: 'none',
             }}
             ref={resizeRef}
           >
