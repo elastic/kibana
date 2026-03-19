@@ -31,7 +31,7 @@ const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => 
   return (
     <EuiFlexGroup direction="column" justifyContent="flexStart">
       <EuiFlexItem grow={false}>
-        <AgentAvatar agent={agent} size="m" color="subdued" shape="square" />
+        <AgentAvatar agent={agent} size="m" color="subdued" shape="circle" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -44,25 +44,31 @@ const AgentOption: React.FC<AgentOptionProps> = ({ agent }) => {
 
   return (
     <OptionText>
-      <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
+      <EuiFlexGroup
+        component="span"
+        responsive={false}
+        alignItems="center"
+        gutterSize="s"
+        direction="row"
+        justifyContent="spaceBetween"
+      >
         <EuiFlexItem component="span" grow={false}>
           {agent.name}
         </EuiFlexItem>
-        {agent.readonly && (
-          <EuiFlexItem component="span" grow={false}>
-            <EuiIconTip
-              type="lock"
-              size="m"
-              content={readonlyAgentTooltip}
-              anchorProps={{
-                css: css`
-                  display: flex;
-                  justify-content: center;
-                `,
-              }}
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem component="span" grow={false}>
+          <EuiIconTip
+            type="info"
+            size="s"
+            content={agent.description}
+            position="right"
+            anchorProps={{
+              css: css`
+                display: flex;
+                justify-content: center;
+              `,
+            }}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </OptionText>
   );
