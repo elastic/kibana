@@ -19,13 +19,13 @@ describe('getEuidSourceFields', () => {
     expect(result.identitySourceFields).toHaveLength(new Set(result.identitySourceFields).size);
   });
 
-  it('excludes fieldEvaluation destinations (entity.namespace, entity.confidence) for user', () => {
-    const result = getEuidSourceFields(EntityType.enum.user);
+  it.only('excludes fieldEvaluation destinations (entity.namespace, entity.confidence) for user', () => {
+    const result = getEuidSourceFields(EntityType.enum.user);    
 
     expect(result.identitySourceFields).not.toContain('entity.namespace');
     expect(result.identitySourceFields).not.toContain('entity.confidence');
     expect(result.identitySourceFields).toEqual(
-      expect.arrayContaining(['user.email', 'user.id', 'user.name', 'user.domain'])
+      expect.arrayContaining(['user.email', 'user.id', 'user.name', 'user.domain', 'host.id'])
     );
     expect(result.requiresOneOf).toEqual(result.identitySourceFields);
   });

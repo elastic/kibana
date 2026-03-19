@@ -10,8 +10,12 @@ import {
   evaluateStreamlangCondition,
   getDocument,
   getFieldValue,
+  normalizeConditionForSingleDoc,
   resolveFieldValueSchema,
 } from './commons';
+import type { Condition } from '@kbn/streamlang';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
+import { getEntityDefinitionWithoutId } from '../definitions/registry';
 
 describe('getDocument', () => {
   it('returns _source when doc is an Elasticsearch hit', () => {
@@ -243,6 +247,122 @@ describe('evaluateStreamlangCondition', () => {
   });
 });
 
+describe('normalizeConditionForSingleDoc', () => {
+  it('returns condition as-is when null or undefined', () => {
+    expect(normalizeConditionForSingleDoc(null)).toBe(null);
+    expect(normalizeConditionForSingleDoc(undefined)).toBe(undefined);
+  });
+
+  it('returns condition as-is when not an object', () => {
+    expect(normalizeConditionForSingleDoc('string')).toBe('string');
+    expect(normalizeConditionForSingleDoc(42)).toBe(42);
+  });
+
+  it('replaces recent.X field with X in simple field predicate', () => {
+    const condition = { field: 'recent.event.kind', includes: 'asset' };
+    expect(normalizeConditionForSingleDoc(condition)).toEqual({
+      field: 'event.kind',
+      includes: 'asset',
+    });
+  });
+
+  it('leaves field unchanged when it does not start with recent.', () => {
+    const condition = { field: 'event.kind', includes: 'asset' };
+    expect(normalizeConditionForSingleDoc(condition)).toEqual(condition);
+  });
+
+  it('recursively normalizes and array', () => {
+    const condition = {
+      and: [
+        { field: 'recent.user.name', exists: true },
+        { field: 'recent.host.id', exists: true },
+      ],
+    };
+    expect(normalizeConditionForSingleDoc(condition)).toEqual({
+      and: [
+        { field: 'user.name', exists: true },
+        { field: 'host.id', exists: true },
+      ],
+    });
+  });
+
+  it('recursively normalizes or array', () => {
+    const condition = {
+      or: [
+        { field: 'recent.event.kind', includes: 'asset' },
+        {
+          and: [
+            { field: 'recent.event.category', includes: 'iam' },
+            { field: 'recent.event.type', includes: 'user' },
+          ],
+        },
+      ],
+    };
+    expect(normalizeConditionForSingleDoc(condition)).toEqual({
+      or: [
+        { field: 'event.kind', includes: 'asset' },
+        {
+          and: [
+            { field: 'event.category', includes: 'iam' },
+            { field: 'event.type', includes: 'user' },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('recursively normalizes not', () => {
+    const condition = {
+      not: { field: 'recent.entity.id', exists: true },
+    };
+    expect(normalizeConditionForSingleDoc(condition)).toEqual({
+      not: { field: 'entity.id', exists: true },
+    });
+  });
+
+  it('preserves always and never conditions', () => {
+    expect(normalizeConditionForSingleDoc({ always: true })).toEqual({ always: true });
+    expect(normalizeConditionForSingleDoc({ never: true })).toEqual({ never: true });
+  });
+
+  it('normalizes nested postAggFilter-like condition', () => {
+    const condition = {
+      or: [
+        { field: 'entity.id', exists: true },
+        { field: 'recent.event.kind', includes: 'asset' },
+        {
+          and: [
+            { field: 'recent.event.category', includes: 'iam' },
+            {
+              or: [
+                { field: 'recent.event.type', includes: 'user' },
+                { field: 'recent.event.type', includes: 'creation' },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    expect(normalizeConditionForSingleDoc(condition)).toEqual({
+      or: [
+        { field: 'entity.id', exists: true },
+        { field: 'event.kind', includes: 'asset' },
+        {
+          and: [
+            { field: 'event.category', includes: 'iam' },
+            {
+              or: [
+                { field: 'event.type', includes: 'user' },
+                { field: 'event.type', includes: 'creation' },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+  });
+});
+
 describe('resolveFieldValueSchema', () => {
   it('returns literal string as-is', () => {
     expect(resolveFieldValueSchema({}, 'local')).toBe('local');
@@ -342,5 +462,85 @@ describe('applyWhenConditionTrueSetFieldsPreAgg', () => {
       },
     ]);
     expect(doc['entity.name']).toBeUndefined();
+  });
+});
+
+describe('user containsId filter condition (documentsFilter AND postAggFilter)', () => {
+  function getUserContainsIdCondition() {
+    const def = getEntityDefinitionWithoutId('user');
+    const { identityField } = def;
+    if (isSingleFieldIdentity(identityField)) {
+      throw new Error('User has calculated identity');
+    }
+    let condition: Condition = identityField.documentsFilter;
+    if (def.postAggFilter) {
+      const normalizedPostAgg = normalizeConditionForSingleDoc(def.postAggFilter) as Condition;
+      condition = { and: [condition, normalizedPostAgg] };
+    }
+    return condition;
+  }
+
+  it('matches IDP doc: event.kind=asset, user.email present', () => {
+    const doc = {
+      'event.outcome': 'success',
+      'event.kind': 'asset',
+      'user.email': 'alice@example.com',
+    };
+    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(true);
+  });
+
+  it('matches IDP doc: event.category=iam, event.type=user, user.id present', () => {
+    const doc = {
+      'event.outcome': 'success',
+      'event.category': 'iam',
+      'event.type': 'user',
+      'user.id': 'user-123',
+    };
+    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(true);
+  });
+
+  it('matches non-IDP doc: user.name + host.id, user.name not in excluded list', () => {
+    const doc = {
+      'event.outcome': 'success',
+      'user.name': 'john.doe',
+      'host.id': 'host-1',
+    };
+    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(true);
+  });
+
+  it('matches doc with entity.id (shared entity from store)', () => {
+    const doc = {
+      'event.outcome': 'success',
+      'user.email': 'alice@example.com',
+      'entity.id': 'user:alice@okta',
+    };
+    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(true);
+  });
+
+  it('excludes invalid doc: user.email + event.module only, no IDP or non-IDP postAggFilter', () => {
+    const doc = {
+      'event.outcome': 'success',
+      'user.email': 'alice@example.com',
+      'event.module': 'okta',
+    };
+    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(false);
+  });
+
+  it('excludes invalid doc: event.outcome=failure', () => {
+    const doc = {
+      'event.outcome': 'failure',
+      'event.kind': 'asset',
+      'user.email': 'alice@example.com',
+    };
+    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(false);
+  });
+
+  it('excludes non-IDP doc with excluded user.name (root)', () => {
+    const doc = {
+      'event.outcome': 'success',
+      'user.name': 'root',
+      'host.id': 'host-1',
+    };
+    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(false);
   });
 });

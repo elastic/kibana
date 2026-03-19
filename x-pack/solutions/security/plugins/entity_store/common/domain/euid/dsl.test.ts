@@ -296,6 +296,27 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(filterFields).not.toContain('entity.namespace');
       expect(mustNotFields).not.toContain('entity.namespace');
     });
+
+    it('returns filter for user.name and host.id when whenConditionTrueSetFieldsPreAgg sets entity.namespace to local (non-IDP)', () => {
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { name: 'alice' },
+        host: { id: 'host-1' },
+        event: { kind: 'event', category: 'authentication' },
+      });
+
+      expect(result).toBeDefined();
+      expect(result?.bool?.filter).toEqual(
+        expect.arrayContaining([
+          { term: { 'user.name': 'alice' } },
+          { term: { 'host.id': 'host-1' } },
+        ])
+      );
+      const filter = result?.bool?.filter as Array<{ term?: Record<string, string> }> | undefined;
+      const filterFields = Array.isArray(filter)
+        ? filter.map((clause) => Object.keys(clause.term ?? {})[0]).filter(Boolean)
+        : [];
+      expect(filterFields).not.toContain('entity.namespace');
+    });
   });
 
   describe('service', () => {
@@ -340,7 +361,7 @@ const isNotEmptyClause = (field: string) => ({
 });
 
 describe('getEuidDslDocumentsContainsIdFilter', () => {
-  it('user: returns documentsFilter DSL (exclusions and at least one id field)', () => {
+  it('user: returns documentsFilter AND postAggFilter DSL (IDP or non-IDP only)', () => {
     const result = getEuidDslDocumentsContainsIdFilter('user');
 
     expect(result).toMatchSnapshot();

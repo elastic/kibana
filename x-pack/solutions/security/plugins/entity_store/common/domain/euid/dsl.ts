@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { conditionToQueryDsl } from '@kbn/streamlang';
+import { conditionToQueryDsl, type Condition } from '@kbn/streamlang';
 import type { EntityType } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
@@ -19,6 +19,7 @@ import {
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
   getSourceFieldNames,
+  normalizeConditionForSingleDoc,
 } from './commons';
 import {
   applyFieldEvaluations,
@@ -29,7 +30,8 @@ import type { FieldEvaluation } from '../definitions/entity_schema';
 
 /**
  * Returns a DSL filter that matches documents considered for the given entity type.
- * This is the translation of {@link CalculatedEntityIdentity.documentsFilter}.
+ * Combines documentsFilter and postAggFilter (when present) so the filter is
+ * equivalent to the ESQL extraction logic: only IDP or non-IDP documents pass.
  *
  * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilter}.
  * Use it to pre-filter searches/aggregations to only documents that could
@@ -45,13 +47,21 @@ import type { FieldEvaluation } from '../definitions/entity_schema';
 export function getEuidDslDocumentsContainsIdFilter(
   entityType: EntityType
 ): QueryDslQueryContainer {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
   if (isSingleFieldIdentity(identityField)) {
     return conditionToQueryDsl(
       isNotEmptyCondition(identityField.singleField)
     ) as QueryDslQueryContainer;
   }
-  return conditionToQueryDsl(identityField.documentsFilter) as QueryDslQueryContainer;
+  let condition: Condition = identityField.documentsFilter;
+  if (entityDefinition.postAggFilter) {
+    const normalizedPostAgg = normalizeConditionForSingleDoc(
+      entityDefinition.postAggFilter
+    ) as Condition;
+    condition = { and: [condition, normalizedPostAgg] };
+  }
+  return conditionToQueryDsl(condition) as QueryDslQueryContainer;
 }
 
 /**

@@ -9,6 +9,7 @@ import type { EntityType, EuidAttribute, FieldEvaluation } from '../definitions/
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField } from './commons';
+import { normalizeConditionForSingleDoc } from './commons';
 
 /**
  * Returns an Elasticsearch runtime keyword field mapping whose Painless script
@@ -50,7 +51,8 @@ export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
  * @returns A Painless evaluation string that computes the entity id.
  */
 export function getEuidPainlessEvaluation(entityType: EntityType): string {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
   const prefixExpr = identityField.skipTypePrepend ? '' : `"${entityType}:" + `;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -64,6 +66,20 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   if (euidRanking.branches.length === 0) {
     throw new Error('No euid ranking branches found, invalid euid logic definition');
   }
+
+  const filterChecks: string[] = [];
+  if (identityField.documentsFilter) {
+    filterChecks.push(
+      `if (!(${streamlangConditionToPainlessDoc(identityField.documentsFilter)})) { return null; }`
+    );
+  }
+  if (entityDefinition.postAggFilter) {
+    const normalizedPostAgg = normalizeConditionForSingleDoc(entityDefinition.postAggFilter);
+    filterChecks.push(
+      `if (!(${streamlangConditionToPainlessDoc(normalizedPostAgg)})) { return null; }`
+    );
+  }
+  const filterPreamble = filterChecks.length > 0 ? filterChecks.join(' ') + ' ' : '';
 
   const evaluatedVars = new Map<string, string>();
   let preamble = '';
@@ -99,7 +115,12 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
 
   const hasConditionalBranch = euidRanking.branches.some((b) => b.when != null);
   if (!hasConditionalBranch && euidRanking.branches.length === 1) {
-    return preamble + buildBranchClauses(euidRanking.branches[0].ranking) + ' return null;';
+    return (
+      filterPreamble +
+      preamble +
+      buildBranchClauses(euidRanking.branches[0].ranking) +
+      ' return null;'
+    );
   }
 
   const buildWhenCondition = (when: unknown): string => {
@@ -130,12 +151,57 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     }
   }
   const branchLogic = branchParts.join(' ');
-  return preamble + branchLogic + ' return null;';
+  return filterPreamble + preamble + branchLogic + ' return null;';
 }
 
 function painlessFieldNonEmpty(field: string): string {
   const escaped = escapePainlessField(field);
   return `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0 && doc['${escaped}'].value != null && doc['${escaped}'].value != ""`;
+}
+
+/**
+ * Translates a streamlang condition to Painless using doc['field'] access for runtime mappings.
+ * Handles and, or, not, and field predicates (eq, neq, exists, includes).
+ *
+ * @internal Exported for testing.
+ */
+export function streamlangConditionToPainlessDoc(condition: unknown): string {
+  if (!condition || typeof condition !== 'object') return 'false';
+  const c = condition as Record<string, unknown>;
+  if ('and' in c && Array.isArray(c.and)) {
+    const parts = (c.and as unknown[]).map((sub) => streamlangConditionToPainlessDoc(sub));
+    return parts.length > 0 ? `(${parts.join(' && ')})` : 'true';
+  }
+  if ('or' in c && Array.isArray(c.or)) {
+    const parts = (c.or as unknown[]).map((sub) => streamlangConditionToPainlessDoc(sub));
+    return parts.length > 0 ? `(${parts.join(' || ')})` : 'false';
+  }
+  if ('not' in c) {
+    return `!(${streamlangConditionToPainlessDoc(c.not)})`;
+  }
+  if ('always' in c) return 'true';
+  if ('never' in c) return 'false';
+  if ('field' in c && typeof c.field === 'string') {
+    const field = c.field;
+    const escaped = escapePainlessField(field);
+    const nonEmpty = painlessFieldNonEmpty(field);
+    if ('eq' in c && c.eq !== undefined) {
+      const val = escapePainlessString(String(c.eq));
+      return `(${nonEmpty} && doc['${escaped}'].value == "${val}")`;
+    }
+    if ('neq' in c && c.neq !== undefined) {
+      const val = escapePainlessString(String(c.neq));
+      return `(!${nonEmpty} || doc['${escaped}'].value != "${val}")`;
+    }
+    if ('exists' in c) {
+      return c.exists ? nonEmpty : `!(${nonEmpty})`;
+    }
+    if ('includes' in c) {
+      const val = escapePainlessString(String(c.includes));
+      return `(${nonEmpty} && doc['${escaped}'].value.contains("${val}"))`;
+    }
+  }
+  return 'false';
 }
 
 function buildPainlessValueExprWithEvaluated(

@@ -81,4 +81,64 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
       }
     );
   }
+
+  apiTest(
+    'user: Painless correctly handles IDP, non-IDP, and illegal documents',
+    async ({ esClient }) => {
+      const entityType = 'user';
+      const baseBody = {
+        runtime_mappings: { entity_id: getEuidPainlessRuntimeMapping(entityType) },
+        size: 10,
+        fields: ['entity_id'],
+      };
+
+      const runSearch = (query: object) =>
+        esClient.search({
+          index: UPDATES_INDEX,
+          body: { ...baseBody, query },
+        } as Parameters<typeof esClient.search>[1]);
+
+      const getEuidFromHit = (hit: { _source?: unknown; fields?: Record<string, unknown> }) => {
+        const expected = getEuidFromObject(entityType, hit);
+        const actual = (hit.fields?.entity_id as string[] | undefined)?.[0];
+        return { expected, actual };
+      };
+
+      const idpResult = await runSearch({
+        bool: {
+          must: [{ term: { 'event.kind': 'asset' } }, { exists: { field: 'user.email' } }],
+        },
+      });
+      const idpHits = idpResult.hits.hits;
+      expect(idpHits.length).toBeGreaterThan(0);
+      for (const hit of idpHits) {
+        const { expected, actual } = getEuidFromHit(hit);
+        expect(expected).toBeDefined();
+        expect(actual).toBe(expected);
+      }
+
+      const nonIdpResult = await runSearch({
+        bool: {
+          must: [
+            { term: { 'user.name': 'alice.local' } },
+            { term: { 'host.id': 'host-nonidp-001' } },
+          ],
+        },
+      });
+      const nonIdpHits = nonIdpResult.hits.hits;
+      expect(nonIdpHits).toHaveLength(1);
+      const { expected: nonIdpExpected, actual: nonIdpActual } = getEuidFromHit(nonIdpHits[0]);
+      expect(nonIdpExpected).toBe('user:alice.local@host-nonidp-001@local');
+      expect(nonIdpActual).toBe(nonIdpExpected);
+
+      const illegalResult = await runSearch({
+        term: { 'user.email': 'invalid-idp-illegal@test.com' },
+      });
+      const illegalHits = illegalResult.hits.hits;
+      expect(illegalHits).toHaveLength(1);
+      const { expected: illegalExpected, actual: illegalActual } = getEuidFromHit(illegalHits[0]);
+      expect(illegalExpected).toBeUndefined();
+      expect(illegalActual).toBeUndefined();
+    }
+  );
 });

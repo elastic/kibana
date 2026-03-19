@@ -730,6 +730,68 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   );
 
   apiTest(
+    'Should not extract user entities for excluded user names (LOCAL_NAMESPACE_EXCLUDED_USER_NAMES)',
+    async ({ apiClient, esClient }) => {
+      const from = '2026-03-18T20:00:00Z';
+      const to = '2026-03-18T21:00:00Z';
+
+      // Excluded user names per user.ts: root, bin, daemon, sys, nobody, jenkins, ansible, deploy,
+      // terraform, gitlab-runner, postgres, mysql, redis, elasticsearch, kafka, admin, operator, service.
+      // Non-IDP docs only (user.name + host.id, no event.kind=asset, no event.category=iam).
+      const excludedNames = ['root', 'jenkins', 'ansible', 'postgres', 'admin', 'service'];
+      for (let i = 0; i < excludedNames.length; i++) {
+        const name = excludedNames[i];
+        await ingestDoc(esClient, {
+          '@timestamp': `2026-03-18T20:0${i + 1}:00Z`,
+          event: { kind: 'event', category: 'network', outcome: 'success' },
+          user: { name: name },
+          host: { id: `excluded-host-${name}`, name: 'server' },
+        });
+      }
+
+      // Valid non-IDP user for comparison
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-18T20:10:00Z',
+        event: { kind: 'event', category: 'network', outcome: 'success' },
+        user: { name: 'allowed.user' },
+        host: { id: 'excluded-host-allowed', name: 'workstation' },
+      });
+
+      const extractionResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: { fromDateISO: from, toDateISO: to },
+        }
+      );
+
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({ success: true });
+
+      // Excluded user names must NOT be extracted (no entity for root@..., jenkins@..., etc.)
+      for (const name of excludedNames) {
+        const entityId = `user:${name}@excluded-host-${name}@local`;
+        const hit = await searchDocById(esClient, entityId);
+        expect(hit.hits.hits).toHaveLength(0);
+      }
+
+      // Valid non-IDP user must be extracted
+      const allowedHit = await searchDocById(esClient, 'user:allowed.user@excluded-host-allowed@local');
+      expect(allowedHit.hits.hits).toHaveLength(1);
+      expect(allowedHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:allowed.user@excluded-host-allowed@local',
+          type: 'Identity',
+          name: 'allowed.user@workstation',
+          namespace: 'local',
+          confidence: 'medium',
+        },
+      });
+    }
+  );
+
+  apiTest(
     'Should process extraction successfully for all entity types with mixed valid and invalid documents',
     async ({ apiClient, esClient }) => {
       const from = '2026-03-18T16:00:00Z';

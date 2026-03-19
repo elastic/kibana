@@ -21,10 +21,12 @@ export const euid = {
   getEuidFromObject: euidModule.getEuidFromObject,
   getEuidPainlessEvaluation: euidModule.getEuidPainlessEvaluation,
   getEuidPainlessRuntimeMapping: euidModule.getEuidPainlessRuntimeMapping,
-  getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
+  getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument, // remain
+  // consult with Alex / Kfir
   getEuidDslDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
   getEuidEsqlDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
-  getEuidEsqlEvaluation: euidModule.getEuidEsqlEvaluation,
-  getEuidEsqlFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
-  getEuidSourceFields: euidModule.getEuidSourceFields,
+  getEuidEsqlEvaluation: euidModule.getEuidEsqlEvaluation, // remain
+  // should have the same logic as getEuidFromObject - on source documents
+  getEuidEsqlFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument, // remain
+  // similar to getEuidDslFilterBasedOnDocument
 };

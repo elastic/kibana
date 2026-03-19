@@ -66,6 +66,31 @@ export function getCompositionFields(composition: EuidAttribute[]): string[] {
   return composition.filter(isEuidField).map((attr) => attr.field);
 }
 
+const RECENT_DATA_PREFIX = 'recent.';
+
+/**
+ * Normalizes a streamlang condition for single-document evaluation by replacing
+ * `recent.X` field references with `X`. Used when evaluating postAggFilter
+ * (which uses recentData() for ESQL aggregation context) against a single doc.
+ */
+export function normalizeConditionForSingleDoc(condition: unknown): unknown {
+  if (!condition || typeof condition !== 'object') return condition;
+  const c = condition as Record<string, unknown>;
+  if ('and' in c && Array.isArray(c.and)) {
+    return { ...c, and: (c.and as unknown[]).map(normalizeConditionForSingleDoc) };
+  }
+  if ('or' in c && Array.isArray(c.or)) {
+    return { ...c, or: (c.or as unknown[]).map(normalizeConditionForSingleDoc) };
+  }
+  if ('not' in c) {
+    return { ...c, not: normalizeConditionForSingleDoc(c.not) };
+  }
+  if ('field' in c && typeof c.field === 'string' && c.field.startsWith(RECENT_DATA_PREFIX)) {
+    return { ...c, field: c.field.slice(RECENT_DATA_PREFIX.length) };
+  }
+  return condition;
+}
+
 /**
  * Evaluates a streamlang condition against a document. Supports and, or, not, and field predicates.
  */

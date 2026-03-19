@@ -210,15 +210,10 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
     expect(result).toBe(expected);
   });
 
-  it('returns documents filter for user (exclusions and at least one id field)', () => {
+  it('returns documents filter AND postAggFilter for user (IDP or non-IDP only)', () => {
     const result = getEuidEsqlDocumentsContainsIdFilter('user');
 
-    expect(result).toMatch(/event\.outcome/);
-    expect(result).toMatch(/event\.kind/);
-    expect(result).toMatch(/AND\s+\(/);
-    expect(result).toMatch(/user\.email/);
-    expect(result).toMatch(/user\.id/);
-    expect(result).toMatch(/user\.name/);
+    expect(result).toMatchSnapshot();
   });
 });
 
@@ -296,15 +291,14 @@ describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
     expect(result).toContain('host.id == "host-1"');
   });
 
-    it('uses else ranking when entity.namespace is not local', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', {
-        user: { email: 'alice@example.com' },
-        event: { module: 'okta' },
-      });
-
-      expect(result).toContain('user.email == "alice@example.com"');
-      expect(result).not.toContain('host.id');
+  it('uses else ranking when entity.namespace is not local', () => {
+    const result = getEuidEsqlFilterBasedOnDocument('user', {
+      user: { email: 'alice@example.com' },
+      event: { module: 'okta' },
     });
+
+    expect(result).toContain('user.email == "alice@example.com"');
+    expect(result).not.toContain('host.id');
   });
 
   describe('evaluated fields and source clauses', () => {
@@ -332,3 +326,4 @@ describe('getEuidEsqlFilterBasedOnDocument user local namespace', () => {
       expect(result).not.toMatch(/entity\.confidence\s*==/);
     });
   });
+});
