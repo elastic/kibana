@@ -8,7 +8,11 @@
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { ALERTING_EPISODES_PAGINATED_QUERY } from '../constants';
+import {
+  ALERTING_EPISODES_PAGINATED_QUERY,
+  LAST_EPISODE_TIMESTAMP_VARIABLE,
+  PAGE_SIZE_VARIABLE,
+} from '../constants';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchAlertingEpisodesOptions {
@@ -38,12 +42,12 @@ export const fetchAlertingEpisodes = ({
       type: 'kibana_context',
       esqlVariables: [
         {
-          key: 'lastEpisodeTimestamp',
+          key: LAST_EPISODE_TIMESTAMP_VARIABLE,
           // null is not a valid type but works in practice
           value: beforeTimestamp as ESQLControlVariable['value'],
           type: ESQLVariableType.VALUES,
         },
-        { key: 'pageSize', value: pageSize, type: ESQLVariableType.VALUES },
+        { key: PAGE_SIZE_VARIABLE, value: pageSize, type: ESQLVariableType.VALUES },
       ] satisfies ESQLControlVariable[],
     },
     abortSignal,

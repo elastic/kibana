@@ -23,7 +23,6 @@ import type { SortOrder } from '@kbn/unified-data-table';
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
-// import { useFetchRules } from '@kbn/alerting-v2-plugin/public';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { pagesToDatatableRecords } from '@kbn/alerting-v2-episodes-ui/utils/pages_to_datatable_records';
 import { AlertingEpisodeStatusBadge } from '@kbn/alerting-v2-episodes-ui/components/alerting_episode_status_badge';
@@ -104,8 +103,18 @@ export function AlertsV2Page() {
     >
       <HeaderMenu />
 
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow>
+      <EuiFlexGroup
+        direction="column"
+        css={css`
+          min-width: 0;
+        `}
+      >
+        <EuiFlexItem
+          grow
+          css={css`
+            min-width: 0;
+          `}
+        >
           <CellActionsProvider
             getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
           >

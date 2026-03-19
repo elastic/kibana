@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// pages_to_datatable_records.test.ts
-
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { pagesToDatatableRecords } from './pages_to_datatable_records';
 

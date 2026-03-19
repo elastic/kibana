@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// File: alerting_episode_status_badge.test.tsx
-
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertingEpisodeStatusBadge } from './alerting_episode_status_badge';

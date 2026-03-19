@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+export const LAST_EPISODE_TIMESTAMP_VARIABLE = 'lastEpisodeTimestamp';
+export const PAGE_SIZE_VARIABLE = 'pageSize';
+
 /**
  * A query to get aggregated alerting v2 episodes data with @timestamp/LIMIT-based pagination.
  *
@@ -12,12 +15,12 @@
  */
 export const ALERTING_EPISODES_PAGINATED_QUERY = `
 FROM .alerting-events
-| WHERE ?lastEpisodeTimestamp IS NULL OR @timestamp < ?lastEpisodeTimestamp
+| WHERE ?${LAST_EPISODE_TIMESTAMP_VARIABLE} IS NULL OR @timestamp < ?${LAST_EPISODE_TIMESTAMP_VARIABLE}
 | INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id
 | EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)
 | WHERE @timestamp == last_timestamp AND type == "alert"
 | SORT @timestamp DESC
-| LIMIT ?pageSize
+| LIMIT ?${PAGE_SIZE_VARIABLE}
 `;
 
 /**
