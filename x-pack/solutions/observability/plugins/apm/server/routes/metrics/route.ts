@@ -13,6 +13,7 @@ import type { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
 import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
 import type { ServiceNodesResponse } from './get_service_nodes';
 import { getServiceNodes } from './get_service_nodes';
+import { hasFields } from './has_fields';
 import { metricsServerlessRouteRepository } from './serverless/route';
 
 const metricsChartsRoute = createApmServerRoute({
@@ -87,8 +88,35 @@ const serviceMetricsJvm = createApmServerRoute({
   },
 });
 
+const metricsHasFieldsRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/services/{serviceName}/metrics/has_fields',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    body: t.type({
+      fields: t.array(t.string),
+    }),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ fieldAvailability: Record<string, boolean> }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { serviceName } = resources.params.path;
+    const { fields } = resources.params.body;
+
+    const fieldAvailability = await hasFields({
+      apmEventClient,
+      serviceName,
+      fields,
+    });
+
+    return { fieldAvailability };
+  },
+});
+
 export const metricsRouteRepository = {
   ...metricsChartsRoute,
   ...serviceMetricsJvm,
+  ...metricsHasFieldsRoute,
   ...metricsServerlessRouteRepository,
 };
