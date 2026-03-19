@@ -62,7 +62,7 @@ ${prompts.examples}`,
 ${nlQuery}
 </user_query>
 
-${formatResourceWithSampledValues({ resource, indentLevel: 0 })}
+${formatResourceWithSampledValues({ resource })}
 
 Now, based on that information, request documentation from the ES|QL handbook
 to help you get the right information needed to generate a query.`,
@@ -133,7 +133,7 @@ ${nlQuery}
 
 ${additionalContext ? `<additional_context>\n${additionalContext}\n</<additional_context>` : ''}
 
-${formatResourceWithSampledValues({ resource, indentLevel: 0 })}
+${formatResourceWithSampledValues({ resource })}
 
 Now, based on that information, please generate the ES|QL query.`,
     ],

@@ -36,6 +36,7 @@ import {
 import {
   getDatasourceLayers,
   getDataViewsMetadata,
+  getLegendTruncateAfterLines,
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
   stripUndefined,
@@ -210,7 +211,7 @@ function convertAPILegendDisplayOption(
         nestedLegend: 'nested' in legend ? legend?.nested : undefined,
         legendSize: legend?.size,
         legendMaxLines: legend?.truncate_after_lines,
-        truncateLegend: legend?.truncate_after_lines != null,
+        truncateLegend: Boolean(legend?.truncate_after_lines),
       })
     : {};
   if (legend?.visible === 'auto' || legend?.visible == null) {
@@ -448,7 +449,7 @@ function fromLensStateToSharedPartitionAPI(
   const layerState = visualization.layers[0];
   const legend = stripUndefined({
     visible: layerState.legendDisplay === 'default' ? 'auto' : layerState.legendDisplay,
-    truncate_after_lines: layerState.legendMaxLines,
+    truncate_after_lines: getLegendTruncateAfterLines(layerState),
     nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
     size: layerState.legendSize,
   });
