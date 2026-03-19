@@ -6,21 +6,23 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { Global } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiResizableContainer,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import {
   RULES_TABLE_FILTERS_MAIN_PANEL_MIN_HEIGHT_PX,
-  RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PERCENT,
+  RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PX,
   RULES_TABLE_FILTERS_SIDEBAR_DEFAULT_WIDTH_PERCENT,
-  RULES_TABLE_FILTERS_SIDEBAR_MIN_WIDTH_PERCENT,
+  RULES_TABLE_FILTERS_SIDEBAR_MIN_WIDTH_PX,
 } from '../constants';
 import * as i18n from '../translations';
 import { CLEAR_RULES_TABLE_FILTERS } from '../../../../common/translations';
@@ -54,89 +56,106 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
     const mainPanelSizePercent = useMemo(() => 100 - sidebarWidthPercent, [sidebarWidthPercent]);
 
     return (
-      <EuiResizableContainer
-        direction="horizontal"
-        onPanelWidthChange={onPanelWidthChange}
-        data-test-subj="rulesTableFiltersLayout"
-        style={{
-          padding: 0,
-          height: '100%',
-          boxShadow: `0 -1px 0 0 ${euiTheme.border.color}`,
-        }}
-      >
-        {(EuiResizablePanel, EuiResizableButton) => (
-          <>
-            <EuiResizablePanel
-              id={RULES_TABLE_FILTERS_SIDEBAR_PANEL_ID}
-              size={sidebarWidthPercent}
-              initialSize={sidebarWidthPercent}
-              minSize={`${RULES_TABLE_FILTERS_SIDEBAR_MIN_WIDTH_PERCENT}%`}
-              scrollable={true}
-              paddingSize="m"
-              data-test-subj="rulesTableFiltersSidebar"
-              style={{ paddingLeft: 0, height: '100%' }}
-            >
-              <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup
-                    alignItems="center"
-                    justifyContent="spaceBetween"
-                    gutterSize="s"
-                    responsive={false}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiIcon type="transitionLeftOut" size="xl" aria-hidden={true} />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiTitle size="s">
-                            <h4>{i18n.FILTER_SIDEBAR_TITLE}</h4>
-                          </EuiTitle>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    {onClearFilters != null && (
+      <>
+        {/* Remove bottom padding from the page section's inner content div (EuiPageSection's
+            content wrapper) when this layout is used so the filter divider can extend to the
+            bottom.
+        */}
+        <Global
+          styles={{
+            '.securityPageWrapper > div': {
+              paddingBottom: 0,
+            },
+          }}
+        />
+        <EuiResizableContainer
+          direction="horizontal"
+          onPanelWidthChange={onPanelWidthChange}
+          data-test-subj="rulesTableFiltersLayout"
+          style={{
+            padding: 0,
+            height: '100%',
+            boxShadow: `0 -1px 0 0 ${euiTheme.border.color}`,
+          }}
+        >
+          {(EuiResizablePanel, EuiResizableButton) => (
+            <>
+              <EuiResizablePanel
+                id={RULES_TABLE_FILTERS_SIDEBAR_PANEL_ID}
+                size={sidebarWidthPercent}
+                initialSize={sidebarWidthPercent}
+                minSize={`${RULES_TABLE_FILTERS_SIDEBAR_MIN_WIDTH_PX}px`}
+                scrollable={true}
+                paddingSize="m"
+                data-test-subj="rulesTableFiltersSidebar"
+                style={{ paddingLeft: 0, height: '100%' }}
+              >
+                <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup
+                      alignItems="center"
+                      justifyContent="spaceBetween"
+                      gutterSize="s"
+                      responsive={false}
+                    >
                       <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          size="xs"
-                          onClick={onClearFilters}
-                          data-test-subj="rulesTableFiltersSidebarClearButton"
-                        >
-                          <EuiText size="s" color="subdued">
-                            {CLEAR_RULES_TABLE_FILTERS}
-                          </EuiText>
-                        </EuiButtonEmpty>
+                        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="transitionLeftOut" size="xl" aria-hidden={true} />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiTitle size="s">
+                              <h4>{i18n.FILTER_SIDEBAR_TITLE}</h4>
+                            </EuiTitle>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem grow={true} style={{ minHeight: 0, overflow: 'auto' }}>
-                  {sidebarContent}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiResizablePanel>
-            <EuiResizableButton
-              indicator="border"
-              alignIndicator="start"
-              style={{ height: 'stretch' }}
-            />
-            <EuiResizablePanel
-              id={RULES_TABLE_FILTERS_MAIN_PANEL_ID}
-              size={mainPanelSizePercent}
-              initialSize={mainPanelSizePercent}
-              minSize={`${RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PERCENT}%`}
-              paddingSize="m"
-              style={{ paddingBottom: 0, minHeight: RULES_TABLE_FILTERS_MAIN_PANEL_MIN_HEIGHT_PX }}
-              data-test-subj="rulesTableFiltersMainContent"
-            >
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiFlexItem grow={true}>{children}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiResizablePanel>
-          </>
-        )}
-      </EuiResizableContainer>
+                      {onClearFilters != null && (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            onClick={onClearFilters}
+                            data-test-subj="rulesTableFiltersSidebarClearButton"
+                          >
+                            <EuiText size="s" color="subdued">
+                              {CLEAR_RULES_TABLE_FILTERS}
+                            </EuiText>
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={true} style={{ minHeight: 0, overflow: 'auto' }}>
+                    {sidebarContent}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiResizablePanel>
+              <EuiResizableButton
+                indicator="border"
+                alignIndicator="start"
+                style={{ height: 'stretch' }}
+              />
+              <EuiResizablePanel
+                id={RULES_TABLE_FILTERS_MAIN_PANEL_ID}
+                size={mainPanelSizePercent}
+                initialSize={mainPanelSizePercent}
+                minSize={`${RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PX}px`}
+                paddingSize="m"
+                style={{
+                  paddingBottom: 0,
+                  minHeight: `${RULES_TABLE_FILTERS_MAIN_PANEL_MIN_HEIGHT_PX}px`,
+                }}
+                data-test-subj="rulesTableFiltersMainContent"
+              >
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  <EuiFlexItem grow={true}>{children}</EuiFlexItem>
+                  <EuiSpacer size="s" />
+                </EuiFlexGroup>
+              </EuiResizablePanel>
+            </>
+          )}
+        </EuiResizableContainer>
+      </>
     );
   }
 );
