@@ -9,47 +9,19 @@
 
 import fs from 'fs';
 import path from 'path';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { findPackageForPath } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ModuleDiscoveryInfo } from './types';
 
 /**
- * Build a map of directory path -> @kbn/ module ID from the root package.json.
- * Used to resolve Scout module roots to their @kbn/ identifiers.
+ * Resolve the @kbn/ module ID for a Scout config path using the kibana.jsonc-based package map.
  */
-interface RootPackageJson {
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-}
-
-export const buildModuleIdLookup = (): Map<string, string> => {
-  const packageJsonPath = path.join(REPO_ROOT, 'package.json');
-  const packageJson = JSON.parse(
-    fs.readFileSync(packageJsonPath, 'utf-8')
-  ) as RootPackageJson;
-  const allDependencies: Record<string, string> = {
-    ...(packageJson.dependencies ?? {}),
-    ...(packageJson.devDependencies ?? {}),
-  };
-
-  const lookup = new Map<string, string>();
-  for (const [moduleId, moduleLink] of Object.entries(allDependencies)) {
-    if (moduleId.startsWith('@kbn/')) {
-      const moduleDir = moduleLink.replace(/^link:/, '');
-      lookup.set(moduleDir, moduleId);
-    }
-  }
-
-  return lookup;
-};
-
-/**
- * Derive the module root directory from a Scout config path.
- * Config paths follow the pattern: <module_root>/test/scout[_*]/<category>/[*.]playwright.config.ts
- */
-const getModuleRootFromConfigPath = (configPath: string): string | undefined => {
-  const testScoutIndex = configPath.indexOf('/test/scout');
-  return testScoutIndex !== -1 ? configPath.substring(0, testScoutIndex) : undefined;
+const getModuleIdForConfigPath = (configPath: string): string | undefined => {
+  const absolutePath = path.isAbsolute(configPath) ? configPath : path.join(REPO_ROOT, configPath);
+  const pkg = findPackageForPath(REPO_ROOT, absolutePath);
+  return pkg?.id;
 };
 
 /**
@@ -82,7 +54,7 @@ export const readAffectedModules = (filePath: string, log: ToolingLog): Set<stri
  * - Module maps to an affected @kbn/ ID -> keep
  * - Module does not map to any @kbn/ ID -> drop (so selective testing only runs configs we can identify)
  * - Module maps to a @kbn/ ID NOT in affected set -> drop
- * - If the file cannot be read or is invalid -> return all modules (no filtering)
+ * - If the file cannot be read or is invalid -> throw (fail fast)
  */
 export const filterModulesByAffectedModules = (
   modules: ModuleDiscoveryInfo[],
@@ -92,8 +64,9 @@ export const filterModulesByAffectedModules = (
   const affectedModules = readAffectedModules(affectedModulesPath, log);
 
   if (affectedModules === null) {
-    log.warning('Selective testing: skipping filtering (could not load affected modules)');
-    return modules;
+    throw createFailError(
+      'Selective testing: could not load affected modules file. Check that list_affected produced a valid JSON array.'
+    );
   }
 
   if (affectedModules.size === 0) {
@@ -101,30 +74,28 @@ export const filterModulesByAffectedModules = (
     return [];
   }
 
-  const moduleIdLookup = buildModuleIdLookup();
   const kept: ModuleDiscoveryInfo[] = [];
-  const dropped: string[] = [];
+  let droppedCount = 0;
 
   for (const module of modules) {
-    const moduleRoot = getModuleRootFromConfigPath(module.configs[0]?.path ?? '');
-    const moduleId = moduleRoot ? moduleIdLookup.get(moduleRoot) : undefined;
+    const configPath = module.configs[0]?.path ?? '';
+    const moduleId = configPath ? getModuleIdForConfigPath(configPath) : undefined;
 
     if (!moduleId) {
-      dropped.push(`${module.name} (unmapped)`);
+      log.warning(
+        `Selective testing: dropping module '${module.name}' (could not resolve @kbn/ ID from config path; check kibana.jsonc or run 'yarn kbn bootstrap')`
+      );
+      droppedCount += 1;
     } else if (affectedModules.has(moduleId)) {
       kept.push(module);
     } else {
-      dropped.push(`${module.name} (${moduleId})`);
+      droppedCount += 1;
     }
   }
 
-  const DROPPED_LOG_LIMIT = 20;
   log.info(
-    `Selective testing: keeping ${kept.length} module(s), dropping ${dropped.length} unaffected module(s)`
+    `Selective testing: keeping ${kept.length} module(s), dropping ${droppedCount} unaffected module(s)`
   );
-  if (dropped.length > 0 && dropped.length <= DROPPED_LOG_LIMIT) {
-    log.info(`Dropped modules: ${dropped.join(', ')}`);
-  }
 
   return kept;
 };

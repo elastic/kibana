@@ -19,6 +19,7 @@
     "@kbn/dev-cli-errors",
     "@kbn/ci-stats-reporter",
     "@kbn/repo-info",
+    "@kbn/repo-packages",
     "@kbn/es",
     "@kbn/dev-proc-runner",
     "@kbn/test",

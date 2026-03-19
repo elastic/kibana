@@ -9,6 +9,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
+import path from 'path';
 import type { ModuleDiscoveryInfo } from './types';
 
 jest.mock('@kbn/repo-info', () => ({
@@ -17,23 +18,19 @@ jest.mock('@kbn/repo-info', () => ({
 
 jest.mock('fs');
 
-import {
-  buildModuleIdLookup,
-  filterModulesByAffectedModules,
-  readAffectedModules,
-} from './affected_modules';
+const mockFindPackageForPath = jest.fn();
+jest.mock('@kbn/repo-packages', () => ({
+  findPackageForPath: (...args: unknown[]) => mockFindPackageForPath(...args),
+}));
 
-const MOCK_PACKAGE_JSON = {
-  dependencies: {
-    '@kbn/scout': 'link:src/platform/packages/shared/kbn-scout',
-    '@kbn/security-solution-plugin': 'link:x-pack/solutions/security/plugins/security_solution',
-    '@kbn/discover-plugin': 'link:src/platform/plugins/shared/discover',
-    'some-external-dep': '^1.0.0',
-  },
-  devDependencies: {
-    '@kbn/utility-types': 'link:src/platform/packages/shared/kbn-utility-types',
-    jest: '^29.0.0',
-  },
+import { filterModulesByAffectedModules, readAffectedModules } from './affected_modules';
+
+/** Path -> @kbn/ module ID mapping used by the findPackageForPath mock */
+const CONFIG_PATH_TO_MODULE_ID: Record<string, string> = {
+  'x-pack/solutions/security/plugins/security_solution/test/scout/ui/playwright.config.ts':
+    '@kbn/security-solution-plugin',
+  'src/platform/plugins/shared/discover/test/scout/ui/playwright.config.ts': '@kbn/discover-plugin',
+  'src/platform/packages/shared/kbn-scout/test/scout/api/playwright.config.ts': '@kbn/scout',
 };
 
 const createModule = (
@@ -55,6 +52,14 @@ const createModule = (
   ],
 });
 
+const setupFindPackageMock = () => {
+  mockFindPackageForPath.mockImplementation((repoRoot: string, filePath: string) => {
+    const rel = path.relative(repoRoot, filePath).replace(/\\/g, '/');
+    const id = CONFIG_PATH_TO_MODULE_ID[rel];
+    return id ? { id } : undefined;
+  });
+};
+
 describe('affected_modules', () => {
   let mockLog: ToolingLog;
 
@@ -62,36 +67,11 @@ describe('affected_modules', () => {
     mockLog = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
     jest.spyOn(mockLog, 'info').mockImplementation(jest.fn());
     jest.spyOn(mockLog, 'warning').mockImplementation(jest.fn());
+    setupFindPackageMock();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('buildModuleIdLookup', () => {
-    it('should build a map of directory -> @kbn/ module ID', () => {
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(MOCK_PACKAGE_JSON));
-
-      const map = buildModuleIdLookup();
-
-      expect(map.get('src/platform/packages/shared/kbn-scout')).toBe('@kbn/scout');
-      expect(map.get('x-pack/solutions/security/plugins/security_solution')).toBe(
-        '@kbn/security-solution-plugin'
-      );
-      expect(map.get('src/platform/plugins/shared/discover')).toBe('@kbn/discover-plugin');
-      expect(map.get('src/platform/packages/shared/kbn-utility-types')).toBe('@kbn/utility-types');
-    });
-
-    it('should exclude non-@kbn/ dependencies', () => {
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(MOCK_PACKAGE_JSON));
-
-      const map = buildModuleIdLookup();
-
-      expect(map.size).toBe(4);
-      for (const [, name] of map) {
-        expect(name).toMatch(/^@kbn\//);
-      }
-    });
   });
 
   describe('readAffectedModules', () => {
@@ -156,22 +136,10 @@ describe('affected_modules', () => {
       ),
     ];
 
-    beforeEach(() => {
-      (fs.readFileSync as jest.Mock).mockImplementation((filePath: string) => {
-        if (filePath.includes('package.json')) {
-          return JSON.stringify(MOCK_PACKAGE_JSON);
-        }
-        return '[]';
-      });
-    });
-
     it('should keep modules whose ID is in the affected set', () => {
-      (fs.readFileSync as jest.Mock).mockImplementation((filePath: string) => {
-        if (filePath.includes('package.json')) {
-          return JSON.stringify(MOCK_PACKAGE_JSON);
-        }
-        return JSON.stringify(['@kbn/security-solution-plugin', '@kbn/scout']);
-      });
+      (fs.readFileSync as jest.Mock).mockReturnValue(
+        JSON.stringify(['@kbn/security-solution-plugin', '@kbn/scout'])
+      );
 
       const result = filterModulesByAffectedModules(modules, '/affected.json', mockLog);
 
@@ -180,12 +148,7 @@ describe('affected_modules', () => {
     });
 
     it('should drop modules whose ID is NOT in the affected set', () => {
-      (fs.readFileSync as jest.Mock).mockImplementation((filePath: string) => {
-        if (filePath.includes('package.json')) {
-          return JSON.stringify(MOCK_PACKAGE_JSON);
-        }
-        return JSON.stringify(['@kbn/scout']);
-      });
+      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(['@kbn/scout']));
 
       const result = filterModulesByAffectedModules(modules, '/affected.json', mockLog);
 
@@ -193,7 +156,7 @@ describe('affected_modules', () => {
       expect(result[0].name).toBe('kbn-scout');
     });
 
-    it('should drop modules that do not map to any @kbn/ ID', () => {
+    it('should drop modules that do not map to any @kbn/ ID and warn', () => {
       const modulesWithUnmapped: ModuleDiscoveryInfo[] = [
         ...modules,
         createModule(
@@ -203,40 +166,32 @@ describe('affected_modules', () => {
         ),
       ];
 
-      (fs.readFileSync as jest.Mock).mockImplementation((filePath: string) => {
-        if (filePath.includes('package.json')) {
-          return JSON.stringify(MOCK_PACKAGE_JSON);
-        }
-        return JSON.stringify(['@kbn/scout']);
-      });
+      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(['@kbn/scout']));
 
       const result = filterModulesByAffectedModules(modulesWithUnmapped, '/affected.json', mockLog);
 
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('kbn-scout');
+      expect(mockLog.warning).toHaveBeenCalledWith(
+        expect.stringContaining("dropping module 'unknown_module'")
+      );
+      expect(mockLog.warning).toHaveBeenCalledWith(
+        expect.stringContaining('could not resolve @kbn/ ID')
+      );
     });
 
-    it('should return all modules when the file cannot be read', () => {
-      (fs.readFileSync as jest.Mock).mockImplementation((filePath: string) => {
-        if (filePath.includes('package.json')) {
-          return JSON.stringify(MOCK_PACKAGE_JSON);
-        }
+    it('should throw when the affected modules file cannot be read', () => {
+      (fs.readFileSync as jest.Mock).mockImplementation(() => {
         throw new Error('ENOENT');
       });
 
-      const result = filterModulesByAffectedModules(modules, '/missing.json', mockLog);
-
-      expect(result).toHaveLength(3);
-      expect(mockLog.warning).toHaveBeenCalledWith(expect.stringContaining('skipping filtering'));
+      expect(() => filterModulesByAffectedModules(modules, '/missing.json', mockLog)).toThrow(
+        'Selective testing: could not load affected modules file'
+      );
     });
 
     it('should return empty array when affected modules set is empty', () => {
-      (fs.readFileSync as jest.Mock).mockImplementation((filePath: string) => {
-        if (filePath.includes('package.json')) {
-          return JSON.stringify(MOCK_PACKAGE_JSON);
-        }
-        return JSON.stringify([]);
-      });
+      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify([]));
 
       const result = filterModulesByAffectedModules(modules, '/affected.json', mockLog);
 
@@ -247,12 +202,9 @@ describe('affected_modules', () => {
     });
 
     it('should log the number of kept and dropped modules', () => {
-      (fs.readFileSync as jest.Mock).mockImplementation((filePath: string) => {
-        if (filePath.includes('package.json')) {
-          return JSON.stringify(MOCK_PACKAGE_JSON);
-        }
-        return JSON.stringify(['@kbn/security-solution-plugin']);
-      });
+      (fs.readFileSync as jest.Mock).mockReturnValue(
+        JSON.stringify(['@kbn/security-solution-plugin'])
+      );
 
       filterModulesByAffectedModules(modules, '/affected.json', mockLog);
 
