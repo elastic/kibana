@@ -62,11 +62,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (shouldSidebarBeOpen) {
         expect(await discover.isSidebarPanelOpen()).to.be(true);
-        await testSubjects.existOrFail('unifiedFieldListSidebar__toggle-collapse');
+        await testSubjects.existOrFail('dscHideSidebarButton');
         await testSubjects.missingOrFail('dscShowSidebarButton');
       } else {
         expect(await discover.isSidebarPanelOpen()).to.be(false);
-        await testSubjects.missingOrFail('unifiedFieldListSidebar__toggle-collapse');
+        await testSubjects.missingOrFail('dscHideSidebarButton');
         await testSubjects.existOrFail('dscShowSidebarButton');
       }
 
