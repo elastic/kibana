@@ -32,7 +32,9 @@ export interface ExecuteWorkflowStepResponse {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExecutionEnginePluginSetup {}
+export interface WorkflowsExecutionEnginePluginSetup {
+  // No setup contract exposed yet. Extend this interface when other plugins need to configure the engine during setup.
+}
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
