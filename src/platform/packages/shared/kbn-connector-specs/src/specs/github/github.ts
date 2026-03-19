@@ -96,7 +96,7 @@ export const GithubConnector: ConnectorSpec = {
       input: GetMeInputSchema,
       handler: async (ctx) => {
         return withMcpClient(ctx, async (mcp) => {
-          const result = await mcp.callTool({ name: 'get_me' });
+          const result = await mcp.callTool({ name: 'get_me', arguments: {} });
           return result.content;
         });
       },
