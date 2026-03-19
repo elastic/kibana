@@ -243,7 +243,7 @@ describe('prepareConversation', () => {
         type: 'text',
         active: true,
         current_version: 1,
-        origin: { saved_object_id: 'so-1' },
+        origin: 'so-1',
         origin_snapshot_at: '2024-01-01T00:00:00.000Z',
         versions: [
           {
