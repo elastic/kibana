@@ -935,7 +935,6 @@
         "joi-to-json",
         "@apidevtools/json-schema-ref-parser",
         "@fast-check/jest",
-        "load-json-file",
         "mock-fs",
         "node-fetch",
         "react-intl",
