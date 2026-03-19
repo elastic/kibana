@@ -152,7 +152,7 @@ const graphEdgeSchema = z.looseObject({
 });
 
 export const graphAttachmentDataSchema = z.looseObject({
-  nodes: z.array(graphNodeSchema),
+  nodes: z.array(graphNodeSchema).min(1),
   edges: z.array(graphEdgeSchema),
   title: z.string().optional(),
   description: z.string().optional(),

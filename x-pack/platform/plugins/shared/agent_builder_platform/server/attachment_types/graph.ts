@@ -68,7 +68,7 @@ const formatGraphAttachment = (data: GraphAttachmentData): string => {
 };
 
 const getEdgeDisplayLabel = (edge: GraphEdge): string => {
-  const edgeLabel = (edge as { label?: string }).label;
   const relation = `${edge.source} -> ${edge.target}`;
-  return edgeLabel ? `${relation} (${edgeLabel})` : relation;
+
+  return edge.label ? `${relation} (${edge.label})` : relation;
 };

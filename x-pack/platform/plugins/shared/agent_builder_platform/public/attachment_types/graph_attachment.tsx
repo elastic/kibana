@@ -32,10 +32,6 @@ export const graphAttachmentDefinition: AttachmentUIDefinition<GraphAttachment> 
 const GraphContent: React.FC<GraphContentProps> = ({ attachment }) => {
   const { colorMode } = useEuiTheme();
 
-  if (attachment.data.nodes.length === 0) {
-    return null;
-  }
-
   return (
     <div
       css={css`
