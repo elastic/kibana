@@ -27,7 +27,10 @@ export const useGoBack = (fallbackPath: string) => {
   return useCallback(
     (event: React.MouseEvent) => {
       event.preventDefault();
-      if (location.state?.fromHistory) {
+      // After a full page refresh ScopedHistory is reconstructed with only the
+      // current entry, so goBack() becomes a no-op even though location.state
+      // is still preserved by the browser.  Check history.length to detect this.
+      if (location.state?.fromHistory && history.length > 1) {
         history.goBack();
       } else {
         history.push(fallbackPath);
