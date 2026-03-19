@@ -46,6 +46,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   isMissingSecrets?: boolean;
   isConnectorTypeDeprecated: boolean;
   source?: ActionTypeSource;
+  authMode?: 'shared' | 'per-user';
 }
 
 export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {
