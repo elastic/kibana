@@ -105,15 +105,11 @@ describe(
     });
 
     it('should identify missing reference sets from QRadar rules', () => {
-      uploadQRadarRules(QRADAR_TEST_RULES_XML_WITH_REFERENCE_SETS);
-
       cy.intercept({
         url: '**/qradar/rules',
       }).as('createQRadarRules');
 
-      cy.intercept({
-        url: '**/resources/missing',
-      }).as('getMissingResources');
+      uploadQRadarRules(QRADAR_TEST_RULES_XML_WITH_REFERENCE_SETS);
 
       cy.wait('@createQRadarRules').its('response.statusCode').should('eq', 200);
 
