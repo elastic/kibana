@@ -2373,6 +2373,8 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 
 # EARS
 /x-pack/platform/plugins/shared/actions/server/lib/ears @elastic/workchat-eng
+x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.ts @elastic/workchat-eng @elastic/response-ops
+x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.test.ts @elastic/workchat-eng @elastic/response-ops
 /src/platform/packages/shared/kbn-connector-specs/src/auth_types/ears.ts @elastic/workchat-eng
 
 # Connector Specs
