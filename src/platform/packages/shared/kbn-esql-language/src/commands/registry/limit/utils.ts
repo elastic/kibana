@@ -6,29 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isOptionNode, isAssignment, isLiteral, isParamLiteral } from '@elastic/esql';
+import { isOptionNode, isLiteral, isParamLiteral } from '@elastic/esql';
 import type { ESQLAstAllCommands, ESQLCommandOption, ESQLColumn } from '@elastic/esql/types';
 
-export type LimitCaretPosition =
-  | 'after_limit_keyword'
-  | 'after_value'
-  | 'grouping_expression_without_assignment'
-  | 'grouping_expression_after_assignment';
+export type LimitCaretPosition = 'after_limit_keyword' | 'after_value' | 'grouping_expression';
 
-const ENDS_WITH_COMMA_AND_WHITESPACE_REGEX = /,\s*$/;
 const ENDS_WITH_WHITESPACE_REGEX = /\s+$/;
 
 export function getPosition(command: ESQLAstAllCommands, innerText: string): LimitCaretPosition {
   const lastCommandArg = command.args[command.args.length - 1];
 
   if (isOptionNode(lastCommandArg) && lastCommandArg.name === 'by') {
-    const lastOptionArg = lastCommandArg.args[lastCommandArg.args.length - 1];
-
-    if (isAssignment(lastOptionArg) && !ENDS_WITH_COMMA_AND_WHITESPACE_REGEX.test(innerText)) {
-      return 'grouping_expression_after_assignment';
-    }
-
-    return 'grouping_expression_without_assignment';
+    return 'grouping_expression';
   }
 
   const rawFirstArg = command.args[0];

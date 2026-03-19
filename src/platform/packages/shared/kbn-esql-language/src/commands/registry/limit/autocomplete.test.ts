@@ -80,7 +80,7 @@ describe('LIMIT Autocomplete', () => {
 
   describe('LIMIT <number> BY', () => {
     test('suggests columns and functions after BY', async () => {
-      const expected = [' = ', ...getFieldNamesByType('any'), ...allScalarFunctionsForBy];
+      const expected = [...getFieldNamesByType('any'), ...allScalarFunctionsForBy];
 
       await limitExpectSuggestions('from a | limit 10 by ', expected);
       await limitExpectSuggestions('from a | limit 10 BY ', expected);
@@ -101,7 +101,6 @@ describe('LIMIT Autocomplete', () => {
 
     test('suggests columns after comma', async () => {
       const expected = [
-        ' = ',
         ...getFieldNamesByType('any').filter((name) => name !== 'integerField'),
         ...allScalarFunctionsForBy,
       ];

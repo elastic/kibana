@@ -44,6 +44,8 @@ export async function suggestFieldsList(
     preferredExpressionType?: ExpressionContextOptions['preferredExpressionType'];
     /** Columns to exclude from suggestions (e.g. already used in BY clause) */
     ignoredColumnsForEmptyExpression?: string[];
+    /** If true, disables col0 and assignment suggestions (for contexts where assignments are not supported) */
+    disableNewColumnSuggestion?: boolean;
   }
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
@@ -82,7 +84,11 @@ export async function suggestFieldsList(
 
   const { position, isComplete, insideFunction } = computed;
 
-  if (position === 'empty_expression' && !insideAssignment) {
+  if (
+    position === 'empty_expression' &&
+    !insideAssignment &&
+    !options?.disableNewColumnSuggestion
+  ) {
     suggestions.push(
       getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
     );
@@ -116,6 +122,7 @@ export async function suggestFieldsList(
   if (
     isColumn(expressionRoot) &&
     !insideAssignment &&
+    !options?.disableNewColumnSuggestion &&
     !context?.columns?.has(expressionRoot.name)
   ) {
     suggestions.push(assignCompletionItem);

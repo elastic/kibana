@@ -39,8 +39,7 @@ export async function autocomplete(
       return limitByHidden ? [pipeCompleteItem] : [byCompleteItem, pipeCompleteItem];
     }
 
-    case 'grouping_expression_without_assignment':
-    case 'grouping_expression_after_assignment': {
+    case 'grouping_expression': {
       if (limitByHidden) {
         return [];
       }
@@ -61,6 +60,7 @@ export async function autocomplete(
         {
           ignoredColumnsForEmptyExpression: getByColumns(byNode),
           allowSingleColumnFields: true,
+          disableNewColumnSuggestion: true,
         }
       );
     }
