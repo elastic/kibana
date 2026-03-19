@@ -494,9 +494,7 @@ function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: strin
 
   const uniqueTooLongMin = [
     ...new Set(
-      types
-        .map((t) => t.tooLongMin)
-        .filter((value): value is number => typeof value === 'number')
+      types.map((t) => t.tooLongMin).filter((value): value is number => typeof value === 'number')
     ),
   ];
   const tooLongThresholdLabel =
