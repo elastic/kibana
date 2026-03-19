@@ -11,18 +11,19 @@ import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { StatusError } from '../streams/errors/status_error';
 
 export class EsqlQueryValidationError extends StatusError {
-  constructor(message: string) {
+  constructor(message: string, data?: unknown) {
     super(message, 400);
+    this.data = data;
   }
 }
 
-export async function validateEsqlQueryForStreamOrThrow({
+export function validateEsqlQueryForStreamOrThrow({
   esqlQuery,
   stream,
 }: {
   esqlQuery: string;
   stream: Streams.all.Definition;
-}): Promise<void> {
+}): void {
   let root: ESQLAstQueryExpression;
 
   try {
@@ -37,23 +38,22 @@ export async function validateEsqlQueryForStreamOrThrow({
     throw new EsqlQueryValidationError('ES|QL query must contain a FROM clause');
   }
 
-  const sources = Walker.matchAll(fromCmd, { type: 'source', sourceType: 'index' }).map(
-    (node) => node.name
-  );
+  const sourcesPattern = Walker.matchAll(fromCmd, { type: 'source', sourceType: 'index' })
+    .map((node) => node.name)
+    .join(', ');
   const { name } = stream;
-  const wiredPattern = [name, `${name}.*`];
-  const matchesWiredPattern =
-    sources.length === 2 && sources[0] === name && sources[1] === `${name}.*`;
+  const wiredPattern = [name, `${name}.*`].join(', ');
+  const matchesWiredPattern = sourcesPattern === wiredPattern;
 
   if (Streams.ClassicStream.Definition.is(stream)) {
-    const isNameOnly = sources.length === 1 && sources[0] === name;
+    const isNameOnly = sourcesPattern === name;
     if (!isNameOnly && !matchesWiredPattern) {
       throw new EsqlQueryValidationError(
-        `ES|QL query must use FROM ${name} or FROM ${wiredPattern.join(', ')}`
+        `ES|QL query must use FROM ${name} or FROM ${wiredPattern}`
       );
     }
   } else if (!matchesWiredPattern) {
-    throw new EsqlQueryValidationError(`ES|QL query must use FROM ${wiredPattern.join(', ')}`);
+    throw new EsqlQueryValidationError(`ES|QL query must use FROM ${wiredPattern}`);
   }
 
   const metadataOption = Walker.match(fromCmd, { type: 'option', name: 'metadata' });

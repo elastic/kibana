@@ -35,33 +35,32 @@ const createWiredStreamDefinition = (name: string): Streams.WiredStream.Definiti
   },
 });
 
-const createClassicStreamDefinition = (name: string): Streams.ClassicStream.Definition =>
-  ({
-    name,
-    description: '',
-    updated_at: new Date().toISOString(),
-    ingest: {
-      lifecycle: { inherit: {} },
-      processing: { steps: [], updated_at: new Date().toISOString() },
-      settings: {},
-      failure_store: { inherit: {} },
-      classic: {
-        field_overrides: {},
-      },
+const createClassicStreamDefinition = (name: string): Streams.ClassicStream.Definition => ({
+  name,
+  description: '',
+  updated_at: new Date().toISOString(),
+  ingest: {
+    lifecycle: { inherit: {} },
+    processing: { steps: [], updated_at: new Date().toISOString() },
+    settings: {},
+    failure_store: { inherit: {} },
+    classic: {
+      field_overrides: {},
     },
-  } as Streams.ClassicStream.Definition);
+  },
+});
 
 describe('validateEsqlQueryForStreamOrThrow', () => {
   describe('parsing errors', () => {
-    it('should throw for syntactically invalid ES|QL', async () => {
+    it('should throw for syntactically invalid ES|QL', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({ esqlQuery: '{{INVALID ESQL}}', stream })
-      ).rejects.toThrow(EsqlQueryValidationError);
+      ).toThrow(EsqlQueryValidationError);
     });
 
-    it('should include "Invalid ES|QL query" in the error message for unparseable input', async () => {
+    it('should include "Invalid ES|QL query" in the error message for unparseable input', () => {
       const { Parser } = jest.requireMock('@elastic/esql');
       (Parser.parse as jest.Mock).mockImplementationOnce(() => {
         throw new Error('parse failure');
@@ -69,188 +68,188 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
-        validateEsqlQueryForStreamOrThrow({ esqlQuery: 'anything', stream })
-      ).rejects.toThrow('Invalid ES|QL query: parse failure');
+      expect(() => validateEsqlQueryForStreamOrThrow({ esqlQuery: 'anything', stream })).toThrow(
+        'Invalid ES|QL query: parse failure'
+      );
     });
 
-    it('should set statusCode to 400', async () => {
+    it('should set statusCode to 400', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({ esqlQuery: '{{INVALID ESQL}}', stream })
-      ).rejects.toMatchObject({ statusCode: 400 });
+      ).toThrow(expect.objectContaining({ statusCode: 400 }));
     });
   });
 
   describe('FROM clause validation', () => {
-    it('should throw when FROM clause is missing', async () => {
+    it('should throw when FROM clause is missing', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
-        validateEsqlQueryForStreamOrThrow({ esqlQuery: 'SHOW INFO', stream })
-      ).rejects.toThrow('ES|QL query must contain a FROM clause');
+      expect(() => validateEsqlQueryForStreamOrThrow({ esqlQuery: 'SHOW INFO', stream })).toThrow(
+        'ES|QL query must contain a FROM clause'
+      );
     });
 
-    it('should throw when FROM clause has no sources', async () => {
+    it('should throw when FROM clause has no sources', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({ esqlQuery: 'FROM | LIMIT 10', stream })
-      ).rejects.toThrow(EsqlQueryValidationError);
+      ).toThrow(EsqlQueryValidationError);
     });
   });
 
   describe('source validation for wired streams', () => {
-    it('should accept FROM name, name.*', async () => {
+    it('should accept FROM name, name.*', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM logs, logs.* METADATA _id, _source',
           stream,
         })
-      ).resolves.toBeUndefined();
+      ).not.toThrow();
     });
 
-    it('should reject FROM name.*, name (reversed order)', async () => {
+    it('should reject FROM name.*, name (reversed order)', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM logs.*, logs METADATA _id, _source',
           stream,
         })
-      ).rejects.toThrow('ES|QL query must use FROM logs, logs.*');
+      ).toThrow('ES|QL query must use FROM logs, logs.*');
     });
 
-    it('should reject FROM with only the stream name', async () => {
+    it('should reject FROM with only the stream name', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM logs METADATA _id, _source',
           stream,
         })
-      ).rejects.toThrow('ES|QL query must use FROM logs, logs.*');
+      ).toThrow('ES|QL query must use FROM logs, logs.*');
     });
 
-    it('should reject FROM with only the wildcard pattern', async () => {
+    it('should reject FROM with only the wildcard pattern', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM logs.* METADATA _id, _source',
           stream,
         })
-      ).rejects.toThrow('ES|QL query must use FROM logs, logs.*');
+      ).toThrow('ES|QL query must use FROM logs, logs.*');
     });
 
-    it('should reject FROM with an unrelated source', async () => {
+    it('should reject FROM with an unrelated source', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM metrics, metrics.* METADATA _id, _source',
           stream,
         })
-      ).rejects.toThrow('ES|QL query must use FROM logs, logs.*');
+      ).toThrow('ES|QL query must use FROM logs, logs.*');
     });
   });
 
   describe('source validation for classic streams', () => {
-    it('should accept FROM with only the stream name', async () => {
+    it('should accept FROM with only the stream name', () => {
       const stream = createClassicStreamDefinition('metrics-custom');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM metrics-custom METADATA _id, _source',
           stream,
         })
-      ).resolves.toBeUndefined();
+      ).not.toThrow();
     });
 
-    it('should accept FROM name, name.*', async () => {
+    it('should accept FROM name, name.*', () => {
       const stream = createClassicStreamDefinition('metrics-custom');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM metrics-custom, metrics-custom.* METADATA _id, _source',
           stream,
         })
-      ).resolves.toBeUndefined();
+      ).not.toThrow();
     });
 
-    it('should reject FROM with only the wildcard pattern', async () => {
+    it('should reject FROM with only the wildcard pattern', () => {
       const stream = createClassicStreamDefinition('metrics-custom');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM metrics-custom.* METADATA _id, _source',
           stream,
         })
-      ).rejects.toThrow(
+      ).toThrow(
         'ES|QL query must use FROM metrics-custom or FROM metrics-custom, metrics-custom.*'
       );
     });
 
-    it('should reject FROM with an unrelated source', async () => {
+    it('should reject FROM with an unrelated source', () => {
       const stream = createClassicStreamDefinition('metrics-custom');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM logs METADATA _id, _source',
           stream,
         })
-      ).rejects.toThrow(
+      ).toThrow(
         'ES|QL query must use FROM metrics-custom or FROM metrics-custom, metrics-custom.*'
       );
     });
   });
 
   describe('METADATA validation', () => {
-    it('should throw when METADATA is missing entirely', async () => {
+    it('should throw when METADATA is missing entirely', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM logs, logs.*',
           stream,
         })
-      ).rejects.toThrow('ES|QL query METADATA must include both `_id` and `_source`');
+      ).toThrow('ES|QL query METADATA must include both `_id` and `_source`');
     });
 
-    it('should throw when _id is missing from METADATA', async () => {
+    it('should throw when _id is missing from METADATA', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM logs, logs.* METADATA _source',
           stream,
         })
-      ).rejects.toThrow('ES|QL query METADATA must include both `_id` and `_source`');
+      ).toThrow('ES|QL query METADATA must include both `_id` and `_source`');
     });
 
-    it('should throw when _source is missing from METADATA', async () => {
+    it('should throw when _source is missing from METADATA', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM logs, logs.* METADATA _id',
           stream,
         })
-      ).rejects.toThrow('ES|QL query METADATA must include both `_id` and `_source`');
+      ).toThrow('ES|QL query METADATA must include both `_id` and `_source`');
     });
 
-    it('should accept METADATA with both _id and _source', async () => {
+    it('should accept METADATA with both _id and _source', () => {
       const stream = createWiredStreamDefinition('logs');
 
-      await expect(
+      expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM logs, logs.* METADATA _id, _source',
           stream,
         })
-      ).resolves.toBeUndefined();
+      ).not.toThrow();
     });
   });
 });

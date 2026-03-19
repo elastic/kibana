@@ -101,7 +101,7 @@ const upsertQueryRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(streamName);
 
-    await validateEsqlQueryForStreamOrThrow({
+    validateEsqlQueryForStreamOrThrow({
       esqlQuery: body.esql.query,
       stream: definition,
     });
@@ -221,7 +221,7 @@ const bulkQueriesRoute = createServerRoute({
     for (const operation of operations) {
       if ('index' in operation && operation.index) {
         try {
-          await validateEsqlQueryForStreamOrThrow({
+          validateEsqlQueryForStreamOrThrow({
             esqlQuery: operation.index.esql.query,
             stream: definition,
           });
@@ -233,9 +233,9 @@ const bulkQueriesRoute = createServerRoute({
     }
 
     if (validationErrors.length > 0) {
-      const bulkError = new EsqlQueryValidationError('One or more ES|QL queries are invalid');
-      bulkError.data = { errors: validationErrors };
-      throw bulkError;
+      throw new EsqlQueryValidationError('One or more ES|QL queries are invalid', {
+        errors: validationErrors,
+      });
     }
 
     await queryClient.bulk(definition, operations);
