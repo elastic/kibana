@@ -11,23 +11,48 @@ interface DashboardFileNamePartsProps {
   agentName: string;
   telemetrySdkName?: string;
   telemetrySdkLanguage?: string;
+  runtimeVersion?: string;
 }
 
-// We use the language name in the filename so we want to have a valid filename
-// Example swift/iOS -> swift_ios : lowercased and '/' is replaces by '_'
 const standardizeLanguageName = (languageName?: string) =>
   languageName ? languageName.toLowerCase().replace('/', '_') : undefined;
+
+export const parseMajorVersion = (version?: string): string | undefined => {
+  if (!version) {
+    return undefined;
+  }
+
+  const major = version.split('.')[0];
+  const parsed = Number(major);
+
+  if (Number.isNaN(parsed)) {
+    return undefined;
+  }
+
+  return String(parsed);
+};
 
 export const getDashboardFileName = ({
   agentName,
   telemetrySdkName,
   telemetrySdkLanguage,
-}: DashboardFileNamePartsProps): string | undefined => {
+  runtimeVersion,
+}: DashboardFileNamePartsProps): {
+  versionedFileName: string | undefined;
+  defaultFileName: string | undefined;
+} => {
   const dataFormat = getIngestionPath(!!(telemetrySdkName ?? telemetrySdkLanguage));
   const { sdkName, language } = getSdkNameAndLanguage(agentName);
   const sdkLanguage = standardizeLanguageName(language);
   if (!sdkName || !sdkLanguage) {
-    return undefined;
+    return { versionedFileName: undefined, defaultFileName: undefined };
   }
-  return `${dataFormat}-${sdkName}-${sdkLanguage}`;
+
+  const defaultFileName = `${dataFormat}-${sdkName}-${sdkLanguage}-default`;
+  const majorVersion = parseMajorVersion(runtimeVersion);
+  const versionedFileName = majorVersion
+    ? `${dataFormat}-${sdkName}-${sdkLanguage}-v${majorVersion}`
+    : undefined;
+
+  return { versionedFileName, defaultFileName };
 };

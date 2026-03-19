@@ -13,6 +13,7 @@ import {
   AGENT_NAME,
   SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
+  SERVICE_RUNTIME_VERSION,
   CLOUD_PROVIDER,
   CLOUD_SERVICE_NAME,
   TELEMETRY_SDK_NAME,
@@ -26,6 +27,7 @@ import { maybe } from '../../../common/utils/maybe';
 export interface ServiceAgentResponse {
   agentName?: string;
   runtimeName?: string;
+  runtimeVersion?: string;
   telemetrySdkName?: string;
   telemetrySdkLanguage?: string;
   serverlessType?: ServerlessType;
@@ -42,11 +44,15 @@ export async function getServiceAgent({
   start: number;
   end: number;
 }): Promise<ServiceAgentResponse> {
+  const PROCESS_RUNTIME_VERSION = 'process.runtime.version' as const;
+
   const fields = asMutableArray([
     AGENT_NAME,
     TELEMETRY_SDK_NAME,
     TELEMETRY_SDK_LANGUAGE,
     SERVICE_RUNTIME_NAME,
+    SERVICE_RUNTIME_VERSION,
+    PROCESS_RUNTIME_VERSION,
     CLOUD_PROVIDER,
     CLOUD_SERVICE_NAME,
   ] as const);
@@ -58,7 +64,13 @@ export async function getServiceAgent({
     },
     track_total_hits: 1,
     size: 1,
-    _source: [AGENT_NAME, SERVICE_RUNTIME_NAME, CLOUD_PROVIDER, CLOUD_SERVICE_NAME],
+    _source: [
+      AGENT_NAME,
+      SERVICE_RUNTIME_NAME,
+      SERVICE_RUNTIME_VERSION,
+      CLOUD_PROVIDER,
+      CLOUD_SERVICE_NAME,
+    ],
     query: {
       bool: {
         filter: [
@@ -108,11 +120,16 @@ export async function getServiceAgent({
     event[CLOUD_SERVICE_NAME]
   );
 
+  const runtimeVersion =
+    event[SERVICE_RUNTIME_VERSION] ??
+    (hit.fields?.[PROCESS_RUNTIME_VERSION]?.[0] as string | undefined);
+
   return {
     agentName: event[AGENT_NAME],
     telemetrySdkName: event[TELEMETRY_SDK_NAME],
     telemetrySdkLanguage: event[TELEMETRY_SDK_LANGUAGE],
     runtimeName: event[SERVICE_RUNTIME_NAME],
+    runtimeVersion,
     serverlessType,
   };
 }
