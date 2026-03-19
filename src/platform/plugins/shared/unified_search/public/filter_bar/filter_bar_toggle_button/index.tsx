@@ -47,7 +47,7 @@ export const FilterBarToggleButton: React.FC<{}> = () => {
     // to stay visible permanently on focused elements, but this is not a desirable behavior when the user
     // has just toggled the button. They already know what this button does. So, hide the tooltip manually.
     onToggleCollapse();
-    () => expandTooltipRef.current?.hideToolTip();
+    expandTooltipRef.current?.hideToolTip();
   }, [onToggleCollapse]);
 
   return (
