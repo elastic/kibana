@@ -270,3 +270,394 @@ evaluate.describe(
     });
   }
 );
+
+const esBaseWorkflowYaml = `name: Data Indexing Pipeline
+description: Indexes and searches data in Elasticsearch
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: create_index
+    type: elasticsearch.indices.create
+    with:
+      index: "my-data-index"
+      mappings:
+        properties:
+          name: { type: text }
+          status: { type: keyword }
+  - name: index_document
+    type: elasticsearch.index
+    with:
+      index: "my-data-index"
+      document:
+        name: "Test Document"
+        status: "active"
+  - name: search_data
+    type: elasticsearch.search
+    with:
+      index: "my-data-index"
+      query:
+        match_all: {}
+  - name: log_results
+    type: console
+    with:
+      message: "Found {{ steps.search_data.output.hits.total.value }} documents"
+`;
+
+evaluate.describe(
+  'Elasticsearch workflow editing via natural language',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate('modifies an Elasticsearch step', async ({ evaluateEditDataset }) => {
+      await evaluateEditDataset({
+        dataset: {
+          name: 'workflow-editing-es: modify-step',
+          description: 'Evaluate the ability to modify Elasticsearch-specific workflow steps',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Change the search_data step to use a term query filtering on status: "active" instead of match_all.',
+                initialYaml: esBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'The search_data step query was changed from match_all to a term query.',
+                  'The term query filters on the status field with value "active".',
+                ],
+              },
+              metadata: { category: 'modify-es-step' },
+            },
+            {
+              input: {
+                instruction:
+                  'Add a new "timestamp" field of type "date" to the create_index step mappings.',
+                initialYaml: esBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'The create_index step mappings were updated.',
+                  'A new "timestamp" field of type "date" was added to the mappings properties.',
+                  'The existing "name" and "status" fields are preserved.',
+                ],
+              },
+              metadata: { category: 'modify-es-step' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('inserts an Elasticsearch step', async ({ evaluateEditDataset }) => {
+      await evaluateEditDataset({
+        dataset: {
+          name: 'workflow-editing-es: insert-step',
+          description: 'Evaluate the ability to insert Elasticsearch-specific steps',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Add an ES|QL query step after the search_data step that runs "FROM my-data-index | WHERE status == \\"active\\" | STATS count = COUNT(*)" and logs the count.',
+                initialYaml: esBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'A new elasticsearch.esql.query step was added after search_data.',
+                  'The ES|QL query references the my-data-index index.',
+                  'The query filters or aggregates data.',
+                ],
+                expectedToolIds: ['platform.workflows.workflow_insert_step'],
+              },
+              metadata: { category: 'insert-es-step' },
+            },
+            {
+              input: {
+                instruction:
+                  'Replace the single index_document step with an elasticsearch.bulk step that indexes three documents: {"name": "Doc A", "status": "active"}, {"name": "Doc B", "status": "inactive"}, and {"name": "Doc C", "status": "active"}.',
+                initialYaml: esBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'The index_document step was replaced with an elasticsearch.bulk step.',
+                  'The bulk step indexes three documents.',
+                  'Each document has a name and status field.',
+                ],
+              },
+              metadata: { category: 'insert-es-step' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('performs multi-step ES edits', async ({ evaluateEditDataset }) => {
+      await evaluateEditDataset({
+        dataset: {
+          name: 'workflow-editing-es: multi-step-edits',
+          description:
+            'Evaluate the ability to perform multiple Elasticsearch-related edits at once',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Change the index name from "my-data-index" to "production-data" in all steps, add an elasticsearch.indices.exists check before create_index, and wrap the create_index step in an if-step that only runs when the index does not exist.',
+                initialYaml: esBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'All references to "my-data-index" were changed to "production-data".',
+                  'An elasticsearch.indices.exists step was added before create_index.',
+                  'An if-step conditionally creates the index only when it does not already exist.',
+                ],
+              },
+              metadata: { category: 'multi-step-es' },
+            },
+          ],
+        },
+      });
+    });
+  }
+);
+
+const casesBaseWorkflowYaml = `name: Case Manager
+description: Creates and manages cases
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: create_case
+    type: cases.createCase
+    with:
+      title: "New Alert Case"
+      description: "Auto-generated case for alert triage"
+      severity: low
+      owner: securitySolution
+      tags:
+        - automated
+  - name: log_case_id
+    type: console
+    with:
+      message: "Created case: {{ steps.create_case.output.case.id }}"
+`;
+
+evaluate.describe(
+  'Cases workflow editing via natural language',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate('modifies a cases step', async ({ evaluateEditDataset }) => {
+      await evaluateEditDataset({
+        dataset: {
+          name: 'workflow-editing-cases: modify-step',
+          description: 'Evaluate the ability to modify cases workflow steps',
+          examples: [
+            {
+              input: {
+                instruction: 'Change the severity of the create_case step from "low" to "high".',
+                initialYaml: casesBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'The create_case step severity was changed from "low" to "high".',
+                  'All other create_case properties remain unchanged.',
+                ],
+              },
+              metadata: { category: 'modify-cases-step' },
+            },
+            {
+              input: {
+                instruction:
+                  'Change the owner of the create_case step from "securitySolution" to "observability".',
+                initialYaml: casesBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'The create_case step owner was changed to "observability".',
+                  'The title, description, and other properties remain unchanged.',
+                ],
+              },
+              metadata: { category: 'modify-cases-step' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('inserts a cases step', async ({ evaluateEditDataset }) => {
+      await evaluateEditDataset({
+        dataset: {
+          name: 'workflow-editing-cases: insert-step',
+          description: 'Evaluate the ability to insert cases-specific steps',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Add a cases.addComment step after create_case that adds the comment "Initial triage started" to the newly created case.',
+                initialYaml: casesBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'A cases.addComment step was added after create_case.',
+                  'The step references the created case ID from the previous step output.',
+                  'The comment text is "Initial triage started" or similar.',
+                ],
+                expectedToolIds: ['platform.workflows.workflow_insert_step'],
+              },
+              metadata: { category: 'insert-cases-step' },
+            },
+            {
+              input: {
+                instruction:
+                  'Add a cases.getCase step at the end that retrieves the case created earlier, including comments.',
+                initialYaml: casesBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'A cases.getCase step was added at the end of the workflow.',
+                  'The step references the case ID from the create_case step output.',
+                  'The include_comments option is set to true.',
+                ],
+                expectedToolIds: ['platform.workflows.workflow_insert_step'],
+              },
+              metadata: { category: 'insert-cases-step' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('performs multi-step cases edits', async ({ evaluateEditDataset }) => {
+      await evaluateEditDataset({
+        dataset: {
+          name: 'workflow-editing-cases: multi-step-edits',
+          description: 'Evaluate the ability to perform multiple cases-related edits at once',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Add a foreach loop after create_case that iterates over a list of comments ["Triage started", "Investigating root cause", "Escalated to team lead"] and adds each as a comment to the case using cases.addComment. Then add a cases.updateCase step at the end that changes the case title to "Triaged: {{ steps.create_case.output.case.title }}".',
+                initialYaml: casesBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'A foreach loop was added that iterates over a list of comments.',
+                  'Inside the loop, a cases.addComment step adds each comment to the case.',
+                  'A cases.updateCase step was added at the end.',
+                  'The update step changes the case title.',
+                ],
+              },
+              metadata: { category: 'multi-step-cases' },
+            },
+          ],
+        },
+      });
+    });
+  }
+);
+
+const connectorBaseWorkflowYaml = `name: Alert Notifier
+description: Sends notifications when alerts are detected
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: fetch_alerts
+    type: http
+    with:
+      method: GET
+      url: "https://api.example.com/alerts"
+  - name: notify_slack
+    type: slack
+    connector-id: my-slack-connector
+    with:
+      message: "New alert detected"
+  - name: log_done
+    type: console
+    with:
+      message: "Notification sent"
+`;
+
+evaluate.describe(
+  'Connector workflow editing via natural language',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate('modifies a connector step', async ({ evaluateEditDataset }) => {
+      await evaluateEditDataset({
+        dataset: {
+          name: 'workflow-editing-connector: modify-step',
+          description: 'Evaluate the ability to modify connector workflow steps',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Update the notify_slack step message to include the alert count from the previous step: "Detected {{ steps.fetch_alerts.output.total }} new alerts".',
+                initialYaml: connectorBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'The notify_slack step message was updated.',
+                  'The new message references data from the fetch_alerts step output.',
+                ],
+              },
+              metadata: { category: 'modify-connector-step' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('inserts a connector step', async ({ evaluateEditDataset }) => {
+      await evaluateEditDataset({
+        dataset: {
+          name: 'workflow-editing-connector: insert-step',
+          description: 'Evaluate the ability to insert connector steps',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Add an email step after the notify_slack step that sends an email to "oncall@example.com" with subject "Alert Summary" and the message body "{{ steps.fetch_alerts.output.total }} alerts detected".',
+                initialYaml: connectorBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'An email step was added after the notify_slack step.',
+                  'The email is sent to "oncall@example.com".',
+                  'The email has a subject of "Alert Summary" or similar.',
+                  'The message body references the alert data from a previous step.',
+                ],
+                expectedToolIds: ['platform.workflows.workflow_insert_step'],
+              },
+              metadata: { category: 'insert-connector-step' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('replaces a connector step', async ({ evaluateEditDataset }) => {
+      await evaluateEditDataset({
+        dataset: {
+          name: 'workflow-editing-connector: replace-step',
+          description: 'Evaluate the ability to replace one connector step with another',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Replace the notify_slack step with an email step that sends an email to "alerts@example.com" with subject "New Alerts" and the same message content.',
+                initialYaml: connectorBaseWorkflowYaml,
+              },
+              output: {
+                criteria: [
+                  'The notify_slack (slack) step was replaced with an email step.',
+                  'The email is sent to "alerts@example.com".',
+                  'The email subject is "New Alerts" or similar.',
+                  'The notification message content is preserved.',
+                ],
+              },
+              metadata: { category: 'replace-connector-step' },
+            },
+          ],
+        },
+      });
+    });
+  }
+);

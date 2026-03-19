@@ -212,3 +212,222 @@ evaluate.describe(
     });
   }
 );
+
+evaluate.describe(
+  'Elasticsearch workflow creation via natural language',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate('creates a workflow with Elasticsearch search', async ({ evaluateCreateDataset }) => {
+      await evaluateCreateDataset({
+        dataset: {
+          name: 'workflow-creation-es: search',
+          description: 'Evaluate the ability to create workflows with Elasticsearch search steps',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Create a workflow called "Error Log Monitor" with a manual trigger. It should use an elasticsearch.search step to search the "logs-*" index with a term query on level: "error", then log the number of hits to the console.',
+              },
+              output: {
+                criteria: [
+                  'A new workflow was created with the name "Error Log Monitor".',
+                  'The workflow has a manual trigger.',
+                  'There is an elasticsearch.search step that queries the "logs-*" index.',
+                  'The search uses a term query filtering on level "error".',
+                  'There is a console step that logs the number of hits.',
+                ],
+              },
+              metadata: { category: 'es-search-creation' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('creates a workflow with ES index management', async ({ evaluateCreateDataset }) => {
+      await evaluateCreateDataset({
+        dataset: {
+          name: 'workflow-creation-es: index-management',
+          description:
+            'Evaluate the ability to create workflows with Elasticsearch index management steps',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Create a workflow called "Index Setup" with a manual trigger. Steps: 1) Check if an index called "app-data" exists using elasticsearch.indices.exists, 2) If the index does not exist, create it with elasticsearch.indices.create with mappings for "name" (text), "timestamp" (date), and "status" (keyword), 3) Use elasticsearch.bulk to index three sample documents with different statuses.',
+              },
+              output: {
+                criteria: [
+                  'A new workflow was created with the name "Index Setup".',
+                  'The workflow has a manual trigger.',
+                  'There is an elasticsearch.indices.exists step checking for "app-data".',
+                  'There is a conditional (if) step that creates the index only when it does not exist.',
+                  'The elasticsearch.indices.create step defines mappings for name, timestamp, and status.',
+                  'There is an elasticsearch.bulk step that indexes multiple documents.',
+                ],
+              },
+              metadata: { category: 'es-index-management-creation' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('creates a workflow with ES|QL', async ({ evaluateCreateDataset }) => {
+      await evaluateCreateDataset({
+        dataset: {
+          name: 'workflow-creation-es: esql',
+          description: 'Evaluate the ability to create workflows with ES|QL query steps',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Create a workflow called "Host CPU Report" with a scheduled trigger every 10 minutes. It should run an elasticsearch.esql.query step with the query "FROM metrics-* | STATS avg_cpu = AVG(system.cpu.total.pct) BY host.name | SORT avg_cpu DESC | LIMIT 10", then log the results to the console.',
+              },
+              output: {
+                criteria: [
+                  'A new workflow was created with the name "Host CPU Report".',
+                  'The workflow has a scheduled trigger set to every 10 minutes.',
+                  'There is an elasticsearch.esql.query step.',
+                  'The ES|QL query references the metrics-* index.',
+                  'The query aggregates CPU usage by host and sorts/limits the results.',
+                  'There is a console step that logs the results.',
+                ],
+              },
+              metadata: { category: 'esql-creation' },
+            },
+          ],
+        },
+      });
+    });
+  }
+);
+
+evaluate.describe(
+  'Cases workflow creation via natural language',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate('creates a workflow with case management', async ({ evaluateCreateDataset }) => {
+      await evaluateCreateDataset({
+        dataset: {
+          name: 'workflow-creation-cases: case-management',
+          description:
+            'Evaluate the ability to create workflows with cases.createCase, cases.addComment, and cases.getCase steps',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Create a workflow called "Incident Response" with a manual trigger. Steps: 1) Create a security case using cases.createCase with title "Security Incident", description "Automated incident case", severity "high", and owner "securitySolution", 2) Add a comment "Investigation initiated" to the case using cases.addComment, 3) Retrieve the case with comments using cases.getCase with include_comments set to true.',
+              },
+              output: {
+                criteria: [
+                  'A new workflow was created with the name "Incident Response".',
+                  'The workflow has a manual trigger.',
+                  'There is a cases.createCase step with title "Security Incident" and severity "high".',
+                  'There is a cases.addComment step that adds a comment to the created case.',
+                  'The addComment step references the case ID from the createCase step output.',
+                  'There is a cases.getCase step with include_comments set to true.',
+                ],
+              },
+              metadata: { category: 'cases-creation' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate(
+      'creates a workflow combining ES and cases steps',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-cases: es-and-cases',
+            description:
+              'Evaluate the ability to create workflows that combine Elasticsearch search with case creation',
+            examples: [
+              {
+                input: {
+                  instruction:
+                    'Create a workflow called "Alert Case Creator" with a manual trigger. Steps: 1) Use elasticsearch.search to find critical alerts in the ".alerts-security.alerts-default" index with a term query on kibana.alert.severity: "critical", 2) Use a foreach loop over the search hits, and inside the loop create a case for each alert using cases.createCase with the alert\'s rule name as the case title, owner "securitySolution", and severity "critical".',
+                },
+                output: {
+                  criteria: [
+                    'A new workflow was created with the name "Alert Case Creator".',
+                    'The workflow has a manual trigger.',
+                    'There is an elasticsearch.search step querying ".alerts-security.alerts-default".',
+                    'The search uses a term query on severity "critical".',
+                    'There is a foreach loop iterating over the search hits.',
+                    'Inside the loop, a cases.createCase step creates a case for each alert.',
+                    'The case title is derived from the alert data.',
+                  ],
+                },
+                metadata: { category: 'es-and-cases-creation' },
+              },
+            ],
+          },
+        });
+      }
+    );
+  }
+);
+
+evaluate.describe(
+  'Connector workflow creation via natural language',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate('creates a Slack notification workflow', async ({ evaluateCreateDataset }) => {
+      await evaluateCreateDataset({
+        dataset: {
+          name: 'workflow-creation-connector: slack',
+          description: 'Evaluate the ability to create workflows with Slack connector steps',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Create a workflow called "API Status Notifier" with a scheduled trigger every 5 minutes. It should make an HTTP GET request to https://api.example.com/status, then send a Slack message with the response status using a slack step.',
+              },
+              output: {
+                criteria: [
+                  'A new workflow was created with the name "API Status Notifier".',
+                  'The workflow has a scheduled trigger set to every 5 minutes.',
+                  'There is an HTTP step that fetches the status endpoint.',
+                  'There is a slack step that sends a message.',
+                  'The Slack message references data from the HTTP step output.',
+                ],
+              },
+              metadata: { category: 'slack-creation' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('creates a multi-channel notification workflow', async ({ evaluateCreateDataset }) => {
+      await evaluateCreateDataset({
+        dataset: {
+          name: 'workflow-creation-connector: multi-channel',
+          description: 'Evaluate the ability to create workflows with multiple connector steps',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Create a workflow called "Alert Broadcaster" with a manual trigger. Steps: 1) Log "Broadcasting alert", 2) Send a Slack message "Critical alert detected" using a slack step, 3) Send an email to "oncall@example.com" with subject "Critical Alert" and message "A critical alert was detected, please investigate" using an email step.',
+              },
+              output: {
+                criteria: [
+                  'A new workflow was created with the name "Alert Broadcaster".',
+                  'The workflow has a manual trigger.',
+                  'There is a console step that logs a message.',
+                  'There is a slack step that sends a notification message.',
+                  'There is an email step that sends to "oncall@example.com".',
+                  'The email has a subject related to alerts.',
+                ],
+              },
+              metadata: { category: 'multi-channel-creation' },
+            },
+          ],
+        },
+      });
+    });
+  }
+);
