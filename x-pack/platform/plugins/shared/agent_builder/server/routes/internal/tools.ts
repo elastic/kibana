@@ -574,7 +574,9 @@ export function registerInternalToolsRoutes({
       const registry = await toolService.getRegistry({ request });
       const healthClient = toolService.getHealthClient({ request });
 
-      const mcpTools = (await registry.list({ types: [ToolType.mcp] })).filter(isMcpTool);
+      const mcpTools: McpToolDefinition[] = (await registry.list({ types: [ToolType.mcp] })).filter(
+        (tool) => isMcpTool(tool)
+      );
 
       if (mcpTools.length === 0) {
         return response.ok<ListMcpToolsHealthResponse>({
