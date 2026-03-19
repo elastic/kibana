@@ -79,7 +79,7 @@ export function createSearchKnowledgeIndicatorsTool({
     schema: searchKnowledgeIndicatorsSchema,
     tags: ['streams', 'significant_events'],
     availability: {
-      cacheMode: 'global',
+      cacheMode: 'space',
       handler: async ({ request, uiSettings }): Promise<ToolAvailabilityResult> => {
         try {
           const { licensing } = await getScopedClients({ request });
@@ -141,7 +141,6 @@ export function createSearchKnowledgeIndicatorsTool({
               type: ToolResultType.error,
               data: {
                 message: `Failed to search knowledge indicators: ${message}`,
-                stack: error instanceof Error ? error.stack : undefined,
               },
             },
           ],
