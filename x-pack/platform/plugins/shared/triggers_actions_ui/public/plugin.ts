@@ -79,6 +79,7 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
+import { createSetBreadcrumbs } from './application/lib/breadcrumb';
 
 import type {
   ActionTypeModel,
@@ -338,7 +339,7 @@ export class Plugin
               element: params.element,
               theme: coreStart.theme,
               storage: new Storage(window.localStorage),
-              setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+              setBreadcrumbs: createSetBreadcrumbs(coreStart.chrome.setBreadcrumbs),
               history: params.history,
               actionTypeRegistry,
               ruleTypeRegistry,
