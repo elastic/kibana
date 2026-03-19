@@ -14,6 +14,7 @@ import {
   SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
+  PROCESS_RUNTIME_VERSION,
   CLOUD_PROVIDER,
   CLOUD_SERVICE_NAME,
   TELEMETRY_SDK_NAME,
@@ -44,8 +45,6 @@ export async function getServiceAgent({
   start: number;
   end: number;
 }): Promise<ServiceAgentResponse> {
-  const PROCESS_RUNTIME_VERSION = 'process.runtime.version' as const;
-
   const fields = asMutableArray([
     AGENT_NAME,
     TELEMETRY_SDK_NAME,

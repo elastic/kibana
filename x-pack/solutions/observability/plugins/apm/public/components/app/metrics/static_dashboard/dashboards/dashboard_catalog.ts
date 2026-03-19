@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+// The new dashboard file names should be added here
 const dashboardFileNames = [
   'classic_apm-apm-nodejs-default',
   'classic_apm-edot-nodejs-default',
@@ -29,6 +29,11 @@ export type DashboardFileName = (typeof dashboardFileNames)[number];
 
 export const existingDashboardFileNames: Set<string> = new Set(dashboardFileNames);
 
+// The new dashboard files should be mapped here
+// + changed with the new ones (following the naming convention)
+// + similar mapping for edot needed
+//     - example: otel_native-edot-nodejs-default
+//     - example: otel_native-edot-nodejs-v26 for a versioned dashboard
 export async function loadDashboardFile(filename: DashboardFileName) {
   switch (filename) {
     case 'classic_apm-apm-nodejs-default': {
@@ -99,7 +104,7 @@ export async function loadDashboardFile(filename: DashboardFileName) {
     }
     case 'classic_apm-edot-dotnet-v9': {
       return import(
-        /* webpackChunkName: "lazyDotnetOtelNativeDashboard" */
+        /* webpackChunkName: "lazyDotnetOtelNativeV9Dashboard" */
         './opentelemetry_dotnet_v9.json'
       );
     }
