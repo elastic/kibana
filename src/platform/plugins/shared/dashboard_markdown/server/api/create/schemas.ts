@@ -23,7 +23,7 @@ export const createRequestParamsSchema = schema.maybe(
           },
           validate: (value) => {
             if (!validateMarkdownId(value)) {
-              return 'ID must contain only lowercase letters, numbers, hyphens, and underscores and must start and end with a letter or number';
+              return 'ID must contain only lowercase letters, numbers, hyphens, and underscores';
             }
           },
           minLength: 1,
