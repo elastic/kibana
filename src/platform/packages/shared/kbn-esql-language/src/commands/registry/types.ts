@@ -246,6 +246,11 @@ export enum Location {
   STATS_BY = 'stats_by',
 
   /**
+   * In a LIMIT grouping clause
+   */
+  LIMIT_BY = 'limit_by',
+
+  /**
    * In a per-agg filter
    */
   STATS_WHERE = 'stats_where',
