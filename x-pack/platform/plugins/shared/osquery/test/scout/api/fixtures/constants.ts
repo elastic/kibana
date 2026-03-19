@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const OSQUERY_API_VERSION = '2023-10-31';
+import { OSQUERY_API_VERSION } from '../../common/constants';
+
+export { OSQUERY_API_VERSION };
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -28,7 +30,7 @@ export const getMinimalRule = (overrides: Record<string, unknown> = {}) => ({
   language: 'kuery',
   query: '_id:*',
   name: `Test rule ${uniqueId()}`,
-  description: 'Test rule for osquery response actions',
+  description: 'Test rule for Osquery response actions',
   risk_score: 21,
   severity: 'low',
   interval: '5m',
@@ -40,7 +42,7 @@ export const getMinimalRule = (overrides: Record<string, unknown> = {}) => ({
 
 export const getMinimalPack = (overrides: Record<string, unknown> = {}) => ({
   name: `test-pack-${uniqueId()}`,
-  description: 'Test pack for osquery Scout tests',
+  description: 'Test pack for Osquery Scout tests',
   enabled: true,
   queries: {
     testQuery: {

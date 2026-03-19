@@ -33,9 +33,10 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
       responseType: 'json',
     });
     expect(createResponse).toHaveStatusCode(200);
+    expect(createResponse.body.data).toBeDefined();
     const savedObjectId = createResponse.body.data.saved_object_id;
-    expect(createResponse.body.data.id).toBe(queryBody.id);
     createdSavedObjectIds.push(savedObjectId);
+    expect(createResponse.body.data.id).toBe(queryBody.id);
 
     const readResponse = await apiClient.get(
       `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
@@ -45,6 +46,7 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
       }
     );
     expect(readResponse).toHaveStatusCode(200);
+    expect(readResponse.body.data).toBeDefined();
     expect(readResponse.body.data.id).toBe(queryBody.id);
     expect(readResponse.body.data.query).toBe(queryBody.query);
   });
@@ -57,6 +59,7 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
       responseType: 'json',
     });
     expect(createResponse).toHaveStatusCode(200);
+    expect(createResponse.body.data).toBeDefined();
     const savedObjectId = createResponse.body.data.saved_object_id;
     createdSavedObjectIds.push(savedObjectId);
 
@@ -70,6 +73,7 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
       }
     );
     expect(updateResponse).toHaveStatusCode(200);
+    expect(updateResponse.body.data).toBeDefined();
     expect(updateResponse.body.data.id).toBe(updatedId);
 
     const readResponse = await apiClient.get(
@@ -80,6 +84,7 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
       }
     );
     expect(readResponse).toHaveStatusCode(200);
+    expect(readResponse.body.data).toBeDefined();
     expect(readResponse.body.data.id).toBe(updatedId);
     expect(readResponse.body.data.query).toBe('select 2;');
   });
@@ -91,6 +96,7 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
       responseType: 'json',
     });
     expect(createResponse).toHaveStatusCode(200);
+    expect(createResponse.body.data).toBeDefined();
     const savedObjectId = createResponse.body.data.saved_object_id;
 
     const deleteResponse = await apiClient.delete(
@@ -116,7 +122,6 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
 
   apiTest('filters by search term and createdBy', async ({ apiClient }) => {
     const uniquePrefix = `findtest-${Date.now()}`;
-    const savedObjectIds: string[] = [];
     let createdByUser: string | undefined;
 
     for (const suffix of ['alpha', 'beta', 'gamma']) {
@@ -126,11 +131,10 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
         responseType: 'json',
       });
       expect(createResponse).toHaveStatusCode(200);
-      savedObjectIds.push(createResponse.body.data.saved_object_id);
+      expect(createResponse.body.data).toBeDefined();
+      createdSavedObjectIds.push(createResponse.body.data.saved_object_id);
       createdByUser ??= createResponse.body.data.created_by;
     }
-
-    createdSavedObjectIds.push(...savedObjectIds);
 
     const searchResponse = await apiClient.get(
       `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?search=${uniquePrefix}-alpha`,

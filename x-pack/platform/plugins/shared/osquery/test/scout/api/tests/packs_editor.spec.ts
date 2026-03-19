@@ -32,6 +32,7 @@ apiTest.describe('Osquery packs - editor', { tag: tags.deploymentAgnostic }, () 
       responseType: 'json',
     });
     expect(createResponse).toHaveStatusCode(200);
+    expect(createResponse.body.data).toBeDefined();
     const packId = createResponse.body.data.saved_object_id;
     createdPackIds.push(packId);
 
@@ -40,6 +41,7 @@ apiTest.describe('Osquery packs - editor', { tag: tags.deploymentAgnostic }, () 
       responseType: 'json',
     });
     expect(readResponse).toHaveStatusCode(200);
+    expect(readResponse.body.data).toBeDefined();
     expect(readResponse.body.data.name).toBe(packBody.name);
     expect(readResponse.body.data.queries.testQuery.query).toBe('select * from uptime;');
   });
@@ -70,6 +72,7 @@ apiTest.describe('Osquery packs - editor', { tag: tags.deploymentAgnostic }, () 
       responseType: 'json',
     });
     expect(createResponse).toHaveStatusCode(200);
+    expect(createResponse.body.data).toBeDefined();
     createdPackIds.push(createResponse.body.data.saved_object_id);
 
     const { queries } = createResponse.body.data;
@@ -87,6 +90,7 @@ apiTest.describe('Osquery packs - editor', { tag: tags.deploymentAgnostic }, () 
       responseType: 'json',
     });
     expect(createResponse).toHaveStatusCode(200);
+    expect(createResponse.body.data).toBeDefined();
     const packId = createResponse.body.data.saved_object_id;
     createdPackIds.push(packId);
 
@@ -111,6 +115,7 @@ apiTest.describe('Osquery packs - editor', { tag: tags.deploymentAgnostic }, () 
       responseType: 'json',
     });
     expect(readResponse).toHaveStatusCode(200);
+    expect(readResponse.body.data).toBeDefined();
     expect(readResponse.body.data.name).toBe(updatedName);
     expect(readResponse.body.data.enabled).toBe(false);
     expect(Object.keys(readResponse.body.data.queries)).toHaveLength(2);
@@ -123,6 +128,7 @@ apiTest.describe('Osquery packs - editor', { tag: tags.deploymentAgnostic }, () 
       responseType: 'json',
     });
     expect(createResponse).toHaveStatusCode(200);
+    expect(createResponse.body.data).toBeDefined();
     const packId = createResponse.body.data.saved_object_id;
 
     const deleteResponse = await apiClient.delete(`${testData.API_PATHS.OSQUERY_PACKS}/${packId}`, {
@@ -137,12 +143,11 @@ apiTest.describe('Osquery packs - editor', { tag: tags.deploymentAgnostic }, () 
     });
 
     // the API seems to throw a 500 error if the pack is not found
-    expect(readResponse.statusCode).toBe(500);
+    expect(readResponse).toHaveStatusCode(500);
   });
 
   apiTest('finds packs with search and enabled filters', async ({ apiClient }) => {
     const uniquePrefix = `findtest-${Date.now()}`;
-    const packIds: string[] = [];
     let createdByUser: string | undefined;
 
     for (const [suffix, enabled] of [
@@ -155,11 +160,10 @@ apiTest.describe('Osquery packs - editor', { tag: tags.deploymentAgnostic }, () 
         responseType: 'json',
       });
       expect(createResponse).toHaveStatusCode(200);
-      packIds.push(createResponse.body.data.saved_object_id);
+      expect(createResponse.body.data).toBeDefined();
+      createdPackIds.push(createResponse.body.data.saved_object_id);
       createdByUser ??= createResponse.body.data.created_by;
     }
-
-    createdPackIds.push(...packIds);
 
     const searchResponse = await apiClient.get(
       `${testData.API_PATHS.OSQUERY_PACKS}?search=${uniquePrefix}`,

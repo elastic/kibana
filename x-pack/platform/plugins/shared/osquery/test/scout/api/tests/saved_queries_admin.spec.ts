@@ -31,6 +31,7 @@ apiTest.describe('Osquery saved queries - admin', { tag: tags.deploymentAgnostic
       responseType: 'json',
     });
     expect(createResponse).toHaveStatusCode(200);
+    expect(createResponse.body.data).toBeDefined();
     createdSavedObjectIds.push(createResponse.body.data.saved_object_id);
 
     expect('created_by_profile_uid' in createResponse.body.data).toBe(true);
@@ -44,6 +45,7 @@ apiTest.describe('Osquery saved queries - admin', { tag: tags.deploymentAgnostic
       responseType: 'json',
     });
     expect(createResponse).toHaveStatusCode(200);
+    expect(createResponse.body.data).toBeDefined();
     const savedObjectId = createResponse.body.data.saved_object_id;
     const queryId = createResponse.body.data.id;
     createdSavedObjectIds.push(savedObjectId);
@@ -56,6 +58,7 @@ apiTest.describe('Osquery saved queries - admin', { tag: tags.deploymentAgnostic
       }
     );
     expect(readResponse).toHaveStatusCode(200);
+    expect(readResponse.body.data).toBeDefined();
     expect('created_by_profile_uid' in readResponse.body.data).toBe(true);
     expect('updated_by_profile_uid' in readResponse.body.data).toBe(true);
 

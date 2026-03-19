@@ -31,6 +31,7 @@ apiTest.describe('Osquery packs - admin', { tag: tags.deploymentAgnostic }, () =
       responseType: 'json',
     });
     expect(createResponse).toHaveStatusCode(200);
+    expect(createResponse.body.data).toBeDefined();
     createdPackIds.push(createResponse.body.data.saved_object_id);
 
     expect('created_by_profile_uid' in createResponse.body.data).toBe(true);
@@ -45,6 +46,7 @@ apiTest.describe('Osquery packs - admin', { tag: tags.deploymentAgnostic }, () =
       }
     );
     expect(findResponse).toHaveStatusCode(200);
+    expect(findResponse.body.data).toBeDefined();
     expect('created_by_profile_uid' in findResponse.body.data[0]).toBe(true);
   });
 });

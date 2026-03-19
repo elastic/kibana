@@ -72,6 +72,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(createResponse).toHaveStatusCode(200);
+      expect(createResponse.body).toBeDefined();
       createdRuleIds.push(createResponse.body.id);
 
       expect(createResponse.body.response_actions).toHaveLength(1);
@@ -88,6 +89,7 @@ apiTest.describe(
         }
       );
       expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body).toBeDefined();
       expect(getResponse.body.response_actions).toHaveLength(1);
       expect(getResponse.body.response_actions[0].params.query).toBe('select * from uptime;');
     });
@@ -114,6 +116,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(createResponse).toHaveStatusCode(200);
+        expect(createResponse.body).toBeDefined();
         createdRuleIds.push(createResponse.body.id);
 
         const { params } = createResponse.body.response_actions[0];
@@ -154,6 +157,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(createResponse).toHaveStatusCode(200);
+      expect(createResponse.body).toBeDefined();
       createdRuleIds.push(createResponse.body.id);
 
       const { params } = createResponse.body.response_actions[0];
@@ -169,6 +173,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(createResponse).toHaveStatusCode(200);
+      expect(createResponse.body).toBeDefined();
       createdRuleIds.push(createResponse.body.id);
 
       const updateResponse = await apiClient.put(testData.API_PATHS.DETECTION_RULES, {
@@ -196,6 +201,7 @@ apiTest.describe(
         }
       );
       expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body).toBeDefined();
       expect(getResponse.body.response_actions).toHaveLength(1);
     });
 
@@ -214,6 +220,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(createResponse).toHaveStatusCode(200);
+      expect(createResponse.body).toBeDefined();
       createdRuleIds.push(createResponse.body.id);
       expect(createResponse.body.response_actions).toHaveLength(1);
 
@@ -269,6 +276,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(createResponse).toHaveStatusCode(200);
+        expect(createResponse.body).toBeDefined();
         createdRuleIds.push(createResponse.body.id);
 
         const actions = createResponse.body.response_actions;

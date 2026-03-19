@@ -7,8 +7,8 @@
 
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
+import { OSQUERY_API_VERSION } from '../constants';
 
-const OSQUERY_API_VERSION = '2023-10-31';
 const OSQUERY_PACKS_URL = '/api/osquery/packs';
 const OSQUERY_SAVED_QUERIES_URL = '/api/osquery/saved_queries';
 
@@ -55,7 +55,7 @@ export const getOsqueryApiService = ({
             method: 'DELETE',
             path: `${OSQUERY_PACKS_URL}/${id}`,
             headers,
-            ignoreErrors: [404, 500],
+            ignoreErrors: [404],
           });
         });
       },

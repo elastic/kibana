@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { OSQUERY_API_VERSION } from '../../common/constants';
+export const OSQUERY_API_VERSION = '2023-10-31';
