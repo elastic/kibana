@@ -12,6 +12,7 @@ import {
   EuiProgress,
   useGeneratedHtmlId,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -77,7 +78,7 @@ const NO_ITEMS_MESSAGE = (
 // eslint-disable-next-line complexity
 export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const modalTitleId = useGeneratedHtmlId();
-
+  const { euiTheme } = useEuiTheme();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
@@ -417,7 +418,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               }}
               {...tableProps}
               tableLayout="auto"
-              css={{ overflowX: 'auto' }}
+              css={{ overflowX: 'auto', paddingBottom: euiTheme.size.l }}
             />
           </RulesTableFiltersLayout>
         </>

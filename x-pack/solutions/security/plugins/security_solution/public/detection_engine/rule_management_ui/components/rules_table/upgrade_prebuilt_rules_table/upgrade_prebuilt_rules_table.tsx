@@ -16,6 +16,7 @@ import {
   EuiSkeletonText,
   EuiSkeletonTitle,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
@@ -44,6 +45,7 @@ const NO_ITEMS_MESSAGE = (
  * Table Component for displaying rules that have available updates
  */
 export const UpgradePrebuiltRulesTable = React.memo(() => {
+  const { euiTheme } = useEuiTheme();
   const {
     state: {
       ruleUpgradeStates,
@@ -139,7 +141,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 onChange={handleTableChange}
                 tableCaption={i18n.RULES_TABLE_CAPTION}
                 tableLayout="auto"
-                css={{ overflowX: 'auto' }}
+                css={{ overflowX: 'auto', paddingBottom: euiTheme.size.l }}
               />
             </RulesTableFiltersLayout>
           )

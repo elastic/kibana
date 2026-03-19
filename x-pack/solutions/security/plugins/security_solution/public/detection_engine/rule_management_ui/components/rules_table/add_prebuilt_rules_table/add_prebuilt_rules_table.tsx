@@ -13,6 +13,7 @@ import {
   EuiSkeletonText,
   EuiBasicTable,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
@@ -33,6 +34,7 @@ import { useAddPrebuiltRulesTableColumns } from './use_add_prebuilt_rules_table_
  * Table Component for displaying new rules that are available to be installed
  */
 export const AddPrebuiltRulesTable = React.memo(() => {
+  const { euiTheme } = useEuiTheme();
   const {
     state: {
       rules,
@@ -129,7 +131,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 onChange={handleTableChange}
                 tableCaption={i18n.PAGE_TITLE}
                 tableLayout="auto"
-                css={{ overflowX: 'auto' }}
+                css={{ overflowX: 'auto', paddingBottom: euiTheme.size.l }}
               />
             </RulesTableFiltersLayout>
           )

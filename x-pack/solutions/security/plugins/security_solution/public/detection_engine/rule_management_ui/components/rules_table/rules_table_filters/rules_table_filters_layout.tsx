@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiResizableContainer,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -149,7 +148,6 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
               >
                 <EuiFlexGroup direction="column" gutterSize="s">
                   <EuiFlexItem grow={true}>{children}</EuiFlexItem>
-                  <EuiSpacer size="s" />
                 </EuiFlexGroup>
               </EuiResizablePanel>
             </>
