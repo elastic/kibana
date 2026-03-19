@@ -73,6 +73,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/es-query'
   - '@kbn/react-hooks'
+  - '@kbn/core-security-server-mocks'
 tags:
   - plugin
   - prod

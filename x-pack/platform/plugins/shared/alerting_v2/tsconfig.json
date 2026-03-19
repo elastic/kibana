@@ -67,7 +67,8 @@
     "@kbn/react-query",
     "@kbn/es-query",
     "@kbn/react-hooks",
-    "@kbn/deeplinks-workflows"
+    "@kbn/deeplinks-workflows",
+    "@kbn/core-security-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }
