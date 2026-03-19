@@ -351,7 +351,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
-        parallelism: 2
+        parallelism: 3
         retry:
           automatic:
             - exit_status: '1'
