@@ -57,6 +57,15 @@ export const identifiedFeatureSchema = baseFeatureSchema
 
 export type IdentifiedFeature = z.infer<typeof identifiedFeatureSchema>;
 
+export const ignoredFeatureSchema = z.object({
+  feature_id: z.string(),
+  feature_title: z.string(),
+  excluded_feature_id: z.string(),
+  reason: z.string(),
+});
+
+export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
+
 export const featureSchema = baseFeatureSchema.and(
   z.object({
     uuid: z.string(),

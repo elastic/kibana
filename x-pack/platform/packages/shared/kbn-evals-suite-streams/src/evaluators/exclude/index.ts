@@ -11,6 +11,13 @@ import type { ExcludedFeatureSummary, IgnoredFeature } from '@kbn/streams-ai';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import { ExcludeCompliancePrompt } from './prompt';
 
+interface ExclusionViolation {
+  run_index: number;
+  excluded_feature: { id: string; title: string; type: string; subtype: string };
+  regenerated_feature: { id: string; title: string; type: string; subtype: string };
+  reason: string;
+}
+
 export interface ExcludeExperimentOutput {
   initialFeatures: BaseFeature[];
   excludedFeatures: ExcludedFeatureSummary[];
@@ -105,12 +112,13 @@ export const createExcludeSemanticEvaluator = ({
       throw new Error('No tool call found in LLM response');
     }
 
-    const { violations, explanation } = toolCall.function.arguments;
+    const { violations, explanation } = toolCall.function.arguments as {
+      violations: ExclusionViolation[];
+      explanation: string;
+    };
 
     const perRunScores = followUpRuns.map((run, runIndex) => {
-      const runViolationCount = violations.filter(
-        (v: { run_index: number }) => v.run_index === runIndex
-      ).length;
+      const runViolationCount = violations.filter((v) => v.run_index === runIndex).length;
       const llmIgnored = run.ignoredFeatures.length;
       const codeFiltered = run.rawFeatures.length - run.features.length;
       return {

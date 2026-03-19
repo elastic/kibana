@@ -9,12 +9,19 @@ import { compact, uniqBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import { type BaseFeature, identifiedFeatureSchema } from '@kbn/streams-schema';
+import {
+  type BaseFeature,
+  type IgnoredFeature,
+  identifiedFeatureSchema,
+  ignoredFeatureSchema,
+} from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
+
+export type { IgnoredFeature } from '@kbn/streams-schema';
 
 export interface ExcludedFeatureSummary {
   id: string;
@@ -23,13 +30,6 @@ export interface ExcludedFeatureSummary {
   title?: string;
   description?: string;
   properties: Record<string, unknown>;
-}
-
-export interface IgnoredFeature {
-  feature_id: string;
-  feature_title: string;
-  excluded_feature_id: string;
-  reason: string;
 }
 
 export interface IdentifyFeaturesOptions {
@@ -101,9 +101,9 @@ export async function identifyFeatures({
     (feature) => feature.id
   );
 
-  const ignoredFeatures: IgnoredFeature[] = response.toolCalls.flatMap(
-    (toolCall) => toolCall.function.arguments.ignored_features ?? []
-  );
+  const ignoredFeatures = response.toolCalls
+    .flatMap((toolCall) => toolCall.function.arguments.ignored_features ?? [])
+    .filter((item): item is IgnoredFeature => ignoredFeatureSchema.safeParse(item).success);
 
   return {
     features,

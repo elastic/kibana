@@ -191,6 +191,7 @@ export {
   type Feature,
   type BaseFeature,
   type IdentifiedFeature,
+  type IgnoredFeature,
   type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
@@ -204,6 +205,7 @@ export {
   featureSchema,
   baseFeatureSchema,
   identifiedFeatureSchema,
+  ignoredFeatureSchema,
   featureStatusSchema,
 } from './src/feature';
 

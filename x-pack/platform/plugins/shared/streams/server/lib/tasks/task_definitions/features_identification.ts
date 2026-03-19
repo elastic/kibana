@@ -118,13 +118,16 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const { hits: sampleDocuments } = await getSampleDocuments({
-                  esClient,
-                  index: stream.name,
-                  start,
-                  end,
-                  size: 20,
-                });
+                const [{ hits: sampleDocuments }, { hits: excludedFeatures }] = await Promise.all([
+                  getSampleDocuments({
+                    esClient,
+                    index: stream.name,
+                    start,
+                    end,
+                    size: 20,
+                  }),
+                  featureClient.getExcludedFeatures(stream.name),
+                ]);
 
                 if (sampleDocuments.length === 0) {
                   taskContext.logger.debug(
@@ -133,10 +136,6 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   );
                   return getDeleteTaskRunResult();
                 }
-
-                const { hits: excludedFeatures } = await featureClient.getExcludedFeatures(
-                  stream.name
-                );
 
                 telemetryProps.excluded_features_count = excludedFeatures.length;
 
@@ -152,37 +151,39 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   }));
 
                 const identifyFeaturesStart = Date.now();
-                const [{ features: inferredBaseFeatures, ignoredFeatures }, computedFeatures] =
-                  await Promise.all([
-                    identifyFeatures({
-                      streamName: stream.name,
-                      sampleDocuments,
-                      excludedFeatures: excludedSummaries,
-                      inferenceClient: boundInferenceClient,
-                      logger: taskContext.logger.get('features_identification'),
-                      signal: runContext.abortController.signal,
-                      systemPrompt: featurePromptOverride,
+                const [
+                  { features: inferredBaseFeatures, ignoredFeatures },
+                  computedFeatures,
+                  { hits: existingFeatures },
+                ] = await Promise.all([
+                  identifyFeatures({
+                    streamName: stream.name,
+                    sampleDocuments,
+                    excludedFeatures: excludedSummaries,
+                    inferenceClient: boundInferenceClient,
+                    logger: taskContext.logger.get('features_identification'),
+                    signal: runContext.abortController.signal,
+                    systemPrompt: featurePromptOverride,
+                  })
+                    .then((result) => {
+                      telemetryProps.input_tokens_used = result.tokensUsed.prompt;
+                      telemetryProps.output_tokens_used = result.tokensUsed.completion;
+                      telemetryProps.total_tokens_used = result.tokensUsed.total;
+                      return result;
                     })
-                      .then((result) => {
-                        telemetryProps.input_tokens_used = result.tokensUsed.prompt;
-                        telemetryProps.output_tokens_used = result.tokensUsed.completion;
-                        telemetryProps.total_tokens_used = result.tokensUsed.total;
-                        return result;
-                      })
-                      .finally(() => {
-                        telemetryProps.identification_duration_ms =
-                          Date.now() - identifyFeaturesStart;
-                      }),
-                    generateAllComputedFeatures({
-                      stream,
-                      start,
-                      end,
-                      esClient,
-                      logger: taskContext.logger.get('computed_features'),
+                    .finally(() => {
+                      telemetryProps.identification_duration_ms =
+                        Date.now() - identifyFeaturesStart;
                     }),
-                  ]);
-
-                const { hits: existingFeatures } = await featureClient.getFeatures(stream.name);
+                  generateAllComputedFeatures({
+                    stream,
+                    start,
+                    end,
+                    esClient,
+                    logger: taskContext.logger.get('computed_features'),
+                  }),
+                  featureClient.getFeatures(stream.name),
+                ]);
 
                 const { features, newFeaturesCount, codeIgnoredCount } = reconcileFeatures({
                   inferredBaseFeatures,

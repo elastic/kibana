@@ -170,7 +170,7 @@ export const listAllFeaturesRoute = createServerRoute({
     const streams = await streamsClient.listStreams();
     const streamNames = streams.map((stream) => stream.name);
 
-    const { hits: features } = await featureClient.getAllFeatures(streamNames);
+    const { hits: features } = await featureClient.getFeatures(streamNames);
 
     return {
       features,

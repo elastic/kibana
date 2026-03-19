@@ -89,19 +89,28 @@ export class FeatureClient {
   }
 
   async getFeatures(
-    stream: string,
+    streams: string | string[],
     filters?: {
       type?: string[];
       id?: string[];
       minConfidence?: number;
       limit?: number;
       includeExcluded?: boolean;
+      includeExpired?: boolean;
     }
   ): Promise<{ hits: Feature[]; total: number }> {
+    const streamNames = Array.isArray(streams) ? streams : [streams];
+    if (streamNames.length === 0) {
+      return { hits: [], total: 0 };
+    }
+
     const filterClauses: QueryDslQueryContainer[] = [
-      ...termQuery(STREAM_NAME, stream),
+      ...termsQuery(STREAM_NAME, streamNames),
       ...(filters?.id?.length ? termsQuery(FEATURE_ID, filters.id) : []),
-      {
+    ];
+
+    if (!filters?.includeExpired) {
+      filterClauses.push({
         bool: {
           should: [
             { bool: { must_not: { exists: { field: FEATURE_EXPIRES_AT } } } },
@@ -109,8 +118,8 @@ export class FeatureClient {
           ],
           minimum_should_match: 1,
         },
-      },
-    ];
+      });
+    }
 
     if (!filters?.includeExcluded) {
       filterClauses.push({
@@ -175,49 +184,15 @@ export class FeatureClient {
   }
 
   async deleteFeatures(stream: string) {
-    const features = await this.getFeatures(stream);
+    const features = await this.getFeatures(stream, {
+      includeExcluded: true,
+      includeExpired: true,
+    });
     return await this.clients.storageClient.bulk({
       operations: features.hits.map((feature) => ({
         delete: { _id: feature.uuid },
       })),
     });
-  }
-
-  async getAllFeatures(streams: string[]): Promise<{ hits: Feature[]; total: number }> {
-    if (streams.length === 0) {
-      return { hits: [], total: 0 };
-    }
-
-    const filterClauses: QueryDslQueryContainer[] = [
-      ...termsQuery(STREAM_NAME, streams),
-      {
-        bool: {
-          should: [
-            { bool: { must_not: { exists: { field: FEATURE_EXPIRES_AT } } } },
-            ...dateRangeQuery(Date.now(), undefined, FEATURE_EXPIRES_AT),
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      {
-        bool: { must_not: { exists: { field: FEATURE_EXCLUDED_AT } } },
-      },
-    ];
-
-    const featuresResponse = await this.clients.storageClient.search({
-      size: 10_000,
-      track_total_hits: true,
-      query: {
-        bool: {
-          filter: filterClauses,
-        },
-      },
-    });
-
-    return {
-      hits: featuresResponse.hits.hits.map((hit) => fromStorage(hit._source)),
-      total: featuresResponse.hits.total.value,
-    };
   }
 
   async getExcludedFeatures(stream: string): Promise<{ hits: Feature[]; total: number }> {
