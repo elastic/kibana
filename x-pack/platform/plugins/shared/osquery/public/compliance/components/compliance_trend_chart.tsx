@@ -7,7 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { Chart, Settings, LineSeries, Axis, ScaleType } from '@elastic/charts';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiText } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 
 interface Props {
   trend: Array<{ timestamp: string; score: number }>;
@@ -20,12 +21,26 @@ const formatTimeTick = (v: number) => new Date(v).toLocaleTimeString();
 const formatScoreTick = (v: number) => `${v}%`;
 
 export const ComplianceTrendChart: React.FC<Props> = ({ trend }) => {
+  const { euiTheme } = useEuiTheme();
+  const lineColor = euiTheme.colors.primary;
+
   const data = useMemo(
     () => trend.map((d) => ({ x: new Date(d.timestamp).getTime(), y: d.score })),
     [trend]
   );
 
-  if (data.length === 0) return null;
+  if (data.length === 0) {
+    return (
+      <EuiPanel hasBorder>
+        <EuiTitle size="xs">
+          <h3>Score Trend</h3>
+        </EuiTitle>
+        <EuiText size="s" color="subdued" textAlign="center">
+          <p>No trend data available yet. Scores will appear after compliance checks run.</p>
+        </EuiText>
+      </EuiPanel>
+    );
+  }
 
   return (
     <EuiPanel hasBorder>
@@ -43,7 +58,7 @@ export const ComplianceTrendChart: React.FC<Props> = ({ trend }) => {
           data={data}
           xAccessor="x"
           yAccessors={Y_ACCESSORS}
-          color="#006BB4"
+          color={lineColor}
         />
       </Chart>
     </EuiPanel>

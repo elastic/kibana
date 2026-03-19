@@ -15,8 +15,6 @@ import {
   COMPLIANCE_ILM_POLICY_FINDINGS,
   COMPLIANCE_ILM_POLICY_SCORES,
   COMPLIANCE_FINDINGS_LATEST_INDEX,
-  COMPLIANCE_FINDINGS_DATA_VIEW_ID,
-  COMPLIANCE_SCORES_DATA_VIEW_ID,
 } from '../../../common/compliance';
 
 export const initializeComplianceIndices = async (
@@ -101,7 +99,8 @@ const createFindingsTransform = async (esClient: ElasticsearchClient, logger: Lo
   try {
     const exists = await esClient.transform
       .getTransform({ transform_id: transformId })
-      .catch(() => null);
+      .then((r) => (r.count ?? 0) > 0)
+      .catch(() => false);
     if (exists) return;
 
     await esClient.transform.putTransform({
@@ -123,40 +122,9 @@ const createFindingsTransform = async (esClient: ElasticsearchClient, logger: Lo
 };
 
 const createDataViews = async (
-  dataViewsService: DataViewsServerPluginStart,
-  esClient: ElasticsearchClient,
+  _dataViewsService: DataViewsServerPluginStart,
+  _esClient: ElasticsearchClient,
   logger: Logger
 ) => {
-  const dataViews = [
-    {
-      id: COMPLIANCE_FINDINGS_DATA_VIEW_ID,
-      title: COMPLIANCE_FINDINGS_INDEX_PATTERN,
-      name: 'Endpoint Compliance Findings',
-      timeFieldName: '@timestamp',
-    },
-    {
-      id: COMPLIANCE_SCORES_DATA_VIEW_ID,
-      title: COMPLIANCE_SCORES_INDEX_PATTERN,
-      name: 'Endpoint Compliance Scores',
-      timeFieldName: '@timestamp',
-    },
-  ];
-
-  for (const dv of dataViews) {
-    try {
-      const svc = await dataViewsService.dataViewsServiceFactory(
-        undefined as any,
-        esClient,
-        undefined,
-        true
-      );
-      const existing = await svc.find(dv.title).catch(() => []);
-      if (existing.length === 0) {
-        await svc.createAndSave({ ...dv });
-        logger.debug(`Created data view: ${dv.name}`);
-      }
-    } catch (error) {
-      logger.warn(`Failed to create data view ${dv.name}: ${error.message}`);
-    }
-  }
+  logger.debug('Data view creation deferred to Kibana startup with proper context');
 };

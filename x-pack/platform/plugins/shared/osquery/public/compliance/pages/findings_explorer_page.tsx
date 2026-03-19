@@ -23,7 +23,7 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiText,
-  EuiButtonGroup,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, EuiSuperSelectOption, Criteria } from '@elastic/eui';
 import { useComplianceFindings, useBenchmarks } from '../hooks';
@@ -41,7 +41,7 @@ const ALL_OPTION = '__all__';
 
 const ResultBadge: React.FC<{ evaluation: string }> = React.memo(({ evaluation }) => (
   <EuiHealth color={EVALUATION_COLORS[evaluation] ?? 'subdued'}>
-    {evaluation.replace('_', ' ')}
+    {evaluation.replaceAll('_', ' ')}
   </EuiHealth>
 ));
 ResultBadge.displayName = 'ResultBadge';
@@ -58,20 +58,15 @@ const EVALUATION_OPTIONS: Array<EuiSuperSelectOption<string>> = [
   { value: 'not_applicable', inputDisplay: 'N/A' },
 ];
 
-const GROUP_BUTTONS = [
-  { id: 'flat', label: 'Flat' },
-  { id: 'rule', label: 'By Rule' },
-  { id: 'host', label: 'By Host' },
-];
-
 const FLAT_COLUMNS: Array<EuiBasicTableColumn<FindingRow>> = [
   {
     field: 'result.evaluation',
     name: 'Result',
     width: '100px',
+    sortable: true,
     render: (_: unknown, item: FindingRow) => <ResultBadge evaluation={item.result.evaluation} />,
   },
-  { field: 'rule.name', name: 'Rule', truncateText: true },
+  { field: 'rule.name', name: 'Rule', truncateText: true, sortable: true },
   { field: 'rule.section', name: 'Section', width: '120px' },
   {
     field: 'rule.level',
@@ -84,6 +79,7 @@ const FLAT_COLUMNS: Array<EuiBasicTableColumn<FindingRow>> = [
   {
     field: '@timestamp',
     name: 'Time',
+    sortable: true,
     render: (ts: string) => new Date(ts).toLocaleString(),
     width: '180px',
   },
@@ -98,7 +94,6 @@ export const FindingsExplorerPage: React.FC = () => {
   const [evaluation, setEvaluation] = useState(ALL_OPTION);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
-  const [groupBy, setGroupBy] = useState('flat');
   const [flyoutFinding, setFlyoutFinding] = useState<FindingRow | null>(null);
 
   const benchmarks = useMemo(() => benchmarkData?.benchmarks ?? [], [benchmarkData]);
@@ -118,10 +113,10 @@ export const FindingsExplorerPage: React.FC = () => {
     const params: Record<string, unknown> = { page: page + 1, per_page: 25 };
     if (selectedBenchmark !== ALL_OPTION) params.benchmark_id = selectedBenchmark;
     if (evaluation !== ALL_OPTION) params.evaluation = evaluation;
-    if (groupBy !== 'flat') params.group_by = groupBy;
+    if (search) params.search = search;
 
     return params;
-  }, [selectedBenchmark, evaluation, page, groupBy]);
+  }, [selectedBenchmark, evaluation, search, page]);
 
   const { data, isLoading, error } = useComplianceFindings(queryParams);
 
@@ -152,11 +147,6 @@ export const FindingsExplorerPage: React.FC = () => {
 
   const handleEvaluationChange = useCallback((value: string) => {
     setEvaluation(value);
-    setPage(0);
-  }, []);
-
-  const handleGroupChange = useCallback((id: string) => {
-    setGroupBy(id);
     setPage(0);
   }, []);
 
@@ -226,6 +216,7 @@ export const FindingsExplorerPage: React.FC = () => {
             valueOfSelected={selectedBenchmark}
             onChange={handleBenchmarkChange}
             compressed
+            aria-label="Benchmark filter"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={EVAL_SELECT_CSS}>
@@ -234,6 +225,7 @@ export const FindingsExplorerPage: React.FC = () => {
             valueOfSelected={evaluation}
             onChange={handleEvaluationChange}
             compressed
+            aria-label="Result filter"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -242,15 +234,7 @@ export const FindingsExplorerPage: React.FC = () => {
             onChange={handleSearchChange}
             placeholder="Search findings..."
             compressed
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend="Group by"
-            options={GROUP_BUTTONS}
-            idSelected={groupBy}
-            onChange={handleGroupChange}
-            buttonSize="compressed"
+            aria-label="Search findings"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -269,8 +253,16 @@ export const FindingsExplorerPage: React.FC = () => {
         />
       </EuiPanel>
 
+      {!isLoading && (data?.findings ?? []).length === 0 && (
+        <EuiEmptyPrompt
+          iconType="search"
+          title={<h3>No findings</h3>}
+          body={<p>Adjust your filters or wait for compliance checks to run.</p>}
+        />
+      )}
+
       {flyoutFinding && (
-        <EuiFlyout onClose={closeFlyout} size="m">
+        <EuiFlyout onClose={closeFlyout} size="m" aria-labelledby="finding-flyout-title">
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
@@ -278,7 +270,7 @@ export const FindingsExplorerPage: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="m">
-                  <h2>{flyoutFinding.rule.name}</h2>
+                  <h2 id="finding-flyout-title">{flyoutFinding.rule.name}</h2>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -7,6 +7,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { COMPLIANCE_API_BASE } from '../../../common/compliance';
 import type {
   ComplianceRuleMetadata,
   ComplianceBenchmarkInfo,
@@ -14,7 +15,6 @@ import type {
   ComplianceFinding,
 } from '../../../common/compliance';
 
-const API_BASE = '/api/endpoint_compliance';
 const QUERY_KEY = 'endpointCompliance';
 
 const useFetch = <T>(path: string, params?: Record<string, unknown>, enabled = true) => {
@@ -24,11 +24,17 @@ const useFetch = <T>(path: string, params?: Record<string, unknown>, enabled = t
     queryKey: [QUERY_KEY, path, params],
     queryFn: () => http!.get<T>(path, { query: params as Record<string, string>, version: '1' }),
     enabled,
+    staleTime: 30_000,
+    retry: (count, error: any) => {
+      if (error?.response?.status >= 400 && error?.response?.status < 500) return false;
+
+      return count < 2;
+    },
   });
 };
 
 export const useBenchmarks = () =>
-  useFetch<{ benchmarks: ComplianceBenchmarkInfo[] }>(`${API_BASE}/benchmarks`);
+  useFetch<{ benchmarks: ComplianceBenchmarkInfo[] }>(`${COMPLIANCE_API_BASE}/benchmarks`);
 
 export const useComplianceRules = (params?: Record<string, unknown>) =>
   useFetch<{
@@ -36,21 +42,25 @@ export const useComplianceRules = (params?: Record<string, unknown>) =>
     page: number;
     per_page: number;
     rules: Array<ComplianceRuleMetadata & { id: string }>;
-  }>(`${API_BASE}/rules/_find`, params);
+  }>(`${COMPLIANCE_API_BASE}/rules/_find`, params);
 
 export const useComplianceRule = (id: string) =>
-  useFetch<ComplianceRuleMetadata & { id: string }>(`${API_BASE}/rules/${id}`, undefined, !!id);
+  useFetch<ComplianceRuleMetadata & { id: string }>(
+    `${COMPLIANCE_API_BASE}/rules/${id}`,
+    undefined,
+    !!id
+  );
 
 export const useDashboardStats = (benchmarkId: string, timeRange?: string) =>
   useFetch<ComplianceDashboardStats & { trend: Array<{ timestamp: string; score: number }> }>(
-    `${API_BASE}/stats/${benchmarkId}`,
+    `${COMPLIANCE_API_BASE}/stats/${benchmarkId}`,
     timeRange ? { time_range: timeRange } : undefined,
     !!benchmarkId
   );
 
 export const useComplianceFindings = (params?: Record<string, unknown>) =>
   useFetch<{ total: number; findings: Array<ComplianceFinding & { id: string }> }>(
-    `${API_BASE}/findings`,
+    `${COMPLIANCE_API_BASE}/findings`,
     params
   );
 
@@ -60,7 +70,7 @@ export const useBulkAction = () => {
 
   return useMutation({
     mutationFn: ({ action, ruleIds }: { action: string; ruleIds: string[] }) =>
-      http!.post(`${API_BASE}/rules/_bulk_action`, {
+      http!.post(`${COMPLIANCE_API_BASE}/rules/_bulk_action`, {
         body: JSON.stringify({ action, rule_ids: ruleIds }),
         version: '1',
       }),

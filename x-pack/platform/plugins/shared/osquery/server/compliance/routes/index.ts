@@ -39,7 +39,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
   router.versioned
     .get({
       path: `${COMPLIANCE_API_BASE}/benchmarks`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_READ,
     })
     .addVersion({ version: '1', validate: false }, async (context, _req, res) => {
@@ -53,7 +53,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
   router.versioned
     .get({
       path: `${COMPLIANCE_API_BASE}/rules/_find`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_READ,
     })
     .addVersion(
@@ -94,7 +94,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
   router.versioned
     .get({
       path: `${COMPLIANCE_API_BASE}/rules/{id}`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_READ,
     })
     .addVersion(
@@ -114,7 +114,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
   router.versioned
     .post({
       path: `${COMPLIANCE_API_BASE}/rules`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_WRITE,
     })
     .addVersion(
@@ -176,7 +176,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
   router.versioned
     .put({
       path: `${COMPLIANCE_API_BASE}/rules/{id}`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_WRITE,
     })
     .addVersion(
@@ -208,7 +208,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
   router.versioned
     .delete({
       path: `${COMPLIANCE_API_BASE}/rules/{id}`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_WRITE,
     })
     .addVersion(
@@ -229,7 +229,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
   router.versioned
     .post({
       path: `${COMPLIANCE_API_BASE}/rules/_bulk_action`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_WRITE,
     })
     .addVersion(
@@ -265,7 +265,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
   router.versioned
     .get({
       path: `${COMPLIANCE_API_BASE}/stats/{benchmark_id}`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_READ,
     })
     .addVersion(
@@ -274,26 +274,38 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
         validate: {
           request: {
             params: schema.object({ benchmark_id: schema.string() }),
-            query: schema.object({ time_range: schema.maybe(schema.string()) }),
+            query: schema.object({
+              time_range: schema.maybe(
+                schema.oneOf([schema.literal('24h'), schema.literal('7d'), schema.literal('30d')])
+              ),
+            }),
           },
         },
       },
       async (context, req, res) => {
-        const coreContext = await context.core;
-        const esClient = coreContext.elasticsearch.client.asCurrentUser;
-        const soClient = coreContext.savedObjects.client;
-        const mutedRules = await getMutedRulesState(soClient);
-        const stats = await getDashboardStats(esClient, req.params.benchmark_id, mutedRules);
-        const trend = await getScoreTrend(esClient, req.params.benchmark_id, req.query.time_range);
+        try {
+          const coreContext = await context.core;
+          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const soClient = coreContext.savedObjects.client;
+          const mutedRules = await getMutedRulesState(soClient);
+          const stats = await getDashboardStats(esClient, req.params.benchmark_id, mutedRules);
+          const trend = await getScoreTrend(
+            esClient,
+            req.params.benchmark_id,
+            req.query.time_range
+          );
 
-        return res.ok({ body: { ...stats, trend } });
+          return res.ok({ body: { ...stats, trend } });
+        } catch (error) {
+          return res.customError({ statusCode: 500, body: { message: error.message } });
+        }
       }
     );
 
   router.versioned
     .get({
       path: `${COMPLIANCE_API_BASE}/findings`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_READ,
     })
     .addVersion(
@@ -308,25 +320,26 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
               evaluation: schema.maybe(schema.string()),
               page: schema.maybe(schema.number({ min: 1 })),
               per_page: schema.maybe(schema.number({ min: 1, max: 100 })),
-              group_by: schema.maybe(
-                schema.oneOf([schema.literal('rule'), schema.literal('host')])
-              ),
             }),
           },
         },
       },
       async (context, req, res) => {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const result = await findComplianceFindings(esClient, {
-          benchmarkId: req.query.benchmark_id,
-          section: req.query.section,
-          hostId: req.query.host_id,
-          evaluation: req.query.evaluation,
-          page: req.query.page,
-          perPage: req.query.per_page,
-        });
+        try {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const result = await findComplianceFindings(esClient, {
+            benchmarkId: req.query.benchmark_id,
+            section: req.query.section,
+            hostId: req.query.host_id,
+            evaluation: req.query.evaluation,
+            page: req.query.page,
+            perPage: req.query.per_page,
+          });
 
-        return res.ok({ body: result });
+          return res.ok({ body: result });
+        } catch (error) {
+          return res.customError({ statusCode: 500, body: { message: error.message } });
+        }
       }
     );
 
@@ -334,7 +347,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
   router.versioned
     .post({
       path: `${COMPLIANCE_API_BASE}/rules/{id}/_generate_detection`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_WRITE,
     })
     .addVersion(
@@ -355,7 +368,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
   router.versioned
     .post({
       path: `${COMPLIANCE_API_BASE}/rules/_generate_detection_rules`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_WRITE,
     })
     .addVersion(
@@ -390,7 +403,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
   router.versioned
     .post({
       path: `${COMPLIANCE_API_BASE}/check`,
-      access: 'public',
+      access: 'internal',
       security: ROUTE_SECURITY_WRITE,
     })
     .addVersion(
@@ -410,11 +423,18 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
       },
       async (context, req, res) => {
         const soClient = (await context.core).savedObjects.client;
+        const noopLogger = {
+          info: () => {},
+          warn: () => {},
+          error: () => {},
+          debug: () => {},
+          fatal: () => {},
+          trace: () => {},
+        } as any;
         const result = await runComplianceCheck(
           soClient,
           req.body.platform as CompliancePlatform,
-          // @ts-expect-error logger not on context
-          context.logger ?? { info: () => {}, warn: () => {} }
+          noopLogger
         );
 
         return res.ok({ body: result });

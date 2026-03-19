@@ -39,8 +39,7 @@ export const BenchmarkCard: React.FC<Props> = ({ benchmark, score, isSelected, o
   return (
     <EuiCard
       title={benchmark.name}
-      description=""
-      onClick={onClick}
+      description={`${benchmark.version} · ${benchmark.platforms.length} platforms`}
       hasBorder
       selectable={selectable}
     >

@@ -39,30 +39,34 @@ const FailedCell: React.FC<{ value: number }> = ({ value }) => (
 );
 
 const DateCell: React.FC<{ value: string }> = ({ value }) => (
-  <>{value ? new Date(value).toLocaleString() : '—'}</>
+  <>{value ? new Date(value).toLocaleString(undefined, { timeZoneName: 'short' }) : '—'}</>
 );
 
 const COLUMNS: Array<EuiBasicTableColumn<ComplianceHostScore>> = [
-  { field: 'host_name', name: 'Host', truncateText: true },
-  { field: 'os_name', name: 'OS' },
+  { field: 'host_name', name: 'Host', truncateText: true, sortable: true },
+  { field: 'os_name', name: 'OS', sortable: true },
   {
     field: 'score',
     name: 'Score',
+    sortable: true,
     render: (val: number) => <ScoreCell value={val} />,
   },
   {
     field: 'passed',
     name: 'Passed',
+    sortable: true,
     render: (val: number) => <PassedCell value={val} />,
   },
   {
     field: 'failed',
     name: 'Failed',
+    sortable: true,
     render: (val: number) => <FailedCell value={val} />,
   },
   {
     field: 'last_evaluated',
     name: 'Last Evaluated',
+    sortable: true,
     render: (val: string) => <DateCell value={val} />,
   },
 ];
@@ -72,6 +76,12 @@ export const WorstHostsTable: React.FC<Props> = ({ hosts }) => (
     <EuiTitle size="xs">
       <h3>Worst Performing Hosts</h3>
     </EuiTitle>
-    <EuiBasicTable items={hosts} columns={COLUMNS} tableLayout="auto" />
+    {hosts.length === 0 ? (
+      <EuiText size="s" color="subdued" textAlign="center">
+        <p>No host data available.</p>
+      </EuiText>
+    ) : (
+      <EuiBasicTable items={hosts} columns={COLUMNS} tableLayout="auto" />
+    )}
   </EuiPanel>
 );

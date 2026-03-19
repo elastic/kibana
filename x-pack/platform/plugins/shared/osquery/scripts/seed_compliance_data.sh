@@ -81,6 +81,16 @@ if [[ "$HEALTH" == "unreachable" || "$HEALTH" == "error" ]]; then
 fi
 echo "  ✓ Cluster health: $HEALTH"
 
+echo ""
+echo "▸ Checking dependencies..."
+for dep in python3 openssl curl; do
+  if ! command -v "$dep" &>/dev/null; then
+    echo "  ✗ Required dependency not found: $dep"
+    exit 1
+  fi
+done
+echo "  ✓ All dependencies available"
+
 # ── Clean ─────────────────────────────────────────────────────────────────────
 if [[ "$CLEAN" == "true" ]]; then
   echo ""
@@ -214,7 +224,11 @@ NOW_EPOCH=$(date +%s)
 
 for day_offset in $(seq 0 $((NUM_DAYS - 1))); do
   for eval_hour in 0 6 12 18; do
-    EVAL_EPOCH=$(( NOW_EPOCH - (day_offset * 86400) + (eval_hour * 3600) ))
+    # Start of the day (midnight UTC), then add eval_hour offset
+    DAY_START=$(( NOW_EPOCH - (NOW_EPOCH % 86400) - (day_offset * 86400) ))
+    EVAL_EPOCH=$(( DAY_START + (eval_hour * 3600) ))
+    # Skip if this would be in the future
+    [[ $EVAL_EPOCH -gt $NOW_EPOCH ]] && continue
     EVAL_TS=$(date -u -r "$EVAL_EPOCH" "+%Y-%m-%dT%H:%M:%S.000Z" 2>/dev/null || date -u -d "@$EVAL_EPOCH" "+%Y-%m-%dT%H:%M:%S.000Z")
 
     for host_idx in $(seq 0 $((NUM_HOSTS - 1))); do
@@ -237,7 +251,12 @@ for day_offset in $(seq 0 $((NUM_DAYS - 1))); do
 
         # Deterministic pass/fail based on host+rule — some hosts are "worse"
         hash_input="${host_id}${rule_id}"
-        hash_val=$(echo -n "$hash_input" | md5sum | cut -c1-4)
+        # Cross-platform hash (works on both macOS and Linux)
+        if command -v md5sum &>/dev/null; then
+          hash_val=$(echo -n "$hash_input" | md5sum | cut -c1-4)
+        else
+          hash_val=$(echo -n "$hash_input" | md5 | cut -c1-4)
+        fi
         hash_num=$((16#$hash_val))
         rand_pct=$((hash_num % 100))
 
@@ -333,7 +352,8 @@ for day_offset in $(seq 0 $((NUM_DAYS - 1))); do
       IFS='|' read -r bm_id bm_name bm_version <<< "$bm_def"
 
       # Simulate gradual improvement over time
-      base_score=$((70 + day_offset * 2))
+      # Scores improve over time: lower in the past, higher today
+      base_score=$((78 - day_offset * 3))
       jitter=$(( (RANDOM % 8) - 4 ))
       score=$(( base_score + jitter ))
       [[ $score -gt 100 ]] && score=100

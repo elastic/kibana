@@ -100,95 +100,107 @@ export const getDashboardStats = async (
 ) => {
   const mutedFilters = buildMutedRulesFilter(mutedRules);
 
-  const response = await esClient.search({
-    index: COMPLIANCE_FINDINGS_LATEST_INDEX,
-    size: 0,
-    query: {
-      bool: {
-        must: [{ term: { 'rule.benchmark.id': benchmarkId } }],
-        must_not: mutedFilters,
+  try {
+    const response = await esClient.search({
+      index: COMPLIANCE_FINDINGS_LATEST_INDEX,
+      size: 0,
+      query: {
+        bool: {
+          must: [{ term: { 'rule.benchmark.id': benchmarkId } }],
+          must_not: mutedFilters,
+        },
       },
-    },
-    aggs: {
-      passed: { filter: { term: { 'result.evaluation': 'passed' } } },
-      failed: { filter: { term: { 'result.evaluation': 'failed' } } },
-      not_applicable: { filter: { term: { 'result.evaluation': 'not_applicable' } } },
-      hosts: { cardinality: { field: 'host.id' } },
-      sections: {
-        terms: { field: 'rule.section', size: 20 },
-        aggs: {
-          passed: { filter: { term: { 'result.evaluation': 'passed' } } },
-          failed: { filter: { term: { 'result.evaluation': 'failed' } } },
-          score: {
-            bucket_script: {
-              buckets_path: { p: 'passed._count', f: 'failed._count' },
-              script:
-                'params.p + params.f == 0 ? 0 : Math.round(params.p * 1000.0 / (params.p + params.f)) / 10.0',
+      aggs: {
+        passed: { filter: { term: { 'result.evaluation': 'passed' } } },
+        failed: { filter: { term: { 'result.evaluation': 'failed' } } },
+        not_applicable: { filter: { term: { 'result.evaluation': 'not_applicable' } } },
+        hosts: { cardinality: { field: 'host.id' } },
+        sections: {
+          terms: { field: 'rule.section', size: 20 },
+          aggs: {
+            passed: { filter: { term: { 'result.evaluation': 'passed' } } },
+            failed: { filter: { term: { 'result.evaluation': 'failed' } } },
+            score: {
+              bucket_script: {
+                buckets_path: { p: 'passed._count', f: 'failed._count' },
+                script:
+                  'params.p + params.f == 0 ? 0 : Math.round(params.p * 1000.0 / (params.p + params.f)) / 10.0',
+              },
             },
           },
         },
-      },
-      worst_hosts: {
-        terms: { field: 'host.id', size: 100 },
-        aggs: {
-          host_name: { terms: { field: 'host.name', size: 1 } },
-          os_name: { terms: { field: 'host.os.name', size: 1 } },
-          os_version: { terms: { field: 'host.os.version', size: 1 } },
-          passed: { filter: { term: { 'result.evaluation': 'passed' } } },
-          failed: { filter: { term: { 'result.evaluation': 'failed' } } },
-          score: {
-            bucket_script: {
-              buckets_path: { p: 'passed._count', f: 'failed._count' },
-              script:
-                'params.p + params.f == 0 ? 0 : Math.round(params.p * 1000.0 / (params.p + params.f)) / 10.0',
+        worst_hosts: {
+          terms: { field: 'host.id', size: 10 },
+          aggs: {
+            host_name: { terms: { field: 'host.name', size: 1 } },
+            os_name: { terms: { field: 'host.os.name', size: 1 } },
+            os_version: { terms: { field: 'host.os.version', size: 1 } },
+            passed: { filter: { term: { 'result.evaluation': 'passed' } } },
+            failed: { filter: { term: { 'result.evaluation': 'failed' } } },
+            score: {
+              bucket_script: {
+                buckets_path: { p: 'passed._count', f: 'failed._count' },
+                script:
+                  'params.p + params.f == 0 ? 0 : Math.round(params.p * 1000.0 / (params.p + params.f)) / 10.0',
+              },
             },
+            last_eval: { max: { field: '@timestamp' } },
           },
-          last_eval: { max: { field: '@timestamp' } },
         },
       },
-    },
-  });
+    });
 
-  const aggs = response.aggregations as any;
-  const passed = aggs?.passed?.doc_count ?? 0;
-  const failed = aggs?.failed?.doc_count ?? 0;
-  const notApplicable = aggs?.not_applicable?.doc_count ?? 0;
+    const aggs = response.aggregations as any;
+    const passed = aggs?.passed?.doc_count ?? 0;
+    const failed = aggs?.failed?.doc_count ?? 0;
+    const notApplicable = aggs?.not_applicable?.doc_count ?? 0;
 
-  const sections: ComplianceSectionScore[] = (aggs?.sections?.buckets ?? [])
-    .map((b: any) => ({
-      section: b.key,
-      passed: b.passed?.doc_count ?? 0,
-      failed: b.failed?.doc_count ?? 0,
-      score: b.score?.value ?? 0,
-    }))
-    .sort((a: ComplianceSectionScore, b: ComplianceSectionScore) => a.score - b.score)
-    .slice(0, 5);
+    const sections: ComplianceSectionScore[] = (aggs?.sections?.buckets ?? [])
+      .map((b: any) => ({
+        section: b.key,
+        passed: b.passed?.doc_count ?? 0,
+        failed: b.failed?.doc_count ?? 0,
+        score: b.score?.value ?? 0,
+      }))
+      .sort((a: ComplianceSectionScore, b: ComplianceSectionScore) => a.score - b.score)
+      .slice(0, 5);
 
-  const worstHosts: ComplianceHostScore[] = (aggs?.worst_hosts?.buckets ?? [])
-    .map((b: any) => ({
-      host_id: b.key,
-      host_name: b.host_name?.buckets?.[0]?.key ?? b.key,
-      os_name: b.os_name?.buckets?.[0]?.key ?? '',
-      os_version: b.os_version?.buckets?.[0]?.key ?? '',
-      passed: b.passed?.doc_count ?? 0,
-      failed: b.failed?.doc_count ?? 0,
-      score: b.score?.value ?? 0,
-      last_evaluated: b.last_eval?.value_as_string ?? '',
-    }))
-    .sort((a: ComplianceHostScore, b: ComplianceHostScore) => a.score - b.score)
-    .slice(0, 10);
+    const worstHosts: ComplianceHostScore[] = (aggs?.worst_hosts?.buckets ?? [])
+      .map((b: any) => ({
+        host_id: b.key,
+        host_name: b.host_name?.buckets?.[0]?.key ?? b.key,
+        os_name: b.os_name?.buckets?.[0]?.key ?? '',
+        os_version: b.os_version?.buckets?.[0]?.key ?? '',
+        passed: b.passed?.doc_count ?? 0,
+        failed: b.failed?.doc_count ?? 0,
+        score: b.score?.value ?? 0,
+        last_evaluated: b.last_eval?.value_as_string ?? '',
+      }))
+      .sort((a: ComplianceHostScore, b: ComplianceHostScore) => a.score - b.score)
+      .slice(0, 10);
 
-  return {
-    score: calculatePostureScore(passed, failed),
-    posture_score: calculatePostureScore(passed, failed),
-    total_findings: passed + failed + notApplicable,
-    passed_findings: passed,
-    failed_findings: failed,
-    not_applicable_findings: notApplicable,
-    host_count: aggs?.hosts?.value ?? 0,
-    sections,
-    worst_hosts: worstHosts,
-  };
+    return {
+      score: calculatePostureScore(passed, failed),
+      total_findings: passed + failed + notApplicable,
+      passed_findings: passed,
+      failed_findings: failed,
+      not_applicable_findings: notApplicable,
+      host_count: aggs?.hosts?.value ?? 0,
+      sections,
+      worst_hosts: worstHosts,
+    };
+  } catch (error) {
+    return {
+      score: 0,
+      total_findings: 0,
+      passed_findings: 0,
+      failed_findings: 0,
+      not_applicable_findings: 0,
+      host_count: 0,
+      sections: [],
+      worst_hosts: [],
+    };
+  }
 };
 
 export const getScoreTrend = async (
@@ -196,36 +208,40 @@ export const getScoreTrend = async (
   benchmarkId: string,
   timeRange: string = '24h'
 ) => {
-  const response = await esClient.search({
-    index: COMPLIANCE_SCORES_DATA_STREAM,
-    size: 0,
-    query: {
-      bool: {
-        must: [
-          { term: { 'rule.benchmark.id': benchmarkId } },
-          { range: { '@timestamp': { gte: `now-${timeRange}` } } },
-        ],
-      },
-    },
-    aggs: {
-      trend: {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: timeRange === '24h' ? '5m' : timeRange === '7d' ? '1h' : '6h',
-        },
-        aggs: {
-          avg_score: { avg: { field: 'score' } },
+  try {
+    const response = await esClient.search({
+      index: COMPLIANCE_SCORES_DATA_STREAM,
+      size: 0,
+      query: {
+        bool: {
+          must: [
+            { term: { 'rule.benchmark.id': benchmarkId } },
+            { range: { '@timestamp': { gte: `now-${timeRange}` } } },
+          ],
         },
       },
-    },
-  });
+      aggs: {
+        trend: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: timeRange === '24h' ? '5m' : timeRange === '7d' ? '1h' : '6h',
+          },
+          aggs: {
+            avg_score: { avg: { field: 'score' } },
+          },
+        },
+      },
+    });
 
-  const buckets = (response.aggregations?.trend as any)?.buckets ?? [];
+    const buckets = (response.aggregations?.trend as any)?.buckets ?? [];
 
-  return buckets.map((b: any) => ({
-    timestamp: b.key_as_string,
-    score: b.avg_score?.value ?? 0,
-  }));
+    return buckets.map((b: any) => ({
+      timestamp: b.key_as_string,
+      score: b.avg_score?.value ?? 0,
+    }));
+  } catch (error) {
+    return [];
+  }
 };
 
 export const findComplianceFindings = async (
@@ -247,21 +263,25 @@ export const findComplianceFindings = async (
   if (filters.hostId) must.push({ term: { 'host.id': filters.hostId } });
   if (filters.evaluation) must.push({ term: { 'result.evaluation': filters.evaluation } });
 
-  const response = await esClient.search({
-    index: COMPLIANCE_FINDINGS_LATEST_INDEX,
-    from: (page - 1) * perPage,
-    size: perPage,
-    query: must.length > 0 ? { bool: { must } } : { match_all: {} },
-    sort: [{ '@timestamp': 'desc' }],
-  });
+  try {
+    const response = await esClient.search({
+      index: COMPLIANCE_FINDINGS_LATEST_INDEX,
+      from: (page - 1) * perPage,
+      size: perPage,
+      query: must.length > 0 ? { bool: { must } } : { match_all: {} },
+      sort: [{ '@timestamp': 'desc' }],
+    });
 
-  return {
-    total:
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? 0,
-    page,
-    per_page: perPage,
-    findings: response.hits.hits.map((hit) => ({ id: hit._id, ...hit._source })),
-  };
+    return {
+      total:
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value ?? 0,
+      page,
+      per_page: perPage,
+      findings: response.hits.hits.map((hit) => ({ id: hit._id, ...hit._source })),
+    };
+  } catch (error) {
+    return { total: 0, page, per_page: perPage, findings: [] };
+  }
 };

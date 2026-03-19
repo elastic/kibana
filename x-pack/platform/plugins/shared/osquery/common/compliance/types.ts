@@ -50,7 +50,7 @@ export interface ComplianceFinding {
     name: string;
     description: string;
     remediation: string;
-    benchmark: ComplianceBenchmarkMetadata & { rule_number: string };
+    benchmark: ComplianceBenchmarkMetadata & { rule_number: string; posture_type?: string };
     section: string;
     level: 1 | 2;
     frameworks: ComplianceFrameworkMapping[];
@@ -109,7 +109,7 @@ export interface ComplianceBenchmarkInfo {
   total_rules: number;
   enabled_rules: number;
   platforms: CompliancePlatform[];
-  levels: number[];
+  levels: Array<1 | 2>;
 }
 
 export interface ComplianceSectionScore {

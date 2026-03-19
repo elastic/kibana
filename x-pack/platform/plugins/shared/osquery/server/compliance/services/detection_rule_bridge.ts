@@ -10,65 +10,91 @@ import { COMPLIANCE_FINDINGS_INDEX_PATTERN } from '../../../common/compliance';
 
 const MITRE_MAPPING: Record<
   string,
-  { technique_id: string; technique_name: string; tactic: string }
+  { technique_id: string; technique_name: string; tactic: string; tactic_id: string }
 > = {
   encryption: {
     technique_id: 'T1486',
     technique_name: 'Data Encrypted for Impact',
     tactic: 'Impact',
+    tactic_id: 'TA0040',
   },
   firewall: {
     technique_id: 'T1562.004',
     technique_name: 'Disable or Modify System Firewall',
     tactic: 'Defense Evasion',
+    tactic_id: 'TA0005',
   },
   patching: {
     technique_id: 'T1211',
     technique_name: 'Exploitation for Defense Evasion',
     tactic: 'Defense Evasion',
+    tactic_id: 'TA0005',
   },
-  session: { technique_id: 'T1078', technique_name: 'Valid Accounts', tactic: 'Persistence' },
+  session: {
+    technique_id: 'T1078',
+    technique_name: 'Valid Accounts',
+    tactic: 'Persistence',
+    tactic_id: 'TA0003',
+  },
   access_control: {
     technique_id: 'T1021.004',
     technique_name: 'Remote Services: SSH',
     tactic: 'Lateral Movement',
+    tactic_id: 'TA0008',
   },
-  network: { technique_id: 'T1090', technique_name: 'Proxy', tactic: 'Command and Control' },
-  account: { technique_id: 'T1078', technique_name: 'Valid Accounts', tactic: 'Persistence' },
+  network: {
+    technique_id: 'T1090',
+    technique_name: 'Proxy',
+    tactic: 'Command and Control',
+    tactic_id: 'TA0011',
+  },
+  account: {
+    technique_id: 'T1078',
+    technique_name: 'Valid Accounts',
+    tactic: 'Persistence',
+    tactic_id: 'TA0003',
+  },
   audit: {
     technique_id: 'T1562.002',
     technique_name: 'Disable Windows Event Logging',
     tactic: 'Defense Evasion',
+    tactic_id: 'TA0005',
   },
   privilege: {
     technique_id: 'T1548',
     technique_name: 'Abuse Elevation Control Mechanism',
     tactic: 'Defense Evasion',
+    tactic_id: 'TA0005',
   },
   antivirus: {
     technique_id: 'T1562.001',
     technique_name: 'Disable or Modify Tools',
     tactic: 'Defense Evasion',
+    tactic_id: 'TA0005',
   },
   integrity: {
-    technique_id: 'SI-7',
-    technique_name: 'Software, Firmware, and Information Integrity',
+    technique_id: 'T1036',
+    technique_name: 'Masquerading',
     tactic: 'Defense Evasion',
+    tactic_id: 'TA0005',
   },
   password_policy: {
     technique_id: 'T1110',
     technique_name: 'Brute Force',
     tactic: 'Credential Access',
+    tactic_id: 'TA0006',
   },
   file_permissions: {
     technique_id: 'T1222',
     technique_name: 'File and Directory Permissions Modification',
     tactic: 'Defense Evasion',
+    tactic_id: 'TA0005',
   },
   filesystem: {
     technique_id: 'T1006',
     technique_name: 'Direct Volume Access',
     tactic: 'Defense Evasion',
+    tactic_id: 'TA0005',
   },
 };
 
@@ -110,11 +136,9 @@ export const generateDetectionRuleTemplate = (
         {
           framework: 'MITRE ATT&CK',
           tactic: {
-            id: mitre.tactic.replace(/\s/g, '-').toLowerCase(),
+            id: mitre.tactic_id,
             name: mitre.tactic,
-            reference: `https://attack.mitre.org/tactics/${mitre.tactic
-              .replace(/\s/g, '-')
-              .toLowerCase()}/`,
+            reference: `https://attack.mitre.org/tactics/${mitre.tactic_id}/`,
           },
           technique: [
             {

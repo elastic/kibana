@@ -50,23 +50,26 @@ const FailedCell: React.FC<{ value: number }> = ({ value }) => (
 );
 
 const COLUMNS: Array<EuiBasicTableColumn<ComplianceSectionScore>> = [
-  { field: 'section', name: 'CIS Section', width: '35%' },
+  { field: 'section', name: 'CIS Section', width: '35%', sortable: true },
   {
     field: 'score',
     name: 'Compliance',
     width: '45%',
+    sortable: true,
     render: (_: unknown, item: ComplianceSectionScore) => <SectionScoreCell item={item} />,
   },
   {
     field: 'passed',
     name: 'Passed',
     width: '10%',
+    sortable: true,
     render: (val: number) => <PassedCell value={val} />,
   },
   {
     field: 'failed',
     name: 'Failed',
     width: '10%',
+    sortable: true,
     render: (val: number) => <FailedCell value={val} />,
   },
 ];
@@ -76,6 +79,12 @@ export const ComplianceBySectionTable: React.FC<Props> = ({ sections }) => (
     <EuiTitle size="xs">
       <h3>Compliance by CIS Section</h3>
     </EuiTitle>
-    <EuiBasicTable items={sections} columns={COLUMNS} tableLayout="auto" />
+    {sections.length === 0 ? (
+      <EuiText size="s" color="subdued" textAlign="center">
+        <p>No section data available.</p>
+      </EuiText>
+    ) : (
+      <EuiBasicTable items={sections} columns={COLUMNS} tableLayout="auto" />
+    )}
   </EuiPanel>
 );

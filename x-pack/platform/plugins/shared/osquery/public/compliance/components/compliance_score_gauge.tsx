@@ -21,15 +21,16 @@ interface ComplianceScoreGaugeProps {
   score: number;
   passed: number;
   failed: number;
-  total: number;
+  notApplicable: number;
 }
 
 export const ComplianceScoreGauge: React.FC<ComplianceScoreGaugeProps> = ({
   score,
   passed,
   failed,
-  total,
+  notApplicable,
 }) => {
+  const total = passed + failed + notApplicable;
   const color = score >= 80 ? 'success' : score >= 60 ? 'warning' : 'danger';
 
   return (
@@ -49,12 +50,14 @@ export const ComplianceScoreGauge: React.FC<ComplianceScoreGaugeProps> = ({
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
               <EuiText size="s">
-                <EuiIcon type="checkInCircleFilled" color="success" /> {passed} passed
+                <EuiIcon type="checkInCircleFilled" color="success" aria-hidden="true" /> {passed}{' '}
+                passed
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s">
-                <EuiIcon type="crossInCircleFilled" color="danger" /> {failed} failed
+                <EuiIcon type="crossInCircleFilled" color="danger" aria-hidden="true" /> {failed}{' '}
+                failed
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

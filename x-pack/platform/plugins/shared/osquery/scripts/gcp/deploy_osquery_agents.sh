@@ -224,6 +224,11 @@ for attempt in $(seq 1 36); do
   sleep 10
 done
 
+if [[ "$ONLINE_COUNT" -lt "$AGENT_COUNT" ]]; then
+  echo "  ⚠ Only $ONLINE_COUNT/$AGENT_COUNT agents came online within timeout."
+  echo "  Check VM logs: gcloud compute ssh <vm-name> --project=$GCP_PROJECT --zone=$GCP_ZONE -- 'sudo journalctl -u elastic-agent -n 50'"
+fi
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 print_header "Osquery Agents Deployed"
 

@@ -7,43 +7,30 @@
 
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { COMPLIANCE_RULE_SO_TYPE } from '../../../common/compliance';
-import type { ComplianceRuleMetadata } from '../../../common/compliance';
 import { PREBUILT_COMPLIANCE_RULES } from '../../../common/compliance/prebuilt_rules';
 
 export const installPrebuiltRules = async (
   soClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<{ installed: number; skipped: number }> => {
-  let installed = 0;
-  let skipped = 0;
+  const objects = PREBUILT_COMPLIANCE_RULES.map((rule) => ({
+    type: COMPLIANCE_RULE_SO_TYPE,
+    id: rule.rule_id,
+    attributes: rule,
+  }));
 
-  for (const rule of PREBUILT_COMPLIANCE_RULES) {
-    try {
-      const existing = await soClient
-        .find({
-          type: COMPLIANCE_RULE_SO_TYPE,
-          filter: `${COMPLIANCE_RULE_SO_TYPE}.attributes.rule_id: "${rule.rule_id}"`,
-          perPage: 1,
-        })
-        .catch(() => ({ total: 0 }));
+  try {
+    const result = await soClient.bulkCreate(objects, { overwrite: false });
+    const installed = result.saved_objects.filter((so) => !so.error).length;
+    const skipped = result.saved_objects.filter((so) => so.error).length;
+    logger.info(
+      `Prebuilt compliance rules: ${installed} installed, ${skipped} skipped (already exist)`
+    );
 
-      if (existing.total > 0) {
-        skipped++;
-        continue;
-      }
+    return { installed, skipped };
+  } catch (error) {
+    logger.error(`Failed to install prebuilt rules: ${error.message}`);
 
-      await soClient.create<ComplianceRuleMetadata>(COMPLIANCE_RULE_SO_TYPE, rule, {
-        id: rule.rule_id,
-      });
-      installed++;
-    } catch (error) {
-      logger.warn(`Failed to install prebuilt rule ${rule.rule_id}: ${error.message}`);
-    }
+    return { installed: 0, skipped: 0 };
   }
-
-  logger.info(
-    `Prebuilt compliance rules: ${installed} installed, ${skipped} skipped (already exist)`
-  );
-
-  return { installed, skipped };
 };

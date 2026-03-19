@@ -24,6 +24,7 @@ const createMockSoClient = () => ({
   update: jest.fn(),
   delete: jest.fn(),
   bulkUpdate: jest.fn(),
+  bulkGet: jest.fn(),
 });
 
 const makeRuleSo = (overrides: Record<string, unknown> = {}) => ({
@@ -100,11 +101,12 @@ describe('ComplianceRulesService', () => {
   });
 
   describe('createComplianceRule', () => {
-    it('creates a rule with prebuilt=false', async () => {
+    it('creates a rule with prebuilt=false and rule_id as SO id', async () => {
       soClient.create.mockResolvedValueOnce(makeRuleSo({ prebuilt: false }));
       const rule = await createComplianceRule(soClient as any, makeRuleSo().attributes);
-      const createCall = soClient.create.mock.calls[0][1];
-      expect(createCall.prebuilt).toBe(false);
+      const createCall = soClient.create.mock.calls[0];
+      expect(createCall[1].prebuilt).toBe(false);
+      expect(createCall[2]).toEqual({ id: 'cis-macos-1.1' });
     });
   });
 
@@ -127,9 +129,7 @@ describe('ComplianceRulesService', () => {
 
     it('rejects deleting prebuilt rules', async () => {
       soClient.get.mockResolvedValueOnce(makeRuleSo({ prebuilt: true }));
-      await expect(deleteComplianceRule(soClient as any, 'test-id')).rejects.toThrow(
-        'Cannot delete prebuilt'
-      );
+      await expect(deleteComplianceRule(soClient as any, 'test-id')).rejects.toThrow('Cannot delete prebuilt');
     });
   });
 
@@ -147,8 +147,10 @@ describe('ComplianceRulesService', () => {
 
     it('mutes rules by updating benchmark state', async () => {
       soClient.get
-        .mockRejectedValueOnce(new Error('not found'))
-        .mockResolvedValueOnce(makeRuleSo());
+        .mockRejectedValueOnce(new Error('not found'));
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [makeRuleSo()],
+      });
       soClient.update.mockResolvedValueOnce({});
       const result = await bulkActionComplianceRules(soClient as any, 'mute', ['test-id']);
       expect(result.updated).toBe(1);

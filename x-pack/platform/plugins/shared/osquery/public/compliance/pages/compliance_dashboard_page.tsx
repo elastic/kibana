@@ -83,7 +83,7 @@ export const ComplianceDashboardPage: React.FC = () => {
   if (benchmarksLoading) {
     return (
       <EuiPanel>
-        <EuiLoadingSpinner size="xl" />
+        <EuiLoadingSpinner size="xl" role="status" aria-label="Loading" />
       </EuiPanel>
     );
   }
@@ -123,6 +123,7 @@ export const ComplianceDashboardPage: React.FC = () => {
             valueOfSelected={timeRange}
             onChange={handleTimeRangeChange}
             compressed
+            aria-label="Time range"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -134,7 +135,7 @@ export const ComplianceDashboardPage: React.FC = () => {
           <BenchmarkCardItem
             key={bm.id}
             benchmark={bm}
-            score={bm.id === activeBenchmarkId ? stats?.posture_score : undefined}
+            score={bm.id === activeBenchmarkId ? stats?.score : undefined}
             isSelected={bm.id === activeBenchmarkId}
             onSelect={handleBenchmarkSelect}
           />
@@ -151,14 +152,14 @@ export const ComplianceDashboardPage: React.FC = () => {
 
       {statsLoading ? (
         <EuiPanel>
-          <EuiLoadingSpinner size="xl" />
+          <EuiLoadingSpinner size="xl" role="status" aria-label="Loading" />
         </EuiPanel>
       ) : stats ? (
         <>
           <EuiFlexGroup>
             <EuiFlexItem grow={1}>
               <ComplianceScoreGauge
-                score={stats.posture_score}
+                score={stats.score}
                 passed={stats.passed_findings}
                 failed={stats.failed_findings}
                 notApplicable={stats.not_applicable_findings}

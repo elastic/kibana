@@ -23,6 +23,8 @@ export class FindingEvaluatorService {
   private pollTimer: NodeJS.Timeout | null = null;
   private lastTimestamp: string;
   private readonly ruleCache = new Map<string, ComplianceRuleMetadata>();
+  private cacheLastCleared = Date.now();
+  private readonly CACHE_TTL_MS = 5 * 60_000;
 
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -178,7 +180,12 @@ export class FindingEvaluatorService {
         { create: { _index: COMPLIANCE_FINDINGS_DATA_STREAM } },
         doc,
       ]);
-      await this.esClient.bulk({ body, refresh: false });
+      const bulkResult = await this.esClient.bulk({ body, refresh: false });
+      if (bulkResult.errors) {
+        const errorItems = bulkResult.items.filter((item: any) => item.create?.error);
+        this.logger.warn(`${errorItems.length} finding write errors out of ${findingDocs.length}`);
+      }
+
       this.logger.info(`Ingested ${findingDocs.length} compliance findings`);
     }
 
@@ -202,6 +209,11 @@ export class FindingEvaluatorService {
   }
 
   private async resolveRule(ruleId: string): Promise<ComplianceRuleMetadata | null> {
+    if (Date.now() - this.cacheLastCleared > this.CACHE_TTL_MS) {
+      this.ruleCache.clear();
+      this.cacheLastCleared = Date.now();
+    }
+
     if (this.ruleCache.has(ruleId)) return this.ruleCache.get(ruleId)!;
 
     try {
@@ -209,7 +221,9 @@ export class FindingEvaluatorService {
       this.ruleCache.set(ruleId, so.attributes);
 
       return so.attributes;
-    } catch {
+    } catch (error) {
+      this.logger.warn(`Failed to resolve compliance rule ${ruleId}: ${error.message}`);
+
       return null;
     }
   }

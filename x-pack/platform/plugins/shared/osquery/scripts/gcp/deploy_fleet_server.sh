@@ -115,10 +115,10 @@ apt-get update -qq && apt-get install -y -qq curl jq
 
 # Download and install Elastic Agent
 cd /tmp
-AGENT_TAR="elastic-agent-${STACK_VERSION}-linux-x86_64.tar.gz"
+AGENT_TAR="elastic-agent-${STACK_VERSION}-linux-\$(uname -m | sed 's/aarch64/arm64/').tar.gz"
 curl -sL "https://artifacts.elastic.co/downloads/beats/elastic-agent/\${AGENT_TAR}" -o "\${AGENT_TAR}"
 tar xzf "\${AGENT_TAR}"
-cd "elastic-agent-${STACK_VERSION}-linux-x86_64"
+cd "elastic-agent-${STACK_VERSION}-linux-\$(uname -m | sed 's/aarch64/arm64/')"
 
 # Install as Fleet Server
 ./elastic-agent install \\
@@ -153,6 +153,9 @@ echo "  ✓ VM created"
 echo ""
 echo "▸ Ensuring firewall rule for Fleet Server port..."
 
+CALLER_IP=$(curl -s https://checkip.amazonaws.com)
+echo "  ℹ Restricting firewall to your IP: ${CALLER_IP}"
+
 RULE_NAME="allow-fleet-server-${FLEET_SERVER_PORT}"
 if ! gcloud compute firewall-rules describe "$RULE_NAME" --project="$GCP_PROJECT" &>/dev/null; then
   gcloud compute firewall-rules create "$RULE_NAME" \
@@ -160,8 +163,8 @@ if ! gcloud compute firewall-rules describe "$RULE_NAME" --project="$GCP_PROJECT
     --network="$GCP_NETWORK" \
     --allow="tcp:${FLEET_SERVER_PORT}" \
     --target-tags=fleet-server \
-    --source-ranges="0.0.0.0/0" \
-    --description="Allow Fleet Server enrollment" \
+    --source-ranges="${CALLER_IP}/32,10.0.0.0/8,172.16.0.0/12" \
+    --description="Allow Fleet Server enrollment (scoped)" \
     --quiet
   echo "  ✓ Firewall rule created"
 else
@@ -210,6 +213,12 @@ for a in data.get('items',[]):
   sleep 10
 done
 
+if [[ "$ONLINE" != "yes" ]]; then
+  echo "  ✗ Fleet Server did not come online within 6 minutes."
+  echo "  Check VM logs: gcloud compute ssh $FLEET_SERVER_VM --project=$GCP_PROJECT --zone=$GCP_ZONE -- 'sudo journalctl -u elastic-agent -n 50'"
+  exit 1
+fi
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 print_header "Fleet Server Deployed"
 
@@ -232,6 +241,7 @@ FLEET_URL=$FLEET_URL
 FLEET_POLICY_ID=$FLEET_POLICY_ID
 SERVICE_TOKEN=$SERVICE_TOKEN
 STATE
+chmod 600 "$STATE_FILE"
 
 echo "  State saved to: $STATE_FILE"
 echo ""

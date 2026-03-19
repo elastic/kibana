@@ -6,6 +6,7 @@
  */
 
 import type { MutedRulesState } from './types';
+import { COMPLIANCE_SCHEDULE_ID_PREFIX } from './constants';
 
 export const calculatePostureScore = (passed: number, failed: number): number => {
   const total = passed + failed;
@@ -35,4 +36,4 @@ export const buildMutedRulesFilter = (rulesStates: MutedRulesState) => {
 };
 
 export const isComplianceScheduleId = (scheduleId: string): boolean =>
-  scheduleId.startsWith('compliance-');
+  scheduleId.startsWith(COMPLIANCE_SCHEDULE_ID_PREFIX);

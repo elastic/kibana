@@ -17,6 +17,8 @@ import type {
 } from '../../../common/compliance';
 import { getMutedRuleKey } from '../../../common/compliance';
 
+const escapeKql = (value: string): string => value.replace(/["\\]/g, '\\$&');
+
 export const findComplianceRules = async (
   soClient: SavedObjectsClientContract,
   options: {
@@ -35,16 +37,20 @@ export const findComplianceRules = async (
   const filterParts: string[] = [];
   if (filters.benchmarkId) {
     filterParts.push(
-      `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.id: "${filters.benchmarkId}"`
+      `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.id: "${escapeKql(filters.benchmarkId)}"`
     );
   }
 
   if (filters.platform) {
-    filterParts.push(`${COMPLIANCE_RULE_SO_TYPE}.attributes.platform: "${filters.platform}"`);
+    filterParts.push(
+      `${COMPLIANCE_RULE_SO_TYPE}.attributes.platform: "${escapeKql(filters.platform)}"`
+    );
   }
 
   if (filters.section) {
-    filterParts.push(`${COMPLIANCE_RULE_SO_TYPE}.attributes.section: "${filters.section}"`);
+    filterParts.push(
+      `${COMPLIANCE_RULE_SO_TYPE}.attributes.section: "${escapeKql(filters.section)}"`
+    );
   }
 
   if (filters.level !== undefined) {
@@ -62,7 +68,7 @@ export const findComplianceRules = async (
     filter: filterParts.length > 0 ? filterParts.join(' AND ') : undefined,
     search,
     searchFields: ['name', 'description'],
-    sortField: 'rule_number',
+    sortField: 'name',
     sortOrder: 'asc',
   });
 
@@ -84,10 +90,14 @@ export const createComplianceRule = async (
   soClient: SavedObjectsClientContract,
   rule: ComplianceRuleMetadata
 ) => {
-  const so = await soClient.create<ComplianceRuleMetadata>(COMPLIANCE_RULE_SO_TYPE, {
-    ...rule,
-    prebuilt: false,
-  });
+  const so = await soClient.create<ComplianceRuleMetadata>(
+    COMPLIANCE_RULE_SO_TYPE,
+    {
+      ...rule,
+      prebuilt: false,
+    },
+    { id: rule.rule_id }
+  );
 
   return { id: so.id, ...so.attributes };
 };
@@ -154,9 +164,10 @@ const bulkMuteRules = async (
   ruleIds: string[]
 ) => {
   const currentState = await getMutedRulesState(soClient);
-  const rules = await Promise.all(
-    ruleIds.map((id) => soClient.get<ComplianceRuleMetadata>(COMPLIANCE_RULE_SO_TYPE, id))
+  const bulkResult = await soClient.bulkGet<ComplianceRuleMetadata>(
+    ruleIds.map((id) => ({ type: COMPLIANCE_RULE_SO_TYPE, id }))
   );
+  const rules = bulkResult.saved_objects.filter((so) => !so.error);
 
   for (const ruleSo of rules) {
     const { benchmark, rule_number } = ruleSo.attributes;

@@ -192,8 +192,10 @@ export const RulesManagementPage: React.FC = () => {
   const handleBulk = useCallback(
     (action: string) => {
       if (selectedRules.length === 0) return;
-      bulkAction.mutate({ action, ruleIds: selectedRules.map((r) => r.id) });
-      setSelectedRules([]);
+      bulkAction.mutate(
+        { action, ruleIds: selectedRules.map((r) => r.id) },
+        { onSuccess: () => setSelectedRules([]) }
+      );
     },
     [selectedRules, bulkAction]
   );
@@ -212,7 +214,11 @@ export const RulesManagementPage: React.FC = () => {
 
   const rowProps = useCallback(
     (item: RuleRow) => ({
-      onClick: () => setFlyoutRule(item),
+      onClick: (e: React.MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (target.closest('.euiCheckbox, [data-test-subj="checkboxSelectRow"]')) return;
+        setFlyoutRule(item);
+      },
       style: { cursor: 'pointer' as const },
     }),
     []
@@ -272,6 +278,7 @@ export const RulesManagementPage: React.FC = () => {
             onChange={handleBenchmarkChange}
             isLoading={benchmarksLoading}
             compressed
+            aria-label="Benchmark filter"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -280,6 +287,7 @@ export const RulesManagementPage: React.FC = () => {
             onChange={handleSearchChange}
             placeholder="Search rules..."
             compressed
+            aria-label="Search rules"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -333,7 +341,7 @@ export const RulesManagementPage: React.FC = () => {
       </EuiPanel>
 
       {flyoutRule && (
-        <EuiFlyout onClose={closeFlyout} size="m">
+        <EuiFlyout onClose={closeFlyout} size="m" aria-labelledby="rule-flyout-title">
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
@@ -341,7 +349,7 @@ export const RulesManagementPage: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="m">
-                  <h2>{flyoutRule.name}</h2>
+                  <h2 id="rule-flyout-title">{flyoutRule.name}</h2>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

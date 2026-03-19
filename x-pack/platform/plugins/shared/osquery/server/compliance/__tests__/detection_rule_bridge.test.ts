@@ -8,20 +8,13 @@
 import { generateDetectionRuleTemplate } from '../services/detection_rule_bridge';
 import type { ComplianceRuleMetadata } from '../../../common/compliance';
 
-const createMockRule = (
-  overrides: Partial<ComplianceRuleMetadata> = {}
-): ComplianceRuleMetadata => ({
+const createMockRule = (overrides: Partial<ComplianceRuleMetadata> = {}): ComplianceRuleMetadata => ({
   rule_id: 'cis_macos_15_2_1_1',
   name: 'Ensure FileVault Is Enabled',
   description: 'Ensure FileVault Is Enabled',
   query: 'SELECT 1 FROM disk_encryption WHERE encrypted = 1;',
   remediation: 'Enable FileVault.',
-  benchmark: {
-    id: 'cis_macos_15',
-    name: 'CIS macOS 15',
-    version: 'v1.0.0',
-    posture_type: 'endpoint',
-  },
+  benchmark: { id: 'cis_macos_15', name: 'CIS macOS 15', version: 'v1.0.0', posture_type: 'endpoint' },
   rule_number: '2.1.1',
   section: '2 Storage',
   level: 1,
@@ -65,6 +58,8 @@ describe('generateDetectionRuleTemplate', () => {
 
     expect(template.threat).toHaveLength(1);
     expect(template.threat[0].technique[0].id).toBe('T1486');
+    expect(template.threat[0].tactic.id).toBe('TA0040');
+    expect(template.threat[0].tactic.reference).toContain('TA0040');
   });
 
   it('maps firewall resource type to MITRE T1562.004', () => {
