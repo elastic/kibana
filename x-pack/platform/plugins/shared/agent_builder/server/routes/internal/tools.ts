@@ -13,7 +13,7 @@ import {
   type ActionTypeExecutorResult,
   AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
+import { ToolType, isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -574,8 +574,7 @@ export function registerInternalToolsRoutes({
       const registry = await toolService.getRegistry({ request });
       const healthClient = toolService.getHealthClient({ request });
 
-      const allTools = await registry.list({});
-      const mcpTools: McpToolDefinition[] = allTools.filter((tool) => isMcpTool(tool));
+      const mcpTools = (await registry.list({ type: [ToolType.mcp] })) as McpToolDefinition[];
 
       if (mcpTools.length === 0) {
         return response.ok<ListMcpToolsHealthResponse>({

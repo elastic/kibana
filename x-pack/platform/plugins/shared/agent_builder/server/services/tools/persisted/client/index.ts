@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { createClient, type ToolClient } from './client';
+export { createClient, type ToolClient, type ToolClientListFilters } from './client';
 export type { ToolPersistedDefinition } from './types';
