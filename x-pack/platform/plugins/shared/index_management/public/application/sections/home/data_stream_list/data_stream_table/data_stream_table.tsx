@@ -46,7 +46,7 @@ import { EditDataRetentionModal } from '../edit_data_retention_modal';
 import { DataRetentionValue } from '../data_retention_value';
 
 interface TableDataStream extends DataStream {
-  isDataStreamFullyManagedByILM: boolean;
+  isNextGenIlm: boolean;
 }
 
 interface Props {
@@ -94,8 +94,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   const data = useMemo(() => {
     return (dataStreams || []).map((dataStream) => ({
       ...dataStream,
-      // todo
-      isDataStreamFullyManagedByILM: isNextGenIlm(dataStream),
+      isNextGenIlm: isNextGenIlm(dataStream),
     }));
   }, [dataStreams]);
 
@@ -241,44 +240,40 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
     truncateText: true,
     sortable: true,
-    render: (lifecycle: DataStream['lifecycle'], dataStream) => {
-      const nextGenIlm = isNextGenIlm(dataStream);
+    render: (lifecycle: DataStream['lifecycle'], dataStream) => (
+      <ConditionalWrap
+        condition={dataStream.isNextGenIlm}
+        wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
+      >
+        <>
+          <DataRetentionValue dataStream={dataStream} infiniteAsIcon={INFINITE_AS_ICON} />
 
-      return (
-        <ConditionalWrap
-          condition={dataStream.isDataStreamFullyManagedByILM && !nextGenIlm}
-          wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
-        >
-          <>
-            <DataRetentionValue dataStream={dataStream} infiniteAsIcon={INFINITE_AS_ICON} />
-
-            {!nextGenIlm &&
-              dataStream.lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
-                <>
-                  {' '}
-                  <EuiIconTip
-                    content={i18n.translate(
-                      'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
-                      {
-                        defaultMessage:
-                          'This data stream is using the maximum allowed data retention: [{effectiveRetention}].',
-                        values: {
-                          effectiveRetention: dataStream.lifecycle?.effective_retention,
-                        },
-                      }
-                    )}
-                    position="top"
-                    type="info"
-                    size="s"
-                    color="subdued"
-                    iconProps={{ 'data-test-subj': 'usingMaxRetention' }}
-                  />
-                </>
-              )}
-          </>
-        </ConditionalWrap>
-      );
-    },
+          {!dataStream.isNextGenIlm &&
+            dataStream.lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
+              <>
+                {' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
+                    {
+                      defaultMessage:
+                        'This data stream is using the maximum allowed data retention: [{effectiveRetention}].',
+                      values: {
+                        effectiveRetention: dataStream.lifecycle?.effective_retention,
+                      },
+                    }
+                  )}
+                  position="top"
+                  type="info"
+                  size="s"
+                  color="subdued"
+                  iconProps={{ 'data-test-subj': 'usingMaxRetention' }}
+                />
+              </>
+            )}
+        </>
+      </ConditionalWrap>
+    ),
   });
 
   columns.push({
