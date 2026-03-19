@@ -383,6 +383,39 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('listTools action', () => {
+    it('returns the list of available tools', async () => {
+      const result = await GithubConnector.actions.listTools.handler(mockContext, {});
+
+      expect(mockListTools).toHaveBeenCalled();
+      expect(result).toEqual([{ name: 'get_me' }, { name: 'search_code' }]);
+    });
+  });
+
+  describe('callTool action', () => {
+    it('calls the named tool with provided arguments', async () => {
+      const result = await GithubConnector.actions.callTool.handler(mockContext, {
+        name: 'search_code',
+        arguments: { query: 'elastic', page: 1, perPage: 5 },
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'search_code',
+        arguments: { query: 'elastic', page: 1, perPage: 5 },
+      });
+      expect(result).toEqual(mockContent);
+    });
+
+    it('calls the named tool with no arguments when omitted', async () => {
+      await GithubConnector.actions.callTool.handler(mockContext, { name: 'get_me' });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_me',
+        arguments: undefined,
+      });
+    });
+  });
+
   describe('test handler', () => {
     it('returns ok with tool count on successful connection', async () => {
       if (!GithubConnector.test) {

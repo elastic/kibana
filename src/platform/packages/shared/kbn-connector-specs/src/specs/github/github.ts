@@ -40,6 +40,7 @@ import {
   GetFileContentsInputSchema,
   GetIssueInputSchema,
   GetIssueCommentsInputSchema,
+  CallToolInputSchema,
 } from './types';
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
@@ -436,6 +437,39 @@ export const GithubConnector: ConnectorSpec = {
           const result = await mcp.callTool({
             name: 'get_issue_comments',
             arguments: { owner: input.owner, repo: input.repo, issueNumber: input.issueNumber },
+          });
+          return result.content;
+        });
+      },
+    },
+
+    listTools: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.listTools.description', {
+        defaultMessage:
+          'List all tools available on the GitHub MCP server. Use this to discover available capabilities or refresh tool context for the LLM.',
+      }),
+      input: z.object({}),
+      handler: async (ctx) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const { tools } = await mcp.listTools();
+          return tools;
+        });
+      },
+    },
+
+    callTool: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.callTool.description', {
+        defaultMessage:
+          'Call any tool on the GitHub MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
+      }),
+      input: CallToolInputSchema,
+      handler: async (ctx, input) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const result = await mcp.callTool({
+            name: input.name,
+            arguments: input.arguments,
           });
           return result.content;
         });

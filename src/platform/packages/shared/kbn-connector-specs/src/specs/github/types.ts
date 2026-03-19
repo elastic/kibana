@@ -168,3 +168,12 @@ export const GetIssueCommentsInputSchema = z.object({
   issueNumber: z.number().describe('Issue number'),
 });
 export type GetIssueCommentsInput = z.infer<typeof GetIssueCommentsInputSchema>;
+
+export const CallToolInputSchema = z.object({
+  name: z.string().min(1).describe('Name of the MCP tool to call'),
+  arguments: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe('Arguments to pass to the tool (tool-specific)'),
+});
+export type CallToolInput = z.infer<typeof CallToolInputSchema>;
