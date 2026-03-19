@@ -99,3 +99,27 @@ export const bulkGetAlertActionsBodySchema = z
   .describe('Request body for bulk getting alert actions by episode IDs.');
 
 export type BulkGetAlertActionsBody = z.infer<typeof bulkGetAlertActionsBodySchema>;
+
+export const bulkGetAlertActionsResponseSchema = z
+  .array(
+    z.object({
+      episode_id: z.string().describe('The episode identifier.'),
+      rule_id: z.string().nullable().describe('The rule identifier, or null if not found.'),
+      group_hash: z.string().nullable().describe('The alert group hash, or null if not found.'),
+      last_ack_action: z
+        .string()
+        .nullable()
+        .describe('The last acknowledge action, or null if none.'),
+      last_deactivate_action: z
+        .string()
+        .nullable()
+        .describe('The last deactivate action, or null if none.'),
+      last_snooze_action: z
+        .string()
+        .nullable()
+        .describe('The last snooze action, or null if none.'),
+    })
+  )
+  .describe('Response body for bulk getting alert actions by episode IDs.');
+
+export type BulkGetAlertActionsResponse = z.infer<typeof bulkGetAlertActionsResponseSchema>;

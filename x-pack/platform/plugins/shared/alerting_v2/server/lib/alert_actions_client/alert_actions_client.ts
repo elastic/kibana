@@ -11,6 +11,7 @@ import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
 import type {
   BulkCreateAlertActionItemBody,
+  BulkGetAlertActionsResponse,
   CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
@@ -56,9 +57,9 @@ export class AlertActionsClient {
     });
   }
 
-  public async bulkGet(episodeIds: string[]): Promise<BulkGetAlertActionsRecord[]> {
+  public async bulkGet(episodeIds: string[]): Promise<BulkGetAlertActionsResponse> {
     const query = getBulkGetAlertActionsQuery(episodeIds);
-    const records = queryResponseToRecords<BulkGetAlertActionsRecord>(
+    const records = queryResponseToRecords<BulkGetAlertActionsResponse[number]>(
       await this.queryService.executeQuery({ query: query.query })
     );
 
@@ -202,13 +203,4 @@ interface AlertEventRecord {
   group_hash: string;
   episode_id: string;
   rule_id: string;
-}
-
-export interface BulkGetAlertActionsRecord {
-  episode_id: string;
-  rule_id: string | null;
-  group_hash: string | null;
-  last_ack_action: string | null;
-  last_deactivate_action: string | null;
-  last_snooze_action: string | null;
 }
