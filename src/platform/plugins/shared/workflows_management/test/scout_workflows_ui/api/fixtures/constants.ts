@@ -14,7 +14,8 @@ export const COMMON_HEADERS = {
 export const SIMPLE_WORKFLOW_YAML = `name: ImportTest Workflow
 description: A simple test workflow for import
 enabled: false
-triggers: []
+triggers:
+  type: manual
 steps:
   - type: core:transform
     id: step1
