@@ -18,6 +18,7 @@ export interface OsqueryApiService {
     delete: (id: string) => Promise<void>;
   };
   savedQueries: {
+    create: (body: Record<string, unknown>) => Promise<any>;
     delete: (id: string) => Promise<void>;
   };
 }
@@ -61,6 +62,19 @@ export const getOsqueryApiService = ({
     },
 
     savedQueries: {
+      create: async (body: Record<string, unknown>) =>
+        await measurePerformanceAsync(
+          log,
+          'osquery.savedQueries.create',
+          async () =>
+            await kbnClient.request({
+              method: 'POST',
+              path: OSQUERY_SAVED_QUERIES_URL,
+              headers,
+              body,
+            })
+        ),
+
       delete: async (id: string) => {
         await measurePerformanceAsync(log, `osquery.savedQueries.delete [${id}]`, async () => {
           await kbnClient.request({
