@@ -22,7 +22,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-common';
+import type { TypedLensSerializedState, LensDatasourceId } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -83,7 +84,7 @@ export function LensEditConfigurationFlyout({
   const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   // Derive datasourceId from attributes - this updates when converting between formBased and textBased
-  const datasourceId = getActiveDatasourceIdFromDoc(attributes) as SupportedDatasourceId;
+  const datasourceId = getActiveDatasourceIdFromDoc(attributes) as LensDatasourceId;
 
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
@@ -121,7 +122,7 @@ export function LensEditConfigurationFlyout({
     let previousPersistable: typeof currentPersistable = null;
     if (previousDsState) {
       previousPersistable =
-        datasourceId === 'textBased'
+        datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
           ? datasource.getPersistableState(previousDsState)
           : {
               state: previousDsState,
@@ -176,9 +177,7 @@ export function LensEditConfigurationFlyout({
     if (attributesChanged) {
       // Use the datasourceId from the previous attributes, not the current one
       // This is important when canceling after a datasource conversion (e.g., formBased -> textBased)
-      const previousDatasourceId = getActiveDatasourceIdFromDoc(
-        previousAttrs
-      ) as SupportedDatasourceId;
+      const previousDatasourceId = getActiveDatasourceIdFromDoc(previousAttrs) as LensDatasourceId;
       if (previousAttrs.visualizationType === visualization.activeId) {
         const currentDatasourceState = datasourceMap[previousDatasourceId].injectReferencesToLayers
           ? datasourceMap[previousDatasourceId]?.injectReferencesToLayers?.(
@@ -406,7 +405,7 @@ export function LensEditConfigurationFlyout({
     if (!esqlConvertAttributes) return;
 
     // Update local attributes state - this triggers re-render of get_edit_lens_configuration
-    // which will derive the new datasourceId ('textBased') from the updated attributes
+    // which will derive the new datasourceId (LENS_DATASOURCE_ID.TEXT_BASED) from the updated attributes
     // and recreate the Redux store with the correct datasource
     setCurrentAttributes?.(esqlConvertAttributes);
 
