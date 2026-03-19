@@ -70,8 +70,7 @@ function generateTypeCast(varName: string, type: JsonExtractType): string {
       return `(${varName} instanceof Boolean ? (Boolean)${varName} : Boolean.parseBoolean(${varName}.toString()))`;
     case 'keyword':
     default:
-      // For Maps/Lists, produce a proper JSON string via Processors.json(); for scalars, use toString().
-      return `(${varName} instanceof Map || ${varName} instanceof List ? Processors.json(${varName}) : ${varName}.toString())`;
+      return `${varName}.toString()`;
   }
 }
 
@@ -110,9 +109,14 @@ function generateJsonExtractScript(
     const targetType = extraction.type ?? 'keyword';
 
     lines.push(`def ${varName} = ${traversalExpr};`);
-
+    lines.push(`if (${varName} != null) {`);
+    lines.push(`  if (${varName} instanceof Map || ${varName} instanceof List) {`);
+    lines.push(`    ${targetAssignment} = ${varName};`);
+    lines.push(`  } else {`);
     const typeCastExpr = generateTypeCast(varName, targetType);
-    lines.push(`if (${varName} != null) { ${targetAssignment} = ${typeCastExpr}; }`);
+    lines.push(`    ${targetAssignment} = ${typeCastExpr};`);
+    lines.push(`  }`);
+    lines.push(`}`);
   }
 
   return lines.join('\n');

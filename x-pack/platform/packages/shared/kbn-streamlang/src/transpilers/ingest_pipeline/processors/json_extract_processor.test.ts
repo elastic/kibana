@@ -102,15 +102,27 @@ describe('processJsonExtractProcessor', () => {
   });
 
   describe('type casting', () => {
-    it('should use toString with Processors.json fallback for keyword type', () => {
+    it('should use toString for keyword type with complex-type pass-through', () => {
       const result = processJsonExtractProcessor({
         field: 'message',
         extractions: [{ selector: 'name', target_field: 'out', type: 'keyword' }],
       }) as ScriptProcessorResult;
       const { source } = result.script;
+      // Complex types (Map/List) are passed through at the assignment level
       expect(source).toContain('instanceof Map || extracted_0 instanceof List');
-      expect(source).toContain('Processors.json(extracted_0)');
       expect(source).toContain('extracted_0.toString()');
+      expect(source).not.toContain('Processors.json(extracted_0)');
+    });
+
+    it('should pass through complex types even when a non-keyword type is requested', () => {
+      const result = processJsonExtractProcessor({
+        field: 'message',
+        extractions: [{ selector: 'data', target_field: 'out', type: 'integer' }],
+      }) as ScriptProcessorResult;
+      const { source } = result.script;
+      // Complex types are passed through before type casting is applied
+      expect(source).toContain('if (extracted_0 instanceof Map || extracted_0 instanceof List)');
+      expect(source).toContain("ctx['out'] = extracted_0;");
     });
 
     it('should use intValue for integer type', () => {

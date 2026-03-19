@@ -144,13 +144,17 @@ apiTest.describe(
         expect(ingestResult).toHaveLength(2);
         expect(esqlResult.documents).toHaveLength(2);
 
-        const ingestDoc1 = ingestResult.find((d: any) => d.should_extract === 'yes');
-        const ingestDoc2 = ingestResult.find((d: any) => d.should_extract === 'no');
+        const ingestDoc1 = ingestResult.find(
+          (d: Record<string, unknown>) => d.should_extract === 'yes'
+        );
+        const ingestDoc2 = ingestResult.find(
+          (d: Record<string, unknown>) => d.should_extract === 'no'
+        );
         const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
-          (d: any) => d.should_extract === 'yes'
+          (d: Record<string, unknown>) => d.should_extract === 'yes'
         );
         const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
-          (d: any) => d.should_extract === 'no'
+          (d: Record<string, unknown>) => d.should_extract === 'no'
         );
 
         expect(ingestDoc1).toStrictEqual(esqlDoc1);
@@ -498,9 +502,13 @@ apiTest.describe(
         expect(ingestResult).toHaveLength(3);
         expect(esqlResult.documentsWithoutKeywords).toHaveLength(3);
 
-        const ingestSorted = [...ingestResult].sort((a: any, b: any) => a.order - b.order);
+        const ingestSorted = [...ingestResult].sort(
+          (a: Record<string, unknown>, b: Record<string, unknown>) =>
+            (a.order as number) - (b.order as number)
+        );
         const esqlSorted = [...esqlResult.documentsWithoutKeywords].sort(
-          (a: any, b: any) => a.order - b.order
+          (a: Record<string, unknown>, b: Record<string, unknown>) =>
+            (a.order as number) - (b.order as number)
         );
 
         expect(ingestSorted).toStrictEqual(esqlSorted);
@@ -565,7 +573,7 @@ apiTest.describe(
 
         // Filter out the mapping document from ES|QL results
         const esqlDocsWithoutMapping = esqlResult.documentsWithoutKeywords.filter(
-          (d: any) => d.other_field
+          (d: Record<string, unknown>) => d.other_field
         );
 
         // Behavioral difference: Ingest Pipeline doesn't add fields that don't exist,
@@ -754,13 +762,19 @@ apiTest.describe(
 
         expect(ingestResult).toHaveLength(3);
 
-        const ingestDoc1 = ingestResult.find((d: any) => d.order === 1);
-        const ingestDoc2 = ingestResult.find((d: any) => d.order === 2);
-        const ingestDoc3 = ingestResult.find((d: any) => d.order === 3);
+        const ingestDoc1 = ingestResult.find((d: Record<string, unknown>) => d.order === 1);
+        const ingestDoc2 = ingestResult.find((d: Record<string, unknown>) => d.order === 2);
+        const ingestDoc3 = ingestResult.find((d: Record<string, unknown>) => d.order === 3);
 
-        const esqlDoc1 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 1);
-        const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 2);
-        const esqlDoc3 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 3);
+        const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
+          (d: Record<string, unknown>) => d.order === 1
+        );
+        const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
+          (d: Record<string, unknown>) => d.order === 2
+        );
+        const esqlDoc3 = esqlResult.documentsWithoutKeywords.find(
+          (d: Record<string, unknown>) => d.order === 3
+        );
 
         expect(ingestDoc1!.extracted_data).toBe('processed');
         expect(esqlDoc1!.extracted_data).toBe('processed');
@@ -809,11 +823,15 @@ apiTest.describe(
         await testBed.ingest('esql-json-extract-cond-multi-type', docs);
         const esqlResult = await esql.queryOnIndex('esql-json-extract-cond-multi-type', query);
 
-        const ingestDoc1 = ingestResult.find((d: any) => d.order === 1);
-        const ingestDoc2 = ingestResult.find((d: any) => d.order === 2);
+        const ingestDoc1 = ingestResult.find((d: Record<string, unknown>) => d.order === 1);
+        const ingestDoc2 = ingestResult.find((d: Record<string, unknown>) => d.order === 2);
 
-        const esqlDoc1 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 1);
-        const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 2);
+        const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
+          (d: Record<string, unknown>) => d.order === 1
+        );
+        const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
+          (d: Record<string, unknown>) => d.order === 2
+        );
 
         expect(ingestDoc1!.user_name).toBe('Alice');
         expect(ingestDoc1!.user_age).toBe(30);
@@ -866,11 +884,15 @@ apiTest.describe(
         await testBed.ingest('esql-json-extract-cond-overwrite', docs);
         const esqlResult = await esql.queryOnIndex('esql-json-extract-cond-overwrite', query);
 
-        const ingestDoc1 = ingestResult.find((d: any) => d.order === 1);
-        const ingestDoc2 = ingestResult.find((d: any) => d.order === 2);
+        const ingestDoc1 = ingestResult.find((d: Record<string, unknown>) => d.order === 1);
+        const ingestDoc2 = ingestResult.find((d: Record<string, unknown>) => d.order === 2);
 
-        const esqlDoc1 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 1);
-        const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 2);
+        const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
+          (d: Record<string, unknown>) => d.order === 1
+        );
+        const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
+          (d: Record<string, unknown>) => d.order === 2
+        );
 
         expect(ingestDoc1!.message).toBe('short_value');
         expect(esqlDoc1!.message).toBe('short_value');
@@ -881,6 +903,64 @@ apiTest.describe(
     );
 
     // *** Complex JSON Extraction Tests ***
+    // *** Complex Type Extraction Tests (arrays/objects pass-through) ***
+
+    apiTest('should extract an array value from JSON', async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'message',
+            extractions: [{ selector: '$.user.roles', target_field: 'roles' }],
+          } as JsonExtractProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [{ message: '{"user":{"roles":["admin","viewer"]}}' }];
+      await testBed.ingest('ingest-json-extract-array-val', docs, processors);
+      const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-array-val');
+
+      await testBed.ingest('esql-json-extract-array-val', docs);
+      const esqlResult = await esql.queryOnIndex('esql-json-extract-array-val', query);
+
+      // NOTE: BEHAVIORAL DIFFERENCE - Complex type extraction
+      // Ingest Pipeline: passes through the array as-is (stored as native array)
+      // ES|QL: returns a JSON string representation of the array
+      expect(ingestResult[0].roles).toStrictEqual(['admin', 'viewer']);
+      expect(esqlResult.documentsWithoutKeywords[0].roles).toBe('["admin","viewer"]');
+    });
+
+    apiTest('should extract a nested object value from JSON', async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'message',
+            extractions: [{ selector: '$.a.b', target_field: 'nested' }],
+          } as JsonExtractProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [{ message: '{"a":{"b":{"c":"deep"}}}' }];
+      await testBed.ingest('ingest-json-extract-obj-val', docs, processors);
+      const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-obj-val');
+
+      await testBed.ingest('esql-json-extract-obj-val', docs);
+      const esqlResult = await esql.queryOnIndex('esql-json-extract-obj-val', query);
+
+      // NOTE: BEHAVIORAL DIFFERENCE - Complex type extraction
+      // Ingest Pipeline: passes through the object as-is (stored as nested object)
+      // ES|QL: returns a JSON string representation of the object
+      expect(ingestResult[0]['nested.c']).toBe('deep');
+      expect(esqlResult.documentsWithoutKeywords[0].nested).toBe('{"c":"deep"}');
+    });
+
     apiTest(
       'should handle complex JSON with mixed types and array access',
       async ({ testBed, esql }) => {
