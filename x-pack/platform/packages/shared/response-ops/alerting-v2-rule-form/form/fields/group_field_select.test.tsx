@@ -8,26 +8,15 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 import { GroupFieldSelect } from './group_field_select';
 import { useQueryColumns } from '../hooks/use_query_columns';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../hooks/use_query_columns');
 
 const mockUseQueryColumns = jest.mocked(useQueryColumns);
 
-const mockServices = {
-  http: httpServiceMock.createStartContract(),
-  data: dataPluginMock.createStartContract(),
-  dataViews: dataViewPluginMocks.createStartContract(),
-  notifications: notificationServiceMock.createStartContract(),
-  application: applicationServiceMock.createStartContract(),
-};
+const mockServices = createMockServices();
 
 describe('GroupFieldSelect', () => {
   beforeEach(() => {

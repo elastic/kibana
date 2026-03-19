@@ -9,12 +9,8 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { getESQLResults } from '@kbn/esql-utils';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { RuleFormProvider, type RuleFormServices } from '../contexts';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { createMockServices } from '../../test_utils';
 import { usePreview, type UsePreviewParams } from './use_preview';
 
 jest.mock('@kbn/esql-utils');
@@ -40,13 +36,7 @@ const mockESQLResponse = {
   },
 };
 
-const createServices = (): RuleFormServices => ({
-  http: httpServiceMock.createStartContract(),
-  data: dataPluginMock.createStartContract(),
-  dataViews: dataViewPluginMocks.createStartContract(),
-  notifications: notificationServiceMock.createStartContract(),
-  application: applicationServiceMock.createStartContract(),
-});
+const createServices = (): RuleFormServices => createMockServices();
 
 const createWrapper = (services: RuleFormServices = createServices()) => {
   const queryClient = new QueryClient({
