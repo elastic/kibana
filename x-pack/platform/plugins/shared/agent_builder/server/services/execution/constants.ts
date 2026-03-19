@@ -24,7 +24,7 @@ export const FOLLOW_TERMINAL_READ_MAX_RETRIES = 2;
 export const FOLLOW_TERMINAL_READ_RETRY_DELAY_MS = 500;
 
 /** Safety timeout (ms) for followExecution polling. Prevents infinite polling if the execution never reaches a terminal status. */
-export const FOLLOW_EXECUTION_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
+export const FOLLOW_EXECUTION_TIMEOUT_MS = 25 * 60 * 1000; // 25 minutes (must exceed idle timeout)
 
 /** Idle timeout (ms) for followExecution polling. If no new events are received and the execution status hasn't changed for this duration, polling is aborted. */
-export const FOLLOW_EXECUTION_IDLE_TIMEOUT_MS = 120 * 1000; // 2 minutes
+export const FOLLOW_EXECUTION_IDLE_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes (long-running tools e.g. malware analysis)
