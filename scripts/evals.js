@@ -349,6 +349,7 @@ function runFastHelp() {
   logInfo('  scout                         Start Scout server for evals');
   logInfo('  run [--suite <id>] [...]      Run an eval suite');
   logInfo('  list [--refresh] [--json]     List eval suites');
+  logInfo('  labels [suite-id ...]         Create/sync GitHub eval suite labels');
   logInfo('  compare <run-a> <run-b>       Compare two eval runs');
   logInfo('  doctor                        Check local prerequisites');
   logInfo('  env                           List environment variables');

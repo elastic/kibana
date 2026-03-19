@@ -78,6 +78,19 @@ export const loadAttackDiscoveryBundledAlertsJsonlDataset = async ({
   const limitedLines = max != null ? offsetLines.slice(0, max) : offsetLines;
   const examples = limitedLines.map((line, i) => parseJsonlLine(line, startAt + i + 1));
 
+  const hasAnyContent = examples.some((ex) => {
+    const alertCount = ex.input.anonymizedAlerts.length;
+    const discoveryCount = ex.output.attackDiscoveries.length;
+    return alertCount > 0 || discoveryCount > 0;
+  });
+
+  if (!hasAnyContent) {
+    throw new Error(
+      `Parsed ${examples.length} example(s) from ${jsonlPath}, but they are all empty. ` +
+        'This usually means you are pointing at a placeholder dataset (e.g. `{}`) or the JSONL format is not what the parser expects.'
+    );
+  }
+
   return {
     name,
     description,

@@ -14,7 +14,7 @@ import {
   restoreAlertsSnapshot,
 } from '../../src/data_generators/restore_alerts_snapshot';
 
-const DEFAULT_DATASET_NAME = 'attack_discovery: bundled alerts (jsonl)';
+const DEFAULT_DATASET_NAME = 'Attack Discovery All Scenarios';
 const DEFAULT_DATASET_DESCRIPTION =
   'Attack Discovery evaluation dataset (all scenarios). Resolved from golden cluster.';
 

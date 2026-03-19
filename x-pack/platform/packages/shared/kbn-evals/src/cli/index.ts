@@ -13,6 +13,7 @@ import { envCmd } from './commands/env';
 import { ciMapCmd } from './commands/ci_map';
 import { compareCmd } from './commands/compare';
 import { initCmd } from './commands/init';
+import { labelsCmd } from './commands/labels';
 import { startCmd } from './commands/start';
 import { stopCmd } from './commands/stop';
 import { logsCmd } from './commands/logs';
@@ -31,6 +32,7 @@ export async function run() {
       scoutCmd,
       runSuiteCmd,
       listSuitesCmd,
+      labelsCmd,
       doctorCmd,
       envCmd,
       ciMapCmd,

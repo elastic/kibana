@@ -24,7 +24,7 @@ const Path = require('path');
 const Https = require('https');
 const Http = require('http');
 
-const DATASET_NAME = 'attack_discovery: bundled alerts (jsonl)';
+const DATASET_NAME = 'Attack Discovery All Scenarios';
 const DATASET_DESCRIPTION =
   'Attack Discovery evaluation dataset (all scenarios). Uploaded via upload_dataset.js.';
 
@@ -73,6 +73,23 @@ async function main() {
   console.log(`Parsed ${lines.length} examples from ${jsonlPath}`);
 
   const examples = lines.map((line, i) => parseJsonlLine(line, i + 1));
+
+  const hasAnyContent = examples.some((ex) => {
+    const alertCount = Array.isArray(ex?.input?.anonymizedAlerts)
+      ? ex.input.anonymizedAlerts.length
+      : 0;
+    const discoveryCount = Array.isArray(ex?.output?.attackDiscoveries)
+      ? ex.output.attackDiscoveries.length
+      : 0;
+    return alertCount > 0 || discoveryCount > 0;
+  });
+
+  if (!hasAnyContent) {
+    throw new Error(
+      `Parsed ${examples.length} example(s) from ${jsonlPath}, but they are all empty. ` +
+        'This usually means you are uploading a placeholder dataset (e.g. `{}`) or the JSONL format is not what the parser expects.'
+    );
+  }
 
   const body = JSON.stringify({
     name: DATASET_NAME,
