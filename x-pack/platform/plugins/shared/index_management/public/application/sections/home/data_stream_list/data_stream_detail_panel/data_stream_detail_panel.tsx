@@ -47,11 +47,7 @@ import { EditDataRetentionModal } from '../edit_data_retention_modal';
 import { ConfigureFailureStoreModal } from '../configure_failure_store_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
-import {
-  isDataStreamFullyManagedByILM,
-  isDataStreamFullyManagedByDSL,
-  isIlmPreferred,
-} from '../../../../lib/data_streams';
+import { isNextGenIlm, isNextGenDlm } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { useIlmLocator } from '../../../../services/use_ilm_locator';
@@ -191,7 +187,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
             defaultMessage: `The index lifecycle policy that manages the data in the data stream. `,
           }),
-          content: isDataStreamFullyManagedByDSL(dataStream) ? (
+          content: isNextGenDlm(dataStream) ? (
             <EuiToolTip
               position="top"
               content={i18n.translate(
@@ -398,8 +394,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }),
         content: (
           <ConditionalWrap
-            /** I suspect this is duplicate / conflicting */
-            condition={isDataStreamFullyManagedByILM(dataStream) && !isIlmPreferred(dataStream)}
+            condition={isNextGenIlm(dataStream)}
             wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
           >
             <>
@@ -446,7 +441,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         ),
         content: (
           <ConditionalWrap
-            condition={isDataStreamFullyManagedByILM(dataStream)}
+            condition={isNextGenIlm(dataStream)}
             wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
           >
             <>{getLifecycleValue(omit(lifecycle, ['effective_retention']))}</>
@@ -513,7 +508,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
     content = (
       <>
-        {isDataStreamFullyManagedByILM(dataStream) && (
+        {isNextGenIlm(dataStream) && (
           <>
             <EuiCallOut
               announceOnMount
@@ -578,8 +573,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         defaultMessage: 'Data stream options',
       }),
       items: [
-        ...(!isDataStreamFullyManagedByILM(dataStream) &&
-        dataStream?.privileges?.manage_data_stream_lifecycle
+        ...(!isNextGenIlm(dataStream) && dataStream?.privileges?.manage_data_stream_lifecycle
           ? [
               {
                 key: 'editDataRetention',

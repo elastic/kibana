@@ -86,29 +86,12 @@ export const getLifecycleValue = (
  * In that case, the effective retention is governed by the ILM policy.
  */
 // this was making sure ilm set and all indices are managed by ilm
-export const isIlmPreferred = (dataStream?: DataStream | null): boolean => {
-  return Boolean(
-    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management'
-  );
+export const isNextGenIlm = (dataStream?: DataStream | null): boolean => {
+  return dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management';
 };
 
-// are future and existing indices managed by ilm
-export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {
-  return (
-    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management' &&
-    dataStream?.indices?.every(
-      (index) => index.managedBy?.toLowerCase() === 'index lifecycle management'
-    )
-  );
-};
-
-export const isDataStreamFullyManagedByDSL = (dataStream?: DataStream | null) => {
-  return (
-    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle' &&
-    dataStream?.indices?.every(
-      (index) => index.managedBy?.toLowerCase() === 'data stream lifecycle'
-    )
-  );
+export const isNextGenDlm = (dataStream?: DataStream | null): boolean => {
+  return dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle';
 };
 
 export const isDSLWithILMIndices = (dataStream?: DataStream | null) => {

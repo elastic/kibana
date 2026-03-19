@@ -28,7 +28,7 @@ import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/compone
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 import type { DataStream } from '../../../../../../common/types';
-import { isDataStreamFullyManagedByILM, isIlmPreferred } from '../../../../lib/data_streams';
+import { isNextGenIlm } from '../../../../lib/data_streams';
 import type { UseRequestResponse } from '../../../../../shared_imports';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
@@ -94,7 +94,8 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   const data = useMemo(() => {
     return (dataStreams || []).map((dataStream) => ({
       ...dataStream,
-      isDataStreamFullyManagedByILM: isDataStreamFullyManagedByILM(dataStream),
+      // todo
+      isDataStreamFullyManagedByILM: isNextGenIlm(dataStream),
     }));
   }, [dataStreams]);
 
@@ -241,17 +242,17 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     truncateText: true,
     sortable: true,
     render: (lifecycle: DataStream['lifecycle'], dataStream) => {
-      const ilmPreferred = isIlmPreferred(dataStream);
+      const nextGenIlm = isNextGenIlm(dataStream);
 
       return (
         <ConditionalWrap
-          condition={dataStream.isDataStreamFullyManagedByILM && !ilmPreferred}
+          condition={dataStream.isDataStreamFullyManagedByILM && !nextGenIlm}
           wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
         >
           <>
             <DataRetentionValue dataStream={dataStream} infiniteAsIcon={INFINITE_AS_ICON} />
 
-            {!ilmPreferred &&
+            {!nextGenIlm &&
               dataStream.lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
                 <>
                   {' '}
@@ -314,8 +315,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   if (
     selection.every(
       (dataStream: DataStream) =>
-        dataStream.privileges.manage_data_stream_lifecycle &&
-        !isDataStreamFullyManagedByILM(dataStream)
+        dataStream.privileges.manage_data_stream_lifecycle && !isNextGenIlm(dataStream)
     )
   ) {
     dataStreamActions.push({

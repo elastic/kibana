@@ -13,7 +13,7 @@ import type { DataStream } from '../../../../../common/types';
 import { ILM_PAGES_POLICY_EDIT } from '../../../constants';
 import { useAppContext } from '../../../app_context';
 import { useIlmLocator } from '../../../services/use_ilm_locator';
-import { getLifecycleValue, isIlmPreferred } from '../../../lib/data_streams';
+import { getLifecycleValue, isNextGenIlm } from '../../../lib/data_streams';
 
 export const DataRetentionValue = ({
   dataStream,
@@ -25,12 +25,11 @@ export const DataRetentionValue = ({
   valueTestSubj?: string;
 }) => {
   const { core } = useAppContext();
-  const isIlmPreferredForDataStream = isIlmPreferred(dataStream);
 
   const ilmPolicyName = dataStream.ilmPolicyName;
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicyName);
 
-  if (isIlmPreferredForDataStream && ilmPolicyName) {
+  if (isNextGenIlm(dataStream) && ilmPolicyName) {
     const ilmLabel = i18n.translate('xpack.idxMgmt.dataStreamList.dataRetention.ilmBadgeLabel', {
       defaultMessage: 'ILM',
     });
@@ -70,4 +69,3 @@ export const DataRetentionValue = ({
 
   return <>{getLifecycleValue(dataStream.lifecycle, infiniteAsIcon)}</>;
 };
-
