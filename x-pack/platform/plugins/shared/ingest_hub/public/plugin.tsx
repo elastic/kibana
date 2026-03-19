@@ -7,22 +7,65 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { AppMountParameters, AppUpdater } from '@kbn/core/public';
-import { DEFAULT_APP_CATEGORIES, type CoreSetup, type Plugin } from '@kbn/core/public';
+import type { AppMountParameters, AppUpdater, CoreStart } from '@kbn/core/public';
+import {
+  DEFAULT_APP_CATEGORIES,
+  type CoreSetup,
+  type Plugin,
+  type PluginInitializerContext,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { from, map, switchMap } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { catchError, from, map, of, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { IngestHubSetup, IngestHubStart, IngestFlow } from './types';
+import type {
+  IngestHubSetup,
+  IngestHubStart,
+  IngestHubStartDependencies,
+  IngestFlow,
+} from './types';
 import { INGEST_HUB_ENABLED_FLAG } from '../common/constants';
 
 const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))
 );
 
-export class IngestHubPlugin implements Plugin<IngestHubSetup, IngestHubStart> {
+const createNavigationAvailable$ = (
+  coreStart: CoreStart,
+  deps: IngestHubStartDependencies,
+  isServerless: boolean
+): Observable<boolean> => {
+  const projectType = deps.cloud?.serverless.projectType;
+
+  return coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false).pipe(
+    switchMap((enabled) => {
+      if (!enabled) return of(false);
+
+      if (isServerless) {
+        return of(projectType === 'observability');
+      }
+
+      if (!deps.spaces?.getActiveSpace) return of(true);
+
+      return from(deps.spaces.getActiveSpace()).pipe(
+        map((space) => {
+          const solution = space?.solution;
+          return !solution || solution === 'classic' || solution === 'oblt';
+        }),
+        catchError(() => of(true))
+      );
+    })
+  );
+};
+
+export class IngestHubPlugin
+  implements Plugin<IngestHubSetup, IngestHubStart, object, IngestHubStartDependencies>
+{
   private readonly ingestFlows: IngestFlow[] = [];
 
-  setup(coreSetup: CoreSetup): IngestHubSetup {
+  constructor(private readonly context: PluginInitializerContext) {}
+
+  setup(coreSetup: CoreSetup<IngestHubStartDependencies>): IngestHubSetup {
     const startServicesPromise = coreSetup.getStartServices();
 
     coreSetup.application.register({
@@ -32,16 +75,15 @@ export class IngestHubPlugin implements Plugin<IngestHubSetup, IngestHubStart> {
       }),
       euiIconType: 'launch',
       appRoute: '/app/ingest-hub',
-      category: DEFAULT_APP_CATEGORIES.observability,
+      category: DEFAULT_APP_CATEGORIES.management,
       updater$: from(startServicesPromise).pipe(
         switchMap(([coreStart]) =>
           coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false).pipe(
-            map(
-              (enabled): AppUpdater =>
-                () => ({
-                  visibleIn: enabled ? ['sideNav', 'globalSearch'] : [],
-                })
-            )
+            map((enabled): AppUpdater => {
+              return () => ({
+                visibleIn: enabled ? ['sideNav', 'globalSearch'] : [],
+              });
+            })
           )
         )
       ),
@@ -66,11 +108,13 @@ export class IngestHubPlugin implements Plugin<IngestHubSetup, IngestHubStart> {
     return {};
   }
 
-  start(): IngestHubStart {
+  start(coreStart: CoreStart, deps: IngestHubStartDependencies): IngestHubStart {
+    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
     return {
       registerIngestFlow: (flow: IngestFlow) => {
         this.ingestFlows.push(flow);
       },
+      navigationAvailable$: createNavigationAvailable$(coreStart, deps, isServerless),
     };
   }
 }

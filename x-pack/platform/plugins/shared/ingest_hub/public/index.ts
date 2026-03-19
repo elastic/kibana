@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { PluginInitializer } from '@kbn/core/public';
+import type { PluginInitializerContext, PluginInitializer } from '@kbn/core/public';
 import { IngestHubPlugin } from './plugin';
-import type { IngestHubSetup, IngestHubStart } from './types';
+import type { IngestHubSetup, IngestHubStart, IngestHubStartDependencies } from './types';
 
 export type { IngestHubSetup, IngestHubStart, IngestFlow } from './types';
 
-export const plugin: PluginInitializer<IngestHubSetup, IngestHubStart> = () =>
-  new IngestHubPlugin();
+export const plugin: PluginInitializer<
+  IngestHubSetup,
+  IngestHubStart,
+  object,
+  IngestHubStartDependencies
+> = (context: PluginInitializerContext) => new IngestHubPlugin(context);

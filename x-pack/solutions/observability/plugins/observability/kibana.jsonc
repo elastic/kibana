@@ -56,7 +56,8 @@
       "spaces",
       "serverless",
       "observabilityAIAssistant",
-      "investigate"
+      "investigate",
+      "ingestHub"
     ],
     "requiredBundles": [
       "aiops",

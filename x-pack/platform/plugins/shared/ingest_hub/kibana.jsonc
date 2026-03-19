@@ -9,6 +9,7 @@
     "id": "ingestHub",
     "browser": true,
     "server": false,
-    "configPath": ["xpack", "ingestHub"]
+    "configPath": ["xpack", "ingestHub"],
+    "optionalPlugins": ["spaces", "cloud"]
   }
 }
