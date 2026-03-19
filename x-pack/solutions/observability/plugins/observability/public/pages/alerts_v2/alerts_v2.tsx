@@ -20,7 +20,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { SortOrder } from '@kbn/unified-data-table';
-import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
+import {
+  DataLoadingState,
+  UnifiedDataTable,
+  type UnifiedDataTableSettings,
+} from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
@@ -32,6 +36,14 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 const PAGE_SIZE = 50;
+
+/** Narrow columns so `rule.id` / time keep flexible width */
+const ALERTS_V2_TABLE_SETTINGS: UnifiedDataTableSettings = {
+  columns: {
+    duration: { width: 100 },
+    'episode.status': { width: 128 },
+  },
+};
 
 function EmptyToolbar() {
   return <></>;
@@ -46,8 +58,8 @@ export function AlertsV2Page() {
   const [columns, setColumns] = useState<string[]>([
     '@timestamp',
     'rule.id',
-    'duration',
     'episode.status',
+    'duration',
   ]);
   const [rowHeight, setRowHeight] = useState(2);
 
@@ -131,6 +143,7 @@ export function AlertsV2Page() {
             ) : (
               <UnifiedDataTable
                 ariaLabelledBy="alertingEpisodesTableAriaLabel"
+                settings={ALERTS_V2_TABLE_SETTINGS}
                 css={css`
                   height: 100%;
                   border-radius: ${euiTheme.border.radius.medium};

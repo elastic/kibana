@@ -420,12 +420,7 @@ export class Plugin
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
-              const isAlertingV2Enabled =
-                (
-                  coreStart.application.capabilities.alertingVTwo as
-                    | { enabled?: boolean }
-                    | undefined
-                )?.enabled ?? false;
+              const isAlertingV2Enabled = Boolean(coreStart.application.capabilities.alertingVTwo);
 
               const chatExperience$ =
                 coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
