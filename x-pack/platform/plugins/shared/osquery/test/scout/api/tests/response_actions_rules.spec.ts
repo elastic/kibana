@@ -11,19 +11,18 @@ import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
 apiTest.describe(
-  'Detection rules with osquery response actions',
+  'Detection rules with Osquery response actions',
   { tag: tags.deploymentAgnostic },
   () => {
     let credentials: RoleApiCredentials;
     let packSavedObjectId: string;
     const createdRuleIds: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
+    apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
       credentials = await requestAuth.getApiKeyForPrivilegedUser();
 
-      const packResponse = await apiClient.post(testData.API_PATHS.OSQUERY_PACKS, {
-        headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
-        body: testData.getMinimalPack({
+      const packResponse = await apiServices.osquery.packs.create(
+        testData.getMinimalPack({
           name: `ra-pack-${Date.now()}`,
           queries: {
             memoryInfo: {
@@ -36,30 +35,28 @@ apiTest.describe(
               interval: 3600,
             },
           },
-        }),
-        responseType: 'json',
-      });
-      expect(packResponse).toHaveStatusCode(200);
-      packSavedObjectId = packResponse.body.data.saved_object_id;
+        })
+      );
+      packSavedObjectId = (packResponse.data as Record<string, Record<string, string>>).data
+        .saved_object_id;
     });
 
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
       for (const ruleId of createdRuleIds) {
-        await apiClient.delete(`${testData.API_PATHS.DETECTION_RULES}?id=${ruleId}`, {
-          headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
-          responseType: 'json',
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `/api/detection_engine/rules?id=${ruleId}`,
+          headers: { 'elastic-api-version': testData.OSQUERY_API_VERSION },
+          ignoreErrors: [404],
         });
       }
 
       if (packSavedObjectId) {
-        await apiClient.delete(`${testData.API_PATHS.OSQUERY_PACKS}/${packSavedObjectId}`, {
-          headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
-          responseType: 'json',
-        });
+        await apiServices.osquery.packs.delete(packSavedObjectId);
       }
     });
 
-    apiTest('creates a rule with a single osquery query action', async ({ apiClient }) => {
+    apiTest('creates a rule with a single Osquery query action', async ({ apiClient }) => {
       const ruleBody = testData.getMinimalRule({
         response_actions: [
           {
@@ -96,7 +93,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'creates a rule with full osquery params including ecs_mapping and timeout',
+      'creates a rule with full Osquery params including ecs_mapping and timeout',
       async ({ apiClient }) => {
         const ruleBody = testData.getMinimalRule({
           response_actions: [
@@ -126,7 +123,7 @@ apiTest.describe(
       }
     );
 
-    apiTest('creates a rule with pack-based osquery action', async ({ apiClient }) => {
+    apiTest('creates a rule with pack-based Osquery action', async ({ apiClient }) => {
       const ruleBody = testData.getMinimalRule({
         response_actions: [
           {

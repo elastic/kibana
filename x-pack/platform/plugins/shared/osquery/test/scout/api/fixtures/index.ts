@@ -5,9 +5,40 @@
  * 2.0.
  */
 
-import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type { ApiServicesFixture, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { apiTest as baseApiTest } from '@kbn/scout';
+import {
+  getOsqueryApiService,
+  type OsqueryApiService,
+} from '../../common/services/osquery_api_service';
 
-export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
+export interface OsqueryApiServicesFixture extends ApiServicesFixture {
+  osquery: OsqueryApiService;
+}
+
+export const apiTest = baseApiTest.extend<
+  ScoutTestFixtures,
+  { apiServices: OsqueryApiServicesFixture }
+>({
+  apiServices: [
+    async (
+      {
+        apiServices,
+        kbnClient,
+        log,
+      }: {
+        apiServices: ApiServicesFixture;
+        kbnClient: ScoutWorkerFixtures['kbnClient'];
+        log: ScoutWorkerFixtures['log'];
+      },
+      use: (extendedApiServices: OsqueryApiServicesFixture) => Promise<void>
+    ) => {
+      const extendedApiServices = apiServices as OsqueryApiServicesFixture;
+      extendedApiServices.osquery = getOsqueryApiService({ kbnClient, log });
+      await use(extendedApiServices);
+    },
+    { scope: 'worker' },
+  ],
+});
 
 export * as testData from './constants';

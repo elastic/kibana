@@ -25,7 +25,7 @@ test.describe(
     let packName: string;
     let agentPolicyId: string;
 
-    test.beforeAll(async ({ kbnClient }) => {
+    test.beforeAll(async ({ kbnClient, apiServices }) => {
       // Install osquery_manager Fleet package so the UI form renders
       // (the form checks /internal/osquery/status for a package policy)
       await kbnClient.request({
@@ -43,49 +43,34 @@ test.describe(
       const osqueryVersion = (packageResponse.data as Record<string, Record<string, string>>).item
         .version;
 
-      const agentPolicyResponse = await kbnClient.request({
-        method: 'POST',
-        path: '/api/fleet/agent_policies',
-        body: {
-          name: `osquery-test-policy-${uniqueId()}`,
+      const policyName = `osquery-test-policy-${uniqueId()}`;
+      const agentPolicyResponse = await apiServices.fleet.agent_policies.create({
+        policyName,
+        policyNamespace: 'default',
+        params: {
           description: 'Agent policy for osquery UI test',
-          namespace: 'default',
           monitoring_enabled: ['logs', 'metrics'],
         },
-        headers: API_HEADERS,
       });
-      agentPolicyId = (agentPolicyResponse.data as Record<string, Record<string, string>>).item.id;
-      const agentPolicyName = (agentPolicyResponse.data as Record<string, Record<string, string>>)
-        .item.name;
+      agentPolicyId = agentPolicyResponse.data.item.id;
 
-      await kbnClient.request({
-        method: 'POST',
-        path: '/api/fleet/package_policies',
-        body: {
-          policy_id: agentPolicyId,
-          package: { name: 'osquery_manager', version: osqueryVersion },
-          name: `Policy for ${agentPolicyName}`,
-          description: '',
-          namespace: 'default',
-          inputs: { 'osquery_manager-osquery': { enabled: true, streams: {} } },
-        },
-        headers: API_HEADERS,
+      await apiServices.fleet.package_policies.create({
+        policy_ids: [agentPolicyId],
+        package: { name: 'osquery_manager', version: osqueryVersion },
+        name: `Policy for ${policyName}`,
+        namespace: 'default',
+        inputs: { 'osquery_manager-osquery': { enabled: true, streams: {} } },
       });
 
       packName = `ui-test-pack-${uniqueId()}`;
-      const packResponse = await kbnClient.request({
-        method: 'POST',
-        path: '/api/osquery/packs',
-        body: {
-          name: packName,
-          description: 'Pack for UI test',
-          enabled: true,
-          queries: {
-            uptimeQuery: { query: 'select * from uptime;', interval: 3600 },
-          },
-          shards: {},
+      const packResponse = await apiServices.osquery.packs.create({
+        name: packName,
+        description: 'Pack for UI test',
+        enabled: true,
+        queries: {
+          uptimeQuery: { query: 'select * from uptime;', interval: 3600 },
         },
-        headers: API_HEADERS,
+        shards: {},
       });
       packId = (packResponse.data as Record<string, Record<string, string>>).data.saved_object_id;
 
@@ -115,30 +100,22 @@ test.describe(
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    test.afterAll(async ({ kbnClient }) => {
+    test.afterAll(async ({ kbnClient, apiServices }) => {
       if (ruleId) {
         await kbnClient.request({
           method: 'DELETE',
           path: `/api/detection_engine/rules?id=${ruleId}`,
           headers: API_HEADERS,
+          ignoreErrors: [404],
         });
       }
 
       if (packId) {
-        await kbnClient.request({
-          method: 'DELETE',
-          path: `/api/osquery/packs/${packId}`,
-          headers: API_HEADERS,
-        });
+        await apiServices.osquery.packs.delete(packId);
       }
 
       if (agentPolicyId) {
-        await kbnClient.request({
-          method: 'POST',
-          path: '/api/fleet/agent_policies/delete',
-          body: { agentPolicyId },
-          headers: API_HEADERS,
-        });
+        await apiServices.fleet.agent_policies.delete(agentPolicyId);
       }
     });
 

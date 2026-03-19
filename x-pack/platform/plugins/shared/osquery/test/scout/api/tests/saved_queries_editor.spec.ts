@@ -18,12 +18,9 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiServices }) => {
     for (const soId of createdSavedObjectIds) {
-      await apiClient.delete(`${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${soId}`, {
-        headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-        responseType: 'json',
-      });
+      await apiServices.osquery.savedQueries.delete(soId);
     }
   });
 

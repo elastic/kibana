@@ -18,12 +18,9 @@ apiTest.describe('Osquery packs - admin', { tag: tags.deploymentAgnostic }, () =
     adminCredentials = await requestAuth.getApiKeyForAdmin();
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiServices }) => {
     for (const packId of createdPackIds) {
-      await apiClient.delete(`${testData.API_PATHS.OSQUERY_PACKS}/${packId}`, {
-        headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        responseType: 'json',
-      });
+      await apiServices.osquery.packs.delete(packId);
     }
   });
 
