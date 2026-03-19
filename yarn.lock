@@ -2434,10 +2434,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.10.0.tgz#e03738608457dfa1718394e51eb6879a00586d6e"
   integrity sha512-kVk1YOZZt3QaSMfQ+pXM+xAQLtAmsDqTW5YL17SsKZUUX6YKsF4s1GS2szwrx2Q/UAyaaxmtOSn4RM/qopUbvw==
 
-"@elastic/esql@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-1.4.1.tgz#2e12806552305ac91fbe8021c1f3052d951aee39"
-  integrity sha512-OMZ6IvUgI8c78Hv/rEFeAUzP9e+xcofrYoWwkF1CNFyPyiMB3M3biaCTIDwOYwfaTESb3Zi8zYL+eWB4goOdXA==
+"@elastic/esql@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-1.5.0.tgz#3c30ba18dbf6559115c236a548e4421cca8f7e5b"
+  integrity sha512-bV3Fb+tawiVOev8igqk5rwbPnBmB/h3fHFTYMobFGhLI6bOFPVDkNeJ3NiMHuIlMOkmNvRnyqjapJX9PPM0WvQ==
   dependencies:
     antlr4 "4.13.2"
     tree-dump "1.1.0"
@@ -25919,16 +25919,6 @@ lmdb@3.4.4:
     "@lmdb/lmdb-linux-x64" "3.4.4"
     "@lmdb/lmdb-win32-arm64" "3.4.4"
     "@lmdb/lmdb-win32-x64" "3.4.4"
-
-load-json-file@6.2.0:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/load-json-file/-/load-json-file-6.2.0.tgz#5c7770b42cafa97074ca2848707c61662f4251a1"
-  integrity sha512-gUD/epcRms75Cw8RT1pUdHugZYM5ce64ucs2GEISABwkRsOQr0q2wm/MV2TKThycIe5e0ytRweW2RZxclogCdQ==
-  dependencies:
-    graceful-fs "^4.1.15"
-    parse-json "^5.0.0"
-    strip-bom "^4.0.0"
-    type-fest "^0.6.0"
 
 loader-runner@^4.2.0:
   version "4.3.0"
