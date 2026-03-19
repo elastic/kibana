@@ -71,11 +71,12 @@ export class ResponseActionsFormPage {
    * The Osquery form uses react-hook-form with mode:'all' and useDebounce(500ms).
    * Validation only fires after an onChange. Setting value to non-empty then empty
    * triggers onChange('') after the debounce, surfacing the required-field error.
+   * Waits for the error container to become visible instead of a hard timeout.
    */
   async triggerQueryValidation(actionIndex: number) {
     await this.setEditorValue(actionIndex, 'x');
-    await this.page.waitForTimeout(600);
     await this.setEditorValue(actionIndex, '');
+    await this.errorsContainer.waitFor({ state: 'visible', timeout: 5000 });
   }
 
   async fillQuery(text: string, actionIndex: number) {
@@ -118,15 +119,31 @@ export class ResponseActionsFormPage {
   async addEcsMapping(field: string, value: string, actionIndex: number) {
     const item = this.getResponseActionItem(actionIndex);
 
-    await item.locator('[data-test-subj="ECS-field-input"]').click();
-    await this.page.keyboard.type(field);
-    await this.page.keyboard.press('ArrowDown');
-    await this.page.keyboard.press('Enter');
+    const ecsInput = item.locator('[data-test-subj="ECS-field-input"]');
+    await ecsInput.click();
+    await ecsInput.pressSequentially(field);
+    await ecsInput.press('ArrowDown');
+    await ecsInput.press('Enter');
 
-    await item.locator('[data-test-subj="osqueryColumnValueSelect"]').click();
-    await this.page.keyboard.type(value);
-    await this.page.keyboard.press('ArrowDown');
-    await this.page.keyboard.press('Enter');
+    const columnSelect = item.locator('[data-test-subj="osqueryColumnValueSelect"]');
+    await columnSelect.click();
+    await columnSelect.pressSequentially(value);
+    await columnSelect.press('ArrowDown');
+    await columnSelect.press('Enter');
+  }
+
+  async removeAction(actionIndex: number) {
+    const item = this.getResponseActionItem(actionIndex);
+    await item.locator('[data-test-subj="remove-response-action"]').click();
+  }
+
+  async getPackComboBoxValue(actionIndex: number): Promise<string> {
+    const item = this.getResponseActionItem(actionIndex);
+    const input = item.locator(
+      '[data-test-subj="comboBoxInput"] [data-test-subj="comboBoxSearchInput"]'
+    );
+
+    return input.inputValue();
   }
 
   async submitRule() {
