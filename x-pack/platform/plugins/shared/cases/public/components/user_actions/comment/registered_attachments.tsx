@@ -4,16 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import React, { Suspense } from 'react';
+import classNames from 'classnames';
 import { memoize, partition } from 'lodash';
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 
 import type {
@@ -30,12 +26,19 @@ import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import {
   ATTACHMENT_NOT_REGISTERED_ERROR,
+  ADD_COMMENT,
   DEFAULT_EVENT_ATTACHMENT_TITLE,
   DELETE_REGISTERED_ATTACHMENT,
 } from './translations';
+import * as caseViewI18n from '../../case_view/translations';
 import { UserActionContentToolbar } from '../content_toolbar';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
+import { CommentChildren } from '../../attachments/comment/comment_children';
+import { createCommentActionCss, hasDraftComment } from '../../attachments/comment/utils';
+
+const getCommentContent = (data?: Record<string, unknown> | null): string =>
+  (data?.comment ?? data?.content ?? '') as string;
 
 type BuilderArgs<C, R> = Pick<
   UserActionBuilderArgs,
@@ -46,22 +49,26 @@ type BuilderArgs<C, R> = Pick<
   isLoading: boolean;
   getId: () => string;
   getAttachmentViewProps: () => object;
+  manageMarkdownEditIds?: string[];
+  selectedOutlineCommentId?: string;
+  loadingCommentIds?: string[];
+  appId?: string;
+  euiTheme?: EuiThemeComputed<{}>;
+  handleManageMarkdownEditId?: (id: string) => void;
+  handleManageQuote?: (quote: string) => void;
 };
 
 /**
- * Provides a render function for attachment type.
- * memoize uses the first argument as the caching key.
- * The argument is intentionally declared and unused to
- * be able for TS to warn us in case we forgot to provide one.
+ * Renders attachment type children (e.g. custom content for lens, etc.)
  */
-const getAttachmentRenderer = memoize((cachingKey: string) => {
+const getAttachmentChildrenRenderer = memoize((cachingKey: string) => {
   let AttachmentElement: React.ReactElement;
 
   const renderCallback = (
     attachmentViewObject: AttachmentViewObject<CommonAttachmentViewProps>,
     props: CommonAttachmentViewProps
   ) => {
-    if (!attachmentViewObject.children) return;
+    if (!attachmentViewObject.children) return null;
 
     if (!AttachmentElement) {
       AttachmentElement = React.createElement(attachmentViewObject.children, props);
@@ -89,6 +96,13 @@ export const createRegisteredAttachmentUserActionBuilder = <
   getId,
   getAttachmentViewProps,
   handleDeleteComment,
+  handleManageMarkdownEditId,
+  handleManageQuote,
+  manageMarkdownEditIds,
+  selectedOutlineCommentId,
+  loadingCommentIds,
+  appId,
+  euiTheme,
 }: BuilderArgs<C, R>): ReturnType<UserActionBuilder> => ({
   build: () => {
     const attachmentTypeId: string = getId();
@@ -157,7 +171,11 @@ export const createRegisteredAttachmentUserActionBuilder = <
       ];
     }
 
-    const viewProps = getAttachmentViewProps();
+    const viewProps = getAttachmentViewProps() as {
+      data?: Record<string, unknown> | null;
+      version?: string;
+      [key: string]: unknown;
+    };
     const savedObjectId = attachment.id;
     const props = {
       ...viewProps,
@@ -173,13 +191,109 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
 
-    const renderer = getAttachmentRenderer(userAction.id);
+    const commentContent = getCommentContent(viewProps.data);
+    const hasComment = viewProps.data?.content != null || viewProps.data?.comment != null;
+    const isAddMode = manageMarkdownEditIds?.includes(savedObjectId) ?? false;
+    const showCommentBlock = hasComment || isAddMode;
+
+    const isReferenceAttachment = 'attachmentId' in props && props.attachmentId !== savedObjectId;
+    const attachmentPayload =
+      showCommentBlock && isReferenceAttachment
+        ? {
+            type: attachment.type,
+            attachmentId: props.attachmentId,
+            owner: (attachment as { owner?: string }).owner ?? caseData.owner,
+            ...(viewProps.metadata != null && { metadata: viewProps.metadata }),
+          }
+        : undefined;
+
+    const attachmentChildrenRenderer = getAttachmentChildrenRenderer(userAction.id);
+    const attachmentChildren = attachmentViewObject.children
+      ? attachmentChildrenRenderer(attachmentViewObject, props)
+      : null;
+
+    const commentBlock = showCommentBlock ? (
+      <CommentChildren
+        commentId={savedObjectId}
+        content={commentContent ?? ''}
+        caseId={caseData.id}
+        version={(viewProps.version as string) ?? ''}
+        attachmentPayload={attachmentPayload}
+      />
+    ) : null;
+
+    const children = (
+      <>
+        {commentBlock}
+        {attachmentChildren}
+      </>
+    );
+
+    const isEdit = manageMarkdownEditIds?.includes(savedObjectId) ?? false;
+    const isLoadingComment = loadingCommentIds?.includes(savedObjectId) ?? false;
+    const draftFooter =
+      !isEdit &&
+      !isLoadingComment &&
+      hasDraftComment(appId ?? '', caseData.id, savedObjectId, commentContent ?? '');
+
+    const commentClassName = classNames('userAction__comment', {
+      outlined: savedObjectId === selectedOutlineCommentId,
+      isEdit,
+      draftFooter,
+      'userAction__comment--hideHeaderOnEdit': showCommentBlock && !isReferenceAttachment,
+      'userAction__comment--emptyComment':
+        (showCommentBlock && !commentContent) || (!showCommentBlock && isReferenceAttachment),
+    });
+
+    const baseClassName =
+      attachmentViewObject.className ?? `comment-${attachment.type}-attachment-${attachmentTypeId}`;
+    const className =
+      showCommentBlock || isReferenceAttachment
+        ? classNames(baseClassName, commentClassName)
+        : baseClassName;
+    const css = showCommentBlock
+      ? attachmentViewObject.css ?? createCommentActionCss(euiTheme)
+      : attachmentViewObject.css;
+
+    const commentActions: Array<{
+      type: typeof AttachmentActionType.BUTTON;
+      iconType: string;
+      label: string;
+      onClick: () => void;
+    }> = [];
+    if (showCommentBlock && handleManageMarkdownEditId) {
+      commentActions.push({
+        type: AttachmentActionType.BUTTON,
+        iconType: 'pencil',
+        label: caseViewI18n.EDIT_COMMENT,
+        onClick: () => handleManageMarkdownEditId(savedObjectId),
+      });
+    }
+    if (showCommentBlock && handleManageQuote) {
+      commentActions.push({
+        type: AttachmentActionType.BUTTON,
+        iconType: 'quote',
+        label: caseViewI18n.QUOTE,
+        onClick: () => handleManageQuote(commentContent ?? ''),
+      });
+    }
+    if (!hasComment && isReferenceAttachment && handleManageMarkdownEditId) {
+      commentActions.push({
+        type: AttachmentActionType.BUTTON,
+        iconType: 'editorComment',
+        label: ADD_COMMENT,
+        onClick: () => handleManageMarkdownEditId(savedObjectId),
+      });
+    }
+
     const actions = attachmentViewObject.getActions?.(props) ?? [];
     const [primaryActions, nonPrimaryActions] = partition(actions, 'isPrimary');
     const visiblePrimaryActions = primaryActions.slice(0, 2);
-    const nonVisiblePrimaryActions = primaryActions.slice(2, primaryActions.length);
-    const className =
-      attachmentViewObject.className ?? `comment-${attachment.type}-attachment-${attachmentTypeId}`;
+    const nonVisiblePrimaryActions = [
+      ...commentActions,
+      ...primaryActions.slice(2),
+      ...nonPrimaryActions,
+    ];
 
     return [
       {
@@ -190,7 +304,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
           />
         ),
         className,
-        css: attachmentViewObject.css,
+        css,
         event: attachmentViewObject.event,
         'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
@@ -220,12 +334,12 @@ export const createRegisteredAttachmentUserActionBuilder = <
             <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}
               onDelete={() => handleDeleteComment(attachment.id, DELETE_REGISTERED_ATTACHMENT)}
-              registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
+              registeredAttachmentActions={nonVisiblePrimaryActions}
               hideDefaultActions={!!attachmentViewObject.hideDefaultActions}
             />
           </UserActionContentToolbar>
         ),
-        children: renderer(attachmentViewObject, props),
+        children,
       },
     ];
   },

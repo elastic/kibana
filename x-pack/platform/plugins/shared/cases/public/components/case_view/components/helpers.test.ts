@@ -53,7 +53,7 @@ describe('Case view helpers', () => {
         ...basicCase,
         comments: [
           { ...alertComment, alertId: 'alert-123' },
-          { ...eventComment, eventId: 'event-123' },
+          { ...eventComment, attachmentId: 'event-123' },
         ],
       };
       const result = filterCaseAttachmentsBySearchTerm(caseData, 'xyz');
@@ -76,19 +76,19 @@ describe('Case view helpers', () => {
         comments: [
           { ...alertComment, alertId: 'alert-123' },
           { ...alertComment, alertId: 'alert-456' },
-          { ...eventComment, eventId: 'event-123' },
-          { ...eventComment, eventId: 'event-789' },
+          { ...eventComment, attachmentId: 'event-123' },
+          { ...eventComment, attachmentId: 'event-789' },
         ],
       };
       const result = filterCaseAttachmentsBySearchTerm(caseData, '123');
       expect(result.comments).toHaveLength(2);
       expect(result.comments[0]).toEqual({ ...alertComment, alertId: ['alert-123'] });
-      expect(result.comments[1]).toEqual({ ...eventComment, eventId: ['event-123'] });
+      expect(result.comments[1]).toEqual({ ...eventComment, attachmentId: 'event-123' });
     });
 
     const testCases = [
       ['alert', 'alertId', alertComment] as const,
-      ['event', 'eventId', eventComment] as const,
+      ['event', 'attachmentId', eventComment] as const,
     ];
 
     testCases.forEach(([type, fieldName, commentTemplate]) => {

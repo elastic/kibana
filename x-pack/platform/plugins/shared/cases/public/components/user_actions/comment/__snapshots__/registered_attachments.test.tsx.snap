@@ -26,20 +26,23 @@ Array [
         }
       />
     </Memo(UserActionContentToolbar)>,
-    "children": <React.Suspense
-      fallback={<EuiLoadingSpinner />}
-    >
-      <UNDEFINED
-        attachmentId="basic-comment-id"
-        caseData={
-          Object {
-            "id": "basic-case-id",
-            "title": "Another horrible breach!!",
+    "children": <React.Fragment>
+      <React.Suspense
+        fallback={<EuiLoadingSpinner />}
+      >
+        <UNDEFINED
+          attachmentId="event-id-123"
+          caseData={
+            Object {
+              "id": "basic-case-id",
+              "title": "Another horrible breach!!",
+            }
           }
-        }
-        foo="bar"
-      />
-    </React.Suspense>,
+          foo="bar"
+          savedObjectId="basic-comment-id"
+        />
+      </React.Suspense>
+    </React.Fragment>,
     "className": "comment-user-attachment-test",
     "css": undefined,
     "data-test-subj": "comment-user-test",
@@ -123,20 +126,23 @@ Array [
         }
       />
     </Memo(UserActionContentToolbar)>,
-    "children": <React.Suspense
-      fallback={<EuiLoadingSpinner />}
-    >
-      <UNDEFINED
-        attachmentId="basic-comment-id"
-        caseData={
-          Object {
-            "id": "basic-case-id",
-            "title": "Another horrible breach!!",
+    "children": <React.Fragment>
+      <React.Suspense
+        fallback={<EuiLoadingSpinner />}
+      >
+        <UNDEFINED
+          attachmentId="event-id-123"
+          caseData={
+            Object {
+              "id": "basic-case-id",
+              "title": "Another horrible breach!!",
+            }
           }
-        }
-        foo="bar"
-      />
-    </React.Suspense>,
+          foo="bar"
+          savedObjectId="basic-comment-id"
+        />
+      </React.Suspense>
+    </React.Fragment>,
     "className": "comment-user-attachment-test",
     "css": undefined,
     "data-test-subj": "comment-user-test",
@@ -207,20 +213,23 @@ Array [
         registeredAttachmentActions={Array []}
       />
     </Memo(UserActionContentToolbar)>,
-    "children": <React.Suspense
-      fallback={<EuiLoadingSpinner />}
-    >
-      <UNDEFINED
-        attachmentId="basic-comment-id"
-        caseData={
-          Object {
-            "id": "basic-case-id",
-            "title": "Another horrible breach!!",
+    "children": <React.Fragment>
+      <React.Suspense
+        fallback={<EuiLoadingSpinner />}
+      >
+        <UNDEFINED
+          attachmentId="basic-comment-id"
+          caseData={
+            Object {
+              "id": "basic-case-id",
+              "title": "Another horrible breach!!",
+            }
           }
-        }
-        foo="bar"
-      />
-    </React.Suspense>,
+          foo="bar"
+          savedObjectId="basic-comment-id"
+        />
+      </React.Suspense>
+    </React.Fragment>,
     "className": "comment-user-attachment-test",
     "css": undefined,
     "data-test-subj": "comment-user-test",

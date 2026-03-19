@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AttachmentPatchRequestRt } from '../../../../common/types/api';
+import { AttachmentPatchRequestRtV2 } from '../../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -32,7 +32,7 @@ export const patchCommentRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const query = decodeWithExcessOrThrow(AttachmentPatchRequestRt)(request.body);
+      const query = decodeWithExcessOrThrow(AttachmentPatchRequestRtV2)(request.body);
 
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();

@@ -10,7 +10,10 @@ import Boom from '@hapi/boom';
 import { AttachmentPatchRequestRtV2 } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
+import {
+  isCommentRequestTypeExternalReference,
+  toUnifiedAttachmentType,
+} from '../../../common/utils/attachments';
 import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
@@ -71,7 +74,7 @@ export async function update(
 
     const model = await CaseCommentModel.create(caseID, clientArgs);
 
-    if (myComment.attributes.type !== queryRestAttributes.type) {
+    if (toUnifiedAttachmentType(myComment.attributes.type) !== toUnifiedAttachmentType(queryRestAttributes.type)) {
       throw Boom.badRequest(`You cannot change the type of the comment.`);
     }
 

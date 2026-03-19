@@ -46,6 +46,7 @@ export const useAddToCaseActions = ({
             {
               type: EVENT_ATTACHMENT_TYPE,
               attachmentId: ecsData._id ?? '',
+              // data: { content: 'test comment' },
               metadata: { index: ecsData._index ?? '' },
             },
           ]

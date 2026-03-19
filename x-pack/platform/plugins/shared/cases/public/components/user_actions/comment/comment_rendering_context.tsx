@@ -15,6 +15,13 @@ import type { CaseUI } from '../../../containers/types';
  * All fields are required when providing the context; consumers receive
  * Partial when outside the provider (e.g. tests) via useCommentRenderingContext.
  */
+export interface AttachmentSavePayload {
+  type: string;
+  attachmentId: string;
+  owner: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface CommentRenderingContextValue {
   appId: string;
   caseData: CaseUI;
@@ -26,6 +33,12 @@ export interface CommentRenderingContextValue {
   euiTheme: EuiThemeComputed<{}>;
   handleManageMarkdownEditId: (id: string) => void;
   handleSaveComment: (props: { id: string; version: string }, content: string) => void;
+  handleSaveAttachmentComment?: (
+    id: string,
+    version: string,
+    content: string,
+    payload: AttachmentSavePayload
+  ) => void;
   handleManageQuote: (quote: string) => void;
   handleDeleteComment: (id: string, title: string) => void;
 }

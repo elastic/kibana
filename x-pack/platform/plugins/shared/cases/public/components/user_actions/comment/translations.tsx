@@ -60,3 +60,7 @@ export const DELETE_REGISTERED_ATTACHMENT = i18n.translate(
     defaultMessage: 'Deleted attachment',
   }
 );
+
+export const ADD_COMMENT = i18n.translate('xpack.cases.userActions.comment.addComment', {
+  defaultMessage: 'Add comment',
+});

@@ -133,6 +133,11 @@ export const patchComment = async (
   signal: AbortSignal
 ): Promise<CaseUI> => Promise.resolve(basicCaseCommentPatch);
 
+export const patchAttachment = async (
+  _params: { caseId: string; payload: unknown },
+  _signal?: AbortSignal
+): Promise<CaseUI> => Promise.resolve(basicCaseCommentPatch);
+
 export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promise<boolean> =>
   Promise.resolve(true);
 

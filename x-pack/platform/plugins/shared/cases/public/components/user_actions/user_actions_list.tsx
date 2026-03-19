@@ -47,10 +47,15 @@ const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
     & .euiCommentEvent__body {
       padding: 0;
     }
+  }
 
-    & .euiCommentEvent__header {
-      display: none;
-    }
+  & .userAction__comment--hideHeaderOnEdit.isEdit .euiCommentEvent__header {
+    display: none;
+  }
+
+  & .userAction__comment--emptyComment .euiCommentEvent__body {
+    padding: 0;
+    min-height: 0;
   }
 
   & .comment-action.empty-comment [class*='euiCommentEvent-regular'] {
@@ -119,6 +124,7 @@ export const UserActionsList = React.memo(
       handleManageMarkdownEditId,
       handleOutlineComment,
       handleSaveComment,
+      handleSaveAttachmentComment,
       handleDeleteComment,
     } = useUserActionsHandler();
 
@@ -159,6 +165,8 @@ export const UserActionsList = React.memo(
           euiTheme,
           handleOutlineComment,
           handleDeleteComment,
+          handleManageMarkdownEditId,
+          handleManageQuote,
           onShowAlertDetails,
           actionsNavigation,
           getRuleDetailsHref,
@@ -186,6 +194,8 @@ export const UserActionsList = React.memo(
       euiTheme,
       handleOutlineComment,
       handleDeleteComment,
+      handleManageMarkdownEditId,
+      handleManageQuote,
       onShowAlertDetails,
       actionsNavigation,
       getRuleDetailsHref,
@@ -216,6 +226,7 @@ export const UserActionsList = React.memo(
         euiTheme,
         handleManageMarkdownEditId,
         handleSaveComment,
+        handleSaveAttachmentComment,
         handleManageQuote,
         handleDeleteComment,
       }),
@@ -230,6 +241,7 @@ export const UserActionsList = React.memo(
         euiTheme,
         handleManageMarkdownEditId,
         handleSaveComment,
+        handleSaveAttachmentComment,
         handleManageQuote,
         handleDeleteComment,
       ]

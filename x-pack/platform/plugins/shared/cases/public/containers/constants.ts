@@ -69,6 +69,7 @@ export const casesMutationsKeys = {
   updateCases: ['update-cases'] as const,
   pushCase: ['push-case'] as const,
   updateComment: ['update-comment'] as const,
+  patchAttachment: ['patch-attachment'] as const,
   deleteComment: ['delete-comment'] as const,
   deleteFileAttachment: ['delete-file-attachment'] as const,
   bulkCreateAttachments: ['bulk-create-attachments'] as const,

@@ -10,6 +10,7 @@ import { useCaseViewParams } from '../../common/navigation';
 import type { CaseUI } from '../../containers/types';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useUpdateComment } from '../../containers/use_update_comment';
+import { usePatchAttachment } from '../../containers/use_patch_attachment';
 import type { AddCommentRefObject } from '../add_comment';
 import type { UserActionMarkdownRefObject } from './markdown_form';
 import type { UserActionBuilderArgs } from './types';
@@ -30,6 +31,12 @@ export type UseUserActionsHandler = Pick<
   >;
   handleManageMarkdownEditId: (id: string) => void;
   handleSaveComment: (props: { id: string; version: string }, content: string) => void;
+  handleSaveAttachmentComment: (
+    id: string,
+    version: string,
+    content: string,
+    payload: { type: string; attachmentId: string; owner: string }
+  ) => void;
   handleManageQuote: (quote: string) => void;
   handleUpdate: (updatedCase: CaseUI) => void;
 };
@@ -50,10 +57,12 @@ const isSetCommentRef = (
 
 export const useUserActionsHandler = (): UseUserActionsHandler => {
   const { detailName: caseId } = useCaseViewParams();
+
   const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
     useLensDraftComment();
   const handlerTimeoutId = useRef(0);
   const { mutate: patchComment } = useUpdateComment();
+  const { mutate: patchAttachment } = usePatchAttachment();
   const { mutate: deleteComment } = useDeleteComment();
   const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
   const [loadingCommentIds, setLoadingCommentIds] = useState<string[]>([]);
@@ -104,6 +113,37 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
       );
     },
     [caseId, patchComment]
+  );
+
+  const handleSaveAttachmentComment = useCallback(
+    (
+      id: string,
+      version: string,
+      content: string,
+      payload: { type: string; attachmentId: string; owner: string; metadata?: Record<string, unknown> }
+    ) => {
+      addCommentIdToLoadingIds(id);
+      patchAttachment(
+        {
+          caseId,
+          payload: {
+            ...payload,
+            id,
+            version,
+            data: { comment: content },
+          },
+        },
+        {
+          onSuccess: () => {
+            removeCommentIdFromLoadingIds(id);
+          },
+          onError: () => {
+            removeCommentIdFromLoadingIds(id);
+          },
+        }
+      );
+    },
+    [caseId, patchAttachment]
   );
 
   const handleDeleteComment = useCallback(
@@ -185,6 +225,7 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
     handleManageMarkdownEditId,
     handleOutlineComment,
     handleSaveComment,
+    handleSaveAttachmentComment,
     handleDeleteComment,
     handleManageQuote,
     handleUpdate: refreshCaseViewPage,

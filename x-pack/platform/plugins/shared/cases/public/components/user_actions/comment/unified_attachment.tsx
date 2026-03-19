@@ -25,6 +25,8 @@ type BuilderArgs = Pick<
   | 'appId'
   | 'euiTheme'
   | 'onShowAlertDetails'
+  | 'handleManageMarkdownEditId'
+  | 'handleManageQuote'
 > & {
   attachment: SnakeToCamelCase<UnifiedAttachment>;
   isLoading: boolean;
@@ -44,6 +46,8 @@ export const createUnifiedAttachmentUserActionBuilder = ({
   appId,
   euiTheme,
   onShowAlertDetails,
+  handleManageMarkdownEditId,
+  handleManageQuote,
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return createRegisteredAttachmentUserActionBuilder({
     userAction,
@@ -53,6 +57,13 @@ export const createUnifiedAttachmentUserActionBuilder = ({
     caseData,
     handleDeleteComment,
     isLoading,
+    handleManageMarkdownEditId,
+    handleManageQuote,
+    manageMarkdownEditIds,
+    selectedOutlineCommentId,
+    loadingCommentIds,
+    appId,
+    euiTheme,
     getId: () => toUnifiedAttachmentType(attachment.type),
     getAttachmentViewProps: () => {
       const baseProps = {

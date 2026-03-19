@@ -11,6 +11,7 @@ import type { CaseCustomField, User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
+  AttachmentPatchRequestV2,
   AttachmentRequest,
   BulkCreateAttachmentsRequestV2,
   CasePatchRequest,
@@ -451,6 +452,23 @@ export const patchComment = async ({
       version,
       owner,
     }),
+    signal,
+  });
+  return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
+export const patchAttachment = async ({
+  caseId,
+  payload,
+  signal,
+}: {
+  caseId: string;
+  payload: AttachmentPatchRequestV2;
+  signal?: AbortSignal;
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseCommentsUrl(caseId), {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
     signal,
   });
   return convertCaseToCamelCase(decodeCaseResponse(response));

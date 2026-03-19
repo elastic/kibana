@@ -156,10 +156,10 @@ export const alertCommentWithIndices: AlertAttachmentUI = {
   version: 'WzQ3LDFc',
 };
 
-export const eventComment: EventAttachmentUI = {
-  eventId: 'event-id-1',
-  index: 'event-index-1',
-  type: AttachmentType.event,
+export const eventComment: AttachmentUIV2 = {
+  type: 'securityEvent',
+  attachmentId: 'event-id-1',
+  metadata: { index: 'event-index-1' },
   id: 'event-comment-id',
   createdAt: basicCreatedAt,
   createdBy: elasticUser,

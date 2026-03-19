@@ -12,6 +12,7 @@ import {
   type UserActionMarkdownRefObject,
 } from '../../user_actions/markdown_form';
 import * as i18n from '../../user_actions/comment/translations';
+import type { AttachmentSavePayload } from '../../user_actions/comment/comment_rendering_context';
 import { useCommentRenderingContext } from '../../user_actions/comment/comment_rendering_context';
 import { hasDraftComment, getCommentFooterCss } from './utils';
 
@@ -20,6 +21,8 @@ export interface CommentChildrenProps {
   content: string;
   caseId: string;
   version: string;
+  /** When provided, uses handleSaveAttachmentComment for reference attachments instead of handleSaveComment */
+  attachmentPayload?: AttachmentSavePayload;
 }
 
 /**
@@ -30,6 +33,7 @@ export const CommentChildren: React.FC<CommentChildrenProps> = ({
   content,
   caseId,
   version,
+  attachmentPayload,
 }) => {
   const {
     appId = '',
@@ -39,6 +43,7 @@ export const CommentChildren: React.FC<CommentChildrenProps> = ({
     commentRefs,
     handleManageMarkdownEditId,
     handleSaveComment,
+    handleSaveAttachmentComment,
   } = useCommentRenderingContext();
 
   const setCommentRef = useCallback(
@@ -71,11 +76,19 @@ export const CommentChildren: React.FC<CommentChildrenProps> = ({
 
   const onSaveContent = useCallback(
     (newContent: string) => {
-      if (handleSaveComment) {
+      if (attachmentPayload && handleSaveAttachmentComment) {
+        handleSaveAttachmentComment(commentId, version, newContent, attachmentPayload);
+      } else if (handleSaveComment) {
         handleSaveComment({ id: commentId, version }, newContent);
       }
     },
-    [handleSaveComment, commentId, version]
+    [
+      attachmentPayload,
+      handleSaveAttachmentComment,
+      handleSaveComment,
+      commentId,
+      version,
+    ]
   );
 
   return (

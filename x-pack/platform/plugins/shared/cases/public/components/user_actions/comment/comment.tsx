@@ -190,6 +190,8 @@ const getCreateCommentUserAction = ({
   loadingCommentIds,
   euiTheme,
   handleDeleteComment,
+  handleManageMarkdownEditId,
+  handleManageQuote,
   getRuleDetailsHref,
   loadingAlertData,
   onRuleDetailsClick,
@@ -278,6 +280,8 @@ const getCreateCommentUserAction = ({
       appId,
       euiTheme,
       onShowAlertDetails,
+      handleManageMarkdownEditId,
+      handleManageQuote,
     });
 
     return unifiedBuilder.build();
@@ -305,6 +309,8 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   onRuleDetailsClick,
   onShowAlertDetails,
   handleDeleteComment,
+  handleManageMarkdownEditId,
+  handleManageQuote,
   handleOutlineComment,
   actionsNavigation,
   caseConnectors,
@@ -351,6 +357,8 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         onRuleDetailsClick,
         onShowAlertDetails,
         handleDeleteComment,
+        handleManageMarkdownEditId,
+        handleManageQuote,
         actionsNavigation,
         caseConnectors,
         attachments,

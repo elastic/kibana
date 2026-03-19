@@ -70,6 +70,8 @@ export interface UserActionBuilderArgs {
   actionsNavigation?: ActionsNavigation;
   handleOutlineComment: (id: string) => void;
   handleDeleteComment: (id: string, successToasterTitle: string) => void;
+  handleManageMarkdownEditId?: (id: string) => void;
+  handleManageQuote?: (quote: string) => void;
   onShowAlertDetails?: (alertId: string, index: string) => void;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];

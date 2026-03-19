@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
+import { EuiAvatar, EuiButtonIcon } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { UserActionActions } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { EVENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
+import type { UnifiedReferenceAttachmentType } from '../../client/attachment_framework/types';
+import { AttachmentActionType } from '../../client/attachment_framework/types';
 import { getCommentAttachmentType } from '../attachments/comment';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, getUserAction } from '../../containers/mock';
@@ -54,10 +59,13 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const onShowAlertDetails = jest.fn();
   const handleDeleteComment = jest.fn();
   const handleOutlineComment = jest.fn();
+  const handleManageMarkdownEditId = jest.fn();
+  const handleManageQuote = jest.fn();
   const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
   const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
   unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+  unifiedAttachmentTypeRegistry.register(getMockEventType());
 
   return {
     appId: 'cases',
@@ -82,6 +90,8 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     onShowAlertDetails,
     handleDeleteComment,
     handleOutlineComment,
+    handleManageMarkdownEditId,
+    handleManageQuote,
     euiTheme: {
       border: { thin: '1px solid #d3dae6' },
       size: { s: '8px', base: '16px', xl: '24px' },
@@ -111,4 +121,69 @@ export const getMockCommentRenderingContext = (
   handleManageQuote: jest.fn(),
   handleDeleteComment: jest.fn(),
   ...overrides,
+});
+
+const MockShowEventButton: React.FC<{
+  id: string;
+  eventId: string;
+  index: string;
+}> = ({ id, eventId, index }) => {
+  const { openFlyout } = require('@kbn/expandable-flyout').useExpandableFlyoutApi();
+  return (
+    <EuiButtonIcon
+      aria-label="Show event details"
+      data-test-subj={`comment-action-show-event-${id}`}
+      iconType="arrowRight"
+      onClick={() => {
+        openFlyout({
+          right: {
+            id: 'document-details-right',
+            params: {
+              id: eventId,
+              indexName: index,
+              scopeId: 'timeline-case',
+            },
+          },
+        });
+      }}
+    />
+  );
+};
+
+/**
+ * Minimal mock event type for unit tests. Renders the expected structure for event tests.
+ */
+export const getMockEventType = (): UnifiedReferenceAttachmentType => ({
+  id: EVENT_ATTACHMENT_TYPE,
+  displayName: 'Event',
+  icon: 'bell',
+  getAttachmentViewObject: (props) => {
+    const eventId = props.attachmentId;
+    const index = (props.metadata?.index ?? '') as string;
+    return {
+      event: (
+        <span data-test-subj={`single-event-user-action-${eventId}`}>added an event</span>
+      ),
+      timelineAvatar: (
+        <EuiAvatar name="event" color="subdued" iconType="bell" aria-label="event" />
+      ),
+      getActions: () =>
+        eventId && index
+          ? [
+              {
+                type: AttachmentActionType.CUSTOM as const,
+                isPrimary: true,
+                render: () => (
+                  <MockShowEventButton
+                    id={props.savedObjectId}
+                    eventId={eventId}
+                    index={index}
+                  />
+                ),
+              },
+            ]
+          : [],
+    };
+  },
+  getAttachmentRemovalObject: () => ({ event: 'removed event' }),
 });
