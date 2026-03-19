@@ -71,6 +71,7 @@ export const agentRoutes: RouteDefinition[] = [
     sidebarView: 'agentSettings',
     navLabel: navLabels.overview,
     element: <RouteDisplay />,
+    navIcon: 'info',
   },
   {
     path: '/agents/:agentId/skills',
@@ -109,7 +110,7 @@ export const manageRoutes: RouteDefinition[] = [
     path: '/manage/agents',
     sidebarView: 'manage',
     navLabel: navLabels.agents,
-    navIcon: 'users',
+    navIcon: 'productAgent',
     element: <AgentBuilderAgentsPage />,
   },
   {
@@ -121,28 +122,6 @@ export const manageRoutes: RouteDefinition[] = [
     path: '/manage/agents/:agentId',
     sidebarView: 'manage',
     element: <AgentBuilderAgentsEdit />,
-  },
-  {
-    path: '/manage/tools',
-    sidebarView: 'manage',
-    navLabel: navLabels.tools,
-    navIcon: 'wrench',
-    element: <AgentBuilderToolsPage />,
-  },
-  {
-    path: '/manage/tools/new',
-    sidebarView: 'manage',
-    element: <AgentBuilderToolCreatePage />,
-  },
-  {
-    path: '/manage/tools/bulk_import_mcp',
-    sidebarView: 'manage',
-    element: <AgentBuilderBulkImportMcpToolsPage />,
-  },
-  {
-    path: '/manage/tools/:toolId',
-    sidebarView: 'manage',
-    element: <AgentBuilderToolDetailsPage />,
   },
   {
     path: '/manage/skills',
@@ -183,6 +162,28 @@ export const manageRoutes: RouteDefinition[] = [
     navIcon: 'plugs',
     isConnectors: true,
     element: <AgentBuilderConnectorsPage />,
+  },
+  {
+    path: '/manage/tools',
+    sidebarView: 'manage',
+    navLabel: navLabels.tools,
+    navIcon: 'wrench',
+    element: <AgentBuilderToolsPage />,
+  },
+  {
+    path: '/manage/tools/new',
+    sidebarView: 'manage',
+    element: <AgentBuilderToolCreatePage />,
+  },
+  {
+    path: '/manage/tools/bulk_import_mcp',
+    sidebarView: 'manage',
+    element: <AgentBuilderBulkImportMcpToolsPage />,
+  },
+  {
+    path: '/manage/tools/:toolId',
+    sidebarView: 'manage',
+    element: <AgentBuilderToolDetailsPage />,
   },
 ];
 

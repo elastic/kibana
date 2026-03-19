@@ -8,7 +8,14 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
@@ -28,12 +35,13 @@ const customizeLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.c
   defaultMessage: 'Customize',
 });
 
-const containerStyles = css`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-`;
+const newChatLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.newChat', {
+  defaultMessage: 'New chat',
+});
+
+const recentChatsLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.recentChats', {
+  defaultMessage: 'Recent chats',
+});
 
 export const ConversationSidebarView: React.FC = () => {
   const { pathname } = useLocation();
@@ -45,11 +53,19 @@ export const ConversationSidebarView: React.FC = () => {
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const lastAgentId = useLastAgentId();
 
+  const containerStyles = css`
+    display: flex;
+    gap: ${euiTheme.size.base};
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+  `;
+
   const listStyles = css`
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: ${euiTheme.size.base};
+    padding: 0 ${euiTheme.size.base};
   `;
 
   useEffect(() => {
@@ -105,9 +121,49 @@ export const ConversationSidebarView: React.FC = () => {
     </EuiFlexGroup>
   );
 
+  const newChatBarStyles = css`
+    flex-grow: 0;
+    padding: 0 ${euiTheme.size.base};
+  `;
+
   return (
     <div css={containerStyles}>
       <CustomizeLink />
+      <EuiFlexGroup gutterSize="s" responsive={false} css={newChatBarStyles}>
+        <EuiFlexItem grow>
+          <EuiButton
+            iconType="plus"
+            size="s"
+            fullWidth
+            color="text"
+            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }))}
+          >
+            {newChatLabel}
+          </EuiButton>
+        </EuiFlexItem>
+        {/* <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            color="text"
+            iconType="search"
+            size="s"
+            display="base"
+            aria-label={searchConversationsLabel}
+            onClick={() => {}}
+          />
+        </EuiFlexItem> */}
+      </EuiFlexGroup>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          padding: 0px ${euiTheme.size.l};
+          font-weight: ${euiTheme.font.weight.medium};
+          color: ${euiTheme.colors.textDisabled};
+        `}
+      >
+        <EuiText size="xs" color="text">
+          {recentChatsLabel}
+        </EuiText>
+      </EuiFlexItem>
       <div css={listStyles}>
         <ConversationList agentId={agentId} currentConversationId={conversationId} />
       </div>
