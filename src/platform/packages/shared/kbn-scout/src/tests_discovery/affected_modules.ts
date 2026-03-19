@@ -48,15 +48,16 @@ export const readAffectedModules = (filePath: string, log: ToolingLog): Set<stri
 };
 
 /**
- * Filter modules to only those whose @kbn/ ID is in the affected modules set.
+ * Mark modules with isAffected based on the affected modules set.
+ * All modules are returned; none are filtered out.
  *
  * Behavior:
- * - Module maps to an affected @kbn/ ID -> keep
- * - Module does not map to any @kbn/ ID -> drop (so selective testing only runs configs we can identify)
- * - Module maps to a @kbn/ ID NOT in affected set -> drop
+ * - Module maps to an affected @kbn/ ID -> isAffected: true
+ * - Module does not map to any @kbn/ ID -> isAffected: false (warn)
+ * - Module maps to a @kbn/ ID NOT in affected set -> isAffected: false
  * - If the file cannot be read or is invalid -> throw (fail fast)
  */
-export const filterModulesByAffectedModules = (
+export const markModulesAffectedStatus = (
   modules: ModuleDiscoveryInfo[],
   affectedModulesPath: string,
   log: ToolingLog
@@ -69,33 +70,31 @@ export const filterModulesByAffectedModules = (
     );
   }
 
-  if (affectedModules.size === 0) {
-    log.info('Selective testing: no affected modules found, all modules will be excluded');
-    return [];
-  }
+  let affectedCount = 0;
+  let unmappedCount = 0;
 
-  const kept: ModuleDiscoveryInfo[] = [];
-  let droppedCount = 0;
-
-  for (const module of modules) {
+  const marked = modules.map((module) => {
     const configPath = module.configs[0]?.path ?? '';
     const moduleId = configPath ? getModuleIdForConfigPath(configPath) : undefined;
 
     if (!moduleId) {
       log.warning(
-        `Selective testing: dropping module '${module.name}' (could not resolve @kbn/ ID from config path; check kibana.jsonc or run 'yarn kbn bootstrap')`
+        `Selective testing: module '${module.name}' could not resolve @kbn/ ID (check kibana.jsonc or run 'yarn kbn bootstrap')`
       );
-      droppedCount += 1;
-    } else if (affectedModules.has(moduleId)) {
-      kept.push(module);
-    } else {
-      droppedCount += 1;
+      unmappedCount += 1;
+      return { ...module, isAffected: false };
     }
-  }
+
+    const isAffected = affectedModules.has(moduleId);
+    if (isAffected) affectedCount += 1;
+    return { ...module, isAffected };
+  });
 
   log.info(
-    `Selective testing: keeping ${kept.length} module(s), dropping ${droppedCount} unaffected module(s)`
+    `Selective testing: ${affectedCount} affected module(s), ${
+      marked.length - affectedCount
+    } rest, ${unmappedCount} unmapped`
   );
 
-  return kept;
+  return marked;
 };

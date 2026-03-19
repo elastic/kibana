@@ -12,7 +12,7 @@ import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_discovery/file_utils';
-import { filterModulesByAffectedModules } from '../tests_discovery/affected_modules';
+import { markModulesAffectedStatus } from '../tests_discovery/affected_modules';
 import {
   filterModulesByScoutCiConfig,
   getScoutCiExcludedConfigs,
@@ -255,13 +255,13 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   // Build initial module discovery info
   const modulesWithTests = buildModuleDiscoveryInfo();
 
-  // Filter by affected modules when selective testing is enabled
-  const modulesAfterAffectedFilter = affectedModulesPath
-    ? filterModulesByAffectedModules(modulesWithTests, affectedModulesPath, log)
+  // Mark affected status when selective testing is enabled (all modules kept, isAffected set)
+  const modulesAfterAffectedMark = affectedModulesPath
+    ? markModulesAffectedStatus(modulesWithTests, affectedModulesPath, log)
     : modulesWithTests;
 
   // Filter modules by target tags and compute server run flags
-  const filteredModulesByTags = filterModulesByTargetTags(modulesAfterAffectedFilter, targetTags);
+  const filteredModulesByTags = filterModulesByTargetTags(modulesAfterAffectedMark, targetTags);
   const filteredModules = filterModulesByCustomServerPaths(
     filteredModulesByTags,
     includeCustomServers
@@ -312,8 +312,8 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                               - 'mki': @cloud-serverless-* tags
                               - 'ech': @cloud-stateful-* tags
     --affected-modules <file>  Path to a JSON file containing affected @kbn/ module IDs
-                              (produced by list_affected). Only modules belonging to these
-                              IDs will be included (selective testing).
+                              (produced by list_affected). All modules run; affected ones
+                              get "affected" prefix in Buildkite step (selective testing).
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
     --validate                Validate that all discovered modules are registered in Scout CI config
     --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'

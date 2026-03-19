@@ -23,7 +23,7 @@ jest.mock('@kbn/repo-packages', () => ({
   findPackageForPath: (...args: unknown[]) => mockFindPackageForPath(...args),
 }));
 
-import { filterModulesByAffectedModules, readAffectedModules } from './affected_modules';
+import { markModulesAffectedStatus, readAffectedModules } from './affected_modules';
 
 /** Path -> @kbn/ module ID mapping used by the findPackageForPath mock */
 const CONFIG_PATH_TO_MODULE_ID: Record<string, string> = {
@@ -117,7 +117,7 @@ describe('affected_modules', () => {
     });
   });
 
-  describe('filterModulesByAffectedModules', () => {
+  describe('markModulesAffectedStatus', () => {
     const modules: ModuleDiscoveryInfo[] = [
       createModule(
         'security_solution',
@@ -136,27 +136,31 @@ describe('affected_modules', () => {
       ),
     ];
 
-    it('should keep modules whose ID is in the affected set', () => {
+    it('should mark affected modules with isAffected: true', () => {
       (fs.readFileSync as jest.Mock).mockReturnValue(
         JSON.stringify(['@kbn/security-solution-plugin', '@kbn/scout'])
       );
 
-      const result = filterModulesByAffectedModules(modules, '/affected.json', mockLog);
+      const result = markModulesAffectedStatus(modules, '/affected.json', mockLog);
 
-      expect(result).toHaveLength(2);
-      expect(result.map((m) => m.name)).toEqual(['security_solution', 'kbn-scout']);
+      expect(result).toHaveLength(3);
+      expect(result.find((m) => m.name === 'security_solution')?.isAffected).toBe(true);
+      expect(result.find((m) => m.name === 'discover')?.isAffected).toBe(false);
+      expect(result.find((m) => m.name === 'kbn-scout')?.isAffected).toBe(true);
     });
 
-    it('should drop modules whose ID is NOT in the affected set', () => {
+    it('should mark non-affected modules with isAffected: false', () => {
       (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(['@kbn/scout']));
 
-      const result = filterModulesByAffectedModules(modules, '/affected.json', mockLog);
+      const result = markModulesAffectedStatus(modules, '/affected.json', mockLog);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('kbn-scout');
+      expect(result).toHaveLength(3);
+      expect(result.find((m) => m.name === 'security_solution')?.isAffected).toBe(false);
+      expect(result.find((m) => m.name === 'discover')?.isAffected).toBe(false);
+      expect(result.find((m) => m.name === 'kbn-scout')?.isAffected).toBe(true);
     });
 
-    it('should drop modules that do not map to any @kbn/ ID and warn', () => {
+    it('should mark unmapped modules with isAffected: false and warn', () => {
       const modulesWithUnmapped: ModuleDiscoveryInfo[] = [
         ...modules,
         createModule(
@@ -168,12 +172,12 @@ describe('affected_modules', () => {
 
       (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(['@kbn/scout']));
 
-      const result = filterModulesByAffectedModules(modulesWithUnmapped, '/affected.json', mockLog);
+      const result = markModulesAffectedStatus(modulesWithUnmapped, '/affected.json', mockLog);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('kbn-scout');
+      expect(result).toHaveLength(4);
+      expect(result.find((m) => m.name === 'unknown_module')?.isAffected).toBe(false);
       expect(mockLog.warning).toHaveBeenCalledWith(
-        expect.stringContaining("dropping module 'unknown_module'")
+        expect.stringContaining("module 'unknown_module'")
       );
       expect(mockLog.warning).toHaveBeenCalledWith(
         expect.stringContaining('could not resolve @kbn/ ID')
@@ -185,31 +189,29 @@ describe('affected_modules', () => {
         throw new Error('ENOENT');
       });
 
-      expect(() => filterModulesByAffectedModules(modules, '/missing.json', mockLog)).toThrow(
+      expect(() => markModulesAffectedStatus(modules, '/missing.json', mockLog)).toThrow(
         'Selective testing: could not load affected modules file'
       );
     });
 
-    it('should return empty array when affected modules set is empty', () => {
+    it('should mark all as isAffected: false when affected set is empty', () => {
       (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify([]));
 
-      const result = filterModulesByAffectedModules(modules, '/affected.json', mockLog);
+      const result = markModulesAffectedStatus(modules, '/affected.json', mockLog);
 
-      expect(result).toHaveLength(0);
-      expect(mockLog.info).toHaveBeenCalledWith(
-        expect.stringContaining('no affected modules found')
-      );
+      expect(result).toHaveLength(3);
+      expect(result.every((m) => m.isAffected === false)).toBe(true);
     });
 
-    it('should log the number of kept and dropped modules', () => {
+    it('should log affected and rest counts', () => {
       (fs.readFileSync as jest.Mock).mockReturnValue(
         JSON.stringify(['@kbn/security-solution-plugin'])
       );
 
-      filterModulesByAffectedModules(modules, '/affected.json', mockLog);
+      markModulesAffectedStatus(modules, '/affected.json', mockLog);
 
       expect(mockLog.info).toHaveBeenCalledWith(
-        expect.stringContaining('keeping 1 module(s), dropping 2 unaffected module(s)')
+        expect.stringContaining('1 affected module(s), 2 rest')
       );
     });
   });
