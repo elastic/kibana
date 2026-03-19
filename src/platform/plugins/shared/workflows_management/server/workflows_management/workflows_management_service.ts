@@ -52,8 +52,12 @@ import type {
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
+import {
+  type ChildWorkflowExecutionItem,
+  getChildWorkflowExecutions,
+} from './lib/get_child_workflow_executions';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
-import { searchStepExecutions } from './lib/search_step_executions';
+import { searchStepExecutions, type StepExecutionListResult } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 
 import type {
@@ -61,6 +65,7 @@ import type {
   GetAvailableConnectorsResponse,
   GetStepExecutionParams,
   GetWorkflowsParams,
+  SearchStepExecutionsParams,
 } from './workflows_management_api';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
@@ -92,6 +97,7 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  omitStepRuns?: boolean;
   page?: number;
   size?: number;
 }
@@ -1143,6 +1149,19 @@ export class WorkflowsService {
     });
   }
 
+  public async getChildWorkflowExecutions(
+    parentExecutionId: string,
+    spaceId: string
+  ): Promise<ChildWorkflowExecutionItem[]> {
+    return getChildWorkflowExecutions({
+      esClient: this.esClient,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      parentExecutionId,
+      spaceId,
+    });
+  }
+
   public async getWorkflowExecutions(
     params: SearchWorkflowExecutionsParams,
     spaceId: string
@@ -1195,6 +1214,14 @@ export class WorkflowsService {
       must.push({
         terms: {
           executedBy: params.executedBy,
+        },
+      });
+    }
+
+    if (params.omitStepRuns) {
+      must.push({
+        bool: {
+          must_not: { exists: { field: 'stepId' } },
         },
       });
     }
@@ -1363,13 +1390,35 @@ export class WorkflowsService {
   }
 
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
-    return searchStepExecutions({
+    const searchResult = await searchStepExecutions({
       esClient: this.esClient,
       logger: this.logger,
       stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: params.executionId,
       additionalQuery: { term: { id: params.id } },
       spaceId,
+    });
+    return searchResult.results;
+  }
+
+  public async searchStepExecutions(
+    params: SearchStepExecutionsParams,
+    spaceId: string
+  ): Promise<StepExecutionListResult> {
+    const sourceExcludes: string[] = [];
+    if (!params.includeInput) sourceExcludes.push('input');
+    if (!params.includeOutput) sourceExcludes.push('output');
+
+    return searchStepExecutions({
+      esClient: this.esClient,
+      logger: this.logger,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      workflowId: params.workflowId,
+      stepId: params.stepId,
+      spaceId,
+      sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,
+      page: params.page,
+      size: params.size,
     });
   }
 
