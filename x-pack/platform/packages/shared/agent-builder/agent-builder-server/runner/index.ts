@@ -22,6 +22,7 @@ export type {
   RunToolParams,
   RunToolReturn,
 } from './runner';
+export { getAgentFromRunContext } from './run_context_utils';
 export {
   type AgentBuilderToolEvent,
   type ToolEventHandlerFn,
