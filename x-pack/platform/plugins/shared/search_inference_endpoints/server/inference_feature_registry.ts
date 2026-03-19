@@ -86,7 +86,8 @@ export class InferenceFeatureRegistry {
    * task types are consistent with the feature's declared task type.
    */
   private async checkRecommendedEndpoints(feature: InferenceFeatureConfig): Promise<string[]> {
-    if (!this.esClient || feature.recommendedEndpoints.length === 0) {
+    const esClient = this.esClient;
+    if (!esClient || feature.recommendedEndpoints.length === 0) {
       return [];
     }
 
@@ -95,22 +96,26 @@ export class InferenceFeatureRegistry {
     const results = await Promise.all(
       feature.recommendedEndpoints.map(async (endpointId) => {
         try {
-          const response = await this.esClient!.inference.get({ inference_id: endpointId });
-          return { endpointId, endpoint: response.endpoints[0] ?? null };
+          const response = await esClient.inference.get({ inference_id: endpointId });
+          return { endpointId, endpoint: response.endpoints[0] ?? null, error: undefined };
         } catch (e) {
           if (e?.statusCode === 404) {
-            return { endpointId, endpoint: null };
+            return { endpointId, endpoint: null, error: undefined };
           }
           this.logger.warn(
             `Failed to check inference endpoint "${endpointId}" for feature "${feature.featureId}": ${e.message}`
           );
-          return { endpointId, endpoint: null };
+          return { endpointId, endpoint: null, error: e.message as string };
         }
       })
     );
 
-    for (const { endpointId, endpoint } of results) {
-      if (!endpoint) {
+    for (const { endpointId, endpoint, error } of results) {
+      if (error) {
+        const warning = `Recommended endpoint "${endpointId}" for feature "${feature.featureId}" could not be verified: ${error}`;
+        this.logger.warn(warning);
+        warnings.push(warning);
+      } else if (!endpoint) {
         const warning = `Recommended endpoint "${endpointId}" for feature "${feature.featureId}" was not found in Elasticsearch.`;
         this.logger.warn(warning);
         warnings.push(warning);

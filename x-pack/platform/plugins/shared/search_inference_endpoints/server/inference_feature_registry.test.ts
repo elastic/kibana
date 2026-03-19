@@ -200,7 +200,7 @@ describe('InferenceFeatureRegistry', () => {
 
       expect(result).toEqual({
         ok: true,
-        warnings: [expect.stringContaining('was not found')],
+        warnings: [expect.stringContaining('could not be verified')],
       });
       expect(mockLogger.get().warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to check inference endpoint')
