@@ -24,13 +24,14 @@ import { createSnapshot, generateGcsBasePath, registerGcsRepository } from './li
 import { sleep } from './lib/sleep';
 import { ensureLogsIndexTemplate } from '../../src/data_generators/logs_index_template';
 import {
-  cleanupSigEventsExtractedFeaturesData,
+  cleanupSigEventsExtractedKIsData,
+  configureModelSelectionSettings,
   disableStreams,
   enableSignificantEvents,
-  logSigEventsExtractedFeatures,
-  persistSigEventsExtractedFeaturesForSnapshot,
-  triggerSigEventsFeatureExtraction,
-  waitForSigEventsFeatureExtraction,
+  logSigEventsExtractedKIs,
+  persistSigEventsExtractedKIsForSnapshot,
+  triggerSigEventsKIsExtraction,
+  waitForSigEventsKIsExtraction,
 } from './lib/significant_events_workflow';
 
 run(
@@ -248,14 +249,15 @@ async function processScenario(
     log.info('[4/7] Skipped (healthy baseline)');
   }
 
-  // Step 5 — Run feature extraction (the task generates both inferred and computed features)
-  // Extracted features will be stored as part of the snapshot
+  // Step 5 — Run feature extraction (the task generates both inferred and computed KIs)
+  // Extracted KIs will be stored as part of the snapshot
   log.info('[5/7] Running feature extraction...');
   await enableSignificantEvents(config, log);
-  await triggerSigEventsFeatureExtraction(config, log, connectorId);
-  await waitForSigEventsFeatureExtraction(config, log);
-  await logSigEventsExtractedFeatures(config, log);
-  await persistSigEventsExtractedFeaturesForSnapshot(config, esClient, log, scenario.id);
+  await configureModelSelectionSettings(config, log, connectorId);
+  await triggerSigEventsKIsExtraction(config, log);
+  await waitForSigEventsKIsExtraction(config, log);
+  await logSigEventsExtractedKIs(config, log);
+  await persistSigEventsExtractedKIsForSnapshot(config, esClient, log, scenario.id);
 
   // Step 6 — Create a snapshot of the logs and extracted features
   log.info('[6/7] Creating GCS snapshot...');
@@ -264,7 +266,7 @@ async function processScenario(
   // Step 7 — Cleanup
   log.info('[7/7] Cleaning up...');
   await disableStreams(config, log);
-  await cleanupSigEventsExtractedFeaturesData(esClient, log);
+  await cleanupSigEventsExtractedKIsData(esClient, log);
   await teardownDemo({ demoType, log });
 
   log.info(`Scenario "${scenario.id}" — done`);

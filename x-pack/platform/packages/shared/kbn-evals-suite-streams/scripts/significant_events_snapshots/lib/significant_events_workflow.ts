@@ -33,13 +33,41 @@ export async function enableSignificantEvents(
     return;
   }
 
+  // If the setting is overridden in kibana.yml, skip and return
+  const message = (data as Record<string, unknown>)?.message;
+  if (status === 400 && typeof message === 'string' && message.includes('overridden')) {
+    log.info('Significant events setting is overridden in kibana.yml — skipping');
+    return;
+  }
+
   throw new Error(`Failed to enable significant events: ${status} ${JSON.stringify(data)}`);
 }
 
-export async function triggerSigEventsFeatureExtraction(
+export async function configureModelSelectionSettings(
   config: ConnectionConfig,
   log: ToolingLog,
   connectorId: string
+): Promise<void> {
+  log.info(`Configuring model selection (connector: ${connectorId})...`);
+  const { status, data } = await kibanaRequest(
+    config,
+    'PUT',
+    '/internal/streams/_significant_events/settings',
+    { connectorIdKnowledgeIndicatorExtraction: connectorId }
+  );
+
+  if (status >= 200 && status < 300) {
+    log.info('Model selection settings configured');
+    return;
+  }
+
+  throw new Error(
+    `Failed to configure model selection settings: ${status} ${JSON.stringify(data)}`
+  );
+}
+export async function triggerSigEventsKIsExtraction(
+  config: ConnectionConfig,
+  log: ToolingLog
 ): Promise<void> {
   log.info('Triggering feature extraction on stream "logs"...');
 
@@ -52,7 +80,6 @@ export async function triggerSigEventsFeatureExtraction(
       action: 'schedule',
       from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
       to: new Date(now).toISOString(),
-      connector_id: connectorId,
     }
   );
 
@@ -61,10 +88,10 @@ export async function triggerSigEventsFeatureExtraction(
     return;
   }
 
-  throw new Error(`Failed to trigger feature extraction: ${status} ${JSON.stringify(data)}`);
+  throw new Error(`Failed to trigger KIs extraction: ${status} ${JSON.stringify(data)}`);
 }
 
-export async function waitForSigEventsFeatureExtraction(
+export async function waitForSigEventsKIsExtraction(
   config: ConnectionConfig,
   log: ToolingLog
 ): Promise<void> {
@@ -92,22 +119,22 @@ export async function waitForSigEventsFeatureExtraction(
   }
 
   throw new Error(
-    `Feature extraction did not complete within ${FEATURE_EXTRACTION_TIMEOUT_MS / 1000}s`
+    `KIs extraction did not complete within ${FEATURE_EXTRACTION_TIMEOUT_MS / 1000}s`
   );
 }
 
-export async function logSigEventsExtractedFeatures(
+export async function logSigEventsExtractedKIs(
   config: ConnectionConfig,
   log: ToolingLog
 ): Promise<void> {
-  const features = await fetchSigEventsExtractedFeatures(config, log, 'logs');
-  log.info(`Extracted ${features.length} features:`);
-  for (const f of features) {
+  const kis = await fetchSigEventsExtractedKIs(config, log, 'logs');
+  log.info(`Extracted ${kis.length} KIs:`);
+  for (const f of kis) {
     log.info(`  - ${f.title || f.description} (${f.type})`);
   }
 }
 
-async function fetchSigEventsExtractedFeatures(
+async function fetchSigEventsExtractedKIs(
   config: ConnectionConfig,
   log: ToolingLog,
   streamName: string
@@ -120,14 +147,14 @@ async function fetchSigEventsExtractedFeatures(
   return features.filter(Boolean) as Feature[];
 }
 
-export async function persistSigEventsExtractedFeaturesForSnapshot(
+export async function persistSigEventsExtractedKIsForSnapshot(
   config: ConnectionConfig,
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
   streamName: string = 'logs'
 ): Promise<{ index: string; count: number }> {
-  const features = await fetchSigEventsExtractedFeatures(config, log, streamName);
+  const kis = await fetchSigEventsExtractedKIs(config, log, streamName);
   const index = getSigeventsSnapshotKIFeaturesIndex(snapshotName);
 
   await esClient.indices.delete({ index, ignore_unavailable: true });
@@ -155,11 +182,8 @@ export async function persistSigEventsExtractedFeaturesForSnapshot(
     },
   });
 
-  if (features.length > 0) {
-    const operations = features.flatMap((feature) => [
-      { index: { _index: index, _id: feature.uuid } },
-      feature,
-    ]);
+  if (kis.length > 0) {
+    const operations = kis.flatMap((ki) => [{ index: { _index: index, _id: ki.uuid } }, ki]);
 
     await esClient.bulk({ refresh: true, operations });
   } else {
@@ -174,11 +198,11 @@ export async function persistSigEventsExtractedFeaturesForSnapshot(
     }
   }
 
-  log.info(`Persisted ${features.length} features to "${index}" for snapshotting`);
-  return { index, count: features.length };
+  log.info(`Persisted ${kis.length} KIs to "${index}" for snapshotting`);
+  return { index, count: kis.length };
 }
 
-export async function cleanupSigEventsExtractedFeaturesData(
+export async function cleanupSigEventsExtractedKIsData(
   esClient: Client,
   log: ToolingLog
 ): Promise<void> {

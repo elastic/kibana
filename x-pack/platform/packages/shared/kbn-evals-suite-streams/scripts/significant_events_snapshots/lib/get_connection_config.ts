@@ -26,7 +26,7 @@ export async function getConnectionConfig(
     flags['es-url'] ||
       (Array.isArray(elasticsearch.hosts) ? elasticsearch.hosts[0] : elasticsearch.hosts)
   );
-  const username = String(flags['es-username'] || elasticsearch.username);
+  const username = String(flags['es-username'] || 'elastic');
   const password = String(flags['es-password'] || elasticsearch.password);
 
   let kibanaUrl: string;
