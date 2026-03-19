@@ -8452,7 +8452,7 @@
           "\"index-pattern\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 48,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8649,7 +8649,7 @@
           "\"metaFields\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 42,
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -28648,6 +28648,10 @@
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
               {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/utils/inference_settings.test.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/packages/get.test.ts"
               },
@@ -29233,7 +29237,7 @@
           "\nValid `failureReason` attribute values for `has_es_data` API error responses"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 83,
+        "lineNumber": 88,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -29271,7 +29275,7 @@
           "\"index-pattern\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 48,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -29921,7 +29925,7 @@
           "300"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 59,
+        "lineNumber": 64,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -29940,7 +29944,7 @@
           "\"metaFields\""
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 42,
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30082,6 +30086,25 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.RUNTIME_FIELD_COMPOSITE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "RUNTIME_FIELD_COMPOSITE_TYPE",
+        "description": [
+          "\nAll runtime field types."
+        ],
+        "signature": [
+          "\"composite\""
+        ],
+        "path": "src/platform/plugins/shared/data_views/common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -30517,7 +30540,7 @@
           "\nUsed to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources\nthat are created by default by elastic in ese.\nWe should somehow prevent creating initial data for the users without their explicit action\ninstead of relying on these hardcoded assets"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 31,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30533,7 +30556,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-            "lineNumber": 32,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30543,18 +30566,33 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-common.PRIMITIVE_RUNTIME_FIELD_TYPES",
+        "type": "Object",
+        "tags": [],
+        "label": "PRIMITIVE_RUNTIME_FIELD_TYPES",
+        "description": [],
+        "signature": [
+          "readonly [\"keyword\", \"long\", \"double\", \"date\", \"ip\", \"boolean\", \"geo_point\"]"
+        ],
+        "path": "src/platform/plugins/shared/data_views/common/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-common.RUNTIME_FIELD_TYPES",
         "type": "Object",
         "tags": [],
         "label": "RUNTIME_FIELD_TYPES",
-        "description": [
-          "\nAll runtime field types."
-        ],
+        "description": [],
         "signature": [
           "readonly [\"keyword\", \"long\", \"double\", \"date\", \"ip\", \"boolean\", \"geo_point\", \"composite\"]"
         ],
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
-        "lineNumber": 14,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

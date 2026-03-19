@@ -81,17 +81,25 @@ export class ConnectorExecutor {
     return new Error(`Action type "${actionTypeId}" with ID "${actionId}" execution was aborted`);
   }
 
-  private async resolveConnectorId(connectorName: string): Promise<string> {
-    const allConnectors = await this.actionsClient.getAll();
-
-    const connector = allConnectors.find(
-      (c: ConnectorWithExtraFindData) => c.name === connectorName || c.id === connectorName
-    );
-
-    if (!connector) {
-      throw new Error(`Connector ${connectorName} not found`);
+  private async resolveConnectorId(connectorNameOrId: string): Promise<string> {
+    // Prefer direct ID lookup: try to fetch by ID first, which is unambiguous
+    try {
+      const connector = await this.actionsClient.get({ id: connectorNameOrId });
+      return connector.id;
+    } catch {
+      // Not found by ID -- fall through to name-based lookup
     }
 
-    return connector.id;
+    const allConnectors = await this.actionsClient.getAll();
+    const connectors = allConnectors.filter(
+      (c: ConnectorWithExtraFindData) => c.name === connectorNameOrId
+    );
+
+    if (connectors.length === 0) {
+      throw new Error(`Connector ${connectorNameOrId} not found`);
+    }
+    // Do not throw if multiple connectors are found. We will use the first one.
+
+    return connectors[0].id;
   }
 }

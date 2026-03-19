@@ -25,6 +25,7 @@ import type {
   ToolRegistry,
   HooksServiceStart,
 } from '@kbn/agent-builder-server';
+import type { WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type {
@@ -48,6 +49,7 @@ import { createAgentsServiceStartMock } from './agents';
 import type { SkillServiceStart, SkillRegistry } from '../services/skills';
 
 export type ToolResultStoreMock = jest.Mocked<WritableToolResultStore>;
+export type SkillsStoreMock = jest.Mocked<WritableSkillsStore>;
 export type SkillRegistryMock = jest.Mocked<SkillRegistry>;
 export type AttachmentsServiceStartMock = jest.Mocked<AttachmentServiceStart>;
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
@@ -93,6 +95,16 @@ export const createToolResultStoreMock = (): ToolResultStoreMock => {
   };
 };
 
+export const createSkillsStoreMock = (): SkillsStoreMock => {
+  return {
+    has: jest.fn(),
+    get: jest.fn(),
+    add: jest.fn(),
+    delete: jest.fn(),
+    asReadonly: jest.fn(),
+  };
+};
+
 export const createAttachmentsServiceStartMock = (): AttachmentsServiceStartMock => {
   return {
     validate: jest.fn(),
@@ -124,6 +136,7 @@ export const createSkillsServiceMock = (): SkillsServiceMock => {
   return {
     list: jest.fn().mockResolvedValue([]),
     get: jest.fn().mockResolvedValue(undefined),
+    bulkGet: jest.fn().mockResolvedValue(new Map()),
     convertSkillTool: jest.fn(),
   };
 };
@@ -150,7 +163,6 @@ export const createSkillServiceStartMock = (): SkillServiceStartMock => {
   return {
     getRegistry: jest.fn().mockResolvedValue(createSkillRegistryMock()),
     registerSkill: jest.fn().mockResolvedValue(undefined),
-    unregisterSkill: jest.fn().mockResolvedValue(false),
   };
 };
 
@@ -158,6 +170,7 @@ export const createSkillRegistryMock = (): SkillRegistryMock => {
   return {
     has: jest.fn().mockResolvedValue(false),
     get: jest.fn(),
+    bulkGet: jest.fn().mockResolvedValue(new Map()),
     list: jest.fn().mockResolvedValue([]),
     create: jest.fn(),
     update: jest.fn(),
@@ -239,6 +252,7 @@ export interface AgentHandlerContextMock extends AgentHandlerContext {
   toolProvider: ToolProviderMock;
   toolRegistry: ToolRegistryMock;
   resultStore: ToolResultStoreMock;
+  skillsStore: SkillsStoreMock;
   attachments: AttachmentsServiceMock;
   filestore: FileSystemStoreMock;
   skills: SkillsServiceMock;
@@ -257,6 +271,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     runner: createScopedRunnerMock(),
     attachments: createAttachmentsService(),
     resultStore: createToolResultStoreMock(),
+    skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
     events: {
       emit: jest.fn(),
@@ -310,6 +325,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     skills: createSkillsServiceMock(),
     toolManager: createToolManagerMock(),
     savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
+    runContext: { runId: 'mock-run-id', stack: [] },
   };
 };
 
@@ -341,6 +357,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     logger: loggerMock.create(),
     request: httpServerMock.createKibanaRequest(),
     resultStore: createToolResultStoreMock(),
+    skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
     attachmentsService: createAttachmentsServiceStartMock(),
     promptManager: createPromptManagerMock(),

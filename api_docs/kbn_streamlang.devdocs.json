@@ -688,10 +688,11 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ") => any"
+          ") => ",
+          "QueryDslQueryContainer"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/condition_to_query_dsl.ts",
-        "lineNumber": 80,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -713,7 +714,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/condition_to_query_dsl.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -1316,10 +1317,10 @@
           "\nGet Monaco YAML schema configuration for the standalone condition editor.\n\nThis generates a JSON Schema from the condition Zod schema and applies\nthe same fixups used for the full Streamlang schema (enum dedup,\nadditionalProperties enforcement) plus condition-specific transforms\n(anyOf flattening, operator snippets).\n"
         ],
         "signature": [
-          "() => { uri: string; fileMatch: string[]; schema: object; } | null"
+          "() => { uri: string; fileMatch: string[]; schema: Record<string, unknown>; } | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/schema/get_json_schema_from_streamlang_schema.ts",
-        "lineNumber": 1012,
+        "lineNumber": 1068,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1527,7 +1528,7 @@
           " | undefined) => StreamlangJsonSchema"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/schema/get_json_schema_from_streamlang_schema.ts",
-        "lineNumber": 24,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1545,7 +1546,7 @@
               "z.ZodType"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/schema/get_json_schema_from_streamlang_schema.ts",
-            "lineNumber": 36,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1571,7 +1572,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/schema/get_json_schema_from_streamlang_schema.ts",
-            "lineNumber": 37,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1773,7 +1774,7 @@
           "(processor: TProcessorDefinition) => \"sort\" | \"concat\" | \"replace\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"math\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"convert\" | \"dissect\" | \"drop_document\" | \"remove_by_prefix\" | \"redact\" | \"network_direction\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 796,
+        "lineNumber": 810,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1789,7 +1790,7 @@
               "TProcessorDefinition"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 800,
+            "lineNumber": 814,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1973,7 +1974,7 @@
           ">(obj?: TBlock | undefined) => obj is Extract<TBlock, { action: string; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 75,
+        "lineNumber": 80,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1989,7 +1990,7 @@
               "TBlock | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-            "lineNumber": 76,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2203,7 +2204,7 @@
         "label": "isConditionBlock",
         "description": [],
         "signature": [
-          "(obj: any) => obj is ",
+          "(obj: unknown) => obj is ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -2221,12 +2222,12 @@
           {
             "parentPluginId": "@kbn/streamlang",
             "id": "def-common.isConditionBlock.$1",
-            "type": "Any",
+            "type": "Unknown",
             "tags": [],
             "label": "obj",
             "description": [],
             "signature": [
-              "any"
+              "unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
             "lineNumber": 57,
@@ -6624,7 +6625,7 @@
           "\nStreamlang DSL Root Type"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 81,
+        "lineNumber": 86,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6641,7 +6642,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-            "lineNumber": 85,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7872,7 +7873,7 @@
           "(\"sort\" | \"concat\" | \"replace\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"math\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"convert\" | \"dissect\" | \"drop_document\" | \"remove_by_prefix\" | \"redact\" | \"network_direction\" | \"manual_ingest_pipeline\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 776,
+        "lineNumber": 786,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8171,7 +8172,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 91,
+        "lineNumber": 96,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8190,8 +8191,35 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 99,
+        "lineNumber": 104,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.StreamlangOasDefinitions",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamlangOasDefinitions",
+        "description": [],
+        "signature": [
+          "{ readonly Condition: z.Schema<",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ">; readonly StreamlangDSL: any; readonly StreamlangStep: z.ZodType<",
+          "StreamlangStep",
+          ">; readonly StreamlangProcessor: any; readonly GrokProcessor: any; readonly DissectProcessor: any; readonly DateProcessor: any; readonly RenameProcessor: any; readonly AppendProcessor: any; readonly ConvertProcessor: any; readonly RemoveByPrefixProcessor: any; readonly RemoveProcessor: any; readonly DropDocumentProcessor: any; readonly ReplaceProcessor: any; readonly RedactProcessor: any; readonly MathProcessor: any; readonly UppercaseProcessor: any; readonly LowercaseProcessor: any; readonly TrimProcessor: any; readonly JoinProcessor: any; readonly SplitProcessor: any; readonly SortProcessor: any; readonly ConcatProcessor: any; readonly NetworkDirectionProcessor: any; readonly ManualIngestPipelineProcessor: any; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/oas_definitions.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10726,6 +10754,33 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "lineNumber": 566,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.streamlangOasDefinitions",
+        "type": "Object",
+        "tags": [],
+        "label": "streamlangOasDefinitions",
+        "description": [],
+        "signature": [
+          "{ readonly Condition: z.Schema<",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ">; readonly StreamlangDSL: any; readonly StreamlangStep: z.ZodType<",
+          "StreamlangStep",
+          ">; readonly StreamlangProcessor: any; readonly GrokProcessor: any; readonly DissectProcessor: any; readonly DateProcessor: any; readonly RenameProcessor: any; readonly AppendProcessor: any; readonly ConvertProcessor: any; readonly RemoveByPrefixProcessor: any; readonly RemoveProcessor: any; readonly DropDocumentProcessor: any; readonly ReplaceProcessor: any; readonly RedactProcessor: any; readonly MathProcessor: any; readonly UppercaseProcessor: any; readonly LowercaseProcessor: any; readonly TrimProcessor: any; readonly JoinProcessor: any; readonly SplitProcessor: any; readonly SortProcessor: any; readonly ConcatProcessor: any; readonly NetworkDirectionProcessor: any; readonly ManualIngestPipelineProcessor: any; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/oas_definitions.ts",
+        "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
