@@ -638,7 +638,7 @@
           ", kibanaVersion: string) => string"
         ],
         "path": "src/core/packages/http/router-server-internal/src/get_warning_header_message.ts",
-        "lineNumber": 12,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -654,7 +654,7 @@
               "RouteDeprecationInfo"
             ],
             "path": "src/core/packages/http/router-server-internal/src/get_warning_header_message.ts",
-            "lineNumber": 13,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -671,7 +671,7 @@
               "string"
             ],
             "path": "src/core/packages/http/router-server-internal/src/get_warning_header_message.ts",
-            "lineNumber": 14,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
