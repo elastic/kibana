@@ -3,6 +3,7 @@
 exports[`Summary Transform Generator for 'Timeslices' and 'Rolling' SLO generates the correct transform for a 7 days SLO 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
     "version": 3.6,
