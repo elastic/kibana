@@ -7,6 +7,7 @@
 
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
+import pRetry from 'p-retry';
 import type { Observable } from 'rxjs';
 import { concat, forkJoin, from as rxjsFrom, of } from 'rxjs';
 import { catchError, tap } from 'rxjs';
@@ -28,6 +29,46 @@ import type { ServiceConfig } from '../config';
 import { getSanitizedError } from './utils/sanitize_error';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
+
+/** Timeout in ms for account access status check (simple GET). */
+const ACCOUNT_ACCESS_CHECK_TIMEOUT_MS = 10_000;
+
+/** Timeout in ms for service endpoint calls (POST/PUT/DELETE with potentially large payloads). */
+const SERVICE_ENDPOINT_TIMEOUT_MS = 60_000;
+
+/** Retry configuration for checkAccountAccessStatus. */
+const ACCOUNT_ACCESS_CHECK_RETRIES = 3;
+const ACCOUNT_ACCESS_CHECK_MIN_TIMEOUT_MS = 1000;
+
+/** Retry configuration for service endpoint calls on transient network errors. */
+const SERVICE_ENDPOINT_RETRIES = 3;
+const SERVICE_ENDPOINT_MIN_TIMEOUT_MS = 1000;
+
+/** Node/axios error codes that indicate transient network failures worth retrying. */
+const TRANSIENT_NETWORK_ERROR_CODES = new Set([
+  'ECONNRESET', // Connection reset by peer / TLS socket disconnect
+  'ETIMEDOUT', // Operation timed out
+  'EAI_AGAIN', // Temporary DNS failure
+  'ECONNREFUSED', // Connection refused (can be transient during restarts)
+  'EPIPE', // Broken pipe / socket closed
+  'EPROTO', // TLS protocol error
+  'ENOTFOUND', // DNS lookup failed (can be transient)
+  'ENETUNREACH', // Network unreachable
+  'ENETRESET', // Network dropped connection
+]);
+
+function isTransientNetworkError(error: unknown): boolean {
+  const err = error as AxiosError & NodeJS.ErrnoException;
+  if (err.response) {
+    return false;
+  }
+  const code = err.code ?? (err.cause as NodeJS.ErrnoException)?.code;
+  if (code && TRANSIENT_NETWORK_ERROR_CODES.has(code)) {
+    return true;
+  }
+  const message = (err.message ?? '').toLowerCase();
+  return message.includes('socket hang up') || message.includes('econnreset');
+}
 
 export interface ServiceData {
   monitors: Array<Partial<MonitorFields>>;
@@ -102,15 +143,29 @@ export class ServiceAPIClient {
 
       if (httpsAgent) {
         try {
-          const { data } = await axios(
-            this.addVersionHeader({
-              method: 'GET',
-              url: url + '/allowed',
-              httpsAgent,
-            })
+          const response = await pRetry(
+            async () =>
+              axios(
+                this.addVersionHeader({
+                  method: 'GET',
+                  url: url + '/allowed',
+                  httpsAgent,
+                  timeout: ACCOUNT_ACCESS_CHECK_TIMEOUT_MS,
+                })
+              ),
+            {
+              retries: ACCOUNT_ACCESS_CHECK_RETRIES,
+              minTimeout: ACCOUNT_ACCESS_CHECK_MIN_TIMEOUT_MS,
+              factor: 2,
+              onFailedAttempt: (error) => {
+                this.logger.debug(
+                  `Attempt ${error.attemptNumber} to check account access status failed. ${error.retriesLeft} retries remaining.`
+                );
+              },
+            }
           );
 
-          const { allowed, signupUrl } = data;
+          const { allowed, signupUrl } = response.data;
           return { allowed, signupUrl };
         } catch (error) {
           this.logger.error(`Error getting isAllowed status, Error: ${error.message}`, {
@@ -222,7 +277,13 @@ export class ServiceAPIClient {
 
     monitorsByLocation.forEach(({ location: { url, id }, data }) => {
       const sendRequest = (payload: ServicePayload): Observable<any> => {
-        const promise = this.callServiceEndpoint(payload, method, url, endpoint);
+        const promise = this.callServiceEndpointWithTransientRetry(
+          payload,
+          method,
+          url,
+          endpoint,
+          id
+        );
         return rxjsFrom(promise).pipe(
           tap((result) => {
             this.logSuccessMessage(url, method, payload.monitors.length, result);
@@ -268,6 +329,33 @@ export class ServiceAPIClient {
     return { pushErrors, result };
   }
 
+  private async callServiceEndpointWithTransientRetry(
+    data: ServicePayload,
+    method: 'POST' | 'PUT' | 'DELETE',
+    baseUrl: string,
+    endpoint: string,
+    locationId: string
+  ): Promise<AxiosResponse<unknown>> {
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= SERVICE_ENDPOINT_RETRIES + 1; attempt++) {
+      try {
+        return await this.callServiceEndpoint(data, method, baseUrl, endpoint);
+      } catch (err) {
+        lastError = err;
+        const exhausted = attempt === SERVICE_ENDPOINT_RETRIES + 1;
+        if (!isTransientNetworkError(err) || exhausted) {
+          throw err;
+        }
+        const delay = SERVICE_ENDPOINT_MIN_TIMEOUT_MS * Math.pow(2, attempt - 1);
+        this.logger.debug(
+          `Attempt ${attempt} to call service location ${baseUrl} (${locationId}) failed with transient error: ${(err as Error).message}. ${SERVICE_ENDPOINT_RETRIES + 1 - attempt} retries remaining.`
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+    throw lastError;
+  }
+
   async callServiceEndpoint(
     data: ServicePayload,
     // INSPECT is a special case where we don't want to call the service, but just return the data
@@ -297,6 +385,7 @@ export class ServiceAPIClient {
         data,
         headers: authHeader,
         httpsAgent: this.getHttpsAgent(baseUrl),
+        timeout: SERVICE_ENDPOINT_TIMEOUT_MS,
       })
     );
   }
