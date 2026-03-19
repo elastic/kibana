@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  EuiText,
-  EuiButtonEmpty,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { TemplatesBulkActions } from './templates_bulk_actions';
@@ -27,8 +20,6 @@ export interface TemplatesTableSettingsProps {
   onBulkActionSuccess: () => void;
   hasFilters: boolean;
   onClearFilters: () => void;
-  showOnlyDisabled: boolean;
-  onShowOnlyDisabledChange: () => void;
 }
 
 const TemplatesTableSettingsComponent: React.FC<TemplatesTableSettingsProps> = ({
@@ -39,8 +30,6 @@ const TemplatesTableSettingsComponent: React.FC<TemplatesTableSettingsProps> = (
   onBulkActionSuccess,
   hasFilters,
   onClearFilters,
-  showOnlyDisabled,
-  onShowOnlyDisabledChange,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -93,16 +82,6 @@ const TemplatesTableSettingsComponent: React.FC<TemplatesTableSettingsProps> = (
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={true} />
-      <EuiFlexItem grow={false}>
-        <EuiSwitch
-          checked={showOnlyDisabled}
-          onChange={onShowOnlyDisabledChange}
-          label={i18n.SHOW_ONLY_DISABLED}
-          compressed
-          data-test-subj="templates-disabled-filter-link"
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

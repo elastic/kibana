@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiFilterGroup,
+  EuiSelect,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -63,6 +64,17 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
     [onQueryParamsChange]
   );
 
+  const onIsEnabledChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const { value } = e.target;
+      onQueryParamsChange({
+        isEnabled: value === '' ? undefined : value === 'true',
+        page: 1,
+      });
+    },
+    [onQueryParamsChange]
+  );
+
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -104,6 +116,19 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
             isLoading={isLoadingCreators}
           />
         </EuiFilterGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSelect
+          options={[
+            { value: '', text: i18n.SHOW_ALL },
+            { value: 'true', text: i18n.TEMPLATE_ENABLED },
+            { value: 'false', text: i18n.TEMPLATE_DISABLED },
+          ]}
+          value={queryParams.isEnabled === undefined ? '' : String(queryParams.isEnabled)}
+          onChange={onIsEnabledChange}
+          aria-label={i18n.STATUS}
+          data-test-subj="templates-status-filter"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon

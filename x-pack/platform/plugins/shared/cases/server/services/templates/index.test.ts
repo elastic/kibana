@@ -741,6 +741,80 @@ describe('TemplatesService', () => {
     );
   });
 
+  it('persists isEnabled: false when explicitly set to false on create', async () => {
+    const definition = buildDefinition('Disabled Template');
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate(
+      {
+        owner: 'securitySolution',
+        definition,
+        isEnabled: false,
+      },
+      'alice'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({ isEnabled: false }),
+      expect.any(Object)
+    );
+  });
+
+  it('persists isEnabled: true when explicitly set to true on create', async () => {
+    const definition = buildDefinition('Enabled Template');
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate(
+      {
+        owner: 'securitySolution',
+        definition,
+        isEnabled: true,
+      },
+      'alice'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({ isEnabled: true }),
+      expect.any(Object)
+    );
+  });
+
+  it('defaults isEnabled to true when not provided on create', async () => {
+    const definition = buildDefinition('Default Enabled Template');
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate(
+      {
+        owner: 'securitySolution',
+        definition,
+      },
+      'alice'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({ isEnabled: true }),
+      expect.any(Object)
+    );
+  });
+
   it('falls back to input description and tags when not present in YAML on create', async () => {
     const definition = buildDefinition('Plain Template');
     const service = createService();

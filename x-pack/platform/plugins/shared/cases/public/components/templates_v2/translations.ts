@@ -119,6 +119,10 @@ export const SHOW_ONLY_DISABLED = i18n.translate('xpack.cases.templates.showOnly
   defaultMessage: 'Show only disabled',
 });
 
+export const STATUS = i18n.translate('xpack.cases.templates.status', {
+  defaultMessage: 'Status',
+});
+
 export const SHOW_ALL = i18n.translate('xpack.cases.templates.showAll', {
   defaultMessage: 'Show all',
 });

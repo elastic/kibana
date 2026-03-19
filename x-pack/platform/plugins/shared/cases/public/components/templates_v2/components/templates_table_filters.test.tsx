@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 
 import { TemplatesTableFilters } from './templates_table_filters';
 import { renderWithTestingProviders } from '../../../common/mock';
@@ -119,6 +119,122 @@ describe('TemplatesTableFilters', () => {
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('existing search')).toBeInTheDocument();
+    });
+  });
+
+  it('renders the status filter select', async () => {
+    renderWithTestingProviders(
+      <TemplatesTableFilters
+        queryParams={defaultQueryParams}
+        onQueryParamsChange={onQueryParamsChange}
+        onRefresh={onRefresh}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-status-filter')).toBeInTheDocument();
+    });
+  });
+
+  it('calls onQueryParamsChange with isEnabled: false when Disabled is selected', async () => {
+    renderWithTestingProviders(
+      <TemplatesTableFilters
+        queryParams={defaultQueryParams}
+        onQueryParamsChange={onQueryParamsChange}
+        onRefresh={onRefresh}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-status-filter')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId('templates-status-filter'), {
+      target: { value: 'false' },
+    });
+
+    expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: false, page: 1 });
+  });
+
+  it('calls onQueryParamsChange with isEnabled: true when Enabled is selected', async () => {
+    renderWithTestingProviders(
+      <TemplatesTableFilters
+        queryParams={{ ...defaultQueryParams, isEnabled: false }}
+        onQueryParamsChange={onQueryParamsChange}
+        onRefresh={onRefresh}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-status-filter')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId('templates-status-filter'), {
+      target: { value: 'true' },
+    });
+
+    expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: true, page: 1 });
+  });
+
+  it('calls onQueryParamsChange with isEnabled: undefined when Show all is selected', async () => {
+    renderWithTestingProviders(
+      <TemplatesTableFilters
+        queryParams={{ ...defaultQueryParams, isEnabled: false }}
+        onQueryParamsChange={onQueryParamsChange}
+        onRefresh={onRefresh}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-status-filter')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId('templates-status-filter'), {
+      target: { value: '' },
+    });
+
+    expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: undefined, page: 1 });
+  });
+
+  it('shows disabled as selected value when queryParams.isEnabled is false', async () => {
+    renderWithTestingProviders(
+      <TemplatesTableFilters
+        queryParams={{ ...defaultQueryParams, isEnabled: false }}
+        onQueryParamsChange={onQueryParamsChange}
+        onRefresh={onRefresh}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-status-filter')).toHaveValue('false');
+    });
+  });
+
+  it('shows enabled as selected value when queryParams.isEnabled is true', async () => {
+    renderWithTestingProviders(
+      <TemplatesTableFilters
+        queryParams={{ ...defaultQueryParams, isEnabled: true }}
+        onQueryParamsChange={onQueryParamsChange}
+        onRefresh={onRefresh}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-status-filter')).toHaveValue('true');
+    });
+  });
+
+  it('shows show all as selected value when queryParams.isEnabled is undefined', async () => {
+    renderWithTestingProviders(
+      <TemplatesTableFilters
+        queryParams={defaultQueryParams}
+        onQueryParamsChange={onQueryParamsChange}
+        onRefresh={onRefresh}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-status-filter')).toHaveValue('');
     });
   });
 });

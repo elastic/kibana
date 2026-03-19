@@ -44,8 +44,6 @@ describe('TemplatesTableSettings', () => {
     onBulkActionSuccess: jest.fn(),
     hasFilters: false,
     onClearFilters: jest.fn(),
-    showOnlyDisabled: false,
-    onShowOnlyDisabledChange: jest.fn(),
   };
 
   beforeAll(() => {
@@ -108,61 +106,6 @@ describe('TemplatesTableSettings', () => {
     await user.click(screen.getByTestId('templates-clear-filters-link-icon'));
 
     expect(onClearFilters).toHaveBeenCalled();
-  });
-
-  it('renders the show only disabled switch', async () => {
-    renderWithTestingProviders(<TemplatesTableSettings {...defaultProps} />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-disabled-filter-link')).toBeInTheDocument();
-    });
-    expect(screen.getByText('Show only disabled')).toBeInTheDocument();
-  });
-
-  it('calls onShowOnlyDisabledChange when show only disabled switch is toggled', async () => {
-    const onShowOnlyDisabledChange = jest.fn();
-    renderWithTestingProviders(
-      <TemplatesTableSettings
-        {...defaultProps}
-        onShowOnlyDisabledChange={onShowOnlyDisabledChange}
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-disabled-filter-link')).toBeInTheDocument();
-    });
-
-    await user.click(screen.getByTestId('templates-disabled-filter-link'));
-
-    expect(onShowOnlyDisabledChange).toHaveBeenCalled();
-  });
-
-  it('renders show only disabled switch as unchecked when showOnlyDisabled is false', async () => {
-    renderWithTestingProviders(
-      <TemplatesTableSettings {...defaultProps} showOnlyDisabled={false} />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-disabled-filter-link')).toBeInTheDocument();
-    });
-    expect(screen.getByTestId('templates-disabled-filter-link')).toHaveAttribute(
-      'aria-checked',
-      'false'
-    );
-  });
-
-  it('renders show only disabled switch as checked when showOnlyDisabled is true', async () => {
-    renderWithTestingProviders(
-      <TemplatesTableSettings {...defaultProps} showOnlyDisabled={true} />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-disabled-filter-link')).toBeInTheDocument();
-    });
-    expect(screen.getByTestId('templates-disabled-filter-link')).toHaveAttribute(
-      'aria-checked',
-      'true'
-    );
   });
 
   it('renders bulk actions when templates are selected', async () => {

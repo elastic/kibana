@@ -267,6 +267,7 @@ export class TemplatesService {
         author,
         fieldCount: parsedDefinition.fields.length,
         fieldNames: parsedDefinition.fields.map((f) => f.name),
+        isEnabled: input.isEnabled ?? true,
       } as Template,
       { refresh: true }
     );

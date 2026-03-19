@@ -315,6 +315,41 @@ describe('useTemplatesActions', () => {
     expect(showSuccessToastMock).toHaveBeenCalledWith('Template updated successfully');
   });
 
+  it('handleIsEnabledChange sends isEnabled: false when template.isEnabled is undefined (treated as enabled)', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    // isEnabled is undefined — treated as enabled per column logic (isEnabled !== false)
+    const templateWithUndefined = { ...mockTemplate };
+    act(() => {
+      result.current.handleIsEnabledChange(templateWithUndefined);
+    });
+
+    expect(updateTemplateMock).toHaveBeenCalledWith(
+      {
+        templateId: mockTemplate.templateId,
+        template: { isEnabled: false },
+      },
+      { onSuccess: expect.any(Function) }
+    );
+  });
+
+  it('handleIsEnabledChange sends isEnabled: true when template.isEnabled is false', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    const disabledTemplate = { ...mockTemplate, isEnabled: false };
+    act(() => {
+      result.current.handleIsEnabledChange(disabledTemplate);
+    });
+
+    expect(updateTemplateMock).toHaveBeenCalledWith(
+      {
+        templateId: mockTemplate.templateId,
+        template: { isEnabled: true },
+      },
+      { onSuccess: expect.any(Function) }
+    );
+  });
+
   it('handlers are stable between renders', () => {
     const { result, rerender } = renderHook(() => useTemplatesActions(), { wrapper });
 
