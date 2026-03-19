@@ -107,6 +107,8 @@ export class ResponseActionsFormPage {
       .click();
   }
 
+  // EuiComboBoxWrapper is page-scoped; here the combobox must be scoped
+  // within a specific action item, so we interact with it directly.
   async selectPack(packName: string, actionIndex: number) {
     const comboBox = this.getResponseActionItem(actionIndex).locator(
       '[data-test-subj="comboBoxInput"]'
@@ -116,34 +118,28 @@ export class ResponseActionsFormPage {
     await this.page.getByRole('option', { name: packName }).click();
   }
 
+  /**
+   * ECS-field-input and osqueryColumnValueSelect are container divs, not
+   * focusable inputs. Clicking them focuses the inner input, so we use
+   * page.keyboard to type into the currently focused element.
+   */
   async addEcsMapping(field: string, value: string, actionIndex: number) {
     const item = this.getResponseActionItem(actionIndex);
 
-    const ecsInput = item.locator('[data-test-subj="ECS-field-input"]');
-    await ecsInput.click();
-    await ecsInput.pressSequentially(field);
-    await ecsInput.press('ArrowDown');
-    await ecsInput.press('Enter');
+    await item.locator('[data-test-subj="ECS-field-input"]').click();
+    await this.page.keyboard.type(field);
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
 
-    const columnSelect = item.locator('[data-test-subj="osqueryColumnValueSelect"]');
-    await columnSelect.click();
-    await columnSelect.pressSequentially(value);
-    await columnSelect.press('ArrowDown');
-    await columnSelect.press('Enter');
+    await item.locator('[data-test-subj="osqueryColumnValueSelect"]').click();
+    await this.page.keyboard.type(value);
+    await this.page.keyboard.press('ArrowDown');
+    await this.page.keyboard.press('Enter');
   }
 
   async removeAction(actionIndex: number) {
     const item = this.getResponseActionItem(actionIndex);
     await item.locator('[data-test-subj="remove-response-action"]').click();
-  }
-
-  async getPackComboBoxValue(actionIndex: number): Promise<string> {
-    const item = this.getResponseActionItem(actionIndex);
-    const input = item.locator(
-      '[data-test-subj="comboBoxInput"] [data-test-subj="comboBoxSearchInput"]'
-    );
-
-    return input.inputValue();
   }
 
   async submitRule() {

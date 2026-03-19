@@ -7,14 +7,9 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, testData } from '../fixtures';
-
-const API_HEADERS = {
-  'kbn-xsrf': 'true',
-  'elastic-api-version': testData.OSQUERY_API_VERSION,
-};
-
-const uniqueId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+import { test } from '../fixtures';
+import { OSQUERY_API_HEADERS } from '../../common/constants';
+import { uniqueId } from '../../common/helpers';
 
 test.describe(
   'Osquery response actions form persistence',
@@ -35,6 +30,7 @@ test.describe(
         },
         shards: {},
       });
+      expect(packResponse.data).toBeDefined();
       packId = (packResponse.data as Record<string, Record<string, string>>).data.saved_object_id;
 
       const ruleResponse = await kbnClient.request({
@@ -54,8 +50,9 @@ test.describe(
           to: 'now',
           enabled: false,
         },
-        headers: API_HEADERS,
+        headers: OSQUERY_API_HEADERS,
       });
+      expect(ruleResponse.data).toBeDefined();
       ruleId = (ruleResponse.data as Record<string, string>).id;
     });
 
@@ -68,7 +65,7 @@ test.describe(
         await kbnClient.request({
           method: 'DELETE',
           path: `/api/detection_engine/rules?id=${ruleId}`,
-          headers: API_HEADERS,
+          headers: OSQUERY_API_HEADERS,
           ignoreErrors: [404],
         });
       }

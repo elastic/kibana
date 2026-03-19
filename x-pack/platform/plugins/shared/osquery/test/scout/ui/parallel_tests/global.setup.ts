@@ -6,15 +6,12 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { OSQUERY_API_VERSION } from '../../common/constants';
+import { OSQUERY_API_HEADERS } from '../../common/constants';
 
 globalSetupHook(
   'Install osquery_manager Fleet package and create agent/package policies',
   async ({ kbnClient, apiServices, log }) => {
-    const headers = {
-      'kbn-xsrf': 'true',
-      'elastic-api-version': OSQUERY_API_VERSION,
-    };
+    const headers = OSQUERY_API_HEADERS;
 
     log.info('[osquery-setup] Installing osquery_manager Fleet package...');
     await kbnClient.request({
@@ -29,6 +26,10 @@ globalSetupHook(
       path: '/api/fleet/epm/packages/osquery_manager',
       headers,
     });
+    if (!packageResponse.data) {
+      throw new Error('Fleet package GET returned empty body');
+    }
+
     const osqueryVersion = (packageResponse.data as Record<string, Record<string, string>>).item
       .version;
     log.info(`[osquery-setup] osquery_manager v${osqueryVersion} installed`);
@@ -43,6 +44,10 @@ globalSetupHook(
         monitoring_enabled: ['logs', 'metrics'],
       },
     });
+    if (!agentPolicyResponse.data) {
+      throw new Error('Agent policy creation returned empty body');
+    }
+
     const agentPolicyId = agentPolicyResponse.data.item.id;
 
     log.info('[osquery-setup] Creating osquery_manager package policy...');

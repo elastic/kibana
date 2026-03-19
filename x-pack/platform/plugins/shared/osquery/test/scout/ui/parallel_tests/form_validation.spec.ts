@@ -7,14 +7,9 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, testData } from '../fixtures';
-
-const API_HEADERS = {
-  'kbn-xsrf': 'true',
-  'elastic-api-version': testData.OSQUERY_API_VERSION,
-};
-
-const uniqueId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+import { test } from '../fixtures';
+import { OSQUERY_API_HEADERS } from '../../common/constants';
+import { uniqueId } from '../../common/helpers';
 
 test.describe(
   'Osquery response actions form validation',
@@ -40,8 +35,9 @@ test.describe(
           to: 'now',
           enabled: false,
         },
-        headers: API_HEADERS,
+        headers: OSQUERY_API_HEADERS,
       });
+      expect(ruleResponse.data).toBeDefined();
       ruleId = (ruleResponse.data as Record<string, string>).id;
     });
 
@@ -54,7 +50,7 @@ test.describe(
         await kbnClient.request({
           method: 'DELETE',
           path: `/api/detection_engine/rules?id=${ruleId}`,
-          headers: API_HEADERS,
+          headers: OSQUERY_API_HEADERS,
           ignoreErrors: [404],
         });
       }
@@ -116,6 +112,13 @@ test.describe(
         await responseActionsForm.addOsqueryAction(1);
         await responseActionsForm.switchToPackMode(1);
         await expect(responseActionsForm.errorsContainer).toContainText('Pack is a required field');
+      });
+
+      await test.step('check accessibility of response actions form', async () => {
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="response-actions-form"]'],
+        });
+        expect(violations).toHaveLength(0);
       });
     });
   }
