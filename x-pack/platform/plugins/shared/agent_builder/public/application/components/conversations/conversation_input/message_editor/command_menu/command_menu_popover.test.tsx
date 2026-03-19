@@ -29,6 +29,7 @@ const activeMatch: CommandMatchResult = {
       id: CommandId.Attachment,
       sequence: '@',
       name: 'Attachment',
+      scheme: 'attachment',
       menuComponent: MockMenuComponent,
     },
     commandStartOffset: 0,
