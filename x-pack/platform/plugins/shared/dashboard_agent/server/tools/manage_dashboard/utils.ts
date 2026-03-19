@@ -13,14 +13,9 @@ import type {
   DashboardAttachmentData,
   LensAttachmentPanel,
 } from '@kbn/dashboard-agent-common';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  isGenericAttachmentPanel,
-  type GenericAttachmentPanel,
-} from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
 
@@ -132,93 +127,6 @@ export const resolvePanelsFromAttachments = async ({
   );
 
   return { panels, failures };
-};
-
-interface UpsertMarkdownPanelResult {
-  panels: AttachmentPanel[];
-  changedPanel?: AttachmentPanel;
-}
-
-const isDashboardMarkdownPanel = (
-  panel: AttachmentPanel
-): panel is GenericAttachmentPanel & { type: typeof MARKDOWN_EMBEDDABLE_TYPE } => {
-  return isGenericAttachmentPanel(panel) && panel.type === MARKDOWN_EMBEDDABLE_TYPE;
-};
-
-const getMarkdownContent = (panel: AttachmentPanel): string | undefined => {
-  if (!isDashboardMarkdownPanel(panel)) {
-    return undefined;
-  }
-
-  const { content } = panel.rawConfig;
-  return typeof content === 'string' ? content : undefined;
-};
-
-const MARKDOWN_GRID_W = 48;
-const MARKDOWN_MIN_H = 4;
-const MARKDOWN_MAX_H = 9;
-
-const estimateMarkdownGridHeight = (content: string): number => {
-  const nonEmptyLines = content.split('\n').filter((line) => line.trim().length > 0).length;
-  return Math.min(MARKDOWN_MAX_H, Math.max(MARKDOWN_MIN_H, nonEmptyLines + 2));
-};
-
-const buildMarkdownGrid = (
-  content: string,
-  existingGrid?: { w: number; h: number; x: number; y: number }
-) => ({
-  w: MARKDOWN_GRID_W,
-  h: estimateMarkdownGridHeight(content),
-  x: existingGrid?.x ?? 0,
-  y: existingGrid?.y ?? 0,
-});
-
-export const upsertMarkdownPanel = (
-  panels: AttachmentPanel[],
-  markdownContent?: string
-): UpsertMarkdownPanelResult => {
-  if (!markdownContent) {
-    return { panels };
-  }
-
-  const existingMarkdownPanelIndex = panels.findIndex((panel) => isDashboardMarkdownPanel(panel));
-  if (existingMarkdownPanelIndex === -1) {
-    const markdownPanel: AttachmentPanel = {
-      type: MARKDOWN_EMBEDDABLE_TYPE,
-      panelId: uuidv4(),
-      rawConfig: { content: markdownContent },
-      grid: buildMarkdownGrid(markdownContent),
-    };
-    return {
-      panels: [markdownPanel, ...panels],
-      changedPanel: markdownPanel,
-    };
-  }
-
-  const existingMarkdownPanel = panels[existingMarkdownPanelIndex];
-  if (!isDashboardMarkdownPanel(existingMarkdownPanel)) {
-    return { panels };
-  }
-
-  if (getMarkdownContent(existingMarkdownPanel) === markdownContent) {
-    return { panels };
-  }
-
-  const updatedMarkdownPanel: AttachmentPanel = {
-    ...existingMarkdownPanel,
-    rawConfig: {
-      ...existingMarkdownPanel.rawConfig,
-      content: markdownContent,
-    },
-    grid: buildMarkdownGrid(markdownContent, existingMarkdownPanel.grid),
-  };
-  const updatedPanels = [...panels];
-  updatedPanels[existingMarkdownPanelIndex] = updatedMarkdownPanel;
-
-  return {
-    panels: updatedPanels,
-    changedPanel: updatedMarkdownPanel,
-  };
 };
 
 export const getRemovedPanels = (

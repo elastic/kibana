@@ -58,6 +58,27 @@ export class WorkflowsApiService {
     return response.data;
   }
 
+  /** GET /api/workflows/{id} — fetch a workflow by ID. */
+  async getWorkflow(workflowId: string): Promise<WorkflowDetailDto> {
+    const response = await this.kbnClient.request<WorkflowDetailDto>({
+      method: 'GET',
+      path: `/s/${this.spaceId}/api/workflows/${workflowId}`,
+    });
+    return response.data;
+  }
+
+  /** GET /api/workflows/{id} — fetch a workflow by ID, with response status. */
+  async rawGetWorkflow(workflowId: string): Promise<{
+    data: WorkflowDetailDto;
+    status: number;
+  }> {
+    const response = await this.kbnClient.request<WorkflowDetailDto>({
+      method: 'GET',
+      path: `/s/${this.spaceId}/api/workflows/${workflowId}`,
+    });
+    return response;
+  }
+
   /** PUT /api/workflows/{id} — partially update a workflow (e.g. toggle enabled). */
   async update(
     id: string,
@@ -69,6 +90,19 @@ export class WorkflowsApiService {
       body,
     });
     return response.data;
+  }
+
+  /** PUT /api/workflows/{id} — update a workflow, with response status. */
+  async rawUpdate(
+    id: string,
+    body: Partial<Pick<WorkflowDetailDto, 'name' | 'description' | 'enabled' | 'yaml'>>
+  ): Promise<{ data: WorkflowDetailDto; status: number }> {
+    const response = await this.kbnClient.request<WorkflowDetailDto>({
+      method: 'PUT',
+      path: `/s/${this.spaceId}/api/workflows/${id}`,
+      body,
+    });
+    return response;
   }
 
   /** DELETE /api/workflows — delete workflows by IDs. */
