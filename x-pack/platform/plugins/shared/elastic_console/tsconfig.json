@@ -24,6 +24,7 @@
     "@kbn/management-settings-ids",
     "@kbn/storage-adapter",
     "@kbn/agent-builder-server",
-    "@kbn/core-feature-flags-server"
+    "@kbn/core-feature-flags-server",
+    "@kbn/logging"
   ]
 }
