@@ -26,7 +26,7 @@
         "label": "EvaluationScoreRepository",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-        "lineNumber": 186,
+        "lineNumber": 190,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -42,7 +42,7 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 187,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -58,7 +58,7 @@
                   "default"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 187,
+                "lineNumber": 191,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -81,13 +81,33 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 187,
+                "lineNumber": 191,
                 "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationScoreRepository.preflightExport",
+            "type": "Function",
+            "tags": [],
+            "label": "preflightExport",
+            "description": [
+              "\nValidates that exporting to the evaluations datastream is possible *before* the evaluation\nsuite spends time on inference.\n\nThis is intentionally behavioral (a real write) rather than mapping-based. Mapping checks tend\nto become brittle as the schema evolves; a representative write will fail for the reasons we\nactually care about (missing data stream/template, auth/privilege issues, mapper errors, etc)."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
+            "lineNumber": 384,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -111,7 +131,7 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 334,
+            "lineNumber": 463,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -134,7 +154,7 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 335,
+                "lineNumber": 464,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -151,7 +171,7 @@
                   "ExportScoresOptions"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 336,
+                "lineNumber": 465,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -179,7 +199,7 @@
               " | null>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 454,
+            "lineNumber": 582,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -195,7 +215,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 455,
+                "lineNumber": 583,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -209,7 +229,7 @@
                 "label": "options",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 456,
+                "lineNumber": 584,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -225,7 +245,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                    "lineNumber": 456,
+                    "lineNumber": 584,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -241,7 +261,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                    "lineNumber": 456,
+                    "lineNumber": 584,
                     "columnNumber": 39,
                     "deprecated": false,
                     "trackAdoption": false
@@ -270,7 +290,7 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 523,
+            "lineNumber": 651,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -286,7 +306,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 524,
+                "lineNumber": 652,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -300,7 +320,7 @@
                 "label": "options",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 525,
+                "lineNumber": 653,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -316,7 +336,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                    "lineNumber": 525,
+                    "lineNumber": 653,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -332,7 +352,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                    "lineNumber": 525,
+                    "lineNumber": 653,
                     "columnNumber": 39,
                     "deprecated": false,
                     "trackAdoption": false
@@ -895,6 +915,117 @@
       },
       {
         "parentPluginId": "@kbn/evals",
+        "id": "def-common.createConversationCoherenceEvaluator",
+        "type": "Function",
+        "tags": [],
+        "label": "createConversationCoherenceEvaluator",
+        "description": [],
+        "signature": [
+          "(config: { inferenceClient: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.BoundInferenceClient",
+            "text": "BoundInferenceClient"
+          },
+          "; log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; }) => ",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Evaluator",
+            "text": "Evaluator"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Example",
+            "text": "Example"
+          },
+          "<Record<string, unknown>, any, Record<string, unknown> | null>, unknown>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/conversation_coherence/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.createConversationCoherenceEvaluator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/conversation_coherence/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 62,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createConversationCoherenceEvaluator.$1.inferenceClient",
+                "type": "Object",
+                "tags": [],
+                "label": "inferenceClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.BoundInferenceClient",
+                    "text": "BoundInferenceClient"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/conversation_coherence/index.ts",
+                "lineNumber": 15,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createConversationCoherenceEvaluator.$1.log",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/conversation_coherence/index.ts",
+                "lineNumber": 16,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
         "id": "def-common.createDefaultTerminalReporter",
         "type": "Function",
         "tags": [],
@@ -1217,6 +1348,136 @@
       },
       {
         "parentPluginId": "@kbn/evals",
+        "id": "def-common.createMultiJudgeEvaluator",
+        "type": "Function",
+        "tags": [],
+        "label": "createMultiJudgeEvaluator",
+        "description": [],
+        "signature": [
+          "(config: { judges: ",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Evaluator",
+            "text": "Evaluator"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Example",
+            "text": "Example"
+          },
+          "<Record<string, unknown>, any, Record<string, unknown> | null>, unknown>[]; strategy?: AggregationStrategy | undefined; logger?: { warn: (msg: string) => void; } | undefined; }) => ",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Evaluator",
+            "text": "Evaluator"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Example",
+            "text": "Example"
+          },
+          "<Record<string, unknown>, any, Record<string, unknown> | null>, unknown>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/multi_judge/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.createMultiJudgeEvaluator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/multi_judge/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 51,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createMultiJudgeEvaluator.$1.judges",
+                "type": "Array",
+                "tags": [],
+                "label": "judges",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/evals",
+                    "scope": "common",
+                    "docId": "kibKbnEvalsPluginApi",
+                    "section": "def-common.Evaluator",
+                    "text": "Evaluator"
+                  },
+                  "<",
+                  {
+                    "pluginId": "@kbn/evals",
+                    "scope": "common",
+                    "docId": "kibKbnEvalsPluginApi",
+                    "section": "def-common.Example",
+                    "text": "Example"
+                  },
+                  "<Record<string, unknown>, any, Record<string, unknown> | null>, unknown>[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/multi_judge/index.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createMultiJudgeEvaluator.$1.strategy",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "strategy",
+                "description": [],
+                "signature": [
+                  "AggregationStrategy | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/multi_judge/index.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createMultiJudgeEvaluator.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "{ warn: (msg: string) => void; } | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/multi_judge/index.ts",
+                "lineNumber": 31,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
         "id": "def-common.createPlaywrightEvalsConfig",
         "type": "Function",
         "tags": [],
@@ -1364,6 +1625,89 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.createPromptLeakDetectionEvaluator",
+        "type": "Function",
+        "tags": [],
+        "label": "createPromptLeakDetectionEvaluator",
+        "description": [],
+        "signature": [
+          "(config: { patterns?: RegExp[] | undefined; excludePatterns?: RegExp[] | undefined; } | undefined) => ",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Evaluator",
+            "text": "Evaluator"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Example",
+            "text": "Example"
+          },
+          "<Record<string, unknown>, any, Record<string, unknown> | null>, unknown>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.createPromptLeakDetectionEvaluator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+            "lineNumber": 60,
+            "columnNumber": 61,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createPromptLeakDetectionEvaluator.$1.patterns",
+                "type": "Array",
+                "tags": [],
+                "label": "patterns",
+                "description": [],
+                "signature": [
+                  "RegExp[] | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+                "lineNumber": 61,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createPromptLeakDetectionEvaluator.$1.excludePatterns",
+                "type": "Array",
+                "tags": [],
+                "label": "excludePatterns",
+                "description": [],
+                "signature": [
+                  "RegExp[] | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+                "lineNumber": 62,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1572,6 +1916,140 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.createScopeViolationEvaluator",
+        "type": "Function",
+        "tags": [],
+        "label": "createScopeViolationEvaluator",
+        "description": [],
+        "signature": [
+          "(config: { allowedPatterns: RegExp[]; }) => ",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Evaluator",
+            "text": "Evaluator"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Example",
+            "text": "Example"
+          },
+          "<Record<string, unknown>, any, Record<string, unknown> | null>, unknown>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+        "lineNumber": 126,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.createScopeViolationEvaluator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+            "lineNumber": 126,
+            "columnNumber": 55,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createScopeViolationEvaluator.$1.allowedPatterns",
+                "type": "Array",
+                "tags": [],
+                "label": "allowedPatterns",
+                "description": [],
+                "signature": [
+                  "RegExp[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+                "lineNumber": 126,
+                "columnNumber": 57,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.createSimilarityEvaluator",
+        "type": "Function",
+        "tags": [],
+        "label": "createSimilarityEvaluator",
+        "description": [],
+        "signature": [
+          "(config: { threshold?: number | undefined; } | undefined) => ",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Evaluator",
+            "text": "Evaluator"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Example",
+            "text": "Example"
+          },
+          "<Record<string, unknown>, any, Record<string, unknown> | null>, unknown>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/similarity/index.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.createSimilarityEvaluator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/similarity/index.ts",
+            "lineNumber": 68,
+            "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createSimilarityEvaluator.$1.threshold",
+                "type": "number",
+                "tags": [],
+                "label": "threshold",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/similarity/index.ts",
+                "lineNumber": 68,
+                "columnNumber": 54,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1884,6 +2362,264 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.createToolPoisoningEvaluator",
+        "type": "Function",
+        "tags": [],
+        "label": "createToolPoisoningEvaluator",
+        "description": [],
+        "signature": [
+          "(config: { allowedTools: string[]; extractToolCalls: (output: unknown) => string[]; }) => ",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Evaluator",
+            "text": "Evaluator"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Example",
+            "text": "Example"
+          },
+          "<Record<string, unknown>, any, Record<string, unknown> | null>, unknown>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.createToolPoisoningEvaluator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 54,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createToolPoisoningEvaluator.$1.allowedTools",
+                "type": "Array",
+                "tags": [],
+                "label": "allowedTools",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+                "lineNumber": 20,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createToolPoisoningEvaluator.$1.extractToolCalls",
+                "type": "Function",
+                "tags": [],
+                "label": "extractToolCalls",
+                "description": [],
+                "signature": [
+                  "(output: unknown) => string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+                "lineNumber": 21,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/evals",
+                    "id": "def-common.createToolPoisoningEvaluator.$1.extractToolCalls.$1",
+                    "type": "Unknown",
+                    "tags": [],
+                    "label": "output",
+                    "description": [],
+                    "signature": [
+                      "unknown"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts",
+                    "lineNumber": 21,
+                    "columnNumber": 22,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.createTrajectoryEvaluator",
+        "type": "Function",
+        "tags": [],
+        "label": "createTrajectoryEvaluator",
+        "description": [],
+        "signature": [
+          "(config: { extractToolCalls: (output: unknown) => string[]; goldenPathExtractor: (expected: unknown) => string[]; orderWeight?: number | undefined; coverageWeight?: number | undefined; }) => ",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Evaluator",
+            "text": "Evaluator"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.Example",
+            "text": "Example"
+          },
+          "<Record<string, unknown>, any, Record<string, unknown> | null>, unknown>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trajectory/index.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.createTrajectoryEvaluator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trajectory/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 51,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createTrajectoryEvaluator.$1.extractToolCalls",
+                "type": "Function",
+                "tags": [],
+                "label": "extractToolCalls",
+                "description": [],
+                "signature": [
+                  "(output: unknown) => string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trajectory/index.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/evals",
+                    "id": "def-common.createTrajectoryEvaluator.$1.extractToolCalls.$1",
+                    "type": "Unknown",
+                    "tags": [],
+                    "label": "output",
+                    "description": [],
+                    "signature": [
+                      "unknown"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trajectory/index.ts",
+                    "lineNumber": 44,
+                    "columnNumber": 22,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createTrajectoryEvaluator.$1.goldenPathExtractor",
+                "type": "Function",
+                "tags": [],
+                "label": "goldenPathExtractor",
+                "description": [],
+                "signature": [
+                  "(expected: unknown) => string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trajectory/index.ts",
+                "lineNumber": 45,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/evals",
+                    "id": "def-common.createTrajectoryEvaluator.$1.goldenPathExtractor.$1",
+                    "type": "Unknown",
+                    "tags": [],
+                    "label": "expected",
+                    "description": [],
+                    "signature": [
+                      "unknown"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trajectory/index.ts",
+                    "lineNumber": 45,
+                    "columnNumber": 25,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createTrajectoryEvaluator.$1.orderWeight",
+                "type": "number",
+                "tags": [],
+                "label": "orderWeight",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trajectory/index.ts",
+                "lineNumber": 46,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.createTrajectoryEvaluator.$1.coverageWeight",
+                "type": "number",
+                "tags": [],
+                "label": "coverageWeight",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trajectory/index.ts",
+                "lineNumber": 47,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -3926,7 +4662,7 @@
         "label": "EvaluationScoreDocument",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3939,7 +4675,7 @@
             "label": "'@timestamp'",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3952,7 +4688,7 @@
             "label": "run_id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3965,7 +4701,7 @@
             "label": "experiment_id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3983,7 +4719,7 @@
               "{ id?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3999,7 +4735,7 @@
               "{ buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4015,7 +4751,7 @@
               "{ id: string; index: number; input?: Record<string, unknown> | null | undefined; dataset: { id: string; name: string; }; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4039,7 +4775,7 @@
               "; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4063,7 +4799,7 @@
               "; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4079,7 +4815,7 @@
               "{ git_branch: string | null; git_commit_sha: string | null; total_repetitions: number; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4095,7 +4831,7 @@
               "{ hostname: string; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4530,7 +5266,7 @@
           "\nStatistics for a single evaluator on a single dataset.\nThis is the core data structure returned by ES aggregations and used throughout the reporting system."
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-        "lineNumber": 135,
+        "lineNumber": 139,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4543,7 +5279,7 @@
             "label": "datasetId",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 140,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4556,7 +5292,7 @@
             "label": "datasetName",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 141,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4569,7 +5305,7 @@
             "label": "evaluatorName",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 142,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4585,7 +5321,7 @@
               "{ mean: number; median: number; stdDev: number; min: number; max: number; count: number; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 143,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5357,7 +6093,7 @@
         "label": "RunStats",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-        "lineNumber": 153,
+        "lineNumber": 157,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5380,7 +6116,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 154,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5402,7 +6138,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 155,
+            "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5424,7 +6160,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 156,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5437,7 +6173,7 @@
             "label": "totalRepetitions",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 157,
+            "lineNumber": 161,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

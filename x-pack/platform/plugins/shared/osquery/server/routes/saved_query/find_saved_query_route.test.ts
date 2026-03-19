@@ -114,7 +114,7 @@ describe('findSavedQueryRoute', () => {
     expect(body.data[0].updated_by_profile_uid).toBe('uid-1');
   });
 
-  it('passes search and searchFields when search param provided', async () => {
+  it('builds search filter with KQL wildcards on id and description', async () => {
     setupRoute();
 
     const mockRequest = httpServerMock.createKibanaRequest({
@@ -125,11 +125,12 @@ describe('findSavedQueryRoute', () => {
     await routeHandler({} as any, mockRequest, mockResponse);
 
     const findArgs = mockSavedObjectsClient.find.mock.calls[0][0];
-    expect(findArgs.search).toBe('windows');
-    expect(findArgs.searchFields).toEqual(['id', 'description']);
+    expect(findArgs.search).toBeUndefined();
+    expect(findArgs.filter).toContain('osquery-saved-query.attributes.id: windows*');
+    expect(findArgs.filter).toContain('osquery-saved-query.attributes.description: windows*');
   });
 
-  it('does not pass search or searchFields when search param is absent', async () => {
+  it('does not pass filter when no search or createdBy provided', async () => {
     setupRoute();
 
     const mockRequest = httpServerMock.createKibanaRequest({ query: {} });
@@ -139,7 +140,24 @@ describe('findSavedQueryRoute', () => {
 
     const findArgs = mockSavedObjectsClient.find.mock.calls[0][0];
     expect(findArgs.search).toBeUndefined();
-    expect(findArgs.searchFields).toBeUndefined();
+    expect(findArgs.filter).toBeUndefined();
+  });
+
+  it('escapes special characters in search term with escapeKuery', async () => {
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      query: { search: 'test<script>' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    const findArgs = mockSavedObjectsClient.find.mock.calls[0][0];
+    expect(findArgs.filter).toContain('osquery-saved-query.attributes.id: test\\<script\\>*');
+    expect(findArgs.filter).toContain(
+      'osquery-saved-query.attributes.description: test\\<script\\>*'
+    );
   });
 
   it('builds createdBy filter for a single user', async () => {
@@ -172,16 +190,20 @@ describe('findSavedQueryRoute', () => {
     );
   });
 
-  it('does not pass filter when no createdBy provided', async () => {
+  it('combines search and createdBy into a single AND filter', async () => {
     setupRoute();
 
-    const mockRequest = httpServerMock.createKibanaRequest({ query: {} });
+    const mockRequest = httpServerMock.createKibanaRequest({
+      query: { search: 'windows', createdBy: 'elastic' },
+    });
     const mockResponse = httpServerMock.createResponseFactory();
 
     await routeHandler({} as any, mockRequest, mockResponse);
 
     const findArgs = mockSavedObjectsClient.find.mock.calls[0][0];
-    expect(findArgs.filter).toBeUndefined();
+    expect(findArgs.filter).toContain('osquery-saved-query.attributes.id: windows*');
+    expect(findArgs.filter).toContain('osquery-saved-query.attributes.created_by: "elastic"');
+    expect(findArgs.filter).toContain(' AND ');
   });
 
   it('returns null profile_uid for legacy saved queries', async () => {
