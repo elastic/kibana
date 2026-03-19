@@ -207,6 +207,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
             <IntegrationSelectablePopover
               options={enabledIntegrationsOptions}
               statusMap={enabledIntegrationsStatusMap}
+              disabled={enabledIntegrationsOptions.length === 0}
             />
           );
         } else {
@@ -214,6 +215,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
             <IntegrationSelectablePopover
               options={missingOrDisabledIntegrationsOptions}
               statusMap={missingOrDisabledStatusMap}
+              disabled={missingOrDisabledIntegrationsOptions.length === 0}
             />
           );
         }
