@@ -705,7 +705,7 @@ export class TaskRunner<
 
       return {
         executionStatus,
-        executionMetrics: executionMetrics,
+        executionMetrics,
         consumerExecutionMetrics: this.ruleMonitoring.getExecutorMetrics(),
       };
     });

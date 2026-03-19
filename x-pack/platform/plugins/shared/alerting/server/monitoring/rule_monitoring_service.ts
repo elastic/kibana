@@ -117,7 +117,7 @@ export class RuleMonitoringService {
   }
 
   private clearGapRange(): void {
-    delete this.metrics['gap_range'];
+    delete this.metrics.gap_range;
   }
 
   private buildExecutionSuccessRatio() {
