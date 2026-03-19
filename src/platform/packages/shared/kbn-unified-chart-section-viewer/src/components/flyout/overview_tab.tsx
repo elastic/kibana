@@ -26,6 +26,7 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
 import { MetricTypeBadge } from './metric_type_badge';
+import { NoValueBadge, renderBadgeGroup } from './badge_group';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 import type { Dimension, ParsedMetricItem } from '../../types';
 
@@ -95,48 +96,32 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
         i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
           defaultMessage: 'Field type',
         }),
-        <EuiFlexGroup wrap gutterSize="xs" responsive={false}>
-          {metricItem.fieldTypes?.map((fieldType) => (
-            <EuiFlexItem grow={false} key={fieldType}>
-              <EuiBadge>{fieldType}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        renderBadgeGroup(metricItem.fieldTypes, (fieldType, index) => (
+          <EuiBadge key={`${fieldType}-${index}`}>{fieldType}</EuiBadge>
+        ))
       ),
-      ...(metricItem.units?.length
-        ? [
-            createDescriptionListItem(
-              i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-                defaultMessage: 'Metric unit',
-              }),
-              <EuiFlexGroup wrap gutterSize="xs" responsive={false}>
-                {metricItem.units.map((unit, index) => (
-                  <EuiFlexItem grow={false} key={`${unit}-${index}`}>
-                    <EuiBadge>{unit != null ? getUnitLabel({ unit }) : 'null'}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>,
-              'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
-            ),
-          ]
-        : []),
-      ...(metricItem.metricTypes?.length
-        ? [
-            createDescriptionListItem(
-              i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-                defaultMessage: 'Metric type',
-              }),
-              <EuiFlexGroup wrap gutterSize="xs" responsive={false}>
-                {metricItem.metricTypes.map((metricType) => (
-                  <EuiFlexItem grow={false} key={metricType}>
-                    <MetricTypeBadge instrument={metricType} />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>,
-              'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
-            ),
-          ]
-        : []),
+      createDescriptionListItem(
+        i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+          defaultMessage: 'Metric unit',
+        }),
+        renderBadgeGroup(metricItem.units, (unit, index) =>
+          unit != null ? (
+            <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
+          ) : (
+            <NoValueBadge key={`${unit}-${index}`} />
+          )
+        ),
+        'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
+      ),
+      createDescriptionListItem(
+        i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+          defaultMessage: 'Metric type',
+        }),
+        renderBadgeGroup(metricItem.metricTypes, (metricType, index) => (
+          <MetricTypeBadge key={`${metricType}-${index}`} instrument={metricType} />
+        )),
+        'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
+      ),
     ],
     [
       metricItem.dataStream,
