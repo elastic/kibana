@@ -100,11 +100,13 @@ export async function evaluateGrokSuggestions() {
       const reviewFields = getReviewFields(grokPatternNodes, 10);
       console.log(`- ${stream}: ${chalk.dim(grokPattern)}`);
 
-      const suggestionData = await getSuggestions(stream, connector, messages, reviewFields);
-      const grokProcessor = getGrokProcessor(grokPatternNodes, suggestionData.grokProcessor);
-      if (!grokProcessor) {
-        throw new Error('No grokProcessor returned');
+      const suggestionData = (await getSuggestions(stream, connector, messages, reviewFields)) as {
+        grokProcessor?: Parameters<typeof getGrokProcessor>[1];
+      };
+      if (!suggestionData.grokProcessor) {
+        throw new Error('No grokProcessor returned from suggestions');
       }
+      const grokProcessor = getGrokProcessor(grokPatternNodes, suggestionData.grokProcessor);
       console.log(`- ${stream}: ${chalk.green(grokProcessor.patterns.join(', '))}`);
 
       return { stream, ...grokProcessor };
@@ -171,7 +173,7 @@ export async function evaluateGrokSuggestions() {
     chalk.bold(`Average Parsing Score (all docs): ${chalk.green(averageParsingScoreAllDocs)}`)
   );
 
-  return output.reduce<Record<string, any>>((acc, suggestion) => {
+  return output.reduce<Record<string, unknown>>((acc, suggestion) => {
     acc[suggestion.stream] = {
       patterns: suggestion.patterns,
       pattern_definitions: suggestion.pattern_definitions,

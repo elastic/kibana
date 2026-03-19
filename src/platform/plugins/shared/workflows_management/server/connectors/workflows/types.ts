@@ -16,10 +16,17 @@ import type { ExecutorParamsSchema } from './schema';
 export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
 export type WorkflowsActionParamsType = ExecutorParams;
 
+export interface AlertStates {
+  new: boolean;
+  ongoing: boolean;
+  recovered: boolean;
+}
+
 export interface RunWorkflowParams {
   workflowId: string;
   spaceId: string;
   summaryMode?: boolean;
+  alertStates?: AlertStates;
   inputs: {
     event: {
       alerts: AlertHit[];
