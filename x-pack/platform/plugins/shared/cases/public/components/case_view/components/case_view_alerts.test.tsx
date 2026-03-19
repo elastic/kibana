@@ -134,5 +134,4 @@ describe('CaseUI View Page activity tab', () => {
 
     expect(await screen.findByTestId('caseViewAlertsEmpty')).toBeInTheDocument();
   });
-
 });
