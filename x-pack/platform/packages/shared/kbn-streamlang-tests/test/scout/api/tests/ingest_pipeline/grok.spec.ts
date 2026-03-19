@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { GrokProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -37,12 +38,12 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.client?.ip).toBe('55.3.244.1');
-      expect(source?.http?.request?.method).toBe('GET');
-      expect(source?.url?.path).toBe('/index.html');
-      expect(source?.http?.response?.body?.bytes).toBe('15824');
-      expect(source?.event?.duration).toBe('0.043');
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.client)?.ip).toBe('55.3.244.1');
+      expect(asDoc(asDoc(source?.http)?.request)?.method).toBe('GET');
+      expect(asDoc(source?.url)?.path).toBe('/index.html');
+      expect(asDoc(asDoc(asDoc(source?.http)?.response)?.body)?.bytes).toBe('15824');
+      expect(asDoc(source?.event)?.duration).toBe('0.043');
     });
 
     apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
@@ -66,8 +67,8 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.client?.ip).toBeUndefined();
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.client)?.ip).toBeUndefined();
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {

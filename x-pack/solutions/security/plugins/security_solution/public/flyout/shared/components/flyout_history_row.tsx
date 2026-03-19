@@ -45,7 +45,10 @@ import {
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 import { VulnerabilityFindingsPanelKey } from '../../csp_details/vulnerabilities_flyout/constants';
 import { MisconfigurationFindingsPanelKey } from '../../csp_details/findings_flyout/constants';
-import { AttackDetailsRightPanelKey } from '../../attack_details/constants/panel_keys';
+import {
+  AttackDetailsPreviewPanelKey,
+  AttackDetailsRightPanelKey,
+} from '../../attack_details/constants/panel_keys';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 
 const MAX_WIDTH = 300; // px
@@ -133,6 +136,7 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
         />
       );
     case AttackDetailsRightPanelKey:
+    case AttackDetailsPreviewPanelKey:
       return <AttackDetailsHistoryRow item={item} index={index} />;
     default:
       return null;
