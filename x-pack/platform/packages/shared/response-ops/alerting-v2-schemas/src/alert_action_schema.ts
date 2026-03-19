@@ -107,15 +107,15 @@ export const bulkGetAlertActionsResponseSchema = z
       rule_id: z.string().nullable().describe('The rule identifier, or null if not found.'),
       group_hash: z.string().nullable().describe('The alert group hash, or null if not found.'),
       last_ack_action: z
-        .string()
+        .enum(['ack', 'unack'])
         .nullable()
         .describe('The last acknowledge action, or null if none.'),
       last_deactivate_action: z
-        .string()
+        .enum(['activate', 'deactivate'])
         .nullable()
         .describe('The last deactivate action, or null if none.'),
       last_snooze_action: z
-        .string()
+        .enum(['snooze', 'unsnooze'])
         .nullable()
         .describe('The last snooze action, or null if none.'),
     })
