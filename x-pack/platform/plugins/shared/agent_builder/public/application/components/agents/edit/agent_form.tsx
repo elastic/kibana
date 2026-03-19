@@ -35,7 +35,6 @@ import {
   filterToolsBySelection,
   hasAgentWriteAccess,
   type AgentDefinition,
-  type SkillSelection,
 } from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -241,21 +240,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     return filterToolsBySelection(tools, agentTools).length;
   }, [tools, agentTools]);
 
-  const agentSkills = watch('configuration.skills') as SkillSelection[] | undefined;
+  const agentSkills = watch('configuration.skill_ids') as string[] | undefined;
   const activeSkillsCount = useMemo(() => {
-    const effectiveSelection =
-      agentSkills && agentSkills.length > 0 ? agentSkills : [{ skill_ids: ['*'] }];
-    const hasWildcard = effectiveSelection.some((s) => s.skill_ids.includes('*'));
-    if (hasWildcard) {
-      const builtinCount = skills.filter((s) => s.readonly).length;
-      const explicitIds = new Set(
-        effectiveSelection.flatMap((s) => s.skill_ids.filter((id) => id !== '*'))
-      );
-      const explicitUserCount = skills.filter((s) => !s.readonly && explicitIds.has(s.id)).length;
-      return builtinCount + explicitUserCount;
-    }
-    const explicitIds = new Set(effectiveSelection.flatMap((s) => s.skill_ids));
-    return skills.filter((skill) => explicitIds.has(skill.id)).length;
+    const ids = agentSkills ?? [];
+    const selectedIds = new Set(ids);
+    return skills.filter((skill) => selectedIds.has(skill.id)).length;
   }, [skills, agentSkills]);
 
   const tabs = useMemo<EuiTabbedContentTab[]>(

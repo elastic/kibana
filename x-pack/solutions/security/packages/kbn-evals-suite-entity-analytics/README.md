@@ -78,6 +78,9 @@ node scripts/playwright test --config x-pack/solutions/security/packages/kbn-eva
 # Run with specific connector
 node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts --project="my-connector"
 
+# Run with multiple workers (parallel test files; default is usually 1–2 for evals)
+node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts --workers=4
+
 # Run with LLM-as-a-judge for consistent evaluation results
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts
 
