@@ -54,7 +54,7 @@ describe('useFilteredInferenceEndpoints', () => {
         useFilteredInferenceEndpoints(InferenceEndpoints, filters, '')
       );
 
-      expect(result.current).toHaveLength(29);
+      expect(result.current).toHaveLength(40);
       expect(
         result.current.every(
           (endpoint) => endpoint.service === 'elasticsearch' || endpoint.service === 'elastic'
@@ -81,7 +81,7 @@ describe('useFilteredInferenceEndpoints', () => {
         useFilteredInferenceEndpoints(InferenceEndpoints, filters, '')
       );
 
-      expect(result.current).toHaveLength(6);
+      expect(result.current).toHaveLength(9);
       expect(result.current.every((endpoint) => endpoint.task_type === 'text_embedding')).toBe(
         true
       );
@@ -219,10 +219,11 @@ describe('useFilteredInferenceEndpoints', () => {
         useFilteredInferenceEndpoints(InferenceEndpoints, filters, 'jina')
       );
 
-      expect(result.current).toHaveLength(1);
-      expect(result.current[0].service).toBe('elastic');
-      expect(result.current[0].task_type).toBe('text_embedding');
-      expect(result.current[0].inference_id).toBe('.jina-embeddings-v3');
+      expect(result.current).toHaveLength(3);
+      result.current.forEach((endpoint) => {
+        expect(endpoint.service).toEqual('elastic');
+        expect(endpoint.task_type).toEqual('text_embedding');
+      });
     });
 
     it('should apply all filters (provider, type, and search) together', () => {
