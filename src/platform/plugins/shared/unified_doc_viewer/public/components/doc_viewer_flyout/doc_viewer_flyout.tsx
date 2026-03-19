@@ -110,6 +110,7 @@ export function UnifiedDocViewerFlyout({
   flyoutActions,
   flyoutType,
   flyoutWidthLocalStorageKey,
+  flyoutViewedContent,
   services,
   docViewsRegistry,
   isEsqlQuery,
@@ -129,7 +130,6 @@ export function UnifiedDocViewerFlyout({
   onFilter,
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
-  flyoutViewedContent: flyoutViewedContentProp,
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const { analytics } = getUnifiedDocViewerServices();
@@ -282,14 +282,14 @@ export function UnifiedDocViewerFlyout({
       onUpdateSelectedTabId?.(tabId);
 
       if (!tabId) return;
-      if (!flyoutViewedContentProp) return;
+      if (!flyoutViewedContent) return;
 
       analytics.reportEvent(FLYOUT_VIEWED_EVENT_TYPE, {
-        content: flyoutViewedContentProp,
+        content: flyoutViewedContent,
         tabId: mapDocViewerTabIdToFlyoutViewedTabId(tabId),
       });
     },
-    [analytics, flyoutViewedContentProp, onUpdateSelectedTabId]
+    [analytics, flyoutViewedContent, onUpdateSelectedTabId]
   );
 
   return (
