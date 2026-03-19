@@ -153,6 +153,7 @@ export const oauthAuthorizeRoute = (
             connectorId,
             kibanaReturnUrl,
             spaceId,
+            createdBy: profile_uid,
           });
 
           let authorizationUrl: string;

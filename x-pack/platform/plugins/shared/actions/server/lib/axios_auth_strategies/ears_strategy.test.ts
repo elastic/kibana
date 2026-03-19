@@ -38,6 +38,7 @@ const createMockAxiosInstance = () => {
   const instance = {
     interceptors: { response: { use: jest.fn() } },
     request: mockRequest,
+    defaults: { headers: { common: {} as Record<string, string> } },
   } as unknown as AxiosInstance;
   return { instance, mockRequest };
 };
