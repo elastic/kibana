@@ -91,7 +91,8 @@ export type FieldFilterPredicate = (f: DataViewField) => boolean;
  * ----------------------------------------------------------------
  */
 
-export type FlattenedPinnedControlState = PinnedControlLayoutState & PinnedControlState['config'];
+export type FlattenedPinnedControlState = PinnedControlLayoutState &
+  Partial<PinnedControlState['config']>;
 
 export interface ControlGroupRuntimeState<State extends {} = {}> {
   initialChildControlState: ControlPanelsState<State>;

@@ -111,7 +111,7 @@ export async function migrateAlertPageControlsTo816(storage: Storage, plugins: S
   const oldFormat: OldFormat = storage.get(GET_PAGE_FILTER_STORAGE_KEY(spaceId));
   if (oldFormat && Object.keys(oldFormat).includes('panels')) {
     // Only run when it is old format
-    const newFormat: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanelState> = {
+    const newFormat: ControlGroupRuntimeState<NewFormatExplicitInput> = {
       initialChildControlState: {},
       ignoreParentSettings: oldFormat.ignoreParentSettings,
     };

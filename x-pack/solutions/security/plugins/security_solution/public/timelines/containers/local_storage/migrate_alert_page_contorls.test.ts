@@ -12,7 +12,7 @@ import {
   migrateAlertPageControlsTo816,
 } from './migrate_alert_page_controls';
 import type { StartPlugins } from '../../../types';
-import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/control-group-renderer';
+import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
 import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 
 const OLD_FORMAT = {
@@ -152,7 +152,7 @@ const OLD_FORMAT = {
   },
 };
 
-const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanelState> = {
+const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput> = {
   initialChildControlState: {
     '0': {
       ...DEFAULT_PINNED_CONTROL_STATE,
