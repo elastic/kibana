@@ -82,11 +82,11 @@ test.describe(
         );
         await expect(timeSeriesAnalysisButton).toBeVisible();
       });
-      
+
       await test.step('renders kibana version badge', async () => {
-         const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
-         await expect(versionBadge).toBeVisible();
-       });
+        const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
+        await expect(versionBadge).toBeVisible();
+      });
 
       await test.step('renders footer links with correct hrefs', async () => {
         const searchLabsLink = await pageObjects.gettingStarted.getFooterLink('SearchLabs');
@@ -151,6 +151,7 @@ test.describe(
 
     test('Tutorial cards open embedded console', async ({ pageObjects }) => {
       await pageObjects.gettingStarted.expandTutorialCards();
+
       await test.step('search basics card opens console', async () => {
         await pageObjects.gettingStarted.clickTutorialCardButton('search_basics');
 

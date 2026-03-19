@@ -14,12 +14,12 @@ test.describe(
   { tag: [...tags.serverless.search] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsViewer();
+      await browserAuth.loginAsAdmin();
       await pageObjects.gettingStarted.goto();
     });
 
     test(
-      'should show Changelog label in Kibana version  on serverless',
+      'should show Changelog label in Kibana version on serverless',
       { tag: [...tags.serverless.search] },
       async ({ pageObjects }) => {
         const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
