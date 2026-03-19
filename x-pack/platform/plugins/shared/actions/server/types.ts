@@ -20,12 +20,13 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z3 from '@kbn/zod';
 import type * as z4 from '@kbn/zod/v4';
+import type { AuthMode } from '@kbn/connector-specs';
+import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
 import type { ActionsClient } from './actions_client';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { TaskInfo } from './lib/action_executor';
-import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { PluginSetupContract, PluginStartContract } from './plugin';
 import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import type { ServiceParams } from './sub_action_framework/types';
@@ -97,6 +98,8 @@ export interface ActionTypeExecutorOptions<
   connectorUsageCollector: ConnectorUsageCollector;
   connectorTokenClient?: ConnectorTokenClientContract;
   signal?: AbortSignal;
+  authMode?: AuthMode;
+  profileUid?: string;
 }
 
 export type ActionResult = Connector;
@@ -182,6 +185,32 @@ export interface PostDeleteConnectorHookParams<
   logger: Logger;
   request: KibanaRequest;
   services: HookServices;
+}
+
+// Params passed to cross-plugin lifecycle listeners, extending the hook params with the connector type.
+// Secrets are intentionally omitted from the public listener contract to avoid exposing plaintext
+// secrets to external plugins.
+export type ConnectorLifecyclePostCreateParams = Omit<
+  PostSaveConnectorHookParams,
+  'secrets' | 'isUpdate'
+> & {
+  connectorType: string;
+  connectorName: string;
+  workflowTemplates: string[];
+};
+export type ConnectorLifecyclePostDeleteParams = PostDeleteConnectorHookParams & {
+  connectorType: string;
+};
+
+// Cross-plugin lifecycle listener for connector create/delete events.
+// Registered by external plugins (e.g., Agent Builder) via the actions setup contract.
+export interface ConnectorLifecycleListener {
+  // Which connector types this listener applies to, or '*' for all types
+  connectorTypes: string[] | '*';
+  // Called after a connector is successfully created
+  onPostCreate?: (params: ConnectorLifecyclePostCreateParams) => Promise<void>;
+  // Called after a connector is deleted
+  onPostDelete?: (params: ConnectorLifecyclePostDeleteParams) => Promise<void>;
 }
 
 export type ActionType<
@@ -274,6 +303,7 @@ export interface RawAction extends Record<string, unknown> {
   isMissingSecrets: boolean;
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
+  authMode?: AuthMode;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {
@@ -299,12 +329,37 @@ export interface ResponseSettings {
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {
+  id?: string;
   connectorId: string;
   tokenType: string;
   token: string;
-  expiresAt: string;
+  expiresAt?: string;
   createdAt: string;
   updatedAt?: string;
+  refreshToken?: string;
+  refreshTokenExpiresAt?: string;
+}
+
+export interface UserConnectorToken {
+  id?: string;
+  profileUid: string;
+  connectorId: string;
+  credentialType: string;
+  credentials: Record<string, unknown>;
+  expiresAt?: string;
+  refreshTokenExpiresAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type OAuthPersonalCredentials = SavedObjectAttributes & {
+  accessToken: string;
+  refreshToken?: string;
+};
+
+export interface UserConnectorOAuthToken extends UserConnectorToken {
+  credentialType: 'oauth';
+  credentials: OAuthPersonalCredentials;
 }
 
 // This unallowlist should only contain connector types that require a request or API key for
