@@ -29,16 +29,17 @@ const defaultLspConfig = '.lsp.json';
 /**
  * Parses and validates a Claude plugin zip archive.
  *
- * Extracts the manifest, parses skill files, and detects
- * unmanaged assets (commands, agents, hooks, etc.) that are
+ * Extracts the manifest, parses skill and command files, and detects
+ * unmanaged assets (agents, hooks, etc.) that are
  * present in the archive but not yet supported for installation.
  */
 export const parsePluginZipFile = async (archive: ZipArchive): Promise<ParsedPluginArchive> => {
   const manifest = await readAndValidateManifest(archive);
   const skills = await readSkills(archive, manifest);
+  const commands = await readCommands(archive, manifest);
   const unmanagedAssets = detectUnmanagedAssets(archive, manifest);
 
-  return { manifest, skills, unmanagedAssets };
+  return { manifest, skills: [...skills, ...commands], unmanagedAssets };
 };
 
 const readAndValidateManifest = async (archive: ZipArchive): Promise<PluginManifest> => {
@@ -191,6 +192,76 @@ const readReferencedFiles = async (
   return referencedFiles;
 };
 
+/**
+ * Reads command markdown files from the archive and converts them to ParsedSkillFile entries.
+ * Each .md file under the commands directory becomes a skill, using the
+ * filename (without extension) as the skill name.
+ */
+const readCommands = async (
+  archive: ZipArchive,
+  manifest: PluginManifest
+): Promise<ParsedSkillFile[]> => {
+  const commandFiles = resolveCommandFiles(archive, manifest);
+  const commands: ParsedSkillFile[] = [];
+
+  for (const filePath of commandFiles) {
+    const content = await archive.getEntryContent(filePath);
+    const { meta, content: body } = parseSkillFile(content.toString('utf-8'));
+
+    const fileName = filePath.split('/').pop()!;
+    const dirName = fileName.replace(/\.md$/, '');
+
+    commands.push({
+      dirName,
+      meta,
+      content: body,
+      referencedFiles: [],
+    });
+  }
+
+  return commands;
+};
+
+/**
+ * Resolves all command markdown files from the archive.
+ * Looks under the default `commands/` directory and any custom paths
+ * from the manifest.
+ */
+const resolveCommandFiles = (archive: ZipArchive, manifest: PluginManifest): string[] => {
+  const searchRoots = new Set<string>();
+  searchRoots.add(defaultCommandsDir);
+
+  if (manifest.commands !== undefined) {
+    const customPaths = Array.isArray(manifest.commands) ? manifest.commands : [manifest.commands];
+    for (const p of customPaths) {
+      const cleaned = p.startsWith('./') ? p.substring(2) : p;
+      if (cleaned.endsWith('.md')) {
+        searchRoots.add(cleaned);
+      } else {
+        searchRoots.add(cleaned.endsWith('/') ? cleaned : `${cleaned}/`);
+      }
+    }
+  }
+
+  const commandFiles = new Set<string>();
+  const entries = archive.getEntryPaths();
+
+  for (const entryPath of entries) {
+    if (entryPath.endsWith('/')) {
+      continue;
+    }
+    for (const root of searchRoots) {
+      if (root.endsWith('.md') && entryPath === root) {
+        commandFiles.add(entryPath);
+      } else if (entryPath.startsWith(root) && entryPath.endsWith('.md')) {
+        commandFiles.add(entryPath);
+      }
+    }
+  }
+
+  return [...commandFiles];
+};
+
 const detectUnmanagedAssets = (
   archive: ZipArchive,
   manifest: PluginManifest
@@ -198,7 +269,6 @@ const detectUnmanagedAssets = (
   const entries = archive.getEntryPaths();
 
   return {
-    commands: findAssetEntries(entries, defaultCommandsDir, manifest.commands),
     agents: findAssetEntries(entries, defaultAgentsDir, manifest.agents),
     hooks: findAssetEntries(entries, defaultHooksDir, manifest.hooks, defaultHooksConfig),
     mcp_servers: findAssetEntries(entries, undefined, manifest.mcpServers, defaultMcpConfig),

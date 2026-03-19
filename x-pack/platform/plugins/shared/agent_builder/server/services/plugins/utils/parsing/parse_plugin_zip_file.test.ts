@@ -131,12 +131,55 @@ describe('parsePluginZipFile', () => {
     );
   });
 
-  it('detects unmanaged assets', async () => {
+  it('imports commands as skills', async () => {
     const archive = createMockArchive({
       '.claude-plugin/plugin.json': JSON.stringify({ name: 'test-plugin' }),
       'commands/': '',
       'commands/deploy.md': 'Deploy command',
       'commands/status.md': 'Status command',
+    });
+
+    const result = await parsePluginZipFile(archive);
+
+    expect(result.skills).toHaveLength(2);
+    const dirNames = result.skills.map((s) => s.dirName);
+    expect(dirNames).toContain('deploy');
+    expect(dirNames).toContain('status');
+
+    const deploySkill = result.skills.find((s) => s.dirName === 'deploy')!;
+    expect(deploySkill.content).toBe('Deploy command');
+    expect(deploySkill.referencedFiles).toEqual([]);
+
+    const statusSkill = result.skills.find((s) => s.dirName === 'status')!;
+    expect(statusSkill.content).toBe('Status command');
+    expect(statusSkill.referencedFiles).toEqual([]);
+  });
+
+  it('imports commands with frontmatter as skills', async () => {
+    const archive = createMockArchive({
+      '.claude-plugin/plugin.json': JSON.stringify({ name: 'test-plugin' }),
+      'commands/deploy.md': [
+        '---',
+        'name: Deploy App',
+        'description: Deploys the application',
+        '---',
+        '',
+        'Deploy command instructions.',
+      ].join('\n'),
+    });
+
+    const result = await parsePluginZipFile(archive);
+
+    expect(result.skills).toHaveLength(1);
+    expect(result.skills[0].dirName).toBe('deploy');
+    expect(result.skills[0].meta.name).toBe('Deploy App');
+    expect(result.skills[0].meta.description).toBe('Deploys the application');
+    expect(result.skills[0].content).toBe('Deploy command instructions.');
+  });
+
+  it('detects unmanaged assets', async () => {
+    const archive = createMockArchive({
+      '.claude-plugin/plugin.json': JSON.stringify({ name: 'test-plugin' }),
       'agents/': '',
       'agents/reviewer.md': 'Reviewer agent',
       'hooks/': '',
@@ -148,9 +191,6 @@ describe('parsePluginZipFile', () => {
     const result = await parsePluginZipFile(archive);
 
     expect(result.skills).toHaveLength(0);
-    expect(result.unmanagedAssets.commands).toEqual(
-      expect.arrayContaining(['commands/deploy.md', 'commands/status.md'])
-    );
     expect(result.unmanagedAssets.agents).toEqual(['agents/reviewer.md']);
     expect(result.unmanagedAssets.hooks).toEqual(['hooks/hooks.json']);
     expect(result.unmanagedAssets.mcp_servers).toEqual(['.mcp.json']);
@@ -295,20 +335,22 @@ describe('parsePluginZipFile', () => {
     });
   });
 
-  it('detects unmanaged assets from custom manifest paths', async () => {
+  it('imports commands from custom manifest paths as skills', async () => {
     const archive = createMockArchive({
       '.claude-plugin/plugin.json': JSON.stringify({
         name: 'test',
         commands: ['./custom/cmd.md'],
         mcpServers: './mcp-config.json',
       }),
-      'custom/cmd.md': 'custom command',
+      'custom/cmd.md': 'custom command content',
       'mcp-config.json': '{}',
     });
 
     const result = await parsePluginZipFile(archive);
 
-    expect(result.unmanagedAssets.commands).toContain('custom/cmd.md');
+    expect(result.skills).toHaveLength(1);
+    expect(result.skills[0].dirName).toBe('cmd');
+    expect(result.skills[0].content).toBe('custom command content');
     expect(result.unmanagedAssets.mcp_servers).toContain('mcp-config.json');
   });
 
