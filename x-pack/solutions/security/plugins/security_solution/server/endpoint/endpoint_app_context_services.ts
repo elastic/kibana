@@ -29,6 +29,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 import {
   ScriptsLibraryClient,
   type ScriptsLibraryClientInterface,
@@ -103,6 +104,7 @@ export interface EndpointAppContextServiceStartContract {
   connectorActions: ActionsPluginStartContract;
   telemetryConfigProvider: TelemetryConfigProvider;
   spacesService: SpacesServiceStart | undefined;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 /**
@@ -269,6 +271,13 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.esClient;
+  }
+
+  public getAgentBuilder(): AgentBuilderPluginStart {
+    if (this.startDependencies?.agentBuilder == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.agentBuilder;
   }
 
   private getFleetAuthzService(): FleetStartContract['authz'] {
