@@ -280,11 +280,7 @@ describe('AutomaticImportSamplesIndexService', () => {
         getClient: mockGetClient,
       });
 
-      const result = await service.deleteSamplesForDataStream(
-        'integration-123',
-        'data-stream-456',
-        mockEsClient
-      );
+      const result = await service.deleteSamplesForDataStream('integration-123', 'data-stream-456');
 
       expect(mockSearch).toHaveBeenCalledTimes(1);
       expect(mockSearch).toHaveBeenCalledWith({
