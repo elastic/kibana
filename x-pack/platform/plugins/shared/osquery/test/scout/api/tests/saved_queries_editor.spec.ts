@@ -133,9 +133,7 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
     );
     expect(createdByResponse).toHaveStatusCode(200);
     expect(createdByResponse.body.total).toBeGreaterThan(0);
-    const creators = createdByResponse.body.data.map(
-      (q: { created_by: string }) => q.created_by
-    );
+    const creators = createdByResponse.body.data.map((q: { created_by: string }) => q.created_by);
     const uniqueCreators = [...new Set(creators)];
     expect(uniqueCreators).toStrictEqual([createdByUser]);
 
