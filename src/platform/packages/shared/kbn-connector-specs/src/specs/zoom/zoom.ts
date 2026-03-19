@@ -94,7 +94,7 @@ export const Zoom: ConnectorSpec = {
     displayName: 'Zoom',
     description: i18n.translate('core.kibanaConnectorSpecs.zoom.metadata.description', {
       defaultMessage:
-        'Kibana Stack Connector for Zoom — access meetings, recordings, transcripts, and participants.',
+        'Access meetings, recordings, transcripts, and participants in Zoom',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,

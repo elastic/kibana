@@ -20,7 +20,7 @@ export const ZendeskConnector: ConnectorSpec = {
     displayName: 'Zendesk',
     description: i18n.translate('core.kibanaConnectorSpecs.zendesk.metadata.description', {
       defaultMessage:
-        'Connect to Zendesk to search and retrieve tickets, users, and Help Center content.',
+        'Search and retrieve tickets, users, and Help Center content in Zendesk',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
