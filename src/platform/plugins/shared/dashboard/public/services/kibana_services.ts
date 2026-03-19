@@ -30,10 +30,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DashboardStartDependencies } from '../plugin';
-import {
-  type DashboardBackupService,
-  createDashboardBackupService,
-} from './dashboard_backup_service';
 
 export let coreServices: CoreStart;
 export let cpsService: CPSPluginStart | undefined;
@@ -57,15 +53,12 @@ export let unifiedSearchService: UnifiedSearchPublicPluginStart;
 export let urlForwardingService: UrlForwardingStart;
 export let usageCollectionService: UsageCollectionStart | undefined;
 
-export let dashboardBackupService: DashboardBackupService | undefined;
-
 const servicesReady$ = new BehaviorSubject(false);
 
-export const setKibanaServices = (
-  kibanaCore: CoreStart,
-  deps: DashboardStartDependencies,
-  backupService: DashboardBackupService
-) => {
+/**
+ * Allows module-level access to all of the Dashboard plugin's dependencies.
+ */
+export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
   coreServices = kibanaCore;
   cpsService = deps.cps;
   contentManagementService = deps.contentManagement;
@@ -88,17 +81,7 @@ export const setKibanaServices = (
   urlForwardingService = deps.urlForwarding;
   usageCollectionService = deps.usageCollection;
 
-  dashboardBackupService = backupService;
-
   servicesReady$.next(true);
-};
-
-export const buildDashboardServices = async (
-  kibanaCore: CoreStart,
-  deps: DashboardStartDependencies
-) => {
-  const backupService = await createDashboardBackupService(deps.spaces);
-  setKibanaServices(kibanaCore, deps, backupService);
 };
 
 export const untilPluginStartServicesReady = () => {

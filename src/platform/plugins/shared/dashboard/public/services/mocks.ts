@@ -46,33 +46,29 @@ export const setStubKibanaServices = () => {
   const core = coreMock.createStart();
   (core.application.capabilities as any).dashboard_v2 = defaultDashboardCapabilities;
 
-  setKibanaServices(
-    core,
-    {
-      contentManagement: contentManagementMock.createStartContract(),
-      customBranding: customBrandingServiceMock.createStartContract(),
-      data: dataPluginMock.createStartContract(),
-      dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
-      embeddable: embeddablePluginMock.createStartContract(),
-      fieldFormats: fieldFormatsServiceMock.createStartContract(),
-      inspector: inspectorPluginMock.createStartContract(),
-      navigation: navigationPluginMock.createStartContract(),
-      noDataPage: noDataPagePublicMock.createStart(),
-      observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
-      presentationUtil: presentationUtilPluginMock.createStartContract(),
-      savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
-      savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
-      screenshotMode: screenshotModePluginMock.createStartContract(),
-      serverless: serverlessMock.createStart(),
-      share: sharePluginMock.createStartContract(),
-      spaces: spacesPluginMock.createStartContract(),
-      uiActions: uiActionsPluginMock.createStartContract(),
-      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-      urlForwarding: urlForwardingPluginMock.createStartContract(),
-      usageCollection: usageCollectionPluginMock.createSetupContract(),
-    },
-    mockDashboardBackupService
-  );
+  setKibanaServices(core, {
+    contentManagement: contentManagementMock.createStartContract(),
+    customBranding: customBrandingServiceMock.createStartContract(),
+    data: dataPluginMock.createStartContract(),
+    dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
+    embeddable: embeddablePluginMock.createStartContract(),
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    inspector: inspectorPluginMock.createStartContract(),
+    navigation: navigationPluginMock.createStartContract(),
+    noDataPage: noDataPagePublicMock.createStart(),
+    observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
+    presentationUtil: presentationUtilPluginMock.createStartContract(),
+    savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
+    savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
+    screenshotMode: screenshotModePluginMock.createStartContract(),
+    serverless: serverlessMock.createStart(),
+    share: sharePluginMock.createStartContract(),
+    spaces: spacesPluginMock.createStartContract(),
+    uiActions: uiActionsPluginMock.createStartContract(),
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    urlForwarding: urlForwardingPluginMock.createStartContract(),
+    usageCollection: usageCollectionPluginMock.createSetupContract(),
+  });
 };
 
 export const setStubLogger = () => {

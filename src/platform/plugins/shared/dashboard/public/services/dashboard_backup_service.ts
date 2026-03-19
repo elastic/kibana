@@ -14,7 +14,6 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { isEqual } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 import type { DashboardState } from '../../common';
-import { dashboardBackupService } from './kibana_services';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
@@ -119,12 +118,4 @@ export const createDashboardBackupService = async (
     dashboardHasUnsavedEdits: (id = DASHBOARD_PANELS_UNSAVED_ID) =>
       warnOnErrors(() => hasUnsavedEdits(getUnsavedDashboardChanges()[id])) ?? false,
   };
-};
-
-export const getDashboardBackupService = () => {
-  if (!dashboardBackupService)
-    throw new Error(
-      "Dashboard backups service is not available. Ensure you've awaited untilPluginStartServicesReady before calling this function"
-    );
-  return dashboardBackupService!;
 };

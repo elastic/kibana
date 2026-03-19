@@ -24,7 +24,7 @@ setStubLogger();
 // Start the kibana services with stubs
 setStubKibanaServices();
 
-jest.mock('./public/services/dashboard_backup_service', () => {
+jest.mock('./public/services/dashboard_api_services', () => {
   return {
     getDashboardBackupService: () => mockDashboardBackupService,
   };

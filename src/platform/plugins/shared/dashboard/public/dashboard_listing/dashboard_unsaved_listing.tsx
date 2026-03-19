@@ -24,13 +24,11 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardState } from '../../server';
-import {
-  DASHBOARD_PANELS_UNSAVED_ID,
-  getDashboardBackupService,
-} from '../services/dashboard_backup_service';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { findService } from '../dashboard_client';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 
 const unsavedItemStyles = {
   item: (euiThemeContext: UseEuiTheme) =>

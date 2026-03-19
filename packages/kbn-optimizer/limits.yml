@@ -30,7 +30,7 @@ pageLoadAssetSize:
   cps: 9209
   crossClusterReplication: 12662
   customIntegrations: 11715
-  dashboard: 21000
+  dashboard: 20000
   dashboardAgent: 5135
   dashboardMarkdown: 6219
   data: 498703

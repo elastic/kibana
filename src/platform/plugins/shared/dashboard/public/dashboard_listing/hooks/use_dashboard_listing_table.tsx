@@ -25,7 +25,6 @@ import {
   findService,
 } from '../../dashboard_client';
 import { getAccessControlClient } from '../../services/access_control_service';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
@@ -41,6 +40,7 @@ import {
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import type { DashboardSavedObjectUserContent } from '../types';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
