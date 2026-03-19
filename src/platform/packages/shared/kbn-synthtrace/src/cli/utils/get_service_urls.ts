@@ -195,14 +195,21 @@ async function discoverTargetFromKibanaUrl(kibanaUrl: string) {
   );
 }
 
+interface ElasticsearchConfig {
+  hosts?: string | string[];
+  username?: string;
+  password?: string;
+}
+
 function discoverTargetFromKibanaConfig() {
   const config = readKibanaConfig();
-  const hosts = config.elasticsearch?.hosts;
-  let username = config.elasticsearch?.username;
+  const esConfig = config.elasticsearch as ElasticsearchConfig | undefined;
+  const hosts = esConfig?.hosts;
+  let username = esConfig?.username;
   if (username === 'kibana_system_user') {
     username = 'elastic';
   }
-  const password = config.elasticsearch?.password;
+  const password = esConfig?.password;
   if (hosts) {
     const parsed = parse(Array.isArray(hosts) ? hosts[0] : hosts);
     return format({

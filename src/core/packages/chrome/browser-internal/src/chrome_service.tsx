@@ -26,7 +26,6 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 
-import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import { DocTitleService } from './services/doc_title';
 import { NavControlsService } from './services/nav_controls';
 import { NavLinksService } from './services/nav_links';
@@ -175,62 +174,7 @@ export class ChromeService {
       docTitle,
     });
 
-    // 6. Create cached observables for components
-    const navLinks$ = navLinks.getNavLinks$();
-    const navigation$ = projectNavigation.getNavigation$();
-    const loadingCount$ = http.getLoadingCount$();
-    const recentlyAccessed$ = recentlyAccessed.get$();
-    const helpMenuLinks$ = navControls.getHelpMenuLinks$();
-    const homeHref = http.basePath.prepend('/app/home');
-    const kibanaVersion = this.params.kibanaVersion;
-
-    // 7. Build component deps (consumed by ChromeComponentsProvider in the layout service)
-    const componentDeps: ChromeComponentsDeps = {
-      config: {
-        isServerless: this.isServerless,
-        kibanaVersion,
-        homeHref,
-        kibanaDocLink: docLinks.links.kibana.guide,
-      },
-      application,
-      basePath: http.basePath,
-      docLinks,
-      navControls: {
-        left$: navControls.getLeft$(),
-        center$: navControls.getCenter$(),
-        right$: navControls.getRight$(),
-        extension$: navControls.getExtension$(),
-      },
-      classic: {
-        breadcrumbs$: state.breadcrumbs.classic.$,
-        recentlyAccessed$,
-        customNavLink$: state.customNavLink.$,
-      },
-      project: {
-        breadcrumbs$: projectNavigation.getProjectBreadcrumbs$(),
-        homeHref$: projectNavigation.getProjectHome$(),
-        navigation$,
-      },
-      loadingCount$,
-      helpMenu: {
-        menuLinks$: helpMenuLinks$,
-        extension$: state.help.extension.$,
-        supportUrl$: state.help.supportUrl.$,
-        globalExtensionMenuLinks$: state.help.globalMenuLinks.$,
-      },
-      navLinks$,
-      customBranding$: customBranding.customBranding$,
-      breadcrumbsAppendExtensions$: state.breadcrumbs.appendExtensionsWithBadges$,
-      appMenu$: state.appMenu.$,
-      headerBanner$: state.headerBanner.$,
-      sideNav: {
-        collapsed$: state.sideNav.collapsed.$,
-        initialCollapsed: state.sideNav.collapsed.get(),
-        onToggleCollapsed: state.sideNav.collapsed.set,
-      },
-    };
-
-    // 8. Return chrome API + componentDeps
+    // 6. Return chrome API
     const chrome = createChromeApi({
       state,
       services: {
@@ -240,7 +184,6 @@ export class ChromeService {
         docTitle,
         projectNavigation,
       },
-      componentDeps,
       sidebar,
     });
 
