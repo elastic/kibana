@@ -134,4 +134,29 @@ describe('<RelatedAttacks />', () => {
     const { getByText } = renderRelatedAttacks();
     expect(getByText('No related attacks.')).toBeInTheDocument();
   });
+
+  it('shows the missing alerts privilege message when the user lacks alerting read privilege', () => {
+    useAlertsPrivilegesMock.mockReturnValue({
+      hasAlertsRead: false,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          _id: 'attack-id-1',
+          _index: 'index',
+          fields: {
+            'kibana.alert.attack_discovery.title': ['Attack 1'],
+          },
+        },
+      ],
+    });
+
+    const { getByText, queryByTestId } = renderRelatedAttacks();
+    expect(getByText('Privileges required')).toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID)
+    ).not.toBeInTheDocument();
+  });
 });
