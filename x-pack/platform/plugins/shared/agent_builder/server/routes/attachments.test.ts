@@ -446,7 +446,7 @@ describe('Attachment Routes', () => {
         id: 'att-1',
         type: 'viz',
         current_version: 1,
-        origin: { savedObjectId: 'so-1' },
+        origin: 'so-1',
         versions: [
           {
             version: 1,
@@ -595,7 +595,7 @@ describe('Attachment Routes', () => {
         }),
         expect.any(Object)
       );
-      expect(resolveMock).toHaveBeenCalledWith({ id: 'source-1' }, expect.any(Object));
+      expect(resolveMock).toHaveBeenCalledWith('source-1', expect.any(Object));
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.attachments).toEqual([
         expect.objectContaining({
