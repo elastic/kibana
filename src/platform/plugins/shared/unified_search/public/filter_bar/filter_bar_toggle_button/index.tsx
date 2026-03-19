@@ -46,8 +46,8 @@ export const FilterBarToggleButton: React.FC<{}> = () => {
     // Clicking the toggle button will bring it into focus if it's not already. EuiToolTip is designed
     // to stay visible permanently on focused elements, but this is not a desirable behavior when the user
     // has just toggled the button. They already know what this button does. So, hide the tooltip manually.
-    expandTooltipRef.current?.hideToolTip();
     onToggleCollapse();
+    requestAnimationFrame(() => expandTooltipRef.current?.hideToolTip());
   }, [onToggleCollapse]);
 
   return (
