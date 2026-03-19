@@ -36,27 +36,17 @@ export const findComplianceRules = async (
 
   const filterParts: string[] = [];
   if (filters.benchmarkId) {
-    filterParts.push(
-      `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.id: "${escapeKql(filters.benchmarkId)}"`
-    );
+    filterParts.push(`${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.id: "${escapeKql(filters.benchmarkId)}"`);
   }
-
   if (filters.platform) {
-    filterParts.push(
-      `${COMPLIANCE_RULE_SO_TYPE}.attributes.platform: "${escapeKql(filters.platform)}"`
-    );
+    filterParts.push(`${COMPLIANCE_RULE_SO_TYPE}.attributes.platform: "${escapeKql(filters.platform)}"`);
   }
-
   if (filters.section) {
-    filterParts.push(
-      `${COMPLIANCE_RULE_SO_TYPE}.attributes.section: "${escapeKql(filters.section)}"`
-    );
+    filterParts.push(`${COMPLIANCE_RULE_SO_TYPE}.attributes.section: "${escapeKql(filters.section)}"`);
   }
-
   if (filters.level !== undefined) {
     filterParts.push(`${COMPLIANCE_RULE_SO_TYPE}.attributes.level: ${filters.level}`);
   }
-
   if (filters.enabled !== undefined) {
     filterParts.push(`${COMPLIANCE_RULE_SO_TYPE}.attributes.enabled: ${filters.enabled}`);
   }
@@ -68,7 +58,7 @@ export const findComplianceRules = async (
     filter: filterParts.length > 0 ? filterParts.join(' AND ') : undefined,
     search,
     searchFields: ['name', 'description'],
-    sortField: 'name',
+    sortField: 'rule_number',
     sortOrder: 'asc',
   });
 
@@ -80,7 +70,10 @@ export const findComplianceRules = async (
   };
 };
 
-export const getComplianceRule = async (soClient: SavedObjectsClientContract, id: string) => {
+export const getComplianceRule = async (
+  soClient: SavedObjectsClientContract,
+  id: string
+) => {
   const so = await soClient.get<ComplianceRuleMetadata>(COMPLIANCE_RULE_SO_TYPE, id);
 
   return { id: so.id, ...so.attributes };
@@ -90,14 +83,10 @@ export const createComplianceRule = async (
   soClient: SavedObjectsClientContract,
   rule: ComplianceRuleMetadata
 ) => {
-  const so = await soClient.create<ComplianceRuleMetadata>(
-    COMPLIANCE_RULE_SO_TYPE,
-    {
-      ...rule,
-      prebuilt: false,
-    },
-    { id: rule.rule_id }
-  );
+  const so = await soClient.create<ComplianceRuleMetadata>(COMPLIANCE_RULE_SO_TYPE, {
+    ...rule,
+    prebuilt: false,
+  }, { id: rule.rule_id });
 
   return { id: so.id, ...so.attributes };
 };
@@ -112,12 +101,14 @@ export const updateComplianceRule = async (
   return getComplianceRule(soClient, id);
 };
 
-export const deleteComplianceRule = async (soClient: SavedObjectsClientContract, id: string) => {
+export const deleteComplianceRule = async (
+  soClient: SavedObjectsClientContract,
+  id: string
+) => {
   const existing = await soClient.get<ComplianceRuleMetadata>(COMPLIANCE_RULE_SO_TYPE, id);
   if (existing.attributes.prebuilt) {
     throw new Error('Cannot delete prebuilt compliance rules. Disable it instead.');
   }
-
   await soClient.delete(COMPLIANCE_RULE_SO_TYPE, id);
 };
 
@@ -207,10 +198,7 @@ export const listBenchmarks = async (
         terms: { field: `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.id`, size: 50 },
         aggs: {
           benchmark_name: {
-            terms: {
-              field: `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.name.keyword`,
-              size: 1,
-            },
+            terms: { field: `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.name.keyword`, size: 1 },
           },
           benchmark_version: {
             terms: { field: `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.version`, size: 1 },

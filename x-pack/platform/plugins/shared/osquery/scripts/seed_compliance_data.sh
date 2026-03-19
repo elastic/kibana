@@ -61,6 +61,13 @@ es_request() {
     "$@"
 }
 
+es_bulk() {
+  curl -s -X POST "${ES_URL}/_bulk" \
+    "${AUTH[@]}" \
+    -H "Content-Type: application/x-ndjson" \
+    --data-binary @-
+}
+
 echo "═══════════════════════════════════════════════════════════════"
 echo " Endpoint Compliance — Sample Data Seeder"
 echo "═══════════════════════════════════════════════════════════════"
@@ -280,34 +287,12 @@ for day_offset in $(seq 0 $((NUM_DAYS - 1))); do
         # Use section as-is for rule_number (from the prebuilt rules pattern)
 
         NDJSON+='{"create":{"_index":"'"$FINDINGS_DS"'"}}'$'\n'
-        NDJSON+='{
-  "@timestamp": "'"$EVAL_TS"'",
-  "result": {"evaluation": "'"$evaluation"'", "evidence": '"$evidence"'},
-  "rule": {
-    "id": "'"$rule_id"'",
-    "name": "'"$rule_name"'",
-    "description": "'"$rule_name"'",
-    "remediation": "See CIS Benchmark documentation.",
-    "benchmark": {"id": "'"$benchmark_id"'", "name": "'"$benchmark_name"'", "version": "'"$benchmark_version"'", "posture_type": "endpoint", "rule_number": "'"$section"'"},
-    "section": "'"$section"'",
-    "level": '"$level"',
-    "frameworks": [{"id": "nist_800_53", "version": "r5", "control": "CM-6"}],
-    "tags": ["'"$benchmark_id"'", "'"$platform"'", "CIS_Level1"]
-  },
-  "host": {
-    "id": "'"$host_id"'",
-    "name": "'"$host_name"'",
-    "os": {"family": "'"$platform"'", "name": "'"$os_name"'", "version": "'"$os_version"'", "platform": "'"$platform"'"}
-  },
-  "agent": {"id": "'"$agent_id"'", "type": "osquery", "version": "5.12.1"},
-  "resource": {"type": "system", "sub_type": "'"$section"'"},
-  "data_stream": {"dataset": "endpoint_compliance.findings", "namespace": "default", "type": "logs"}
-}'$'\n'
+        NDJSON+='{"@timestamp":"'"$EVAL_TS"'","result":{"evaluation":"'"$evaluation"'","evidence":'"$evidence"'},"rule":{"id":"'"$rule_id"'","name":"'"$rule_name"'","description":"'"$rule_name"'","remediation":"See CIS Benchmark documentation.","benchmark":{"id":"'"$benchmark_id"'","name":"'"$benchmark_name"'","version":"'"$benchmark_version"'","posture_type":"endpoint","rule_number":"'"$section"'"},"section":"'"$section"'","level":'"$level"',"frameworks":[{"id":"nist_800_53","version":"r5","control":"CM-6"}],"tags":["'"$benchmark_id"'","'"$platform"'","CIS_Level1"]},"host":{"id":"'"$host_id"'","name":"'"$host_name"'","os":{"family":"'"$platform"'","name":"'"$os_name"'","version":"'"$os_version"'","platform":"'"$platform"'"}},"agent":{"id":"'"$agent_id"'","type":"osquery","version":"5.12.1"},"resource":{"type":"system","sub_type":"'"$section"'"},"data_stream":{"dataset":"endpoint_compliance.findings","namespace":"default","type":"logs"}}'$'\n'
         FINDING_COUNT=$((FINDING_COUNT + 1))
 
         # Flush every 500 docs to avoid huge request bodies
         if [[ $FINDING_COUNT -gt 0 && $((FINDING_COUNT % 500)) -eq 0 ]]; then
-          RESULT=$(echo "$NDJSON" | es_request POST "/_bulk" -d @-)
+          RESULT=$(echo "$NDJSON" | es_bulk)
           ERRORS=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('errors', True))" 2>/dev/null || echo "true")
           if [[ "$ERRORS" == "True" || "$ERRORS" == "true" ]]; then
             echo "  ⚠ Some bulk errors at doc $FINDING_COUNT (may be benign)"
@@ -322,7 +307,7 @@ done
 
 # Flush remaining
 if [[ -n "$NDJSON" ]]; then
-  RESULT=$(echo "$NDJSON" | es_request POST "/_bulk" -d @-)
+  RESULT=$(echo "$NDJSON" | es_bulk)
   ERRORS=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('errors', True))" 2>/dev/null || echo "true")
   if [[ "$ERRORS" == "True" || "$ERRORS" == "true" ]]; then
     echo "  ⚠ Some bulk errors in final batch"
@@ -369,26 +354,14 @@ for day_offset in $(seq 0 $((NUM_DAYS - 1))); do
       host_count=$(( NUM_HOSTS / 3 + (NUM_HOSTS % 3 > 0 ? 1 : 0) ))
 
       NDJSON+='{"create":{"_index":"'"$SCORES_DS"'"}}'$'\n'
-      NDJSON+='{
-  "@timestamp": "'"$SCORE_TS"'",
-  "score": '"$score"',
-  "total_findings": '"$total"',
-  "passed_findings": '"$passed"',
-  "failed_findings": '"$failed"',
-  "not_applicable_findings": '"$na"',
-  "rule": {"benchmark": {"id": "'"$bm_id"'", "name": "'"$bm_name"'", "version": "'"$bm_version"'"}},
-  "policy_template": "endpoint_compliance",
-  "host_count": '"$host_count"',
-  "is_enabled_rules_score": true,
-  "namespace": "default"
-}'$'\n'
+      NDJSON+='{"@timestamp":"'"$SCORE_TS"'","score":'"$score"',"total_findings":'"$total"',"passed_findings":'"$passed"',"failed_findings":'"$failed"',"not_applicable_findings":'"$na"',"rule":{"benchmark":{"id":"'"$bm_id"'","name":"'"$bm_name"'","version":"'"$bm_version"'"}},"policy_template":"endpoint_compliance","host_count":'"$host_count"',"is_enabled_rules_score":true,"namespace":"default"}'$'\n'
       SCORE_COUNT=$((SCORE_COUNT + 1))
     done
   done
 done
 
 if [[ -n "$NDJSON" ]]; then
-  RESULT=$(echo "$NDJSON" | es_request POST "/_bulk" -d @-)
+  RESULT=$(echo "$NDJSON" | es_bulk)
   ERRORS=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('errors', True))" 2>/dev/null || echo "true")
   if [[ "$ERRORS" == "True" || "$ERRORS" == "true" ]]; then
     echo "  ⚠ Some bulk errors in scores batch"

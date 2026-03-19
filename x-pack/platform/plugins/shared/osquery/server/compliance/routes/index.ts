@@ -37,11 +37,7 @@ const ROUTE_SECURITY_WRITE = {
 export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>) => {
   // --- Benchmarks ---
   router.versioned
-    .get({
-      path: `${COMPLIANCE_API_BASE}/benchmarks`,
-      access: 'internal',
-      security: ROUTE_SECURITY_READ,
-    })
+    .get({ path: `${COMPLIANCE_API_BASE}/benchmarks`, access: 'internal', security: ROUTE_SECURITY_READ })
     .addVersion({ version: '1', validate: false }, async (context, _req, res) => {
       const soClient = (await context.core).savedObjects.client;
       const benchmarks = await listBenchmarks(soClient);
@@ -274,11 +270,7 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
         validate: {
           request: {
             params: schema.object({ benchmark_id: schema.string() }),
-            query: schema.object({
-              time_range: schema.maybe(
-                schema.oneOf([schema.literal('24h'), schema.literal('7d'), schema.literal('30d')])
-              ),
-            }),
+            query: schema.object({ time_range: schema.maybe(schema.oneOf([schema.literal('24h'), schema.literal('7d'), schema.literal('30d')])) }),
           },
         },
       },
@@ -423,20 +415,12 @@ export const initComplianceRoutes = (router: IRouter<DataRequestHandlerContext>)
       },
       async (context, req, res) => {
         const soClient = (await context.core).savedObjects.client;
-        const noopLogger = {
-          info: () => {},
-          warn: () => {},
-          error: () => {},
-          debug: () => {},
-          fatal: () => {},
-          trace: () => {},
-        } as any;
+        const noopLogger = { info: () => {}, warn: () => {}, error: () => {}, debug: () => {}, fatal: () => {}, trace: () => {} } as any;
         const result = await runComplianceCheck(
           soClient,
           req.body.platform as CompliancePlatform,
           noopLogger
         );
-
         return res.ok({ body: result });
       }
     );

@@ -7,14 +7,10 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
-  COMPLIANCE_FINDINGS_LATEST_INDEX,
+  COMPLIANCE_FINDINGS_DATA_STREAM,
   COMPLIANCE_SCORES_DATA_STREAM,
 } from '../../../common/compliance';
-import type {
-  MutedRulesState,
-  ComplianceSectionScore,
-  ComplianceHostScore,
-} from '../../../common/compliance';
+import type { MutedRulesState, ComplianceSectionScore, ComplianceHostScore } from '../../../common/compliance';
 import { calculatePostureScore, buildMutedRulesFilter } from '../../../common/compliance';
 
 export const computeAndWriteScores = async (
@@ -29,7 +25,7 @@ export const computeAndWriteScores = async (
 
   try {
     const response = await esClient.search({
-      index: COMPLIANCE_FINDINGS_LATEST_INDEX,
+      index: COMPLIANCE_FINDINGS_DATA_STREAM,
       size: 0,
       query: {
         bool: {
@@ -102,7 +98,7 @@ export const getDashboardStats = async (
 
   try {
     const response = await esClient.search({
-      index: COMPLIANCE_FINDINGS_LATEST_INDEX,
+      index: COMPLIANCE_FINDINGS_DATA_STREAM,
       size: 0,
       query: {
         bool: {
@@ -123,8 +119,7 @@ export const getDashboardStats = async (
             score: {
               bucket_script: {
                 buckets_path: { p: 'passed._count', f: 'failed._count' },
-                script:
-                  'params.p + params.f == 0 ? 0 : Math.round(params.p * 1000.0 / (params.p + params.f)) / 10.0',
+                script: 'params.p + params.f == 0 ? 0 : Math.round(params.p * 1000.0 / (params.p + params.f)) / 10.0',
               },
             },
           },
@@ -140,8 +135,7 @@ export const getDashboardStats = async (
             score: {
               bucket_script: {
                 buckets_path: { p: 'passed._count', f: 'failed._count' },
-                script:
-                  'params.p + params.f == 0 ? 0 : Math.round(params.p * 1000.0 / (params.p + params.f)) / 10.0',
+                script: 'params.p + params.f == 0 ? 0 : Math.round(params.p * 1000.0 / (params.p + params.f)) / 10.0',
               },
             },
             last_eval: { max: { field: '@timestamp' } },
@@ -265,7 +259,7 @@ export const findComplianceFindings = async (
 
   try {
     const response = await esClient.search({
-      index: COMPLIANCE_FINDINGS_LATEST_INDEX,
+      index: COMPLIANCE_FINDINGS_DATA_STREAM,
       from: (page - 1) * perPage,
       size: perPage,
       query: must.length > 0 ? { bool: { must } } : { match_all: {} },
@@ -273,10 +267,7 @@ export const findComplianceFindings = async (
     });
 
     return {
-      total:
-        typeof response.hits.total === 'number'
-          ? response.hits.total
-          : response.hits.total?.value ?? 0,
+      total: typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0,
       page,
       per_page: perPage,
       findings: response.hits.hits.map((hit) => ({ id: hit._id, ...hit._source })),

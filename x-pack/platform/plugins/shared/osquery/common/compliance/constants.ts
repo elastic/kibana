@@ -17,7 +17,7 @@ export const COMPLIANCE_BENCHMARK_STATE_SO_TYPE = 'endpoint-compliance-benchmark
 
 export const COMPLIANCE_SCHEDULE_ID_PREFIX = 'compliance-';
 
-export const COMPLIANCE_API_BASE = '/api/endpoint_compliance';
+export const COMPLIANCE_API_BASE = '/internal/endpoint_compliance';
 
 export const COMPLIANCE_SCORE_AGGREGATION_TASK_TYPE = 'endpoint-compliance:score-aggregation';
 export const COMPLIANCE_SCORE_AGGREGATION_INTERVAL = '5m';

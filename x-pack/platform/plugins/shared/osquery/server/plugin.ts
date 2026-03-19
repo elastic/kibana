@@ -116,8 +116,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
         defineRoutes(router, osqueryContext);
       })
-      .catch(() => {
-        // it shouldn't reject, but just in case
+      .catch((err) => {
+        this.logger.error(`Failed to register osquery routes: ${err.message}`);
+        this.logger.error(err.stack);
       });
 
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
