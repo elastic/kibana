@@ -82,15 +82,17 @@ export class ObservabilityOnboardingPlugin
   implements Plugin<ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart>
 {
   private locators?: ObservabilityOnboardingPluginLocators;
-  private pluginSetupDeps?: ObservabilityOnboardingPluginSetupDeps;
+  private isServerless = false;
 
   constructor(private readonly ctx: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ObservabilityOnboardingPluginSetupDeps) {
-    this.pluginSetupDeps = plugins;
+    this.isServerless =
+      Boolean(plugins.cloud?.isServerlessEnabled) ||
+      this.ctx.env.packageInfo.buildFlavor === 'serverless';
     const stackVersion = this.ctx.env.packageInfo.version;
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
-    const isServerlessBuild = this.ctx.env.packageInfo.buildFlavor === 'serverless';
+    const isServerless = this.isServerless;
     const isDevEnvironment = this.ctx.env.mode.dev;
     const pluginSetupDeps = plugins;
 
@@ -121,7 +123,7 @@ export class ObservabilityOnboardingPlugin
           context: {
             isDev: isDevEnvironment,
             isCloud: Boolean(pluginSetupDeps.cloud?.isCloudEnabled),
-            isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled) || isServerlessBuild,
+            isServerless,
             stackVersion,
             cloudServiceProvider: pluginSetupDeps.cloud?.csp,
           },
@@ -160,20 +162,10 @@ export class ObservabilityOnboardingPlugin
       return;
     }
 
-    const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const deps = {
       core,
       plugins,
-      config,
-      context: {
-        isDev: this.ctx.env.mode.dev,
-        isCloud: Boolean(this.pluginSetupDeps?.cloud?.isCloudEnabled),
-        isServerless:
-          Boolean(this.pluginSetupDeps?.cloud?.isServerlessEnabled) ||
-          this.ctx.env.packageInfo.buildFlavor === 'serverless',
-        stackVersion: this.ctx.env.packageInfo.version,
-        cloudServiceProvider: this.pluginSetupDeps?.cloud?.csp,
-      },
+      isServerless: this.isServerless,
     };
 
     const KubernetesFlow = dynamic(async () => {

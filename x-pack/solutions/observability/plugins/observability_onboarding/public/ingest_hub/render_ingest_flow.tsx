@@ -9,15 +9,13 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import type { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import type { ObservabilityOnboardingPluginStartDeps } from '../plugin';
 import { createCallApi } from '../services/rest/create_call_api';
 
 export interface IngestFlowDeps {
   core: CoreStart;
   plugins: ObservabilityOnboardingPluginStartDeps;
-  config: ConfigSchema;
-  context: AppContext;
+  isServerless: boolean;
 }
 
 export const createIngestFlowComponent = (
@@ -26,11 +24,12 @@ export const createIngestFlowComponent = (
 ): React.FC => {
   createCallApi(deps.core);
 
-  const services: ObservabilityOnboardingAppServices = {
+  const services = {
     ...deps.core,
     ...deps.plugins,
-    config: deps.config,
-    context: deps.context,
+    context: {
+      isServerless: deps.isServerless,
+    },
   };
 
   return () => (
