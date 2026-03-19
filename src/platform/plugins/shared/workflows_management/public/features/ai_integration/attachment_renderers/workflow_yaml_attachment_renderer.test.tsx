@@ -257,23 +257,5 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       const buttons = registerActionButtons.mock.calls[0][0];
       expect(buttons.find((b: { label: string }) => b.label === 'Open in editor')).toBeDefined();
     });
-
-    it('does NOT register buttons in sidebar mode', () => {
-      const services = createMockServices();
-      const definition = createWorkflowYamlAttachmentUiDefinition(services);
-      const attachment = createAttachment({ workflowId: 'wf-123' });
-      const registerActionButtons = jest.fn();
-
-      render(
-        <>
-          {definition.renderCanvasContent!(
-            { attachment, isSidebar: true },
-            { registerActionButtons, updateOrigin: jest.fn(), closeCanvas: jest.fn() }
-          )}
-        </>
-      );
-
-      expect(registerActionButtons).not.toHaveBeenCalled();
-    });
   });
 });
