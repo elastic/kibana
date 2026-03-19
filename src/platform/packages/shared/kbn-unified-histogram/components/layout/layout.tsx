@@ -80,14 +80,14 @@ export const UnifiedHistogramLayout = ({
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const showFixedPanels = isMobile || !chart || chart.hidden;
-  const hideMainPanel = Boolean(isMainPanelHidden && chart && !chart.hidden);
+  const shouldHideMainPanel = Boolean(isMainPanelHidden && chart && !chart.hidden);
   const { euiTheme } = useEuiTheme();
   const minTopPanelHeight = euiTheme.base * 12;
   const defaultTopPanelHeight = originalDefaultTopPanelHeight ?? minTopPanelHeight;
   const minMainPanelHeight = euiTheme.base * 10;
 
   const chartCss =
-    isMobile && chart && !chart.hidden && !hideMainPanel
+    isMobile && chart && !chart.hidden && !shouldHideMainPanel
       ? css`
           .unifiedHistogram__chart {
             height: ${defaultTopPanelHeight}px;
@@ -100,7 +100,7 @@ export const UnifiedHistogramLayout = ({
         `;
 
   const panelsMode =
-    !hideMainPanel && (chart || hits)
+    !shouldHideMainPanel && (chart || hits)
       ? showFixedPanels
         ? ResizableLayoutMode.Static
         : ResizableLayoutMode.Resizable
@@ -108,12 +108,12 @@ export const UnifiedHistogramLayout = ({
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
   const mainPanel = <OutPortal node={mainPanelNode} />;
-  const fixedPanel = hideMainPanel ? mainPanel : unifiedHistogramChart;
-  const flexPanel = hideMainPanel ? unifiedHistogramChart : mainPanel;
+  const fixedPanel = shouldHideMainPanel ? mainPanel : unifiedHistogramChart;
+  const flexPanel = shouldHideMainPanel ? unifiedHistogramChart : mainPanel;
 
   return (
     <>
-      {!hideMainPanel && (
+      {!shouldHideMainPanel && (
         <InPortal node={mainPanelNode}>
           {React.isValidElement<{ isChartAvailable?: boolean }>(children)
             ? React.cloneElement(children, { isChartAvailable })
