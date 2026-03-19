@@ -48,15 +48,17 @@ export async function createSnapshot({
   log,
   snapshotName,
   runId,
+  indices,
 }: {
   esClient: Client;
   log: ToolingLog;
   snapshotName: string;
   runId: string;
+  indices?: string;
 }): Promise<void> {
   const repoName = generateGcsRepoName({ runId });
   const kiFeaturesIndex = getSigeventsSnapshotKIFeaturesIndex(snapshotName);
-  const indices = `logs*,${kiFeaturesIndex}`;
+  const indicesToCapture = indices ?? `logs*,${kiFeaturesIndex}`;
 
   try {
     await esClient.snapshot.get({ repository: repoName, snapshot: snapshotName });
@@ -72,13 +74,13 @@ export async function createSnapshot({
     }
   }
 
-  log.info(`Creating snapshot "${repoName}/${snapshotName}" (indices: ${indices})`);
+  log.info(`Creating snapshot "${repoName}/${snapshotName}" (indices: ${indicesToCapture})`);
 
   const result = await esClient.snapshot.create({
     repository: repoName,
     snapshot: snapshotName,
     wait_for_completion: true,
-    indices,
+    indices: indicesToCapture,
     include_global_state: false,
   });
 
