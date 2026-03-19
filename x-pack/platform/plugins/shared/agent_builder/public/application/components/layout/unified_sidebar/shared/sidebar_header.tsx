@@ -23,10 +23,6 @@ import { appPaths } from '../../../../utils/app_paths';
 import { AgentAvatar } from '../../../common/agent_avatar';
 import { AgentSelector } from './agent_selector';
 
-// Exported so index.tsx can use this for the scrollable area top offset.
-// TODO: replace with a ResizeObserver once the layout stabilises
-export const HEADER_HEIGHT = 120;
-
 const labels = {
   customizeAgent: i18n.translate('xpack.agentBuilder.sidebar.header.customizeAgent', {
     defaultMessage: 'Customize agent',

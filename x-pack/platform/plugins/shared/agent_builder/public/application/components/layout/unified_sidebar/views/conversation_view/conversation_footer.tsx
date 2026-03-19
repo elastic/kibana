@@ -15,8 +15,6 @@ import { appPaths } from '../../../../../utils/app_paths';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { SidebarLink } from './sidebar_link';
 
-// Exported so index.tsx can use this for the scrollable area bottom offset.
-// TODO: replace with a ResizeObserver once the layout stabilises
 export const FOOTER_HEIGHT = 64;
 
 const footerStyles = css`
