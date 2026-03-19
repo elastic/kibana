@@ -90,6 +90,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'automatic_troubleshooting',
   'entity-analytics',
   'alert-analysis',
+  'malware-analysis',
 
   // O11Y
   'observability.log-search',
