@@ -148,7 +148,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const [fileError, setFileError] = useState<string | undefined>(undefined);
   const [uploadedFileName, setUploadedFileName] = useState<string | undefined>(undefined);
 
-  const logsSourceOption = formData?.logsSourceOption ?? 'upload';
+  const logsSourceOption = formData?.logsSourceOption ?? 'file';
   const logSample = formData?.logSample;
   const selectedIndex = formData?.selectedIndex ?? '';
 
@@ -195,7 +195,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const handleLogsSourceChange = useCallback(
     async (option: LogsSourceOption) => {
       form.setFieldValue('logsSourceOption', option);
-      if (option === 'upload') {
+      if (option === 'file') {
         clearIndexValidationError();
       } else {
         setFileError(undefined);
@@ -239,7 +239,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     formData.dataCollectionMethod.length > 0;
 
   const isLogSourceValid =
-    (logsSourceOption === 'upload' && !!logSample) ||
+    (logsSourceOption === 'file' && !!logSample) ||
     (logsSourceOption === 'index' && !!selectedIndex && !indexValidationError);
 
   const isAnalyzeDisabled =
@@ -268,7 +268,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     };
 
     try {
-      if (logsSourceOption === 'upload' && logSample) {
+      if (logsSourceOption === 'file' && logSample) {
         const samples = logSample
           .split('\n')
           .map((line) => line.trim())
@@ -445,8 +445,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         <EuiCheckableCard
           id="logsSourceUpload"
           label={<FormStyledLabel text={i18n.UPLOAD_LOG_FILE_LABEL} />}
-          checked={logsSourceOption === 'upload'}
-          onChange={() => handleLogsSourceChange('upload')}
+          checked={logsSourceOption === 'file'}
+          onChange={() => handleLogsSourceChange('file')}
           data-test-subj="logsSourceUploadCard"
           css={styles.checkableCard}
         >
@@ -460,7 +460,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               aria-label={i18n.ARIA_LABELS.uploadLogFile}
               isLoading={isParsing}
               isInvalid={fileError != null}
-              disabled={logsSourceOption !== 'upload'}
+              disabled={logsSourceOption !== 'file'}
             />
           </EuiFormRow>
         </EuiCheckableCard>

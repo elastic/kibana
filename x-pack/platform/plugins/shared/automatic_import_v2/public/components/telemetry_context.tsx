@@ -9,7 +9,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { useKibana } from '../common/hooks/use_kibana';
 import { AIV2TelemetryEventType } from '../../common';
 
-export type LogsSource = 'upload' | 'index';
+export type LogsSource = 'file' | 'index';
 type ReportDataStreamFlyoutOpened = (params: {
   integrationId?: string;
   integrationName?: string;

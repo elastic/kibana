@@ -132,7 +132,7 @@ describe('useTelemetry', () => {
         integrationName: 'My Integration',
         dataStreamId: 'ds-1',
         dataStreamName: 'My DataStream',
-        logsSource: 'upload',
+        logsSource: 'file',
       });
     });
 
@@ -141,7 +141,7 @@ describe('useTelemetry', () => {
       expect.objectContaining({
         sessionId: expect.any(String),
         integrationId: 'int-1',
-        logsSource: 'upload',
+        logsSource: 'file',
       })
     );
   });
