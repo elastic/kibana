@@ -354,6 +354,68 @@ describe('TraceItemRow', () => {
     });
   });
 
+  describe('interactivity (hover behaviour conditioned on onClick)', () => {
+    it('is interactive when onClick is provided, regardless of whether another span is highlighted', () => {
+      mockUseTraceWaterfallContext.mockReturnValue({
+        duration: 100,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        onErrorClick: jest.fn(),
+        highlightedSpanId: 'some-other-span',
+        criticalPathSegmentsById: {},
+        showCriticalPath: false,
+      } as unknown as TraceWaterfallContextProps);
+
+      const { getByTestId } = render(
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+
+      expect(getByTestId('traceItemRowContent')).toHaveAttribute('role', 'button');
+      expect(getByTestId('traceItemRowContent')).toHaveAttribute('tabIndex', '0');
+    });
+
+    it('is not interactive when onClick is not provided', () => {
+      mockUseTraceWaterfallContext.mockReturnValue({
+        duration: 100,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: undefined,
+        onErrorClick: jest.fn(),
+        highlightedSpanId: undefined,
+        criticalPathSegmentsById: {},
+        showCriticalPath: false,
+      } as unknown as TraceWaterfallContextProps);
+
+      const { getByTestId } = render(
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+
+      expect(getByTestId('traceItemRowContent')).not.toHaveAttribute('role', 'button');
+      expect(getByTestId('traceItemRowContent')).toHaveAttribute('tabIndex', '-1');
+    });
+
+    it('remains interactive when onClick is provided and current item is highlighted', () => {
+      mockUseTraceWaterfallContext.mockReturnValue({
+        duration: 100,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        onErrorClick: jest.fn(),
+        highlightedSpanId: 'span-1', // this item is highlighted
+        criticalPathSegmentsById: {},
+        showCriticalPath: false,
+      } as unknown as TraceWaterfallContextProps);
+
+      const { getByTestId } = render(
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+
+      expect(getByTestId('traceItemRowContent')).toHaveAttribute('role', 'button');
+      expect(getByTestId('traceItemRowContent')).toHaveAttribute('tabIndex', '0');
+    });
+  });
+
   /**
    * Regression test: EUI forces arrow display when buttonElement="div" for accessibility.
    * We hide it via arrowProps.css since we use our own ToggleAccordionButton.
