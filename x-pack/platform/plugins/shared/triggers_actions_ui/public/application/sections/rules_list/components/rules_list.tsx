@@ -117,8 +117,6 @@ export interface RulesListProps {
   onTypeFilterChange?: (type: string[]) => void;
   onRefresh?: (refresh: Date) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
-  navigateToEditRuleForm?: (ruleId: string) => void;
-  navigateToCreateRuleForm?: (ruleTypeId: string) => void;
 }
 
 export const percentileFields = {
@@ -159,8 +157,6 @@ export const RulesList = ({
   onStatusFilterChange,
   onTypeFilterChange,
   onRefresh,
-  navigateToEditRuleForm,
-  navigateToCreateRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -296,11 +292,6 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
-    if (navigateToEditRuleForm) {
-      navigateToEditRuleForm(ruleItem.id);
-      return;
-    }
-
     navigateToApp('management', {
       path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
       state: {
@@ -1007,13 +998,9 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
-              if (navigateToCreateRuleForm) {
-                navigateToCreateRuleForm(ruleTypeId);
-              } else {
-                navigateToApp('management', {
-                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
-                });
-              }
+              navigateToApp('management', {
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+              });
             }}
             onSelectTemplate={(templateId) => {
               // For templates, we need to extract the ruleTypeId or handle it differently

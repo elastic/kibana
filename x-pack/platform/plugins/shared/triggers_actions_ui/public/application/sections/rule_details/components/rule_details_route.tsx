@@ -51,8 +51,7 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
   const setBreadcrumbs = useSetBreadcrumbs();
   useEffect(() => {
     setBreadcrumbs([getRulesBreadcrumbWithHref(getUrlForApp)]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getUrlForApp, setBreadcrumbs]);
 
   const [rule, setRule] = useState<ResolvedRule | null>(null);
   const [ruleType, setRuleType] = useState<RuleType | null>(null);

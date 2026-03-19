@@ -13,7 +13,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import {
   getCreateRuleRoute,
-  getEditRuleRoute,
   getRulesAppDetailsRoute,
   rulesAppDetailsRoute,
   getCreateRuleFromTemplateRoute,
@@ -40,7 +39,7 @@ const RulesPage = () => {
   const location = useLocation();
   const {
     chrome: { docTitle },
-    application: { navigateToApp, getUrlForApp, isAppRegistered },
+    application: { getUrlForApp, isAppRegistered },
     http,
     notifications: { toasts },
     ruleTypeRegistry,
@@ -102,23 +101,6 @@ const RulesPage = () => {
   const locationRef = useRef(location);
   locationRef.current = location;
 
-  const navigateToEditRuleForm = useCallback(
-    (ruleId: string) => {
-      const { pathname, search, hash } = locationRef.current;
-      const returnPath = `${pathname}${search}${hash}` || '/';
-
-      history.push({
-        pathname: getEditRuleRoute(ruleId),
-        search,
-        hash,
-        state: {
-          returnPath,
-        },
-      });
-    },
-    [history]
-  );
-
   const navigateToCreateRuleForm = useCallback(
     (ruleTypeId: string) => {
       const { pathname, search, hash } = locationRef.current;
@@ -140,13 +122,11 @@ const RulesPage = () => {
           consumers={NON_SIEM_CONSUMERS}
           rulesListKey="rules-page"
           showCreateRuleButtonInPrompt={true}
-          navigateToEditRuleForm={navigateToEditRuleForm}
-          navigateToCreateRuleForm={navigateToCreateRuleForm}
           ruleDetailsRoute={rulesAppDetailsRoute}
         />
       </KibanaPageTemplate.Section>
     );
-  }, [navigateToEditRuleForm, navigateToCreateRuleForm]);
+  }, []);
 
   const renderLogsList = useCallback(() => {
     return (
@@ -212,16 +192,15 @@ const RulesPage = () => {
       {ruleTypeModalVisible && (
         <RuleTypeModal
           onClose={() => setRuleTypeModalVisibility(false)}
-          onSelectRuleType={(ruleTypeId) => {
-            navigateToApp('rules', {
-              path: `${getCreateRuleRoute(ruleTypeId)}`,
-            });
-          }}
+          onSelectRuleType={navigateToCreateRuleForm}
           onSelectTemplate={(templateId) => {
-            // For templates, we need to extract the ruleTypeId or handle it differently
-            // For now, fall back to default behavior
-            navigateToApp('rules', {
-              path: getCreateRuleFromTemplateRoute(encodeURIComponent(templateId)),
+            const { pathname, search, hash } = locationRef.current;
+            const returnPath = `${pathname}${search}${hash}`;
+            history.push({
+              pathname: getCreateRuleFromTemplateRoute(templateId),
+              search,
+              hash,
+              state: { returnPath },
             });
           }}
           http={http}
