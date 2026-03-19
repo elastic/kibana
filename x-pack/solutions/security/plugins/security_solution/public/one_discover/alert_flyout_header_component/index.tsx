@@ -9,7 +9,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import React, { useEffect, useState } from 'react';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
-import { DocumentHeader } from '../../flyout_v2/document/components/document_header';
+import { DocumentHeader } from '../../flyout_v2/document/header';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 
 export interface AlertFlyoutHeaderProps {
