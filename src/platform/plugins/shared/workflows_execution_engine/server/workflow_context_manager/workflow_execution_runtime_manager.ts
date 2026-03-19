@@ -59,7 +59,7 @@ export class WorkflowExecutionRuntimeManager {
 
   private workflowExecutionState: WorkflowExecutionState;
   private entryTransactionId?: string;
-  private workflowTransaction?: any; // APM transaction instance
+  private workflowTransaction?: agent.Transaction; // APM transaction instance
   private workflowGraph: WorkflowGraph;
   private nextNodeId: string | undefined;
   private coreStart?: CoreStart;
