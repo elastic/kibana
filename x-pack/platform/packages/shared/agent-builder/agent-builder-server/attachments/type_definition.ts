@@ -93,7 +93,7 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
 
 /**
  * Return type for attachment's validation handlers.
- * Refer to {@link InlineAttachmentTypeDefinition.validate}
+ * Refer to {@link AttachmentTypeDefinition.validate}
  */
 export type AttachmentValidationResult<TValidatedData = unknown> =
   /** valid attachment */

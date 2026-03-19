@@ -133,7 +133,7 @@ export interface AgentBuilderPluginStart {
    *
    * @param conversationId - The conversation containing the attachment
    * @param attachmentId - The ID of the attachment to update
-   * @param origin - The origin reference object (shape depends on attachment type)
+   * @param origin - Origin string for the attachment (e.g. saved object id); same value passed to `resolve` on the server
    * @returns Promise resolving to the update result
    *
    * @example
