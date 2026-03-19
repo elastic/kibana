@@ -23,7 +23,10 @@ import {
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import {
   visualizationElement,
   renderAttachmentElement,
@@ -47,6 +50,7 @@ interface Props {
   content: string;
   steps: ConversationRoundStep[];
   conversationAttachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
 }
 
@@ -58,6 +62,7 @@ export function ChatMessageText({
   content,
   steps: stepsFromCurrentRound,
   conversationAttachments,
+  attachmentRefs,
   conversationId,
 }: Props) {
   const { euiTheme } = useEuiTheme();
@@ -178,6 +183,7 @@ export function ChatMessageText({
       }),
       [renderAttachmentElement.tagName]: createRenderAttachmentRenderer({
         conversationAttachments,
+        attachmentRefs,
         conversationId,
         isSidebar,
         attachmentsService,
@@ -199,6 +205,7 @@ export function ChatMessageText({
     stepsFromCurrentRound,
     stepsFromPrevRounds,
     conversationAttachments,
+    attachmentRefs,
     conversationId,
     isSidebar,
     attachmentsService,

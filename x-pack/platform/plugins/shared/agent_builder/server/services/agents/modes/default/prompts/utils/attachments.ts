@@ -33,12 +33,11 @@ export const renderAttachmentPrompt = () => {
   return `### RENDERING VISUALIZATIONS
       You may render any attachment in the UI by emitting a custom XML element:
 
-      <${tagName} ${attributes.attachmentId}="ATTACHMENT_ID" ${attributes.version}="VERSION" />
+      <${tagName} ${attributes.attachmentId}="ATTACHMENT_ID" />
 
       **Rules**
-      * You must always include both \`${attributes.attachmentId}\` and \`${attributes.version}\`.
+      * You can specify an optional version by adding the \`${attributes.version}\` attribute. If not provided latest version will be used.
       * You must copy the \`attachment_id\` from the the attachment you want to render into \`${attributes.attachmentId}\` element attribute verbatim.
-      * You must copy the exact numeric version into \`${attributes.version}\` verbatim.
       * Do not invent, alter, or guess \`attachment_id\`. You must use the exact id of one of the existing attachments in the conversation.
       * You must not include any other attributes or content within the \`<${tagName}>\` element.
 
@@ -47,7 +46,6 @@ export const renderAttachmentPrompt = () => {
       Attachment has:
       {
         "attachment_id": "LiDoF1",
-        "version": 2,
         "type": "...",
         "data": {
           ...
@@ -55,5 +53,5 @@ export const renderAttachmentPrompt = () => {
       }
 
       To visualize this response your reply should be:
-      <${tagName} ${attributes.attachmentId}="LiDoF1" ${attributes.version}="2"/>`;
+      <${tagName} ${attributes.attachmentId}="LiDoF1"/>`;
 };

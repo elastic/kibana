@@ -8,6 +8,7 @@
 import React from 'react';
 import type {
   VersionedAttachment,
+  AttachmentVersionRef,
   ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
@@ -20,28 +21,34 @@ import { createTagParser } from './utils';
 import { InlineAttachmentWithActions } from '../attachments/inline_attachment_with_actions';
 
 interface ResolveAttachmentVersionParams {
-  explicitVersion: string | number;
-  attachment: VersionedAttachment;
+  explicitVersion: string | number | undefined;
+  attachmentId: string;
+  attachmentRefs: AttachmentVersionRef[] | undefined;
+  currentVersion: number;
 }
 
 /**
- * Resolves explicit version from tag attributes.
+ * Resolves the version to use for an attachment.
+ * Priority: explicit version > highest version from refs > current_version
  */
 export const resolveAttachmentVersion = ({
   explicitVersion,
-  attachment,
-}: ResolveAttachmentVersionParams): number | undefined => {
+  attachmentId,
+  attachmentRefs,
+  currentVersion,
+}: ResolveAttachmentVersionParams): number => {
   if (explicitVersion !== undefined) {
-    const parsedVersion =
-      typeof explicitVersion === 'string' ? Number.parseInt(explicitVersion, 10) : explicitVersion;
-
-    return Number.isInteger(parsedVersion) && parsedVersion > 0 ? parsedVersion : undefined;
+    return typeof explicitVersion === 'string' ? parseInt(explicitVersion, 10) : explicitVersion;
   }
 
-  return attachment.versions.reduce<number | undefined>(
-    (max, r) => (max === undefined || r.version > max ? r.version : max),
-    undefined
-  );
+  const highestRefVersion = attachmentRefs
+    ?.filter((r) => r.attachment_id === attachmentId)
+    .reduce<number | undefined>(
+      (max, r) => (max === undefined || r.version > max ? r.version : max),
+      undefined
+    );
+
+  return highestRefVersion ?? currentVersion;
 };
 
 /**
@@ -57,13 +64,13 @@ export const renderAttachmentTagParser = createTagParser({
   assignAttributes: (node, attributes) => {
     node.type = renderAttachmentElement.tagName;
     node.attachmentId = attributes.attachmentId;
-    node.version = attributes.version;
+    node.attachmentVersion = attributes.version;
     delete node.value;
   },
   createNode: (attributes, position) => ({
     type: renderAttachmentElement.tagName,
     attachmentId: attributes.attachmentId,
-    version: attributes.version,
+    attachmentVersion: attributes.version,
     position,
   }),
 });
@@ -84,6 +91,7 @@ const getScreenContext = (
 interface RenderAttachmentRendererProps {
   attachmentsService: AttachmentsService;
   conversationAttachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
   isSidebar: boolean;
 }
@@ -93,6 +101,7 @@ interface RenderAttachmentRendererProps {
 export const createRenderAttachmentRenderer = ({
   attachmentsService,
   conversationAttachments,
+  attachmentRefs,
   conversationId,
   isSidebar,
 }: RenderAttachmentRendererProps) => {
@@ -111,7 +120,12 @@ export const createRenderAttachmentRenderer = ({
       return null;
     }
 
-    const versionToUse = resolveAttachmentVersion({ explicitVersion, attachment });
+    const versionToUse = resolveAttachmentVersion({
+      explicitVersion,
+      attachmentId,
+      attachmentRefs,
+      currentVersion: attachment.current_version,
+    });
 
     const versionData = attachment.versions.find((v) => v.version === versionToUse);
 
