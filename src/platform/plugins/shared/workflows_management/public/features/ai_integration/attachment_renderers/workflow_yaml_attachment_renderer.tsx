@@ -179,7 +179,7 @@ const WorkflowYamlCanvasContent: React.FC<{
   }, [http, notifications, application, attachment.data.yaml]);
 
   useEffect(() => {
-    if (!ready || isSidebar) {
+    if (!ready) {
       return;
     }
 
