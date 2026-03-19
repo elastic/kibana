@@ -173,6 +173,8 @@ export function CalendarPanel() {
           type: [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
           isNaturalLanguage: false,
           isInvalid: false,
+          startOffset: null,
+          endOffset: null,
         }),
       });
     }
