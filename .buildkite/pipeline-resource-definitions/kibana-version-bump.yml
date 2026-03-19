@@ -19,13 +19,13 @@ spec:
       description: Buildkite Pipeline for kibana version bump
     spec:
       allow_rebuilds: true
-      cancel_intermediate_builds: true
+      cancel_intermediate_builds: false
       branch_configuration: main
       pipeline_file: .buildkite/version_bump.yml
       provider_settings:
         trigger_mode: none
       repository: elastic/kibana
-      skip_intermediate_builds: true
+      skip_intermediate_builds: false
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
