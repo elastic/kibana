@@ -216,7 +216,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
         metadata,
         service: { type: 'kibana', version: kibanaVersion },
       };
-      if (correlationId) document.group = { id: correlationId };
+      if (correlationId) document.transaction = { id: correlationId };
       // Do we have "before" state?
       // Perform diff using registered calculation, defaulting to defaultDiffCalculation().
       if (change.before) {

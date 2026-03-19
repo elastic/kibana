@@ -47,8 +47,8 @@ export interface ChangeHistoryDocument {
     created?: string;
   };
 
-  group?: {
-    /** ID shared between events that take place as a group. */
+  transaction?: {
+    /** ID shared between events in the same transaction. */
     id: string;
   };
 
@@ -124,7 +124,7 @@ export interface LogChangeHistoryOptions {
   userProfileId?: string;
   /** Kibana space that the event belongs to. (ie `default` etc). */
   spaceId: string;
-  /** ID shared between events that take place as a group. */
+  /** ID shared between events that take place together (ie in the same transaction). */
   correlationId?: string;
   /** Direct overrides for the change document */
   data?: Partial<Pick<ChangeHistoryDocument, 'event' | 'tags' | 'metadata'>>;

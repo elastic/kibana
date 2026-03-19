@@ -44,7 +44,7 @@ export const changeHistoryMappings = {
         },
       }),
 
-      group: mappings.object({
+      transaction: mappings.object({
         properties: {
           id: mappings.keyword(),
         },
