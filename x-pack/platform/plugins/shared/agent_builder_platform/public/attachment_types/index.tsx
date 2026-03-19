@@ -11,7 +11,7 @@ import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createEsqlAttachmentDefinition } from './esql_attachment';
 import { textAttachmentDefinition } from './text_attachment';
 import { screenContextAttachmentDefinition } from './screen_context_attachment';
-import { graphAttachmentDefinition } from './graph_attachment';
+import { graphAttachmentDefinition } from './graph_attachment/graph_attachment';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,

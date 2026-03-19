@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
-import { Background, Controls, ReactFlow, ReactFlowProvider, type ColorMode } from '@xyflow/react';
+import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GraphAttachment } from '@kbn/agent-builder-common/attachments';
 import { type AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 
-import '@xyflow/react/dist/style.css';
+const GraphFlowCanvas = React.lazy(() =>
+  import('./graph_flow_canvas').then((module) => ({ default: module.GraphFlowCanvas }))
+);
 
 interface GraphContentProps {
   attachment: GraphAttachment;
@@ -39,21 +40,27 @@ const GraphContent: React.FC<GraphContentProps> = ({ attachment }) => {
         height: 420px;
       `}
     >
-      <ReactFlowProvider>
-        <ReactFlow
+      <Suspense
+        fallback={
+          <div
+            css={css`
+              width: 100%;
+              height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            `}
+          >
+            <EuiLoadingSpinner size="l" />
+          </div>
+        }
+      >
+        <GraphFlowCanvas
           nodes={attachment.data.nodes}
           edges={attachment.data.edges}
-          fitView
-          nodesDraggable={false}
-          nodesConnectable={false}
-          elementsSelectable
-          proOptions={{ hideAttribution: true }}
-          colorMode={colorMode.toLowerCase() as ColorMode}
-        >
-          <Background />
-          <Controls showInteractive={false} />
-        </ReactFlow>
-      </ReactFlowProvider>
+          colorMode={colorMode}
+        />
+      </Suspense>
     </div>
   );
 };
