@@ -9,7 +9,7 @@ import { dateRangeQuery, termQuery, termsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { BaseFeature, Feature } from '@kbn/streams-schema';
-import { isDuplicateFeature } from '@kbn/streams-schema';
+import { isDuplicateFeature, isComputedFeature } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   STREAM_NAME,
@@ -257,22 +257,30 @@ export class FeatureClient {
 
     for (const hit of validHits) {
       const id = hit._id!;
+      const feature = fromStorage(hit._source);
+
       if (deleteIdSet.has(id)) {
         validatedOps.push({ delete: { id } });
       } else if (excludeIdSet.has(id)) {
+        if (isComputedFeature(feature)) {
+          continue;
+        }
         validatedOps.push({
           index: {
             feature: {
-              ...fromStorage(hit._source),
+              ...feature,
               excluded_at: now,
             },
           },
         });
       } else if (restoreIdSet.has(id)) {
+        if (isComputedFeature(feature)) {
+          continue;
+        }
         validatedOps.push({
           index: {
             feature: {
-              ...fromStorage(hit._source),
+              ...feature,
               excluded_at: undefined,
               last_seen: now,
               expires_at: new Date(Date.now() + MAX_FEATURE_AGE_MS).toISOString(),
