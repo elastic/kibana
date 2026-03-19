@@ -58,7 +58,12 @@ export const GithubConnector: ConnectorSpec = {
   },
 
   auth: {
-    types: ['bearer'],
+    types: [
+      'bearer'
+    ],
+    headers: {
+      Accept: 'application/vnd.github+json',
+    },
   },
 
   schema: z.object({
