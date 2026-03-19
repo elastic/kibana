@@ -74,7 +74,26 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
       },
       path: {
         tab: 'notes',
-        subTab: 'entity',
+      },
+    });
+  });
+
+  it('returns a callback that opens the left panel with correlation subTab when provided', () => {
+    const { result } = renderHook(() =>
+      useNavigateToAttackDetailsLeftPanel({ subTab: 'correlation' })
+    );
+
+    result.current();
+
+    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
+      id: AttackDetailsLeftPanelKey,
+      params: {
+        attackId,
+        indexName,
+      },
+      path: {
+        tab: 'insights',
+        subTab: 'correlation',
       },
     });
   });

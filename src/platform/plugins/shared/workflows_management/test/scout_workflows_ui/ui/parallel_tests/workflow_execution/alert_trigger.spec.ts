@@ -38,7 +38,8 @@ const getCreateAlertRuleWorkflow = (projectType: string | undefined) => {
 
 // Alert trigger tests run on Security and Observability (and ESS), but NOT on Elasticsearch/Search.
 // Security uses the detection engine API; Observability uses the generic alerting API.
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/252959
+test.describe.skip(
   'Workflow execution - Alert triggers',
   {
     tag: [
@@ -81,7 +82,6 @@ test.describe(
       pageObjects,
       page,
       apiServices,
-      scoutSpace,
       config,
     }) => {
       test.setTimeout(ALERT_TRIGGER_TEST_TIMEOUT);
@@ -111,7 +111,7 @@ test.describe(
       ];
 
       // Create all 4 workflows via bulk API in a single request
-      const { created } = await apiServices.workflows.bulkCreate(scoutSpace.id, [
+      const { created } = await apiServices.workflows.bulkCreate([
         getPrintAlertsWorkflowYaml(singleWorkflowName),
         getPrintAlertsWorkflowYaml(multipleWorkflowName),
         getCreateAlertRuleYaml(createAlertRuleWorkflowName),
@@ -212,7 +212,6 @@ test.describe(
       pageObjects,
       page,
       apiServices,
-      scoutSpace,
       config,
     }) => {
       test.setTimeout(ALERT_TRIGGER_TEST_TIMEOUT);
@@ -235,7 +234,7 @@ test.describe(
 
       // Create four workflows: the target to be disabled, a canary that stays enabled
       // (to prove alerts actually propagated), plus rule-creation and alert-trigger helpers.
-      const { created } = await apiServices.workflows.bulkCreate(scoutSpace.id, [
+      const { created } = await apiServices.workflows.bulkCreate([
         getPrintAlertsWorkflowYaml(disabledWorkflowName),
         getPrintAlertsWorkflowYaml(canaryWorkflowName),
         getCreateAlertRuleYaml(createRuleWorkflowName),
