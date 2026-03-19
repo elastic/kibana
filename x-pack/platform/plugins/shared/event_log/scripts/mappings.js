@@ -199,12 +199,6 @@ exports.EcsCustomPropertyMappings = {
                           recovered: {
                             type: 'long',
                           },
-                          candidates: {
-                            type: 'long',
-                          },
-                          suppressed: {
-                            type: 'long',
-                          },
                         },
                       },
                       number_of_delayed_alerts: {
@@ -260,6 +254,12 @@ exports.EcsCustomPropertyMappings = {
                         type: 'long',
                       },
                       update_alerts_duration_ms: {
+                        type: 'long',
+                      },
+                      alerts_candidate_count: {
+                        type: 'long',
+                      },
+                      alerts_suppressed_count: {
                         type: 'long',
                       },
                     },

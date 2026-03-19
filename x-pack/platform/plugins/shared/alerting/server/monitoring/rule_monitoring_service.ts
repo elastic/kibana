@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, isUndefined, omitBy } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { getDefaultMonitoring, getExecutionDurationPercentiles } from '../lib/monitoring';
 import type {
   RuleMonitoring,
@@ -51,27 +51,19 @@ export class RuleMonitoringService {
   public getMonitoring(): RuleMonitoring {
     const result = cloneDeep(this.monitoring);
 
-    Object.assign(
-      result.run.last_run.metrics,
-      omitBy(
-        {
-          total_search_duration_ms: this.frameworkMetrics.total_search_duration_ms,
-          total_indexing_duration_ms: this.metrics.total_indexing_duration_ms,
-          gap_duration_s: this.metrics.gap_duration_s,
-          gap_range: this.metrics.gap_range,
-        },
-        isUndefined
-      )
-    );
+    Object.assign(result.run.last_run.metrics, {
+      total_search_duration_ms: this.frameworkMetrics.total_search_duration_ms ?? null,
+      total_indexing_duration_ms: this.metrics.total_indexing_duration_ms ?? null,
+      gap_duration_s: this.metrics.gap_duration_s ?? null,
+      gap_range: this.metrics.gap_range ?? null,
+    });
 
     return result;
   }
 
   public getExecutorMetrics(): Partial<ConsumerExecutionMetrics> | undefined {
-    const result = omitBy(this.metrics, (value) => value == null);
-
-    if (Object.keys(result).length === 0) {
-      return;
+    if (Object.values(this.metrics).some((v) => v != null)) {
+      return this.metrics;
     }
   }
 

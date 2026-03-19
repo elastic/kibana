@@ -6,7 +6,6 @@
  */
 
 import * as uuid from 'uuid';
-import { isUndefined, omitBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { IEvent, IEventLogger, InternalFields } from '@kbn/event-log-plugin/server';
 import { millisToNanos, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
@@ -795,32 +794,16 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
   }
 
   if (consumerMetrics) {
-    set(
-      event,
-      'kibana.alert.rule.execution.metrics',
-      omitBy(
-        {
-          ...event.kibana?.alert?.rule?.execution?.metrics,
-          alert_counts: omitBy(
-            {
-              ...event.kibana?.alert?.rule?.execution?.metrics?.alert_counts,
-              // "candidates" and "suppressed" fields have mappings added
-              // uncomment the two following lines after https://github.com/elastic/kibana/pull/257203
-              // is merged
-              // candidates: consumerMetrics.candidate_alerts_count,
-              // suppressed: consumerMetrics.suppressed_alerts,
-            },
-            isUndefined
-          ),
-          frozen_indices_queried_count: consumerMetrics.frozen_indices_queried_count,
-          total_indexing_duration_ms: consumerMetrics.total_indexing_duration_ms,
-          total_enrichment_duration_ms: consumerMetrics.total_enrichment_duration_ms,
-          execution_gap_duration_s: consumerMetrics.gap_duration_s,
-          gap_range: consumerMetrics.gap_range,
-        },
-        isUndefined
-      )
-    );
+    set(event, 'kibana.alert.rule.execution.metrics', {
+      ...event.kibana?.alert?.rule?.execution?.metrics,
+      alerts_candidate_count: consumerMetrics.candidate_alerts_count,
+      alerts_suppressed_count: consumerMetrics.suppressed_alerts,
+      frozen_indices_queried_count: consumerMetrics.frozen_indices_queried_count,
+      total_indexing_duration_ms: consumerMetrics.total_indexing_duration_ms,
+      total_enrichment_duration_ms: consumerMetrics.total_enrichment_duration_ms,
+      execution_gap_duration_s: consumerMetrics.gap_duration_s,
+      gap_range: consumerMetrics.gap_range,
+    });
   }
 
   if (backfill) {

@@ -2923,7 +2923,7 @@ describe('Task Runner', () => {
         warning,
         alertsCount: { active: 1, new: 1 },
         metrics: {
-          total_search_duration_ms: 23423,
+          total_search_duration_ms: null,
         },
       })
     );
@@ -3099,7 +3099,7 @@ describe('Task Runner', () => {
         warning,
         alertsCount: { active: 2, new: 2 },
         metrics: {
-          total_search_duration_ms: 23423,
+          total_search_duration_ms: null,
         },
       })
     );
