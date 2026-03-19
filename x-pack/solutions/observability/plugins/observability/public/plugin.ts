@@ -232,6 +232,15 @@ export class Plugin
     this.telemetry = new TelemetryService();
   }
 
+  private canUseHistory = (history: AppMountParameters<unknown>['history']) => {
+    try {
+      history.createHref(history.location, { prependBasePath: false });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
@@ -300,6 +309,10 @@ export class Plugin
 
       const { renderApp } = await import('./application');
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+
+      if (!this.canUseHistory(params.history)) {
+        return () => {};
+      }
 
       return renderApp({
         appMountParameters: params,
