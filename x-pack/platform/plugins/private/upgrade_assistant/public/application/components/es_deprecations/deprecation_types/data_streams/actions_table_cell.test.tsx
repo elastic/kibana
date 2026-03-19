@@ -37,11 +37,9 @@ const baseCorrectiveAction: DataStreamsAction = {
 const createContext = ({
   status,
   resolutionType,
-  excludedActions,
 }: {
   status: DataStreamMigrationStatus;
   resolutionType?: 'reindex' | 'readonly';
-  excludedActions?: Array<'readOnly' | 'reindex'>;
 }): MigrationStateContext => ({
   loadDataStreamMetadata: jest.fn<Promise<void>, []>(),
   initMigration: jest.fn<void, [resolutionType: 'reindex' | 'readonly']>(),
