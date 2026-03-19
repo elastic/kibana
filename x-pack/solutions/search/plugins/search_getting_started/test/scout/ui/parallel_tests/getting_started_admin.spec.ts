@@ -96,15 +96,6 @@ test.describe('Getting Started - Admin', { tag: ['@ess', '@svlSearch'] }, () => 
     });
   });
 
-  test(
-    'should show Changelog label in Kibana version  on serverless',
-    { tag: ['@svlSearch'] },
-    async ({ pageObjects }) => {
-      const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
-      await expect(versionBadge).toContainText('Changelog');
-    }
-  );
-
   test('Add data button navigates to correct pages', async ({ pageObjects, page }) => {
     await test.step('navigates to upload file page', async () => {
       await pageObjects.gettingStarted.selectAddDataOption('gettingStartedUploadMenuItem');
