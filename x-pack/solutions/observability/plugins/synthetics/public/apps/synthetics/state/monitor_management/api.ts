@@ -16,6 +16,7 @@ import type {
 } from '../../../../../common/runtime_types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import type { PackagePolicyLink } from '../../../../../common/types';
+export type { PackagePolicyLink };
 
 export type UpsertMonitorResponse = ServiceLocationErrorsResponse | SyntheticsMonitorWithId;
 
@@ -54,8 +55,8 @@ export const inspectMonitorAPI = async ({
   });
 };
 
-export const fetchMonitorAPI = async ({ id }: { id: string }): Promise<SyntheticsMonitor> => {
-  return await apiService.get(
+export const fetchMonitorAPI = async ({ id }: { id: string }): Promise<SyntheticsMonitorWithId> => {
+  return await apiService.get<SyntheticsMonitorWithId>(
     SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id)
   );
 };
