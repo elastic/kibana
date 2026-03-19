@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
@@ -19,7 +20,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
 import { handlePreviewInDashboard } from './handle_preview_in_dashboard';
-import { createAttachmentMountHandler } from './create_attachment_mount_handler';
+import { onAttachmentMount } from './create_attachment_mount_handler';
 
 export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder: {
@@ -57,7 +58,8 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    onAttachmentMount: createAttachmentMountHandler({ dashboardPlugin, chat$ }),
+    onAttachmentMount: (params: AttachmentLifecycleParams<DashboardAttachment>) =>
+      onAttachmentMount({ ...params, dashboardPlugin, chat$ }),
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}
