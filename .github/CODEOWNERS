@@ -420,6 +420,8 @@ src/platform/packages/private/kbn-validate-oas @elastic/kibana-core
 src/platform/packages/private/opentelemetry/kbn-metrics @elastic/kibana-core @elastic/stack-monitoring
 src/platform/packages/private/opentelemetry/kbn-metrics-config @elastic/kibana-core
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
+src/platform/packages/shared/as-code/data-views-schema @elastic/kibana-data-discovery
+src/platform/packages/shared/as-code/data-views-transforms @elastic/kibana-data-discovery
 src/platform/packages/shared/as-code/filters-constants @elastic/kibana-presentation
 src/platform/packages/shared/as-code/filters-schema @elastic/kibana-presentation
 src/platform/packages/shared/as-code/filters-transforms @elastic/kibana-presentation
@@ -1032,6 +1034,7 @@ x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/resp
 x-pack/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/form-generator @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/oauth-hooks @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/retry-service @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/rule_form @elastic/response-ops
