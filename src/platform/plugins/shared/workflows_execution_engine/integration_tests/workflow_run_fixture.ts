@@ -14,7 +14,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { StepExecutionRepositoryMock, WorkflowExecutionRepositoryMock } from './mocks';
-import { ScopedActionsClientMock, UnsecuredActionsClientMock } from './mocks/actions_plugin.mock';
+import { ScopedActionsClientMock, UnsecuredActionsClientMock } from './mocks/actions_plugin_mock';
 import { TaskManagerMock } from './mocks/task_manager.mock';
 import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { resumeWorkflow } from '../server/execution_functions';
