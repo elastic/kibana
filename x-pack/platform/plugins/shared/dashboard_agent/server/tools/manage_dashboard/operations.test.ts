@@ -59,11 +59,11 @@ describe('executeDashboardOperations', () => {
       },
     ];
 
-    const result = await executeDashboardOperations({
+    const result = executeDashboardOperations({
       dashboardData: baseDashboardData,
       operations,
       logger,
-      resolvePanelsFromAttachments: async () => ({ panels: [attachmentPanel], failures: [] }),
+      resolvePanelsFromAttachments: () => ({ panels: [attachmentPanel], failures: [] }),
       onPanelsAdded: (panels) => {
         for (const panel of panels) {
           events.push(`added:${panel.panelId}`);
@@ -98,7 +98,7 @@ describe('executeDashboardOperations', () => {
       ...createLensPanel('from-attachment'),
     };
 
-    const result = await executeDashboardOperations({
+    const result = executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
         description: 'Description',
@@ -118,7 +118,7 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: async (attachmentInputs) => {
+      resolvePanelsFromAttachments: (attachmentInputs) => {
         const attachmentIds = attachmentInputs.map(({ attachmentId }) => attachmentId);
         const panels = attachmentIds.includes('viz-1') ? [attachmentPanel] : [];
         const failures = attachmentIds
@@ -150,7 +150,7 @@ describe('executeDashboardOperations', () => {
   });
 
   it('preserves dashboard metadata while mutating panels', async () => {
-    const result = await executeDashboardOperations({
+    const result = executeDashboardOperations({
       dashboardData: {
         title: 'Existing title',
         description: 'Existing description',
@@ -173,7 +173,7 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: async () => ({
+      resolvePanelsFromAttachments: () => ({
         panels: [
           {
             ...createLensPanel('from-attachment-1'),
@@ -201,7 +201,7 @@ describe('executeDashboardOperations', () => {
   it('adds a section with generated sectionId and default collapsed=false', async () => {
     const addedPanelEvents: string[] = [];
 
-    const result = await executeDashboardOperations({
+    const result = executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
         description: 'Description',
@@ -216,7 +216,7 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: async () => ({
+      resolvePanelsFromAttachments: () => ({
         panels: [createLensPanel('section-panel-1')],
         failures: [],
       }),
@@ -243,7 +243,7 @@ describe('executeDashboardOperations', () => {
   });
 
   it('adds attachment panels into a target section when sectionId is provided', async () => {
-    const result = await executeDashboardOperations({
+    const result = executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
         description: 'Description',
@@ -271,7 +271,7 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: async (attachmentInputs) => ({
+      resolvePanelsFromAttachments: (attachmentInputs) => ({
         panels: [
           {
             ...createLensPanel('section-routed-panel'),
@@ -294,7 +294,7 @@ describe('executeDashboardOperations', () => {
   });
 
   it('removes section and promotes panels when panelAction=promote', async () => {
-    const result = await executeDashboardOperations({
+    const result = executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
         description: 'Description',
@@ -311,7 +311,7 @@ describe('executeDashboardOperations', () => {
       },
       operations: [{ operation: 'remove_section', sectionId: 'section-a', panelAction: 'promote' }],
       logger,
-      resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
+      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       onPanelsAdded: () => {},
       onPanelsRemoved: () => {},
     });
@@ -327,7 +327,7 @@ describe('executeDashboardOperations', () => {
   it('removes section and deletes contained panels when panelAction=delete', async () => {
     const removedPanelIds: string[] = [];
 
-    const result = await executeDashboardOperations({
+    const result = executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
         description: 'Description',
@@ -344,7 +344,7 @@ describe('executeDashboardOperations', () => {
       },
       operations: [{ operation: 'remove_section', sectionId: 'section-a', panelAction: 'delete' }],
       logger,
-      resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
+      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       onPanelsAdded: () => {},
       onPanelsRemoved: (panels) => {
         removedPanelIds.push(...panels.map(({ panelId }) => panelId));
@@ -359,7 +359,7 @@ describe('executeDashboardOperations', () => {
   it('removes matching panelIds from top-level and section panels', async () => {
     const removedPanelIds: string[] = [];
 
-    const result = await executeDashboardOperations({
+    const result = executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
         description: 'Description',
@@ -376,7 +376,7 @@ describe('executeDashboardOperations', () => {
       },
       operations: [{ operation: 'remove_panels', panelIds: ['section-a-1', 'top-1'] }],
       logger,
-      resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
+      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       onPanelsAdded: () => {},
       onPanelsRemoved: (panels) => {
         removedPanelIds.push(...panels.map(({ panelId }) => panelId));
@@ -399,7 +399,7 @@ describe('executeDashboardOperations', () => {
   it('adds markdown panel into a target section when sectionId is provided', async () => {
     const addedPanelIds: string[] = [];
 
-    const result = await executeDashboardOperations({
+    const result = executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
         description: 'Description',
@@ -423,7 +423,7 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
+      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       onPanelsAdded: (panels) => {
         addedPanelIds.push(...panels.map(({ panelId }) => panelId));
       },
@@ -456,7 +456,7 @@ describe('executeDashboardOperations', () => {
 
     it('updates a top-level panel from its source attachment, preserving panelId and grid', async () => {
       const originalPanel = createLensPanelWithSource('panel-1', 'viz-att-1', 5);
-      const resolveFn = jest.fn().mockResolvedValue({
+      const resolveFn = jest.fn().mockReturnValue({
         panels: [
           {
             type: 'lens',
@@ -469,7 +469,7 @@ describe('executeDashboardOperations', () => {
         failures: [],
       });
 
-      const result = await executeDashboardOperations({
+      const result = executeDashboardOperations({
         dashboardData: {
           title: 'Test',
           description: 'Desc',
@@ -497,7 +497,7 @@ describe('executeDashboardOperations', () => {
     it('updates a panel inside a section', async () => {
       const sectionPanel = createLensPanelWithSource('sec-panel-1', 'viz-att-2', 0);
 
-      const result = await executeDashboardOperations({
+      const result = executeDashboardOperations({
         dashboardData: {
           title: 'Test',
           description: 'Desc',
@@ -514,7 +514,7 @@ describe('executeDashboardOperations', () => {
         },
         operations: [{ operation: 'update_panels_from_attachments', attachmentIds: ['viz-att-2'] }],
         logger,
-        resolvePanelsFromAttachments: async () => ({
+        resolvePanelsFromAttachments: () => ({
           panels: [
             {
               type: 'lens',
@@ -539,7 +539,7 @@ describe('executeDashboardOperations', () => {
       const panel = createLensPanelWithSource('panel-1', 'viz-att-1');
       const resolveFn = jest.fn();
 
-      const result = await executeDashboardOperations({
+      const result = executeDashboardOperations({
         dashboardData: {
           title: 'Test',
           description: 'Desc',
@@ -561,7 +561,7 @@ describe('executeDashboardOperations', () => {
     it('records failures when attachment resolution fails and leaves panel unchanged', async () => {
       const panel = createLensPanelWithSource('panel-1', 'viz-att-1');
 
-      const result = await executeDashboardOperations({
+      const result = executeDashboardOperations({
         dashboardData: {
           title: 'Test',
           description: 'Desc',
@@ -569,7 +569,7 @@ describe('executeDashboardOperations', () => {
         },
         operations: [{ operation: 'update_panels_from_attachments', attachmentIds: ['viz-att-1'] }],
         logger,
-        resolvePanelsFromAttachments: async () => {
+        resolvePanelsFromAttachments: () => {
           throw new Error('Attachment not found');
         },
         onPanelsAdded: () => {},
@@ -590,7 +590,7 @@ describe('executeDashboardOperations', () => {
       const events: string[] = [];
       const panel = createLensPanelWithSource('panel-1', 'viz-att-1');
 
-      await executeDashboardOperations({
+      executeDashboardOperations({
         dashboardData: {
           title: 'Test',
           description: 'Desc',
@@ -598,7 +598,7 @@ describe('executeDashboardOperations', () => {
         },
         operations: [{ operation: 'update_panels_from_attachments', attachmentIds: ['viz-att-1'] }],
         logger,
-        resolvePanelsFromAttachments: async () => ({
+        resolvePanelsFromAttachments: () => ({
           panels: [
             {
               type: 'lens',
@@ -622,8 +622,8 @@ describe('executeDashboardOperations', () => {
     });
   });
 
-  it('throws when add_markdown references an invalid sectionId', async () => {
-    await expect(
+  it('throws when add_markdown references an invalid sectionId', () => {
+    expect(() =>
       executeDashboardOperations({
         dashboardData: {
           title: 'Test dashboard',
@@ -639,10 +639,10 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
+        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         onPanelsAdded: () => {},
         onPanelsRemoved: () => {},
       })
-    ).rejects.toThrow('Section "nonexistent-section" not found.');
+    ).toThrow('Section "nonexistent-section" not found.');
   });
 });

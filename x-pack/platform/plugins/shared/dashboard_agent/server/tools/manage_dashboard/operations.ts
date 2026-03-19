@@ -116,7 +116,7 @@ interface ExecuteDashboardOperationsParams {
   logger: Logger;
   resolvePanelsFromAttachments: (
     attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
-  ) => Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }>;
+  ) => { panels: AttachmentPanel[]; failures: VisualizationFailure[] };
   onPanelsAdded: (panels: AttachmentPanel[]) => void;
   onPanelsRemoved: (panels: AttachmentPanel[]) => void;
 }
@@ -178,17 +178,17 @@ const removePanelsFromDashboard = ({
   };
 };
 
-export const executeDashboardOperations = async ({
+export const executeDashboardOperations = ({
   dashboardData,
   operations,
   logger,
   resolvePanelsFromAttachments,
   onPanelsAdded,
   onPanelsRemoved,
-}: ExecuteDashboardOperationsParams): Promise<{
+}: ExecuteDashboardOperationsParams): {
   dashboardData: DashboardAttachmentData;
   failures: VisualizationFailure[];
-}> => {
+} => {
   let nextDashboardData = structuredClone(dashboardData);
   const failures: VisualizationFailure[] = [];
 
@@ -249,7 +249,7 @@ export const executeDashboardOperations = async ({
 
       case 'add_panels_from_attachments': {
         for (const item of operation.items) {
-          const result = await resolvePanelsFromAttachments([
+          const result = resolvePanelsFromAttachments([
             {
               attachmentId: item.attachmentId,
               grid: item.grid,
@@ -289,7 +289,7 @@ export const executeDashboardOperations = async ({
       case 'add_section': {
         const sectionPanels: AttachmentPanel[] = [];
         for (const panelInput of operation.panels) {
-          const result = await resolvePanelsFromAttachments([
+          const result = resolvePanelsFromAttachments([
             {
               attachmentId: panelInput.attachmentId,
               grid: panelInput.grid,
@@ -373,7 +373,7 @@ export const executeDashboardOperations = async ({
       case 'update_panels_from_attachments': {
         const attachmentIdSet = new Set(operation.attachmentIds);
 
-        const updatePanel = async (panel: AttachmentPanel): Promise<AttachmentPanel> => {
+        const updatePanel = (panel: AttachmentPanel): AttachmentPanel => {
           if (
             !isLensAttachmentPanel(panel) ||
             !panel.sourceAttachmentId ||
@@ -383,7 +383,7 @@ export const executeDashboardOperations = async ({
           }
 
           try {
-            const result = await resolvePanelsFromAttachments([
+            const result = resolvePanelsFromAttachments([
               { attachmentId: panel.sourceAttachmentId, grid: panel.grid },
             ]);
             failures.push(...result.failures);
@@ -419,19 +419,17 @@ export const executeDashboardOperations = async ({
 
         const updatedTopLevelPanels: AttachmentPanel[] = [];
         for (const panel of nextDashboardData.panels) {
-          updatedTopLevelPanels.push(await updatePanel(panel));
+          updatedTopLevelPanels.push(updatePanel(panel));
         }
 
         const updatedSections = nextDashboardData.sections
-          ? await Promise.all(
-              nextDashboardData.sections.map(async (section) => {
-                const updatedSectionPanels: AttachmentPanel[] = [];
-                for (const panel of section.panels) {
-                  updatedSectionPanels.push(await updatePanel(panel));
-                }
-                return { ...section, panels: updatedSectionPanels };
-              })
-            )
+          ? nextDashboardData.sections.map((section) => {
+              const updatedSectionPanels: AttachmentPanel[] = [];
+              for (const panel of section.panels) {
+                updatedSectionPanels.push(updatePanel(panel));
+              }
+              return { ...section, panels: updatedSectionPanels };
+            })
           : undefined;
 
         nextDashboardData = {

@@ -96,7 +96,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
           events.sendUiEvent(DASHBOARD_PANELS_REMOVED_EVENT, removedPayload);
         };
 
-        const operationResult = await executeDashboardOperations({
+        const operationResult = executeDashboardOperations({
           dashboardData: latestVersion?.data ?? createEmptyDashboardData(),
           operations,
           logger,

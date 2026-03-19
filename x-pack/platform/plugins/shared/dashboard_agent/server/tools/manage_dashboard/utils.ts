@@ -87,7 +87,7 @@ const resolvePanelsFromAttachment = (
  * Resolves attachment ids into dashboard panel entries.
  * Supports visualization attachments and dashboard-compatible panel payloads.
  */
-export const resolvePanelsFromAttachments = async ({
+export const resolvePanelsFromAttachments = ({
   attachmentInputs,
   attachments,
   logger,
@@ -95,7 +95,7 @@ export const resolvePanelsFromAttachments = async ({
   attachmentInputs?: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>;
   attachments: AttachmentStateManager;
   logger: Logger;
-}): Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }> => {
+}): { panels: AttachmentPanel[]; failures: VisualizationFailure[] } => {
   if (!attachmentInputs || attachmentInputs.length === 0) {
     return { panels: [], failures: [] };
   }
