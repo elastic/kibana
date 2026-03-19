@@ -85,7 +85,7 @@ describe('searchKnowledgeIndicators', () => {
     expect(res.knowledge_indicators.every((ki) => ki.kind === 'query')).toBe(true);
   });
 
-  it('supports kind=[knowledge_indicator] (features-only)', async () => {
+  it('supports kind=[feature] (features-only)', async () => {
     const getFeatures = jest.fn(async () => [makeFeature({ id: 'f1' })]);
     const getQueries = jest.fn();
 
@@ -132,12 +132,18 @@ describe('searchKnowledgeIndicators', () => {
             rule_backed: true,
             rule_id: 'rule-1',
             stream_name: 'logs.test',
+            'asset.uuid': 'asset-uuid',
+            'asset.type': 'query',
+            'asset.id': 'asset-id',
           },
           {
             query: makeStreamQuery({ id: 'q2' }),
             rule_backed: true,
             rule_id: 'rule-2',
             stream_name: 'logs.test',
+            'asset.uuid': 'asset-uuid',
+            'asset.type': 'query',
+            'asset.id': 'asset-id',
           },
         ] as QueryLink[],
     });
