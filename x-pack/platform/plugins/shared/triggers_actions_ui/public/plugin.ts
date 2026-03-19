@@ -372,10 +372,6 @@ export class Plugin
               });
               break;
           }
-              });
-              break;
-          }
-
           return () => {};
         },
       });

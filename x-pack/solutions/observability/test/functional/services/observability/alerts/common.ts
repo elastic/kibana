@@ -62,7 +62,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const navigateToRulesLogsPage = async () => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory('rules', 'logs', '', {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory('rules', '/logs', '', {
       ensureCurrentUrl: false,
     });
   };
@@ -77,7 +77,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const navigateToRuleDetailsByRuleId = async (ruleId: string) => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory('rules', `${ruleId}`, '?', {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory('rules', `/${ruleId}`, '?', {
       ensureCurrentUrl: false,
     });
   };

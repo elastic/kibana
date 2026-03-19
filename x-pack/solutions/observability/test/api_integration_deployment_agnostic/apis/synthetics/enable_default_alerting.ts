@@ -331,7 +331,6 @@ const defaultAlertRules = {
       lastDuration: 64,
     },
     ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
-    viewInAppRelativeUrl: '/app/rules/rule/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
   },
   tlsRule: {
     id: '574eaa00-1672-11ee-8e7d-c985c0ef6c2e',
@@ -367,6 +366,5 @@ const defaultAlertRules = {
       lastDuration: 193,
     },
     ruleTypeId: 'xpack.synthetics.alerts.tls',
-    viewInAppRelativeUrl: '/app/rules/rule/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
   },
 };
