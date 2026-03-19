@@ -38,6 +38,7 @@ const supportedTypes = new Set([
   'date',
   'date_range',
   'murmur3',
+  'flattened',
 ]);
 
 const SCALE = 'ratio';

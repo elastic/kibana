@@ -9,7 +9,7 @@ export const DEFAULT_SIZE = 9;
 // Elasticsearch limit
 export const MAXIMUM_MAX_DOC_COUNT = 100;
 export const DEFAULT_MAX_DOC_COUNT = 1;
-export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
+export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'flattened']);
 
 export const MULTI_KEY_VISUAL_SEPARATOR = '›';
 

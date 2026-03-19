@@ -64,6 +64,7 @@ const supportedTypes = new Set([
   'ip_range',
   'number_range',
   'date_range',
+  'flattened',
 ]);
 
 function getInvalidSortFieldMessages(

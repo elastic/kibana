@@ -93,6 +93,12 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
     esTypes: [ES_FIELD_TYPES.OBJECT],
   }),
   new KbnFieldType({
+    name: KBN_FIELD_TYPES.FLATTENED,
+    sortable: true,
+    filterable: true,
+    esTypes: [ES_FIELD_TYPES.FLATTENED],
+  }),
+  new KbnFieldType({
     name: KBN_FIELD_TYPES.NESTED,
     esTypes: [ES_FIELD_TYPES.NESTED],
   }),

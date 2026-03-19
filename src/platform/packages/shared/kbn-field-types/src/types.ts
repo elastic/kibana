@@ -30,6 +30,7 @@ export enum ES_FIELD_TYPES {
 
   BOOLEAN = 'boolean',
   OBJECT = 'object',
+  FLATTENED = 'flattened',
 
   DATE = 'date',
   DATE_NANOS = 'date_nanos',
@@ -87,6 +88,7 @@ export enum KBN_FIELD_TYPES {
   UNKNOWN = 'unknown',
   CONFLICT = 'conflict',
   OBJECT = 'object',
+  FLATTENED = 'flattened',
   NESTED = 'nested',
   HISTOGRAM = 'histogram',
   EXPONENTIAL_HISTOGRAM = 'exponential_histogram',

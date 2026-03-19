@@ -73,6 +73,7 @@ const supportedFieldTypes = new Set([
   'geo_point',
   'geo_shape',
   'murmur3',
+  'flattened',
 ]);
 
 function onSupportedFieldFilter(field: IndexPatternField): boolean {

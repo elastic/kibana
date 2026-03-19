@@ -73,12 +73,7 @@ const resolveDataView = ({
     return {
       title: indexNames.join(','),
       fieldFormatMap: {},
-      fields: (fields?.fields ?? []).map((field) => {
-        return {
-          ...field,
-          ...(field.esTypes && field.esTypes.includes('flattened') ? { type: 'string' } : {}),
-        };
-      }),
+      fields: fields?.fields ?? [],
     };
   }
 };
