@@ -11,6 +11,16 @@ import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentHeader } from './header';
 
+jest.mock('../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: jest.fn().mockReturnValue('https://example.com/rule/test-rule-id'),
+      },
+    },
+  }),
+}));
+
 jest.mock('./components/header_title', () => ({
   HeaderTitle: ({ hit, titleHref }: { hit: DataTableRecord; titleHref?: string }) => (
     <div
@@ -33,6 +43,11 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
 const alertHit = createMockHit({
   'event.kind': 'signal',
   'kibana.alert.rule.name': 'Test Rule',
+  'kibana.alert.rule.uuid': 'test-rule-id',
+});
+
+const eventHit = createMockHit({
+  'event.kind': 'event',
 });
 
 const renderDocumentHeader = (props: Parameters<typeof DocumentHeader>[0]) =>
@@ -50,15 +65,18 @@ describe('<DocumentHeader />', () => {
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-event-kind', 'signal');
   });
 
-  it('should pass titleHref to the header title', () => {
-    const { getByTestId } = renderDocumentHeader({
-      hit: alertHit,
-      titleHref: 'https://example.com/rule/123',
-    });
+  it('should resolve and pass titleHref for alerts with a rule id', () => {
+    const { getByTestId } = renderDocumentHeader({ hit: alertHit });
 
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute(
       'data-title-href',
-      'https://example.com/rule/123'
+      'https://example.com/rule/test-rule-id'
     );
+  });
+
+  it('should not pass titleHref when there is no rule id', () => {
+    const { getByTestId } = renderDocumentHeader({ hit: eventHit });
+
+    expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-title-href', '');
   });
 });

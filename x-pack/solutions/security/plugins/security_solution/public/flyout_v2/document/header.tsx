@@ -6,27 +6,44 @@
  */
 
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { SecurityPageName } from '@kbn/deeplinks-security';
 import { HeaderTitle } from './components/header_title';
+import { useKibana } from '../../common/lib/kibana';
+import { getRuleDetailsUrl } from '../../common/components/link_to';
 
 export interface DocumentHeaderProps {
   /**
    * The document to display
    */
   hit: DataTableRecord;
-  /**
-   * Optional link URL for the title
-   */
-  titleHref?: string;
 }
 
 /**
  * Document header container for the flyout.
  * Currently renders only the title; future PRs will add severity, timestamp, and metadata blocks.
  */
-export const DocumentHeader: FC<DocumentHeaderProps> = memo(({ hit, titleHref }) => {
-  return <HeaderTitle hit={hit} titleHref={titleHref} />;
+export const DocumentHeader: FC<DocumentHeaderProps> = memo(({ hit }) => {
+  const { services } = useKibana();
+
+  const ruleId = useMemo(
+    () => (getFieldValue(hit, ALERT_RULE_UUID) as string | null) ?? null,
+    [hit]
+  );
+
+  const ruleDetailsHref = useMemo(() => {
+    if (!ruleId) return undefined;
+    const path = getRuleDetailsUrl(ruleId);
+    return services.application.getUrlForApp('securitySolutionUI', {
+      deepLinkId: SecurityPageName.rules,
+      path,
+    });
+  }, [ruleId, services.application]);
+
+  return <HeaderTitle hit={hit} titleHref={ruleDetailsHref} />;
 });
 
 DocumentHeader.displayName = 'DocumentHeader';

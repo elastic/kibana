@@ -6,17 +6,12 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getFieldValue } from '@kbn/discover-utils';
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { SecurityPageName } from '@kbn/deeplinks-security';
 import type { ResolverCellActionRenderer } from '../../resolver/types';
 import { DocumentHeader } from './header';
 import { OverviewTab } from './tabs/overview_tab';
-import { useKibana } from '../../common/lib/kibana';
-import { getRuleDetailsUrl } from '../../common/components/link_to';
 
 export interface DocumentFlyoutProps {
   /**
@@ -31,30 +26,13 @@ export interface DocumentFlyoutProps {
 
 /**
  * Content for the document flyout, combining the header and overview tab.
- * This component resolves the rule details link via the application service.
  */
 export const DocumentFlyout: FC<DocumentFlyoutProps> = memo(
   ({ hit, renderCellActions }) => {
-    const { services } = useKibana();
-
-    const ruleId = useMemo(
-      () => (getFieldValue(hit, ALERT_RULE_UUID) as string | null) ?? null,
-      [hit]
-    );
-
-    const ruleDetailsHref = useMemo(() => {
-      if (!ruleId) return undefined;
-      const path = getRuleDetailsUrl(ruleId);
-      return services.application.getUrlForApp('securitySolutionUI', {
-        deepLinkId: SecurityPageName.rules,
-        path,
-      });
-    }, [ruleId, services.application]);
-
     return (
       <>
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m" grow={false}>
-          <DocumentHeader hit={hit} titleHref={ruleDetailsHref} />
+          <DocumentHeader hit={hit} />
         </EuiPanel>
         <OverviewTab hit={hit} renderCellActions={renderCellActions} />
       </>
