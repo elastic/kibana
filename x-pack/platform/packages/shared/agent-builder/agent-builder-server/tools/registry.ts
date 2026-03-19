@@ -16,7 +16,7 @@ export interface ToolListParams {
   /**
    * Filter tools by type. Only tools matching one of the specified types will be returned.
    */
-  type?: ToolType[];
+  types?: ToolType[];
   /**
    * Filter tools by tags. Only tools that have at least one of the specified tags will be returned.
    */

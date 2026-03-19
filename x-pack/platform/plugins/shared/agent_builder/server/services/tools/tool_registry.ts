@@ -130,7 +130,7 @@ class ToolRegistryImpl implements ToolRegistry {
 
   async list(opts?: ToolListParams | undefined) {
     const providerFilters = {
-      types: opts?.type && opts.type.length > 0 ? opts.type : undefined,
+      types: opts?.types && opts.types.length > 0 ? opts.types : undefined,
       tags: opts?.tags && opts.tags.length > 0 ? opts.tags : undefined,
     };
 

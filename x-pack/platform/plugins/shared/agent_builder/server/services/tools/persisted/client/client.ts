@@ -8,7 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { createToolNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
+import { createToolNotFoundError, createBadRequestError, type ToolType } from '@kbn/agent-builder-common';
 import type { ToolCreateParams } from '@kbn/agent-builder-server';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { ToolTypeUpdateParams } from '../../tool_provider';
@@ -18,7 +18,7 @@ import { fromEs, createAttributes, updateDocument } from './converters';
 import type { ToolDocument, ToolPersistedDefinition } from './types';
 
 export interface ToolClientListFilters {
-  types?: string[];
+  types?: ToolType[];
   tags?: string[];
 }
 

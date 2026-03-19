@@ -166,7 +166,7 @@ describe('ToolRegistryImpl', () => {
           persistedTools: [esqlTool, mcpTool],
         });
 
-        await registry.list({ type: [ToolType.mcp] });
+        await registry.list({ types: [ToolType.mcp] });
 
         expect(builtinProvider.list).toHaveBeenCalledWith({
           types: [ToolType.mcp],
@@ -202,7 +202,7 @@ describe('ToolRegistryImpl', () => {
           persistedTools: [esqlTool, mcpTool],
         });
 
-        await registry.list({ type: [ToolType.mcp], tags: ['search'] });
+        await registry.list({ types: [ToolType.mcp], tags: ['search'] });
 
         expect(builtinProvider.list).toHaveBeenCalledWith({
           types: [ToolType.mcp],
@@ -220,7 +220,7 @@ describe('ToolRegistryImpl', () => {
           persistedTools: [esqlTool],
         });
 
-        await registry.list({ type: [], tags: [] });
+        await registry.list({ types: [], tags: [] });
 
         expect(builtinProvider.list).toHaveBeenCalledWith({
           types: undefined,
@@ -240,7 +240,7 @@ describe('ToolRegistryImpl', () => {
           persistedTools: [esqlTool, mcpTool, workflowTool],
         });
 
-        const tools = await registry.list({ type: [ToolType.mcp] });
+        const tools = await registry.list({ types: [ToolType.mcp] });
 
         expect(tools).toHaveLength(1);
         expect(tools[0].id).toBe('mcp.tavily.search');
@@ -252,7 +252,7 @@ describe('ToolRegistryImpl', () => {
           persistedTools: [esqlTool, mcpTool, workflowTool],
         });
 
-        const tools = await registry.list({ type: [ToolType.mcp, ToolType.esql] });
+        const tools = await registry.list({ types: [ToolType.mcp, ToolType.esql] });
 
         expect(tools).toHaveLength(2);
         expect(tools.map((t) => t.id)).toEqual(['my-esql-query', 'mcp.tavily.search']);
@@ -264,7 +264,7 @@ describe('ToolRegistryImpl', () => {
           persistedTools: [esqlTool],
         });
 
-        const tools = await registry.list({ type: [ToolType.index_search] });
+        const tools = await registry.list({ types: [ToolType.index_search] });
 
         expect(tools).toHaveLength(0);
       });
@@ -275,7 +275,7 @@ describe('ToolRegistryImpl', () => {
           persistedTools: [esqlTool],
         });
 
-        const tools = await registry.list({ type: [] });
+        const tools = await registry.list({ types: [] });
 
         expect(tools).toHaveLength(2);
       });
@@ -347,7 +347,7 @@ describe('ToolRegistryImpl', () => {
         });
 
         const tools = await registry.list({
-          type: [ToolType.mcp, ToolType.builtin],
+          types: [ToolType.mcp, ToolType.builtin],
           tags: ['search'],
         });
 
@@ -362,7 +362,7 @@ describe('ToolRegistryImpl', () => {
         });
 
         const tools = await registry.list({
-          type: [ToolType.mcp],
+          types: [ToolType.mcp],
           tags: ['search'],
         });
 
@@ -377,7 +377,7 @@ describe('ToolRegistryImpl', () => {
         });
 
         const tools = await registry.list({
-          type: [ToolType.esql],
+          types: [ToolType.esql],
           tags: ['search'],
         });
 
@@ -397,7 +397,7 @@ describe('ToolRegistryImpl', () => {
         persistedTools: [mcpTool, unavailableTool],
       });
 
-      const tools = await registry.list({ type: [ToolType.mcp] });
+      const tools = await registry.list({ types: [ToolType.mcp] });
 
       expect(tools).toHaveLength(1);
       expect(tools[0].id).toBe('mcp.tavily.search');

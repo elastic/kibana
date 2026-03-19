@@ -197,7 +197,7 @@ export function registerInternalToolsRoutes({
       const { tools: toolService } = getInternalServices();
       const registry = await toolService.getRegistry({ request });
 
-      const allTools = await registry.list({});
+      const allTools = await registry.list({ types: [ToolType.mcp] });
 
       const toolsInNamespace = allTools.filter((tool) => {
         const lastDotIndex = tool.id.lastIndexOf('.');
@@ -574,7 +574,7 @@ export function registerInternalToolsRoutes({
       const registry = await toolService.getRegistry({ request });
       const healthClient = toolService.getHealthClient({ request });
 
-      const mcpTools = (await registry.list({ type: [ToolType.mcp] })) as McpToolDefinition[];
+      const mcpTools = (await registry.list({ types: [ToolType.mcp] })) as McpToolDefinition[];
 
       if (mcpTools.length === 0) {
         return response.ok<ListMcpToolsHealthResponse>({
