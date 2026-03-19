@@ -37,7 +37,8 @@ export const SharepointOnline: ConnectorSpec = {
     id: '.sharepoint-online',
     displayName: 'SharePoint Online',
     description: i18n.translate('core.kibanaConnectorSpecs.sharepointOnline.metadata.description', {
-      defaultMessage: 'Kibana Stack Connector for SharePoint Online.',
+      defaultMessage:
+        'Search content, browse sites and document libraries, and download files from SharePoint Online',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,

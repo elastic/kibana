@@ -15,7 +15,8 @@ export const GithubConnector: ConnectorSpec = {
     id: '.github',
     displayName: 'Github',
     description: i18n.translate('core.kibanaConnectorSpecs.github.metadata.description', {
-      defaultMessage: 'Search through repositories and issues in Github',
+      defaultMessage:
+        'Search repositories, issues, and pull requests, browse file contents, and list branches in GitHub',
     }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
