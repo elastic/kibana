@@ -109,7 +109,7 @@
           "\nData payload for a panel added event."
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 162,
+        "lineNumber": 154,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -122,7 +122,7 @@
             "label": "dashboardAttachmentId",
             "description": [],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 166,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -138,7 +138,7 @@
               "z.infer<any>"
             ],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 167,
+            "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -156,7 +156,7 @@
           "\nData payload for a panel removed event."
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 170,
+        "lineNumber": 162,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -169,7 +169,7 @@
             "label": "dashboardAttachmentId",
             "description": [],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 174,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -185,7 +185,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 175,
+            "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -336,33 +336,14 @@
         "tags": [],
         "label": "DashboardAttachmentOrigin",
         "description": [
-          "\nOrigin payload for dashboard attachments."
+          "\nOrigin payload for dashboard attachments is a saved object ID string."
         ],
         "signature": [
-          "z.infer<any>"
+          "string"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 157,
+        "lineNumber": 149,
         "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.dashboardAttachmentOriginSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "dashboardAttachmentOriginSchema",
-        "description": [
-          "\nZod schema for dashboard attachment origin references."
-        ],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 152,
-        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -449,7 +430,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 178,
+        "lineNumber": 170,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
