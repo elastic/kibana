@@ -36,9 +36,9 @@ import { getUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 import {
+  FlyoutViewedContent,
   FlyoutViewedTabId,
   reportFlyoutViewedEvent,
-  type FlyoutViewedContent,
 } from '../../analytics/flyout_viewed_event';
 
 const mapDocViewerTabIdToFlyoutViewedTabId = (tabId: string): FlyoutViewedTabId => {
@@ -110,7 +110,7 @@ export function UnifiedDocViewerFlyout({
   flyoutActions,
   flyoutType,
   flyoutWidthLocalStorageKey,
-  flyoutViewedContent,
+  flyoutViewedContent = FlyoutViewedContent.DOC_DETAIL,
   services,
   docViewsRegistry,
   isEsqlQuery,
@@ -281,8 +281,7 @@ export function UnifiedDocViewerFlyout({
     (tabId: string | undefined) => {
       onUpdateSelectedTabId?.(tabId);
 
-      if (!tabId) return;
-      if (!flyoutViewedContent) return;
+      if (!tabId || !flyoutViewedContent) return;
 
       reportFlyoutViewedEvent(analytics, {
         content: flyoutViewedContent,
