@@ -265,10 +265,6 @@ export class WorkflowExecutionRuntimeManager {
 
     while (!scopeStack.isEmpty()) {
       const currentScope = scopeStack.getCurrentScope();
-      if (!currentScope) {
-        break;
-      }
-
       const matched = shouldStop?.(currentScope) ?? false;
       if (matched && !inclusive) {
         break;

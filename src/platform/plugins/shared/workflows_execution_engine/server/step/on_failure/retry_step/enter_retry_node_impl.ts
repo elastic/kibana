@@ -45,13 +45,13 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       return;
     }
 
-    const steoState = this.stepExecutionRuntime.getCurrentStepState();
+    const stepState = this.stepExecutionRuntime.getCurrentStepState();
 
-    if (!steoState) {
+    if (!stepState) {
       throw new Error(`Retry state for step ${this.node.stepId} not found`);
     }
 
-    const attempt = (steoState.attempt as number) ?? 0;
+    const attempt = (stepState.attempt as number) ?? 0;
 
     if (attempt < this.node.configuration['max-attempts']) {
       // If the retry attempt is within the allowed limit, re-enter the retry step

@@ -42,11 +42,6 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
 
       while (!stack.isEmpty()) {
         const currentScope = stack.getCurrentScope();
-
-        if (!currentScope) {
-          break;
-        }
-
         stack = stack.exitScope();
         const scopeStepExecutionRuntime =
           this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
