@@ -15,7 +15,7 @@ import {
 } from '@kbn/workflows-extensions/common';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
-  AiGuardrailsStepCommonDefinition,
+  AiGuardrailStepCommonDefinition,
   type CustomPromptGuardrailConfig,
 } from '../../../common/step_types';
 import type { AgentBuilderStartDependencies } from '../../types';
@@ -96,11 +96,11 @@ function formatAttachmentsWithinBudget(
   return parts.join('');
 }
 
-export const getAiGuardrailsStepDefinition = (
+export const getAiGuardrailStepDefinition = (
   coreSetup: CoreSetup<AgentBuilderStartDependencies, unknown>
 ) =>
   createServerStepDefinition({
-    ...AiGuardrailsStepCommonDefinition,
+    ...AiGuardrailStepCommonDefinition,
     handler: async (context) => {
       const {
         message,
@@ -210,9 +210,9 @@ export const getAiGuardrailsStepDefinition = (
           return {
             output: {
               pass: false,
-              reason: 'System error: unable to evaluate guardrails due to LLM failure.',
+              reason: 'System error: unable to evaluate guardrail due to LLM failure.',
               abort: true,
-              abort_message: 'System error: unable to evaluate guardrails due to LLM failure.',
+              abort_message: 'System error: unable to evaluate guardrail due to LLM failure.',
             },
           };
         }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InputSchema } from './ai_guardrails_step';
+import { InputSchema } from './ai_guardrail_step';
 
 const checks = [
   {
@@ -14,7 +14,7 @@ const checks = [
   },
 ];
 
-describe('ai.guardrails InputSchema', () => {
+describe('ai.guardrail InputSchema', () => {
   it('parses message + checks', () => {
     const r = InputSchema.safeParse({ message: 'm', checks });
     expect(r.success).toBe(true);

@@ -8,7 +8,7 @@
  */
 
 /**
- * Shared limits for guardrail context (conversation history for hook + ai.guardrails step).
+ * Shared limits for guardrail context (conversation history for hook + ai.guardrail step).
  */
 export const MAX_CONVERSATION_HISTORY_MESSAGES = 20;
 

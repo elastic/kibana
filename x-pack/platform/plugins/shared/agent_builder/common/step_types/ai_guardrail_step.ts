@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 /** Registered workflow step type id. */
-export const AiGuardrailsStepTypeId = 'ai.guardrails';
+export const AiGuardrailStepTypeId = 'ai.guardrail';
 
 export const ConfigSchema = z.object({
   'connector-id': z.string().optional(),
@@ -51,7 +51,7 @@ export const InputSchema = z.object({
 });
 
 export const OutputSchema = z.object({
-  pass: z.boolean().describe('True if guardrails passed, false if evaluation failed.'),
+  pass: z.boolean().describe('True if guardrail passed, false if evaluation failed.'),
   reason: z.string().optional().describe('When pass is false, explains why the guardrail failed.'),
   abort: z
     .boolean()
@@ -63,35 +63,35 @@ export const OutputSchema = z.object({
     .describe('Message shown when the workflow aborts agent execution.'),
 });
 
-export type AiGuardrailsStepConfigSchema = typeof ConfigSchema;
-export type AiGuardrailsStepInputSchema = typeof InputSchema;
-export type AiGuardrailsStepOutputSchema = typeof OutputSchema;
+export type AiGuardrailStepConfigSchema = typeof ConfigSchema;
+export type AiGuardrailStepInputSchema = typeof InputSchema;
+export type AiGuardrailStepOutputSchema = typeof OutputSchema;
 export type CustomPromptGuardrailConfig = z.infer<typeof CustomPromptCheckConfigSchema>;
 
-export const AiGuardrailsStepCommonDefinition: CommonStepDefinition<
-  AiGuardrailsStepInputSchema,
-  AiGuardrailsStepOutputSchema,
-  AiGuardrailsStepConfigSchema
+export const AiGuardrailStepCommonDefinition: CommonStepDefinition<
+  AiGuardrailStepInputSchema,
+  AiGuardrailStepOutputSchema,
+  AiGuardrailStepConfigSchema
 > = {
-  id: AiGuardrailsStepTypeId,
+  id: AiGuardrailStepTypeId,
   category: StepCategory.Ai,
-  label: i18n.translate('xpack.agentBuilder.guardrailsStep.label', {
-    defaultMessage: '[Experimental] AI Guardrails',
+  label: i18n.translate('xpack.agentBuilder.guardrailStep.label', {
+    defaultMessage: '[Experimental] AI Guardrail',
   }),
-  description: i18n.translate('xpack.agentBuilder.guardrailsStep.description', {
+  description: i18n.translate('xpack.agentBuilder.guardrailStep.description', {
     defaultMessage:
-      'Experimental: Declarative guardrails with hook-injected context; custom_prompt checks; abort or monitor on failure.',
+      'Experimental: Declarative guardrail with hook-injected context; custom_prompt checks; abort or monitor on failure.',
   }),
   documentation: {
-    details: i18n.translate('xpack.agentBuilder.guardrailsStep.documentation.details', {
-      defaultMessage: `The ${AiGuardrailsStepTypeId} step evaluates the message using optional conversation_history and attachments from the before-agent hook. Map message from inputs.prompt. Use checks with type custom_prompt. on_fail: abort or monitor (shadow mode). Reference output with {templateSyntax}.`,
+    details: i18n.translate('xpack.agentBuilder.guardrailStep.documentation.details', {
+      defaultMessage: `The ${AiGuardrailStepTypeId} step evaluates the message using optional conversation_history and attachments from the before-agent hook. Map message from inputs.prompt. Use checks with type custom_prompt. on_fail: abort or monitor (shadow mode). Reference output with {templateSyntax}.`,
       values: { templateSyntax: '`{{ steps.stepName.output }}`' },
     }),
     examples: [
       `## Hook inputs + custom_prompt
 \`\`\`yaml
 - name: validate
-  type: ${AiGuardrailsStepTypeId}
+  type: ${AiGuardrailStepTypeId}
   with:
     message: "{{ inputs.prompt }}"
     conversation_history: "{{ inputs.conversation_history }}"
@@ -109,7 +109,7 @@ export const AiGuardrailsStepCommonDefinition: CommonStepDefinition<
       `## Monitor (shadow) mode
 \`\`\`yaml
 - name: validate
-  type: ${AiGuardrailsStepTypeId}
+  type: ${AiGuardrailStepTypeId}
   with:
     message: "{{ inputs.prompt }}"
     on_fail: monitor

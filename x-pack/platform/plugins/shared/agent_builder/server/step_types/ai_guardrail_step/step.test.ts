@@ -15,10 +15,10 @@ jest.mock('@kbn/workflows-extensions/server', () => ({
   createServerStepDefinition: jest.fn((def: { handler: unknown }) => def),
 }));
 
-import { getAiGuardrailsStepDefinition } from './step';
+import { getAiGuardrailStepDefinition } from './step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
-describe('getAiGuardrailsStepDefinition (ai.guardrails)', () => {
+describe('getAiGuardrailStepDefinition (ai.guardrail)', () => {
   const fakeRequest = { headers: {} } as unknown as KibanaRequest;
   let mockInvoke: jest.Mock;
   let mockGetChatModel: jest.Mock;
@@ -60,7 +60,7 @@ describe('getAiGuardrailsStepDefinition (ai.guardrails)', () => {
       logger: mockLogger,
       abortSignal: new AbortController().signal,
       stepId: 'validate',
-      stepType: 'ai.guardrails',
+      stepType: 'ai.guardrail',
       ...overrides,
     } as StepHandlerContext);
 
@@ -79,7 +79,7 @@ describe('getAiGuardrailsStepDefinition (ai.guardrails)', () => {
   });
 
   it('returns pass true when LLM returns pass true', async () => {
-    const step = getAiGuardrailsStepDefinition(mockCoreSetup as any);
+    const step = getAiGuardrailStepDefinition(mockCoreSetup as any);
     const result = await step.handler(createContext({ message: 'Hello.', checks: defaultChecks }));
     expect(result.output?.pass).toBe(true);
     expect(mockInvoke).toHaveBeenCalledTimes(1);
@@ -90,7 +90,7 @@ describe('getAiGuardrailsStepDefinition (ai.guardrails)', () => {
 
   it('on_fail abort uses abort_message and sets abort true', async () => {
     mockInvoke.mockResolvedValue({ parsed: { pass: false, reason: 'Bad.' } });
-    const step = getAiGuardrailsStepDefinition(mockCoreSetup as any);
+    const step = getAiGuardrailStepDefinition(mockCoreSetup as any);
     const result = await step.handler(
       createContext({
         message: 'x',
@@ -106,7 +106,7 @@ describe('getAiGuardrailsStepDefinition (ai.guardrails)', () => {
 
   it('on_fail monitor logs and returns pass true', async () => {
     mockInvoke.mockResolvedValue({ parsed: { pass: false, reason: 'Shadow hit.' } });
-    const step = getAiGuardrailsStepDefinition(mockCoreSetup as any);
+    const step = getAiGuardrailStepDefinition(mockCoreSetup as any);
     const result = await step.handler(
       createContext({ message: 'x', on_fail: 'monitor', checks: defaultChecks })
     );
@@ -119,7 +119,7 @@ describe('getAiGuardrailsStepDefinition (ai.guardrails)', () => {
   });
 
   it('slices conversation_history by previous_conversations', async () => {
-    const step = getAiGuardrailsStepDefinition(mockCoreSetup as any);
+    const step = getAiGuardrailStepDefinition(mockCoreSetup as any);
     await step.handler(
       createContext({
         message: 'Current',
@@ -142,7 +142,7 @@ describe('getAiGuardrailsStepDefinition (ai.guardrails)', () => {
   it('LLM failure is fail-closed', async () => {
     const err = new Error('429');
     mockInvoke.mockRejectedValue(err);
-    const step = getAiGuardrailsStepDefinition(mockCoreSetup as any);
+    const step = getAiGuardrailStepDefinition(mockCoreSetup as any);
     const result = await step.handler(createContext({ message: 'x', checks: defaultChecks }));
     expect(mockLogger.warn).toHaveBeenCalledWith('Guardrail LLM evaluation failed', err);
     expect(result.output?.pass).toBe(false);
@@ -152,7 +152,7 @@ describe('getAiGuardrailsStepDefinition (ai.guardrails)', () => {
   it('LLM failure in monitor mode ignores error and returns pass true', async () => {
     const err = new Error('500');
     mockInvoke.mockRejectedValue(err);
-    const step = getAiGuardrailsStepDefinition(mockCoreSetup as any);
+    const step = getAiGuardrailStepDefinition(mockCoreSetup as any);
     const result = await step.handler(
       createContext({ message: 'x', on_fail: 'monitor', checks: defaultChecks })
     );

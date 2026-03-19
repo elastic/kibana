@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { AiGuardrailsStepCommonDefinition } from '../../common/step_types/ai_guardrails_step';
+import { AiGuardrailStepCommonDefinition } from '../../common/step_types/ai_guardrail_step';
 
-export const AiGuardrailsStepDefinition = createPublicStepDefinition({
-  ...AiGuardrailsStepCommonDefinition,
+export const AiGuardrailStepDefinition = createPublicStepDefinition({
+  ...AiGuardrailStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/app_security').then(({ icon }) => ({
       default: icon,
