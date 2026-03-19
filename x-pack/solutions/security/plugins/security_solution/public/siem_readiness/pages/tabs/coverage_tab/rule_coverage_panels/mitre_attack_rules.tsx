@@ -296,10 +296,12 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
               closePopover={() => setActiveTacticPopover(null)}
               button={
                 <div
-                  onClick={() => setActiveTacticPopover(tactic.tacticId)}
+                  onClick={() =>
+                    tactic.missingPackages.length > 0 && setActiveTacticPopover(tactic.tacticId)
+                  }
                   // Keyboard accessibility: Opens the popover when user presses Enter or Space
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
+                    if ((e.key === 'Enter' || e.key === ' ') && tactic.missingPackages.length > 0) {
                       e.preventDefault();
                       setActiveTacticPopover(tactic.tacticId);
                     }
@@ -310,7 +312,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                   style={{
                     backgroundColor: tactic.statusColor,
                     padding: euiTheme.size.s,
-                    cursor: 'pointer',
+                    cursor: tactic.missingPackages.length > 0 ? 'pointer' : 'default',
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',

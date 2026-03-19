@@ -171,8 +171,8 @@ apiTest.describe(
 
         // Both documents should be present
         expect(esqlResult.documents).toHaveLength(2);
-        const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-        const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+        const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+        const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
         expect(doc1).toStrictEqual(expect.objectContaining({ message: 'Connection from <ip>' }));
         expect(doc2).toStrictEqual(expect.objectContaining({ message: null }));
       }
@@ -239,11 +239,13 @@ apiTest.describe(
       expect(esqlResult.documents).toHaveLength(2);
 
       // Production doc should have IP redacted
-      const prodDoc = esqlResult.documents.find((d: any) => d.status === 'doc1');
+      const prodDoc = esqlResult.documents.find(
+        (d: Record<string, unknown>) => d.status === 'doc1'
+      );
       expect(prodDoc).toStrictEqual(expect.objectContaining({ message: 'Connection from <ip>' }));
 
       // Development doc should keep original IP
-      const devDoc = esqlResult.documents.find((d: any) => d.status === 'doc2');
+      const devDoc = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
       expect(devDoc).toStrictEqual(
         expect.objectContaining({ message: 'Connection from 192.168.1.2' })
       );
