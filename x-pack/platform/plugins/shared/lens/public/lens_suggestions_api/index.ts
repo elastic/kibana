@@ -17,7 +17,7 @@ import type {
   TypedLensByValueInput,
 } from '@kbn/lens-common';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
+import { mergeSuggestionWithVisContext } from './helpers';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -113,6 +113,8 @@ export const suggestionsApi = ({
   ) {
     return [];
   }
+  const chartType = preferredChartType?.toLowerCase();
+
   // compute the rest suggestions depending on the active one and filter out the lnsLegacyMetric
   const newSuggestions = getSuggestions({
     datasourceMap,
@@ -124,6 +126,7 @@ export const suggestionsApi = ({
     },
     visualizationMap,
     activeVisualization,
+    subVisualizationId: chartType,
     visualizationState: primarySuggestion.visualizationState,
     dataViews,
     query,
@@ -136,27 +139,6 @@ export const suggestionsApi = ({
       // Filter out suggestions that are hidden and legacy metrics
       (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
   );
-
-  const chartType = preferredChartType?.toLowerCase();
-
-  const xyResult = switchVisualizationType({
-    visualizationMap,
-    suggestions: newSuggestions,
-    targetTypeId: chartType,
-    familyType: 'lnsXY',
-    forceSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
-  });
-  if (xyResult) return xyResult;
-
-  // to return a donut instead of a pie chart
-  const pieResult = switchVisualizationType({
-    visualizationMap,
-    suggestions: newSuggestions,
-    targetTypeId: chartType,
-    familyType: 'lnsPie',
-    forceSwitch: preferredChartType === ChartType.Donut,
-  });
-  if (pieResult) return pieResult;
 
   const chartTypeFromAttrs = preferredVisAttributes
     ? mapVisToChartType(preferredVisAttributes.visualizationType)
@@ -178,10 +160,9 @@ export const suggestionsApi = ({
       return true;
     })
     .sort((a, b) => {
-      // If has transformations, prioritize lnsXY
-      if (a.visualizationId === 'lnsXY' && b.visualizationId !== 'lnsXY') return -1;
-      if (a.visualizationId !== 'lnsXY' && b.visualizationId === 'lnsXY') return 1;
-      // Both are same type, sort by score
+      const priorityA = visualizationMap[a.visualizationId]?.suggestionPriority ?? 0;
+      const priorityB = visualizationMap[b.visualizationId]?.suggestionPriority ?? 0;
+      if (priorityA !== priorityB) return priorityB - priorityA;
       return b.score - a.score;
     });
 
