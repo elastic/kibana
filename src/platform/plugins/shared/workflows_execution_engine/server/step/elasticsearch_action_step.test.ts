@@ -60,6 +60,7 @@ describe('ElasticsearchActionStepImpl', () => {
       failStep: jest.fn().mockResolvedValue(undefined),
       setInput: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
+      node: {},
     } as any;
 
     mockWorkflowRuntime = {
@@ -84,15 +85,17 @@ describe('ElasticsearchActionStepImpl', () => {
         query: { size: '10' },
       });
 
+      const stepWith = {
+        index: 'my-test',
+        query: { match_all: {} },
+        size: 10,
+      };
       const step: ElasticsearchActionStep = {
+        stepId: 'search_step',
         name: 'search_step',
         type: 'elasticsearch.search',
         spaceId: 'default',
-        with: {
-          index: 'my-test',
-          query: { match_all: {} },
-          size: 10,
-        },
+        configuration: { name: 'search_step', type: 'elasticsearch.search', with: stepWith },
       };
 
       const esStep = new ElasticsearchActionStepImpl(
@@ -102,9 +105,9 @@ describe('ElasticsearchActionStepImpl', () => {
         mockWorkflowLogger
       );
 
-      await (esStep as any)._run(step.with);
+      await (esStep as any)._run(stepWith);
 
-      expect(mockedBuildRequest).toHaveBeenCalledWith('elasticsearch.search', step.with);
+      expect(mockedBuildRequest).toHaveBeenCalledWith('elasticsearch.search', stepWith);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
           method: 'GET',
@@ -129,14 +132,16 @@ describe('ElasticsearchActionStepImpl', () => {
         bulkBody: bulkOperations,
       });
 
+      const stepWith = {
+        index: 'my-test',
+        operations: bulkOperations,
+      };
       const step: ElasticsearchActionStep = {
+        stepId: 'bulk_step',
         name: 'bulk_step',
         type: 'elasticsearch.bulk',
         spaceId: 'default',
-        with: {
-          index: 'my-test',
-          operations: bulkOperations,
-        },
+        configuration: { name: 'bulk_step', type: 'elasticsearch.bulk', with: stepWith },
       };
 
       const esStep = new ElasticsearchActionStepImpl(
@@ -146,9 +151,9 @@ describe('ElasticsearchActionStepImpl', () => {
         mockWorkflowLogger
       );
 
-      await (esStep as any)._run(step.with);
+      await (esStep as any)._run(stepWith);
 
-      expect(mockedBuildRequest).toHaveBeenCalledWith('elasticsearch.bulk', step.with);
+      expect(mockedBuildRequest).toHaveBeenCalledWith('elasticsearch.bulk', stepWith);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
           method: 'POST',
@@ -168,16 +173,18 @@ describe('ElasticsearchActionStepImpl', () => {
         query: { refresh: 'wait_for', pipeline: 'my-pipeline' },
       });
 
+      const stepWith = {
+        index: 'my-test',
+        refresh: 'wait_for',
+        pipeline: 'my-pipeline',
+        operations: [{ index: {} }, { field: 'value' }],
+      };
       const step: ElasticsearchActionStep = {
+        stepId: 'bulk_step',
         name: 'bulk_step',
         type: 'elasticsearch.bulk',
         spaceId: 'default',
-        with: {
-          index: 'my-test',
-          refresh: 'wait_for',
-          pipeline: 'my-pipeline',
-          operations: [{ index: {} }, { field: 'value' }],
-        },
+        configuration: { name: 'bulk_step', type: 'elasticsearch.bulk', with: stepWith },
       };
 
       const esStep = new ElasticsearchActionStepImpl(
@@ -187,7 +194,7 @@ describe('ElasticsearchActionStepImpl', () => {
         mockWorkflowLogger
       );
 
-      await (esStep as any)._run(step.with);
+      await (esStep as any)._run(stepWith);
 
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
@@ -203,17 +210,19 @@ describe('ElasticsearchActionStepImpl', () => {
 
   describe('raw request format', () => {
     it('should use raw API format when params.request is provided', async () => {
+      const stepWith = {
+        request: {
+          method: 'PUT',
+          path: '/my-index/_settings',
+          body: { 'index.number_of_replicas': 2 },
+        },
+      };
       const step: ElasticsearchActionStep = {
+        stepId: 'raw_step',
         name: 'raw_step',
         type: 'elasticsearch.custom',
         spaceId: 'default',
-        with: {
-          request: {
-            method: 'PUT',
-            path: '/my-index/_settings',
-            body: { 'index.number_of_replicas': 2 },
-          },
-        },
+        configuration: { name: 'raw_step', type: 'elasticsearch.custom', with: stepWith },
       };
 
       const esStep = new ElasticsearchActionStepImpl(
@@ -223,7 +232,7 @@ describe('ElasticsearchActionStepImpl', () => {
         mockWorkflowLogger
       );
 
-      await (esStep as any)._run(step.with);
+      await (esStep as any)._run(stepWith);
 
       // Should not call buildElasticsearchRequest for raw format
       expect(mockedBuildRequest).not.toHaveBeenCalled();
@@ -238,14 +247,16 @@ describe('ElasticsearchActionStepImpl', () => {
     });
 
     it('should use raw API format for elasticsearch.request step type', async () => {
+      const stepWith = {
+        method: 'DELETE',
+        path: '/my-index',
+      };
       const step: ElasticsearchActionStep = {
+        stepId: 'raw_step',
         name: 'raw_step',
         type: 'elasticsearch.request',
         spaceId: 'default',
-        with: {
-          method: 'DELETE',
-          path: '/my-index',
-        },
+        configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith },
       };
 
       const esStep = new ElasticsearchActionStepImpl(
@@ -255,7 +266,7 @@ describe('ElasticsearchActionStepImpl', () => {
         mockWorkflowLogger
       );
 
-      await (esStep as any)._run(step.with);
+      await (esStep as any)._run(stepWith);
 
       // Should not call buildElasticsearchRequest for elasticsearch.request type
       expect(mockedBuildRequest).not.toHaveBeenCalled();
@@ -266,16 +277,18 @@ describe('ElasticsearchActionStepImpl', () => {
     });
 
     it('should pass headers for elasticsearch.request step type', async () => {
+      const stepWith = {
+        method: 'GET',
+        path: '/my-index/_search',
+        body: { query: { match_all: {} } },
+        headers: { 'X-Custom-Header': 'value' },
+      };
       const step: ElasticsearchActionStep = {
+        stepId: 'raw_step',
         name: 'raw_step',
         type: 'elasticsearch.request',
         spaceId: 'default',
-        with: {
-          method: 'GET',
-          path: '/my-index/_search',
-          body: { query: { match_all: {} } },
-          headers: { 'X-Custom-Header': 'value' },
-        },
+        configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith },
       };
 
       const esStep = new ElasticsearchActionStepImpl(
@@ -285,7 +298,7 @@ describe('ElasticsearchActionStepImpl', () => {
         mockWorkflowLogger
       );
 
-      await (esStep as any)._run(step.with);
+      await (esStep as any)._run(stepWith);
 
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         { method: 'GET', path: '/my-index/_search', body: { query: { match_all: {} } } },
@@ -304,14 +317,16 @@ describe('ElasticsearchActionStepImpl', () => {
       );
       mockEsClient.transport.request = jest.fn().mockRejectedValue(sizeError);
 
+      const stepWith = {
+        index: 'large-index',
+        body: { query: { match_all: {} }, size: 10000 },
+      };
       const step: ElasticsearchActionStep = {
+        stepId: 'size_limit_step',
         name: 'size_limit_step',
         type: 'elasticsearch.search',
         spaceId: 'default',
-        with: {
-          index: 'large-index',
-          body: { query: { match_all: {} }, size: 10000 },
-        },
+        configuration: { name: 'size_limit_step', type: 'elasticsearch.search', with: stepWith },
       };
 
       const esStep = new ElasticsearchActionStepImpl(
@@ -321,7 +336,7 @@ describe('ElasticsearchActionStepImpl', () => {
         mockWorkflowLogger
       );
 
-      const result = await (esStep as any)._run(step.with);
+      const result = await (esStep as any)._run(stepWith);
 
       expect(result.error).toBeDefined();
       expect(result.error.type).toBe('StepSizeLimitExceeded');
@@ -334,14 +349,16 @@ describe('ElasticsearchActionStepImpl', () => {
       const abortError = new errors.RequestAbortedError('Request aborted by user');
       mockEsClient.transport.request = jest.fn().mockRejectedValue(abortError);
 
+      const stepWith = {
+        index: 'test',
+        body: { query: { match_all: {} } },
+      };
       const step: ElasticsearchActionStep = {
+        stepId: 'abort_step',
         name: 'abort_step',
         type: 'elasticsearch.search',
         spaceId: 'default',
-        with: {
-          index: 'test',
-          body: { query: { match_all: {} } },
-        },
+        configuration: { name: 'abort_step', type: 'elasticsearch.search', with: stepWith },
       };
 
       const esStep = new ElasticsearchActionStepImpl(
@@ -351,7 +368,7 @@ describe('ElasticsearchActionStepImpl', () => {
         mockWorkflowLogger
       );
 
-      const result = await (esStep as any)._run(step.with);
+      const result = await (esStep as any)._run(stepWith);
 
       expect(result.error).toBeDefined();
       // Should be a generic error, not StepSizeLimitExceeded
