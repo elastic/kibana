@@ -361,6 +361,63 @@ export class DiscoverApp {
     await rowLocator.waitFor({ state: 'visible', timeout });
   }
 
+  public get esqlMenuPopover(): Locator {
+    return this.page.testSubj.locator('esql-menu-popover');
+  }
+
+  async openRecommendedQueriesPanel() {
+    const menuPopover = this.esqlMenuPopover;
+    if (!(await menuPopover.isVisible())) {
+      await this.page.testSubj.click('esql-help-popover-button');
+    }
+
+    await menuPopover.waitFor({ state: 'visible' });
+
+    const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
+    await expect(recommendedQueriesButton).toBeVisible();
+    await recommendedQueriesButton.click();
+    await this.page.testSubj.locator('contextMenuPanelTitleButton').waitFor({ state: 'visible' });
+  }
+
+  async runRecommendedEsqlQuery(queryLabel: string) {
+    await this.openRecommendedQueriesPanel();
+
+    const queryOption = this.esqlMenuPopover.getByRole('button', {
+      exact: true,
+      name: queryLabel,
+    });
+
+    await expect(queryOption).toBeVisible();
+    await queryOption.click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
+    return this.codeEditor.getCodeEditorValue(nthIndex);
+  }
+
+  async addBreakdownFieldFromSidebar(field: string) {
+    const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
+    if (await sidebarToggleButton.isVisible()) {
+      await sidebarToggleButton.click();
+    }
+
+    await this.waitUntilFieldListHasCountOfFields();
+
+    const fieldLocator = this.page.testSubj.locator(`field-${field}`);
+    await fieldLocator.hover();
+    await fieldLocator.click();
+    await this.waitUntilFieldPopoverIsLoaded();
+
+    await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  private async waitUntilFieldPopoverIsLoaded() {
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await expect(this.page.locator('[data-test-subj*="-statsLoading"]')).toBeHidden();
+  }
+
   /**
    * Scrolls through the virtualized doc table grid to assert that the given
    * text exists somewhere in the rendered rows. Necessary because virtual
