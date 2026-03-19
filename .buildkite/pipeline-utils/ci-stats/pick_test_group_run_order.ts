@@ -93,7 +93,10 @@ export async function pickTestGroupRunOrder() {
   if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
     throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
   }
-  const TOO_LONG_MINUTES = 27;
+
+  const JEST_UNIT_TOO_LONG_MINUTES = 27;
+  const JEST_INTEGRATION_TOO_LONG_MINUTES = 27;
+  const FUNCTIONAL_TOO_LONG_MINUTES = 27;
 
   /**
    * This env variable corresponds to the env stanza within
@@ -286,7 +289,7 @@ export async function pickTestGroupRunOrder() {
         type: UNIT_TYPE,
         defaultMin: 4,
         maxMin: JEST_UNIT_MAX_MINUTES,
-        tooLongMin: TOO_LONG_MINUTES,
+        tooLongMin: JEST_UNIT_TOO_LONG_MINUTES,
         overheadMin: 0.2,
         warmupMin: 4,
         concurrency: 3,
@@ -296,7 +299,7 @@ export async function pickTestGroupRunOrder() {
         type: INTEGRATION_TYPE,
         defaultMin: 60,
         maxMin: JEST_INTEGRATION_MAX_MINUTES,
-        tooLongMin: TOO_LONG_MINUTES,
+        tooLongMin: JEST_INTEGRATION_TOO_LONG_MINUTES,
         overheadMin: 0.2,
         warmupMin: 2,
         concurrency: 1,
@@ -307,7 +310,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 60,
         queue,
         maxMin: FUNCTIONAL_MAX_MINUTES,
-        tooLongMin: TOO_LONG_MINUTES,
+        tooLongMin: FUNCTIONAL_TOO_LONG_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
         overheadMin: 0,
         warmupMin: 3,
