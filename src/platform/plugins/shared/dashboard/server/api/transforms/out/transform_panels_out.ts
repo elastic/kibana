@@ -88,6 +88,11 @@ function transformPanelProperties(
     transformedPanelConfig =
       transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
       defaultTransform(embeddableConfig);
+
+    transformedPanelConfig =
+      transforms?.schema?.validate(transformedPanelConfig, undefined, undefined, {
+        stripUnknownKeys: true,
+      }) ?? transformedPanelConfig;
   } catch (transformOutError) {
     // do not prevent read on transformOutError
     logger.warn(
