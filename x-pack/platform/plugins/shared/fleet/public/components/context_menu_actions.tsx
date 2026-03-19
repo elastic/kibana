@@ -63,7 +63,7 @@ export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen,
       iconType="boxesHorizontal"
       onClick={handleToggleMenu}
       aria-label={i18n.translate('xpack.fleet.genericActionsMenuText', {
-        defaultMessage: 'Open',
+        defaultMessage: 'Actions',
       })}
       data-test-subj="agentActionsBtn"
     />
