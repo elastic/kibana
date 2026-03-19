@@ -21,7 +21,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { injectMetadataFields } from '@kbn/esql-utils';
+import { injectMetadataFields, retrieveMetadataColumns } from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -68,11 +68,19 @@ export function fetchEsql({
   projectRouting,
   inspectorConfig,
 }: FetchEsqlParams): Promise<RecordsFetchResponse> {
+  const metadataFieldsToInject = ['_id', '_index'];
   let queryWithMetadata = query;
+  let injectedMetadataFields: string[] = [];
   if (isOfAggregateQueryType(query)) {
     try {
-      const injected = injectMetadataFields(query.esql, ['_id', '_index']);
-      queryWithMetadata = { ...query, esql: injected };
+      const existingMetadata = retrieveMetadataColumns(query.esql);
+      injectedMetadataFields = metadataFieldsToInject.filter(
+        (field) => !existingMetadata.includes(field)
+      );
+      if (injectedMetadataFields.length > 0) {
+        const injected = injectMetadataFields(query.esql, metadataFieldsToInject);
+        queryWithMetadata = { ...query, esql: injected };
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('[Discover] Failed to inject METADATA _id, _index into ES|QL query:', error);
@@ -115,7 +123,9 @@ export function fetchEsql({
           } else {
             const table = response as Datatable;
             const rows = table?.rows ?? [];
-            esqlQueryColumns = table?.columns ?? undefined;
+            esqlQueryColumns = table?.columns?.filter(
+              (col) => !injectedMetadataFields.includes(col.id)
+            );
             esqlHeaderWarning = table.warning ?? undefined;
             finalData = rows.map((row, idx) => {
               const record: DataTableRecord = {
