@@ -393,7 +393,9 @@ describe('SyntheticsService', () => {
       });
 
       jest.spyOn(service.apiClient, 'syncMonitors').mockImplementation(async ({ location }) => {
-        events.push(`sync:${location.id}`);
+        if (location) {
+          events.push(`sync:${location.id}`);
+        }
         return [];
       });
 
