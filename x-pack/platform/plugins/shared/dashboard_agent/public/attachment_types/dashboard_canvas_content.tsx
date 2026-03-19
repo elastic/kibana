@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import type { DashboardAttachmentOrigin } from '@kbn/dashboard-agent-common';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UseEuiTheme } from '@elastic/eui';
@@ -59,17 +58,17 @@ export const DashboardCanvasContent = ({
   updateOrigin,
   dashboardLocator,
   searchBarComponent: SearchBar,
-  doesSavedDashboardExist,
+  checkSavedDashboardExist,
 }: AttachmentRenderProps<DashboardAttachment> & {
   registerActionButtons: (buttons: ActionButton[]) => void;
-  updateOrigin: (origin: DashboardAttachmentOrigin) => Promise<unknown>;
+  updateOrigin: (origin: string) => Promise<unknown>;
   dashboardLocator?: DashboardRendererProps['locator'];
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
-  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }) => {
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
-  const linkedSavedObjectId = attachment.origin?.savedObjectId;
+  const linkedSavedObjectId = attachment.origin;
   const [savedObjectStatus, setSavedObjectStatus] = useState<SavedObjectStatus>({
     status: 'idle',
   });
@@ -84,7 +83,7 @@ export const DashboardCanvasContent = ({
       let canceled = false;
       setSavedObjectStatus({ status: 'loading' });
 
-      doesSavedDashboardExist(linkedSavedObjectId)
+      checkSavedDashboardExist(linkedSavedObjectId)
         .then((exists) => {
           if (!canceled) {
             setSavedObjectStatus({ status: 'resolved', exists });
@@ -100,7 +99,7 @@ export const DashboardCanvasContent = ({
         canceled = true;
       };
     },
-    [linkedSavedObjectId, doesSavedDashboardExist]
+    [linkedSavedObjectId, checkSavedDashboardExist]
   );
 
   const dashboardState = useMemo(() => getStateFromAttachment(attachment), [attachment]);
@@ -124,7 +123,7 @@ export const DashboardCanvasContent = ({
     timeRange,
     dashboardState,
     linkedSavedObjectId,
-    doesSavedDashboardExist,
+    checkSavedDashboardExist,
   });
 
   return (

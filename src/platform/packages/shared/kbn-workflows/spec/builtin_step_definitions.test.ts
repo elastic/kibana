@@ -15,6 +15,8 @@ const EXPECTED_BUILT_IN_IDS = [
   'if',
   'foreach',
   'while',
+  'loop.break',
+  'loop.continue',
   'wait',
   'data.set',
   'workflow.execute',

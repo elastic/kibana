@@ -48,11 +48,18 @@ export type {
   ExitFallbackPathNode,
   EnterTimeoutZoneNode,
   ExitTimeoutZoneNode,
+  LoopBreakNode,
+  LoopBreakNodeSchema,
+  LoopContinueNode,
+  LoopContinueNodeSchema,
   GraphNodeUnion,
   WorkflowExecuteGraphNode,
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNode,
+  WorkflowOutputGraphNodeSchema,
+  LoopEnterNode,
 } from './types';
 
 export {
@@ -80,5 +87,8 @@ export {
   isExitStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
+  isLoopBreak,
+  isLoopContinue,
+  isLoopEnterNode,
   shouldSuggestInnerSteps,
 } from './types';

@@ -17,6 +17,7 @@ import {
   WaitGraphNodeSchema,
   WorkflowExecuteAsyncGraphNodeSchema,
   WorkflowExecuteGraphNodeSchema,
+  WorkflowOutputGraphNodeSchema,
 } from './base';
 import {
   EnterConditionBranchNodeSchema,
@@ -24,6 +25,7 @@ import {
   ExitConditionBranchNodeSchema,
   ExitIfNodeSchema,
 } from './branching_nodes';
+import { LoopBreakNodeSchema, LoopContinueNodeSchema } from './flow_control_nodes';
 import {
   EnterForeachNodeSchema,
   EnterWhileNodeSchema,
@@ -57,6 +59,7 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   WaitForInputGraphNodeSchema,
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNodeSchema,
   EnterIfNodeSchema,
   ExitIfNodeSchema,
   EnterConditionBranchNodeSchema,
@@ -80,6 +83,8 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   OnFailureNodeSchema,
   StepLevelOnFailureNodeSchema,
   WorkflowLevelOnFailureNodeSchema,
+  LoopBreakNodeSchema,
+  LoopContinueNodeSchema,
 ]);
 
 export type GraphNodeUnion = z.infer<typeof GraphNodeUnionSchema>;

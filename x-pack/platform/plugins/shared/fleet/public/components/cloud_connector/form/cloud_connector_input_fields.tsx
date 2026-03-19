@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import { EuiFieldText, EuiFormRow, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSpacer, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -77,15 +77,24 @@ export const CloudConnectorInputFields = ({
         }
 
         if (field.type === 'text') {
+          const labelContent = field.tooltip ? (
+            <span>
+              {field.label} <EuiIconTip content={field.tooltip} position="right" type="info" />
+            </span>
+          ) : (
+            field.label
+          );
+
           return (
             <EuiFormRow
               key={field.id}
-              label={field.label}
+              label={labelContent}
               isInvalid={invalid}
               error={invalid ? invalidError : undefined}
               fullWidth
               hasChildLabel={true}
               id={field.id}
+              helpText={field.helpText}
             >
               <EuiFieldText
                 id={field.id}

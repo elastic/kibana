@@ -52,8 +52,12 @@ import type {
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
+import {
+  type ChildWorkflowExecutionItem,
+  getChildWorkflowExecutions,
+} from './lib/get_child_workflow_executions';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
-import { searchStepExecutions } from './lib/search_step_executions';
+import { searchStepExecutions, type StepExecutionListResult } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 
 import type {
@@ -61,6 +65,7 @@ import type {
   GetAvailableConnectorsResponse,
   GetStepExecutionParams,
   GetWorkflowsParams,
+  SearchStepExecutionsParams,
 } from './workflows_management_api';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
@@ -73,7 +78,7 @@ import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
-import { createStorage } from '../storage/workflow_storage';
+import { createStorage, workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
@@ -92,6 +97,7 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  omitStepRuns?: boolean;
   page?: number;
   size?: number;
 }
@@ -736,40 +742,97 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const searchResponse = await this.workflowStorage.getClient().search({
-      size: 1000,
-      track_total_hits: true,
-      _source: [
-        'name',
-        'description',
-        'enabled',
-        'yaml',
-        'definition',
-        'createdBy',
-        'lastUpdatedBy',
-        'valid',
-        'created_at',
-        'updated_at',
-      ],
-      query: {
-        bool: {
-          must: [
-            { term: { spaceId } },
-            { term: { enabled: true } },
-            { term: { triggerTypes: triggerId } },
-          ],
-          must_not: [{ exists: { field: 'deleted_at' } }],
-        },
+    const pageSize = 1000;
+    const MAX_PAGES = 100;
+    const keepAlive = '1m';
+    const indexPattern = `${workflowIndexName}-*`;
+    const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
+    const query = {
+      bool: {
+        must: [
+          { term: { spaceId } },
+          { term: { enabled: true } },
+          { term: { triggerTypes: triggerId } },
+        ],
+        must_not: [{ exists: { field: 'deleted_at' } }],
       },
-      sort: [{ updated_at: { order: 'desc' } }],
-    });
+    };
+    const _source = [
+      'name',
+      'description',
+      'enabled',
+      'yaml',
+      'definition',
+      'createdBy',
+      'lastUpdatedBy',
+      'valid',
+      'created_at',
+      'updated_at',
+    ];
 
-    return searchResponse.hits.hits.map((hit) => {
-      if (!hit._source) {
-        throw new Error('Missing _source in search result');
-      }
-      return this.transformStorageDocumentToWorkflowDto(hit._id, hit._source as WorkflowProperties);
+    const pitResponse = await this.esClient.openPointInTime({
+      index: indexPattern,
+      keep_alive: keepAlive,
+      ignore_unavailable: true,
     });
+    const pitId = pitResponse.id;
+
+    try {
+      const allHits: Array<{ _id: string; _source: WorkflowProperties }> = [];
+      let searchAfter: estypes.SearchHit['sort'] | undefined;
+      let hasMore = true;
+      let pageCount = 0;
+
+      while (hasMore && pageCount < MAX_PAGES) {
+        pageCount++;
+        const searchResponse = await this.esClient.search<WorkflowProperties>({
+          pit: { id: pitId, keep_alive: keepAlive },
+          size: pageSize,
+          _source,
+          query,
+          sort,
+          ...(searchAfter ? { search_after: searchAfter } : {}),
+        });
+
+        const hits = searchResponse.hits.hits;
+        for (const hit of hits) {
+          if (hit._source && hit._id) {
+            allHits.push({ _id: hit._id, _source: hit._source as WorkflowProperties });
+          }
+        }
+
+        hasMore = hits.length >= pageSize;
+        if (hasMore) {
+          const lastHit = hits[hits.length - 1];
+          if (!lastHit.sort) {
+            throw new Error(
+              `Missing sort value on last hit (required for search_after). Last hit: ${JSON.stringify(
+                lastHit
+              )}`
+            );
+          }
+          searchAfter = lastHit.sort;
+        }
+      }
+
+      if (hasMore && pageCount >= MAX_PAGES) {
+        this.logger.warn(
+          `getWorkflowsSubscribedToTrigger truncated at ${MAX_PAGES} pages (${
+            pageCount * pageSize
+          } workflows) for trigger ${triggerId} in space ${spaceId}`
+        );
+      }
+
+      return allHits.map(({ _id, _source: source }) =>
+        this.transformStorageDocumentToWorkflowDto(_id, source)
+      );
+    } finally {
+      try {
+        await this.esClient.closePointInTime({ id: pitId });
+      } catch (closeErr) {
+        this.logger.warn(`Failed to close PIT ${pitId}: ${closeErr}`);
+      }
+    }
   }
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
@@ -1086,6 +1149,19 @@ export class WorkflowsService {
     });
   }
 
+  public async getChildWorkflowExecutions(
+    parentExecutionId: string,
+    spaceId: string
+  ): Promise<ChildWorkflowExecutionItem[]> {
+    return getChildWorkflowExecutions({
+      esClient: this.esClient,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      parentExecutionId,
+      spaceId,
+    });
+  }
+
   public async getWorkflowExecutions(
     params: SearchWorkflowExecutionsParams,
     spaceId: string
@@ -1138,6 +1214,14 @@ export class WorkflowsService {
       must.push({
         terms: {
           executedBy: params.executedBy,
+        },
+      });
+    }
+
+    if (params.omitStepRuns) {
+      must.push({
+        bool: {
+          must_not: { exists: { field: 'stepId' } },
         },
       });
     }
@@ -1306,13 +1390,35 @@ export class WorkflowsService {
   }
 
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
-    return searchStepExecutions({
+    const searchResult = await searchStepExecutions({
       esClient: this.esClient,
       logger: this.logger,
       stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: params.executionId,
       additionalQuery: { term: { id: params.id } },
       spaceId,
+    });
+    return searchResult.results;
+  }
+
+  public async searchStepExecutions(
+    params: SearchStepExecutionsParams,
+    spaceId: string
+  ): Promise<StepExecutionListResult> {
+    const sourceExcludes: string[] = [];
+    if (!params.includeInput) sourceExcludes.push('input');
+    if (!params.includeOutput) sourceExcludes.push('output');
+
+    return searchStepExecutions({
+      esClient: this.esClient,
+      logger: this.logger,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      workflowId: params.workflowId,
+      stepId: params.stepId,
+      spaceId,
+      sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,
+      page: params.page,
+      size: params.size,
     });
   }
 

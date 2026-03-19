@@ -12,5 +12,6 @@ export type {
   CanvasRenderCallbacks,
   GetActionButtonsParams,
   ActionButton,
+  AttachmentPreviewState,
 } from './contract';
 export { ActionButtonType } from './contract';

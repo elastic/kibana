@@ -27,6 +27,12 @@ check_cdn_assets_ready() {
   fi
 }
 
+echo "--- Clean up cached images"
+{
+  docker rmi $(docker images -q | grep -v) || true
+  docker image prune -f || true
+}
+
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
