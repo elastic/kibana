@@ -97,25 +97,6 @@ function getPathForTab(tab: AdministrationSubTab): string {
   }
 }
 
-function getSecurityPageNameForTab(tab: AdministrationSubTab): SecurityPageName {
-  switch (tab) {
-    case AdministrationSubTab.endpointExceptions:
-      return SecurityPageName.endpointExceptions;
-    case AdministrationSubTab.trustedApps:
-      return SecurityPageName.trustedApps;
-    case AdministrationSubTab.trustedDevices:
-      return SecurityPageName.trustedDevices;
-    case AdministrationSubTab.eventFilters:
-      return SecurityPageName.eventFilters;
-    case AdministrationSubTab.hostIsolationExceptions:
-      return SecurityPageName.hostIsolationExceptions;
-    case AdministrationSubTab.blocklist:
-      return SecurityPageName.blocklist;
-    default:
-      return SecurityPageName.trustedApps;
-  }
-}
-
 function getActiveTabFromPathname(pathname: string): AdministrationSubTab {
   for (const tab of ARTIFACT_SUB_TABS) {
     if (pathname.includes(`/${tab}`)) {
@@ -187,8 +168,6 @@ export const ArtifactsPage = memo(() => {
     history.push(getPathForTab(tab));
   };
 
-  const pageName = getSecurityPageNameForTab(activeTab);
-
   return (
     <AdministrationListPage
       data-test-subj="artifactsPage"
@@ -216,7 +195,7 @@ export const ArtifactsPage = memo(() => {
         <HostIsolationExceptionsList />
       )}
       {activeTab === AdministrationSubTab.blocklist && <Blocklist />}
-      <SpyRoute pageName={pageName} />
+      <SpyRoute pageName={SecurityPageName.artifacts} />
     </AdministrationListPage>
   );
 });
