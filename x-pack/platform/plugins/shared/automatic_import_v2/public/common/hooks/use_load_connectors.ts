@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import type { IHttpFetchError } from '@kbn/core/public';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from './use_kibana';
 import * as i18n from './translations';
@@ -40,6 +41,9 @@ export const useLoadConnectors = (): UseLoadConnectorsResult => {
 
       setConnectors(aiConnectors);
     } catch (e) {
+      if ((e as IHttpFetchError)?.response?.status === 403) {
+        return;
+      }
       const errorMessage = e instanceof Error ? e.message : i18n.LOAD_CONNECTORS_ERROR_MESSAGE;
       setError(errorMessage);
       notifications.toasts.addDanger({
