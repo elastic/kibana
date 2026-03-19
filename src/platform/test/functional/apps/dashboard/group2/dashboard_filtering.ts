@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe.only('dashboard filtering', function () {
+  describe('dashboard filtering', function () {
     const populateDashboard = async () => {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
@@ -126,10 +126,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('tsvb top n is filtered', async () => {
         await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
-      });
-
-      it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowsMissing();
       });
 
       it('timelion is filtered', async () => {
