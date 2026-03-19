@@ -20,9 +20,16 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
 
   if (stepDefinition && stepSchemas.isPublicStepDefinition(stepDefinition)) {
     try {
-      if (stepDefinition?.editorHandlers?.dynamicSchema?.getOutputSchema) {
-        return stepDefinition.editorHandlers.dynamicSchema.getOutputSchema({
-          input: node.configuration.with,
+      const getDynamicOutput = stepDefinition.editorHandlers?.dynamicSchema?.getOutputSchema;
+      if (
+        getDynamicOutput &&
+        'configuration' in node &&
+        node.configuration &&
+        typeof node.configuration === 'object' &&
+        'with' in node.configuration
+      ) {
+        return getDynamicOutput({
+          input: (node.configuration as { with: unknown }).with,
           config: node.configuration,
         });
       }

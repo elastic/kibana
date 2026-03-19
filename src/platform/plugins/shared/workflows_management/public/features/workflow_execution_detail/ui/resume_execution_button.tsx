@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { StepContext } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ResumeExecutionModal } from './resume_execution_modal';
@@ -51,7 +52,11 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
     const jsonSchema = resumeSchema as JSONSchema7;
     const zodSchema = convertJsonSchemaToZod(jsonSchema);
     const defaults = generateSampleFromJsonSchema(jsonSchema);
-    return { schema: zodSchema, stepContext: defaults, rawJsonSchema: resumeSchema };
+    return {
+      schema: zodSchema,
+      stepContext: defaults as Partial<StepContext>,
+      rawJsonSchema: resumeSchema,
+    };
   }, [resumeSchema]);
 
   const openModal = useCallback(() => setIsModalOpen(true), []);
