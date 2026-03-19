@@ -96,9 +96,9 @@ export const SearchHomepagePage = () => {
           <EuiFlexItem grow={false}>
             <SearchHomepageVersionBadge
               docLink={
-                !cloud?.isServerlessEnabled
-                  ? docLinks.hostedCloudReleaseNotes
-                  : docLinks.serverlessReleaseNotes
+                cloud?.isServerlessEnabled
+                  ? docLinks.serverlessReleaseNotes
+                  : docLinks.hostedCloudReleaseNotes
               }
               kibanaVersion={
                 !cloud?.isServerlessEnabled
