@@ -41,6 +41,7 @@ export const ServiceProviderFilter: React.FC<Props> = ({
   return (
     <MultiSelectFilter
       buttonLabel={i18n.SERVICE_PROVIDER}
+      ariaLabel={i18n.SERVICE_PROVIDER_ARIA_LABEL}
       onChange={onSystemFilterChange}
       options={filteredOptions}
       renderOption={(option) => option.label}

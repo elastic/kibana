@@ -34,6 +34,7 @@ describe('TestTrack', () => {
           estimate: 10,
         },
       },
+      metadata: {},
     };
 
     const lane = track.addLoadToLeastCongestedLane(load, true);
@@ -67,6 +68,7 @@ describe('TestTrack', () => {
           estimate: 3,
         },
       },
+      metadata: {},
     };
 
     const lane = track.addLoadToLeastCongestedLane(load, true);
@@ -100,6 +102,7 @@ describe('TestTrack', () => {
           estimate: 3,
         },
       },
+      metadata: {},
     };
 
     const loadB: TestTrackLoad = {
@@ -115,6 +118,7 @@ describe('TestTrack', () => {
           estimate: 5,
         },
       },
+      metadata: {},
     };
 
     track.addLoadToLeastCongestedLane(loadA, true);
@@ -151,6 +155,7 @@ describe('TestTrack', () => {
           estimate: 9,
         },
       },
+      metadata: {},
     };
 
     const loadB: TestTrackLoad = {
@@ -166,6 +171,7 @@ describe('TestTrack', () => {
           estimate: 1,
         },
       },
+      metadata: {},
     };
 
     track.addLoadToLeastCongestedLane(loadA, true);
@@ -202,6 +208,7 @@ describe('TestTrack', () => {
           estimate: 10,
         },
       },
+      metadata: {},
     };
 
     const laneAfterAddingLoadA = track.addLoadToLeastCongestedLane(loadA, true);
@@ -228,6 +235,7 @@ describe('TestTrack', () => {
           estimate: 1,
         },
       },
+      metadata: {},
     };
 
     // we expect a new lane to be created to accommodate the second load
@@ -263,6 +271,7 @@ describe('TestTrack', () => {
           estimate: 10,
         },
       },
+      metadata: {},
     };
 
     track.addLoadToLeastCongestedLane(loadA, true);
@@ -280,6 +289,7 @@ describe('TestTrack', () => {
           estimate: 1,
         },
       },
+      metadata: {},
     };
 
     // we expect the load to be mounted on the original lane, even though it exceeds capacity
@@ -318,6 +328,7 @@ describe('TestTrack', () => {
           estimate: 7,
         },
       },
+      metadata: {},
     };
 
     track.addLoadToLeastCongestedLane(loadA, true);
@@ -335,6 +346,7 @@ describe('TestTrack', () => {
           estimate: 8,
         },
       },
+      metadata: {},
     };
 
     track.addLoadToLeastCongestedLane(loadB, true);
@@ -356,6 +368,7 @@ describe('TestTrack', () => {
           estimate: 1,
         },
       },
+      metadata: {},
     };
 
     // disable creating a new lane
@@ -384,6 +397,7 @@ describe('TestTrack', () => {
           estimate: 7,
         },
       },
+      metadata: {},
     };
 
     track.addLoadToLeastCongestedLane(loadA, true);
@@ -401,6 +415,7 @@ describe('TestTrack', () => {
           estimate: 8,
         },
       },
+      metadata: {},
     };
 
     track.addLoadToNewLane(loadB);
@@ -426,6 +441,7 @@ describe('TestTrack', () => {
           estimate: 7,
         },
       },
+      metadata: {},
     };
 
     expect(() => track.addLoadToLeastCongestedLane(load, false)).toThrowError(
@@ -449,6 +465,7 @@ describe('TestTrack', () => {
           estimate: 7,
         },
       },
+      metadata: {},
     };
 
     track.addLoadToLeastCongestedLane(loadA, true);
@@ -466,6 +483,7 @@ describe('TestTrack', () => {
           estimate: 8,
         },
       },
+      metadata: {},
     };
 
     track.addLoadToLeastCongestedLane(loadB, true);
@@ -484,6 +502,7 @@ describe('TestTrack', () => {
           estimate: 2,
         },
       },
+      metadata: {},
     };
 
     // disable creating a new lane
@@ -502,6 +521,7 @@ describe('TestTrack', () => {
           estimate: 5,
         },
       },
+      metadata: {},
     };
 
     track.addLoadToLeastCongestedLane(loadD, false);
@@ -510,21 +530,25 @@ describe('TestTrack', () => {
       lanes: [
         {
           availableCapacity: 1,
+          estimatedSetupDuration: 0,
           isCongested: false,
           loads: ['configPathA', 'configPathC'],
           number: 1,
           runtimeEstimate: 9,
           runtimeTarget: 10,
           status: 'open',
+          metadata: {},
         },
         {
           availableCapacity: -3,
+          estimatedSetupDuration: 0,
           isCongested: true,
           loads: ['configPathB', 'configPathD'],
           number: 2,
           runtimeEstimate: 13,
           runtimeTarget: 10,
           status: 'closed',
+          metadata: {},
         },
       ],
       stats: {
@@ -541,6 +565,169 @@ describe('TestTrack', () => {
           shortestEstimate: 9,
         },
       },
+      metadata: {},
+    });
+  });
+
+  describe('estimatedLaneSetupDuration', () => {
+    it('defaults to 0 when omitted', () => {
+      const track = new TestTrack({ runtimeTarget: 10 });
+      expect(track.estimatedLaneSetupDuration).toBe(0);
+
+      const lane = track.addLane();
+      expect(lane.estimatedSetupDuration).toBe(0);
+    });
+
+    it('propagates to new lanes', () => {
+      const track = new TestTrack({ runtimeTarget: 100, estimatedLaneSetupDuration: 20 });
+      const lane = track.addLane();
+      expect(lane.estimatedSetupDuration).toBe(20);
+    });
+
+    it('includes setup duration in lane runtimeEstimate', () => {
+      const track = new TestTrack({ runtimeTarget: 100, estimatedLaneSetupDuration: 20 });
+
+      const load: TestTrackLoad = {
+        id: 'configA',
+        stats: {
+          runCount: 0,
+          runtime: { avg: 0, median: 0, pc95th: 0, pc99th: 0, max: 0, estimate: 30 },
+        },
+        metadata: {},
+      };
+
+      const lane = track.addLoadToLeastCongestedLane(load, true);
+      expect(lane.runtimeEstimate).toBe(50);
+    });
+
+    it('reduces available capacity by setup duration', () => {
+      const track = new TestTrack({ runtimeTarget: 100, estimatedLaneSetupDuration: 20 });
+
+      const load: TestTrackLoad = {
+        id: 'configA',
+        stats: {
+          runCount: 0,
+          runtime: { avg: 0, median: 0, pc95th: 0, pc99th: 0, max: 0, estimate: 30 },
+        },
+        metadata: {},
+      };
+
+      const lane = track.addLoadToLeastCongestedLane(load, true);
+      expect(lane.availableCapacity).toBe(50);
+    });
+
+    it('causes a lane to close sooner', () => {
+      const track = new TestTrack({ runtimeTarget: 10, estimatedLaneSetupDuration: 5 });
+
+      const load: TestTrackLoad = {
+        id: 'configA',
+        stats: {
+          runCount: 0,
+          runtime: { avg: 0, median: 0, pc95th: 0, pc99th: 0, max: 0, estimate: 5 },
+        },
+        metadata: {},
+      };
+
+      const lane = track.addLoadToLeastCongestedLane(load, true);
+      expect(lane.runtimeEstimate).toBe(10);
+      expect(lane.status).toBe('closed');
+
+      const overflowLoad: TestTrackLoad = {
+        id: 'configB',
+        stats: {
+          runCount: 0,
+          runtime: { avg: 0, median: 0, pc95th: 0, pc99th: 0, max: 0, estimate: 1 },
+        },
+        metadata: {},
+      };
+
+      const newLane = track.addLoadToLeastCongestedLane(overflowLoad, true);
+      expect(newLane.number).toBe(2);
+    });
+
+    it('is included in the specification per lane', () => {
+      const track = new TestTrack({ runtimeTarget: 20, estimatedLaneSetupDuration: 3 });
+
+      const load: TestTrackLoad = {
+        id: 'configA',
+        stats: {
+          runCount: 0,
+          runtime: { avg: 0, median: 0, pc95th: 0, pc99th: 0, max: 0, estimate: 10 },
+        },
+        metadata: {},
+      };
+
+      track.addLoadToLeastCongestedLane(load, true);
+      const spec = track.specification;
+
+      expect(spec.lanes[0].estimatedSetupDuration).toBe(3);
+    });
+
+    it('is accounted for in specification stats', () => {
+      const track = new TestTrack({ runtimeTarget: 20, estimatedLaneSetupDuration: 5 });
+
+      const load: TestTrackLoad = {
+        id: 'configA',
+        stats: {
+          runCount: 0,
+          runtime: { avg: 0, median: 0, pc95th: 0, pc99th: 0, max: 0, estimate: 10 },
+        },
+        metadata: {},
+      };
+
+      track.addLoadToLeastCongestedLane(load, true);
+      const spec = track.specification;
+
+      expect(spec.stats.combinedRuntime.expected).toBe(15);
+      expect(spec.stats.combinedRuntime.unused).toBe(5);
+      expect(spec.stats.combinedRuntime.target).toBe(20);
+    });
+  });
+
+  describe('metadata', () => {
+    it('includes track metadata in specification', () => {
+      const track = new TestTrack({ runtimeTarget: 10 });
+      track.metadata = {
+        testTarget: { location: 'local', arch: 'stateful', domain: 'classic' },
+      };
+
+      const load: TestTrackLoad = {
+        id: 'configA',
+        stats: {
+          runCount: 0,
+          runtime: { avg: 0, median: 0, pc95th: 0, pc99th: 0, max: 0, estimate: 5 },
+        },
+        metadata: {},
+      };
+
+      track.addLoadToLeastCongestedLane(load, true);
+      const spec = track.specification;
+
+      expect(spec.metadata).toEqual({
+        testTarget: { location: 'local', arch: 'stateful', domain: 'classic' },
+      });
+    });
+
+    it('includes lane metadata in specification', () => {
+      const track = new TestTrack({ runtimeTarget: 10 });
+
+      const load: TestTrackLoad = {
+        id: 'configA',
+        stats: {
+          runCount: 0,
+          runtime: { avg: 0, median: 0, pc95th: 0, pc99th: 0, max: 0, estimate: 5 },
+        },
+        metadata: {},
+      };
+
+      const lane = track.addLoadToLeastCongestedLane(load, true);
+      lane.metadata = { buildkite: { agentQueue: 'n2-4-spot' } };
+
+      const spec = track.specification;
+
+      expect(spec.lanes[0].metadata).toEqual({
+        buildkite: { agentQueue: 'n2-4-spot' },
+      });
     });
   });
 });
