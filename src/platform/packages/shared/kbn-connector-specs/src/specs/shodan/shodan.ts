@@ -31,7 +31,7 @@ export const ShodanConnector: ConnectorSpec = {
       defaultMessage: 'Internet-wide asset discovery and vulnerability scanning',
     }),
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

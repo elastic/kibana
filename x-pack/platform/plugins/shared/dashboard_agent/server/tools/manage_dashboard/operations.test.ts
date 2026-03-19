@@ -53,8 +53,9 @@ describe('executeDashboardOperations', () => {
         items: [{ attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       },
       {
-        operation: 'upsert_markdown',
+        operation: 'add_markdown',
         markdownContent: '### Updated summary',
+        grid: { x: 0, y: 9, w: 48, h: 5 },
       },
     ];
 
@@ -76,12 +77,12 @@ describe('executeDashboardOperations', () => {
     expect(result.dashboardData.title).toBe('Updated title');
     expect(result.dashboardData.panels).toEqual([
       expect.objectContaining({
-        type: MARKDOWN_EMBEDDABLE_TYPE,
-        grid: expect.objectContaining({ w: 48 }),
-      }),
-      expect.objectContaining({
         panelId: 'from-attachment-panel',
         grid: { x: 0, y: 0, w: 24, h: 9 },
+      }),
+      expect.objectContaining({
+        type: MARKDOWN_EMBEDDABLE_TYPE,
+        grid: { x: 0, y: 9, w: 48, h: 5 },
       }),
     ]);
 
@@ -393,5 +394,74 @@ describe('executeDashboardOperations', () => {
       },
     ]);
     expect(removedPanelIds.sort()).toEqual(['section-a-1', 'top-1']);
+  });
+
+  it('adds markdown panel into a target section when sectionId is provided', async () => {
+    const addedPanelIds: string[] = [];
+
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test dashboard',
+        description: 'Description',
+        panels: [],
+        sections: [
+          {
+            sectionId: 'section-a',
+            title: 'Section A',
+            collapsed: false,
+            grid: { y: 0 },
+            panels: [],
+          },
+        ],
+      },
+      operations: [
+        {
+          operation: 'add_markdown',
+          markdownContent: '### Section Summary',
+          grid: { x: 0, y: 0, w: 24, h: 4 },
+          sectionId: 'section-a',
+        },
+      ],
+      logger,
+      resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
+      onPanelsAdded: (panels) => {
+        addedPanelIds.push(...panels.map(({ panelId }) => panelId));
+      },
+      onPanelsRemoved: () => {},
+    });
+
+    expect(result.dashboardData.panels).toEqual([]);
+    expect(result.dashboardData.sections?.[0].panels).toEqual([
+      expect.objectContaining({
+        type: MARKDOWN_EMBEDDABLE_TYPE,
+        rawConfig: { content: '### Section Summary' },
+        grid: { x: 0, y: 0, w: 24, h: 4 },
+      }),
+    ]);
+    expect(addedPanelIds).toHaveLength(1);
+  });
+
+  it('throws when add_markdown references an invalid sectionId', async () => {
+    await expect(
+      executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [],
+        },
+        operations: [
+          {
+            operation: 'add_markdown',
+            markdownContent: '### Summary',
+            grid: { x: 0, y: 0, w: 48, h: 5 },
+            sectionId: 'nonexistent-section',
+          },
+        ],
+        logger,
+        resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
+        onPanelsAdded: () => {},
+        onPanelsRemoved: () => {},
+      })
+    ).rejects.toThrow('Section "nonexistent-section" not found.');
   });
 });
