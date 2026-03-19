@@ -37,6 +37,7 @@ interface UseMonitorIntegrationHealthReturn {
   resetMonitor: (configId: string) => Promise<void>;
   resetMonitors: (configIds: string[]) => Promise<void>;
   isUnhealthy: (configId: string) => boolean;
+  isAgentLevelIssue: (status: LocationHealthStatusValue) => boolean;
   getUnhealthyLocationStatuses: (configId: string) => MonitorIntegrationStatus[];
   getUnhealthyLocationCount: () => number;
   getUnhealthyMonitorCountForLocation: (locationId: string) => number;
@@ -100,6 +101,13 @@ export const useMonitorIntegrationHealth = (
 
     return map;
   }, [healthData]);
+
+  const isAgentLevelIssue = useCallback((status: LocationHealthStatusValue): boolean => {
+    return (
+      status === LocationHealthStatusValue.MissingAgents ||
+      status === LocationHealthStatusValue.UnhealthyAgent
+    );
+  }, []);
 
   const isUnhealthy = useCallback(
     (configId: string): boolean => {
@@ -190,6 +198,7 @@ export const useMonitorIntegrationHealth = (
     resetMonitor,
     resetMonitors,
     isUnhealthy,
+    isAgentLevelIssue,
     getUnhealthyLocationStatuses,
     getUnhealthyLocationCount,
     getUnhealthyMonitorCountForLocation,

@@ -137,6 +137,31 @@ describe('useMonitorIntegrationHealth', () => {
     });
   });
 
+  describe('isAgentLevelIssue', () => {
+    it('returns true for missing_agents and unhealthy_agent statuses', () => {
+      setupSelectors({ monitors: [], errors: [] });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth());
+
+      expect(result.current.isAgentLevelIssue(LocationHealthStatusValue.MissingAgents)).toBe(true);
+      expect(result.current.isAgentLevelIssue(LocationHealthStatusValue.UnhealthyAgent)).toBe(true);
+    });
+
+    it('returns false for non-agent-level statuses', () => {
+      setupSelectors({ monitors: [], errors: [] });
+
+      const { result } = renderHook(() => useMonitorIntegrationHealth());
+
+      expect(
+        result.current.isAgentLevelIssue(LocationHealthStatusValue.MissingPackagePolicy)
+      ).toBe(false);
+      expect(
+        result.current.isAgentLevelIssue(LocationHealthStatusValue.MissingAgentPolicy)
+      ).toBe(false);
+      expect(result.current.isAgentLevelIssue(LocationHealthStatusValue.Healthy)).toBe(false);
+    });
+  });
+
   describe('resetMonitor', () => {
     it('calls resetMonitorAPI and re-fetches health', async () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });

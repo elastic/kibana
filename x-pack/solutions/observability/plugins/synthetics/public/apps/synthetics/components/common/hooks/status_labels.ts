@@ -43,6 +43,20 @@ export const STATUS_LABELS: Record<
       defaultMessage: 'The synthetics Fleet package is not installed.',
     }
   ),
+  [LocationHealthStatusValue.MissingAgents]: i18n.translate(
+    'xpack.synthetics.monitorHealth.status.missingAgents',
+    {
+      defaultMessage:
+        'No Fleet agents are enrolled in the agent policy for this private location. Enroll an agent in Fleet to resolve this.',
+    }
+  ),
+  [LocationHealthStatusValue.UnhealthyAgent]: i18n.translate(
+    'xpack.synthetics.monitorHealth.status.unhealthyAgent',
+    {
+      defaultMessage:
+        'All Fleet agents for this private location are unhealthy or offline. Check the agent status in Fleet.',
+    }
+  ),
 };
 
 export const getStatusLabel = (status: LocationHealthStatusValue): string | undefined => {

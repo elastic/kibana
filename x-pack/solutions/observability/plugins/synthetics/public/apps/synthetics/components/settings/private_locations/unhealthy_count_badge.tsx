@@ -11,7 +11,8 @@ import React from 'react';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 
 export const UnhealthyCountBadge = ({ item }: { item: { id: string } }) => {
-  const { getUnhealthyMonitorCountForLocation } = useMonitorIntegrationHealth();
+  const { getUnhealthyMonitorCountForLocation, getUnhealthyConfigIdsForLocation, statuses, isAgentLevelIssue } =
+    useMonitorIntegrationHealth();
 
   const unhealthyMonitorCount = getUnhealthyMonitorCountForLocation(item.id);
 
@@ -19,9 +20,19 @@ export const UnhealthyCountBadge = ({ item }: { item: { id: string } }) => {
     return null;
   }
 
+  const configIds = getUnhealthyConfigIdsForLocation(item.id);
+  const allAgentLevelIssues = configIds.every((configId) => {
+    const locationStatuses = statuses.get(configId);
+    return locationStatuses
+      ?.filter((s) => s.locationId === item.id && s.isUnhealthy)
+      .every((s) => isAgentLevelIssue(s.status));
+  });
+
+  const tooltip = allAgentLevelIssues ? AGENT_ISSUE_TOOLTIP : UNHEALTHY_MONITORS_TOOLTIP;
+
   return (
     <EuiFlexItem grow={false}>
-      <EuiToolTip content={UNHEALTHY_MONITORS_TOOLTIP}>
+      <EuiToolTip content={tooltip}>
         <EuiBadge color="warning" data-test-subj="syntheticsLocationMissingIntegrationBadge">
           {i18n.translate('xpack.synthetics.privateLocations.missingIntegrations.count', {
             defaultMessage: '{count} {count, plural, one {unhealthy} other {unhealthy}}',
@@ -37,5 +48,13 @@ const UNHEALTHY_MONITORS_TOOLTIP = i18n.translate(
   'xpack.synthetics.privateLocations.missingIntegrations.tooltip',
   {
     defaultMessage: 'These monitors are unhealthy and will not run until they are resolved.',
+  }
+);
+
+const AGENT_ISSUE_TOOLTIP = i18n.translate(
+  'xpack.synthetics.privateLocations.agentIssue.tooltip',
+  {
+    defaultMessage:
+      'These monitors are unhealthy due to agent issues. Check the Fleet agent status for this location.',
   }
 );

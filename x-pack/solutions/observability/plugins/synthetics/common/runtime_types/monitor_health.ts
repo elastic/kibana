@@ -12,6 +12,8 @@ export enum LocationHealthStatusValue {
   AgentPolicyMismatch = 'agent_policy_mismatch',
   MissingLocation = 'missing_location',
   PackageNotInstalled = 'package_not_installed',
+  MissingAgents = 'missing_agents',
+  UnhealthyAgent = 'unhealthy_agent',
 }
 
 export interface LocationHealthStatus {

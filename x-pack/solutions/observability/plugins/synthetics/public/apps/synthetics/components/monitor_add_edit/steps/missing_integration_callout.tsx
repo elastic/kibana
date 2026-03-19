@@ -15,6 +15,7 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
   const {
     isUnhealthy: hasMissingIntegrations,
     getUnhealthyLocationStatuses: getMissingStatuses,
+    isAgentLevelIssue,
     resetMonitor,
     isResetting,
   } = useMonitorIntegrationHealth({
@@ -25,6 +26,11 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
 
   const isMissing = hasMissingIntegrations(configId);
   const missingStatuses = getMissingStatuses(configId);
+
+  // Hide the reset CTA when all unhealthy locations have agent-level issues,
+  // since resetting the monitor cannot fix missing or unhealthy agents.
+  const allAgentLevelIssues =
+    missingStatuses.length > 0 && missingStatuses.every((s) => isAgentLevelIssue(s.status));
 
   const handleReset = useCallback(async () => {
     await resetMonitor(configId);
@@ -54,7 +60,7 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
   return (
     <>
       <EuiCallOut
-        title={CALLOUT_TITLE}
+        title={allAgentLevelIssues ? AGENT_ISSUE_CALLOUT_TITLE : CALLOUT_TITLE}
         color="warning"
         iconType="warning"
         data-test-subj="syntheticsMissingIntegrationCallout"
@@ -74,15 +80,19 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
             </ul>
           </EuiText>
         )}
-        <EuiSpacer size="s" />
-        <EuiButton
-          data-test-subj="syntheticsMissingIntegrationResetButton"
-          color="warning"
-          onClick={handleReset}
-          isLoading={isResetting}
-        >
-          {RESET_BUTTON_LABEL}
-        </EuiButton>
+        {!allAgentLevelIssues && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiButton
+              data-test-subj="syntheticsMissingIntegrationResetButton"
+              color="warning"
+              onClick={handleReset}
+              isLoading={isResetting}
+            >
+              {RESET_BUTTON_LABEL}
+            </EuiButton>
+          </>
+        )}
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
@@ -92,6 +102,13 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
 const CALLOUT_TITLE = i18n.translate('xpack.synthetics.missingIntegration.callout.title', {
   defaultMessage: 'Missing Fleet integration',
 });
+
+const AGENT_ISSUE_CALLOUT_TITLE = i18n.translate(
+  'xpack.synthetics.missingIntegration.callout.agentIssueTitle',
+  {
+    defaultMessage: 'Agent issue detected',
+  }
+);
 
 const RESET_BUTTON_LABEL = i18n.translate('xpack.synthetics.missingIntegration.resetButton', {
   defaultMessage: 'Reset monitor',

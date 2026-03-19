@@ -36,6 +36,10 @@ const STATUS_REASONS: Record<
   [LocationHealthStatusValue.MissingLocation]:
     'The monitor references a private location that no longer exists.',
   [LocationHealthStatusValue.PackageNotInstalled]: 'The synthetics Fleet package is not installed.',
+  [LocationHealthStatusValue.MissingAgents]:
+    'No Fleet agents are enrolled in the agent policy for this private location.',
+  [LocationHealthStatusValue.UnhealthyAgent]:
+    'All Fleet agents enrolled in the agent policy for this private location are unhealthy or offline.',
 };
 
 interface FoundMonitor {
@@ -86,12 +90,14 @@ export class MonitorIntegrationHealthApi {
     const referencedAgentPolicyIds = [
       ...new Set(allPrivateLocations.map((loc) => loc.agentPolicyId)),
     ];
-    const [existingPackagePoliciesMap, existingAgentPoliciesMap] = await Promise.all([
-      this.getExistingPackagePoliciesMap(
-        this.getExpectedPackagePolicyIds(foundMonitors, privateLocationAPI, allSpaces)
-      ),
-      this.getExistingAgentPoliciesMap(referencedAgentPolicyIds),
-    ]);
+    const [existingPackagePoliciesMap, existingAgentPoliciesMap, agentStatusMap] =
+      await Promise.all([
+        this.getExistingPackagePoliciesMap(
+          this.getExpectedPackagePolicyIds(foundMonitors, privateLocationAPI, allSpaces)
+        ),
+        this.getExistingAgentPoliciesMap(referencedAgentPolicyIds),
+        this.getAgentStatusMap(referencedAgentPolicyIds),
+      ]);
 
     const existingPoliciesArray = [...existingPackagePoliciesMap.values()];
 
@@ -162,6 +168,26 @@ export class MonitorIntegrationHealthApi {
             LocationHealthStatusValue.AgentPolicyMismatch,
             resolvedPolicyId
           );
+        }
+
+        const agentStatus = agentStatusMap.get(expectedAgentPolicyId);
+        if (agentStatus !== undefined) {
+          if (agentStatus.total === 0) {
+            return MonitorIntegrationHealthApi.buildLocationStatus(
+              loc.id,
+              existingPrivateLocation.label,
+              LocationHealthStatusValue.MissingAgents,
+              resolvedPolicyId
+            );
+          }
+          if (agentStatus.online === 0) {
+            return MonitorIntegrationHealthApi.buildLocationStatus(
+              loc.id,
+              existingPrivateLocation.label,
+              LocationHealthStatusValue.UnhealthyAgent,
+              resolvedPolicyId
+            );
+          }
         }
 
         return MonitorIntegrationHealthApi.buildLocationStatus(
@@ -265,6 +291,25 @@ export class MonitorIntegrationHealthApi {
       { ignoreMissing: true, withPackagePolicies: false }
     );
     return new Map((existingAgentPolicies ?? []).map((policy) => [policy.id, policy]));
+  }
+
+  private async getAgentStatusMap(
+    agentPolicyIds: string[]
+  ): Promise<Map<string, { total: number; online: number }>> {
+    if (agentPolicyIds.length === 0) {
+      return new Map();
+    }
+
+    const entries = await Promise.all(
+      agentPolicyIds.map(async (policyId) => {
+        const status = await this.server.fleet.agentService.asInternalUser.getAgentStatusForAgentPolicy(
+          policyId
+        );
+        return [policyId, { total: status.all, online: status.online }] as const;
+      })
+    );
+
+    return new Map(entries);
   }
 
   private buildAllLocationsWithStatus(
