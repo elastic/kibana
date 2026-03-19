@@ -46,7 +46,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       return;
     }
     const retryState = this.stepExecutionRuntime.getCurrentStepState();
-    const currentAttempt = retryState?.attempt as number;
+    const currentAttempt = (retryState?.attempt as number) ?? 0;
 
     if (currentAttempt < this.node.configuration['max-attempts']) {
       // If the retry attempt is within the allowed limit, re-enter the retry step

@@ -103,7 +103,6 @@ export async function catchError(
         currentNodeId: scopeEntry.nodeId,
         scopeStack: newWorkflowScopeStack.stackFrames,
       });
-      workflowScopeStack = newWorkflowScopeStack;
       params.workflowRuntime.navigateToNode(scopeEntry.nodeId);
 
       const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
@@ -127,6 +126,9 @@ export async function catchError(
           });
         }
       }
+
+      workflowScopeStack = newWorkflowScopeStack;
+
       const workflowError = params.workflowExecutionState.getWorkflowExecution().error;
 
       if (workflowError) {
