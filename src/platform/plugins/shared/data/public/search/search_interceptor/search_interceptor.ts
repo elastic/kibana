@@ -65,6 +65,7 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import type { ICPSManager } from '@kbn/cps-utils';
+import moment from 'moment';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -398,7 +399,9 @@ export class SearchInterceptor {
     let firstRequestParams: SanitizedConnectionRequestParams;
 
     return pollSearch(search, cancel, {
-      pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
+      pollInterval: moment
+        .duration(this.deps.searchConfig.asyncSearch.pollInterval)
+        .asMilliseconds(),
       ...options,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
