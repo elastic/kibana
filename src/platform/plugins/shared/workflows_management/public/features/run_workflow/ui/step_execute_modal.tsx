@@ -93,7 +93,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
       [contextOverride.stepContext]
     );
     const [selectedTab, setSelectedTab] = useState<StepInputTab>(
-      isResumeMode ? 'manual' : (initialTab ?? (initialStepExecutionId ? 'historical' : 'manual'))
+      isResumeMode ? 'manual' : initialTab ?? (initialStepExecutionId ? 'historical' : 'manual')
     );
     const [inputsJson, setInputsJson] = React.useState<string>(
       JSON.stringify(stepContextOverride, null, 2)
