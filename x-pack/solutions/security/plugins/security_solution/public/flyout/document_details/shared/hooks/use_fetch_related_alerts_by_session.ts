@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useAlertPrevalence } from './use_alert_prevalence';
 import { isActiveTimeline } from '../../../../helpers';
-import { ENTRY_LEADER_ENTITY_ID } from '../constants/field_names';
+import { ENTRY_LEADER_ENTITY_ID } from '../../../../flyout_v2/document/constants/field_names';
 
 export interface UseFetchRelatedAlertsBySessionParams {
   /**

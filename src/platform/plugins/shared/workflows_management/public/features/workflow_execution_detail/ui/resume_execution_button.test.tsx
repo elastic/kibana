@@ -23,11 +23,11 @@ jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsCapabilities: jest.fn(),
 }));
 
-// Capture the onSubmit callback exposed by TestStepModal so tests can trigger it.
+// Capture the onSubmit callback exposed by StepExecuteModal so tests can trigger it.
 let capturedOnSubmit: ((params: { stepInputs: Record<string, unknown> }) => void) | undefined;
 
-jest.mock('../../run_workflow/ui/test_step_modal', () => ({
-  TestStepModal: ({
+jest.mock('../../run_workflow/ui/step_execute_modal', () => ({
+  StepExecuteModal: ({
     onSubmit,
     onClose,
     resumeMessage,

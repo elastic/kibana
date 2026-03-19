@@ -44,27 +44,6 @@ export async function persistenceLoop(
   params: WorkflowExecutionLoopParams,
   persistenceAbortSignal?: AbortSignal
 ) {
-  // Create the abort promise once outside the loop to avoid accumulating
-  // event listeners on each iteration.
-  //
-  // The no-op .catch() is intentional: the promise can reject while persistenceLoop is
-  // inside `await flushState` (outside the try-catch that handles TimeoutAbortedError).
-  // Without it, Node.js would detect an unhandled rejection and crash the process.
-  // Promise.race still receives the rejection normally via the original promise reference.
-  const persistenceAbortPromise: Promise<void> = persistenceAbortSignal
-    ? new Promise<void>((_, reject) => {
-        if (persistenceAbortSignal.aborted) {
-          reject(new TimeoutAbortedError());
-          return;
-        }
-        persistenceAbortSignal.addEventListener('abort', () => reject(new TimeoutAbortedError()), {
-          once: true,
-        });
-      })
-    : new Promise<void>(() => {});
-
-  persistenceAbortPromise.catch(() => {});
-
   while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
     if (persistenceAbortSignal?.aborted) {
       return;
@@ -76,7 +55,21 @@ export async function persistenceLoop(
       const waitSpan = apm.startSpan('persistence wait', 'workflow', 'wait');
       await Promise.race([
         abortableTimeout(FLUSH_INTERVAL_MS, params.taskAbortController.signal),
-        persistenceAbortPromise,
+        persistenceAbortSignal
+          ? new Promise<void>((_, reject) => {
+              if (persistenceAbortSignal.aborted) {
+                reject(new TimeoutAbortedError());
+                return;
+              }
+              persistenceAbortSignal.addEventListener(
+                'abort',
+                () => reject(new TimeoutAbortedError()),
+                {
+                  once: true,
+                }
+              );
+            })
+          : new Promise<void>(() => {}),
       ]);
       waitSpan?.end();
     } catch (error) {
