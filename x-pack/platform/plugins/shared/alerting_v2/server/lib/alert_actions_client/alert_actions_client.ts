@@ -72,6 +72,7 @@ export class AlertActionsClient {
           last_ack_action: null,
           last_deactivate_action: null,
           last_snooze_action: null,
+          tags: null,
         });
       }
     }
@@ -211,4 +212,5 @@ export interface BulkGetAlertActionsRecord {
   last_ack_action: string | null;
   last_deactivate_action: string | null;
   last_snooze_action: string | null;
+  tags: string[] | null;
 }

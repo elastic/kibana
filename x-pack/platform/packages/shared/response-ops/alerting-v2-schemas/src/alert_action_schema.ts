@@ -22,11 +22,6 @@ const tagActionSchema = z.object({
   tags: z.array(z.string()).describe('List of tags to add to the alert.'),
 });
 
-const untagActionSchema = z.object({
-  action_type: z.literal('untag').describe('Removes tags from an alert.'),
-  tags: z.array(z.string()).describe('List of tags to remove from the alert.'),
-});
-
 const snoozeActionSchema = z.object({
   action_type: z.literal('snooze').describe('Snoozes an alert.'),
 });
@@ -50,14 +45,13 @@ export const createAlertActionBodySchema = z
     ackActionSchema,
     unackActionSchema,
     tagActionSchema,
-    untagActionSchema,
     snoozeActionSchema,
     unsnoozeActionSchema,
     activateActionSchema,
     deactivateActionSchema,
   ])
   .describe(
-    'Request body for creating a single alert action. One of: ack, unack, tag, untag, snooze, unsnooze, activate, deactivate.'
+    'Request body for creating a single alert action. One of: ack, unack, tag, snooze, unsnooze, activate, deactivate.'
   );
 
 export type CreateAlertActionBody = z.infer<typeof createAlertActionBodySchema>;
