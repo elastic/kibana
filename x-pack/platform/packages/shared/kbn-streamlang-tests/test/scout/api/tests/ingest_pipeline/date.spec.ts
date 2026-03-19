@@ -196,20 +196,20 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
       `${description}`,
       { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
       async () => {
-        await expect(() => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'date',
-                from: templateFrom,
-                to: templateTo,
-                formats: ['ISO8601'],
-                output_format: 'yyyy-MM-dd',
-              } as DateProcessor,
-            ],
-          };
-          transpile(streamlangDSL);
-        }).rejects.toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'date',
+              from: templateFrom,
+              to: templateTo,
+              formats: ['ISO8601'],
+              output_format: 'yyyy-MM-dd',
+            } as DateProcessor,
+          ],
+        };
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       }
     );
   });

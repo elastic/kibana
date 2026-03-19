@@ -123,20 +123,20 @@ apiTest.describe(
       },
     ].forEach(({ templateFrom, description }) => {
       apiTest(`${description}`, async () => {
-        await expect(() => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'grok',
-                from: templateFrom,
-                patterns: [
-                  '%{IP:client.ip} %{WORD:http.request.method} %{URIPATHPARAM:url.path} %{NUMBER:http.response.body.bytes} %{NUMBER:event.duration}',
-                ],
-              } as GrokProcessor,
-            ],
-          };
-          transpile(streamlangDSL);
-        }).rejects.toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'grok',
+              from: templateFrom,
+              patterns: [
+                '%{IP:client.ip} %{WORD:http.request.method} %{URIPATHPARAM:url.path} %{NUMBER:http.response.body.bytes} %{NUMBER:event.duration}',
+              ],
+            } as GrokProcessor,
+          ],
+        };
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
   }

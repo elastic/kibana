@@ -340,7 +340,7 @@ apiTest.describe(
           };
 
           // Both transpilers should reject Mustache template syntax
-          expect(await transpileIngestPipeline(streamlangDSL)).toThrow(
+          await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
           await expect(transpileEsql(streamlangDSL)).rejects.toThrow(

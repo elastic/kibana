@@ -131,18 +131,18 @@ apiTest.describe(
       },
     ].forEach(({ templateFrom, description }) => {
       apiTest(`${description}`, async () => {
-        await expect(() => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'dissect',
-                from: templateFrom,
-                pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
-              } as DissectProcessor,
-            ],
-          };
-          transpile(streamlangDSL);
-        }).rejects.toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed'); // Added error message for Mustache templates
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'dissect',
+              from: templateFrom,
+              pattern: '[%{@timestamp}] [%{log.level}] %{client.ip}',
+            } as DissectProcessor,
+          ],
+        };
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
   }

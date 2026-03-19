@@ -76,9 +76,9 @@ apiTest.describe(
           ],
         };
 
-        await expect(() => {
-          transpile(streamlangDSL);
-        }).rejects.toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed'); // Should throw validation error for Mustache templates
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
 
