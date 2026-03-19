@@ -89,10 +89,10 @@ export const ConversationSidebarView: React.FC = () => {
       <EuiFlexItem grow>
         <SidebarLink
           label={customizeLabel}
-          href={appPaths.agent.instructions({ agentId })}
+          href={appPaths.agent.overview({ agentId })}
           onClick={(e) => {
             e.preventDefault();
-            navigateToAgentBuilderUrl(appPaths.agent.instructions({ agentId }));
+            navigateToAgentBuilderUrl(appPaths.agent.overview({ agentId }));
           }}
         />
       </EuiFlexItem>

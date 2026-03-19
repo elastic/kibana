@@ -86,6 +86,9 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
             iconType="transitionLeftIn"
             aria-label={labels.toggleSidebar}
             color="text"
+            css={css`
+              color: ${euiTheme.colors.textDisabled};
+            `}
             size="s"
             onClick={onToggleCondensed}
           />
@@ -105,6 +108,9 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         iconType="transitionLeftOut"
         aria-label={labels.toggleSidebar}
         color="text"
+        css={css`
+          color: ${euiTheme.colors.textDisabled};
+        `}
         size="s"
         onClick={onToggleCondensed}
       />

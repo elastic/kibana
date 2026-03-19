@@ -37,7 +37,14 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({ label, href, onClick }
   return (
     <a href={href} onClick={onClick} css={linkStyles}>
       <EuiText size="s">{label}</EuiText>
-      <EuiIcon type="arrowRight" size="s" aria-hidden={true} color="textDisabled" />
+      <EuiIcon
+        type="arrowRight"
+        size="s"
+        aria-hidden={true}
+        css={css`
+          color: ${euiTheme.colors.textDisabled};
+        `}
+      />
     </a>
   );
 };

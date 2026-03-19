@@ -6,83 +6,55 @@
  */
 
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom-v5-compat';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-
-import { appPaths } from '../../../../utils/app_paths';
-import { useLastAgentId } from '../../../../hooks/use_last_agent_id';
+import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { getManageNavItems } from '../../../../route_config';
-
-const labels = {
-  back: i18n.translate('xpack.agentBuilder.sidebar.manage.back', {
-    defaultMessage: '← Back',
-  }),
-  title: i18n.translate('xpack.agentBuilder.sidebar.manage.title', {
-    defaultMessage: 'Manage Components',
-  }),
-};
+import { SidebarNavList } from '../shared/sidebar_nav_list';
 
 interface ManageSidebarViewProps {
   pathname: string;
 }
 
 export const ManageSidebarView: React.FC<ManageSidebarViewProps> = ({ pathname }) => {
-  const lastAgentId = useLastAgentId();
-  const { euiTheme } = useEuiTheme();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
-
-  const linkStyles = css`
-    text-decoration: none;
-    color: inherit;
-    &:hover {
-      text-decoration: underline;
-    }
-  `;
-
-  const activeLinkStyles = css`
-    ${linkStyles}
-    font-weight: ${euiTheme.font.weight.bold};
-    color: ${euiTheme.colors.primaryText};
-  `;
-
-  const isActive = (path: string) => pathname.startsWith(path);
+  const { euiTheme } = useEuiTheme();
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  const isConnectorsEnabled = uiSettings.get<boolean>(
+    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
+    false
+  );
 
   const navItems = useMemo(() => {
     return getManageNavItems().filter((item) => {
       if (item.isExperimental && !isExperimentalFeaturesEnabled) {
         return false;
       }
+      if (item.isConnectors && !isConnectorsEnabled) {
+        return false;
+      }
       return true;
     });
-  }, [isExperimentalFeaturesEnabled]);
+  }, [isExperimentalFeaturesEnabled, isConnectorsEnabled]);
+
+  const isActive = (path: string) => pathname.startsWith(path);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <Link to={appPaths.agent.root({ agentId: lastAgentId })} css={linkStyles}>
-          <EuiText size="s">{labels.back}</EuiText>
-        </Link>
-      </EuiFlexItem>
-
-      <EuiHorizontalRule margin="s" />
-
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          <strong>{labels.title}</strong>
-        </EuiText>
-      </EuiFlexItem>
-
-      {navItems.map((item) => (
-        <EuiFlexItem grow={false} key={item.path}>
-          <Link to={item.path} css={isActive(item.path) ? activeLinkStyles : linkStyles}>
-            <EuiText size="s">{item.label}</EuiText>
-          </Link>
-        </EuiFlexItem>
-      ))}
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiHorizontalRule margin="none" />
+      <EuiFlexGroup
+        direction="column"
+        css={css`
+          padding: ${euiTheme.size.base};
+        `}
+      >
+        <SidebarNavList items={navItems} isActive={isActive} />
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 };

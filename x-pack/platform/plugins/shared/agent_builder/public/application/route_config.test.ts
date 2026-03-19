@@ -24,10 +24,8 @@ describe('route_config', () => {
         );
       });
 
-      it('returns "agentSettings" for instructions route', () => {
-        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/instructions')).toBe(
-          'agentSettings'
-        );
+      it('returns "agentSettings" for overview route', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/overview')).toBe('agentSettings');
       });
 
       it('returns "agentSettings" for skills route', () => {

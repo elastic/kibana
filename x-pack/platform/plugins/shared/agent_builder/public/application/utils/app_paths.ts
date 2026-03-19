@@ -22,7 +22,7 @@ export const appPaths = {
     skills: ({ agentId }: { agentId: string }) => `/agents/${agentId}/skills`,
     plugins: ({ agentId }: { agentId: string }) => `/agents/${agentId}/plugins`,
     connectors: ({ agentId }: { agentId: string }) => `/agents/${agentId}/connectors`,
-    instructions: ({ agentId }: { agentId: string }) => `/agents/${agentId}/instructions`,
+    overview: ({ agentId }: { agentId: string }) => `/agents/${agentId}/overview`,
   },
 
   // Manage routes (global CRUD, no agent context)
