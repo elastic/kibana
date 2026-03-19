@@ -59,7 +59,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveStatusCode(201);
         expect(response.body.id).toBeDefined();
         expect(response.body.data).toBeDefined();
         expect(response.body.data.title).toBe(dashboardTitle);
