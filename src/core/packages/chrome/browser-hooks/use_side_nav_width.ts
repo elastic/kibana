@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useChromeStyle } from './use_chrome_style';
-export { useActiveSolutionNavId } from './use_active_solution_nav_id';
-export { useIsChromeVisible } from './use_is_chrome_visible';
-export { useSidebarWidth } from './use_sidebar_width';
-export { useSideNavCollapsed } from './use_side_nav_collapsed';
-export { useSideNavWidth } from './use_side_nav_width';
+import { useMemo } from 'react';
+import { useObservable } from '@kbn/use-observable';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+
+/**
+ * Returns the effective side nav pixel width.
+ */
+export function useSideNavWidth(): number {
+  const chrome = useChromeService();
+  const sideNavWidth$ = useMemo(() => chrome.sideNav.getWidth$(), [chrome]);
+  return useObservable(sideNavWidth$, chrome.sideNav.getWidth());
+}

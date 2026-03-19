@@ -101,6 +101,16 @@ export interface SideNavLogo {
 }
 
 /**
+ * Responsive collapse configuration for the navigation component.
+ */
+export interface ResponsiveNavigationConfig {
+  mode?: 'euiBreakpoints' | 'containerWidth';
+  getContainer?: () => HTMLElement | null;
+  collapseAtWidth?: number;
+  expandAtWidth?: number;
+}
+
+/**
  * Props accepted by the `OneNavigation` component.
  */
 export interface NavigationProps {
@@ -108,6 +118,8 @@ export interface NavigationProps {
   activeItemId?: string;
   /** Whether the navigation is collapsed. */
   isCollapsed: boolean;
+  /** Optional responsive collapse configuration. */
+  responsive?: ResponsiveNavigationConfig;
   /** The navigation structure containing primary, secondary, and footer items. */
   items: NavigationStructure;
   /** The logo object containing the route ID, href, label, and type. */

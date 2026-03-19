@@ -9,7 +9,10 @@
 
 import React, { useMemo } from 'react';
 import { map } from 'rxjs';
-import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
+import {
+  Navigation as NavigationComponent,
+  type NavigationProps as CoreNavigationProps,
+} from '@kbn/core-chrome-navigation';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
@@ -22,6 +25,7 @@ import { PanelStateManager } from './panel_state_manager';
 
 export interface ChromeNavigationProps {
   isCollapsed: boolean;
+  responsive?: CoreNavigationProps['responsive'];
   setWidth: (width: number) => void;
   onToggleCollapsed: (isCollapsed: boolean) => void;
 }
@@ -41,6 +45,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         items={navItems}
         logo={logoItem}
         isCollapsed={props.isCollapsed}
+        responsive={props.responsive}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}

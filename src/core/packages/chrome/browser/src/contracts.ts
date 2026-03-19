@@ -295,6 +295,22 @@ export interface ChromeStart {
      * @param isCollapsed The collapsed state of the side nav.
      */
     setIsCollapsed(isCollapsed: boolean): void;
+
+    /**
+     * Get an observable of the current width of the side nav.
+     */
+    getWidth$(): Observable<number>;
+
+    /**
+     * Get the current width of the side nav synchronously.
+     */
+    getWidth(): number;
+
+    /**
+     * Set the width of the side nav.
+     * @param width The width of the side nav in pixels.
+     */
+    setWidth(width: number): void;
   };
 
   /**
