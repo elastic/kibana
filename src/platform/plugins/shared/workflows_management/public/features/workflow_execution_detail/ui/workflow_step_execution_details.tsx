@@ -80,12 +80,14 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         : { workflowId: '' }
     );
 
+    const isWaitingForInput = stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT;
+
     // Show data for terminal steps OR steps paused for input (they have input but no output yet)
     const isFinished = useMemo(
       () =>
         Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)) ||
-        stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT,
-      [stepExecution?.status]
+        isWaitingForInput,
+      [stepExecution?.status, isWaitingForInput]
     );
 
     const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
@@ -150,15 +152,12 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       ];
     }, [hasInput, hasOutput, hasError, isTriggerPseudoStep]);
 
-    const defaultTabId =
-      stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT ? 'input' : tabs[0].id;
+    const defaultTabId = isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input';
     const [selectedTabId, setSelectedTabId] = useState<string>(defaultTabId);
 
     useEffect(() => {
       // reset the tab to the default one on step change
-      setSelectedTabId(
-        stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT ? 'input' : tabs[0].id
-      );
+      setSelectedTabId(isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input');
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stepExecution?.stepId, stepExecution?.status, tabs[0].id]);
 
@@ -186,7 +185,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       );
     }
 
-    const showResumeUI = stepExecution.status === ExecutionStatus.WAITING_FOR_INPUT;
+    const showResumeUI = isWaitingForInput;
 
     return (
       <EuiPanel
