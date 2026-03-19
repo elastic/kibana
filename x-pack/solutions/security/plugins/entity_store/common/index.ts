@@ -36,6 +36,7 @@ export const ENTITY_STORE_ROUTES = {
   STATUS: `${ENTITY_STORE_BASE_ROUTE}/status`,
   START: `${ENTITY_STORE_BASE_ROUTE}/start`,
   STOP: `${ENTITY_STORE_BASE_ROUTE}/stop`,
+  CHECK_PRIVILEGES: `${ENTITY_STORE_BASE_ROUTE}/check_privileges`,
   FORCE_LOG_EXTRACTION: `${ENTITY_STORE_BASE_ROUTE}/{entityType}/force_log_extraction`,
   FORCE_HISTORY_SNAPSHOT: `${ENTITY_STORE_BASE_ROUTE}/force_history_snapshot`,
   CRUD_UPSERT: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,

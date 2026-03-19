@@ -739,3 +739,248 @@ agentBuilder.skills.register({
   ],
 });
 ```
+
+## Semantic Metadata Layer (SML) — Developer Guide
+
+### 1. What is SML?
+
+The **Semantic Metadata Layer** is an indexing and search subsystem inside
+Agent Builder. It allows solutions to expose their Kibana assets
+(visualizations, dashboards, saved searches, …) so the AI agent can find and
+attach them to a conversation.
+
+#### High-level architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Solution plugin (e.g. agent_builder_platform)               │
+│  ┌────────────────────────────┐                              │
+│  │  SmlTypeDefinition         │ ← you provide this           │
+│  │  • id                      │                              │
+│  │  • list()                  │                              │
+│  │  • getSmlData()            │                              │
+│  │  • toAttachment()          │                              │
+│  └────────────────────────────┘                              │
+└──────────────────────────────────────────────────────────────┘
+                          │
+                          │ agentBuilder.sml.registerType(...)
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  agent_builder plugin (server)                               │
+│                                                              │
+│  ┌──────────────┐    ┌──────────────┐    ┌───────────────┐  │
+│  │ Type Registry │───▶│   Crawler    │───▶│  ES Indices   │  │
+│  └──────────────┘    │ (Task Mgr)   │    │ .chat-sml-*   │  │
+│                      └──────────────┘    └───────────────┘  │
+│                                                 │            │
+│                                                 ▼            │
+│  ┌──────────────┐    ┌──────────────────────────────────┐   │
+│  │  sml_search  │◀───│  SmlService.search()              │   │
+│  │  sml_attach  │    │  (space + permission filtering)   │   │
+│  └──────────────┘    └──────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+#### Key concepts
+
+| Concept | Description |
+|---|---|
+| **SML Type** | A category of content you expose (e.g. `visualization`, `dashboard`). You implement `SmlTypeDefinition`. |
+| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlData()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
+| **SML Document** | A single indexed chunk stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
+| **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
+| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert an SML search result into a conversation attachment (e.g. a rendered Lens visualization). |
+| **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link SML documents back to their source. |
+
+#### Data flow
+
+1. **Crawl**: The crawler runs on a configurable interval (default 10 min).
+   For each registered SML type it calls `list()` to enumerate items, detects
+   changes via timestamps, and calls `getSmlData()` for new/updated items.
+2. **Index**: Results are written to the `.chat-sml-data` system index.
+   Crawler state (which items have been seen) is stored in a separate
+   `.chat-sml-crawler-state` index.
+3. **Search**: When the AI agent calls `sml_search`, the SML service queries
+   the data index, filtering by the user's current space and checking Kibana
+   privileges against each result's `permissions` array.
+4. **Attach**: When the AI agent calls `sml_attach`, the service resolves
+   the saved object via your `toAttachment()` hook and adds the result as a
+   conversation attachment.
+
+#### Security model
+
+- The crawler runs with **internal credentials** (`asInternalUser`) — it indexes
+  content from all spaces.
+- Access control is enforced at **query time**: results are filtered by space
+  and by Kibana feature privileges (the `permissions` array you set in
+  `getSmlData`).
+
+---
+
+### 2. How to add a new SML type
+
+#### Step 1: Implement `SmlTypeDefinition`
+
+Create a file in your plugin (e.g.
+`server/sml_types/my_asset.ts`). You need to implement four things:
+
+```typescript
+import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+
+export const myAssetSmlType: SmlTypeDefinition = {
+  // Unique identifier — lowercase, alphanumeric, hyphens, underscores.
+  // Must match /^[a-z][a-z0-9_-]*$/
+  id: 'my-asset',
+
+  // Optional: how often the crawler re-indexes this type.
+  // Defaults to '10m' if omitted.
+  fetchFrequency: () => '30m',
+
+  // Yield pages of items to consider for indexing.
+  // Called by the crawler with internal credentials.
+  async *list(context) {
+    // Use createPointInTimeFinder for efficient pagination
+    const finder = context.savedObjectsClient.createPointInTimeFinder({
+      type: 'my-saved-object-type',
+      perPage: 1000,
+      namespaces: ['*'],  // all spaces
+      fields: ['title'],  // only fetch fields needed for the list
+    });
+
+    try {
+      for await (const response of finder.find()) {
+        yield response.saved_objects.map((so) => ({
+          id: so.id,
+          updatedAt: so.updated_at ?? new Date().toISOString(),
+          spaces: so.namespaces ?? [],
+        }));
+      }
+    } finally {
+      await finder.close();
+    }
+  },
+
+  // Fetch the full data for a single item to index.
+  // Return undefined to skip the item (e.g. if it was deleted).
+  getSmlData: async (originId, context) => {
+    try {
+      const so = await context.savedObjectsClient.get('my-saved-object-type', originId);
+      const attrs = so.attributes as { title?: string; description?: string };
+
+      return {
+        chunks: [
+          {
+            type: 'my-asset',
+            title: attrs.title ?? originId,
+            content: [attrs.title, attrs.description].filter(Boolean).join('\n'),
+            // Kibana feature privileges required to access this item.
+            // Users without these privileges won't see the item in search results.
+            permissions: ['saved_object:my-saved-object-type/get'],
+          },
+        ],
+      };
+    } catch {
+      return undefined;
+    }
+  },
+
+  // Convert an SML document back into a conversation attachment.
+  // Called when the AI agent wants to "attach" a search result.
+  toAttachment: async (item, context) => {
+    const resolveResult = await context.savedObjectsClient.resolve(
+      'my-saved-object-type',
+      item.origin_id
+    );
+    if ((resolveResult.saved_object as { error?: unknown }).error) {
+      return undefined;
+    }
+
+    return {
+      type: 'my-asset',
+      data: {
+        title: resolveResult.saved_object.attributes.title,
+        // ... whatever data the attachment renderer needs
+      },
+    };
+  },
+};
+```
+
+#### Step 2: Register the type during plugin setup
+
+In your plugin's `setup` method:
+
+```typescript
+import { myAssetSmlType } from './sml_types/my_asset';
+
+export class MyPlugin implements Plugin {
+  setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
+    agentBuilder.sml.registerType(myAssetSmlType);
+  }
+}
+```
+
+That's it. The Agent Builder crawler will automatically pick up your type and
+start indexing on the configured interval.
+
+#### Key implementation notes
+
+##### `list()` — Use `AsyncIterable` for memory safety
+
+The `list` hook must return an `AsyncIterable<SmlListItem[]>`. Each yielded
+array is one "page" of items. The crawler processes pages with O(page_size)
+memory, so even types with millions of items won't cause OOM.
+
+Use `createPointInTimeFinder` with `namespaces: ['*']` to enumerate across
+all spaces. The crawler indexes everything; access control happens at query time.
+
+##### `getSmlData()` — Chunks and permissions
+
+You can return multiple chunks per item (e.g. if a dashboard has multiple
+panels). Each chunk gets its own document in the SML index.
+
+The `permissions` array should list the Kibana saved object privileges
+required to access the underlying asset. Common patterns:
+
+- `['saved_object:lens/get']` for Lens visualizations
+- `['saved_object:dashboard/get']` for dashboards
+- `['saved_object:search/get']` for saved searches
+
+Users without the listed privileges won't see the item in `sml_search` results.
+
+##### `toAttachment()` — Resolving saved objects
+
+Use `savedObjectsClient.resolve()` instead of `get()` when possible — it
+handles saved object aliasing (e.g. after a space migration).
+
+Return `undefined` if the item can no longer be resolved. The `sml_attach`
+tool will report a per-item error to the AI agent without failing the entire
+call.
+
+##### `fetchFrequency` — Choose an appropriate interval
+
+- High-churn data (alerts, logs): `5m`–`10m`
+- Medium-churn (visualizations, dashboards): `30m`–`1h`
+- Low-churn (index patterns, static config): `1h`–`4h`
+
+The default is `10m` if you don't specify `fetchFrequency`.
+
+#### Real-world example: Visualizations
+
+The visualization SML type is registered in
+`x-pack/platform/plugins/shared/agent_builder_platform/server/sml_types/visualization.ts`.
+
+It:
+- Lists all `lens` saved objects across all spaces
+- Extracts title, description, chart type, and ES|QL query as searchable content
+- Sets `permissions: ['saved_object:lens/get']`
+- Converts results back to Lens API format for the attachment renderer
+- Uses a 1-hour crawl interval
+
+```typescript
+// Registration (in agent_builder_platform plugin setup):
+setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
+```
+
+The full implementation is ~130 lines and serves as the reference for new types.
+
