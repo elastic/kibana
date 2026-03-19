@@ -36,6 +36,7 @@ import {
   getAttachmentTypeTransformers,
   resolveAttachmentSavedObjectType,
 } from '../../common/attachments';
+import { passThroughTransformer } from '../../common/attachments/base';
 
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
@@ -509,6 +510,7 @@ export class AttachmentService {
   public async bulkUpdate({
     comments,
     refresh,
+    requestWithoutType = false,
   }: BulkUpdateAttachmentArgs): Promise<SavedObjectsBulkUpdateResponse<AttachmentAttributesV2>> {
     try {
       this.context.log.debug(
@@ -524,9 +526,9 @@ export class AttachmentService {
               const decodedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
                 c.updatedAttributes
               );
-              const transformer = getAttachmentTypeTransformers(
-                getAttachmentTypeFromAttributes(decodedAttributes)
-              );
+              const transformer = requestWithoutType
+                ? passThroughTransformer
+                : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
               const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
 
               return {
@@ -538,7 +540,7 @@ export class AttachmentService {
             }),
             { refresh }
           );
-        return this.transformAndDecodeBulkUpdateResponse(res, comments);
+        return this.transformAndDecodeBulkUpdateResponse(res, comments, requestWithoutType);
       }
 
       const res =
@@ -548,9 +550,9 @@ export class AttachmentService {
               c.updatedAttributes
             );
             assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
-            const transformer = getAttachmentTypeTransformers(
-              getAttachmentTypeFromAttributes(decodedAttributes)
-            );
+            const transformer = requestWithoutType
+              ? passThroughTransformer
+              : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
             const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
             const {
               attributes: extractedAttributes,
@@ -580,7 +582,7 @@ export class AttachmentService {
           { refresh }
         );
 
-      return this.transformAndDecodeBulkUpdateResponse(res, comments);
+      return this.transformAndDecodeBulkUpdateResponse(res, comments, requestWithoutType);
     } catch (error) {
       this.context.log.error(
         `Error on UPDATE attachments ${comments.map((c) => c.attachmentId).join(', ')}: ${error}`
@@ -593,7 +595,8 @@ export class AttachmentService {
     res: SavedObjectsBulkUpdateResponse<
       AttachmentPersistedAttributes | UnifiedAttachmentPersistedAttributes
     >,
-    comments: UpdateArgs[]
+    comments: UpdateArgs[],
+    requestWithoutType: boolean
   ): SavedObjectsBulkUpdateResponse<AttachmentTransformedAttributesV2> {
     const validatedAttachments: Array<
       SavedObjectsUpdateResponse<AttachmentTransformedAttributesV2>
@@ -616,9 +619,9 @@ export class AttachmentService {
         const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
           comments[i].updatedAttributes
         );
-        const transformer = getAttachmentTypeTransformers(
-          getAttachmentTypeFromAttributes(decodedAttributes)
-        );
+        const transformer = requestWithoutType
+          ? passThroughTransformer
+          : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
         const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
         const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
           legacyAttributes,

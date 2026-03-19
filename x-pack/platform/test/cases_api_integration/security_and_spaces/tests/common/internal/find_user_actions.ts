@@ -127,8 +127,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const attachment = response.latestAttachments[0];
         expect(attachment.type).to.eql('user');
         // just to make TS happy
-        if (attachment.type === 'user' && `comment` in attachment) {
-          expect(attachment.comment).to.eql('this is an edited comment');
+        if (attachment.type === 'comment' && `data` in attachment) {
+          expect(attachment.data?.comment).to.eql('this is an edited comment');
         }
         expect(attachment.id).to.eql(response.userActions[1].comment_id);
       });

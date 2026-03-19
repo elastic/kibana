@@ -115,4 +115,5 @@ export type UpdateAttachmentArgs = UpdateArgs;
 
 export interface BulkUpdateAttachmentArgs extends IndexRefresh {
   comments: UpdateArgs[];
+  requestWithoutType?: boolean;
 }

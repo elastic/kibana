@@ -45,6 +45,18 @@ describe('common/attachments', () => {
         'Invalid attributes: missing attachment type'
       );
     });
+
+    it('throws when type is not a string', () => {
+      expect(() => getAttachmentTypeFromAttributes({ type: 1 })).toThrow(
+        'Invalid attributes: missing attachment type'
+      );
+      expect(() =>
+        getAttachmentTypeFromAttributes({
+          pushed_at: '2020-01-01T00:00:00.000Z',
+          pushed_by: { username: 'elastic', full_name: null, email: null },
+        })
+      ).toThrow('Invalid attributes: missing attachment type');
+    });
   });
 
   describe('getAttachmentTypeTransformers', () => {

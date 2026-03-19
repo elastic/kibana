@@ -29,10 +29,11 @@ export function getAttachmentTypeFromAttributes(attributes: unknown): string {
   if (attributes === null || typeof attributes !== 'object') {
     throw new Error('Invalid attributes: expected non-null object');
   }
-  if (!('type' in attributes)) {
+  const { type } = attributes as Record<string, unknown>;
+  if (typeof type !== 'string') {
     throw new Error('Invalid attributes: missing attachment type');
   }
-  return attributes.type as string;
+  return type;
 }
 
 /**
