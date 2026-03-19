@@ -7,7 +7,8 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen, waitFor, fireEvent } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { TemplatesTableFilters } from './templates_table_filters';
 import { renderWithTestingProviders } from '../../../common/mock';
@@ -99,19 +100,16 @@ describe('TemplatesTableFilters', () => {
       expect(screen.getByTestId('templates-refresh-button')).toBeInTheDocument();
     });
 
-    const refreshButton = screen.getByTestId('templates-refresh-button');
-    expect(refreshButton).toHaveAttribute('aria-label', 'Refresh templates');
+    expect(screen.getByTestId('templates-refresh-button')).toHaveAttribute(
+      'aria-label',
+      'Refresh templates'
+    );
   });
 
   it('displays the current search value', async () => {
-    const queryParamsWithSearch = {
-      ...defaultQueryParams,
-      search: 'existing search',
-    };
-
     renderWithTestingProviders(
       <TemplatesTableFilters
-        queryParams={queryParamsWithSearch}
+        queryParams={{ ...defaultQueryParams, search: 'existing search' }}
         onQueryParamsChange={onQueryParamsChange}
         onRefresh={onRefresh}
       />
@@ -122,119 +120,111 @@ describe('TemplatesTableFilters', () => {
     });
   });
 
-  it('renders the status filter select', async () => {
-    renderWithTestingProviders(
-      <TemplatesTableFilters
-        queryParams={defaultQueryParams}
-        onQueryParamsChange={onQueryParamsChange}
-        onRefresh={onRefresh}
-      />
-    );
+  describe('status filter', () => {
+    it('renders the status filter button', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={defaultQueryParams}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-status-filter')).toBeInTheDocument();
-    });
-  });
-
-  it('calls onQueryParamsChange with isEnabled: false when Disabled is selected', async () => {
-    renderWithTestingProviders(
-      <TemplatesTableFilters
-        queryParams={defaultQueryParams}
-        onQueryParamsChange={onQueryParamsChange}
-        onRefresh={onRefresh}
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-status-filter')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('options-filter-popover-button-status')).toBeInTheDocument();
+      });
     });
 
-    fireEvent.change(screen.getByTestId('templates-status-filter'), {
-      target: { value: 'false' },
+    it('shows Enabled and Disabled options in the popover', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={defaultQueryParams}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+      await waitForEuiPopoverOpen();
+
+      expect(screen.getByRole('option', { name: 'Enabled' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Disabled' })).toBeInTheDocument();
     });
 
-    expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: false, page: 1 });
-  });
+    it('sends isEnabled: false when Enabled is deselected (only Disabled remains)', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={defaultQueryParams}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
 
-  it('calls onQueryParamsChange with isEnabled: true when Enabled is selected', async () => {
-    renderWithTestingProviders(
-      <TemplatesTableFilters
-        queryParams={{ ...defaultQueryParams, isEnabled: false }}
-        onQueryParamsChange={onQueryParamsChange}
-        onRefresh={onRefresh}
-      />
-    );
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+      await waitForEuiPopoverOpen();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-status-filter')).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('option', { name: 'Enabled' }));
+
+      await waitFor(() => {
+        expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: false, page: 1 });
+      });
     });
 
-    fireEvent.change(screen.getByTestId('templates-status-filter'), {
-      target: { value: 'true' },
+    it('sends isEnabled: true when Disabled is deselected (only Enabled remains)', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={defaultQueryParams}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+      await waitForEuiPopoverOpen();
+
+      await userEvent.click(screen.getByRole('option', { name: 'Disabled' }));
+
+      await waitFor(() => {
+        expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: true, page: 1 });
+      });
     });
 
-    expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: true, page: 1 });
-  });
+    it('sends isEnabled: undefined when both options are selected', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={{ ...defaultQueryParams, isEnabled: false }}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
 
-  it('calls onQueryParamsChange with isEnabled: undefined when Show all is selected', async () => {
-    renderWithTestingProviders(
-      <TemplatesTableFilters
-        queryParams={{ ...defaultQueryParams, isEnabled: false }}
-        onQueryParamsChange={onQueryParamsChange}
-        onRefresh={onRefresh}
-      />
-    );
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+      await waitForEuiPopoverOpen();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-status-filter')).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('option', { name: 'Enabled' }));
+
+      await waitFor(() => {
+        expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: undefined, page: 1 });
+      });
     });
 
-    fireEvent.change(screen.getByTestId('templates-status-filter'), {
-      target: { value: '' },
-    });
+    it('sends isEnabled: undefined when both options are deselected', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={{ ...defaultQueryParams, isEnabled: true }}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
 
-    expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: undefined, page: 1 });
-  });
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+      await waitForEuiPopoverOpen();
 
-  it('shows disabled as selected value when queryParams.isEnabled is false', async () => {
-    renderWithTestingProviders(
-      <TemplatesTableFilters
-        queryParams={{ ...defaultQueryParams, isEnabled: false }}
-        onQueryParamsChange={onQueryParamsChange}
-        onRefresh={onRefresh}
-      />
-    );
+      await userEvent.click(screen.getByRole('option', { name: 'Enabled' }));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-status-filter')).toHaveValue('false');
-    });
-  });
-
-  it('shows enabled as selected value when queryParams.isEnabled is true', async () => {
-    renderWithTestingProviders(
-      <TemplatesTableFilters
-        queryParams={{ ...defaultQueryParams, isEnabled: true }}
-        onQueryParamsChange={onQueryParamsChange}
-        onRefresh={onRefresh}
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-status-filter')).toHaveValue('true');
-    });
-  });
-
-  it('shows show all as selected value when queryParams.isEnabled is undefined', async () => {
-    renderWithTestingProviders(
-      <TemplatesTableFilters
-        queryParams={defaultQueryParams}
-        onQueryParamsChange={onQueryParamsChange}
-        onRefresh={onRefresh}
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-status-filter')).toHaveValue('');
+      await waitFor(() => {
+        expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: undefined, page: 1 });
+      });
     });
   });
 });
