@@ -74,10 +74,7 @@ export const registerConversationRoutes = ({
     {
       path: '/internal/elastic_console/conversations',
       security: {
-        authz: {
-          enabled: false,
-          reason: 'This route uses the internal ES client to access system conversation indices',
-        },
+        authz: { requiredPrivileges: ['agentBuilder:write'] },
       },
       options: { access: 'internal' },
       validate: {
@@ -144,10 +141,7 @@ export const registerConversationRoutes = ({
     {
       path: '/internal/elastic_console/conversations/{id}',
       security: {
-        authz: {
-          enabled: false,
-          reason: 'This route uses the internal ES client to access system conversation indices',
-        },
+        authz: { requiredPrivileges: ['agentBuilder:write'] },
       },
       options: { access: 'internal' },
       validate: {
@@ -202,10 +196,7 @@ export const registerConversationRoutes = ({
     {
       path: '/internal/elastic_console/conversations',
       security: {
-        authz: {
-          enabled: false,
-          reason: 'This route uses the internal ES client to access system conversation indices',
-        },
+        authz: { requiredPrivileges: ['agentBuilder:write'] },
       },
       options: { access: 'internal' },
       validate: {
@@ -268,10 +259,7 @@ export const registerConversationRoutes = ({
     {
       path: '/internal/elastic_console/conversations/{id}',
       security: {
-        authz: {
-          enabled: false,
-          reason: 'This route uses the internal ES client to access system conversation indices',
-        },
+        authz: { requiredPrivileges: ['agentBuilder:write'] },
       },
       options: { access: 'internal' },
       validate: {
