@@ -20,20 +20,6 @@ export const EnrichProcessorForm = () => {
     <>
       <EnrichPolicySelector />
       <ProcessorFieldSelector
-        fieldKey="field"
-        label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.enrichFieldLabel',
-          { defaultMessage: 'Field' }
-        )}
-        helpText={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.enrichFieldHelpText',
-          {
-            defaultMessage:
-              'The field in the input document that matches the policies match_field used to retrieve the enrichment data',
-          }
-        )}
-      />
-      <ProcessorFieldSelector
         fieldKey="to"
         label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.enrichTargetFieldLabel',

@@ -19,7 +19,6 @@ import type { EnrichPolicyResolver } from '../../../../types/resolvers';
  * {
  *   action: 'enrich',
  *   policy_name: 'ip_location',
- *   field: 'ip',
  *   to: 'location',
  * }
  *

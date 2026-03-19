@@ -43,7 +43,6 @@ apiTest.describe(
           {
             action: 'enrich',
             policy_name: ENRICH_POLICY_NAME,
-            field: 'ip',
             to: 'location',
           } as EnrichProcessor,
         ],
@@ -74,7 +73,6 @@ apiTest.describe(
             {
               action: 'enrich',
               policy_name: ENRICH_POLICY_NAME,
-              field: 'ip',
               to: 'location',
               ignore_missing: true,
             } as EnrichProcessor,
@@ -107,7 +105,6 @@ apiTest.describe(
             {
               action: 'enrich',
               policy_name: ENRICH_POLICY_NAME,
-              field: 'ip',
               to: 'location',
               ignore_missing: false,
             } as EnrichProcessor,
@@ -133,7 +130,6 @@ apiTest.describe(
           {
             action: 'enrich',
             policy_name: ENRICH_POLICY_NAME,
-            field: 'ip',
             to: 'location',
             override: true,
           } as EnrichProcessor,
@@ -161,7 +157,6 @@ apiTest.describe(
           {
             action: 'enrich',
             policy_name: ENRICH_POLICY_NAME,
-            field: 'ip',
             to: 'location',
             override: false,
           } as EnrichProcessor,
@@ -189,7 +184,6 @@ apiTest.describe(
           {
             action: 'enrich',
             policy_name: 'invalid-policy-name',
-            field: 'ip',
             to: 'location',
           } as EnrichProcessor,
         ],

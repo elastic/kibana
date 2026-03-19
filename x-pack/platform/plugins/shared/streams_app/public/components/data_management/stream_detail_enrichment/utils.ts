@@ -354,7 +354,6 @@ const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState 
 const defaultEnrichProcessorFormState = (): EnrichFormState => ({
   action: 'enrich' as const,
   policy_name: '',
-  field: '',
   to: '',
   ignore_failure: true,
   ignore_missing: true,
@@ -852,12 +851,11 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'enrich') {
-      const { policy_name, field, to, ignore_failure, ignore_missing, override } = formState;
+      const { policy_name, to, ignore_failure, ignore_missing, override } = formState;
       return {
         processorDefinition: {
           action: 'enrich',
           policy_name,
-          field,
           to,
           ignore_failure,
           ignore_missing,
