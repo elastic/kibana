@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { JsonExtractProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -22,7 +23,7 @@ import { streamlangApiTest as apiTest } from '../..';
  */
 apiTest.describe(
   'Streamlang to ES|QL - JsonExtract Processor (ES|QL-specific)',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should filter out documents with missing source field when ignore_missing: false (ES|QL-specific WHERE filter)',
@@ -79,8 +80,8 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(2);
-        const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-        const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+        const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+        const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
         expect(doc1).toStrictEqual(expect.objectContaining({ user_id: 'abc123' }));
         expect(doc2).toStrictEqual(expect.objectContaining({ user_id: null }));
       }
