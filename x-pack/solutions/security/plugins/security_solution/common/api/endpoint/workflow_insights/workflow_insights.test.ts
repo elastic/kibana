@@ -57,16 +57,6 @@ describe('Workflow Insights', () => {
 
         expect(() => validateQuery(validQuery)).not.toThrow();
       });
-
-      it('should validate successfully with noisy_process_tree and policy_response_failure', () => {
-        const validQuery = {
-          query: {
-            types: ['noisy_process_tree', 'policy_response_failure'],
-          },
-        };
-
-        expect(() => validateQuery(validQuery)).not.toThrow();
-      });
     });
 
     it('should throw an error for invalid types', () => {
@@ -238,8 +228,7 @@ describe('Workflow Insights', () => {
       expect(() => validateRequest(invalidRequest)).toThrowErrorMatchingInlineSnapshot(`
     "[body.type]: types that failed validation:
     - [body.type.0]: expected value to equal [incompatible_antivirus]
-    - [body.type.1]: expected value to equal [policy_response_failure]
-    - [body.type.2]: expected value to equal [noisy_process_tree]"
+    - [body.type.1]: expected value to equal [policy_response_failure]"
     `);
     });
 

@@ -119,10 +119,12 @@ describe('ProcessTreeAlerts component', () => {
 
     it('should execute onShowAlertDetails callback when clicking on expand button', async () => {
       const onShowAlertDetails = jest.fn();
+      const onClick = jest.fn();
       renderResult = mockedContext.render(
         <ProcessTreeAlert
           {...props}
           alert={mockAlertWithIndex}
+          onClick={onClick}
           onShowAlertDetails={onShowAlertDetails}
         />
       );
@@ -131,6 +133,7 @@ describe('ProcessTreeAlerts component', () => {
       expect(expandButton).toBeTruthy();
       expandButton?.click();
       expect(onShowAlertDetails).toHaveBeenCalledTimes(1);
+      expect(onClick).not.toHaveBeenCalled();
       expect(onShowAlertDetails.mock.calls[0]).toEqual([
         mockAlertWithIndex.kibana?.alert?.uuid,
         mockAlertWithIndex.kibana?.alert?.index,
