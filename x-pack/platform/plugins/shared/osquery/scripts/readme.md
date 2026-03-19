@@ -170,6 +170,129 @@ ES_URL=https://my-cluster.es.cloud:443 ES_API_KEY=abc123 \
 
 ---
 
+## GCP E2E Deployment (`gcp/`)
+
+Deploys a full end-to-end compliance monitoring stack on GCP: Fleet Server + Osquery Agents + compliance packs — all wired to your Elasticsearch/Kibana cluster.
+
+### Architecture
+
+```
+┌─────────────────────┐     ┌──────────────────────┐
+│   Elasticsearch     │◄────│    Kibana             │
+│   (Cloud / local)   │     │  (Cloud / local)      │
+└────────▲────────────┘     └──────────────────────┘
+         │                           ▲
+         │ results, findings         │ Fleet API
+         │                           │
+    ┌────┴──────────────────────┐    │
+    │   Fleet Server (GCP VM)   │◄───┘
+    │   e2-medium, Ubuntu 22.04 │
+    └────────▲──────────────────┘
+             │ enrollment
+    ┌────────┴──────────────────────────────────────┐
+    │           Agent VMs (GCP)                      │
+    │  ┌─────────┐ ┌─────────┐ ┌─────────┐         │
+    │  │Ubuntu 22│ │Debian 12│ │Ubuntu 22│  ...     │
+    │  │ osquery │ │ osquery │ │ osquery │          │
+    │  └─────────┘ └─────────┘ └─────────┘         │
+    └───────────────────────────────────────────────┘
+```
+
+### Prerequisites
+
+- **gcloud CLI** installed and authenticated (`gcloud auth login`)
+- **GCP Project** with Compute Engine API enabled
+- **Elasticsearch + Kibana** accessible from GCP VMs (Elastic Cloud recommended, or use a tunnel)
+
+### Quick Start (one command)
+
+```bash
+export GCP_PROJECT=my-gcp-project
+export ES_URL=https://my-cluster.es.cloud:443
+export KIBANA_URL=https://my-cluster.kb.cloud:443
+export ES_USERNAME=elastic
+export ES_PASSWORD=changeme
+export STACK_VERSION=9.0.0
+
+# Deploy everything: Fleet Server + 3 agents + compliance packs + sample data
+./x-pack/platform/plugins/shared/osquery/scripts/gcp/deploy_all.sh
+
+# Deploy with 6 agents
+./x-pack/platform/plugins/shared/osquery/scripts/gcp/deploy_all.sh --agents 6
+
+# Tear down everything when done
+./x-pack/platform/plugins/shared/osquery/scripts/gcp/teardown.sh
+```
+
+### Step-by-Step
+
+```bash
+cd x-pack/platform/plugins/shared/osquery/scripts/gcp
+
+# Step 1: Deploy Fleet Server
+./deploy_fleet_server.sh
+
+# Step 2: Deploy Osquery Agents (reads Fleet state automatically)
+AGENT_COUNT=3 ./deploy_osquery_agents.sh
+
+# Step 3: Deploy compliance osquery packs
+./deploy_compliance_packs.sh
+
+# Step 4 (optional): Seed historical sample data
+../seed_compliance_data.sh --days 3
+```
+
+### Scripts
+
+| Script | Purpose |
+|---|---|
+| `deploy_all.sh` | One-command orchestrator (runs all steps) |
+| `deploy_fleet_server.sh` | Creates Fleet Server agent policy + GCP VM |
+| `deploy_osquery_agents.sh` | Creates agent policy with osquery + N GCP VMs |
+| `deploy_compliance_packs.sh` | Creates compliance osquery packs via Kibana API |
+| `teardown.sh` | Deletes all GCP VMs, firewall rules, Kibana policies |
+| `env.sh` | Shared config and helper functions |
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `GCP_PROJECT` | (required) | GCP project ID |
+| `GCP_ZONE` | `us-central1-a` | GCP zone for VMs |
+| `STACK_VERSION` | `9.0.0` | Elastic Agent version to install |
+| `ES_URL` | (required) | Elasticsearch URL |
+| `KIBANA_URL` | (required) | Kibana URL |
+| `ES_USERNAME` | `elastic` | Auth username |
+| `ES_PASSWORD` | `changeme` | Auth password |
+| `AGENT_COUNT` | `3` | Number of agent VMs to create |
+| `FLEET_SERVER_MACHINE_TYPE` | `e2-medium` | GCP machine type for Fleet Server |
+| `AGENT_MACHINE_TYPE` | `e2-small` | GCP machine type for agents |
+
+### Data Flow (E2E)
+
+1. **Packs deployed** → osquery integration receives compliance queries
+2. **Osquery executes** → results written to `logs-osquery_manager.result-default`
+3. **Finding Evaluator** (Kibana server) → polls results, evaluates pass/fail/N/A, writes to `logs-endpoint_compliance.findings-default`
+4. **Transform** → deduplicates to `endpoint_compliance.findings_latest-default`
+5. **Score Aggregation** (Task Manager) → computes per-benchmark scores to `logs-endpoint_compliance.scores-default`
+6. **Dashboard** → reads from latest findings + scores indices
+
+First real findings appear ~5-10 minutes after deployment.
+
+### Cost
+
+Typical cost for a development session:
+
+| Resource | Spec | ~Cost/hour |
+|---|---|---|
+| Fleet Server | e2-medium (2 vCPU, 4GB) | $0.034 |
+| Agent VMs (x3) | e2-small (2 vCPU, 2GB) | $0.050 |
+| **Total** | 4 VMs | **~$0.08/hour** |
+
+Always run `teardown.sh` when done to avoid charges.
+
+---
+
 ## Schema Formatter (`schema_formatter/`)
 
 Extracts only the currently used fields from osquery schema files (manually curated selection). Output goes to `public/editor/osquery_schema`.
