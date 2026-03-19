@@ -45,7 +45,7 @@ export const scriptsLibrarySavedObjectType: SavedObjectsType = {
     dynamic: false,
     properties: {
       id: { type: 'keyword' },
-      name: { type: 'keyword' },
+      name: { type: 'text' },
       platform: { type: 'keyword' },
       file_id: { type: 'keyword' },
       file_name: { type: 'keyword' },
