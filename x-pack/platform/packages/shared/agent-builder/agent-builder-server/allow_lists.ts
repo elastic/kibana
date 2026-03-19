@@ -42,6 +42,12 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
 
+  // Alerting
+  'alerting.list_rule_types',
+  'alerting.get_rule_type_params_schema',
+  'alerting.create_rule',
+  'alerting.get_rule',
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,

@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/alerting-agent-builder-plugin",
+  "owner": ["@elastic/response-ops"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "alertingAgentBuilder",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": ["alerting", "agentBuilder"]
+  }
+}
