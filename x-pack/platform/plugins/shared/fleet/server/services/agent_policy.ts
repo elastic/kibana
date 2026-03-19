@@ -9,7 +9,7 @@ import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { dump } from 'js-yaml';
 import pMap from 'p-map';
-import { lt } from 'semver';
+import { lt, minVersion, gt } from 'semver';
 import type {
   AuthenticatedUser,
   ElasticsearchClient,
@@ -25,7 +25,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -70,6 +70,7 @@ import type {
   OutputsForAgentPolicy,
   PostAgentPolicyPostUpdateCallback,
 } from '../types';
+import type { AgentPolicyAgentVersionCondition } from '../../common/types/models/agent_policy';
 import {
   AGENT_POLICY_INDEX,
   agentPolicyStatuses,
@@ -121,7 +122,7 @@ import {
   elasticAgentStandaloneManifest,
 } from './elastic_agent_manifest';
 
-import { bulkInstallPackages } from './epm/packages';
+import { bulkInstallPackages, getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import {
   getPackagePolicySavedObjectType,
@@ -206,6 +207,8 @@ class AgentPolicyService {
       returnUpdatedPolicy?: boolean;
       asyncDeploy?: boolean;
       hasAgentVersionConditions?: boolean;
+      minAgentVersion?: string | null;
+      packageAgentVersionConditions?: AgentPolicyAgentVersionCondition[] | null;
     } = {
       bumpRevision: true,
       removeProtection: false,
@@ -268,6 +271,12 @@ class AgentPolicyService {
         updated_at: new Date().toISOString(),
         updated_by: user ? user.username : 'system',
         has_agent_version_conditions: options.hasAgentVersionConditions,
+        ...(options.minAgentVersion !== undefined
+          ? { min_agent_version: options.minAgentVersion }
+          : {}),
+        ...(options.packageAgentVersionConditions !== undefined
+          ? { package_agent_version_conditions: options.packageAgentVersionConditions }
+          : {}),
       })
       .catch(catchAndSetErrorStackTrace.withMessage(`SO update to agent policy [${id}] failed`));
 
@@ -566,7 +575,7 @@ class AgentPolicyService {
       forcePackagePolicyCreation,
     });
 
-    const createdPackagePolicyIds = [];
+    const createdPackagePolicyIds: string[] = [];
 
     try {
       for (const packagePolicy of packagePolicies) {
@@ -915,7 +924,7 @@ class AgentPolicyService {
       }
     }
 
-    const agentPolicies = agentPoliciesSO.saved_objects.map((agentPolicySO) => {
+    const agentPolicies: AgentPolicy[] = agentPoliciesSO.saved_objects.map((agentPolicySO) => {
       const agentPolicy = mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
       agentPolicy.agents = 0;
       return agentPolicy;
@@ -924,7 +933,7 @@ class AgentPolicyService {
     if (options.withAgentCount || withPackagePolicies) {
       await pMap(
         agentPolicies,
-        async (agentPolicy) => {
+        async (agentPolicy: AgentPolicy) => {
           if (withPackagePolicies) {
             agentPolicy.package_policies =
               (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
@@ -1041,7 +1050,7 @@ class AgentPolicyService {
       });
     }
     const { monitoring_enabled: monitoringEnabled } = agentPolicy;
-    const packagesToInstall = [];
+    const packagesToInstall: string[] = [];
     if (!existingAgentPolicy.monitoring_enabled && monitoringEnabled?.length) {
       packagesToInstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
     }
@@ -1221,6 +1230,8 @@ class AgentPolicyService {
     }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
+      const { minAgentVersion, packageAgentVersionConditions } =
+        await this.computeMinAgentVersionData(soClient, id);
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
         removeProtection: options?.removeProtection ?? false,
@@ -1228,8 +1239,70 @@ class AgentPolicyService {
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
         hasAgentVersionConditions: options?.hasAgentVersionConditions,
+        minAgentVersion: minAgentVersion ?? null,
+        packageAgentVersionConditions: packageAgentVersionConditions ?? null,
       });
     });
+  }
+
+  private async computeMinAgentVersionData(
+    soClient: SavedObjectsClientContract,
+    policyId: string
+  ): Promise<{
+    minAgentVersion: string | undefined;
+    packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
+  }> {
+    const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, policyId);
+
+    const conditions: AgentPolicyAgentVersionCondition[] = [];
+    for (const pp of packagePolicies) {
+      let versionCondition = pp.package_agent_version_condition;
+
+      // For package policies created before this field was introduced, fall back
+      // to looking up the installed package info to get the version condition.
+      if (!versionCondition && pp.package?.name && pp.package?.version) {
+        try {
+          const pkgInfo = await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: pp.package.name,
+            pkgVersion: pp.package.version,
+            prerelease: true,
+          });
+          versionCondition = pkgInfo.conditions?.agent?.version;
+        } catch {
+          // ignore — package might not be installed or accessible
+        }
+      }
+
+      if (versionCondition) {
+        conditions.push({
+          name: pp.package?.name ?? '',
+          title: pp.package?.title ?? '',
+          version_condition: versionCondition,
+        });
+      }
+    }
+
+    if (conditions.length === 0) {
+      return { minAgentVersion: undefined, packageAgentVersionConditions: undefined };
+    }
+
+    let highestMinVersion: string | undefined;
+    for (const { version_condition: condition } of conditions) {
+      try {
+        const parsed = minVersion(condition);
+        if (parsed && (!highestMinVersion || gt(parsed.version, highestMinVersion))) {
+          highestMinVersion = parsed.version;
+        }
+      } catch {
+        // skip invalid version condition
+      }
+    }
+
+    return {
+      minAgentVersion: highestMinVersion,
+      packageAgentVersionConditions: conditions,
+    };
   }
 
   /**
@@ -1818,7 +1891,7 @@ class AgentPolicyService {
 
       if (bulkResponse.errors) {
         const erroredDocuments = bulkResponse.items.reduce((acc, item, idx) => {
-          const value: BulkResponseItem | undefined = item.index;
+          const value: estypes.BulkResponseItem | undefined = item.index;
           if (!value || !value.error) {
             return acc;
           }
@@ -1830,7 +1903,7 @@ class AgentPolicyService {
             revisionIdx: policy?.revision_idx,
           });
           return acc;
-        }, [] as Array<{ bulkItem: BulkResponseItem; policyId?: string; revisionIdx?: number }>);
+        }, [] as Array<{ bulkItem: estypes.BulkResponseItem; policyId?: string; revisionIdx?: number }>);
 
         const errorMessage = `Failed to deploy ${
           erroredDocuments.length

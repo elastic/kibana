@@ -933,6 +933,10 @@ describe('Agent policy', () => {
   });
 
   describe('bumpRevision', () => {
+    beforeEach(() => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
+    });
+
     it('should call agentPolicyUpdateEventHandler with updated event once', async () => {
       const soClient = getSavedObjectMock({
         revision: 1,
@@ -943,6 +947,63 @@ describe('Agent policy', () => {
       await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it('should compute and persist min_agent_version using the highest minimum from package policy version conditions', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        {
+          id: 'pp-1',
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+          package_agent_version_condition: '>=9.3.0',
+        } as any,
+        {
+          id: 'pp-2',
+          package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
+          package_agent_version_condition: '>=8.0.0',
+        } as any,
+      ]);
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({
+          // 9.3.0 is the highest minimum version across both conditions
+          min_agent_version: '9.3.0',
+          package_agent_version_conditions: [
+            { name: 'apache', title: 'Apache', version_condition: '>=9.3.0' },
+            { name: 'nginx', title: 'Nginx', version_condition: '>=8.0.0' },
+          ],
+        })
+      );
+    });
+
+    it('should persist null min_agent_version when no package policies have version conditions', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Omit `package` so that no EPM fallback lookup is triggered
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        {
+          id: 'pp-1',
+          package_agent_version_condition: undefined,
+        } as any,
+      ]);
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({
+          min_agent_version: null,
+          package_agent_version_conditions: null,
+        })
+      );
     });
   });
 
