@@ -24,7 +24,7 @@ export interface InferenceEndpointSetting {
   id: string;
 }
 
-interface InferenceFeatureSetting {
+export interface InferenceFeatureSetting {
   feature_id: string;
   endpoints: InferenceEndpointSetting[];
 }
