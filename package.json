@@ -235,6 +235,8 @@
     "@kbn/apm-utils": "link:src/platform/packages/shared/kbn-apm-utils",
     "@kbn/app-link-test-plugin": "link:src/platform/test/plugin_functional/plugins/app_link_test",
     "@kbn/application-usage-test-plugin": "link:x-pack/platform/test/usage_collection/plugins/application_usage_test",
+    "@kbn/as-code-data-views-schema": "link:src/platform/packages/shared/as-code/data-views-schema",
+    "@kbn/as-code-data-views-transforms": "link:src/platform/packages/shared/as-code/data-views-transforms",
     "@kbn/as-code-filters-constants": "link:src/platform/packages/shared/as-code/filters-constants",
     "@kbn/as-code-filters-schema": "link:src/platform/packages/shared/as-code/filters-schema",
     "@kbn/as-code-filters-transforms": "link:src/platform/packages/shared/as-code/filters-transforms",
