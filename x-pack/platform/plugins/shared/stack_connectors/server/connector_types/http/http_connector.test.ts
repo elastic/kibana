@@ -1143,6 +1143,82 @@ describe('execute()', () => {
     expect(resultUrl).toContain('apiKey=secret');
   });
 
+  test('execute appends query params with & when base URL already has query', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://example.com/api?address=1',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: emptySecrets,
+      params: {
+        method: 'GET',
+        query: { key: 'value' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    expect(resultUrl).toContain('https://example.com/api?address=1');
+    expect(resultUrl).toContain('&key=value');
+  });
+
+  test('execute handles null secretQueryParams', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://example.com/api',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: emptySecrets,
+      params: {
+        method: 'GET',
+        query: { foo: 'bar' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    expect(resultUrl).toContain('foo=bar');
+  });
+
+  test('execute handles empty secretQueryParams', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://example.com/api',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        ...emptySecrets,
+        secretQueryParams: {},
+      },
+      params: {
+        method: 'GET',
+        query: { foo: 'bar' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    expect(resultUrl).toContain('foo=bar');
+  });
+
   test('execute uses params.url when config.url is not provided', async () => {
     const config: ConnectorTypeConfigType = { ...emptyConfig };
     await connectorType.executor?.({
