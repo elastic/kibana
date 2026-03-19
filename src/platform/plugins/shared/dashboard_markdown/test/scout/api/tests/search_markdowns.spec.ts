@@ -44,8 +44,8 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.markdowns.length).toBeGreaterThan(1);
   });
 
-  apiTest('should narrow results by search', async ({ apiClient }) => {
-    const response = await apiClient.get(`${SEARCH_ENDPOINT}?search=0*`, {
+  apiTest('should narrow results by query', async ({ apiClient }) => {
+    const response = await apiClient.get(`${SEARCH_ENDPOINT}?query=0*`, {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
