@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SyncNowButton } from './sync_now_button';
 
 export const MwsPendingSyncCallout = ({ syncInterval }: { syncInterval: number }) => {
   return (
@@ -26,6 +27,8 @@ export const MwsPendingSyncCallout = ({ syncInterval }: { syncInterval: number }
           defaultMessage="One or more maintenance windows have been recently modified or deleted. It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for changes to be applied to private location monitors."
           values={{ syncInterval }}
         />
+        <EuiSpacer size="s" />
+        <SyncNowButton />
       </EuiCallOut>
       <EuiSpacer size="s" />
     </>
