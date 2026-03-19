@@ -328,6 +328,17 @@ const createToolCallsEvaluator = ({ evaluators }: { evaluators: DefaultEvaluator
         };
       }
 
+      if (steps.length === 0) {
+        const expectedToolIds = toolCalls.map((tc) => tc.id).join(', ');
+        return {
+          score: 0,
+          label: 'FAIL',
+          explanation: `No steps were returned from the conversation (steps array is ${
+            output.steps === undefined ? 'undefined' : 'empty'
+          }). Expected tool calls: [${expectedToolIds}].`,
+        };
+      }
+
       const toolCallResults = await evaluateAllToolCalls(
         toolCalls,
         steps,
