@@ -91,6 +91,7 @@ const actionExecutorInitializationParams = {
   encryptedSavedObjectsClient,
   eventLogger,
   getActionsAuthorizationWithRequest,
+  getCurrentUserProfileIdFromAPIKey: jest.fn().mockResolvedValue(undefined),
   inMemoryConnectors: [
     createMockInMemoryConnector({
       id: 'preconfigured',
@@ -354,6 +355,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
         signal: undefined,
       });
@@ -399,6 +401,7 @@ describe('Action Executor', () => {
         globalAuthHeaders: {
           'x-custom-header': 'custom-header-value',
         },
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
         signal: undefined,
       });
@@ -503,6 +506,7 @@ describe('Action Executor', () => {
           logger: loggerMock,
           source: executionSource.source,
           connectorUsageCollector: expect.any(ConnectorUsageCollector),
+          profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         });
 
         expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -591,6 +595,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
@@ -676,6 +681,7 @@ describe('Action Executor', () => {
           logger: loggerMock,
           request: {},
           connectorUsageCollector: expect.any(ConnectorUsageCollector),
+          profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
           ...(executeUnsecure ? {} : { source: SOURCE }),
         });
       }
@@ -797,6 +803,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
@@ -1126,6 +1133,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
     });
@@ -1160,6 +1168,7 @@ describe('Action Executor', () => {
         request: {},
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         source: SOURCE,
+        profileUid: mockUser?.profile_uid,
       });
     });
 
@@ -1235,6 +1244,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
@@ -1333,6 +1343,7 @@ describe('Action Executor', () => {
         request: {},
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         source: SOURCE,
+        profileUid: mockUser?.profile_uid,
       });
 
       expect(loggerMock.debug).toBeCalledWith(
@@ -1564,6 +1575,7 @@ describe('Action Executor', () => {
           logger: loggerMock,
           connectorUsageCollector: expect.any(ConnectorUsageCollector),
           source: SOURCE,
+          profileUid: mockUser?.profile_uid,
         });
       }
     });

@@ -56,8 +56,8 @@ Use this contract:
   "dashboardAttachmentId": "optional-existing-id",
   "operations": [
     { "operation": "set_metadata", "title": "optional", "description": "optional" },
-    { "operation": "upsert_markdown", "markdownContent": "..." },
-    { "operation": "add_panels_from_attachments", "items": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 }, "sectionId": "optional-section-id" }] },
+    { "operation": "add_markdown", "markdownContent": "...", "grid": { "x": 0, "y": 0, "w": 36, "h": 5 }, "sectionId": "optional-section-id" },
+    { "operation": "add_panels_from_attachments", "items": [{ "attachmentId": "id", "grid": { "x": 0, "y": 5, "w": 24, "h": 9 }, "sectionId": "optional-section-id" }] },
     { "operation": "add_section", "title": "Section title", "grid": { "y": 16 }, "panels": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 } }] },
     { "operation": "remove_section", "sectionId": "existing-section-id", "panelAction": "promote" },
     { "operation": "remove_panels", "panelIds": ["panel-id"] }
@@ -69,7 +69,7 @@ Use this contract:
 
 When creating a dashboard, prefer this sequence:
 1. \`set_metadata\` to set title/description
-2. \`upsert_markdown\` to add a summary panel
+2. Consider adding an \`add_markdown\` panel to set context — use explicit \`grid\` placement like any other panel
 3. Add visualizations with \`add_panels_from_attachments\` using \`items[]\` — each item specifies \`attachmentId\` and a required \`grid: { x, y, w, h }\`
 4. For sectioned dashboards, use \`add_section\` (with \`grid.y\`) and add section panels with section-relative coordinates
 
@@ -84,9 +84,8 @@ If you omit metadata on a new dashboard, creation can fail.
    - \`add_section\` to create a new section (server generates \`sectionId\`)
    - \`remove_section\` with required \`panelAction: "promote" | "delete"\`
    - \`remove_panels\` to remove by \`panelId\`
-   - \`set_metadata\` / \`upsert_markdown\` for dashboard metadata and summary updates
-
-**Keeping the markdown summary in sync:** After adding or removing panels, the existing markdown summary panel may no longer reflect the current dashboard content. If the update changes the panel composition (new panels added or existing ones removed), check whether the markdown summary still accurately describes the dashboard. If it does not, ask the user whether they would like you to update the markdown summary to match the new dashboard state. Do not update it silently — let the user decide.
+   - \`set_metadata\` for dashboard metadata updates
+   - To update a markdown panel, use \`remove_panels\` to remove the old one, then \`add_markdown\` to add a new one with updated content and grid
 
 ### Step 2: Interpret results and report clearly
 
@@ -103,12 +102,13 @@ See \`./examples/tool-result-format\` for the complete result structure with exa
 - Summarize what was created or updated. List each panel by title so the user knows what is included.
 - If \`failures\` is present and non-empty, explain which attachments could not be resolved and include the error message. Offer to recreate those visualizations and retry adding them.
 - Remember the \`dashboardAttachment.id\` for follow-up updates. Do not ask the user for it again.
+- **Render the dashboard attachment inline** so the user can see and interact with the dashboard card. Do NOT render individual visualization attachments inline during dashboard composition — only the final dashboard attachment should be rendered.
 
 ## Dashboard Composition Guidelines
 
 A well-composed dashboard tells a coherent story about the data:
 
-1. **Start with a markdown panel** to set context: what the dashboard monitors, what the data source is, and any important notes.
+1. **Consider a markdown panel when it adds value** — to set context about what the dashboard monitors, data sources, or important notes. Not every dashboard needs one.
 2. **Lead with high-level metrics** (Metric or Gauge panels): total counts, averages, key performance indicators that give an at-a-glance summary.
 3. **Follow with time-series trends** (XY line/area panels): how the key metrics change over time.
 4. **Add breakdowns and distributions** (XY bar, Heatmap, Tagcloud panels): top-N rankings, categorical splits, and density views.
@@ -154,15 +154,16 @@ See \`./examples/manage-dashboard-payloads\` for complete payload examples cover
       "description": "Overview of web server request traffic and host resource usage"
     },
     {
-      "operation": "upsert_markdown",
-      "markdownContent": "### Web Server Performance\n\nThis dashboard tracks nginx access logs and system metrics across all production hosts."
+      "operation": "add_markdown",
+      "markdownContent": "### Web Server Performance\n\nThis dashboard tracks nginx access logs and system metrics across all production hosts.",
+      "grid": { "x": 0, "y": 0, "w": 48, "h": 5 }
     },
     {
       "operation": "add_panels_from_attachments",
       "items": [
-        { "attachmentId": "viz-1", "grid": { "x": 0, "y": 0, "w": 24, "h": 5 } },
-        { "attachmentId": "viz-2", "grid": { "x": 24, "y": 0, "w": 24, "h": 5 } },
-        { "attachmentId": "viz-3", "grid": { "x": 0, "y": 5, "w": 48, "h": 8 } }
+        { "attachmentId": "viz-1", "grid": { "x": 0, "y": 5, "w": 24, "h": 5 } },
+        { "attachmentId": "viz-2", "grid": { "x": 24, "y": 5, "w": 24, "h": 5 } },
+        { "attachmentId": "viz-3", "grid": { "x": 0, "y": 10, "w": 48, "h": 8 } }
       ]
     }
   ]
@@ -180,8 +181,9 @@ See \`./examples/manage-dashboard-payloads\` for complete payload examples cover
       "description": "Overview by metrics, trends, and breakdowns"
     },
     {
-      "operation": "upsert_markdown",
-      "markdownContent": "### Web Server Performance\n\nTraffic health and anomaly overview."
+      "operation": "add_markdown",
+      "markdownContent": "### Web Server Performance\n\nTraffic health and anomaly overview.",
+      "grid": { "x": 0, "y": 0, "w": 36, "h": 4 }
     },
     {
       "operation": "add_section",
@@ -214,11 +216,12 @@ See \`./examples/manage-dashboard-payloads\` for complete payload examples cover
     { "operation": "remove_panels", "panelIds": ["panel-xyz"] },
     {
       "operation": "add_panels_from_attachments",
-      "items": [{ "attachmentId": "viz-attachment-789", "grid": { "x": 0, "y": 0, "w": 24, "h": 8 } }]
+      "items": [{ "attachmentId": "viz-attachment-789", "grid": { "x": 0, "y": 5, "w": 24, "h": 8 } }]
     },
     {
-      "operation": "upsert_markdown",
-      "markdownContent": "### Updated Summary\n\nNow includes response-size trend."
+      "operation": "add_markdown",
+      "markdownContent": "### Updated Summary\n\nNow includes response-size trend.",
+      "grid": { "x": 0, "y": 0, "w": 48, "h": 5 }
     }
   ]
 }
@@ -271,8 +274,9 @@ Use this when the user wants to add a visualization that was already created ear
       "title": "Web Server Performance (Production)"
     },
     {
-      "operation": "upsert_markdown",
-      "markdownContent": "### Updated Summary\n\nNow filtered to production hosts only."
+      "operation": "add_markdown",
+      "markdownContent": "### Updated Summary\n\nNow filtered to production hosts only.",
+      "grid": { "x": 0, "y": 0, "w": 32, "h": 4 }
     }
   ]
 }
