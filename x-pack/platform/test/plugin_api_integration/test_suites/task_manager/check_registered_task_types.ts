@@ -111,6 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions_telemetry',
         'ad_hoc_run-backfill',
         'agent-builder:run-agent',
+        'agent_builder:sml_crawler',
         'alert-deletion',
         'alerting:.es-query',
         'alerting:.geo-containment',
