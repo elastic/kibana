@@ -150,6 +150,7 @@ export const oauthAuthorizeRoute = (
             connectorId,
             kibanaReturnUrl,
             spaceId,
+            createdBy: profile_uid,
           });
 
           const authorizationUrl = oauthService.buildAuthorizationUrl({
