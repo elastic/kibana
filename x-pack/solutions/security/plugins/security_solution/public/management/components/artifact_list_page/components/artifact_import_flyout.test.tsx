@@ -94,7 +94,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     expect(mockedTrustedAppApi.responseProvider.trustedAppImportList).toHaveBeenCalledWith(
       expect.objectContaining({
         version: '2023-10-31',
-        query: { overwrite: false } as HttpFetchOptionsWithPath['query'],
+        query: { overwrite: true } as HttpFetchOptionsWithPath['query'],
       })
     );
   });
@@ -120,15 +120,16 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     await userEvent.click(ui.getImportButton());
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-      text: '2 items imported',
+      text: '2 artifacts imported.',
       title: 'Artifact list imported successfully',
+      toastLifeTimeMs: 60_000,
     });
     expect(props.onSuccess).toHaveBeenCalled();
   });
 
   it('should show an error toast if the import API fails', async () => {
     mockedTrustedAppApi.responseProvider.trustedAppImportList.mockImplementation(() => {
-      throw new Error('Import failed');
+      throw new Error('Fail message from server');
     });
 
     await render();
@@ -137,8 +138,8 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     await userEvent.click(ui.getImportButton());
 
     expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
-      expect.objectContaining(new Error('Import failed')),
-      { title: 'Artifact list import failed' }
+      expect.objectContaining(new Error('Fail message from server')),
+      { title: 'Artifact list import failed', toastMessage: 'Fail message from server' }
     );
   });
 });

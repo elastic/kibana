@@ -64,33 +64,47 @@ export const MainNavigation = () => {
     permissions.writeLiveQueries ||
     (permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks));
 
+  const isSubRoute = useMemo(() => {
+    const segments = location.pathname.split('/').filter(Boolean);
+
+    return segments.length > 1;
+  }, [location.pathname]);
+
   if (isHistoryEnabled) {
+    const topBar = (
+      <div css={topBarCss}>
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
+              {isFeedbackEnabled && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    href="https://ela.st/osquery-feedback"
+                    target="_blank"
+                    aria-label={feedbackButtonLabel}
+                    iconType="popout"
+                    iconSide="right"
+                    color="primary"
+                    size="s"
+                  >
+                    {feedbackButtonLabel}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              <ManageIntegrationLink />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    );
+
+    if (isSubRoute) {
+      return topBar;
+    }
+
     return (
       <>
-        <div css={topBarCss}>
-          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
-                {isFeedbackEnabled && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      href="https://ela.st/osquery-feedback"
-                      target="_blank"
-                      aria-label={feedbackButtonLabel}
-                      iconType="popout"
-                      iconSide="right"
-                      color="primary"
-                      size="s"
-                    >
-                      {feedbackButtonLabel}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                )}
-                <ManageIntegrationLink />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+        {topBar}
         <div css={navCss}>
           <EuiSpacer size="l" />
           <EuiFlexGroup gutterSize="l" alignItems="center">
