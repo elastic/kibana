@@ -51,6 +51,8 @@ const defaultConfig: WorkflowSelectorConfig = {
     loadFailed: i18n.FAILED_TO_LOAD_WORKFLOWS,
   },
   listView: false,
+  hideLabel: false,
+  hideViewWorkflowLink: false,
 };
 
 const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
@@ -59,6 +61,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   config = {},
   error,
 }) => {
+  const ROW_HEIGHT = 60;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isSearching, setIsSearching] = useState(true);
@@ -83,6 +86,28 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     () => processWorkflowsToOptions(workflowsData?.results, selectedWorkflowId, finalConfig),
     [workflowsData?.results, selectedWorkflowId, finalConfig]
   );
+
+  // Compute list height dynamically for listView: shrink to fit visible options, cap at listViewMaxHeight if set
+  const listViewHeight = useMemo(() => {
+    if (!finalConfig.listView) return undefined;
+    const visibleCount =
+      isSearching && inputValue
+        ? workflowOptions.filter((opt) =>
+            opt.label.toLowerCase().includes(inputValue.toLowerCase())
+          ).length
+        : workflowOptions.length;
+    // Ensure at least one row height so the empty state message has space
+    const height = Math.max(visibleCount, 1) * ROW_HEIGHT;
+    return finalConfig.listViewMaxHeight !== undefined
+      ? Math.min(height, finalConfig.listViewMaxHeight)
+      : height;
+  }, [
+    finalConfig.listView,
+    finalConfig.listViewMaxHeight,
+    isSearching,
+    inputValue,
+    workflowOptions,
+  ]);
 
   // Get selected workflow disabled error
   const selectedWorkflowDisabledError = useMemo(
@@ -248,28 +273,10 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   const listView = useCallback(
     (list: ReactElement, search?: ReactElement) => {
       return (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: 0,
-            maxHeight: '100%',
-            minWidth: 0,
-          }}
-        >
+        <EuiPanel paddingSize="none">
           {search}
-          <div
-            style={{
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              minHeight: 0,
-              flex: '1 1 auto',
-              minWidth: 0,
-            }}
-          >
-            {list}
-          </div>
-          {workflowOptions.length > 0 && (
+          <div>{list}</div>
+          {workflowOptions.length > 0 && !finalConfig.hideViewWorkflowLink && (
             <EuiPanel
               paddingSize="s"
               hasShadow={false}
@@ -286,10 +293,15 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
               </EuiText>
             </EuiPanel>
           )}
-        </div>
+        </EuiPanel>
       );
     },
-    [euiTheme.colors.backgroundBaseSubdued, workflowManagementLinkProps, workflowOptions.length]
+    [
+      euiTheme.colors.backgroundBaseSubdued,
+      finalConfig.hideViewWorkflowLink,
+      workflowManagementLinkProps,
+      workflowOptions.length,
+    ]
   );
 
   const popoverView = useCallback(
@@ -335,12 +347,14 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
 
   return (
     <EuiFormRow
-      label={finalConfig.label}
+      label={finalConfig.hideLabel ? undefined : finalConfig.label}
       labelAppend={
-        <EuiLink {...workflowManagementLinkProps} external={false}>
-          {finalConfig.createWorkflowLinkText}{' '}
-          <EuiIcon type="plusInCircle" size="s" aria-hidden={true} />
-        </EuiLink>
+        finalConfig.hideLabel ? undefined : (
+          <EuiLink {...workflowManagementLinkProps} external={false}>
+            {finalConfig.createWorkflowLinkText}{' '}
+            <EuiIcon type="plusInCircle" size="s" aria-hidden={true} />
+          </EuiLink>
+        )
       }
       helpText={helpText}
       error={displayError}
@@ -356,6 +370,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
           onChange={handleWorkflowChange}
           singleSelection
           searchable
+          height={listViewHeight}
           searchProps={{
             value: inputValue,
             onChange: (value) => {
@@ -377,7 +392,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
             <WorkflowSelectorEmptyState createWorkflowHref={workflowManagementLinkProps.href} />
           }
           listProps={{
-            rowHeight: 60, // Increased height to accommodate secondary content and tags
+            rowHeight: ROW_HEIGHT, // Increased height to accommodate secondary content and tags
             showIcons: false,
             css: {
               // Hide the badge when the option is focused

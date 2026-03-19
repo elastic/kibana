@@ -50,6 +50,9 @@ export interface WorkflowSelectorConfig {
   placeholder?: string;
   createWorkflowLinkText?: string;
   listView?: boolean;
+  listViewMaxHeight?: number;
+  hideLabel?: boolean;
+  hideViewWorkflowLink?: boolean;
 
   // Error Messages
   errorMessages?: {

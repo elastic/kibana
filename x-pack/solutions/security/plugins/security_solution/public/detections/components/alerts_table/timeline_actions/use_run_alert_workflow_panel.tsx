@@ -126,6 +126,10 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
               if (!aHasAlert && bHasAlert) return 1;
               return 0;
             }),
+          listView: true,
+          hideLabel: true,
+          hideViewWorkflowLink: true,
+          listViewMaxHeight: 240,
         }}
         selectedWorkflowId={selectedId || undefined}
         onWorkflowChange={setSelectedId}
@@ -136,7 +140,9 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
 
   return (
     <>
-      <EuiPanel>{isLoading ? <Loader>{workflowSelector}</Loader> : workflowSelector}</EuiPanel>
+      <EuiPanel paddingSize={'none'}>
+        {isLoading ? <Loader>{workflowSelector}</Loader> : workflowSelector}
+      </EuiPanel>
       <EuiButton
         data-test-subj="execute-alert-workflow-button"
         fullWidth
