@@ -47,7 +47,7 @@ import { EditDataRetentionModal } from '../edit_data_retention_modal';
 import { ConfigureFailureStoreModal } from '../configure_failure_store_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
-import { isNextGenIlm, isNextGenDlm } from '../../../../lib/data_streams';
+import { isNextGenIlm, isNextGenDsl } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { useIlmLocator } from '../../../../services/use_ilm_locator';
@@ -187,7 +187,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
             defaultMessage: `The index lifecycle policy that manages the data in the data stream. `,
           }),
-          content: isNextGenDlm(dataStream) ? (
+          content: isNextGenDsl(dataStream) ? (
             <EuiToolTip
               position="top"
               content={i18n.translate(
