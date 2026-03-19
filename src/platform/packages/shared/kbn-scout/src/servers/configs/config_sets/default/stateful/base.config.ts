@@ -121,6 +121,7 @@ export const defaultConfig: ScoutServerConfig = {
       `--security.showInsecureClusterWarning=false`,
       '--telemetry.banner=false',
       '--telemetry.optIn=false',
+      '--uiSettings.overrides.timepicker:useLegacyTimePicker=true',
       // These are *very* important to have them pointing to staging
       '--telemetry.sendUsageTo=staging',
       `--server.maxPayload=1679958`,
