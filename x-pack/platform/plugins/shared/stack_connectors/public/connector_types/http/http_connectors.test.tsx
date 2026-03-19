@@ -11,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 import HttpActionConnectorFields from './http_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { formSerializer, formDeserializer } from '../lib/http/form_serialization';
-import { useSecretQueryParams } from '../../common/auth/use_secret_query_params';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
@@ -19,9 +18,6 @@ jest.mock('../../common/auth/auth_config', () => ({
   __esModule: true,
   default: () => <div data-test-subj="authConfigMock">Auth</div>,
 }));
-
-jest.mock('../../common/auth/use_secret_query_params');
-const useSecretQueryParamsMock = useSecretQueryParams as jest.Mock;
 
 describe('HttpActionConnectorFields', () => {
   const connector = {
@@ -49,7 +45,6 @@ describe('HttpActionConnectorFields', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useSecretQueryParamsMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
   });
 
   it('renders base URL field and proxy switch', async () => {

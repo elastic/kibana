@@ -25,12 +25,8 @@ import {
   useConnectorContext,
   type ActionConnectorFieldsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { isEqual } from 'lodash';
 
-import { useSecretQueryParams } from '../../common/auth/use_secret_query_params';
-import { QueryParamFields } from '../../common/auth/query_param_fields';
 import * as i18n from './translations';
-import * as authI18n from '../../common/auth/translations';
 
 const { urlField, emptyField } = fieldValidators;
 
@@ -88,61 +84,15 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
     services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
   } = useConnectorContext();
 
-  const { getFieldDefaultValue, getFormData, updateFieldValues } = useFormContext();
-  const [{ config, __internal__, id: connectorId }] = useFormData({
-    watch: [
-      'config.hasProxyAuth',
-      '__internal__.hasProxy',
-      '__internal__.hasQueryParams',
-      '__internal__.queryParams',
-    ],
+  const { getFieldDefaultValue } = useFormContext();
+  const [{ config, __internal__ }] = useFormData({
+    watch: ['config.hasProxyAuth', '__internal__.hasProxy'],
   });
 
   // TODO: remove this check once the intermediate release is complete
   const supportsProxySettings = !isEdit || getFieldDefaultValue('config.proxyUrl') !== undefined;
   const hasProxy = __internal__?.hasProxy ?? false;
   const hasProxyAuth = config?.hasProxyAuth ?? false;
-
-  const {
-    data: secretQueryParamKeys = [],
-    isLoading: isLoadingQueryParams,
-    isFetching: isFetchingQueryParams,
-  } = useSecretQueryParams(connectorId);
-
-  const loadingQueryParams = isLoadingQueryParams || isFetchingQueryParams;
-  const hasQueryParams = __internal__ != null ? __internal__.hasQueryParams : false;
-  const hasQueryParamsDefaultValue = secretQueryParamKeys.length > 0;
-
-  const queryParamsInitializedRef = React.useRef(false);
-  React.useEffect(() => {
-    if (loadingQueryParams) return;
-    if (queryParamsInitializedRef.current) return;
-    queryParamsInitializedRef.current = true;
-
-    const formData = getFormData();
-    const currentParams: Array<{ key: string; value: string }> =
-      formData.__internal__?.queryParams ?? [];
-    const currentParamKeysSet = new Set(currentParams.map((p) => p.key));
-    const newSecretParams = secretQueryParamKeys
-      .filter((key) => !currentParamKeysSet.has(key))
-      .map((key) => ({ key, value: '' }));
-
-    let mergedParams = [...currentParams, ...newSecretParams];
-
-    if (mergedParams.length === 0 && hasQueryParams) {
-      mergedParams = [{ key: '', value: '' }];
-    }
-
-    if (!isEqual(currentParams, mergedParams)) {
-      updateFieldValues({
-        __internal__: {
-          ...formData.__internal__,
-          hasQueryParams: mergedParams.length > 0,
-          queryParams: mergedParams,
-        },
-      });
-    }
-  }, [getFormData, secretQueryParamKeys, updateFieldValues, hasQueryParams, loadingQueryParams]);
 
   const proxyAuthOptions = [
     {
@@ -189,32 +139,6 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           isOAuth2Enabled={true}
         />
       </React.Suspense>
-      <EuiSpacer size="m" />
-      <UseField
-        style={{ visibility: loadingQueryParams ? 'hidden' : 'visible' }}
-        path="__internal__.hasQueryParams"
-        component={ToggleField}
-        config={{
-          defaultValue: hasQueryParamsDefaultValue,
-          label: authI18n.QUERY_PARAMS_SWITCH,
-        }}
-        componentProps={{
-          euiFieldProps: {
-            disabled: readOnly,
-            'data-test-subj': 'httpQueryParamsSwitch',
-          },
-        }}
-      />
-      {hasQueryParams &&
-        (loadingQueryParams ? (
-          <EuiFlexGroup justifyContent="spaceAround">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="xl" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <QueryParamFields readOnly={readOnly} />
-        ))}
       {supportsProxySettings && (
         <>
           <EuiSpacer size="m" />

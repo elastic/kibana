@@ -32,7 +32,7 @@ export function useSecretQueryParams(
     {
       enabled: Boolean(connectorId),
       initialData: [],
-      refetchOnMount: true,
+      refetchOnMount: 'always',
       onError: (error: ServerError) => {
         toasts.addError(error.body?.message ? new Error(error.body.message) : error, {
           title: i18n.translate(

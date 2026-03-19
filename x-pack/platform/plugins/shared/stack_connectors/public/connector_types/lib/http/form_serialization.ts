@@ -48,7 +48,6 @@ export const formDeserializer = (data: ConnectorFormSchema): HttpConnectorForm =
       headers: isEmpty(configHeaders) ? undefined : configHeaders,
     },
     __internal__: {
-      ...(data as HttpConnectorForm).__internal__,
       headers: configHeaders,
       hasProxy: !!data?.config?.proxyUrl,
     },
