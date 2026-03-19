@@ -16,7 +16,7 @@ import type {
 } from 'axios';
 import { AxiosHeaders, isAxiosError } from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type { SSLSettings } from '@kbn/actions-utils';
+import type { ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorUsageCollector } from '../types';
@@ -33,6 +33,7 @@ export const request = async <T = unknown>({
   configurationUtilities,
   headers,
   sslOverrides,
+  proxyOverrides,
   timeout,
   connectorUsageCollector,
   keepAlive,
@@ -47,6 +48,7 @@ export const request = async <T = unknown>({
   headers?: Record<string, AxiosHeaderValue>;
   timeout?: number;
   sslOverrides?: SSLSettings;
+  proxyOverrides?: ProxySettings;
   connectorUsageCollector?: ConnectorUsageCollector;
   /**
    *  keep-alive is only supported for https connections or proxied http connections
@@ -63,7 +65,8 @@ export const request = async <T = unknown>({
     configurationUtilities,
     logger,
     url,
-    sslOverrides
+    sslOverrides,
+    proxyOverrides
   );
 
   if (keepAlive) {
