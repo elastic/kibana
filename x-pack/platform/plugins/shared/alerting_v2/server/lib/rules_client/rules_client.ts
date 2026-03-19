@@ -18,7 +18,9 @@ import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
+import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
+import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
@@ -474,6 +476,16 @@ export class RulesClient {
     if (itemsToUpdate.length > 0) {
       const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
 
+      const tasksToSchedule: Array<{
+        id: string;
+        taskType: string;
+        schedule: { interval: string };
+        params: RuleExecutorTaskParams;
+        state: Record<string, unknown>;
+        scope: string[];
+        enabled: boolean;
+      }> = [];
+
       for (let i = 0; i < updateResults.length; i++) {
         const updateResult = updateResults[i];
         const item = itemsToUpdate[i];
@@ -491,16 +503,21 @@ export class RulesClient {
 
         rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
 
-        // Ensure tasks are scheduled for newly enabled rules
+        tasksToSchedule.push({
+          id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
+          taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
+          schedule: { interval: item.attrs.schedule.every },
+          params: { ruleId: item.id, spaceId },
+          state: {},
+          scope: ['alerting'],
+          enabled: true,
+        });
+      }
+
+      if (tasksToSchedule.length > 0) {
         try {
-          await ensureRuleExecutorTaskScheduled({
-            services: { taskManager: this.taskManager },
-            input: {
-              ruleId: item.id,
-              spaceId,
-              schedule: { interval: item.attrs.schedule.every },
-              request: this.request as unknown as CoreKibanaRequest,
-            },
+          await this.taskManager.bulkSchedule(tasksToSchedule, {
+            request: this.request as unknown as CoreKibanaRequest,
           });
         } catch {
           // Task scheduling failure is non-fatal for bulk operations

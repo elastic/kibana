@@ -1007,10 +1007,15 @@ describe('RulesClient', () => {
         }),
       ]);
 
-      expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          input: expect.objectContaining({ ruleId: 'rule-1' }),
-        })
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: 'task:fallback',
+            params: expect.objectContaining({ ruleId: 'rule-1' }),
+            enabled: true,
+          }),
+        ],
+        expect.objectContaining({ request })
       );
 
       expect(res.rules).toHaveLength(1);
