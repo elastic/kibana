@@ -10,7 +10,7 @@ import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { createMockedTool } from '../../test_utils/tools';
+import { createMockedTool, type MockedTool } from '../../test_utils/tools';
 import { createToolRegistry } from './tool_registry';
 import type {
   ReadonlyToolProvider,
@@ -64,13 +64,14 @@ const createMockPersistedProvider = (tools: InternalToolDefinition[]): WritableT
 
 const createMockHealthClient = (): jest.Mocked<ToolHealthClient> => ({
   get: jest.fn(),
+  upsert: jest.fn(),
   recordSuccess: jest.fn(),
   recordFailure: jest.fn(),
   delete: jest.fn(),
   listBySpace: jest.fn(),
 });
 
-const availableTool = (overrides: Partial<InternalToolDefinition> = {}) =>
+const availableTool = (overrides: Partial<MockedTool> = {}) =>
   createMockedTool({
     isAvailable: jest.fn(async () => ({ status: 'available' as const })),
     ...overrides,
