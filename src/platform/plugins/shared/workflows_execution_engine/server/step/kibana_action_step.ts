@@ -48,15 +48,13 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
   }
 
   public getInput() {
-    // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.configuration?.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
-    // Support both direct step types (kibana.createCase) and atomic+configuration pattern
     const stepType = this.step.configuration.type;
-    // Use rendered inputs if provided, otherwise fall back to raw step.with or configuration.with
+    // Use rendered inputs if provided, otherwise fall back to raw configuration.with
     const stepWith = withInputs || this.step.configuration.with;
     // Extract meta params (not forwarded as HTTP request params)
     const {

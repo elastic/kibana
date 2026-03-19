@@ -38,16 +38,14 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
   }
 
   public getInput() {
-    // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.configuration.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
     try {
-      // Support both direct step types (elasticsearch.search.query) and atomic+configuration pattern
       const stepType = this.step.configuration.type;
-      // Use rendered inputs if provided, otherwise fall back to raw step.with or configuration.with
+      // Use rendered inputs if provided, otherwise fall back to raw configuration.with
       const stepWith = withInputs || this.step.configuration.with;
 
       this.workflowLogger.logInfo(`Executing Elasticsearch action: ${stepType}`, {
