@@ -10,7 +10,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
 import useAsync from 'react-use/lib/useAsync';
 
-const FIND_RULES_ENDPOINT = '/internal/alerting/v2/rule';
+const GET_RULES_BULK_ENDPOINT = '/internal/alerting/v2/rule/_bulk';
 
 export interface UseAlertingRulesIndexOptions {
   ruleIds: string[];
@@ -35,7 +35,7 @@ export const useAlertingRulesIndex = ({ ruleIds, services }: UseAlertingRulesInd
       return;
     }
 
-    const rulesResponse = await services.http.get<FindRulesResponse>(FIND_RULES_ENDPOINT, {
+    const rulesResponse = await services.http.get<FindRulesResponse>(GET_RULES_BULK_ENDPOINT, {
       query: { ids: uncachedIds },
     });
     rulesResponse.items.forEach((rule) => {

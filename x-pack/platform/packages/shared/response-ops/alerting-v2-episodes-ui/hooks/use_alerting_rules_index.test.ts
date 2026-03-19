@@ -19,7 +19,7 @@ jest.mock('react-use/lib/useAsync', () => ({
 }));
 
 const mockHttp = httpServiceMock.createStartContract();
-const FIND_RULES_ENDPOINT = '/internal/alerting/v2/rule';
+const GET_RULES_BULK_ENDPOINT = '/internal/alerting/v2/rule/_bulk';
 
 describe('useAlertingRulesIndex', () => {
   beforeEach(() => {
@@ -71,7 +71,7 @@ describe('useAlertingRulesIndex', () => {
     );
 
     await waitFor(() =>
-      expect(mockHttp.get).toHaveBeenCalledWith(FIND_RULES_ENDPOINT, {
+      expect(mockHttp.get).toHaveBeenCalledWith(GET_RULES_BULK_ENDPOINT, {
         query: { ids: [ruleId] },
       })
     );

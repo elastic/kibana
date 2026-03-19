@@ -17,7 +17,6 @@ export interface CreateRuleParams {
 export interface FindRulesParams {
   page?: number;
   perPage?: number;
-  ids?: string[];
 }
 
 export interface FindRulesResponse {
