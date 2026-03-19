@@ -8,12 +8,13 @@
 import { expect } from '@kbn/scout/api';
 import type { NetworkDirectionProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
+import { tags } from '@kbn/scout';
 import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Cross-compatibility - Network Direction Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should set network direction with internal networks in both ingest pipeline and ES|QL',
