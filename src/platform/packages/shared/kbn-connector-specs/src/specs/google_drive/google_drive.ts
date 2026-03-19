@@ -52,10 +52,21 @@ export const GoogleDriveConnector: ConnectorSpec = {
       defaultMessage: 'Search and access files and folders in Google Drive',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
+
   auth: {
-    types: ['bearer'],
+    types: [
+      'bearer',
+      {
+        type: 'ears',
+        defaults: {
+          provider: 'google',
+          scope: 'profile,email,https://www.googleapis.com/auth/drive.readonly',
+        },
+      },
+    ],
     headers: {
       Accept: 'application/json',
     },
