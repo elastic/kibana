@@ -245,6 +245,20 @@ describe('SharedLists', () => {
       );
     });
 
+    it('should display callout when FF is enabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <SharedLists />
+        </TestProviders>
+      );
+
+      const callout = getByTestId('EndpointExceptionsMovedCallout');
+      expect(callout).toBeInTheDocument();
+      expect(callout).toHaveTextContent('Endpoint exceptions have moved.');
+    });
+
     it('should fetch "endpoint_list" but hide other endpoint artifacts when Endpoint exceptions moved FF is disabled', async () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       (useUserPrivileges as jest.Mock).mockReturnValue({
@@ -269,6 +283,19 @@ describe('SharedLists', () => {
           hideLists: ENDPOINT_ARTIFACT_LIST_IDS.filter((id) => id !== 'endpoint_list'),
         } as Partial<Parameters<typeof useExceptionLists>[0]>)
       );
+    });
+
+    it('should not display callout when FF is disabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <SharedLists />
+        </TestProviders>
+      );
+
+      const callout = queryByTestId('EndpointExceptionsMovedCallout');
+      expect(callout).not.toBeInTheDocument();
     });
   });
 

@@ -55,6 +55,7 @@ import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/serv
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { EndpointExceptionsMovedCallout } from '../../components/endpoint_exceptions_moved_callout';
 
 export type Func = () => Promise<void>;
 
@@ -149,8 +150,8 @@ export const SharedLists = React.memo(() => {
     hideLists: isEndpointExceptionsMovedFFEnabled
       ? []
       : ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
-      (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-    ),
+          (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+        ),
   });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
@@ -605,6 +606,10 @@ export const SharedLists = React.memo(() => {
 
       <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
+        {isEndpointExceptionsMovedFFEnabled && (
+          <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
+        )}
+
         {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
         <EuiSpacer size="m" />
         {viewerStatus != null ? (
