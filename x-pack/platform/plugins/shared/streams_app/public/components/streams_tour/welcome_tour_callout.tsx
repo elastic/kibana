@@ -85,7 +85,13 @@ export function WelcomeTourCallout({
               </EuiFlexItem>
               <EuiSpacer size="m" />
               <EuiFlexItem>
-                <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
+                <EuiFlexGroup
+                  direction="row"
+                  gutterSize="s"
+                  responsive={false}
+                  alignItems="center"
+                  justifyContent="flexEnd"
+                >
                   {isTourEnabled && (
                     <EuiFlexItem grow={false}>
                       <EuiButton color="primary" size="s" onClick={handleStartTour}>
@@ -110,12 +116,7 @@ export function WelcomeTourCallout({
                       })}
                     </EuiButton>
                   </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                    css={css`
-                      margin-left: 10px;
-                    `}
-                  >
+                  <EuiFlexItem grow={false}>
                     <EuiLink
                       onClick={dismissCallout}
                       aria-label={i18n.translate('xpack.streams.welcomeCallout.dismissAriaLabel', {

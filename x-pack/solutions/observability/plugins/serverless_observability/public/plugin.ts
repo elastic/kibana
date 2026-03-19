@@ -9,7 +9,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import type { Subscription } from 'rxjs';
-import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, of, merge, fromEvent } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { createNavigationTree } from './navigation_tree';
@@ -45,32 +45,47 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { serverless, management, security, workflowsManagement } = setupDeps;
+    const { serverless, management, security } = setupDeps;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+
+    const INGEST_HUB_VERSION_KEY = 'ingestHub:activeVersion';
+    const getIngestHubVersion = () => {
+      try {
+        return typeof sessionStorage !== 'undefined'
+          ? sessionStorage.getItem(INGEST_HUB_VERSION_KEY)
+          : null;
+      } catch {
+        return null;
+      }
+    };
+    const ingestHubVersion$ =
+      typeof window === 'undefined'
+        ? of(getIngestHubVersion())
+        : merge(
+            of(getIngestHubVersion()),
+            fromEvent<CustomEvent<string>>(window, 'ingestHubVersionChange').pipe(
+              map((e) => e.detail)
+            )
+          );
 
     const navigationTree$ = combineLatest([
       setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
       chatExperience$,
+      ingestHubVersion$,
     ]).pipe(
-      map(([{ status }, chatExperience]) => {
+      map(([streamsStatus, chatExperience, ingestHubVersion]) => {
         return createNavigationTree({
-          streamsAvailable: status === 'enabled',
+          streamsAvailable: streamsStatus.status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
-          showAlertingV2: Boolean(core.application.capabilities.alertingVTwo),
+          hideIngestHubDataManagement: ingestHubVersion === 'skipUx',
         });
       })
     );
-    serverless.initNavigation('oblt', navigationTree$);
-
-    if (workflowsManagement && !core.pricing.isFeatureAvailable('observability:workflows')) {
-      workflowsManagement.setUnavailableInServerlessTier({
-        // Hardcoded for now since it's the only product that can require an upgrade. Could be improved by retrieving the required products from the pricing config.
-        requiredProducts: ['Observability: Complete'],
-      });
-    }
+    serverless.setProjectHome('/app/observability/landing');
+    serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
 
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
     const roleManagementEnabled = security.authz.isRoleManagementEnabled();
@@ -82,8 +97,8 @@ export class ServerlessObservabilityPlugin
             Boolean(aiAssistantIsEnabled) && chatExperience !== AIChatExperience.Agent
         ),
         distinctUntilChanged(),
-        switchMap((showAiAssistant) =>
-          serverless.getNavigationCards$(
+        map((showAiAssistant) =>
+          serverless.getNavigationCards(
             roleManagementEnabled,
             showAiAssistant
               ? {

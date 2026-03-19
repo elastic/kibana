@@ -80,4 +80,10 @@ export interface StreamsAppStartDependencies {
 
 export interface StreamsAppPublicSetup {}
 
-export interface StreamsAppPublicStart {}
+export interface StreamsAppPublicStart {
+  /**
+   * Renders the Streams list view into the given container (e.g. for embedding in another app).
+   * Returns an unmount function to clean up when the container is no longer needed.
+   */
+  renderEmbeddedStreamListView: (container: HTMLElement) => () => void;
+}

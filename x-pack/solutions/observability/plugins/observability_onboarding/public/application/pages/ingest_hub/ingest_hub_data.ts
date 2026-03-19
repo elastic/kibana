@@ -330,6 +330,48 @@ export const CONNECTOR_CATEGORIES = [
   'Security',
 ];
 
+export interface ApiIngestionTile extends IntegrationTile {
+  endpointLabel: string;
+}
+
+export const API_INGESTION_TILES: ApiIngestionTile[] = [
+  {
+    id: 'api-apm',
+    name: 'APM',
+    description:
+      'Send application performance data, traces, and errors using APM agents or OpenTelemetry.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/apm/img/logo_apm.svg`,
+    endpointLabel: 'endpoint_access',
+  },
+  {
+    id: 'api-elasticsearch',
+    name: 'Elasticsearch',
+    description:
+      'Index and query observability data directly using the Elasticsearch API or bulk ingestion.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
+    endpointLabel: 'elasticsearch_access',
+  },
+  {
+    id: 'api-kibana',
+    name: 'Kibana',
+    description: 'Access Kibana programmatically or embed dashboards using the Kibana API.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/kibana/img/logo_kibana.svg`,
+    endpointLabel: 'endpoint_access',
+  },
+  {
+    id: 'api-ingest',
+    name: 'Ingest',
+    description:
+      'Send data from Beats, Logstash, or Fleet-managed agents to your Elastic deployment.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/elastic/img/logo_elastic.svg`,
+    endpointLabel: 'endpoint_access',
+  },
+];
+
 export const INTEGRATION_CATEGORIES = [
   'AWS',
   'Azure',
@@ -363,6 +405,28 @@ export const INTEGRATION_CATEGORIES = [
 ];
 
 export const INSTALLED_INTEGRATIONS = ['kubernetes', 'aws', 'confluence', 'salesforce', 'slack', 'jira'];
+
+/** Row shape for the Installed tab table (matches the 6 AWS log sources we seed). */
+export interface InstalledIntegrationRow {
+  id: string;
+  name: string;
+  version: string;
+  /** When set, version column shows "Upgrade to X.X.X" with gear icon */
+  upgradeVersion?: string;
+  dashboards: number;
+  rules: number;
+  attachedPolicies: number;
+  logoUrl?: string;
+}
+
+export const AWS_INSTALLED_INTEGRATIONS_TABLE: InstalledIntegrationRow[] = [
+  { id: 'aws-cloudtrail', name: 'AWS CloudTrail', version: '1.0.0', dashboards: 1, rules: 10, attachedPolicies: 1, logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_cloudtrail.svg` },
+  { id: 'aws-vpcflow', name: 'Amazon VPC Flow Logs', version: '1.0.0', upgradeVersion: '1.2.0', dashboards: 1, rules: 0, attachedPolicies: 1, logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_vpcflow.svg` },
+  { id: 'aws-cloudwatch_logs', name: 'AWS CloudWatch Logs', version: '1.0.0', dashboards: 2, rules: 0, attachedPolicies: 1, logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_cloudwatch.svg` },
+  { id: 'aws-s3access', name: 'Amazon S3 Server Access', version: '1.0.0', upgradeVersion: '2.0.0', dashboards: 1, rules: 0, attachedPolicies: 1, logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_s3.svg` },
+  { id: 'aws-guardduty', name: 'Amazon GuardDuty', version: '1.0.0', dashboards: 5, rules: 10, attachedPolicies: 1, logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_guardduty.svg` },
+  { id: 'aws-elb_logs', name: 'AWS ELB Access Logs', version: '1.0.0', dashboards: 1, rules: 0, attachedPolicies: 1, logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_elb.svg` },
+];
 
 export interface RecommendationGroup {
   trigger: string;
@@ -427,12 +491,15 @@ export const getRecommendations = (installed: string[]): RecommendationGroup[] =
 
 export const SECONDARY_NAV_ITEMS = [
   { id: 'get-started', label: 'Get started' },
-  { id: 'integrations', label: 'Integrations' },
-  { id: 'api-endpoint', label: 'API Endpoint' },
+  { id: 'integrations', label: 'Data sources' },
 ];
 
 export const MIGRATION_NAV_ITEMS = [
   { id: 'platform-migration', label: 'Platform Migration' },
   { id: 'migration-dashboards', label: 'Dashboards' },
   { id: 'migration-rules', label: 'Rules & Monitors' },
+];
+
+export const DATA_MANAGEMENT_NAV_ITEMS = [
+  { id: 'data-management', label: 'Streams' },
 ];

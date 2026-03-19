@@ -283,23 +283,30 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
           }
         : {})}
       css={css`
-        inline-size: ${isChild ? '65vw' : '50vw'} !important;
-        ${isChild ? `
+        inline-size: ${isChild ? '74vw' : '50vw'} !important;
+        ${
+          isChild
+            ? `
           animation-duration: 0s !important;
           transition-duration: 0s !important;
           [class*="euiFlyoutMenu__container"] {
             border-block-end: none !important;
           }
-          & .euiFlyoutHeader {
-            padding: 32px !important;
-          }
-          & .euiFlyoutBody__overflowContent {
-            padding: 32px !important;
-          }
-          & .euiFlyoutFooter {
-            padding: 32px !important;
-          }
-        ` : ''}
+        `
+            : ''
+        }
+        & .euiFlyoutHeader {
+          padding-block: 32px !important;
+          padding-inline: 32px !important;
+        }
+        & .euiFlyoutBody__overflowContent {
+          padding-block: 32px !important;
+          padding-inline: 32px !important;
+        }
+        & .euiFlyoutFooter {
+          padding-block: 24px !important;
+          padding-inline: 32px !important;
+        }
       `}
     >
       <EuiFlyoutHeader hasBorder>

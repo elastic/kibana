@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { combineLatest, map, of } from 'rxjs';
+import { combineLatest, map, of, merge, fromEvent } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { Location } from 'history';
@@ -40,14 +40,38 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
+const INGEST_HUB_VERSION_STORAGE_KEY = 'ingestHub:activeVersion';
+
+/** Observable of Ingest Hub version (skipUx = hide Data management nav). No cross-plugin import. */
+function getIngestHubVersion$() {
+  const getVersion = () => {
+    try {
+      return typeof sessionStorage !== 'undefined'
+        ? sessionStorage.getItem(INGEST_HUB_VERSION_STORAGE_KEY)
+        : null;
+    } catch {
+      return null;
+    }
+  };
+  if (typeof window === 'undefined') {
+    return of(getVersion());
+  }
+  return merge(
+    of(getVersion()),
+    fromEvent<CustomEvent<string>>(window, 'ingestHubVersionChange').pipe(map((e) => e.detail))
+  );
+}
+
 function createNavTree({
   streamsAvailable,
   showAiAssistant,
   isCloudEnabled,
+  hideIngestHubDataManagement = false,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
+  hideIngestHubDataManagement?: boolean;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -432,14 +456,8 @@ function createNavTree({
               },
               {
                 link: 'observabilityOnboarding:ingest-hub-integrations',
-                title: i18n.translate('xpack.observability.obltNav.ingestHub.integrations', {
-                  defaultMessage: 'Integrations',
-                }),
-              },
-              {
-                link: 'observabilityOnboarding:ingest-hub-api-endpoint',
-                title: i18n.translate('xpack.observability.obltNav.ingestHub.apiEndpoint', {
-                  defaultMessage: 'API Endpoint',
+                title: i18n.translate('xpack.observability.obltNav.ingestHub.dataSources', {
+                  defaultMessage: 'Data sources',
                 }),
               },
             ],
@@ -473,6 +491,24 @@ function createNavTree({
               },
             ],
           },
+          ...(hideIngestHubDataManagement
+            ? []
+            : [
+                {
+                  id: 'ingestHub_data_management',
+                  title: i18n.translate('xpack.observability.obltNav.ingestHub.dataManagement', {
+                    defaultMessage: 'Data management',
+                  }),
+                  children: [
+                    {
+                      link: 'observabilityOnboarding:ingest-hub-data-management',
+                      title: i18n.translate('xpack.observability.obltNav.ingestHub.streams', {
+                        defaultMessage: 'Streams',
+                      }),
+                    },
+                  ],
+                },
+              ]),
         ],
       },
       {
@@ -718,12 +754,14 @@ export const createDefinition = (
   navigationTree$: combineLatest([
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
+    getIngestHubVersion$(),
   ]).pipe(
-    map(([{ status }, chatExperience]) =>
+    map(([streamsStatus, chatExperience, ingestHubVersion]) =>
       createNavTree({
-        streamsAvailable: status === 'enabled',
+        streamsAvailable: streamsStatus.status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
+        hideIngestHubDataManagement: ingestHubVersion === 'skipUx',
       })
     )
   ),

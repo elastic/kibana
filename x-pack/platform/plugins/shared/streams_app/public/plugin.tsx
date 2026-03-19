@@ -8,6 +8,7 @@
 import type { AppMountParameters, AppUpdater } from '@kbn/core/public';
 import {
   APP_WRAPPER_CLASS,
+  CoreScopedHistory,
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
   type CoreStart,
@@ -17,6 +18,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import { DataStreamsStatsService } from '@kbn/dataset-quality-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { from, map, switchMap } from 'rxjs';
@@ -75,7 +77,50 @@ export const renderApp = ({
   );
   return () => {
     ReactDOM.unmountComponentAtNode(element);
-    appWrapperElement.classList.remove(APP_WRAPPER_CLASS);
+    appWrapperElement.classList.remove(appWrapperClassName);
+  };
+};
+
+/**
+ * Renders the Streams list view into a container (e.g. for embedding in Ingest Hub).
+ * Does not touch the global app wrapper. Returns an unmount function.
+ */
+export const renderEmbeddedStreamList = ({
+  container,
+  coreStart,
+  pluginsStart,
+  services,
+  isServerless,
+}: {
+  container: HTMLElement;
+  coreStart: CoreStart;
+  pluginsStart: StreamsAppStartDependencies;
+  services: StreamsAppServices;
+  isServerless: boolean;
+}): (() => void) => {
+  const memoryHistory = createMemoryHistory({ initialEntries: ['/'], initialIndex: 0 });
+  const scopedHistory = new CoreScopedHistory(memoryHistory, '/app/streams');
+  const appMountParameters: AppMountParameters & { __embedded?: boolean } = {
+    element: container,
+    history: scopedHistory,
+    appBasePath: '/app/streams',
+    onAppLeave: () => {},
+    setHeaderActionMenu: () => {},
+    theme$: coreStart.theme.theme$,
+    __embedded: true,
+  };
+  ReactDOM.render(
+    <StreamsApplication
+      coreStart={coreStart}
+      pluginsStart={pluginsStart}
+      services={services}
+      isServerless={isServerless}
+      appMountParameters={appMountParameters}
+    />,
+    container
+  );
+  return () => {
+    ReactDOM.unmountComponentAtNode(container);
   };
 };
 
@@ -159,7 +204,7 @@ export class StreamsAppPlugin
     return {};
   }
 
-  start(_coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+  start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
     pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;
@@ -181,6 +226,24 @@ export class StreamsAppPlugin
       });
     });
 
-    return {};
+    return {
+      renderEmbeddedStreamListView: (container: HTMLElement): (() => void) => {
+        const services: StreamsAppServices = {
+          dataStreamsClient: new DataStreamsStatsService()
+            .start({ http: coreStart.http })
+            .getClient(),
+          telemetryClient: this.telemetry.getClient(),
+          version: this.version,
+        };
+        pluginsStart.data.query.timefilter.timefilter.triggerFetch();
+        return renderEmbeddedStreamList({
+          container,
+          coreStart,
+          pluginsStart,
+          services,
+          isServerless: this.context.env.packageInfo.buildFlavor === 'serverless',
+        });
+      },
+    };
   }
 }
