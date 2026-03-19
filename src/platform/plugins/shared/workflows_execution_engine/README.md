@@ -467,6 +467,7 @@ The plugin stores data in Elasticsearch using the following indices:
   "stepId": "step-1",
   "spaceId": "default",
   "status": "completed",
+  "isTestRun": false,
   "startedAt": "2024-01-01T00:00:00Z",
   "finishedAt": "2024-01-01T00:00:05Z",
   "duration": 5000

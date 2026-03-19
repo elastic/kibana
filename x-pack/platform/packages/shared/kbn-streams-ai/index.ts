@@ -28,3 +28,20 @@ export {
   type IterationTelemetry,
 } from './src/features/identify_features_iteratively';
 export { generateAllComputedFeatures } from './src/features/computed';
+
+export {
+  searchKnowledgeIndicators,
+  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT,
+} from './src/knowledge_indicators/search';
+export {
+  featureToKnowledgeIndicatorFeature,
+  queryLinkToKnowledgeIndicatorQuery,
+} from './src/knowledge_indicators/mappers';
+export type {
+  SearchKnowledgeIndicatorsInput,
+  SearchKnowledgeIndicatorsKind,
+  SearchKnowledgeIndicatorsOutput,
+  KnowledgeIndicator,
+  KnowledgeIndicatorFeature,
+  KnowledgeIndicatorQuery,
+} from './src/knowledge_indicators/types';
