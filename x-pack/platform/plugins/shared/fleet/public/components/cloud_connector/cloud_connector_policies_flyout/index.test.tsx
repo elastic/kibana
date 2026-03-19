@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -194,20 +194,23 @@ describe('CloudConnectorPoliciesFlyout', () => {
   });
 
   it('should enable save button when name is changed', async () => {
-    const user = userEvent.setup();
     renderFlyout();
 
-    const nameInput = screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT);
+    const nameInput = screen.getByTestId(
+      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
+    ) as HTMLInputElement;
     const saveButton = screen.getByTestId(
       CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
     );
 
     expect(saveButton).toBeDisabled();
 
-    await user.clear(nameInput);
-    await user.type(nameInput, 'New Name');
+    // Use fireEvent.change for controlled inputs - more reliable than userEvent
+    fireEvent.change(nameInput, { target: { value: 'New Name' } });
 
-    expect(saveButton).toBeEnabled();
+    await waitFor(() => {
+      expect(saveButton).toBeEnabled();
+    });
   });
 
   it('should call mutate when save button is clicked', async () => {
@@ -220,13 +223,15 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
     renderFlyout();
 
-    const nameInput = screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT);
+    const nameInput = screen.getByTestId(
+      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
+    ) as HTMLInputElement;
     const saveButton = screen.getByTestId(
       CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
     );
 
-    await user.clear(nameInput);
-    await user.type(nameInput, 'New Name');
+    // Use fireEvent.change for controlled inputs - more reliable than userEvent
+    fireEvent.change(nameInput, { target: { value: 'New Name' } });
     await user.click(saveButton);
 
     expect(mockMutate).toHaveBeenCalledWith({ name: 'New Name' });

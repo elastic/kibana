@@ -246,6 +246,16 @@ describe(
         clickInsightsResultRemediationButton();
 
         validateUserGotRedirectedToTrustedApps();
+
+        // Fill in the trusted apps form to enable submit button
+        cy.getByTestSubj('trustedApps-form-nameTextField').type('Test Trusted App');
+        cy.getByTestSubj('trustedApps-form-descriptionField').type(
+          'Test Description for trusted app'
+        );
+        cy.getByTestSubj('trustedApps-form-conditionsBuilder-group1-entry0-value').type(
+          'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476'
+        );
+
         stubPutWorkflowInsightsApiResponse();
         clickTrustedAppFormSubmissionButton();
         validateUserGotRedirectedToEndpointDetails(endpointId);

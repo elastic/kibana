@@ -89,6 +89,15 @@ describe('getAggregationTemplate', () => {
     });
     expect(result).toBe('PERCENTILE(??metricName, 95)');
   });
+
+  it('should return PERCENTILE with to_tdigest casting for legacy histogram', () => {
+    const result = getAggregationTemplate({
+      type: ES_FIELD_TYPES.HISTOGRAM,
+      instrument: 'histogram',
+      placeholderName: 'metricName',
+    });
+    expect(result).toBe('PERCENTILE(TO_TDIGEST(??metricName), 95)');
+  });
 });
 
 describe('createTimeBucketAggregation', () => {

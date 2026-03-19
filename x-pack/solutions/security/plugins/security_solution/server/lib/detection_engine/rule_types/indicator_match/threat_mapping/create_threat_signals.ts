@@ -37,6 +37,7 @@ import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
 import { getDataTierFilter } from '../../utils/get_data_tier_filter';
+import { getDataStreamNamespaceFilter } from '../../utils/get_data_stream_namespace_filter';
 import { getQueryFields } from '../../utils/get_query_fields';
 
 export const createThreatSignals = async ({
@@ -100,9 +101,23 @@ export const createThreatSignals = async ({
     uiSettingsClient: services.uiSettingsClient,
   });
 
+  const dataStreamNamespaceFilters = await getDataStreamNamespaceFilter({
+    uiSettingsClient: services.uiSettingsClient,
+  });
+
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
-  const allEventFilters = [...filters, eventMappingFilter, ...dataTiersFilters];
-  const allThreatFilters = [...threatFilters, indicatorMappingFilter, ...dataTiersFilters];
+  const allEventFilters = [
+    ...filters,
+    eventMappingFilter,
+    ...dataTiersFilters,
+    ...dataStreamNamespaceFilters,
+  ];
+  const allThreatFilters = [
+    ...threatFilters,
+    indicatorMappingFilter,
+    ...dataTiersFilters,
+    ...dataStreamNamespaceFilters,
+  ];
 
   const dataViews = await services.getDataViews();
   const inputIndexFields = await getQueryFields({
@@ -126,6 +141,7 @@ export const createThreatSignals = async ({
   });
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
+  results.totalEventsFound = eventCount;
 
   let threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
@@ -155,7 +171,7 @@ export const createThreatSignals = async ({
     indexFields: threatIndexFields,
   });
 
-  ruleExecutionLogger.debug(`Total indicator items: ${threatListCount}`);
+  ruleExecutionLogger.info(`Found threat indicators: ${threatListCount}`);
 
   const threatListConfig = {
     fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
@@ -388,6 +404,9 @@ export const createThreatSignals = async ({
     signalsCount: results.createdSignalsCount,
     responseActions: completeRule.ruleParams.responseActions,
   });
+  // Restore totalEventsFound since combineConcurrentResults doesn't carry it through
+  results.totalEventsFound = eventCount;
+
   ruleExecutionLogger.trace('Indicator matching rule has completed');
   return results;
 };

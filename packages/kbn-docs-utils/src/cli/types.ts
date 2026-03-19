@@ -17,6 +17,7 @@ import type {
   ReferencedDeprecationsByPlugin,
   UnreferencedDeprecationsByPlugin,
   AdoptionTrackedAPIsByPlugin,
+  UnnamedExportsByPlugin,
   ApiStats,
   PluginMetaInfo,
 } from '../types';
@@ -71,8 +72,10 @@ export interface CliContext {
  * Result from setup_project task.
  */
 export interface SetupProjectResult {
-  /** Discovered plugins and packages. */
+  /** Plugins/packages to analyze (may be filtered via --plugin/--package). */
   plugins: PluginOrPackage[];
+  /** All discovered plugins/packages (for cross-reference resolution). */
+  allPlugins: PluginOrPackage[];
   /** File paths grouped by package. */
   pathsByPlugin: Map<PluginOrPackage, string[]>;
   /** TypeScript project instance. */
@@ -95,6 +98,8 @@ export interface BuildApiMapResult {
   unreferencedDeprecations: UnreferencedDeprecationsByPlugin;
   /** Adoption-tracked APIs. */
   adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
+  /** Unnamed exports found during API collection. */
+  unnamedExports: UnnamedExportsByPlugin;
 }
 
 /**

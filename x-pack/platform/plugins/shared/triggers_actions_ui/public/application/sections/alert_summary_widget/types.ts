@@ -50,7 +50,7 @@ export interface DependencyProps {
 export interface AlertSummaryWidgetProps {
   ruleTypeIds?: string[];
   consumers?: string[];
-  filter?: estypes.QueryDslQueryContainer;
+  filter?: NonNullable<estypes.QueryDslQueryContainer>;
   fullSize?: boolean;
   onClick?: (status?: PublicAlertStatus) => void;
   timeRange: AlertSummaryTimeRange;

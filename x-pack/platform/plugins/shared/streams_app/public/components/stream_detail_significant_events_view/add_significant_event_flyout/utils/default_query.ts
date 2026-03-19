@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 
-export function defaultQuery(): StreamQueryKql {
+export function defaultQuery(): StreamQuery {
   return {
     id: v4(),
     title: '',
-    kql: {
+    description: '',
+    esql: {
       query: '',
     },
-    feature: undefined,
   };
 }

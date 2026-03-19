@@ -7,7 +7,7 @@
 
 import type { TimeState } from '@kbn/es-query';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import { buildEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
+import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 
 export function buildDiscoverParams(
@@ -15,15 +15,13 @@ export function buildDiscoverParams(
   definition: Streams.all.Definition,
   timeState: TimeState
 ) {
-  const esqlQuery = buildEsqlQuery(getIndexPatternsForStream(definition), query);
-
   return {
     timeRange: {
       from: timeState.timeRange.from,
       to: timeState.timeRange.to,
     },
     query: {
-      esql: esqlQuery,
+      esql: query.esql.query,
     },
     dataViewSpec: {
       id: v4(),

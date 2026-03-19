@@ -87,7 +87,7 @@ export function Histogram({
         : '0'};
     }
 
-    & .echLegend .echLegendList {
+    & .echLegend .echLegendGridList {
       padding-right: ${euiTheme.size.s};
     }
 

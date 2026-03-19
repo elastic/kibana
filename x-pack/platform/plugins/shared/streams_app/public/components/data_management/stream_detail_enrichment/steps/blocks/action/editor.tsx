@@ -57,6 +57,8 @@ import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './pro
 import { ReplaceProcessorForm } from './replace';
 import { RedactProcessorForm } from './redact';
 import { SetProcessorForm } from './set';
+import { SplitProcessorForm } from './split';
+import { SortProcessorForm } from './sort';
 import { TransformStringProcessorForm } from './transform_string';
 import { ConcatProcessorForm } from './concat';
 import { JoinProcessorForm } from './join';
@@ -157,51 +159,11 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 {type === 'set' && <SetProcessorForm />}
                 {type === 'drop_document' && <DropProcessorForm />}
                 {type === 'math' && <MathProcessorForm />}
-                {type === 'uppercase' && (
-                  <TransformStringProcessorForm
-                    fieldSelectorHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseFieldHelpText',
-                      { defaultMessage: 'The field to uppercase.' }
-                    )}
-                    targetFieldHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseTargetHelpText',
-                      {
-                        defaultMessage:
-                          'The field that will hold the uppercased string. If empty, the input field is updated in place.',
-                      }
-                    )}
-                  />
-                )}
-                {type === 'lowercase' && (
-                  <TransformStringProcessorForm
-                    fieldSelectorHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseFieldHelpText',
-                      { defaultMessage: 'The field to lowercase.' }
-                    )}
-                    targetFieldHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseTargetHelpText',
-                      {
-                        defaultMessage:
-                          'The field that will hold the lowercase string. If empty, the input field is updated in place.',
-                      }
-                    )}
-                  />
-                )}
-                {type === 'trim' && (
-                  <TransformStringProcessorForm
-                    fieldSelectorHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimFieldHelpText',
-                      { defaultMessage: 'The field to trim.' }
-                    )}
-                    targetFieldHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimTargetHelpText',
-                      {
-                        defaultMessage:
-                          'The field that will hold the trimmed string. If empty, the input field is updated in place.',
-                      }
-                    )}
-                  />
-                )}
+                {type === 'uppercase' && <TransformStringProcessorForm />}
+                {type === 'lowercase' && <TransformStringProcessorForm />}
+                {type === 'trim' && <TransformStringProcessorForm />}
+                {type === 'split' && <SplitProcessorForm />}
+                {type === 'sort' && <SortProcessorForm />}
                 {type === 'concat' && <ConcatProcessorForm />}
                 {type === 'join' && <JoinProcessorForm />}
                 {type === 'network_direction' && <NetworkDirectionProcessorForm />}

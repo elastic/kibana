@@ -57,6 +57,7 @@
       "_cat/aliases/{name}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-aliases",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cat-aliases",
     "availability": {
       "stack": true,
       "serverless": true

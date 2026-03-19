@@ -25,6 +25,8 @@ import type {
   TrimProcessor,
   LowercaseProcessor,
   JoinProcessor,
+  SplitProcessor,
+  SortProcessor,
   ConcatProcessor,
   NetworkDirectionProcessor,
 } from '.';
@@ -142,6 +144,18 @@ export type IngestPipelineConcatProcessor = RenameFieldsAndRemoveAction<
   { to: 'field'; where: 'if' }
 >;
 
+// Split
+export type IngestPipelineSplitProcessor = RenameFieldsAndRemoveAction<
+  SplitProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Sort
+export type IngestPipelineSortProcessor = RenameFieldsAndRemoveAction<
+  SortProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
 // Network Direction
 export type IngestPipelineNetworkDirectionProcessor = RenameFieldsAndRemoveAction<
   NetworkDirectionProcessor,
@@ -172,6 +186,8 @@ export type IngestPipelineProcessor =
   | IngestPipelineLowercaseProcessor
   | IngestPipelineTrimProcessor
   | IngestPipelineJoinProcessor
+  | IngestPipelineSplitProcessor
+  | IngestPipelineSortProcessor
   | IngestPipelineConcatProcessor
   | IngestPipelineNetworkDirectionProcessor
   | IngestPipelineManualIngestPipelineProcessor;

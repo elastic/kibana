@@ -23,7 +23,7 @@
             "label": "payload",
             "description": [],
             "signature": [
-              "{ spaceId?: string | undefined; version: string; isDeprecated?: boolean | undefined; title: string; objectType: string; forceNow?: string | undefined; layout?: { id?: ",
+              "{ spaceId?: string | undefined; version: string; isDeprecated?: boolean | undefined; objectType: string; title: string; forceNow?: string | undefined; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",

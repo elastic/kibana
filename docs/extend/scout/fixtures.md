@@ -8,7 +8,12 @@ Fixtures are Scout’s reusable building blocks for authentication, clients, dat
 
 ## Quick usage [scout-fixtures-usage]
 
+`kbnClient` and `browserAuth` are some popular fixtures:
+
 ```ts
+import { tags } from '@kbn/scout';
+import { test } from '../fixtures';
+
 test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.importExport.load('path/to/archive');
@@ -20,34 +25,35 @@ test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
 });
 ```
 
+The example uses `beforeAll` for worker-scoped setup (`kbnClient`) and `beforeEach` for test-scoped setup (`browserAuth`)—this pattern matches fixture availability (see [Fixture scope](#scout-fixtures-scope)).
+
 ## Fixture scope [scout-fixtures-scope]
 
 - **Worker-scoped** fixtures live for the lifetime of a Playwright worker.
 - **Test-scoped** fixtures are created per test.
 
-Use worker scope for expensive setup when tests can safely share it.
+::::::{note}
+Scope **affects** where a fixture is available: worker-scoped fixtures work in `beforeAll`, `beforeEach`, the test body, `afterEach`, and `afterAll`; test-scoped fixtures only in `beforeEach`, the test body, and `afterEach` (not in `beforeAll` or `afterAll`, since Playwright creates a new page/context per test).
+::::::
 
 ## Core Scout fixtures [core-scout-fixtures]
 
-These are provided by `@kbn/scout` and are also available when using solution Scout packages.
+Scout exposes different fixture sets depending on the entrypoint you import.
 
-| Worker-scoped | What it’s for                                              |
-| ------------- | ---------------------------------------------------------- |
-| `apiClient`   | Supertest-based HTTP client for endpoint validation        |
-| `apiServices` | Higher-level API helpers (setup/teardown/verification)     |
-| `config`      | Test server configuration                                  |
-| `esArchiver`  | Load ES archives                                           |
-| `esClient`    | Elasticsearch client                                       |
-| `kbnClient`   | Kibana API client                                          |
-| `requestAuth` | Role-scoped API key helper (see [API auth](./api-auth.md)) |
-| `log`         | Logger for fixtures and tests                              |
-| `samlAuth`    | SAML auth helper for interactive sessions (API tests)      |
+### UI tests (`test`) [scout-fixtures-test]
 
-| Test-scoped   | What it’s for                                                     |
-| ------------- | ----------------------------------------------------------------- |
-| `browserAuth` | Browser login via cookies (see [Browser auth](./browser-auth.md)) |
-| `pageObjects` | Registered [page objects](./page-objects.md)                      |
-| `page`        | Playwright `Page` extended by Scout helpers                       |
+- **Worker-scoped**: `log`, `config`, `kbnUrl`, `kbnClient`, `esClient`, `esArchiver`, `uiSettings`, `apiServices`, `samlAuth` (plus optional synthtrace clients)
+- **Test-scoped**: `browserAuth`, `page` (Scout-extended), `pageObjects`, `perfTracker`
+
+### Parallel UI tests (`spaceTest`) [scout-fixtures-spaceTest]
+
+- **Worker-scoped**: `log`, `config`, `kbnUrl`, `kbnClient`, `esClient`, `apiServices`, `samlAuth`, `scoutSpace` (one Space per worker)
+- **Test-scoped**: `browserAuth`, `page` (Scout-extended), `pageObjects`
+
+### API tests (`apiTest`) [scout-fixtures-apiTest]
+
+- **Worker-scoped**: `log`, `config`, `kbnUrl`, `kbnClient`, `esClient`, `esArchiver`, `apiClient`, `apiServices`, `samlAuth`, `requestAuth`
+- **Test-scoped**: browser fixtures like `page`/`context` are disabled (API tests are HTTP-only)
 
 ::::::{note}
 Availability varies by test type (UI vs API). When in doubt, rely on editor autocomplete for the fixture list available in your test.
@@ -55,21 +61,38 @@ Availability varies by test type (UI vs API). When in doubt, rely on editor auto
 
 ## Create plugin/solution fixtures [create-a-new-fixture]
 
+:::::::::::{stepper}
+
+::::::::::{step} Add fixture folders
+
 Add fixtures under your test tree:
 
 - UI fixtures: `<plugin-root>/test/scout/ui/fixtures`
 - API fixtures: `<plugin-root>/test/scout/api/fixtures`
 - Shared: `<plugin-root>/test/scout/common/fixtures`
 
+::::::::::
+
+::::::::::{step} Create a `fixtures/index.ts` entry point
+
 Typically you’ll create a `fixtures/index.ts` entry point that **extends** Scout’s base `test` (UI) and/or `apiTest` (API), then import that in your spec files:
 
 ```ts
 // UI test spec: <plugin-root>/test/scout/ui/tests/my_suite.spec.ts
+import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test('uses plugin fixtures', async ({ pageObjects }) => {
+test('uses plugin fixtures', { tag: tags.deploymentAgnostic }, async ({ pageObjects }) => {
   // ...
 });
 ```
 
+::::::::::
+
+::::::::::{step} Contribute when broadly useful
+
 If a fixture would be broadly useful, consider contributing it to `@kbn/scout` (platform-wide) or your solution Scout package.
+
+::::::::::
+
+:::::::::::

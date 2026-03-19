@@ -8,14 +8,16 @@
 import moment from 'moment-timezone';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiInMemoryTable,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
+  EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,7 +31,9 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
+import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../../../common/use_persisted_page_size';
 import { SavedQueryRowActions } from './saved_query_row_actions';
+import { SavedQueriesTable } from './saved_queries_table';
 
 export interface SavedQuerySO {
   name: string;
@@ -40,10 +44,19 @@ export interface SavedQuerySO {
   timeout?: number;
   ecs_mapping: ECSMapping;
   created_by?: string;
+  created_by_profile_uid?: string;
   updated_at: string;
   updated_by?: string;
+  updated_by_profile_uid?: string;
   prebuilt?: boolean;
 }
+
+const RUN_QUERY_PERMISSION_DENIED = i18n.translate(
+  'xpack.osquery.savedQueryList.permissionDeniedRunTooltip',
+  {
+    defaultMessage: 'You do not have sufficient permissions to run this query.',
+  }
+);
 
 interface PlayButtonProps {
   disabled: boolean;
@@ -79,8 +92,10 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
     [savedQuery]
   );
 
+  const tooltipContent = disabled ? RUN_QUERY_PERMISSION_DENIED : playText;
+
   return (
-    <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
+    <EuiToolTip position="top" content={tooltipContent}>
       <EuiButtonIcon
         color="primary"
         iconType="play"
@@ -133,6 +148,12 @@ const EditButtonComponent: React.FC<EditButtonProps> = ({
 
 const EditButton = React.memo(EditButtonComponent);
 
+const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
+  padding: `0 ${euiTheme.size.l}`,
+  flex: 1,
+  minWidth: 0,
+});
+
 const SavedQueriesPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
@@ -140,7 +161,7 @@ const SavedQueriesPageComponent = () => {
   useBreadcrumbs('saved_queries');
   const newQueryLinkProps = useRouterNavigate('saved_queries/new');
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = usePersistedPageSize();
   const [sortField, setSortField] = useState('updated_at');
   const [sortDirection, setSortDirection] = useState<Direction>(Direction.desc);
 
@@ -154,16 +175,13 @@ const SavedQueriesPageComponent = () => {
   );
 
   const renderPlayAction = useCallback(
-    (item: SavedQuerySO) =>
-      permissions.runSavedQueries || permissions.writeLiveQueries ? (
-        <PlayButton savedQuery={item} disabled={false} />
-      ) : (
-        <></>
-      ),
-    [permissions.runSavedQueries, permissions.writeLiveQueries]
+    (item: SavedQuerySO) => (
+      <PlayButton savedQuery={item} disabled={!permissions.runSavedQueries} />
+    ),
+    [permissions.runSavedQueries]
   );
 
-  const renderUpdatedAt = useCallback((updatedAt: any, item: any) => {
+  const renderUpdatedAt = useCallback((updatedAt: string, item: SavedQuerySO) => {
     if (!updatedAt) return '-';
 
     const updatedBy = item.updated_by !== item.created_by ? ` @ ${item.updated_by}` : '';
@@ -243,19 +261,22 @@ const SavedQueriesPageComponent = () => {
     ]
   );
 
-  const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
-    setSortField(sort.field);
-    setSortDirection(sort.direction);
-  }, []);
+  const onTableChange = useCallback(
+    ({ page = {}, sort = {} }: any) => {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+      setSortField(sort.field);
+      setSortDirection(sort.direction);
+    },
+    [setPageSize]
+  );
 
   const pagination = useMemo(
     () => ({
       pageIndex,
       pageSize,
       totalItemCount: data?.total ?? 0,
-      pageSizeOptions: [10, 20, 50, 100],
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
     }),
     [pageIndex, pageSize, data?.total]
   );
@@ -270,25 +291,7 @@ const SavedQueriesPageComponent = () => {
     [sortDirection, sortField]
   );
 
-  const LeftColumn = useMemo(
-    () => (
-      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.osquery.savedQueryList.pageTitle"
-                defaultMessage="Saved queries"
-              />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    []
-  );
-
-  const RightColumn = useMemo(
+  const addSavedQueryButton = useMemo(
     () => (
       <EuiButton
         fill
@@ -305,8 +308,36 @@ const SavedQueriesPageComponent = () => {
     [permissions.writeSavedQueries, newQueryLinkProps]
   );
 
+  if (queryHistoryRework) {
+    return (
+      <div css={fullWidthContentCss}>
+        <EuiSpacer size="l" />
+        <SavedQueriesTable />
+      </div>
+    );
+  }
+
+  const LeftColumn = (
+    <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
+      <EuiFlexItem>
+        <EuiText>
+          <h1>
+            <FormattedMessage
+              id="xpack.osquery.savedQueryList.pageTitle"
+              defaultMessage="Saved queries"
+            />
+          </h1>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
+    <WithHeaderLayout
+      leftColumn={LeftColumn}
+      rightColumn={addSavedQueryButton}
+      rightColumnGrow={false}
+    >
       {data?.data && (
         <EuiInMemoryTable
           items={data?.data}

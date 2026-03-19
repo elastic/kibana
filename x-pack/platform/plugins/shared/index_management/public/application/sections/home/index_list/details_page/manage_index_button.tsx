@@ -42,6 +42,7 @@ interface Props {
   index: Index;
   reloadIndexDetails: () => Promise<void>;
   navigateToIndicesList: () => void;
+  onIndexRefresh?: () => Promise<void> | void;
   fill?: boolean;
 }
 
@@ -55,6 +56,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
   index,
   reloadIndexDetails,
   navigateToIndicesList,
+  onIndexRefresh,
   fill = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -131,6 +133,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     try {
       await refreshIndicesRequest(indexNames);
       await reloadIndices();
+      await onIndexRefresh?.();
       setIsLoading(false);
       notificationService.showSuccessToast(
         i18n.translate('xpack.idxMgmt.refreshIndicesAction.indexRefreshedMessage', {
@@ -142,7 +145,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndices, indexNames]);
+  }, [reloadIndices, indexNames, onIndexRefresh]);
 
   const clearCacheIndices = useCallback(async () => {
     setIsLoading(true);

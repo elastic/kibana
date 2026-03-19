@@ -12,7 +12,7 @@ import type {
   ConversationRound,
   VersionedAttachment,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, attachmentTools } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { registerAttachmentRoutes } from './attachments';
@@ -571,7 +571,7 @@ describe('Attachment Routes', () => {
           {
             type: ConversationRoundStepType.toolCall,
             tool_call_id: 'tc-1',
-            tool_id: 'platform.core.attachment_read',
+            tool_id: attachmentTools.read,
             params: { attachment_id: 'att-1' },
             results: [
               {

@@ -8,15 +8,22 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { BuiltInStepType, ConnectorTypeInfo } from '@kbn/workflows';
+import type { BuiltInStepType, ConnectorTypeInfo, WorkflowOutput } from '@kbn/workflows';
 import {
   DataSetStepSchema,
   ForEachStepSchema,
-  HttpStepSchema,
+  getBuiltInStepStability,
   IfStepSchema,
+  LoopBreakStepSchema,
+  LoopContinueStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
   WaitStepSchema,
+  WhileStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
+  WorkflowOutputStepSchema,
 } from '@kbn/workflows';
 import { getCachedAllConnectors } from '../../../connectors_cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
@@ -31,10 +38,12 @@ const connectorTypeSuggestionsCache = new Map<string, monaco.languages.Completio
 export function getConnectorTypeSuggestions(
   typePrefix: string,
   range: monaco.IRange,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
+  isInsideLoopBody = false,
+  workflowOutputs?: WorkflowOutput[]
 ): monaco.languages.CompletionItem[] {
-  // Create a cache key based on the type prefix and context
-  const cacheKey = `${typePrefix}|${JSON.stringify(range)}`;
+  // Create a cache key based on the type prefix, context, and loop state
+  const cacheKey = `${typePrefix}|${JSON.stringify(range)}|${isInsideLoopBody}`;
 
   // Check cache first
   if (connectorTypeSuggestionsCache.has(cacheKey)) {
@@ -108,18 +117,30 @@ export function getConnectorTypeSuggestions(
     });
   } else {
     // First, add built-in step types that match the prefix
-    const matchingBuiltInTypes = builtInStepTypes.filter((stepType) =>
-      stepType.type.toLowerCase().includes(typePrefix.toLowerCase())
+    const matchingBuiltInTypes = builtInStepTypes.filter(
+      (stepType) =>
+        stepType.type.toLowerCase().includes(typePrefix.toLowerCase()) &&
+        (!stepType.loopOnly || isInsideLoopBody)
     );
 
     matchingBuiltInTypes.forEach((stepType) => {
-      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType);
+      const snippetText = generateBuiltInStepSnippet(
+        stepType.type as BuiltInStepType,
+        {},
+        workflowOutputs
+      );
       const extendedRange = {
         startLineNumber: range.startLineNumber,
         endLineNumber: range.endLineNumber,
         startColumn: range.startColumn,
         endColumn: Math.max(range.endColumn, 1000),
       };
+
+      const stability = getBuiltInStepStability(stepType.type);
+      const detail =
+        stability === 'tech_preview'
+          ? 'Built-in workflow step (Tech Preview)'
+          : 'Built-in workflow step';
 
       suggestions.push({
         label: stepType.type,
@@ -129,8 +150,8 @@ export function getConnectorTypeSuggestions(
         range: extendedRange,
         documentation: stepType.description,
         filterText: stepType.type,
-        sortText: `!${stepType.type}`, // Priority prefix to sort before connector suggestions
-        detail: 'Built-in workflow step',
+        sortText: `!${stepType.type}`,
+        detail,
         preselect: false,
       });
     });
@@ -187,6 +208,7 @@ let builtInStepTypesCache: Array<{
   type: string;
   description: string;
   icon: monaco.languages.CompletionItemKind;
+  loopOnly?: boolean;
 }> | null = null;
 
 /**
@@ -196,6 +218,7 @@ function getBuiltInStepTypesFromSchema(): Array<{
   type: string;
   description: string;
   icon: monaco.languages.CompletionItemKind;
+  loopOnly?: boolean;
 }> {
   if (builtInStepTypesCache !== null) {
     return builtInStepTypesCache;
@@ -210,9 +233,27 @@ function getBuiltInStepTypesFromSchema(): Array<{
       icon: monaco.languages.CompletionItemKind.Method,
     },
     {
+      schema: WhileStepSchema,
+      description:
+        'Repeat steps while condition is true (do-while semantics — first iteration always runs).',
+      icon: monaco.languages.CompletionItemKind.Method,
+    },
+    {
       schema: IfStepSchema,
       description: 'Execute steps conditionally based on a condition',
       icon: monaco.languages.CompletionItemKind.Keyword,
+    },
+    {
+      schema: LoopBreakStepSchema,
+      description: 'Exit the enclosing loop immediately',
+      icon: monaco.languages.CompletionItemKind.Keyword,
+      loopOnly: true,
+    },
+    {
+      schema: LoopContinueStepSchema,
+      description: 'Skip to the next loop iteration',
+      icon: monaco.languages.CompletionItemKind.Keyword,
+      loopOnly: true,
     },
     {
       schema: ParallelStepSchema,
@@ -230,18 +271,33 @@ function getBuiltInStepTypesFromSchema(): Array<{
       icon: monaco.languages.CompletionItemKind.Variable,
     },
     {
-      schema: HttpStepSchema,
-      description: 'Make HTTP requests',
-      icon: monaco.languages.CompletionItemKind.Reference,
-    },
-    {
       schema: WaitStepSchema,
       description: 'Wait for a specified duration',
       icon: monaco.languages.CompletionItemKind.Constant,
     },
+    {
+      schema: WorkflowExecuteStepSchema,
+      description: 'Execute another workflow (synchronous)',
+      icon: monaco.languages.CompletionItemKind.Function,
+    },
+    {
+      schema: WorkflowExecuteAsyncStepSchema,
+      description: 'Execute another workflow (asynchronous)',
+      icon: monaco.languages.CompletionItemKind.Function,
+    },
+    {
+      schema: WorkflowOutputStepSchema,
+      description: 'Output values from the workflow',
+      icon: monaco.languages.CompletionItemKind.Property,
+    },
+    {
+      schema: WorkflowFailStepSchema,
+      description: 'Fail the workflow with a message',
+      icon: monaco.languages.CompletionItemKind.Constant,
+    },
   ];
 
-  const stepTypes = stepSchemas.map(({ schema, description, icon }) => {
+  const stepTypes = stepSchemas.map(({ schema, description, icon, loopOnly = false }) => {
     // Extract the literal type value from the Zod schema
     const typeField = schema.shape.type;
     const stepType = typeField.def.values[0]; // Get the literal value from z.literal()
@@ -250,6 +306,7 @@ function getBuiltInStepTypesFromSchema(): Array<{
       type: stepType,
       description,
       icon,
+      loopOnly,
     };
   });
 

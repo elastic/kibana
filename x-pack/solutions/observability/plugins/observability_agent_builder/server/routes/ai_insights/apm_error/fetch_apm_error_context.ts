@@ -15,7 +15,8 @@ import type {
 } from '../../../types';
 import { getApmIndices } from '../../../utils/get_apm_indices';
 import { parseDatemath } from '../../../utils/time';
-import { fetchDistributedTrace } from './fetch_distributed_trace';
+import { getServiceTopology } from '../../../tools/get_service_topology/get_service_topology';
+import { getTraceDocuments } from '../../../tools/get_traces/get_trace_documents';
 
 export interface FetchApmErrorContextParams {
   core: ObservabilityAgentBuilderCoreSetup;
@@ -84,10 +85,14 @@ export async function fetchApmErrorContext({
       start,
       end,
       handler: () =>
-        dataRegistry.getData('apmDownstreamDependencies', {
+        getServiceTopology({
+          core,
+          plugins,
+          dataRegistry,
           request,
+          logger,
           serviceName,
-          serviceEnvironment: environment ?? '',
+          direction: 'downstream',
           start,
           end,
         }),
@@ -97,13 +102,15 @@ export async function fetchApmErrorContext({
   if (traceId) {
     const traceContextPromise = (async () => {
       const apmIndices = await getApmIndices({ core, plugins, logger });
-      return fetchDistributedTrace({
+      return getTraceDocuments({
         esClient,
-        apmIndices,
-        traceId,
-        start: parsedStart,
-        end: parsedEnd,
-        logger,
+        traceIds: [traceId],
+        index: [apmIndices.transaction, apmIndices.span, apmIndices.error].flatMap((pattern) =>
+          pattern.split(',')
+        ),
+        size: 100,
+        startTime: parsedStart,
+        endTime: parsedEnd,
       });
     })();
 
@@ -112,10 +119,10 @@ export async function fetchApmErrorContext({
       start,
       end,
       handler: async () => {
-        const { traceDocuments, isPartialTrace } = await traceContextPromise;
+        const [trace] = await traceContextPromise;
         return {
-          isPartialTrace,
-          documents: traceDocuments,
+          isPartialTrace: trace.isTruncated,
+          documents: trace.items,
         };
       },
     });
@@ -124,7 +131,10 @@ export async function fetchApmErrorContext({
       name: 'TraceServices',
       start,
       end,
-      handler: async () => (await traceContextPromise).services,
+      handler: async () => {
+        const [trace] = await traceContextPromise;
+        return trace.services;
+      },
     });
   }
 

@@ -105,6 +105,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   agents?: number;
   unprivileged_agents?: number;
   fips_agents?: number;
+  agents_per_version?: Array<{ version: string; count: number }>;
   is_protected: boolean;
   version?: string;
 }

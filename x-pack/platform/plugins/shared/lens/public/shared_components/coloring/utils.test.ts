@@ -14,19 +14,19 @@ describe('getContrastColor', () => {
   });
 
   it('should pick the dark color when the passed one is light', () => {
-    expect(getContrastColor('#fff', true)).toBe('#000000');
-    expect(getContrastColor('#fff', false)).toBe('#000000');
+    expect(getContrastColor('#fff', true)).toBe('#07101F');
+    expect(getContrastColor('#fff', false)).toBe('#07101F');
   });
 
   it('should take into account background color if the primary color is opaque', () => {
     expect(getContrastColor('rgba(0,0,0,0)', true)).toBe('#FFFFFF');
-    expect(getContrastColor('rgba(0,0,0,0)', false)).toBe('#000000');
+    expect(getContrastColor('rgba(0,0,0,0)', false)).toBe('#07101F');
     expect(getContrastColor('#00000000', true)).toBe('#FFFFFF');
-    expect(getContrastColor('#00000000', false)).toBe('#000000');
+    expect(getContrastColor('#00000000', false)).toBe('#07101F');
     expect(getContrastColor('#FFFFFF00', true)).toBe('#FFFFFF');
-    expect(getContrastColor('#FFFFFF00', false)).toBe('#000000');
+    expect(getContrastColor('#FFFFFF00', false)).toBe('#07101F');
     expect(getContrastColor('rgba(255,255,255,0)', true)).toBe('#FFFFFF');
-    expect(getContrastColor('rgba(255,255,255,0)', false)).toBe('#000000');
+    expect(getContrastColor('rgba(255,255,255,0)', false)).toBe('#07101F');
   });
 });
 

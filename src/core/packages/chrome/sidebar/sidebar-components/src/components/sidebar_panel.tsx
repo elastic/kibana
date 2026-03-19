@@ -33,6 +33,7 @@ const panelContainerStyles = (isProjectStyle: boolean) => (theme: UseEuiTheme) =
     flex-direction: column;
     flex-grow: 1;
     min-width: 0; // Allow panel to shrink
+    overflow: hidden; // Force children to respect border radius and shadow
 
     ${isProjectStyle &&
     css`

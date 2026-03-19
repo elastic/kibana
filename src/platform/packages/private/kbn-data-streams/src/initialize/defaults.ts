@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep, get } from 'lodash';
 import type { AnyDataStreamDefinition, DataStreamDefinition } from '../types';
 
 /**
@@ -20,9 +20,26 @@ function validateMappings(def: AnyDataStreamDefinition): void {
     return;
   }
 
-  if ('kibana' in properties) {
+  const kibanaProperties: unknown = get(properties, 'kibana.properties');
+  const kibanaType: unknown = get(properties, 'kibana.type');
+
+  if ('kibana' in properties && kibanaType !== undefined && kibanaType !== 'object') {
     throw new Error(
-      `Data stream "${def.name}" contains reserved mapping key "kibana". ` +
+      `Data stream "${def.name}" contains invalid mapping for "kibana". ` +
+        `This field must be mapped as type "object".`
+    );
+  }
+
+  if (kibanaProperties && typeof kibanaProperties === 'object' && 'space_ids' in kibanaProperties) {
+    throw new Error(
+      `Data stream "${def.name}" contains reserved mapping key "kibana.space_ids". ` +
+        `This field is reserved for space-aware indexing.`
+    );
+  }
+
+  if (kibanaProperties && typeof kibanaProperties === 'object' && '_system' in kibanaProperties) {
+    throw new Error(
+      `Data stream "${def.name}" contains reserved mapping key "kibana._system". ` +
         `This namespace is reserved for system properties.`
     );
   }

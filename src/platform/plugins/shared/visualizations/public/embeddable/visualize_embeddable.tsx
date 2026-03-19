@@ -10,7 +10,6 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EmbeddableStart, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
@@ -40,10 +39,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
-import {
-  APPLY_FILTER_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER, ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { getInspector, getUiActions, getUsageCollection } from '../services';
@@ -59,26 +55,22 @@ import { checkForDuplicateTitle } from '../utils/saved_objects_utils';
 
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
-  embeddableEnhancedStart?: EmbeddableEnhancedPluginStart;
-}) => EmbeddableFactory<VisualizeEmbeddableState, VisualizeApi> = ({
-  embeddableStart,
-  embeddableEnhancedStart,
-}) => ({
+}) => EmbeddableFactory<VisualizeEmbeddableState, VisualizeApi> = ({ embeddableStart }) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
-  buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+  buildEmbeddable: async ({
+    initializeDrilldownsManager,
+    initialState,
+    finalizeApi,
+    parentApi,
+    uuid,
+  }) => {
     // Runtime state may contain title loaded from saved object
     // Initialize titleManager with serialized state
     // to avoid tracking runtime state title as serialized state title
     const titleManager = initializeTitleManager(initialState);
 
     // Initialize dynamic actions
-    const dynamicActionsManager = await embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
-      uuid,
-      () => titleManager.api.title$.getValue(),
-      initialState
-    );
-    // if it is provided, start the dynamic actions manager
-    const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+    const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
     const runtimeState = await deserializeState(initialState);
 
@@ -188,7 +180,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         ...(runtimeState.savedObjectProperties
           ? { savedObjectProperties: runtimeState.savedObjectProperties }
           : {}),
-        getDynamicActionsState: dynamicActionsManager?.getLatestState,
+        drilldowns: drilldownsManager.getLatestState(),
         ...timeRangeManager.getLatestState(),
       });
     };
@@ -200,7 +192,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         return serializeVisualizeEmbeddable(savedObjectId$.getValue(), linkedToLibrary);
       },
       anyStateChange$: merge(
-        ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
+        drilldownsManager.anyStateChange$,
         savedObjectId$,
         serializedVis$,
         titleManager.anyStateChange$,
@@ -208,7 +200,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       ).pipe(map(() => undefined)),
       getComparators: () => {
         return {
-          ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
+          ...drilldownsManager.comparators,
           ...titleComparators,
           ...timeRangeComparators,
           savedObjectId: 'skip',
@@ -239,7 +231,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         };
       },
       onReset: async (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        drilldownsManager.reinitializeState(lastSaved ?? {});
         timeRangeManager.reinitializeState(lastSaved);
         titleManager.reinitializeState(lastSaved);
 
@@ -252,14 +244,14 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const api = finalizeApi({
       ...timeRangeManager.api,
       ...titleManager.api,
-      ...(dynamicActionsManager?.api ?? {}),
+      ...drilldownsManager.api,
       ...unsavedChangesApi,
       defaultTitle$,
       dataLoading$,
       dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
       projectRoutingOverrides$,
       rendered$: hasRendered$,
-      supportedTriggers: () => [ACTION_CONVERT_TO_LENS, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER],
+      supportedTriggers: () => [ACTION_CONVERT_TO_LENS, ON_APPLY_FILTER, ON_SELECT_RANGE],
       serializeState: () => {
         // In the visualize editor, linkedToLibrary should always be false to force the full state to be serialized,
         // instead of just passing a reference to the linked saved object. Other contexts like dashboards should
@@ -496,9 +488,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
         useEffect(() => {
           return () => {
+            drilldownsManager.cleanup();
             fetchSubscription.unsubscribe();
             serializedVisSubscription.unsubscribe();
-            maybeStopDynamicActions?.stopDynamicActions();
           };
         }, []);
 

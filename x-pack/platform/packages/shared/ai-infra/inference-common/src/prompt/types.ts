@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { MessageRole } from '../chat_complete';
 import type { Model } from '../model_provider';
 import type { ToolDefinitions } from '../chat_complete/tools';

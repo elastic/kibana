@@ -17,11 +17,13 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { ResponseSection } from './response_section';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../../../shared/hooks/use_expand_section');
+jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
+  useExpandSection: jest.fn(),
+}));
 jest.mock('../../../../common/lib/kibana');
 
 const mockedUseKibana = mockUseKibana();
@@ -41,31 +43,33 @@ const renderResponseSection = () =>
   );
 
 describe('<ResponseSection />', () => {
+  const mockUseExpandSection = jest.mocked(useExpandSection);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseExpandSection.mockReturnValue(true);
+  });
+
   it('should render response component', () => {
     const { getByTestId } = renderResponseSection();
 
-    expect(getByTestId(RESPONSE_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RESPONSE_SECTION_HEADER_TEST_ID)).toHaveTextContent('Response');
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render the component collapsed if value is false in local storage', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(false);
+    mockUseExpandSection.mockReturnValue(false);
 
     const { getByTestId } = renderResponseSection();
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).not.toBeVisible();
   });
 
   it('should render the component expanded if value is true in local storage', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
-
     const { getByTestId } = renderResponseSection();
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toBeVisible();
   });
 
   it('should render response button for event kind signal', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
-
     const mockGetFieldsData = (field: string) => {
       switch (field) {
         case 'event.kind':
@@ -91,8 +95,6 @@ describe('<ResponseSection />', () => {
   });
 
   it('should render preview message if flyout is in preview', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
-
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <TestProvider>
@@ -106,8 +108,6 @@ describe('<ResponseSection />', () => {
   });
 
   it('should render empty component if document is not signal', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
-
     const mockGetFieldsData = (field: string) => {
       switch (field) {
         case 'event.kind':

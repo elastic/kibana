@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PatchListRequestBody, PatchListResponse } from '@kbn/securitysolution-lists-common/api';
 import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 

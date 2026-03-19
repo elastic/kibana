@@ -44,7 +44,7 @@ export const DateFormatsField = ({ onGenerate }: { onGenerate?: () => void }) =>
         <span css={{ alignContent: 'flex-end', height: '100%', display: 'inline-block' }}>
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.dateFormatsLabel',
-            { defaultMessage: 'Format' }
+            { defaultMessage: 'Date format' }
           )}
         </span>
       }
@@ -67,7 +67,7 @@ export const DateFormatsField = ({ onGenerate }: { onGenerate?: () => void }) =>
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateFormatsHelpText"
-          defaultMessage="Expected date format. Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N format."
+          defaultMessage="Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N format."
         />
       }
       fullWidth

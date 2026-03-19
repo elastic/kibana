@@ -21,14 +21,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { SloTabId } from '@kbn/deeplinks-observability';
 import { OVERVIEW_TAB_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
+} from '@kbn/observability-agent-builder-plugin/public';
 import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
 import { SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../hooks/use_kibana';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export interface SloOverviewDetailsContentProps {
   slo: SLOWithSummaryResponse;
@@ -39,14 +44,55 @@ export function SloOverviewDetailsContent({
   slo,
   initialTabId = OVERVIEW_TAB_ID,
 }: SloOverviewDetailsContentProps) {
+  const { agentBuilder } = useKibana().services;
+  const { telemetry } = usePluginContext();
   const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
+
+  const handleTabChange = useCallback(
+    (tabId: SloTabId) => {
+      setSelectedTabId(tabId);
+      if (telemetry) {
+        telemetry.reportSloDetailsFlyoutTabChanged({ tabId });
+      }
+    },
+    [telemetry]
+  );
 
   const { tabs } = useSloDetailsTabs({
     slo,
     isAutoRefreshing: false,
     selectedTabId,
-    setSelectedTabId,
+    setSelectedTabId: handleTabChange,
   });
+
+  // Configure agent builder global flyout with the SLO attachment
+  useEffect(() => {
+    if (!agentBuilder || !slo) {
+      return;
+    }
+
+    agentBuilder.setChatConfig({
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
+          data: {
+            sloId: slo.id,
+            remoteName: slo.remote?.remoteName,
+            sloInstanceId: slo.instanceId,
+            attachmentLabel: i18n.translate('xpack.slo.sloDetails.sloAttachmentLabel', {
+              defaultMessage: '{sloName} SLO',
+              values: { sloName: slo.name },
+            }),
+          },
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearChatConfig();
+    };
+  }, [agentBuilder, slo]);
 
   return (
     <>

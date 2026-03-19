@@ -4,21 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
-import { IngestBase, IngestBaseStream, IngestBaseUpsertRequest } from './base';
+import { z } from '@kbn/zod/v4';
+import type { IngestBaseStream } from './base';
+import {
+  IngestBase,
+  IngestBaseUpsertRequest,
+  ingestBaseSchemaFields,
+  ingestBaseUpsertSchemaFields,
+  ingestBaseStreamDefinitionSchema,
+  ingestBaseStreamGetResponseSchema,
+  ingestBaseStreamUpsertDefinitionSchema,
+  ingestBaseStreamUpsertRequestSchema,
+} from './base';
 import type { ClassicIngestStreamEffectiveLifecycle } from './lifecycle';
 import { classicIngestStreamEffectiveLifecycleSchema } from './lifecycle';
 import type { ElasticsearchAssets } from './common';
 import { elasticsearchAssetsSchema } from './common';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
-import type { ModelOfSchema, ModelValidation } from '../validation/model_validation';
-import { modelValidation } from '../validation/model_validation';
-import { BaseStream } from '../base';
+import type { BaseStream } from '../base';
 import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
-import type { FieldDefinition } from '../../fields';
-import { fieldDefinitionSchema } from '../../fields';
+import type { ClassicFieldDefinition } from '../../fields';
+import { classicFieldDefinitionSchema } from '../../fields';
 import type { EffectiveFailureStore } from './failure_store';
 import { effectiveFailureStoreSchema } from './failure_store';
 
@@ -26,36 +34,39 @@ import { effectiveFailureStoreSchema } from './failure_store';
 
 export interface IngestClassic {
   classic: {
-    field_overrides?: FieldDefinition;
+    field_overrides?: ClassicFieldDefinition;
   };
 }
 
-export const IngestClassic: z.Schema<IngestClassic> = z.object({
+const ingestClassicShape = {
   classic: z.object({
-    field_overrides: z.optional(fieldDefinitionSchema),
+    field_overrides: z.optional(classicFieldDefinitionSchema),
   }),
-});
+};
 
 export type ClassicIngest = IngestBase & IngestClassic;
 
+const classicIngestSchemaObject = z.object({
+  ...ingestBaseSchemaFields,
+  ...ingestClassicShape,
+});
+
 export const ClassicIngest: Validation<IngestBase, ClassicIngest> = validation(
   IngestBase.right,
-  z.intersection(IngestBase.right, IngestClassic)
+  classicIngestSchemaObject
 );
 
-type IngestClassicUpsertRequest = IngestClassic;
+export type ClassicIngestUpsertRequest = IngestBaseUpsertRequest & IngestClassic;
 
-const IngestClassicUpsertRequest = IngestClassic;
-
-export type ClassicIngestUpsertRequest = IngestBaseUpsertRequest & IngestClassicUpsertRequest;
+const classicIngestUpsertSchemaObject = z.object({
+  ...ingestBaseUpsertSchemaFields,
+  ...ingestClassicShape,
+});
 
 export const ClassicIngestUpsertRequest: Validation<
   IngestBaseUpsertRequest,
   ClassicIngestUpsertRequest
-> = validation(
-  IngestBaseUpsertRequest.right,
-  z.intersection(IngestBaseUpsertRequest.right, IngestClassicUpsertRequest)
-);
+> = validation(IngestBaseUpsertRequest.right, classicIngestUpsertSchemaObject);
 
 type OmitClassicStreamUpsertProps<
   T extends {
@@ -68,16 +79,6 @@ type OmitClassicStreamUpsertProps<
     processing: Omit<ClassicIngest['processing'], 'updated_at'> & { updated_at?: never };
   };
 };
-
-type ClassicStreamDefaults = {
-  Source: z.input<IClassicStreamSchema['Definition']>;
-  GetResponse: {
-    stream: z.input<IClassicStreamSchema['Definition']>;
-  };
-  UpsertRequest: {
-    stream: OmitClassicStreamUpsertProps<{} & z.input<IClassicStreamSchema['Definition']>>;
-  };
-} & ModelOfSchema<IClassicStreamSchema>;
 
 export namespace ClassicStream {
   export interface Definition extends IngestBaseStream.Definition {
@@ -106,30 +107,48 @@ export namespace ClassicStream {
   }
 }
 
-const ClassicStreamSchema = {
-  Definition: z.object({
-    ingest: ClassicIngest.right,
-  }),
-  Source: z.intersection(IngestBaseStream.Source.right, z.object({})),
-  GetResponse: z.intersection(
-    IngestBaseStream.GetResponse.right,
-    z.object({
-      elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
-      data_stream_exists: z.boolean(),
-      effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
-      effective_settings: ingestStreamSettingsSchema,
-      effective_failure_store: effectiveFailureStoreSchema,
-    })
-  ),
-  UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
-};
-type IClassicStreamSchema = typeof ClassicStreamSchema;
+const classicStreamDefinitionSchema = ingestBaseStreamDefinitionSchema.extend({
+  ingest: classicIngestSchemaObject,
+});
 
-export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Model> =
-  modelValidation<BaseStream.Model, IClassicStreamSchema, ClassicStreamDefaults>(
-    BaseStream,
-    ClassicStreamSchema
-  );
+const classicStreamGetResponseSchema = ingestBaseStreamGetResponseSchema.extend({
+  stream: classicStreamDefinitionSchema,
+  elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
+  data_stream_exists: z.boolean(),
+  effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
+  effective_settings: ingestStreamSettingsSchema,
+  effective_failure_store: effectiveFailureStoreSchema,
+});
+
+const classicStreamUpsertRequestSchema = ingestBaseStreamUpsertRequestSchema.extend({
+  stream: ingestBaseStreamUpsertDefinitionSchema.extend({
+    ingest: classicIngestUpsertSchemaObject,
+  }),
+});
+
+export const ClassicStream: {
+  Definition: Validation<BaseStream.Model['Definition'], ClassicStream.Definition>;
+  Source: Validation<BaseStream.Model['Definition'], ClassicStream.Source>;
+  GetResponse: Validation<BaseStream.Model['GetResponse'], ClassicStream.GetResponse>;
+  UpsertRequest: Validation<BaseStream.Model['UpsertRequest'], ClassicStream.UpsertRequest>;
+} = {
+  Definition: validation(
+    classicStreamDefinitionSchema as z.Schema<BaseStream.Model['Definition']>,
+    classicStreamDefinitionSchema
+  ),
+  Source: validation(
+    classicStreamDefinitionSchema as z.Schema<BaseStream.Model['Definition']>,
+    classicStreamDefinitionSchema
+  ),
+  GetResponse: validation(
+    classicStreamGetResponseSchema as z.Schema<BaseStream.Model['GetResponse']>,
+    classicStreamGetResponseSchema
+  ),
+  UpsertRequest: validation(
+    classicStreamUpsertRequestSchema as z.Schema<BaseStream.Model['UpsertRequest']>,
+    classicStreamUpsertRequestSchema
+  ),
+};
 
 // Optimized implementation for Definition check - the fallback is a zod-based check
 ClassicStream.Definition.is = (

@@ -11,20 +11,20 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiSkeletonText,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
-import { spanFlyoutId } from './waterfall_flyout/span_flyout';
-import { logsFlyoutId } from './waterfall_flyout/logs_flyout';
 import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
 
-export const EUI_FLYOUT_BODY_OVERFLOW_CLASS = 'euiFlyoutBody__overflow';
+export const FULL_TRACE_WATERFALL_RENDER_DELAY_MS = 150;
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -32,6 +32,14 @@ export interface FullScreenWaterfallProps {
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
   serviceName?: string;
+  docId: string | null;
+  docIndex?: string;
+  activeFlyoutType: DocumentType | null;
+  activeSection?: TraceOverviewSections;
+  skipOpenAnimation?: boolean;
+  onNodeClick: (nodeSpanId: string) => void;
+  onErrorClick: FullTraceWaterfallOnErrorClick;
+  onCloseFlyout: () => void;
   onExitFullScreen: () => void;
 }
 
@@ -41,6 +49,14 @@ export const FullScreenWaterfall = ({
   rangeTo,
   dataView,
   serviceName,
+  docId,
+  docIndex,
+  activeFlyoutType,
+  activeSection,
+  skipOpenAnimation,
+  onNodeClick,
+  onErrorClick,
+  onCloseFlyout,
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
   const { discoverShared } = getUnifiedDocViewerServices();
@@ -82,11 +98,62 @@ export const FullScreenWaterfall = ({
     };
   }, [euiTheme.levels.menu]);
 
-  const [docId, setDocId] = useState<string | null>(null);
-  const [docIndex, setDocIndex] = useState<string | undefined>(undefined);
-  const [activeFlyoutType, setActiveFlyoutType] = useState<DocumentType | null>(null);
-  const [activeSection, setActiveSection] = useState<TraceOverviewSections | undefined>();
-  const [scrollElement, setScrollElement] = useState<Element | null>(null);
+  // Suppress EuiFlyout's open-animation when restoring previously-open state.
+  // Uses a native <style> tag (not Emotion) to avoid cleanup races with nested flyout unmounts.
+  // Removed after 1s so subsequent open/close interactions animate normally.
+  const skipAnimationOnMountRef = useRef(skipOpenAnimation);
+
+  useLayoutEffect(() => {
+    // typical path
+    if (!skipAnimationOnMountRef.current) return;
+
+    // suppress animation when restoring previously-open state
+    // this style applies for 1 second to block animations
+    const style = document.createElement('style');
+    style.id = 'flyout-skip-open-animation';
+    style.textContent = `
+      .euiFlyout[data-test-subj="traceWaterfallFlyout"],
+      .euiFlyout[data-test-subj="traceWaterfallDocumentFlyout"] {
+        animation-duration: 0s !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    const timerId = setTimeout(() => {
+      style.remove();
+    }, 1000);
+
+    // once animation is suppressed, remove the style
+    return () => {
+      clearTimeout(timerId);
+      style.remove();
+    };
+  }, []);
+
+  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
+  const scrollContainerRef = useCallback((node: HTMLDivElement | null) => {
+    setScrollElement(node);
+  }, []);
+
+  // TODO: Remove this deferred-mount workaround once EUI exposes a prop to
+  // disable the flyout open animation at mount time.
+  // Tracking issue: https://github.com/elastic/kibana/issues/256531
+  const [isWaterfallReady, setIsWaterfallReady] = useState(Boolean(skipOpenAnimation));
+
+  useEffect(() => {
+    if (skipOpenAnimation) {
+      setIsWaterfallReady(true);
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setIsWaterfallReady(true);
+    }, FULL_TRACE_WATERFALL_RENDER_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [skipOpenAnimation]);
 
   const traceWaterfallTitleId = useGeneratedHtmlId({
     prefix: 'traceWaterfallTitle',
@@ -101,62 +168,13 @@ export const FullScreenWaterfall = ({
 
   const minWidth = euiTheme.base * 30;
 
-  /**
-   * Obtains the EUI flyout scroll container for the trace waterfall embeddable.
-   *
-   * This pattern is necessary because:
-   * - EUI components don't expose refs, requiring a wrapper div with closest()
-   * - scrollElement must be available before the embeddable initializes (conditional render below)
-   *
-   *
-   * TODO: Once the EUI team implements a scrollRef prop (or exposes refs on EUIFlyoutBody, Issue: 2564 in kibana-team repository),
-   * we can replace this workaround with a direct ref usage.
-   */
-  const waterfallContainerRef = useCallback((node: HTMLDivElement | null) => {
-    if (node) {
-      setScrollElement(node.closest(`.${EUI_FLYOUT_BODY_OVERFLOW_CLASS}`) ?? null);
-    }
-  }, []);
-
-  function handleCloseFlyout() {
-    setActiveFlyoutType(null);
-    setActiveSection(undefined);
-    setDocId(null);
-    setDocIndex(undefined);
-  }
-
-  function handleNodeClick(nodeSpanId: string) {
-    setActiveSection(undefined);
-    setDocId(nodeSpanId);
-    setDocIndex(undefined);
-    setActiveFlyoutType(spanFlyoutId);
-  }
-
-  function handleErrorClick(params: {
-    traceId: string;
-    docId: string;
-    errorCount: number;
-    errorDocId?: string;
-    docIndex?: string;
-  }) {
-    if (params.errorCount > 1) {
-      setActiveFlyoutType(spanFlyoutId);
-      setActiveSection('errors-table');
-      setDocId(params.docId);
-      setDocIndex(undefined);
-    } else if (params.errorDocId) {
-      setActiveFlyoutType(logsFlyoutId);
-      setDocId(params.errorDocId);
-      setDocIndex(params.docIndex);
-    }
-  }
-
   if (!FullTraceWaterfall) {
     return null;
   }
 
   return (
     <EuiFlyout
+      data-test-subj="traceWaterfallFlyout"
       session="start"
       size="m"
       onClose={onExitFullScreen}
@@ -173,25 +191,20 @@ export const FullScreenWaterfall = ({
           <h2 id={traceWaterfallTitleId}>{traceWaterfallTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {/* TODO: This is a workaround for layout issues when using hidePanelChrome outside of Dashboard.
-          The PresentationPanel applies flex styles (.embPanel__content) that cause width: 0 in non-Dashboard contexts.
-          This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
-          Issue: https://github.com/elastic/kibana/issues/248307
-          */}
-        <div ref={waterfallContainerRef}>
-          {scrollElement && serviceName ? (
-            <FullTraceWaterfall
-              traceId={traceId}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              serviceName={serviceName}
-              scrollElement={scrollElement}
-              onNodeClick={handleNodeClick}
-              onErrorClick={handleErrorClick}
-            />
-          ) : null}
-        </div>
+      <EuiFlyoutBody scrollContainerRef={scrollContainerRef}>
+        {isWaterfallReady && scrollElement ? (
+          <FullTraceWaterfall
+            traceId={traceId}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            serviceName={serviceName}
+            scrollElement={scrollElement}
+            onNodeClick={onNodeClick}
+            onErrorClick={onErrorClick}
+          />
+        ) : (
+          <EuiSkeletonText lines={4} />
+        )}
       </EuiFlyoutBody>
 
       {docId && activeFlyoutType ? (
@@ -201,7 +214,8 @@ export const FullScreenWaterfall = ({
           docIndex={docIndex}
           traceId={traceId}
           dataView={dataView}
-          onCloseFlyout={handleCloseFlyout}
+          dataTestSubj="traceWaterfallDocumentFlyout"
+          onCloseFlyout={onCloseFlyout}
           activeSection={activeSection}
         />
       ) : null}

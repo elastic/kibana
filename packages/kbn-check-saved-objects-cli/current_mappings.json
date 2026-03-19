@@ -290,6 +290,9 @@
       "throttle": {
         "type": "keyword"
       },
+      "uiamApiKey": {
+        "type": "binary"
+      },
       "updatedAt": {
         "type": "date"
       },
@@ -321,6 +324,10 @@
       }
     }
   },
+  "anonymization-salt": {
+    "dynamic": false,
+    "properties": {}
+  },
   "api_key_pending_invalidation": {
     "properties": {
       "apiKeyId": {
@@ -328,6 +335,9 @@
       },
       "createdAt": {
         "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
       }
     }
   },
@@ -608,6 +618,9 @@
       "duration": {
         "type": "unsigned_long"
       },
+      "extended_fields": {
+        "type": "flattened"
+      },
       "external_service": {
         "properties": {
           "connector_name": {
@@ -689,6 +702,17 @@
       },
       "tags": {
         "type": "keyword"
+      },
+      "template": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
       },
       "title": {
         "fields": {
@@ -1407,12 +1431,27 @@
       }
     }
   },
+  "entity-store-global-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "epm-packages": {
     "dynamic": false,
     "properties": {
       "additional_spaces_installed_kibana": {
         "index": false,
         "type": "flattened"
+      },
+      "dependencies": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
       },
       "es_index_patterns": {
         "dynamic": false,
@@ -1496,6 +1535,10 @@
         "type": "keyword"
       },
       "package_assets": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "pending_upgrade_review": {
         "dynamic": false,
         "properties": {}
       },
@@ -2321,6 +2364,10 @@
       }
     }
   },
+  "inference-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "infra-custom-dashboards": {
     "dynamic": false,
     "properties": {
@@ -2863,6 +2910,9 @@
       "created_by": {
         "type": "keyword"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "data_stream_count": {
         "type": "integer"
       },
@@ -3033,6 +3083,21 @@
       }
     }
   },
+  "markdown": {
+    "dynamic": false,
+    "properties": {
+      "content": {
+        "index": false,
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      }
+    }
+  },
   "metrics-data-source": {
     "dynamic": false,
     "properties": {}
@@ -3163,6 +3228,20 @@
       }
     }
   },
+  "oauth_state": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "expiresAt": {
+        "type": "date"
+      },
+      "state": {
+        "type": "keyword"
+      }
+    }
+  },
   "observability-onboarding-state": {
     "properties": {
       "progress": {
@@ -3194,6 +3273,9 @@
         "type": "date"
       },
       "created_by": {
+        "type": "keyword"
+      },
+      "created_by_profile_uid": {
         "type": "keyword"
       },
       "description": {
@@ -3240,6 +3322,9 @@
         "type": "date"
       },
       "updated_by": {
+        "type": "keyword"
+      },
+      "updated_by_profile_uid": {
         "type": "keyword"
       },
       "version": {
@@ -3301,6 +3386,9 @@
       "created_by": {
         "type": "text"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
       },
@@ -3328,6 +3416,9 @@
       },
       "updated_by": {
         "type": "text"
+      },
+      "updated_by_profile_uid": {
+        "type": "keyword"
       },
       "version": {
         "type": "keyword"
@@ -4081,6 +4172,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "streams-significant-events-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
@@ -4376,6 +4471,9 @@
       "attempts": {
         "type": "integer"
       },
+      "cost": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
       },
@@ -4444,6 +4542,25 @@
     "properties": {
       "count": {
         "type": "integer"
+      }
+    }
+  },
+  "uiam_api_keys_provisioning_status": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "entityId": {
+        "type": "keyword"
+      },
+      "entityType": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "message": {
+        "type": "text"
       }
     }
   },
@@ -4531,6 +4648,20 @@
       }
     }
   },
+  "user_connector_token": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "credentialType": {
+        "type": "keyword"
+      },
+      "profileUid": {
+        "type": "keyword"
+      }
+    }
+  },
   "visualization": {
     "dynamic": false,
     "properties": {
@@ -4545,6 +4676,23 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "watchlist-config": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "riskModifier": {
+        "type": "float"
       }
     }
   },

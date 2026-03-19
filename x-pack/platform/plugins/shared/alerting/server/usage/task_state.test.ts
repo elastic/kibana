@@ -1070,4 +1070,40 @@ describe('telemetry task state', () => {
       expect(result).not.toHaveProperty('foo');
     });
   });
+
+  describe('v9', () => {
+    const v9 = stateSchemaByVersion[9];
+
+    it('should set defaults for gap auto fill scheduler telemetry fields', () => {
+      const result = v9.up({});
+      expect(result).toEqual(
+        expect.objectContaining({
+          gap_auto_fill_scheduler_runs_per_day: 0,
+          gap_auto_fill_scheduler_runs_by_status_per_day: {},
+          gap_auto_fill_scheduler_duration_ms_per_day: {
+            min: 0,
+            max: 0,
+            avg: 0,
+            sum: 0,
+          },
+          gap_auto_fill_scheduler_unique_rule_count_per_day: 0,
+          gap_auto_fill_scheduler_processed_gaps_total_per_day: 0,
+          gap_auto_fill_scheduler_results_by_status_per_day: {},
+        })
+      );
+    });
+
+    it(`shouldn't overwrite properties when running the up migration`, () => {
+      const state = {
+        gap_auto_fill_scheduler_runs_per_day: 1,
+        gap_auto_fill_scheduler_runs_by_status_per_day: { success: 2 },
+        gap_auto_fill_scheduler_duration_ms_per_day: { min: 1, max: 2, avg: 3, sum: 4 },
+        gap_auto_fill_scheduler_unique_rule_count_per_day: 5,
+        gap_auto_fill_scheduler_processed_gaps_total_per_day: 6,
+        gap_auto_fill_scheduler_results_by_status_per_day: { success: 7, error: 8 },
+      };
+      const result = v9.up(state);
+      expect(result).toEqual(expect.objectContaining(state));
+    });
+  });
 });

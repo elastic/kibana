@@ -73,7 +73,7 @@ export const getWebhookSecretHeadersKeyRoute = (
         const connector = await actionsClient.get({ id });
         const spaceId = spaces.spacesService.getSpaceId(req);
 
-        const allowedConnectorTypes = ['.webhook', '.cases-webhook', '.mcp'];
+        const allowedConnectorTypes = ['.webhook', '.cases-webhook', '.mcp', '.http'];
 
         if (!allowedConnectorTypes.includes(connector.actionTypeId)) {
           return res.badRequest({

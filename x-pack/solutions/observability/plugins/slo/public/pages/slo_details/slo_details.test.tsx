@@ -346,7 +346,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchActiveAlertsMock.mockReturnValue({
       isLoading: false,
-      data: new ActiveAlerts({ [`${slo.id}|${ALL_VALUE}`]: 2 }),
+      data: new ActiveAlerts([[{ id: slo.id, instanceId: ALL_VALUE }, 2]]),
     });
 
     render(<SloDetailsPage />);

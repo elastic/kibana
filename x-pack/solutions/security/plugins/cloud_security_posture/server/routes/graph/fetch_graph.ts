@@ -22,6 +22,7 @@ export interface FetchGraphParams {
   spaceId: string;
   esQuery?: EsQuery;
   entityIds?: EntityId[];
+  pinnedIds?: string[];
 }
 
 export interface FetchGraphResult {
@@ -47,6 +48,7 @@ export const fetchGraph = async ({
   spaceId,
   esQuery,
   entityIds,
+  pinnedIds,
 }: FetchGraphParams): Promise<FetchGraphResult> => {
   // Only fetch events when originEventIds or esQuery are provided
   const hasOriginEventIds = originEventIds.length > 0;
@@ -68,6 +70,7 @@ export const fetchGraph = async ({
           indexPatterns,
           spaceId,
           esQuery,
+          pinnedIds,
         }).catch((error) => {
           logger.error(`Failed to fetch events: ${error.message}`);
           throw error;

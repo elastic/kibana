@@ -32,6 +32,13 @@ class TriggerSchemas {
   }
 
   /**
+   * Returns the registered trigger definition for the given trigger type id, or undefined.
+   */
+  public getTriggerDefinition(triggerType: string): PublicTriggerDefinition | undefined {
+    return this.extensions?.getTriggerDefinition(triggerType);
+  }
+
+  /**
    * Returns registered trigger ids.
    */
   public getRegisteredIds(): string[] {

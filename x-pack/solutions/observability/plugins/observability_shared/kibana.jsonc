@@ -19,6 +19,9 @@
       "embeddable",
       "share"
     ],
+    "optionalPlugins": [
+      "agentBuilder"
+    ],
     "requiredBundles": [
       "cases",
       "data",

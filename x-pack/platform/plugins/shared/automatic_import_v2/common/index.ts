@@ -7,7 +7,6 @@
 export type {
   ApproveIntegrationRequest,
   CreateAutoImportIntegrationResponse,
-  DeleteAutoImportIntegrationRequestParams,
   GetAutoImportIntegrationResponse,
   GetAllAutoImportIntegrationsResponse,
   UpdateAutoImportIntegrationRequestBody,
@@ -18,6 +17,8 @@ export {
   ApproveAutoImportIntegrationRequestBody,
   ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
+  DeleteAutoImportIntegrationRequestParams,
+  DownloadAutoImportIntegrationRequestParams,
   GetAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
 

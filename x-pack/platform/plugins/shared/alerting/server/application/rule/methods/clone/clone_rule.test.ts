@@ -10,6 +10,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -70,6 +71,8 @@ describe('clone', () => {
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    featureFlags: coreFeatureFlagsMock.createStart(),
+    isServerless: false,
   };
 
   let rulesClient: RulesClient;

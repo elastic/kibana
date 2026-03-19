@@ -39,6 +39,7 @@ describe('convertTreeToList', () => {
     color: 'red',
     errors: [],
     spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'transaction',
   };
   const itemB: TraceWaterfallItem = {
     id: 'b',
@@ -54,6 +55,7 @@ describe('convertTreeToList', () => {
     color: 'blue',
     errors: [],
     spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'span',
   };
   const itemC: TraceWaterfallItem = {
     id: 'c',
@@ -69,6 +71,7 @@ describe('convertTreeToList', () => {
     color: 'green',
     errors: [],
     spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'span',
   };
   const itemD: TraceWaterfallItem = {
     id: 'd',
@@ -84,6 +87,7 @@ describe('convertTreeToList', () => {
     color: 'yellow',
     errors: [],
     spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'span',
   };
 
   const treeMap = {
@@ -148,6 +152,7 @@ describe('TraceWaterfall', () => {
       timestampUs: 0,
       errors: [],
       spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'transaction',
     },
     {
       id: 'span-1',
@@ -159,6 +164,7 @@ describe('TraceWaterfall', () => {
       timestampUs: 0,
       errors: [],
       spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
     },
     {
       id: 'span-2',
@@ -170,6 +176,7 @@ describe('TraceWaterfall', () => {
       timestampUs: 0,
       errors: [],
       spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
     },
   ];
 

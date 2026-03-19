@@ -32,6 +32,13 @@ const getDownsampleFieldsToValidateOnChange = (
   return phasesToValidate.map(getIntervalPath);
 };
 
+const getMinAgeFieldsToValidateOnChange = (phase: 'warm' | 'cold' | 'frozen' | 'delete') => {
+  const ordered = ['warm', 'cold', 'frozen', 'delete'] as const;
+  const startIndex = ordered.indexOf(phase);
+  const phasesToValidate = startIndex < 0 ? ordered : ordered.slice(startIndex);
+  return phasesToValidate.map((p) => `_meta.${p}.minAgeValue`);
+};
+
 /**
  * Minimal schema for the ILM phases flyout.
  *
@@ -74,14 +81,17 @@ export const getIlmPhasesFlyoutFormSchema = (): FormSchema<IlmPhasesFlyoutFormIn
       sizeInBytes: { defaultValue: 0 },
       minAgeValue: {
         defaultValue: '',
-        fieldsToValidateOnChange: [],
+        fieldsToValidateOnChange: getMinAgeFieldsToValidateOnChange('warm'),
         validations: [
           { validator: requiredMinAgeValue('warm') },
           { validator: ifExistsNumberNonNegative },
           { validator: minAgeMustBeInteger('warm') },
         ],
       },
-      minAgeUnit: { defaultValue: 'd' },
+      minAgeUnit: {
+        defaultValue: 'd',
+        fieldsToValidateOnChange: getMinAgeFieldsToValidateOnChange('warm'),
+      },
       minAgeToMilliSeconds: {
         defaultValue: -1,
         fieldsToValidateOnChange: [
@@ -118,7 +128,7 @@ export const getIlmPhasesFlyoutFormSchema = (): FormSchema<IlmPhasesFlyoutFormIn
       sizeInBytes: { defaultValue: 0 },
       minAgeValue: {
         defaultValue: '',
-        fieldsToValidateOnChange: [],
+        fieldsToValidateOnChange: getMinAgeFieldsToValidateOnChange('cold'),
         validations: [
           { validator: requiredMinAgeValue('cold') },
           { validator: ifExistsNumberNonNegative },
@@ -126,7 +136,10 @@ export const getIlmPhasesFlyoutFormSchema = (): FormSchema<IlmPhasesFlyoutFormIn
           { validator: minAgeGreaterThanPreviousPhase('cold') },
         ],
       },
-      minAgeUnit: { defaultValue: 'd' },
+      minAgeUnit: {
+        defaultValue: 'd',
+        fieldsToValidateOnChange: getMinAgeFieldsToValidateOnChange('cold'),
+      },
       minAgeToMilliSeconds: {
         defaultValue: -1,
         fieldsToValidateOnChange: [
@@ -168,7 +181,7 @@ export const getIlmPhasesFlyoutFormSchema = (): FormSchema<IlmPhasesFlyoutFormIn
       },
       minAgeValue: {
         defaultValue: '',
-        fieldsToValidateOnChange: [],
+        fieldsToValidateOnChange: getMinAgeFieldsToValidateOnChange('frozen'),
         validations: [
           { validator: requiredMinAgeValue('frozen') },
           { validator: ifExistsNumberNonNegative },
@@ -176,7 +189,10 @@ export const getIlmPhasesFlyoutFormSchema = (): FormSchema<IlmPhasesFlyoutFormIn
           { validator: minAgeGreaterThanPreviousPhase('frozen') },
         ],
       },
-      minAgeUnit: { defaultValue: 'd' },
+      minAgeUnit: {
+        defaultValue: 'd',
+        fieldsToValidateOnChange: getMinAgeFieldsToValidateOnChange('frozen'),
+      },
       minAgeToMilliSeconds: {
         defaultValue: -1,
         fieldsToValidateOnChange: ['_meta.frozen.minAgeValue', '_meta.delete.minAgeValue'],
@@ -186,7 +202,7 @@ export const getIlmPhasesFlyoutFormSchema = (): FormSchema<IlmPhasesFlyoutFormIn
       enabled: { defaultValue: false },
       minAgeValue: {
         defaultValue: '',
-        fieldsToValidateOnChange: [],
+        fieldsToValidateOnChange: getMinAgeFieldsToValidateOnChange('delete'),
         validations: [
           { validator: requiredMinAgeValue('delete') },
           { validator: ifExistsNumberNonNegative },
@@ -194,7 +210,10 @@ export const getIlmPhasesFlyoutFormSchema = (): FormSchema<IlmPhasesFlyoutFormIn
           { validator: minAgeGreaterThanPreviousPhase('delete') },
         ],
       },
-      minAgeUnit: { defaultValue: 'd' },
+      minAgeUnit: {
+        defaultValue: 'd',
+        fieldsToValidateOnChange: getMinAgeFieldsToValidateOnChange('delete'),
+      },
       minAgeToMilliSeconds: {
         defaultValue: -1,
         fieldsToValidateOnChange: ['_meta.delete.minAgeValue'],

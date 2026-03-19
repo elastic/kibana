@@ -102,8 +102,17 @@ export const useStreamRoutingEvents = () => {
           success: finalSnapshot.matches({ ready: { ingestMode: 'idle' } }),
         };
       },
+      bulkForkStreams: (items: Array<{ name: string; condition: Condition }>) => {
+        service.send({ type: 'routingRule.bulkFork', items });
+      },
+      acknowledgeBulkFork: () => {
+        service.send({ type: 'bulkFork.acknowledge' });
+      },
       saveChanges: () => {
         service.send({ type: 'routingRule.save' });
+      },
+      setConditionEditorValidity: (isValid: boolean) => {
+        service.send({ type: 'routingRule.setConditionEditorValidity', isValid });
       },
       setDocumentMatchFilter: (filter: DocumentMatchFilterOptions) => {
         service.send({ type: 'routingSamples.setDocumentMatchFilter', filter });

@@ -59,7 +59,7 @@ export const RuleAlertDelay = () => {
         value={alertDelay?.active ?? 1}
         name="alertDelay"
         data-test-subj="alertDelayInput"
-        prepend={[ALERT_DELAY_TITLE_PREFIX]}
+        prepend={ALERT_DELAY_TITLE_PREFIX}
         isInvalid={!!baseErrors?.alertDelay?.length}
         append={ALERT_DELAY_TITLE_SUFFIX}
         onChange={onAlertDelayChange}

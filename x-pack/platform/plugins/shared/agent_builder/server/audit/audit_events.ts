@@ -32,6 +32,9 @@ export enum AgentBuilderAuditAction {
   TOOL_CREATE = 'agent_builder_tool_create',
   TOOL_UPDATE = 'agent_builder_tool_update',
   TOOL_DELETE = 'agent_builder_tool_delete',
+  SKILL_CREATE = 'agent_builder_skill_create',
+  SKILL_UPDATE = 'agent_builder_skill_update',
+  SKILL_DELETE = 'agent_builder_skill_delete',
 }
 
 type VerbsTuple = [string, string, string];
@@ -43,6 +46,9 @@ const eventVerbs: Record<AgentBuilderAuditAction, VerbsTuple> = {
   [AgentBuilderAuditAction.TOOL_CREATE]: ['create', 'creating', 'created'],
   [AgentBuilderAuditAction.TOOL_UPDATE]: ['update', 'updating', 'updated'],
   [AgentBuilderAuditAction.TOOL_DELETE]: ['delete', 'deleting', 'deleted'],
+  [AgentBuilderAuditAction.SKILL_CREATE]: ['create', 'creating', 'created'],
+  [AgentBuilderAuditAction.SKILL_UPDATE]: ['update', 'updating', 'updated'],
+  [AgentBuilderAuditAction.SKILL_DELETE]: ['delete', 'deleting', 'deleted'],
 };
 
 const eventTypes: Record<AgentBuilderAuditAction, ArrayElement<EcsEvent['type']> | undefined> = {
@@ -52,6 +58,9 @@ const eventTypes: Record<AgentBuilderAuditAction, ArrayElement<EcsEvent['type']>
   [AgentBuilderAuditAction.TOOL_CREATE]: AUDIT_TYPE.CREATION,
   [AgentBuilderAuditAction.TOOL_UPDATE]: AUDIT_TYPE.CHANGE,
   [AgentBuilderAuditAction.TOOL_DELETE]: AUDIT_TYPE.DELETION,
+  [AgentBuilderAuditAction.SKILL_CREATE]: AUDIT_TYPE.CREATION,
+  [AgentBuilderAuditAction.SKILL_UPDATE]: AUDIT_TYPE.CHANGE,
+  [AgentBuilderAuditAction.SKILL_DELETE]: AUDIT_TYPE.DELETION,
 };
 
 interface CommonAuditEventParams {
@@ -80,6 +89,42 @@ export function agentAuditEvent({
   } else if (agentName) {
     doc = `agent [name="${agentName}"]`;
   }
+
+  const [present, progressive, past] = eventVerbs[action];
+  const message = error
+    ? `Failed attempt to ${present} ${doc}`
+    : outcome === 'unknown'
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
+
+  const type = eventTypes[action];
+
+  return {
+    message,
+    event: {
+      action,
+      category: [AUDIT_CATEGORY.DATABASE],
+      type: type ? [type] : undefined,
+      outcome: outcome ?? (error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.SUCCESS),
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+}
+
+export interface SkillAuditEventParams extends CommonAuditEventParams {
+  skillId?: string;
+}
+
+export function skillAuditEvent({
+  action,
+  skillId,
+  outcome,
+  error,
+}: SkillAuditEventParams): AuditEvent {
+  const doc = skillId ? `skill [id=${skillId}]` : 'a skill';
 
   const [present, progressive, past] = eventVerbs[action];
   const message = error

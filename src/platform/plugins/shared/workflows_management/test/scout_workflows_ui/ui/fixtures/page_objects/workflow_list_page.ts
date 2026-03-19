@@ -23,13 +23,21 @@ export class WorkflowListPage {
   }
 
   /** Returns the state toggle switch locator for the specified workflow. */
-  getWorkflowStateToggle(workflowName: string): Locator {
-    return this.getWorkflowRow(workflowName).locator('[data-test-subj^="workflowToggleSwitch-"]');
+  getWorkflowStateToggle(workflowName: string, index: number = 0): Locator {
+    const toggles = this.getWorkflowRow(workflowName).locator(
+      '[data-test-subj^="workflowToggleSwitch-"]'
+    );
+    // eslint-disable-next-line playwright/no-nth-methods
+    return toggles.nth(index);
   }
 
   /** Returns the checkbox locator for selecting the specified workflow. */
-  getSelectCheckboxForWorkflow(workflowName: string): Locator {
-    return this.getWorkflowRow(workflowName).locator('td:first-child input[type="checkbox"]');
+  getSelectCheckboxForWorkflow(workflowName: string, index: number = 0): Locator {
+    const checkboxes = this.getWorkflowRow(workflowName).locator(
+      'td:first-child input[type="checkbox"]'
+    );
+    // eslint-disable-next-line playwright/no-nth-methods
+    return checkboxes.nth(index);
   }
 
   // Single Workflow Actions
@@ -37,9 +45,12 @@ export class WorkflowListPage {
   /** Returns the direct action button locator (run or edit) for the specified workflow. */
   getWorkflowAction(
     workflowName: string,
-    action: 'runWorkflowAction' | 'editWorkflowAction'
+    action: 'runWorkflowAction' | 'editWorkflowAction',
+    index: number = 0
   ): Locator {
-    return this.getWorkflowRow(workflowName).locator(`[data-test-subj="${action}"]`);
+    const actions = this.getWorkflowRow(workflowName).locator(`[data-test-subj="${action}"]`);
+    // eslint-disable-next-line playwright/no-nth-methods
+    return actions.nth(index);
   }
 
   /** Opens the three dots menu and returns the specified action button locator. */
@@ -49,11 +60,14 @@ export class WorkflowListPage {
       | 'runWorkflowAction'
       | 'editWorkflowAction'
       | 'cloneWorkflowAction'
-      | 'deleteWorkflowAction'
+      | 'deleteWorkflowAction',
+    index: number = 0
   ): Promise<Locator> {
-    await this.getWorkflowRow(workflowName)
-      .locator('[data-test-subj="euiCollapsedItemActionsButton"]')
-      .click();
+    const buttons = this.getWorkflowRow(workflowName).locator(
+      '[data-test-subj="euiCollapsedItemActionsButton"]'
+    );
+    // eslint-disable-next-line playwright/no-nth-methods
+    await buttons.nth(index).click();
     return this.page.locator(`.euiContextMenuPanel [data-test-subj="${action}"]`);
   }
 
@@ -74,6 +88,14 @@ export class WorkflowListPage {
     });
     await this.page.testSubj.click('workflows-table-bulk-actions-button');
     await this.page.testSubj.click(`workflows-bulk-action-${action}`);
+  }
+
+  /** Returns workflow names in current table order (visible page only). */
+  async getVisibleWorkflowNamesInOrder(): Promise<string[]> {
+    await this.page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
+    const links = this.page.testSubj.locator('workflowListTable workflowNameLink');
+    const texts = await links.allTextContents();
+    return texts.map((t) => t.trim());
   }
 
   // Filter/Search/Sort

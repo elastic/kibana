@@ -43,6 +43,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
     fields: undefined,
     includeEmptyFields: undefined,
     runtimeMappings: undefined,
+    projectRouting: undefined,
     ...args,
   });
 

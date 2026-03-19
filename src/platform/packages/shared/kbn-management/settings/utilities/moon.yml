@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/management-settings-utilities'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/management-settings-utilities'
+  title: '@kbn/management-settings-utilities'
   description: Moon project for @kbn/management-settings-utilities
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-management/settings/utilities
+  sourceRoot: src/platform/packages/shared/kbn-management/settings/utilities
 dependsOn:
   - '@kbn/management-settings-types'
   - '@kbn/i18n'

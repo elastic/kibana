@@ -10,11 +10,13 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiToolTip,
@@ -22,12 +24,14 @@ import {
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
+import { isTriggerType } from '@kbn/workflows';
 import { useWorkflows } from '@kbn/workflows-ui';
+import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
@@ -38,6 +42,7 @@ import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
+import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
@@ -50,10 +55,15 @@ interface WorkflowListProps {
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
-  const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
+  const {
+    eventDrivenExecutionEnabled,
+    isLoading: isLoadingEventDrivenStatus,
+    error: eventDrivenStatusError,
+  } = useEventDrivenExecutionStatus();
   const [workflowToDelete, setWorkflowToDelete] = useState<WorkflowListItemDto | null>(null);
   const modalTitleId = useGeneratedHtmlId();
   const telemetry = useTelemetry();
+  const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
 
   // Report list viewed telemetry when workflows are loaded
   React.useEffect(() => {
@@ -69,6 +79,18 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
   const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
 
+  // Use a ref here to avoid re-rendering when the selected items change
+  const selectedItemsRef = useRef(selectedItems);
+  selectedItemsRef.current = selectedItems;
+
+  const hasEventDrivenWorkflowsInList = useMemo(
+    () =>
+      workflows?.results?.some((w) =>
+        w.definition?.triggers?.some((t) => !isTriggerType(t.type))
+      ) ?? false,
+    [workflows?.results]
+  );
+
   const canCreateWorkflow = application.capabilities.workflowsManagement.createWorkflow;
   const canExecuteWorkflow = application.capabilities.workflowsManagement.executeWorkflow;
   const canUpdateWorkflow = application.capabilities.workflowsManagement.updateWorkflow;
@@ -80,18 +102,19 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const onRefresh = useCallback(async () => {
     const result = await refetch();
-    // Update selected items with fresh data after refetch
-    if (result.data?.results && selectedItems.length > 0) {
-      const selectedIds = selectedItems.map((item) => item.id);
+
+    const currentSelectedItems = selectedItemsRef.current;
+    if (result.data?.results && currentSelectedItems.length > 0) {
+      const selectedIds = new Set(currentSelectedItems.map((item) => item.id));
       const updatedSelectedItems = result.data.results.filter((workflow) =>
-        selectedIds.includes(workflow.id)
+        selectedIds.has(workflow.id)
       );
       setSelectedItems(updatedSelectedItems);
     }
-  }, [refetch, selectedItems]);
+  }, [refetch]);
 
   const handleRunWorkflow = useCallback(
-    (id: string, event: Record<string, unknown>, triggerTab?: 'manual' | 'alert' | 'index') => {
+    (id: string, event: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
       runWorkflow.mutate(
         { id, inputs: event, triggerTab },
         {
@@ -119,7 +142,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const handleDeleteWorkflow = useCallback(
     (item: WorkflowListItemDto) => setWorkflowToDelete(item),
-    [setWorkflowToDelete]
+    []
   );
 
   const handleConfirmDelete = useCallback(() => {
@@ -154,6 +177,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflow: {
             enabled: !item.enabled,
           },
+          skipRefetch: true,
         },
         {
           onError: (err: unknown) => {
@@ -453,6 +477,30 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   return (
     <>
+      {!isLoadingEventDrivenStatus &&
+        !eventDrivenStatusError &&
+        !eventDrivenExecutionEnabled &&
+        hasEventDrivenWorkflowsInList && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate('workflows.workflowList.eventDrivenDisabled.title', {
+                defaultMessage: 'Event-driven triggers are disabled',
+              })}
+              color="warning"
+              iconType="alert"
+              data-test-subj="workflows-event-driven-disabled-banner"
+            >
+              <p>
+                {i18n.translate('workflows.workflowList.eventDrivenDisabled.description', {
+                  defaultMessage:
+                    'Event-driven triggers are disabled. Workflows that use event-driven triggers will not run automatically until the feature is enabled again. Manual and Scheduled runs are not affected.',
+                })}
+              </p>
+            </EuiCallOut>
+          </>
+        )}
       <WorkflowsUtilityBar
         totalWorkflows={workflows?.total || 0}
         selectedWorkflows={selectedItems}
@@ -499,13 +547,13 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           definition={executeWorkflow.definition}
           workflowId={executeWorkflow.id}
           onClose={() => setExecuteWorkflow(null)}
-          onSubmit={(event) => handleRunWorkflow(executeWorkflow.id, event)}
+          onSubmit={(data, triggerTab) => handleRunWorkflow(executeWorkflow.id, data, triggerTab)}
         />
       )}
       {workflowToDelete && (
         <EuiConfirmModal
           title={i18n.translate('workflows.workflowList.deleteModal.title', {
-            defaultMessage: `Delete "${workflowToDelete.name}"?`,
+            defaultMessage: 'Delete "{name}"?',
             values: { name: workflowToDelete.name },
           })}
           titleProps={{ id: modalTitleId }}
@@ -524,7 +572,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         >
           <p>
             {i18n.translate('workflows.workflowList.deleteModal.message', {
-              defaultMessage: `Delete the "${workflowToDelete.name}" workflow? This action cannot be undone.`,
+              defaultMessage: 'Delete the "{name}" workflow? This action cannot be undone.',
               values: { name: workflowToDelete.name },
             })}
           </p>

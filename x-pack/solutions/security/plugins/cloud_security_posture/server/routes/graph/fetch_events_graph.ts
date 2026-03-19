@@ -16,20 +16,16 @@ import {
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import {
-  getEnrichPolicyId,
-  getEntitiesLatestIndexName,
-} from '@kbn/cloud-security-posture-common/utils/helpers';
-import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import {
   generateFieldHintCases,
   formatJsonProperty,
-  buildLookupJoinEsql,
-  buildEnrichPolicyEsql,
-  checkIfEntitiesIndexLookupMode,
+  buildEntityEnrichment,
+  checkEnrichmentAvailability,
 } from './utils';
+import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEdge } from './types';
 
 interface BuildEsqlQueryParams {
@@ -40,6 +36,7 @@ interface BuildEsqlQueryParams {
   isEnrichPolicyExists: boolean;
   spaceId: string;
   alertsMappingsIncluded: boolean;
+  pinnedIds?: string[];
 }
 
 /**
@@ -56,6 +53,7 @@ export const fetchEvents = async ({
   indexPatterns,
   spaceId,
   esQuery,
+  pinnedIds,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -66,6 +64,7 @@ export const fetchEvents = async ({
   indexPatterns: string[];
   spaceId: string;
   esQuery?: EsQuery;
+  pinnedIds?: string[];
 }): Promise<EsqlToRecords<EventEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
@@ -81,11 +80,11 @@ export const fetchEvents = async ({
 
   // Check if the entities lookup index exists and is in lookup mode (preferred)
   // If not, fall back to checking if the enrich policy exists (deprecated)
-  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
-  const isEnrichPolicyExists = isLookupIndexAvailable
-    ? false
-    : await checkEnrichPolicyExists(esClient, logger, spaceId);
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
+  const { isLookupIndexAvailable, isEnrichPolicyExists } = await checkEnrichmentAvailability(
+    esClient,
+    logger,
+    spaceId
+  );
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
@@ -98,6 +97,7 @@ export const fetchEvents = async ({
     isEnrichPolicyExists,
     spaceId,
     alertsMappingsIncluded,
+    pinnedIds,
   });
 
   logger.trace(`Executing query [${query}]`);
@@ -114,6 +114,7 @@ export const fetchEvents = async ({
         ...originEventIds
           .filter((originEventId) => originEventId.isAlert)
           .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
+        ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
       ],
     })
     .toRecords<EventEdge>();
@@ -173,27 +174,23 @@ const buildDslFilter = (
   },
 });
 
-const checkEnrichPolicyExists = async (
-  esClient: IScopedClusterClient,
-  logger: Logger,
-  spaceId: string
-): Promise<boolean> => {
-  try {
-    const { policies } = await esClient.asInternalUser.enrich.getPolicy({
-      name: getEnrichPolicyId(spaceId),
-    });
-
-    logger.debug(
-      `Enrich policy check for [${getEnrichPolicyId(spaceId)}]: found ${
-        policies?.length
-      } policies, policies: ${JSON.stringify(policies?.map((p) => p.config.match?.name))}`
-    );
-    return policies.some((policy) => policy.config.match?.name === getEnrichPolicyId(spaceId));
-  } catch (error) {
-    logger.error(`Error fetching enrich policy ${error.message}`);
-    logger.error(error);
-    return false;
+/**
+ * Generates ESQL statement for evaluating pinned IDs.
+ * This checks if the document _id, actorEntityId, or targetEntityId matches any of the pinned IDs.
+ */
+const buildPinnedEsql = (pinnedIds?: string[]): string => {
+  if (!pinnedIds || pinnedIds.length === 0) {
+    return '| EVAL pinned = TO_STRING(null)';
   }
+
+  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
+
+  return `| EVAL pinned = CASE(
+    _id IN (${pinnedParamsStr}), _id,
+    actorEntityId IN (${pinnedParamsStr}), actorEntityId,
+    targetEntityId IN (${pinnedParamsStr}), targetEntityId,
+    null
+  )`;
 };
 
 /**
@@ -253,10 +250,8 @@ const buildEsqlQuery = ({
   isEnrichPolicyExists,
   spaceId,
   alertsMappingsIncluded,
+  pinnedIds,
 }: BuildEsqlQueryParams): string => {
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
-  const enrichPolicyName = getEnrichPolicyId(spaceId);
-
   const actorFieldsCoalesce = GRAPH_ACTOR_ENTITY_FIELDS.join(',\n    ');
 
   // Generate target entity ID collection logic
@@ -293,6 +288,7 @@ const buildEsqlQuery = ({
 ${targetEntityIdEvals}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
+${buildPinnedEsql(pinnedIds)}
 | EVAL actorEntityFieldHint = CASE(
 ${actorFieldHintCases},
     ""
@@ -302,15 +298,9 @@ ${targetFieldHintCases},
     ""
 )
 ${
-  isLookupIndexAvailable
+  isLookupIndexAvailable || isEnrichPolicyExists
     ? `
-${buildLookupJoinEsql(getEntitiesLatestIndexName(spaceId))}
-
-${buildEnrichedEntityFieldsEsql()}
-`
-    : isEnrichPolicyExists
-    ? `
-${buildEnrichPolicyEsql(enrichPolicyName)}
+${buildEntityEnrichment(isLookupIndexAvailable, isEnrichPolicyExists, spaceId)}
 
 ${buildEnrichedEntityFieldsEsql()}
 `
@@ -425,9 +415,12 @@ ${buildEnrichedEntityFieldsEsql()}
       targetEntityType,
       targetEntitySubType,
       isOrigin,
-      isOriginAlert
+      isOriginAlert,
+      pinned
+| EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
+| SORT action DESC, pinnedSort ASC, isOrigin
 | LIMIT 1000
-| SORT action DESC, isOrigin`;
+| DROP pinnedSort`;
 
   return query;
 };

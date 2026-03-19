@@ -8,7 +8,6 @@
       "react",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop"
     ]
   },
   "include": [

@@ -7,9 +7,8 @@
 
 import {
   EuiFieldText,
-  EuiFormLabel,
+  EuiFormPrepend,
   EuiFormRow,
-  EuiIcon,
   EuiLink,
   EuiScreenReaderOnly,
   EuiTextTruncate,
@@ -18,7 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
+import { validateStreamName } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -42,30 +41,17 @@ interface StreamNameFormRowProps {
 const MIN_NAME_LENGTH = 1;
 const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
 
-export const getHelpText = (
-  isStreamNameEmpty: boolean,
-  isStreamNameTooLong: boolean,
-  readOnly: boolean
-): string | undefined => {
+export const getHelpText = (isStreamNameEmpty: boolean, readOnly: boolean): string | undefined => {
   if (isStreamNameEmpty && !readOnly) {
     return i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
       defaultMessage: `Stream name is required.`,
     });
-  } else if (isStreamNameTooLong && !readOnly) {
-    return i18n.translate('xpack.streams.streamDetailRouting.maximumNameHelpText', {
-      defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
-      values: {
-        maxLength: MAX_STREAM_NAME_LENGTH,
-      },
-    });
-  } else {
-    return undefined;
   }
+  return undefined;
 };
 
 export const getErrorMessage = (
-  containsUpperCaseChars: boolean,
-  containsSpaces: boolean,
+  baseValidationError: string | undefined,
   isDuplicatedName: boolean,
   rootChildExists: boolean,
   isDotPresent: boolean,
@@ -73,15 +59,9 @@ export const getErrorMessage = (
   rootChild: string,
   router: StatefulStreamsAppRouter
 ): ReactNode | string | undefined => {
-  if (containsUpperCaseChars) {
-    return i18n.translate('xpack.streams.streamDetailRouting.uppercaseCharsError', {
-      defaultMessage: 'Stream name cannot contain uppercase characters.',
-    });
-  }
-  if (containsSpaces) {
-    return i18n.translate('xpack.streams.streamDetailRouting.containsSpacesError', {
-      defaultMessage: 'Stream name cannot contain spaces.',
-    });
+  // Return base validation errors from the shared validator first
+  if (baseValidationError) {
+    return baseValidationError;
   }
   if (isDuplicatedName) {
     return i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
@@ -174,19 +154,20 @@ export const useChildStreamInput = (
     [routing, prefix, rootChild]
   );
 
+  // Use shared validation for basic stream name checks
+  const baseValidation = validateStreamName(localStreamName);
   const isStreamNameEmpty = localStreamName.length <= prefix.length;
-  const isStreamNameTooLong = localStreamName.length > MAX_STREAM_NAME_LENGTH;
-  const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
-  const containsUpperCaseChars = localStreamName !== localStreamName.toLowerCase();
-  const containsSpaces = localStreamName.includes(' ');
+  // Base validation passes if the name is valid according to shared validator
+  // However, we also need to check if the partition (the part after the prefix) is empty
+  const baseValidationError =
+    !baseValidation.valid && !isStreamNameEmpty ? baseValidation.message : undefined;
 
-  const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
+  const helpText = getHelpText(isStreamNameEmpty, readOnly);
 
   const isDotPresent = !readOnly && partitionName.includes('.');
 
   const errorMessage = getErrorMessage(
-    containsUpperCaseChars,
-    containsSpaces,
+    baseValidationError,
     isDuplicatedName,
     rootChildExists,
     isDotPresent,
@@ -199,11 +180,7 @@ export const useChildStreamInput = (
     localStreamName,
     setLocalStreamName,
     isStreamNameValid:
-      isLengthValid &&
-      !isDotPresent &&
-      !isDuplicatedName &&
-      !containsUpperCaseChars &&
-      !containsSpaces,
+      baseValidation.valid && !isStreamNameEmpty && !isDotPresent && !isDuplicatedName,
     prefix,
     partitionName,
     helpText,
@@ -259,16 +236,12 @@ export function StreamNameFormRow({
         onChange={handleChange}
         minLength={MIN_NAME_LENGTH}
         prepend={
-          prefix
-            ? [
-                <EuiIcon type="streamsWired" />,
-                <EuiFormLabel
-                  css={css`
-                    inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
-                  `}
-                  id={descriptionId}
-                  data-test-subj="streamsAppRoutingStreamNamePrefix"
-                >
+          prefix ? (
+            <EuiFormPrepend
+              id={descriptionId}
+              iconLeft="streamsWired"
+              label={
+                <>
                   <EuiScreenReaderOnly>
                     <span>
                       {i18n.translate('xpack.streams.streamDetailRouting.screenReaderPrefixLabel', {
@@ -281,9 +254,16 @@ export function StreamNameFormRow({
                     truncation="start"
                     data-test-subj={`streamNamePrefix`}
                   />
-                </EuiFormLabel>,
-              ]
-            : undefined
+                </>
+              }
+              css={css`
+                .euiFormLabel {
+                  inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
+                }
+              `}
+              data-test-subj="streamsAppRoutingStreamNamePrefix"
+            />
+          ) : undefined
         }
       />
     </EuiFormRow>

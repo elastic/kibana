@@ -10,18 +10,21 @@
 import React, { type KeyboardEvent, type PropsWithChildren, useCallback } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, keys, useEuiTheme } from '@elastic/eui';
 
 import { FOCUSABLE_SELECTOR } from './constants';
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { DateRangePickerControl } from './date_range_picker_control';
+import { dialogTexts } from './translations';
 
 /**
  * Dialog popover for the DateRangePicker.
  * Opens when the control enters editing mode.
  */
 export function DateRangePickerDialog({ children }: PropsWithChildren) {
-  const { isEditing, setIsEditing, maxWidth, panelRef, panelId } = useDateRangePickerContext();
+  const { isEditing, setIsEditing, panelRef, panelId, width } = useDateRangePickerContext();
+  const { euiTheme } = useEuiTheme();
+  const maxWidth = euiTheme.components.forms.maxWidth;
 
   const closePopover = useCallback(() => {
     setIsEditing(false);
@@ -38,14 +41,14 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
    */
   const onPanelKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === 'Escape') {
+      if (event.key === keys.ESCAPE) {
         event.preventDefault();
         event.stopPropagation();
         setIsEditing(false);
         return;
       }
 
-      if (event.key === 'Tab') {
+      if (event.key === keys.TAB) {
         const panel = panelRef.current;
         if (!panel) return;
 
@@ -67,31 +70,39 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
     [panelRef, setIsEditing]
   );
 
+  const popoverWrapperFullWidthStyles = css`
+    inline-size: 100%;
+  `;
+
   return (
     <EuiPopover
-      css={css({ maxInlineSize: maxWidth })}
+      css={width === 'full' && popoverWrapperFullWidthStyles}
       button={<DateRangePickerControl />}
       isOpen={isEditing}
       closePopover={closePopover}
       anchorPosition="downLeft"
       attachToAnchor={true}
       repositionToCrossAxis={false}
-      display="block"
+      display={width === 'auto' ? 'inline' : 'block'}
       ownFocus={false}
+      data-test-subj="dateRangePickerDialogTriggerWrapper"
       panelPaddingSize="none"
+      panelRef={(node) => {
+        panelRef.current = node;
+      }}
+      panelProps={{
+        id: panelId,
+        'aria-label': dialogTexts.ariaLabel,
+        'aria-modal': undefined,
+        tabIndex: -1,
+        onKeyDown: onPanelKeyDown,
+        css: css({
+          inlineSize: maxWidth,
+          maxInlineSize: '100%',
+        }),
+      }}
     >
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-      <div
-        css={css({ minWidth: maxWidth })}
-        ref={panelRef}
-        id={panelId}
-        role="dialog"
-        aria-label="Date range picker dialog"
-        tabIndex={-1}
-        onKeyDown={onPanelKeyDown}
-      >
-        {children}
-      </div>
+      {children}
     </EuiPopover>
   );
 }

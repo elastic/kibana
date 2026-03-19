@@ -12,7 +12,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
-  APPLY_FILTER_TRIGGER,
+  ON_APPLY_FILTER,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { setCoreStart, setIndexPatterns } from './services';
@@ -85,7 +85,7 @@ export class UnifiedSearchPublicPlugin
 
     const SearchBar = getCustomSearchBar();
 
-    uiActions.addTriggerActionAsync(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER, async () => {
+    uiActions.addTriggerActionAsync(ON_APPLY_FILTER, ACTION_GLOBAL_APPLY_FILTER, async () => {
       const { createFilterAction } = await import('./actions/actions_module');
       return createFilterAction(data.query.filterManager, data.query.timefilter.timefilter, core);
     });

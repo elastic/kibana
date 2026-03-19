@@ -154,6 +154,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 
@@ -186,6 +187,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: false,
           manage_failure_store: false,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 
@@ -253,7 +255,7 @@ describe('StreamDetailSchemaEditor', () => {
     it('does not display callout for non-root streams', () => {
       const definition = createMockWiredStreamDefinition({
         stream: {
-          name: 'logs.child', // child stream
+          name: 'logs.otel.child', // child stream
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
           ingest: {
@@ -389,14 +391,22 @@ describe('StreamDetailSchemaEditor', () => {
     });
   });
 
-  describe('Submit changes modal', () => {
-    it('opens confirmation modal when submit button is clicked', async () => {
+  describe('Submit changes flow', () => {
+    it('opens confirmation modal when there are mapping-affecting changes', async () => {
       const user = userEvent.setup();
       const mockCloseModal = jest.fn();
       mockOpenModal.mockReturnValue({ close: mockCloseModal });
 
+      const mockSubmitChanges = jest.fn().mockResolvedValue(undefined);
       mockUseSchemaFields.mockReturnValue({
-        fields: [],
+        fields: [
+          {
+            name: 'attributes.test_field',
+            type: 'long',
+            parent: 'logs.classic-test',
+            status: 'mapped',
+          },
+        ],
         storedFields: [],
         isLoadingFields: false,
         refreshFields: jest.fn(),
@@ -404,7 +414,7 @@ describe('StreamDetailSchemaEditor', () => {
         updateField: jest.fn(),
         pendingChangesCount: 1,
         discardChanges: jest.fn(),
-        submitChanges: jest.fn(),
+        submitChanges: mockSubmitChanges,
       });
 
       const definition = createMockClassicStreamDefinition();
@@ -421,6 +431,63 @@ describe('StreamDetailSchemaEditor', () => {
       await user.click(submitButton);
 
       expect(mockOpenModal).toHaveBeenCalled();
+    });
+
+    it('submits directly and skips the modal when changes are description-only', async () => {
+      const user = userEvent.setup();
+
+      const mockSubmitChanges = jest.fn().mockResolvedValue(undefined);
+      mockUseSchemaFields.mockReturnValue({
+        fields: [
+          {
+            name: 'attributes.test_field',
+            type: 'keyword',
+            parent: 'logs.classic-test',
+            status: 'mapped',
+            description: 'Updated description',
+          },
+        ],
+        storedFields: [],
+        isLoadingFields: false,
+        refreshFields: jest.fn(),
+        addField: jest.fn(),
+        updateField: jest.fn(),
+        pendingChangesCount: 1,
+        discardChanges: jest.fn(),
+        submitChanges: mockSubmitChanges,
+      });
+
+      const definition = createMockClassicStreamDefinition({
+        stream: {
+          ...createMockClassicStreamDefinition().stream,
+          ingest: {
+            ...createMockClassicStreamDefinition().stream.ingest,
+            classic: {
+              field_overrides: {
+                'attributes.test_field': {
+                  type: 'keyword',
+                  description: 'Original description',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      render(
+        <I18nProvider>
+          <StreamDetailSchemaEditor
+            definition={definition}
+            refreshDefinition={mockRefreshDefinition}
+          />
+        </I18nProvider>
+      );
+
+      const submitButton = screen.getByTestId('streamsAppSchemaEditorReviewStagedChangesButton');
+      await user.click(submitButton);
+
+      expect(mockOpenModal).not.toHaveBeenCalled();
+      expect(mockSubmitChanges).toHaveBeenCalled();
     });
   });
 
@@ -495,7 +562,7 @@ describe('StreamDetailSchemaEditor', () => {
     it('shows add field button for non-root streams with manage privilege', () => {
       const definition = createMockClassicStreamDefinition({
         stream: {
-          name: 'logs.child',
+          name: 'logs.otel.child',
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
           ingest: {
@@ -517,6 +584,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 
@@ -564,6 +632,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 

@@ -207,6 +207,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     apiKey: esRule.apiKey,
     apiKeyOwner: esRule.apiKeyOwner,
     apiKeyCreatedByUser: esRule.apiKeyCreatedByUser,
+    ...(esRule.uiamApiKey !== undefined ? { uiamApiKey: esRule.uiamApiKey } : {}),
     throttle: esRule.throttle,
     muteAll: esRule.muteAll,
     notifyWhen: esRule.notifyWhen,
@@ -235,6 +236,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
         }
       : {}),
     ...(esRule.nextRun ? { nextRun: new Date(esRule.nextRun) } : {}),
+    ...(esRule.lastEnabledAt ? { lastEnabledAt: new Date(esRule.lastEnabledAt) } : {}),
     revision: esRule.revision,
     running: esRule.running,
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),

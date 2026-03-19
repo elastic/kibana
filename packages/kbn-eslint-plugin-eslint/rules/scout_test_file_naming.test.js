@@ -74,11 +74,23 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
       code: '',
       filename: 'x-pack/solutions/observability/plugins/my_plugin/test/scout/common/constants.ts',
     },
+    // Valid: Scout fixture file with 'test' in the name (not a test file)
+    {
+      code: '',
+      filename:
+        'x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/fixtures/test_bed_fixture.ts',
+    },
     // Valid: Scout config file
     {
       code: '',
       filename:
         'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/playwright.config.ts',
+    },
+    // Valid: Scout parallel config file
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/parallel.playwright.config.ts',
     },
     // Valid: global.setup.ts in tests directory
     {
@@ -211,6 +223,34 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
       errors: [
         {
           messageId: 'invalidExtension',
+        },
+      ],
+    },
+    // Invalid: Non-standard Playwright config file with dot separator
+    {
+      code: '',
+      filename:
+        'src/platform/plugins/shared/discover/test/scout/ui/metrics_experience_parallel.playwright.config.ts',
+      errors: [
+        {
+          messageId: 'invalidPlaywrightConfigName',
+          data: {
+            actual: 'metrics_experience_parallel.playwright.config.ts',
+          },
+        },
+      ],
+    },
+    // Invalid: Non-standard Playwright config file without dot separator
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/randomplaywright.config.ts',
+      errors: [
+        {
+          messageId: 'invalidPlaywrightConfigName',
+          data: {
+            actual: 'randomplaywright.config.ts',
+          },
         },
       ],
     },

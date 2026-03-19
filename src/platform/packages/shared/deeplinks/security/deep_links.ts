@@ -28,6 +28,7 @@ export enum SecurityPageName {
   case = 'cases', // must match `CasesDeepLinkId.cases`
   caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
   caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
+  caseTemplates = 'cases_templates', // must match `CasesDeepLinkId.casesTemplates`
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/solutions/security/plugins/cloud_security_posture/public/common/navigation/types.ts
@@ -74,7 +75,7 @@ export enum SecurityPageName {
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
   rulesManagement = 'rules-management',
-  scriptsLibrary = 'scripts_library',
+  scriptLibrary = 'script_library',
   siemReadiness = 'siem_readiness',
   siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',

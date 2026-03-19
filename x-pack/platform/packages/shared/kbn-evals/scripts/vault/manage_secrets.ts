@@ -101,6 +101,7 @@ const configSchema = schema.object(
         { unknowns: 'allow' }
       )
     ),
+    gcsDatasetAccessCredentials: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   },
   { unknowns: 'allow' }
 );

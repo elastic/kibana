@@ -25,10 +25,10 @@ export const QUERIES_COLUMN_HEADER = i18n.translate(
   }
 );
 
-export const FEATURES_COLUMN_HEADER = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.featuresColumnName',
+export const KNOWLEDGE_INDICATORS_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.knowledgeIndicatorsColumnName',
   {
-    defaultMessage: 'Features',
+    defaultMessage: 'Knowledge Indicators',
   }
 );
 
@@ -104,5 +104,44 @@ export const ONBOARDING_SCHEDULING_FAILURE_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.schedulingErrorTitle',
   {
     defaultMessage: 'Could not schedule a task to onboard stream',
+  }
+);
+
+export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsButtonLabel',
+  {
+    defaultMessage: 'Discover Significant Events',
+  }
+);
+
+export const INSIGHTS_SCHEDULING_FAILURE_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.insightsSchedulingErrorTitle',
+  {
+    defaultMessage: 'Could not start Significant Events generation',
+  }
+);
+
+export function getInsightsCompleteToastTitle(count: number): string {
+  return i18n.translate(
+    'xpack.streams.significantEventsDiscovery.streamsView.insightsCompleteToastTitle',
+    {
+      defaultMessage:
+        '{count} {count, plural, one {Significant Event} other {Significant Events}} found',
+      values: { count },
+    }
+  );
+}
+
+export const INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.insightsCompleteToastViewButton',
+  {
+    defaultMessage: 'View Significant Events',
+  }
+);
+
+export const NO_INSIGHTS_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.noInsightsToastTitle',
+  {
+    defaultMessage: 'No Significant Events found',
   }
 );

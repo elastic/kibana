@@ -9,20 +9,22 @@
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import {
   selectEditorYaml,
   selectIsTestModalOpen,
+  selectReplayExecutionId,
   selectWorkflowDefinition,
   selectWorkflowId,
 } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
+import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
 const mockUseKibana = jest.fn();
-const mockUseCapabilities = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 const mockUseAsyncThunk = jest.fn();
 
@@ -30,9 +32,14 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => mockUseKibana(),
 }));
 
-jest.mock('../../../hooks/use_capabilities', () => ({
-  useCapabilities: () => mockUseCapabilities(),
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
 }));
+
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
 
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
@@ -44,6 +51,7 @@ jest.mock('../../../hooks/use_async_thunk', () => ({
 
 jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
   selectIsTestModalOpen: jest.fn(),
+  selectReplayExecutionId: jest.fn(),
   selectWorkflowDefinition: jest.fn(),
   selectWorkflowId: jest.fn(),
   selectWorkflow: jest.fn(),
@@ -59,7 +67,7 @@ jest.mock('../../../features/run_workflow/ui/workflow_execute_modal', () => ({
   }: {
     definition: any;
     onClose: () => void;
-    onSubmit: (inputs: any) => void;
+    onSubmit: (inputs: any, triggerTab: string) => void;
   }) => (
     <div data-test-subj="workflow-execute-modal">
       <div data-test-subj="modal-definition">{JSON.stringify(definition)}</div>
@@ -69,7 +77,7 @@ jest.mock('../../../features/run_workflow/ui/workflow_execute_modal', () => ({
       <button
         type="button"
         data-test-subj="submit-modal"
-        onClick={() => onSubmit({ test: 'input' })}
+        onClick={() => onSubmit({ test: 'input' }, 'manual')}
       >
         {'Run'}
       </button>
@@ -103,6 +111,7 @@ describe('WorkflowDetailTestModal', () => {
     mockTestWorkflow = jest.fn();
 
     (selectIsTestModalOpen as unknown as jest.Mock).mockReturnValue(true);
+    (selectReplayExecutionId as unknown as jest.Mock).mockReturnValue(null);
     (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue(mockDefinition);
     (selectWorkflowId as unknown as jest.Mock).mockReturnValue(null);
     (selectEditorYaml as unknown as jest.Mock).mockReturnValue('');
@@ -123,7 +132,8 @@ describe('WorkflowDetailTestModal', () => {
       },
     });
 
-    mockUseCapabilities.mockReturnValue({
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...mockWorkflowsManagementCapabilities,
       canExecuteWorkflow: true,
     });
 
@@ -149,7 +159,8 @@ describe('WorkflowDetailTestModal', () => {
     });
 
     it('should not render when user lacks permissions', () => {
-      mockUseCapabilities.mockReturnValue({
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...mockWorkflowsManagementCapabilities,
         canExecuteWorkflow: false,
       });
 
@@ -199,7 +210,10 @@ describe('WorkflowDetailTestModal', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(expectedCalledFunction).toHaveBeenCalledWith({ inputs: { test: 'input' } });
+      expect(expectedCalledFunction).toHaveBeenCalledWith({
+        inputs: { test: 'input' },
+        triggerTab: 'manual',
+      });
     });
   });
 
@@ -216,7 +230,8 @@ describe('WorkflowDetailTestModal', () => {
         },
       });
 
-      mockUseCapabilities.mockReturnValue({
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...mockWorkflowsManagementCapabilities,
         canExecuteWorkflow: false,
       });
 
