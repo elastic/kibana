@@ -117,6 +117,11 @@ export const apiPublishesSavedSearch = (
   return Boolean(embeddable.savedSearch$);
 };
 
+/**
+ * Interface for publishing the selected tab ID
+ * @interface PublishesSelectedTabId
+ * @property {() => string | undefined} getSelectedTabId - Returns the ID of the selected tab
+ */
 export interface PublishesSelectedTabId {
   getSelectedTabId: () => string | undefined;
 }
