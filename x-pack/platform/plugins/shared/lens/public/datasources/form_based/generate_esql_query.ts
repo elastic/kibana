@@ -262,10 +262,12 @@ export function generateEsqlQuery(
       filterClause = ` WHERE ${cmd}(${esql.str(filteredQueryString)})`;
     }
 
-    // metricESQL is the full expression (template + optional filter); same value is used as map key and in STATS
-    const metricESQL = rawResult.template + filterClause;
+    const metricExpr = rawResult.template + filterClause;
+    const roleName = columnRoles?.[colId];
+    const metricESQL = roleName ? `${roleName} = ${metricExpr}` : metricExpr;
+    const esAggsIdMapKey = roleName ?? metricExpr;
 
-    esAggsIdMap[metricESQL] = createEsAggsIdMapEntry({
+    esAggsIdMap[esAggsIdMapKey] = createEsAggsIdMapEntry({
       col,
       colId,
       format,
