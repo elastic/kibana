@@ -137,6 +137,11 @@ export function FeatureDetailsFlyout({
       ownFocus={false}
       size="40%"
       hideCloseButton
+      css={css`
+        // Temporary workaround for #253800 removing global push-flyout positioning.
+        // Remove once the platform team restores these rules.
+        top: var(--kbn-layout--application-top, 0px);
+      `}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -168,7 +173,7 @@ export function FeatureDetailsFlyout({
                       items={[
                         <EuiContextMenuItem
                           key="delete"
-                          icon={<EuiIcon type="trash" color="danger" />}
+                          icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
                           css={css`
                             color: ${euiTheme.colors.danger};
                           `}
