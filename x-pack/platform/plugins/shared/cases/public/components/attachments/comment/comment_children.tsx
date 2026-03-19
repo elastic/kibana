@@ -82,13 +82,7 @@ export const CommentChildren: React.FC<CommentChildrenProps> = ({
         handleSaveComment({ id: commentId, version }, newContent);
       }
     },
-    [
-      attachmentPayload,
-      handleSaveAttachmentComment,
-      handleSaveComment,
-      commentId,
-      version,
-    ]
+    [attachmentPayload, handleSaveAttachmentComment, handleSaveComment, commentId, version]
   );
 
   return (

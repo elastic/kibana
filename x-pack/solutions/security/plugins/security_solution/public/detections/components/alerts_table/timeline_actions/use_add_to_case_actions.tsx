@@ -47,6 +47,7 @@ export const useAddToCaseActions = ({
               type: EVENT_ATTACHMENT_TYPE,
               attachmentId: ecsData._id ?? '',
               // data: { content: 'test comment' },
+              data: { snapshot: JSON.stringify(ecsData) },
               metadata: { index: ecsData._index ?? '' },
             },
           ]
