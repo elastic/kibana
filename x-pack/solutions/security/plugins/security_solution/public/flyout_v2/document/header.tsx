@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { HeaderTitle } from './header_title';
+import { HeaderTitle } from './components/header_title';
 
 export interface DocumentHeaderProps {
   /**

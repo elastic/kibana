@@ -9,9 +9,9 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DocumentHeader } from './document_header';
+import { DocumentHeader } from './header';
 
-jest.mock('./header_title', () => ({
+jest.mock('./components/header_title', () => ({
   HeaderTitle: ({ hit, titleHref }: { hit: DataTableRecord; titleHref?: string }) => (
     <div
       data-test-subj="mockHeaderTitle"

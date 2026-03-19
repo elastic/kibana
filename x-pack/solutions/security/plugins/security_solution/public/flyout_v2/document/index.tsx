@@ -13,7 +13,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import type { ResolverCellActionRenderer } from '../../resolver/types';
-import { DocumentHeader } from './components/document_header';
+import { DocumentHeader } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { useKibana } from '../../common/lib/kibana';
 import { getRuleDetailsUrl } from '../../common/components/link_to';
