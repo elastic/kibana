@@ -27,7 +27,7 @@ To get started, first you need to know a trigger you will attach your actions to
 Now, when user clicks on a UI element you need to "trigger" your trigger and provide some context data:
 
 ```typescript
-plugins.uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+plugins.uiActions.executeTriggerActions('on_click_value', {
   /* Custom context data. */
 });
 ```
@@ -42,10 +42,10 @@ plugins.uiActions.registerAction({
     // Do something.
   },
 });
-plugins.uiActions.attachAction('VALUE_CLICK_TRIGGER', 'DO_SOMETHING');
+plugins.uiActions.attachAction('on_click_value', 'DO_SOMETHING');
 ```
 
-Now your `DO_SOMETHING` action will automatically execute when `VALUE_CLICK_TRIGGER` trigger is triggered; or, if more than one compatible action is attached to that trigger, user will be presented with a context menu popup to select one action to execute.
+Now your `DO_SOMETHING` action will automatically execute when `on_click_value` trigger is triggered; or, if more than one compatible action is attached to that trigger, user will be presented with a context menu popup to select one action to execute.
 
 ## Examples [_examples_9]
 

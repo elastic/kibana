@@ -33,7 +33,6 @@ const createClientMock = createClient as jest.MockedFunction<typeof createClient
 const runToolRefCleanupMock = runToolRefCleanup as jest.MockedFunction<typeof runToolRefCleanup>;
 
 const createStartDeps = (): AgentsServiceStartDeps => ({
-  getRunner: () => ({ runAgent: jest.fn() } as any),
   security: securityServiceMock.createStart(),
   elasticsearch: elasticsearchServiceMock.createStart(),
   uiSettings: uiSettingsServiceMock.createStartContract(),

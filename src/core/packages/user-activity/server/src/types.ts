@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UserActivityActionId } from './user_activity_actions';
+
 /**
  * Information about the object being acted upon.
  * @public
@@ -52,10 +54,22 @@ export type UserActivityEventType =
  */
 export interface UserActivityEvent {
   /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
-  action: string;
+  action: UserActivityActionId;
   /** Event type {@link UserActivityEventType}. */
   type: UserActivityEventType;
+  /** ISO8601 timestamp of the event start time. */
+  start?: string;
+  /** ISO8601 timestamp of the event end time. */
+  end?: string;
+  /** Duration (in ns) between the event start and end timestamps. */
+  duration?: number;
 }
+
+/**
+ * Additional bucket of non-standard metadata specific to the user activity log.
+ * @public
+ */
+export type UserActivityMetadata = Record<string, unknown>;
 
 /** @public */
 export interface TrackUserActionParams {
@@ -65,6 +79,8 @@ export interface TrackUserActionParams {
   event: UserActivityEvent;
   /** Object attributes written to the log entry. */
   object: UserActivityObject;
+  /** Additional bucket of non-standard metadata. */
+  metadata?: UserActivityMetadata;
 }
 
 /**
@@ -74,7 +90,7 @@ export interface TrackUserActionParams {
  * @example
  * ```ts
  * core.userActivity.trackUserAction({
- *   event: { action: 'create_dashboard', type: 'creation' },
+ *   event: { action: 'edit_dashboard', type: 'change' },
  *   object: { id: 'dash-123', name: 'My Dashboard', type: 'dashboard', tags: [] },
  * });
  * ```

@@ -2590,5 +2590,77 @@ export default function (providerContext: FtrProviderContext) {
           .expect(404);
       });
     });
+
+    describe('GET /api/fleet/agent_policies agents_per_version', () => {
+      let policyId: string;
+      const agentId1 = `agent-per-version-1-${Date.now()}`;
+      const agentId2 = `agent-per-version-2-${Date.now()}`;
+      const agentId3 = `agent-per-version-3-${Date.now()}`;
+
+      before(async () => {
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test agents_per_version policy',
+            namespace: 'default',
+            force: true,
+          })
+          .expect(200);
+        policyId = agentPolicyResponse.item.id;
+
+        await fleetAndAgents.generateAgent('online', agentId1, policyId, '8.15.0');
+        await fleetAndAgents.generateAgent('online', agentId2, policyId, '8.16.0');
+        await fleetAndAgents.generateAgent('online', agentId3, policyId, '8.16.0');
+      });
+
+      after(async () => {
+        for (const agentId of [agentId1, agentId2, agentId3]) {
+          await es.delete({ index: '.fleet-agents', id: agentId, refresh: true });
+        }
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: policyId })
+          .expect(200);
+      });
+
+      it('should return agents_per_version when getting a single agent policy', async () => {
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${policyId}`).expect(200);
+
+        const agentsPerVersion = body.item.agents_per_version;
+        expect(agentsPerVersion).to.be.an('array');
+        expect(agentsPerVersion.length).to.eql(2);
+
+        const sorted = [...agentsPerVersion].sort((a: any, b: any) =>
+          a.version.localeCompare(b.version)
+        );
+        expect(sorted[0]).to.eql({ version: '8.15.0', count: 1 });
+        expect(sorted[1]).to.eql({ version: '8.16.0', count: 2 });
+      });
+
+      it('should return agents_per_version when listing agent policies with withAgentCount', async () => {
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies?withAgentCount=true&perPage=100`)
+          .expect(200);
+
+        const policy = body.items.find((p: { id: string }) => p.id === policyId);
+        expect(policy).to.be.ok();
+
+        const agentsPerVersion = policy.agents_per_version;
+        expect(agentsPerVersion).to.be.an('array');
+        expect(agentsPerVersion.length).to.eql(2);
+
+        const sorted = [...agentsPerVersion].sort((a: any, b: any) =>
+          a.version.localeCompare(b.version)
+        );
+        expect(sorted[0]).to.eql({ version: '8.15.0', count: 1 });
+        expect(sorted[1]).to.eql({ version: '8.16.0', count: 2 });
+      });
+    });
   });
 }

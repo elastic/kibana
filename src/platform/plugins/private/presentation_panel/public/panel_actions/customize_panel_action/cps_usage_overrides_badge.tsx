@@ -29,10 +29,11 @@ import {
   type ProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { triggers } from '@kbn/ui-actions-plugin/public';
 import { CPS_USAGE_OVERRIDES_BADGE } from './constants';
 import { uiActions, core } from '../../kibana_services';
 import { ACTION_EDIT_PANEL } from '../edit_panel_action/constants';
-import { CONTEXT_MENU_TRIGGER } from '../triggers';
 
 export class CpsUsageOverridesBadge
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
@@ -88,7 +89,7 @@ export class CpsUsageOverridesBadge
                     if (action) {
                       await action.execute({
                         ...context,
-                        trigger: { id: CONTEXT_MENU_TRIGGER },
+                        trigger: triggers[ON_OPEN_PANEL_MENU],
                       });
                     }
                   } catch (error) {

@@ -52,6 +52,10 @@ export function getFakeAutocompleteContextParams(
       : undefined,
     computed: computedData,
     connectors: { connectorTypes, totalConnectors: Object.keys(connectorTypes).length },
+    workflows: {
+      workflows: {},
+      totalWorkflows: 0,
+    },
   } as WorkflowDetailState;
 
   return {

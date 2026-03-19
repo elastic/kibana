@@ -9,6 +9,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type {
   CreateAutoImportIntegrationResponse,
   GetAutoImportIntegrationResponse,
+  GetAllAutoImportIntegrationsResponse,
 } from '../../../common/model/api/integrations/integration.gen';
 
 import type { UploadSamplesToDataStreamResponse } from '../../../common/model/api/data_streams/data_stream.gen';
@@ -29,12 +30,26 @@ export interface RequestDeps {
 }
 
 export interface EpmPackageResponse {
-  items: [{ id: string; type: string }];
+  items: Array<{ id: string; type: string }>;
   _meta?: {
     install_source: string;
     name: string;
   };
 }
+
+export const runInstallPackage = async (
+  zipFile: Blob,
+  { http, abortSignal }: RequestDeps
+): Promise<EpmPackageResponse> =>
+  http.post<EpmPackageResponse>(FLEET_PACKAGES_PATH, {
+    headers: {
+      ...fleetDefaultHeaders,
+      Accept: 'application/zip',
+      'Content-Type': 'application/zip',
+    },
+    body: zipFile,
+    signal: abortSignal,
+  });
 
 export const getInstalledPackages = async ({
   http,
@@ -83,10 +98,20 @@ export const getIntegrationById = async ({
     }
   );
 
+export const getAllIntegrations = async ({
+  http,
+  abortSignal,
+}: RequestDeps): Promise<GetAllAutoImportIntegrationsResponse> =>
+  http.get<GetAllAutoImportIntegrationsResponse>(AUTOMATIC_IMPORT_INTEGRATIONS_PATH, {
+    version: '1',
+    signal: abortSignal,
+  });
+
 export interface UploadSamplesRequest {
   integrationId: string;
   dataStreamId: string;
-  samples: string[];
+  samples?: string[];
+  sourceIndex?: string;
   originalSource: OriginalSource;
 }
 
@@ -96,6 +121,7 @@ export const uploadSamplesToDataStream = async ({
   integrationId,
   dataStreamId,
   samples,
+  sourceIndex,
   originalSource,
 }: RequestDeps & UploadSamplesRequest): Promise<UploadSamplesToDataStreamResponse> =>
   http.post<UploadSamplesToDataStreamResponse>(
@@ -104,7 +130,11 @@ export const uploadSamplesToDataStream = async ({
     )}/data_streams/${encodeURIComponent(dataStreamId)}/upload`,
     {
       version: '1',
-      body: JSON.stringify({ samples, originalSource }),
+      body: JSON.stringify({
+        ...(samples ? { samples } : {}),
+        ...(sourceIndex ? { sourceIndex } : {}),
+        originalSource,
+      }),
       signal: abortSignal,
     }
   );
@@ -178,6 +208,30 @@ export const getDataStreamResults = async ({
     )}/data_streams/${encodeURIComponent(dataStreamId)}/results`,
     {
       version: '1',
+      signal: abortSignal,
+    }
+  );
+
+export interface UpdateDataStreamPipelineRequest {
+  integrationId: string;
+  dataStreamId: string;
+  ingestPipeline: string;
+}
+
+export const updateDataStreamPipeline = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  ingestPipeline,
+}: RequestDeps & UpdateDataStreamPipelineRequest): Promise<GetDataStreamResultsResponse> =>
+  http.patch<GetDataStreamResultsResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}`,
+    {
+      version: '1',
+      body: JSON.stringify({ ingest_pipeline: ingestPipeline }),
       signal: abortSignal,
     }
   );

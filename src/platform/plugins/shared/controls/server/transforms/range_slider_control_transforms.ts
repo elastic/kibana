@@ -9,9 +9,10 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type {
-  LegacyStoredRangeSliderExplicitInput,
-  RangeSliderControlState,
+import {
+  rangeSliderControlSchema,
+  type LegacyStoredRangeSliderExplicitInput,
+  type RangeSliderControlState,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { transformDataControlIn, transformDataControlOut } from './data_control_transforms';
@@ -24,6 +25,7 @@ const RANGE_SLIDER_LEGACY_REF_NAMES = [
 
 export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(RANGE_SLIDER_CONTROL, {
+    getSchema: () => rangeSliderControlSchema,
     getTransforms: () => ({
       transformIn: (state: RangeSliderControlState) => {
         const { state: dataControlState, references } = transformDataControlIn(

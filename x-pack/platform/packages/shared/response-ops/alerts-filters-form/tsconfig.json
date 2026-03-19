@@ -5,8 +5,7 @@
     "types": [
       "jest",
       "node",
-      "@emotion/react/types/css-prop",
-      "@kbn/ambient-ui-types"
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [

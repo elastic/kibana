@@ -63,15 +63,11 @@
  */
 
 import type { ApmFields, LogDocument, Timerange } from '@kbn/synthtrace-client';
-import { apm } from '@kbn/synthtrace-client';
+import { apm, log } from '@kbn/synthtrace-client';
 import { createCliScenario } from '../../../../lib/utils/create_scenario';
 import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
 import type { ApmSynthtraceEsClient } from '../../../../lib/apm/client/apm_synthtrace_es_client';
 import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
-import {
-  createLogSequence,
-  generateCorrelatedLogsData,
-} from '../get_correlated_logs/correlated_logs';
 
 interface SpanConfig {
   spanName: string;
@@ -93,6 +89,12 @@ export interface GetTracesScenarioConfig {
     type: string;
   };
   children?: SpanConfig[];
+}
+
+export interface LogEntry {
+  message: string;
+  '@timestamp'?: number;
+  [key: string]: unknown;
 }
 
 export const DEFAULT_TRACE_CONFIGS: GetTracesScenarioConfig[] = [
@@ -133,6 +135,71 @@ export const DEFAULT_TRACE_CONFIGS: GetTracesScenarioConfig[] = [
     ],
   },
 ];
+
+export const DEFAULT_LOGS: LogEntry[] = [
+  { 'log.level': 'info', message: 'Checkout request received' },
+  { 'log.level': 'debug', message: 'Calling downstream cart service' },
+  { 'log.level': 'error', message: 'Database query failed: timeout' },
+  { 'log.level': 'warn', message: 'Retrying operation' },
+  { 'log.level': 'info', message: 'Checkout completed' },
+];
+
+/**
+ * Generates log data.
+ *
+ * @param range - Time range for log generation
+ * @param logsEsClient - Synthtrace ES client
+ * @param logs - Optional array of log entries. If not provided, generates default realistic sequences.
+ */
+export function generateLogsData({
+  range,
+  logsEsClient,
+  logs,
+}: {
+  range: Timerange;
+  logsEsClient: LogsSynthtraceEsClient;
+  logs: LogEntry[];
+}): ScenarioReturnType<LogDocument> {
+  const data = range
+    .interval('5m')
+    .rate(1)
+    .generator((timestamp) => {
+      return logs.map((event, index) => {
+        const { message, '@timestamp': eventTimestamp, ...fields } = event;
+
+        return log
+          .create()
+          .message(message)
+          .defaults(fields)
+          .timestamp(eventTimestamp ?? timestamp + index * 10000);
+      });
+    });
+
+  return withClient(logsEsClient, data);
+}
+
+export function createLogSequence({
+  service,
+  correlation,
+  logs,
+  defaults = {},
+}: {
+  /** Service name (maps to service.name) */
+  service: string;
+  /** Correlation field(s) shared by all logs, e.g. { 'trace.id': 'abc' } or { order_id: '123' } */
+  correlation: Record<string, string>;
+  /** Log entries - each must have `message`, other fields are optional */
+  logs: LogEntry[];
+  /** Additional fields to apply to all logs */
+  defaults?: Record<string, unknown>;
+}): LogEntry[] {
+  return logs.map((entry) => ({
+    'service.name': service,
+    ...correlation,
+    ...defaults,
+    ...entry,
+  }));
+}
 
 export function generateGetTracesApmDataset({
   range,
@@ -213,7 +280,7 @@ export function generateGetTracesLogsData({
   // `traceId` lookup path and the anchor-from-logs path (which prefers `trace.id`).
   // For additional correlation identifiers (request.id, session.id, etc.) we rely on the
   // default sequences from `logs.ts` (see default export below).
-  const correlatedLogs = createLogSequence({
+  const logs = createLogSequence({
     service: serviceName,
     correlation: {
       'trace.id': traceId,
@@ -224,14 +291,10 @@ export function generateGetTracesLogsData({
     defaults: {
       'service.environment': environment,
     },
-    logs: [
-      { 'log.level': 'info', message: 'Checkout request received' },
-      { 'log.level': 'debug', message: 'Calling downstream cart service' },
-      { 'log.level': 'error', message: 'Database query failed: timeout' },
-    ],
+    logs: DEFAULT_LOGS,
   });
 
-  return generateCorrelatedLogsData({ range, logsEsClient, logs: correlatedLogs });
+  return generateLogsData({ range, logsEsClient, logs });
 }
 
 export default createCliScenario<ApmFields | LogDocument>(
@@ -242,26 +305,14 @@ export default createCliScenario<ApmFields | LogDocument>(
       traces: DEFAULT_TRACE_CONFIGS,
     });
 
-    // Index two log sets:
-    // 1) Default realistic sequences (uses generateDefaultSequences via generateCorrelatedLogsData)
-    // 2) A deterministic trace.id-correlated sequence matching DEFAULT_CONFIG.traceId
-    const defaultLogsData = generateCorrelatedLogsData({ range, logsEsClient });
-
-    const correlatedLogsData = [
-      // Deterministic anchor log (has stable _id for logId lookups)
+    const logsData = DEFAULT_TRACE_CONFIGS.map((config) =>
       generateGetTracesLogsData({
         range,
         logsEsClient,
-        config: DEFAULT_TRACE_CONFIGS[0],
-      }),
-      // Additional trace.id-correlated sequences for direct lookups and anchor expansion
-      generateGetTracesLogsData({
-        range,
-        logsEsClient,
-        config: DEFAULT_TRACE_CONFIGS[1],
-      }),
-    ];
+        config,
+      })
+    );
 
-    return [apmData, defaultLogsData, ...correlatedLogsData];
+    return [apmData, ...logsData];
   }
 );

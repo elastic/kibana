@@ -18,7 +18,7 @@
           ") => null"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
-        "lineNumber": 46,
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -34,7 +34,7 @@
               "AppMenuProps"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 25,
             "deprecated": false,
             "trackAdoption": false,

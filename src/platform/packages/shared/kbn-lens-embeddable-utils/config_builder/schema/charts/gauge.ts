@@ -30,17 +30,29 @@ const gaugeStateSharedOptionsSchema = {
               defaultValue: 'horizontal',
             }),
           },
-          { meta: { id: 'gaugeShapeBullet', description: 'Bullet gauge shape' } }
+          {
+            meta: {
+              id: 'gaugeShapeBullet',
+              title: 'Shape (Bullet)',
+              description: 'Bullet gauge shape',
+            },
+          }
         ),
         schema.object(
           {
             type: schema.oneOf([
               schema.literal('circle'),
-              schema.literal('semiCircle'),
+              schema.literal('semi_circle'),
               schema.literal('arc'),
             ]),
           },
-          { meta: { id: 'gaugeShapeCircular', description: 'Circular gauge shape' } }
+          {
+            meta: {
+              id: 'gaugeShapeCircular',
+              title: 'Shape (Circular)',
+              description: 'Circular gauge shape',
+            },
+          }
         ),
       ],
       { defaultValue: { type: 'bullet', direction: 'horizontal' } }
@@ -129,7 +141,7 @@ export const gaugeStateSchemaNoESQL = schema.object(
       ...gaugeStateMetricInnerNoESQLOpsSchema,
     }),
   },
-  { meta: { id: 'gaugeNoESQL' } }
+  { meta: { id: 'gaugeNoESQL', title: 'Gauge Chart (DSL)' } }
 );
 
 export const gaugeStateSchemaESQL = schema.object(
@@ -147,11 +159,11 @@ export const gaugeStateSchemaESQL = schema.object(
       ...gaugeStateMetricInnerESQLOpsSchema,
     }),
   },
-  { meta: { id: 'gaugeESQL' } }
+  { meta: { id: 'gaugeESQL', title: 'Gauge Chart (ES|QL)' } }
 );
 
 export const gaugeStateSchema = schema.oneOf([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
-  meta: { id: 'gaugeChartSchema' },
+  meta: { id: 'gaugeChart', title: 'Gauge Chart' },
 });
 
 export type GaugeState = TypeOf<typeof gaugeStateSchema>;

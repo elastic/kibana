@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react';
-import type { ReactWrapper } from 'enzyme';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { SpaceListInternal } from './space_list_internal';
 import type { SpaceListProps } from './types';
@@ -21,7 +21,7 @@ import { spacesManagerMock } from '../spaces_manager/mocks';
 const ACTIVE_SPACE: Space = {
   id: 'default',
   name: 'Default',
-  initials: 'D!', // so it can be differentiated from 'Delta'
+  initials: 'D!',
   disabledFeatures: [],
 };
 const getSpaceData = (inactiveSpaceCount: number = 0) => {
@@ -36,12 +36,6 @@ const getSpaceData = (inactiveSpaceCount: number = 0) => {
   return { spaces, namespaces };
 };
 
-/**
- * Displays a corresponding list of spaces for a given list of saved object namespaces. It shows up to five spaces (and an indicator for any
- * number of spaces that the user is not authorized to see) by default. If more than five named spaces would be displayed, the extras (along
- * with the unauthorized spaces indicator, if present) are hidden behind a button. If '*' (aka "All spaces") is present, it supersedes all
- * of the above and just displays a single badge without a button.
- */
 describe('SpaceListInternal', () => {
   const createSpaceList = async ({
     spaces,
@@ -61,27 +55,28 @@ describe('SpaceListInternal', () => {
       getStartServices,
       spacesManager,
     });
-    const wrapper = mountWithIntl(
-      <SpacesContext feature={feature}>
-        <SpaceListInternal {...props} />
-      </SpacesContext>
-    );
 
-    // wait for context wrapper to rerender
-    await act(async () => {});
-    wrapper.update();
+    let result: ReturnType<typeof render>;
+    await act(async () => {
+      result = render(
+        <I18nProvider>
+          <SpacesContext feature={feature}>
+            <SpaceListInternal {...props} />
+          </SpacesContext>
+        </I18nProvider>
+      );
+    });
 
-    return wrapper;
+    return result!;
   };
 
-  function getListText(wrapper: ReactWrapper) {
-    return wrapper.find('EuiFlexItem').map((x) => x.text());
+  function getListText(container: HTMLElement) {
+    const flexItems = container.querySelectorAll('.euiFlexItem');
+    return Array.from(flexItems).map((el) => el.textContent || '');
   }
-  function getButton(wrapper: ReactWrapper) {
-    return wrapper.find('EuiButtonEmpty');
-  }
-  async function getListClickTarget(wrapper: ReactWrapper) {
-    return (await wrapper.find('[data-test-subj="space-avatar-alpha"]')).last();
+
+  function getButton(container: HTMLElement) {
+    return container.querySelector('[class*="euiButtonEmpty"]') as HTMLElement | null;
   }
 
   describe('using default properties', () => {
@@ -89,11 +84,9 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData();
 
       it('does not show badges or button', async () => {
-        const props = { namespaces };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toHaveLength(0);
-        expect(getButton(wrapper)).toHaveLength(0);
+        const { container } = await createSpaceList({ spaces, props: { namespaces } });
+        expect(getListText(container)).toHaveLength(0);
+        expect(getButton(container)).toBeNull();
       });
     });
 
@@ -101,11 +94,9 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData(1);
 
       it('shows one badge without button', async () => {
-        const props = { namespaces };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toEqual(['A']);
-        expect(getButton(wrapper)).toHaveLength(0);
+        const { container } = await createSpaceList({ spaces, props: { namespaces } });
+        expect(getListText(container)).toEqual(['A']);
+        expect(getButton(container)).toBeNull();
       });
     });
 
@@ -113,11 +104,9 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData(5);
 
       it('shows badges without button', async () => {
-        const props = { namespaces };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toEqual(['A', 'B', 'C', 'D', 'E']);
-        expect(getButton(wrapper)).toHaveLength(0);
+        const { container } = await createSpaceList({ spaces, props: { namespaces } });
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E']);
+        expect(getButton(container)).toBeNull();
       });
     });
 
@@ -125,11 +114,12 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData(5);
 
       it('shows badges without button', async () => {
-        const props = { namespaces: [...namespaces, '?'] };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toEqual(['A', 'B', 'C', 'D', 'E', '+1']);
-        expect(getButton(wrapper)).toHaveLength(0);
+        const { container } = await createSpaceList({
+          spaces,
+          props: { namespaces: [...namespaces, '?'] },
+        });
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', '+1']);
+        expect(getButton(container)).toBeNull();
       });
     });
 
@@ -137,11 +127,12 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData(5);
 
       it('shows badges without button', async () => {
-        const props = { namespaces: [...namespaces, '?', '?'] };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toEqual(['A', 'B', 'C', 'D', 'E', '+2']);
-        expect(getButton(wrapper)).toHaveLength(0);
+        const { container } = await createSpaceList({
+          spaces,
+          props: { namespaces: [...namespaces, '?', '?'] },
+        });
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', '+2']);
+        expect(getButton(container)).toBeNull();
       });
     });
 
@@ -149,21 +140,17 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData(6);
 
       it('shows badges with button', async () => {
-        const props = { namespaces };
-        const wrapper = await createSpaceList({ spaces, props });
+        const { container } = await createSpaceList({ spaces, props: { namespaces } });
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E']);
 
-        expect(getListText(wrapper)).toEqual(['A', 'B', 'C', 'D', 'E']);
+        const button = getButton(container);
+        expect(button).not.toBeNull();
+        expect(button!.textContent).toEqual('+1 more');
 
-        const button = getButton(wrapper);
-        expect(button.text()).toEqual('+1 more');
+        await userEvent.click(button!);
 
-        await act(async () => {
-          button.simulate('click');
-        });
-        wrapper.update();
-        const badgeText = getListText(wrapper);
-        expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F']);
-        expect(button.text()).toEqual('show less');
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F']);
+        expect(button!.textContent).toEqual('show less');
       });
     });
 
@@ -171,20 +158,20 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData(6);
 
       it('shows badges with button', async () => {
-        const props = { namespaces: [...namespaces, '?'] };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toEqual(['A', 'B', 'C', 'D', 'E']);
-        const button = getButton(wrapper);
-        expect(button.text()).toEqual('+2 more');
-
-        await act(async () => {
-          button.simulate('click');
+        const { container } = await createSpaceList({
+          spaces,
+          props: { namespaces: [...namespaces, '?'] },
         });
-        wrapper.update();
-        const badgeText = getListText(wrapper);
-        expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F', '+1']);
-        expect(button.text()).toEqual('show less');
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E']);
+
+        const button = getButton(container);
+        expect(button).not.toBeNull();
+        expect(button!.textContent).toEqual('+2 more');
+
+        await userEvent.click(button!);
+
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', '+1']);
+        expect(button!.textContent).toEqual('show less');
       });
     });
 
@@ -192,43 +179,44 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData(6);
 
       it('shows badges with button', async () => {
-        const props = { namespaces: [...namespaces, '?', '?'] };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toEqual(['A', 'B', 'C', 'D', 'E']);
-        const button = getButton(wrapper);
-        expect(button.text()).toEqual('+3 more');
-
-        await act(async () => {
-          button.simulate('click');
+        const { container } = await createSpaceList({
+          spaces,
+          props: { namespaces: [...namespaces, '?', '?'] },
         });
-        wrapper.update();
-        const badgeText = getListText(wrapper);
-        expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F', '+2']);
-        expect(button.text()).toEqual('show less');
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E']);
+
+        const button = getButton(container);
+        expect(button).not.toBeNull();
+        expect(button!.textContent).toEqual('+3 more');
+
+        await userEvent.click(button!);
+
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', '+2']);
+        expect(button!.textContent).toEqual('show less');
       });
     });
 
     describe('with only "all spaces"', () => {
       it('shows one badge without button', async () => {
-        const props = { namespaces: ['*'] };
-        const wrapper = await createSpaceList({ spaces: [], props });
-
-        expect(getListText(wrapper)).toEqual(['*']);
-        expect(getButton(wrapper)).toHaveLength(0);
+        const { container } = await createSpaceList({
+          spaces: [],
+          props: { namespaces: ['*'] },
+        });
+        expect(getListText(container)).toEqual(['*']);
+        expect(getButton(container)).toBeNull();
       });
     });
 
     describe('with "all spaces", the active space, six inactive spaces, and one unauthorized space', () => {
-      // same as assertions 'with only "all spaces"' test case; if "all spaces" is present, it supersedes everything else
       const { spaces, namespaces } = getSpaceData(6);
 
       it('shows one badge without button', async () => {
-        const props = { namespaces: ['*', ...namespaces, '?'] };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toEqual(['*']);
-        expect(getButton(wrapper)).toHaveLength(0);
+        const { container } = await createSpaceList({
+          spaces,
+          props: { namespaces: ['*', ...namespaces, '?'] },
+        });
+        expect(getListText(container)).toEqual(['*']);
+        expect(getButton(container)).toBeNull();
       });
     });
   });
@@ -238,79 +226,94 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData(8);
 
       it('with displayLimit=0, shows badges without button', async () => {
-        const props = { namespaces: [...namespaces, '?'], displayLimit: 0, listOnClick: jest.fn() };
-        const wrapper = await createSpaceList({ spaces, props });
+        const listOnClick = jest.fn();
+        const { container } = await createSpaceList({
+          spaces,
+          props: { namespaces: [...namespaces, '?'], displayLimit: 0, listOnClick },
+        });
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
+        expect(getButton(container)).toBeNull();
 
-        expect(getListText(wrapper)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
-        expect(getButton(wrapper)).toHaveLength(0);
-
-        (await getListClickTarget(wrapper)).simulate('click');
-        expect(props.listOnClick).toHaveBeenCalledTimes(1);
+        await userEvent.click(screen.getByTestId('space-avatar-alpha'));
+        expect(listOnClick).toHaveBeenCalledTimes(1);
       });
 
       it('with displayLimit=1, shows badges with button', async () => {
-        const props = { namespaces: [...namespaces, '?'], displayLimit: 1, listOnClick: jest.fn() };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toEqual(['A']);
-        const button = getButton(wrapper);
-        expect(button.text()).toEqual('+8 more');
-
-        await act(async () => {
-          button.simulate('click');
+        const listOnClick = jest.fn();
+        const { container } = await createSpaceList({
+          spaces,
+          props: { namespaces: [...namespaces, '?'], displayLimit: 1, listOnClick },
         });
-        wrapper.update();
-        const badgeText = getListText(wrapper);
-        expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
-        expect(button.text()).toEqual('show less');
+        expect(getListText(container)).toEqual(['A']);
 
-        (await getListClickTarget(wrapper)).simulate('click');
-        expect(props.listOnClick).toHaveBeenCalledTimes(1);
+        const button = getButton(container);
+        expect(button).not.toBeNull();
+        expect(button!.textContent).toEqual('+8 more');
+
+        await userEvent.click(button!);
+
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
+        expect(button!.textContent).toEqual('show less');
+
+        await userEvent.click(screen.getByTestId('space-avatar-alpha'));
+        expect(listOnClick).toHaveBeenCalledTimes(1);
       });
 
       it('with displayLimit=7, shows badges with button', async () => {
-        const props = { namespaces: [...namespaces, '?'], displayLimit: 7 };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
-        const button = getButton(wrapper);
-        expect(button.text()).toEqual('+2 more');
-
-        await act(async () => {
-          button.simulate('click');
+        const { container } = await createSpaceList({
+          spaces,
+          props: { namespaces: [...namespaces, '?'], displayLimit: 7 },
         });
-        wrapper.update();
-        const badgeText = getListText(wrapper);
-        expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
-        expect(button.text()).toEqual('show less');
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
+
+        const button = getButton(container);
+        expect(button).not.toBeNull();
+        expect(button!.textContent).toEqual('+2 more');
+
+        await userEvent.click(button!);
+
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
+        expect(button!.textContent).toEqual('show less');
       });
 
       it('with displayLimit=8, shows badges without button', async () => {
-        const props = { namespaces: [...namespaces, '?'], displayLimit: 8 };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
-        expect(getButton(wrapper)).toHaveLength(0);
+        const { container } = await createSpaceList({
+          spaces,
+          props: { namespaces: [...namespaces, '?'], displayLimit: 8 },
+        });
+        expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
+        expect(getButton(container)).toBeNull();
       });
 
       it('with behaviorContext="outside-space", shows badges with button', async () => {
-        const props: SpaceListProps = {
-          namespaces: [...namespaces, '?'],
-          behaviorContext: 'outside-space',
-        };
-        const wrapper = await createSpaceList({ spaces, props });
-
-        expect(getListText(wrapper)).toEqual(['D!', 'A', 'B', 'C', 'D']);
-        const button = getButton(wrapper);
-        expect(button.text()).toEqual('+5 more');
-
-        await act(async () => {
-          button.simulate('click');
+        const { container } = await createSpaceList({
+          spaces,
+          props: {
+            namespaces: [...namespaces, '?'],
+            behaviorContext: 'outside-space',
+          } as SpaceListProps,
         });
-        wrapper.update();
-        const badgeText = getListText(wrapper);
-        expect(badgeText).toEqual(['D!', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
-        expect(button.text()).toEqual('show less');
+        expect(getListText(container)).toEqual(['D!', 'A', 'B', 'C', 'D']);
+
+        const button = getButton(container);
+        expect(button).not.toBeNull();
+        expect(button!.textContent).toEqual('+5 more');
+
+        await userEvent.click(button!);
+
+        expect(getListText(container)).toEqual([
+          'D!',
+          'A',
+          'B',
+          'C',
+          'D',
+          'E',
+          'F',
+          'G',
+          'H',
+          '+1',
+        ]);
+        expect(button!.textContent).toEqual('show less');
       });
     });
   });
@@ -320,25 +323,21 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData(8);
 
       it('shows badges with button, showing disabled features at the end of the list', async () => {
-        // Each space that is generated by the getSpaceData function has a disabled feature derived from its own ID.
-        // E.g., the Alpha space has `disabledFeatures: ['alpha-feature']`, the Bravo space has `disabledFeatures: ['bravo-feature']`, and
-        // so on and so forth. For this test case we will render the Space context for the 'bravo-feature' feature, so the SpaceAvatar for
-        // the Bravo space will appear at the end of the list.
-        const props = { namespaces: [...namespaces, '?'] };
-        const feature = 'bravo-feature';
-        const wrapper = await createSpaceList({ spaces, props, feature });
-
-        expect(getListText(wrapper)).toEqual(['A', 'C', 'D', 'E', 'F']);
-        const button = getButton(wrapper);
-        expect(button.text()).toEqual('+4 more');
-
-        await act(async () => {
-          button.simulate('click');
+        const { container } = await createSpaceList({
+          spaces,
+          props: { namespaces: [...namespaces, '?'] },
+          feature: 'bravo-feature',
         });
-        wrapper.update();
-        const badgeText = getListText(wrapper);
-        expect(badgeText).toEqual(['A', 'C', 'D', 'E', 'F', 'G', 'H', 'B', '+1']);
-        expect(button.text()).toEqual('show less');
+        expect(getListText(container)).toEqual(['A', 'C', 'D', 'E', 'F']);
+
+        const button = getButton(container);
+        expect(button).not.toBeNull();
+        expect(button!.textContent).toEqual('+4 more');
+
+        await userEvent.click(button!);
+
+        expect(getListText(container)).toEqual(['A', 'C', 'D', 'E', 'F', 'G', 'H', 'B', '+1']);
+        expect(button!.textContent).toEqual('show less');
       });
     });
   });

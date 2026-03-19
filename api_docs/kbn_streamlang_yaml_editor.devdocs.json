@@ -52,7 +52,7 @@
             "tags": [],
             "label": "streamType",
             "description": [
-              "- Optional stream type to filter available actions\nReturns null if schema generation fails, allowing fallback to basic syntax highlighting"
+              "- Optional stream type to filter available actions"
             ],
             "signature": [
               {
@@ -112,7 +112,7 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
-        "lineNumber": 104,
+        "lineNumber": 105,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -134,7 +134,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
-            "lineNumber": 108,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -157,7 +157,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
-            "lineNumber": 109,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -288,7 +288,7 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/streamlang_yaml_editor.tsx",
-        "lineNumber": 40,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -310,7 +310,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/streamlang_yaml_editor.tsx",
-            "lineNumber": 40,
+            "lineNumber": 42,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -516,7 +516,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"success\" | \"disabled\" | \"running\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
+              "\"disabled\" | \"running\" | \"success\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
             "lineNumber": 64,
@@ -1069,7 +1069,7 @@
         "label": "StepStatus",
         "description": [],
         "signature": [
-          "\"success\" | \"disabled\" | \"running\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
+          "\"disabled\" | \"running\" | \"success\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
         "lineNumber": 47,

@@ -7,17 +7,19 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
+import { isLensESQLConfig } from '@kbn/lens-embeddable-utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
+
+import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
 import type { LensCreateIn, LensSavedObject } from '../../../content_management';
-import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../types';
+import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../../types';
+import { getLensRequestConfig, getLensResponseItem } from './utils';
 import {
   lensCreateRequestBodySchema,
   lensCreateRequestParamsSchema,
   lensCreateRequestQuerySchema,
   lensCreateResponseBodySchema,
 } from './schema';
-import { getLensRequestConfig, getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -25,7 +27,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
 ) => {
   const createRoute = router.post({
     path: `${LENS_VIS_API_PATH}/{id?}`,
-    access: LENS_API_ACCESS,
+    access: 'internal', // to go public in 9.4
     enableQueryVersion: true,
     summary: 'Create Lens visualization',
     description: 'Create a new Lens visualization.',
@@ -73,18 +75,20 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
-      const requestBodyData = req.body;
-      if ('state' in requestBodyData && !requestBodyData.visualizationType) {
-        throw new Error('visualizationType is required');
+      if (isLensESQLConfig(req.body)) {
+        return res.badRequest({
+          body: {
+            message:
+              'ES|QL charts are not yet supported in Lens. Use POST /api/dashboards instead.',
+          },
+        });
       }
 
-      // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
       try {
-        // Note: these types are to enforce loose param typings of client methods
         const { references, ...data } = getLensRequestConfig(builder, req.body);
         const options: LensCreateIn['options'] = { ...req.query, references, id: req.params.id };
         const { result } = await client.create(data, options);

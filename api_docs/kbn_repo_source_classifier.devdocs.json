@@ -163,7 +163,7 @@
               "Specifies the group to which this module belongs"
             ],
             "signature": [
-              "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | \"common\""
+              "\"search\" | \"security\" | \"common\" | \"observability\" | \"workplaceai\" | \"platform\""
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
             "lineNumber": 18,

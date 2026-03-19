@@ -53,7 +53,9 @@ export const createAnnotationActions = ({
     core.application.capabilities.visualize_v2.save && isSaveable
   );
 
-  if (savingToLibraryPermitted) {
+  // Linked annotations are auto-saved to library on Apply/Save, so the
+  // explicit "Save to library" action is only offered for by-value layers.
+  if (savingToLibraryPermitted && !isByReferenceAnnotationsLayer(layer)) {
     actions.push(
       getSaveLayerAction({
         state,

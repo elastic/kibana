@@ -28,6 +28,8 @@ import {
 } from '../../../hooks';
 import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 
+import { ExperimentalFeaturesService } from '../../../services';
+
 import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
@@ -106,6 +108,35 @@ jest.mock('../../../hooks', () => {
                 ],
                 package: 'nginx',
                 path: 'access',
+              },
+              {
+                type: 'logs',
+                dataset: 'nginx.error',
+                title: 'Nginx error logs',
+                release: 'experimental',
+                ingest_pipeline: 'default',
+                streams: [
+                  {
+                    input: 'logfile',
+                    vars: [
+                      {
+                        name: 'paths',
+                        type: 'text',
+                        title: 'Paths',
+                        multi: true,
+                        required: true,
+                        show_user: true,
+                        default: ['/var/log/nginx/error.log*'],
+                      },
+                    ],
+                    template_path: 'stream.yml.hbs',
+                    title: 'Nginx error logs',
+                    description: 'Collect Nginx error logs',
+                    enabled: true,
+                  },
+                ],
+                package: 'nginx',
+                path: 'error',
               },
             ],
             latestVersion: version,
@@ -214,6 +245,13 @@ const mockPackagePolicy = {
             paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
           },
         },
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'nginx.error' },
+          vars: {
+            paths: { value: ['/var/log/nginx/error.log*'], type: 'text' },
+          },
+        },
       ],
       vars: undefined,
     },
@@ -249,6 +287,9 @@ describe('edit package policy page', () => {
     (renderResult = testRenderer.render(<EditPackagePolicyPage />, { legacyRoot: true }));
 
   beforeEach(() => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      enableVarGroups: true,
+    } as any);
     testRenderer = createFleetTestRendererMock();
     lastStepConfigureProps = undefined;
 
@@ -349,6 +390,10 @@ describe('edit package policy page', () => {
             streams: [
               {
                 ...mockPackagePolicy.inputs[0].streams[0],
+                enabled: false,
+              },
+              {
+                ...mockPackagePolicy.inputs[0].streams[1],
                 enabled: false,
               },
             ],

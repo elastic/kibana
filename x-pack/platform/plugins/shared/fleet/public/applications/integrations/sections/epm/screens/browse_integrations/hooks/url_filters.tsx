@@ -10,20 +10,35 @@ import { useHistory } from 'react-router-dom';
 import { omit } from 'lodash';
 
 import { useUrlParams } from '../../../../../../../hooks';
+import { dataTypes } from '../../../../../../../../common/constants';
 
 import type {
   BrowseIntegrationsFilter,
   BrowseIntegrationSortType,
   IntegrationStatusFilterType,
+  SetupMethodFilterType,
+  SignalFilterType,
 } from '../types';
 
 const VALID_STATUSES: IntegrationStatusFilterType[] = ['deprecated'];
+const VALID_SETUP_METHODS: SetupMethodFilterType[] = ['agentless', 'elastic_agent'];
+const VALID_SIGNALS: SignalFilterType[] = Object.values(dataTypes);
 const INTEGRATIONS_QUERYPARAM_Q = 'q';
 const INTEGRATIONS_QUERYPARAM_SORT = 'sort';
 const INTEGRATIONS_QUERYPARAM_STATUS = 'status';
+const INTEGRATIONS_QUERYPARAM_SETUP_METHOD = 'setupMethod';
+const INTEGRATIONS_QUERYPARAM_SIGNAL = 'signal';
 
 function isValidStatus(value: string): value is IntegrationStatusFilterType {
   return (VALID_STATUSES as string[]).includes(value);
+}
+
+function isValidSetupMethod(value: string): value is SetupMethodFilterType {
+  return (VALID_SETUP_METHODS as string[]).includes(value);
+}
+
+function isValidSignal(value: string): value is SignalFilterType {
+  return (VALID_SIGNALS as string[]).includes(value);
 }
 
 export function useAddUrlFilters() {
@@ -44,12 +59,20 @@ export function useAddUrlFilters() {
               urlParams,
               INTEGRATIONS_QUERYPARAM_Q,
               INTEGRATIONS_QUERYPARAM_SORT,
-              INTEGRATIONS_QUERYPARAM_STATUS
+              INTEGRATIONS_QUERYPARAM_STATUS,
+              INTEGRATIONS_QUERYPARAM_SETUP_METHOD,
+              INTEGRATIONS_QUERYPARAM_SIGNAL
             ),
             ...(newFilters.q ? { q: newFilters.q } : {}),
             ...(newFilters.sort ? { sort: newFilters.sort } : {}),
             ...(newFilters.status && newFilters.status.length > 0
               ? { status: newFilters.status }
+              : {}),
+            ...(newFilters.setupMethod && newFilters.setupMethod.length > 0
+              ? { setupMethod: newFilters.setupMethod }
+              : {}),
+            ...(newFilters.signal && newFilters.signal.length > 0
+              ? { signal: newFilters.signal }
               : {}),
           },
           {
@@ -93,10 +116,42 @@ export function useUrlFilters(): BrowseIntegrationsFilter {
       }
     }
 
+    let setupMethod: BrowseIntegrationsFilter[typeof INTEGRATIONS_QUERYPARAM_SETUP_METHOD];
+    const rawSetupMethod = urlParams[INTEGRATIONS_QUERYPARAM_SETUP_METHOD];
+    if (typeof rawSetupMethod === 'string') {
+      if (isValidSetupMethod(rawSetupMethod)) {
+        setupMethod = [rawSetupMethod];
+      }
+    } else if (Array.isArray(rawSetupMethod)) {
+      const validMethods = rawSetupMethod.filter(
+        (s): s is SetupMethodFilterType => typeof s === 'string' && isValidSetupMethod(s)
+      );
+      if (validMethods.length > 0) {
+        setupMethod = validMethods;
+      }
+    }
+
+    let signal: BrowseIntegrationsFilter[typeof INTEGRATIONS_QUERYPARAM_SIGNAL];
+    const rawSignal = urlParams[INTEGRATIONS_QUERYPARAM_SIGNAL];
+    if (typeof rawSignal === 'string') {
+      if (isValidSignal(rawSignal)) {
+        signal = [rawSignal];
+      }
+    } else if (Array.isArray(rawSignal)) {
+      const validSignals = rawSignal.filter(
+        (s): s is SignalFilterType => typeof s === 'string' && isValidSignal(s)
+      );
+      if (validSignals.length > 0) {
+        signal = validSignals;
+      }
+    }
+
     return {
       q,
       sort,
       status,
+      setupMethod,
+      signal,
     };
   }, [urlParams]);
 }

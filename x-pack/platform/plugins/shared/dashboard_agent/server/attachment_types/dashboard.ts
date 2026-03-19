@@ -39,6 +39,8 @@ export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
+    getAgentDescription: () =>
+      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment.`,
     getTools: () => [],
   };
 };

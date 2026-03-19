@@ -125,7 +125,32 @@ export async function populateAssignedAgentsCount(
           kuery: `${policyKuery} and ${FIPS_AGENT_KUERY}`,
         })
         .then(({ total }) => (agentPolicy.fips_agents = total));
-      return Promise.all([totalAgents, unprivilegedAgents, fipsAgents]);
+
+      const perVersionAgents = agentClient
+        .listAgents({
+          showInactive: true,
+          perPage: 0,
+          page: 1,
+          aggregations: {
+            versions: {
+              terms: {
+                field: 'agent.version',
+                size: 1000,
+              },
+            },
+          },
+          kuery: policyKuery,
+        })
+        .then(({ aggregations }) => {
+          const versions = (aggregations?.versions as any)?.buckets ?? [];
+          agentPolicy.agents_per_version = versions.map(
+            (version: { key: string; doc_count: number }) => ({
+              version: version.key,
+              count: version.doc_count,
+            })
+          );
+        });
+      return Promise.all([totalAgents, unprivilegedAgents, fipsAgents, perVersionAgents]);
     },
     { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
   );

@@ -16,7 +16,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./tools/get_runtime_metrics.spec.ts'));
     loadTestFile(require.resolve('./tools/run_log_rate_analysis.spec.ts'));
     loadTestFile(require.resolve('./tools/get_log_groups.spec.ts'));
-    loadTestFile(require.resolve('./tools/get_correlated_logs.spec.ts'));
     loadTestFile(require.resolve('./tools/get_hosts.spec.ts'));
     loadTestFile(require.resolve('./tools/get_trace_metrics.spec.ts'));
     loadTestFile(require.resolve('./tools/get_log_change_points.spec.ts'));
@@ -25,7 +24,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./tools/get_index_info.spec.ts'));
     loadTestFile(require.resolve('./tools/get_service_topology.spec.ts'));
     loadTestFile(require.resolve('./tools/get_traces.spec.ts'));
-
+    loadTestFile(require.resolve('./tools/get_logs.spec.ts'));
     // ai insights
     loadTestFile(require.resolve('./ai_insights/error.spec.ts'));
     loadTestFile(require.resolve('./ai_insights/alert.spec.ts'));

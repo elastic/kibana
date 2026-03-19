@@ -45,7 +45,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
 import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
@@ -285,7 +285,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
           return;
         }
-        const trigger = pluginStart.uiActions.getTrigger(APPLY_FILTER_TRIGGER);
+        const trigger = pluginStart.uiActions.getTrigger(ON_APPLY_FILTER);
         if (!trigger) {
           toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
           return;

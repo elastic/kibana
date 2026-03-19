@@ -32,7 +32,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   AsyncSearchGetResponse,
   ErrorResponseBase,
-  SqlGetAsyncResponse,
+  EsqlAsyncQueryResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -65,7 +65,6 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import type { ICPSManager } from '@kbn/cps-utils';
-import { getProjectRouting } from './project_routing';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -311,7 +310,7 @@ export class SearchInterceptor {
         { isSearchStored: false },
         () => {},
       ];
-      const projectRouting = getProjectRouting(options.projectRouting, this.deps.getCPSManager?.());
+      const projectRouting = this.deps.getCPSManager?.()?.getProjectRouting(options.projectRouting);
       return this.runSearch(
         { id, ...request },
         {
@@ -550,7 +549,7 @@ export class SearchInterceptor {
               ...getTotalLoaded(shimmedResponse),
             };
           case ESQL_ASYNC_SEARCH_STRATEGY:
-            const esqlResponse = rawResponse.body as unknown as SqlGetAsyncResponse;
+            const esqlResponse = rawResponse.body as unknown as EsqlAsyncQueryResponse;
             return {
               id: esqlResponse.id,
               rawResponse: esqlResponse,

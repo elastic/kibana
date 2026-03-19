@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiSkeletonText,
   EuiToolTip,
+  type CriteriaWithPagination,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -24,27 +25,19 @@ import { useHistory } from 'react-router-dom';
 import { QUERY_TIMEOUT } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
-import { useBulkGetUserProfiles } from './use_user_profiles';
 import type { SearchHit } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
-import { RunByColumn } from './components/run_by_column';
-import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
+import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
 interface ActionTableResultsButtonProps {
   actionId: string;
-  isHistoryEnabled: boolean;
 }
 
-const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({
-  actionId,
-  isHistoryEnabled,
-}) => {
-  const navProps = useRouterNavigate(
-    isHistoryEnabled ? `history/${actionId}` : `live_queries/${actionId}`
-  );
+const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
+  const navProps = useRouterNavigate(`live_queries/${actionId}`);
 
   const detailsText = i18n.translate(
     'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
@@ -64,10 +57,11 @@ ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = usePersistedPageSize();
+
+  const kuery = 'user_id: *';
 
   const { data: packsData } = usePacks({});
 
@@ -78,7 +72,7 @@ const ActionsTableComponent = () => {
   } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    kuery: 'user_id: *',
+    kuery,
   });
 
   const actionItems = useMemo(
@@ -86,23 +80,20 @@ const ActionsTableComponent = () => {
     [actionsData?.data?.items]
   );
 
-  const { profilesMap, isLoading: isLoadingProfiles } = useBulkGetUserProfiles(
-    isHistoryEnabled ? actionItems : EMPTY_ARRAY
+  const onTableChange = useCallback(
+    ({ page }: CriteriaWithPagination<SearchHit>) => {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    },
+    [setPageSize]
   );
-
-  const onTableChange = useCallback(({ page = {} }: any) => {
-    const { index, size } = page;
-
-    setPageIndex(index);
-    setPageSize(size);
-  }, []);
 
   const renderQueryColumn = useCallback((_: any, item: any) => {
     if (item._source.pack_name) {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="package" />
+            <EuiIcon type="package" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>{item._source.pack_name}</EuiFlexItem>
         </EuiFlexGroup>
@@ -130,39 +121,17 @@ const ActionsTableComponent = () => {
     []
   );
 
-  const renderRunByColumn = useCallback(
-    (_: unknown, item: SearchHit) => {
-      const userId = (item.fields?.user_id as string[] | undefined)?.[0];
-      const userProfileUid = (item.fields?.user_profile_uid as string[] | undefined)?.[0];
-
-      return (
-        <RunByColumn
-          userId={userId}
-          userProfileUid={userProfileUid}
-          profilesMap={profilesMap}
-          isLoadingProfiles={isLoadingProfiles}
-        />
-      );
-    },
-    [profilesMap, isLoadingProfiles]
-  );
-
   const renderTimestampColumn = useCallback(
     (_: any, item: any) => <>{formatDate(item.fields['@timestamp'][0])}</>,
     []
   );
 
   const renderActionsColumn = useCallback(
-    (item: any) => (
-      <ActionTableResultsButton
-        actionId={item.fields.action_id[0]}
-        isHistoryEnabled={isHistoryEnabled}
-      />
-    ),
-    [isHistoryEnabled]
+    (item: any) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
+    []
   );
 
-  const newQueryPath = isHistoryEnabled ? '/new' : '/live_queries/new';
+  const newQueryPath = '/live_queries/new';
 
   const handlePlayClick = useCallback(
     (item: any) => () => {
@@ -203,8 +172,9 @@ const ActionsTableComponent = () => {
         ),
       });
     },
-    [push, newQueryPath]
+    [push]
   );
+
   const renderPlayButton = useCallback(
     (item: any, enabled: any) => {
       const playText = i18n.translate('xpack.osquery.liveQueryActions.table.runActionAriaLabel', {
@@ -275,13 +245,12 @@ const ActionsTableComponent = () => {
           defaultMessage: 'Run by',
         }),
         width: '200px',
-        render: isHistoryEnabled ? renderRunByColumn : renderCreatedByColumn,
+        render: renderCreatedByColumn,
       },
       {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle', {
           defaultMessage: 'View details',
         }),
-        ...(isHistoryEnabled ? { width: '120px' } : {}),
         actions: [
           {
             available: isPlayButtonAvailable,
@@ -294,14 +263,12 @@ const ActionsTableComponent = () => {
       },
     ],
     [
-      isHistoryEnabled,
       isPlayButtonAvailable,
       renderActionsColumn,
       renderAgentsColumn,
       renderCreatedByColumn,
       renderPlayButton,
       renderQueryColumn,
-      renderRunByColumn,
       renderTimestampColumn,
     ]
   );
@@ -311,7 +278,7 @@ const ActionsTableComponent = () => {
       pageIndex,
       pageSize,
       totalItemCount: actionsData?.data?.total ?? 0,
-      pageSizeOptions: [20, 50, 100],
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
     }),
     [actionsData, pageIndex, pageSize]
   );

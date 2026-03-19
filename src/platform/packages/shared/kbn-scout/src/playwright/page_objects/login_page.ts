@@ -11,10 +11,22 @@ import type { ScoutPage } from '../fixtures/scope/test';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
 export class LoginPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public readonly loginBtn;
+  public readonly roleSelectionInput;
+
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.loginBtn = this.page.testSubj.locator('loginButton');
+    this.roleSelectionInput = this.page.getByRole('combobox');
+  }
 
   async goto() {
     await this.page.goto(this.kbnUrl.get('/login'));
     await this.page.testSubj.locator('loginSubmit').waitFor({ state: 'visible' });
+  }
+
+  async loginWithRole(role: string) {
+    await this.loginBtn.waitFor({ state: 'visible' });
+    await this.roleSelectionInput.fill(role);
+    await this.loginBtn.click();
   }
 }

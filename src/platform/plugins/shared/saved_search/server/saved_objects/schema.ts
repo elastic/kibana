@@ -222,6 +222,17 @@ export const SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND = schema.object({
   tabs: schema.maybe(tabsV10),
 });
 
+export const SCHEMA_SEARCH_MODEL_VERSION_11 = SCHEMA_SEARCH_MODEL_VERSION_10.extends({
+  chartInterval: schema.maybe(schema.string()),
+});
+
+const { tabs: tabsV11, ...restV11Props } = SCHEMA_SEARCH_MODEL_VERSION_11.getPropSchemas();
+
+export const SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND = schema.object({
+  ...restV11Props,
+  tabs: schema.maybe(tabsV11),
+});
+
 export type DiscoverSessionTabAttributes = TypeOf<
   typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10
 >;

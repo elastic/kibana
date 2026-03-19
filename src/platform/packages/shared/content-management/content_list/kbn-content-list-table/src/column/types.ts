@@ -7,15 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContentListItemConfig, ContentListSupports } from '@kbn/content-list-provider';
+import type {
+  ContentListItem,
+  ContentListItemConfig,
+  ContentListSupports,
+} from '@kbn/content-list-provider';
+
+/**
+ * Callbacks for action orchestration (e.g., delete confirmation).
+ *
+ * Provides table-level handlers that action builders use to trigger
+ * flows requiring UI outside the action itself (modals, toasts, etc.).
+ */
+export interface BuilderContextActions {
+  /** Opens the delete confirmation modal for the given items. */
+  onDelete?: (items: ContentListItem[]) => void;
+}
 
 /**
  * Shared context available to all builder functions (columns, actions).
  *
- * Provides provider-level configuration common to every builder. Specific
- * builder context interfaces extend this base when they need additional fields
- * (e.g., `ActionBuilderContext` will add delete orchestration callbacks in a
- * future PR).
+ * Provides provider-level configuration common to every builder.
  */
 export interface BuilderContext {
   /** Item configuration from the content list provider. */
@@ -26,6 +38,8 @@ export interface BuilderContext {
   entityName?: string;
   /** Feature support flags from the provider. */
   supports?: ContentListSupports;
+  /** Callbacks for action orchestration. */
+  actions?: BuilderContextActions;
 }
 
 /**

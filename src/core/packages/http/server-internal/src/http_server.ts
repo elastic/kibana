@@ -635,7 +635,7 @@ export class HttpServer {
         user: user
           ? {
               id: user.profile_uid,
-              username: user.username,
+              name: user.username,
               email: user.email,
               roles: user.roles ? [...user.roles] : undefined,
             }
