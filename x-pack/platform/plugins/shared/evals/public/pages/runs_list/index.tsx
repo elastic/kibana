@@ -26,6 +26,18 @@ import type { EvaluationRunSummary } from '@kbn/evals-common';
 import { useEvaluationRuns } from '../../hooks/use_evals_api';
 import * as i18n from './translations';
 
+const isLikelyUrl = (value: string): boolean => /^https?:\/\//i.test(value);
+
+const resolvePrUrl = (pullRequest: string): string | null => {
+  const raw = pullRequest.trim();
+  if (!raw || raw === 'false') return null;
+  if (isLikelyUrl(raw)) return raw;
+  if (/^\d+$/.test(raw)) {
+    return `https://github.com/elastic/kibana/pull/${raw}`;
+  }
+  return null;
+};
+
 export const RunsListPage: React.FC = () => {
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
@@ -115,12 +127,37 @@ export const RunsListPage: React.FC = () => {
         name: i18n.COLUMN_CI,
         render: (ci: EvaluationRunSummary['ci']) =>
           ci?.build_url ? (
-            <EuiLink href={ci.build_url} target="_blank" external>
+            <EuiLink
+              href={ci.build_url}
+              target="_blank"
+              external
+              onClick={(event) => event.stopPropagation()}
+            >
               {i18n.CI_BUILD_LINK}
             </EuiLink>
           ) : (
             '-'
           ),
+      },
+      {
+        field: 'ci',
+        name: i18n.COLUMN_PULL_REQUEST,
+        render: (ci: EvaluationRunSummary['ci']) => {
+          const prRaw = ci?.pull_request;
+          if (!prRaw) return '-';
+          const prUrl = resolvePrUrl(prRaw);
+          if (!prUrl) return '-';
+          return (
+            <EuiLink
+              href={prUrl}
+              target="_blank"
+              external
+              onClick={(event) => event.stopPropagation()}
+            >
+              {i18n.PR_LINK}
+            </EuiLink>
+          );
+        },
       },
     ],
     [history]

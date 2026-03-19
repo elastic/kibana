@@ -189,6 +189,7 @@ describe('query_builders', () => {
           'git_commit_sha',
           'total_repetitions',
           'build_url',
+          'pull_request',
         ])
       );
     });
@@ -212,6 +213,7 @@ describe('query_builders', () => {
       git_commit_sha: { buckets: [{ key: 'abc123' }] },
       total_repetitions: { value: 3 },
       build_url: { buckets: [{ key: 'https://buildkite.com/build/1' }] },
+      pull_request: { buckets: [{ key: '12345' }] },
       ...overrides,
     });
 
@@ -248,7 +250,7 @@ describe('query_builders', () => {
         git_branch: 'main',
         git_commit_sha: 'abc123',
         total_repetitions: 3,
-        ci: { build_url: 'https://buildkite.com/build/1' },
+        ci: { build_url: 'https://buildkite.com/build/1', pull_request: '12345' },
       });
     });
 
