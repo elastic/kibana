@@ -82,7 +82,7 @@ export function getOptionDisplayLabel(option: TimeRangeBoundsOption): string {
  * @example
  * getOptionShorthand({ start: 'now-15m', end: 'now' }) // "-15m"
  * getOptionShorthand({ start: 'now', end: 'now+3d' })  // "+3d"
- * getOptionShorthand({ start: 'now-7d', end: 'now-1d' }) // "-7d to -1d"
+ * getOptionShorthand({ start: 'now-7d', end: 'now-1d' }) // "-7d - -1d"
  * getOptionShorthand({ start: '2025-01-01', end: 'now' }) // null
  */
 export function getOptionShorthand(option: TimeRangeBoundsOption): string | null {
@@ -96,7 +96,7 @@ export function getOptionShorthand(option: TimeRangeBoundsOption): string | null
   if (startOffset === 'now') return endOffset;
   if (endOffset === 'now') return startOffset;
 
-  return `${startOffset} to ${endOffset}`;
+  return `${startOffset} ${DATE_RANGE_INPUT_DELIMITER} ${endOffset}`;
 }
 
 /**

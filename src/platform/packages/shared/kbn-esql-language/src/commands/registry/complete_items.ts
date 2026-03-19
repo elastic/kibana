@@ -307,10 +307,12 @@ export const mmrLimitKeywordSuggestion: ISuggestionItem = {
   }),
 };
 
+export const defaultLimitValueSuggestions = ['10', '100', '1000'];
+
 // wrapping in a function to avoid circular dependency issues with the tests
 export const mmrLimitValueSuggestions: () => ISuggestionItem[] = () =>
   buildConstantsDefinitions(
-    ['10', '100', '1000'],
+    defaultLimitValueSuggestions,
     i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitValueSuggestion', {
       defaultMessage: 'Suggested limit',
     }),
