@@ -113,6 +113,7 @@ function getElasticsearchErrorReason(error: Error | ElasticsearchErrorLike): str
 import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
 import { ErrorUtils } from '../errors/util';
 import type { AutomaticImportV2PluginStartDependencies } from '../types';
+import { AgentService } from './agents/agent_service';
 
 function bumpMinorVersion(version: string): string {
   const parts = version.split('.').map(Number);
@@ -129,6 +130,7 @@ export class AutomaticImportService {
   private savedObjectsServiceSetup: SavedObjectsServiceSetup;
   private taskManagerSetup: TaskManagerSetupContract;
   private taskManagerService: TaskManagerService;
+  private _agentService: AgentService | null = null;
   private logger: Logger;
 
   constructor(
@@ -160,6 +162,13 @@ export class AutomaticImportService {
       savedObjectsClient
     );
     this.taskManagerService.initialize(taskManagerStart, this.savedObjectService);
+  }
+
+  public getAgentService(): AgentService {
+    if (!this._agentService) {
+      this._agentService = new AgentService(this.samplesIndexService, this.loggerFactory);
+    }
+    return this._agentService;
   }
 
   public async createUpdateIntegration(params: CreateUpdateIntegrationParams): Promise<void> {

@@ -15,13 +15,19 @@ const DataStreamResultsFlyout = React.lazy(() =>
 );
 
 export const getDataStreamResultsFlyoutComponent = (): DataStreamResultsFlyoutComponent =>
-  React.memo(function DataStreamResultsFlyoutLazy({ integrationId, dataStream, onClose }) {
+  React.memo(function DataStreamResultsFlyoutLazy({
+    integrationId,
+    dataStream,
+    onClose,
+    connectorId,
+  }) {
     return (
       <Suspense fallback={null}>
         <DataStreamResultsFlyout
           integrationId={integrationId}
           dataStream={dataStream}
           onClose={onClose}
+          connectorId={connectorId}
         />
       </Suspense>
     );
