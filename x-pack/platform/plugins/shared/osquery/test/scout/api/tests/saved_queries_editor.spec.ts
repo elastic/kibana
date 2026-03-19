@@ -24,7 +24,7 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
     }
   });
 
-  apiTest('creates, reads, updates, and deletes a saved query', async ({ apiClient }) => {
+  apiTest('creates and reads a saved query', async ({ apiClient }) => {
     const queryBody = testData.getMinimalSavedQuery();
 
     const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_SAVED_QUERIES, {
@@ -35,6 +35,7 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
     expect(createResponse).toHaveStatusCode(200);
     const savedObjectId = createResponse.body.data.saved_object_id;
     expect(createResponse.body.data.id).toBe(queryBody.id);
+    createdSavedObjectIds.push(savedObjectId);
 
     const readResponse = await apiClient.get(
       `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
@@ -45,6 +46,19 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
     );
     expect(readResponse).toHaveStatusCode(200);
     expect(readResponse.body.data.id).toBe(queryBody.id);
+    expect(readResponse.body.data.query).toBe(queryBody.query);
+  });
+
+  apiTest('updates a saved query', async ({ apiClient }) => {
+    const queryBody = testData.getMinimalSavedQuery();
+    const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_SAVED_QUERIES, {
+      headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: queryBody,
+      responseType: 'json',
+    });
+    expect(createResponse).toHaveStatusCode(200);
+    const savedObjectId = createResponse.body.data.saved_object_id;
+    createdSavedObjectIds.push(savedObjectId);
 
     const updatedId = `${queryBody.id}-updated`;
     const updateResponse = await apiClient.put(
@@ -58,16 +72,26 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
     expect(updateResponse).toHaveStatusCode(200);
     expect(updateResponse.body.data.id).toBe(updatedId);
 
-    const findResponse = await apiClient.get(
-      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?page=1&pageSize=20`,
+    const readResponse = await apiClient.get(
+      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
       {
         headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
         responseType: 'json',
       }
     );
-    expect(findResponse).toHaveStatusCode(200);
-    const found = findResponse.body.data.some((q: { id: string }) => q.id === updatedId);
-    expect(found).toBe(true);
+    expect(readResponse).toHaveStatusCode(200);
+    expect(readResponse.body.data.id).toBe(updatedId);
+    expect(readResponse.body.data.query).toBe('select 2;');
+  });
+
+  apiTest('deletes a saved query', async ({ apiClient }) => {
+    const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_SAVED_QUERIES, {
+      headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: testData.getMinimalSavedQuery(),
+      responseType: 'json',
+    });
+    expect(createResponse).toHaveStatusCode(200);
+    const savedObjectId = createResponse.body.data.saved_object_id;
 
     const deleteResponse = await apiClient.delete(
       `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
@@ -77,6 +101,17 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
       }
     );
     expect(deleteResponse).toHaveStatusCode(200);
+
+    const readResponse = await apiClient.get(
+      `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/${savedObjectId}`,
+      {
+        headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+        responseType: 'json',
+      }
+    );
+
+    // the API seems to throw a 500 error if the saved query is not found
+    expect(readResponse).toHaveStatusCode(500);
   });
 
   apiTest('filters by search term and createdBy', async ({ apiClient }) => {
