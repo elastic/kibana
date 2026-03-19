@@ -475,10 +475,12 @@ function deriveInitialState(
     }
   }
 
+  const isValidDate = date != null && !isNaN(date.getTime());
+
   return {
     type: DATE_TYPE_ABSOLUTE,
     relativeOffset: DEFAULT_RELATIVE,
-    absoluteText: date
+    absoluteText: isValidDate
       ? moment(date).format(DEFAULT_DATE_FORMAT)
       : dateString || formatAbsolute(null),
   };
