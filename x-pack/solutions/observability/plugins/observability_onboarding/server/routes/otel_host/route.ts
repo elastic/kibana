@@ -85,9 +85,7 @@ const setupFlowRoute = createObservabilityOnboardingServerRoute({
 const hasOtelHostDataRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/otel_host/has-data',
   params: t.type({
-    query: t.type({
-      start: t.string,
-    }),
+    query: t.intersection([t.type({ start: t.string }), t.partial({ osType: t.string })]),
   }),
   security: {
     authz: {
@@ -96,14 +94,18 @@ const hasOtelHostDataRoute = createObservabilityOnboardingServerRoute({
     },
   },
   async handler(resources): Promise<{ hasData: boolean }> {
-    const { start } = resources.params.query;
+    const { start, osType } = resources.params.query;
     const { elasticsearch } = await resources.context.core;
 
     try {
+      const filters: estypes.QueryDslQueryContainer[] = [
+        { range: { '@timestamp': { gte: start } } },
+      ];
+      if (osType) {
+        filters.push({ term: { 'host.os.type': osType } });
+      }
       const query: estypes.QueryDslQueryContainer = {
-        bool: {
-          filter: [{ range: { '@timestamp': { gte: start } } }],
-        },
+        bool: { filter: filters },
       };
 
       const [logsResult, metricsResult] = await Promise.all([

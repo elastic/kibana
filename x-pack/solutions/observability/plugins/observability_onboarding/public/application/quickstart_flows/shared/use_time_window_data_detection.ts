@@ -11,6 +11,12 @@ import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/tel
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 
+// After this many consecutive "no data" responses with filters applied,
+// drop the extra filters and fall back to the basic time-window query.
+// This prevents users from getting stuck if a field like host.os.type
+// is missing from indexed documents due to mapping or collector differences.
+const FALLBACK_POLL_THRESHOLD = 30;
+
 interface UseTimeWindowDataDetectionOptions {
   isMonitoringActive: boolean;
   sessionStartTime: string;
@@ -34,6 +40,7 @@ export function useTimeWindowDataDetection({
 }: UseTimeWindowDataDetectionOptions) {
   const [checkDataStartTime, setCheckDataStartTime] = useState<number | null>(null);
   const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
+  const [noDataPollCount, setNoDataPollCount] = useState(0);
   const {
     services: { analytics },
   } = useKibana<ObservabilityOnboardingContextValue>();
@@ -50,6 +57,13 @@ export function useTimeWindowDataDetection({
     [JSON.stringify(extraQueryParams)]
   );
 
+  // After FALLBACK_POLL_THRESHOLD consecutive "no data" responses,
+  // drop extra filters (e.g. osType) and fall back to basic time-window.
+  const hasExtraParams =
+    stableExtraQueryParams !== undefined && Object.keys(stableExtraQueryParams).length > 0;
+  const shouldFallback = hasExtraParams && noDataPollCount >= FALLBACK_POLL_THRESHOLD;
+  const effectiveExtraParams = shouldFallback ? undefined : stableExtraQueryParams;
+
   const {
     data: hasDataResponse,
     status: hasDataStatus,
@@ -59,11 +73,11 @@ export function useTimeWindowDataDetection({
       if (!isMonitoringActive) return;
       return callApi(`GET ${endpoint}` as any, {
         params: {
-          query: { start: sessionStartTime, ...stableExtraQueryParams },
+          query: { start: sessionStartTime, ...effectiveExtraParams },
         },
       });
     },
-    [isMonitoringActive, sessionStartTime, endpoint, stableExtraQueryParams],
+    [isMonitoringActive, sessionStartTime, endpoint, effectiveExtraParams],
     { showToastOnError: false }
   );
 
@@ -71,6 +85,9 @@ export function useTimeWindowDataDetection({
     const pendingStatusList = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
     if (pendingStatusList.includes(hasDataStatus) || hasDataResponse?.hasData === true) {
       return;
+    }
+    if (hasDataResponse?.hasData === false) {
+      setNoDataPollCount((prev) => prev + 1);
     }
     const timeout = setTimeout(() => {
       refetchHasData();

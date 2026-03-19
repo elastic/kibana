@@ -62,6 +62,13 @@ const HOST_COMMAND = i18n.translate(
 const FETCH_INTERVAL = 2000;
 const SHOW_TROUBLESHOOTING_DELAY = 120_000;
 
+// Used to scope time-window detection to the user's OS and avoid false positives from other hosts.
+const OS_TYPE_MAP: Record<string, string> = {
+  linux: 'linux',
+  mac: 'darwin',
+  windows: 'windows',
+};
+
 export const OtelLogsPanel: React.FC = () => {
   useFlowBreadcrumb({
     text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.otelHost', {
@@ -95,7 +102,7 @@ export const OtelLogsPanel: React.FC = () => {
     }
   }, [onPageReady, setupData]);
 
-  const [sessionStartTime] = useState(() => new Date().toISOString());
+  const [selectedTab, setSelectedTab] = useState('linux');
 
   const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
     isActive: !!setupData,
@@ -103,14 +110,25 @@ export const OtelLogsPanel: React.FC = () => {
     onboardingId: setupData?.onboardingId,
   });
 
+  // Set sessionStartTime when monitoring begins (first blur) rather than on
+  // mount, to narrow the time-window and reduce false positives from other
+  // OTel collectors already ingesting data on the same cluster.
+  const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
+  useEffect(() => {
+    if (isMonitoringStepActive && sessionStartTime === null) {
+      setSessionStartTime(new Date().toISOString());
+    }
+  }, [isMonitoringStepActive, sessionStartTime]);
+
   const { hasData, isTroubleshootingVisible } = useTimeWindowDataDetection({
-    isMonitoringActive: isMonitoringStepActive,
-    sessionStartTime,
+    isMonitoringActive: isMonitoringStepActive && sessionStartTime !== null,
+    sessionStartTime: sessionStartTime ?? '',
     fetchInterval: FETCH_INTERVAL,
     troubleshootingDelay: SHOW_TROUBLESHOOTING_DELAY,
     flowType: 'otel_logs',
     onboardingId: setupData?.onboardingId ?? '',
     endpoint: '/internal/observability_onboarding/otel_host/has-data',
+    extraQueryParams: { osType: OS_TYPE_MAP[selectedTab] },
   });
 
   const isMetricsOnboardingEnabled = usePricingFeature(
@@ -149,31 +167,31 @@ export const OtelLogsPanel: React.FC = () => {
     () => [
       ...(deeplinks?.logs
         ? [
-            {
-              id: 'logs',
-              title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.logsTitle', {
-                defaultMessage: 'View and analyze your logs',
-              }),
-              label: i18n.translate('xpack.observability_onboarding.otelLogsPanel.logsLabel', {
-                defaultMessage: 'Explore logs',
-              }),
-              href: deeplinks.logs,
-            },
-          ]
+          {
+            id: 'logs',
+            title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.logsTitle', {
+              defaultMessage: 'View and analyze your logs',
+            }),
+            label: i18n.translate('xpack.observability_onboarding.otelLogsPanel.logsLabel', {
+              defaultMessage: 'Explore logs',
+            }),
+            href: deeplinks.logs,
+          },
+        ]
         : []),
       ...(isMetricsOnboardingEnabled && deeplinks?.metrics
         ? [
-            {
-              id: 'metrics',
-              title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.metricsTitle', {
-                defaultMessage: 'View and analyze your metrics',
-              }),
-              label: i18n.translate('xpack.observability_onboarding.otelLogsPanel.metricsLabel', {
-                defaultMessage: 'Open Hosts',
-              }),
-              href: deeplinks.metrics,
-            },
-          ]
+          {
+            id: 'metrics',
+            title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.metricsTitle', {
+              defaultMessage: 'View and analyze your metrics',
+            }),
+            label: i18n.translate('xpack.observability_onboarding.otelLogsPanel.metricsLabel', {
+              defaultMessage: 'Open Hosts',
+            }),
+            href: deeplinks.metrics,
+          },
+        ]
         : []),
     ],
     [deeplinks, isMetricsOnboardingEnabled]
@@ -187,15 +205,15 @@ export const OtelLogsPanel: React.FC = () => {
         firstStepTitle: HOST_COMMAND,
         content: setupData
           ? buildInstallCommand({
-              platform: 'linux',
-              isMetricsOnboardingEnabled,
-              isManagedOtlpServiceAvailable,
-              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-              elasticsearchUrl: setupData.elasticsearchUrl,
-              apiKeyEncoded: setupData.apiKeyEncoded,
-              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-              useWiredStreams,
-            })
+            platform: 'linux',
+            isMetricsOnboardingEnabled,
+            isManagedOtlpServiceAvailable,
+            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+            elasticsearchUrl: setupData.elasticsearchUrl,
+            apiKeyEncoded: setupData.apiKeyEncoded,
+            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+            useWiredStreams,
+          })
           : '',
         start: 'sudo ./otelcol --config otel.yml',
         codeLanguage: 'sh',
@@ -206,15 +224,15 @@ export const OtelLogsPanel: React.FC = () => {
         firstStepTitle: HOST_COMMAND,
         content: setupData
           ? buildInstallCommand({
-              platform: 'mac',
-              isMetricsOnboardingEnabled,
-              isManagedOtlpServiceAvailable,
-              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-              elasticsearchUrl: setupData.elasticsearchUrl,
-              apiKeyEncoded: setupData.apiKeyEncoded,
-              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-              useWiredStreams,
-            })
+            platform: 'mac',
+            isMetricsOnboardingEnabled,
+            isManagedOtlpServiceAvailable,
+            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+            elasticsearchUrl: setupData.elasticsearchUrl,
+            apiKeyEncoded: setupData.apiKeyEncoded,
+            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+            useWiredStreams,
+          })
           : '',
         start: './otelcol --config otel.yml',
         codeLanguage: 'sh',
@@ -225,15 +243,15 @@ export const OtelLogsPanel: React.FC = () => {
         firstStepTitle: HOST_COMMAND,
         content: setupData
           ? buildInstallCommand({
-              platform: 'windows',
-              isMetricsOnboardingEnabled,
-              isManagedOtlpServiceAvailable,
-              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-              elasticsearchUrl: setupData.elasticsearchUrl,
-              apiKeyEncoded: setupData.apiKeyEncoded,
-              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-              useWiredStreams,
-            })
+            platform: 'windows',
+            isMetricsOnboardingEnabled,
+            isManagedOtlpServiceAvailable,
+            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+            elasticsearchUrl: setupData.elasticsearchUrl,
+            apiKeyEncoded: setupData.apiKeyEncoded,
+            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+            useWiredStreams,
+          })
           : '',
         start: '.\\otelcol.ps1 --config otel.yml',
         codeLanguage: 'powershell',
@@ -241,8 +259,6 @@ export const OtelLogsPanel: React.FC = () => {
     ],
     [setupData, isMetricsOnboardingEnabled, isManagedOtlpServiceAvailable, useWiredStreams]
   );
-
-  const [selectedTab, setSelectedTab] = React.useState(installTabContents[0].id);
 
   const selectedContent = installTabContents.find((tab) => tab.id === selectedTab)!;
 
@@ -382,19 +398,19 @@ export const OtelLogsPanel: React.FC = () => {
                     <p>
                       {selectedTab === 'windows'
                         ? i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.windowsLogDescription',
-                            {
-                              defaultMessage:
-                                'On Windows, logs are collected from the Windows Event Log. You can customize this in the otel.yml file.',
-                            }
-                          )
+                          'xpack.observability_onboarding.otelLogsPanel.windowsLogDescription',
+                          {
+                            defaultMessage:
+                              'On Windows, logs are collected from the Windows Event Log. You can customize this in the otel.yml file.',
+                          }
+                        )
                         : i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
-                            {
-                              defaultMessage:
-                                'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
-                            }
-                          )}
+                          'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
+                          {
+                            defaultMessage:
+                              'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
+                          }
+                        )}
                     </p>
                   </EuiCallOut>
 
@@ -422,21 +438,21 @@ export const OtelLogsPanel: React.FC = () => {
               status: (hasData
                 ? 'complete'
                 : isMonitoringStepActive
-                ? 'current'
-                : 'incomplete') as EuiStepStatus,
+                  ? 'current'
+                  : 'incomplete') as EuiStepStatus,
               children: isMonitoringStepActive ? (
                 <>
                   <ProgressIndicator
                     title={
                       hasData
                         ? i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.monitoringHost',
-                            { defaultMessage: 'We are monitoring your host' }
-                          )
+                          'xpack.observability_onboarding.otelLogsPanel.monitoringHost',
+                          { defaultMessage: 'We are monitoring your host' }
+                        )
                         : i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.waitingForData',
-                            { defaultMessage: 'Waiting for data to be shipped' }
-                          )
+                          'xpack.observability_onboarding.otelLogsPanel.waitingForData',
+                          { defaultMessage: 'Waiting for data to be shipped' }
+                        )
                     }
                     iconType="checkInCircleFilled"
                     isLoading={!hasData}
