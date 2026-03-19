@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function savedObjectsManagementApp({}: FtrProviderContext) {
-  describe('saved objects management', function savedObjectsManagementAppTestSuite() {
-    // Migrated to Scout: src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
