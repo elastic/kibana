@@ -32,8 +32,10 @@ export const useBulkAgentDetails = (agentIds: string[]) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
+  const stableKey = useMemo(() => [...agentIds].sort().join(','), [agentIds]);
+
   const { data: agentsData } = useQuery(
-    ['bulkAgentDetails', agentIds],
+    ['bulkAgentDetails', stableKey],
     async () => {
       if (agentIds.length === 0) return { agents: [] };
 

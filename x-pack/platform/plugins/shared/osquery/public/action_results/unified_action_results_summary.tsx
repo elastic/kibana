@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EuiProgress, EuiTablePagination, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
@@ -32,18 +33,42 @@ const DEFAULT_COLUMNS = ['status', 'agent_id', 'action_response.osquery.count', 
 
 const COLUMN_DISPLAY_SETTINGS = {
   columns: {
-    status: { display: 'Status' },
-    agent_id: { display: 'Agent ID' },
-    'action_response.osquery.count': { display: 'Number of result rows' },
-    error: { display: 'Error' },
+    status: {
+      display: i18n.translate('xpack.osquery.liveQueryActionResults.table.statusColumnTitle', {
+        defaultMessage: 'Status',
+      }),
+    },
+    agent_id: {
+      display: i18n.translate('xpack.osquery.liveQueryActionResults.table.agentIdColumnTitle', {
+        defaultMessage: 'Agent Id',
+      }),
+    },
+    'action_response.osquery.count': {
+      display: i18n.translate(
+        'xpack.osquery.liveQueryActionResults.table.resultRowsNumberColumnTitle',
+        { defaultMessage: 'Number of result rows' }
+      ),
+    },
+    error: {
+      display: i18n.translate('xpack.osquery.liveQueryActionResults.table.errorColumnTitle', {
+        defaultMessage: 'Error',
+      }),
+    },
   },
 };
 
 const STATUS_COLUMNS_META = {
-  'action_response.osquery.count': { type: 'string' as const },
+  'action_response.osquery.count': { type: 'number' as const },
 };
 
-const storageInstance = new Storage(localStorage);
+let storageInstance: Storage;
+const getStorage = () => {
+  if (!storageInstance) {
+    storageInstance = new Storage(localStorage);
+  }
+
+  return storageInstance;
+};
 
 const statusTableContainerCss = {
   width: '100%',
@@ -143,7 +168,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
       fieldFormats: dataService.fieldFormats,
       uiSettings,
       toastNotifications: toasts,
-      storage: storageInstance,
+      storage: getStorage(),
       data: dataService,
     }),
     [dataService, theme, toasts, uiSettings]

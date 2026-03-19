@@ -12,7 +12,7 @@ import { useKibana } from '../common/lib/kibana';
 const STATUS_COLUMNS = [
   { name: 'status', type: 'keyword' as const },
   { name: 'agent_id', type: 'keyword' as const },
-  { name: 'action_response.osquery.count', type: 'keyword' as const },
+  { name: 'action_response.osquery.count', type: 'long' as const },
   { name: 'error', type: 'keyword' as const },
 ];
 
@@ -27,15 +27,18 @@ export const useActionResultsDataView = (): DataView | undefined => {
   useEffect(() => {
     let cancelled = false;
 
-    dataViews.create({ title: '' }, true).then((dv) => {
-      if (cancelled) return;
+    dataViews
+      .create({ title: '' }, true)
+      .then((dv) => {
+        if (cancelled) return;
 
-      for (const col of STATUS_COLUMNS) {
-        dv.addRuntimeField(col.name, { type: col.type });
-      }
+        for (const col of STATUS_COLUMNS) {
+          dv.addRuntimeField(col.name, { type: col.type });
+        }
 
-      setDataView(dv);
-    });
+        setDataView(dv);
+      })
+      .catch(() => {});
 
     return () => {
       cancelled = true;
