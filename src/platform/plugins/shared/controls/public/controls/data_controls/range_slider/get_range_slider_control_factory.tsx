@@ -43,7 +43,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
   return {
     type: RANGE_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = { ...DEFAULT_RANGE_SLIDER_STATE, ...initialState };
+      const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -130,7 +130,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       ])
         .pipe(skip(1))
         .subscribe(() => {
-          editorStateManager.api.setStep(1);
+          editorStateManager.api.setStep(DEFAULT_RANGE_SLIDER_STATE.step);
           selections.setValue(undefined);
         });
 
@@ -261,7 +261,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               max={max}
               min={min}
               onChange={selections.setValue}
-              step={step ?? 1}
+              step={step}
               value={value}
               uuid={uuid}
               compressed={isCompressed(api)}
