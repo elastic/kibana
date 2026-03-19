@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import { EuiFlexGroup, EuiPanel, EuiWindowEvent, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { isMac } from '@kbn/shared-ux-utility';
 import { storageKeys } from '../../../storage_keys';
 import { getSidebarViewForRoute, getAgentIdFromPath } from '../../../route_config';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -24,19 +23,21 @@ import { ManageSidebarView } from './views/manage_view';
 import { SidebarHeader } from './shared/sidebar_header';
 import { appPaths } from '../../../utils/app_paths';
 
-const SIDEBAR_WIDTH = 300;
-const CONDENSED_SIDEBAR_WIDTH = 64;
+export const SIDEBAR_WIDTH = 300;
+export const CONDENSED_SIDEBAR_WIDTH = 64;
 
-const isPeriod = (event: KeyboardEvent) => event.code === 'Period' || event.key === '.';
+interface UnifiedSidebarProps {
+  isCondensed: boolean;
+  onToggleCondensed: () => void;
+}
 
-export const UnifiedSidebar: React.FC = () => {
+export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({ isCondensed, onToggleCondensed }) => {
   const location = useLocation();
   const sidebarView = getSidebarViewForRoute(location.pathname);
   const agentIdFromPath = getAgentIdFromPath(location.pathname) ?? agentBuilderDefaultAgentId;
   const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.agentId);
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const validateAgentId = useValidateAgentId();
-  const [isCondensed, setIsCondensed] = useState(false);
   const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
@@ -50,13 +51,6 @@ export const UnifiedSidebar: React.FC = () => {
     (newAgentId: string) => appPaths.agent.root({ agentId: newAgentId }),
     []
   );
-
-  const onKeyDown = useCallback((event: KeyboardEvent) => {
-    if (isPeriod(event) && (isMac ? event.metaKey : event.ctrlKey)) {
-      event.preventDefault();
-      setIsCondensed((v) => !v);
-    }
-  }, []);
 
   const sidebarStyles = css`
     width: ${isCondensed ? CONDENSED_SIDEBAR_WIDTH : SIDEBAR_WIDTH}px;
@@ -74,33 +68,30 @@ export const UnifiedSidebar: React.FC = () => {
   `;
 
   return (
-    <>
-      <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      <EuiPanel
-        css={sidebarStyles}
-        paddingSize="none"
-        hasShadow={false}
-        hasBorder={false}
-        role="navigation"
-        aria-label="Agent Builder navigation"
-      >
-        <SidebarHeader
-          sidebarView={sidebarView}
-          agentId={agentIdFromPath}
-          getNavigationPath={getNavigationPath}
-          isCondensed={isCondensed}
-          onToggleCondensed={() => setIsCondensed((v) => !v)}
-        />
-        {!isCondensed && (
-          <EuiFlexGroup css={sidebarContentStyles}>
-            {sidebarView === 'conversation' && <ConversationSidebarView />}
-            {sidebarView === 'agentSettings' && (
-              <AgentSettingsSidebarView pathname={location.pathname} />
-            )}
-            {sidebarView === 'manage' && <ManageSidebarView pathname={location.pathname} />}
-          </EuiFlexGroup>
-        )}
-      </EuiPanel>
-    </>
+    <EuiPanel
+      css={sidebarStyles}
+      paddingSize="none"
+      hasShadow={false}
+      hasBorder={false}
+      role="navigation"
+      aria-label="Agent Builder navigation"
+    >
+      <SidebarHeader
+        sidebarView={sidebarView}
+        agentId={agentIdFromPath}
+        getNavigationPath={getNavigationPath}
+        isCondensed={isCondensed}
+        onToggleCondensed={onToggleCondensed}
+      />
+      {!isCondensed && (
+        <EuiFlexGroup css={sidebarContentStyles}>
+          {sidebarView === 'conversation' && <ConversationSidebarView />}
+          {sidebarView === 'agentSettings' && (
+            <AgentSettingsSidebarView pathname={location.pathname} />
+          )}
+          {sidebarView === 'manage' && <ManageSidebarView pathname={location.pathname} />}
+        </EuiFlexGroup>
+      )}
+    </EuiPanel>
   );
 };

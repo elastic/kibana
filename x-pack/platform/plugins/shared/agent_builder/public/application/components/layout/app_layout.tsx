@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiWindowEvent, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { isMac } from '@kbn/shared-ux-utility';
 
-import { UnifiedSidebar } from './unified_sidebar/unified_sidebar';
+import {
+  CONDENSED_SIDEBAR_WIDTH,
+  SIDEBAR_WIDTH,
+  UnifiedSidebar,
+} from './unified_sidebar/unified_sidebar';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -18,6 +24,20 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
+  const [isCondensed, setIsCondensed] = useState(false);
+
+  const onKeyDown = useCallback((event: KeyboardEvent) => {
+    if ((event.code === 'Period' || event.key === '.') && (isMac ? event.metaKey : event.ctrlKey)) {
+      event.preventDefault();
+      setIsCondensed((v) => !v);
+    }
+  }, []);
+
+  const sidebarStyles = css`
+    @media (max-width: ${euiTheme.breakpoint.m - 1}px) {
+      display: none;
+    }
+  `;
 
   const contentStyles = css`
     overflow: auto;
@@ -25,11 +45,27 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   `;
 
   return (
-    <EuiFlexGroup gutterSize="none" style={{ height: '100%', width: '100%' }}>
-      <EuiFlexItem grow={false}>
-        <UnifiedSidebar />
-      </EuiFlexItem>
-      <EuiFlexItem css={contentStyles}>{children}</EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiWindowEvent event="keydown" handler={onKeyDown} />
+      <KibanaPageTemplate
+        paddingSize="none"
+        restrictWidth={false}
+        responsive={[]}
+        pageSideBar={
+          <UnifiedSidebar
+            isCondensed={isCondensed}
+            onToggleCondensed={() => setIsCondensed((v) => !v)}
+          />
+        }
+        pageSideBarProps={{
+          minWidth: isCondensed ? CONDENSED_SIDEBAR_WIDTH : SIDEBAR_WIDTH,
+          css: sidebarStyles,
+        }}
+      >
+        <KibanaPageTemplate.Section paddingSize="none" grow={true} css={contentStyles}>
+          {children}
+        </KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
+    </>
   );
 };

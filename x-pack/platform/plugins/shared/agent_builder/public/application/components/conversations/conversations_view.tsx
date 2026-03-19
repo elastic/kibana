@@ -7,8 +7,6 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
@@ -20,17 +18,24 @@ import { conversationBackgroundStyles, headerHeight } from './conversation.style
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
 
-  const mainStyles = css`
-    border: none;
+  const containerStyles = css`
+    display: flex;
+    flex-direction: column;
+    height: var(--kbn-application--content-height);
     ${conversationBackgroundStyles(euiTheme)}
   `;
+
   const headerStyles = css`
-    justify-content: center;
+    flex-shrink: 0;
     height: ${headerHeight}px;
+    display: flex;
+    align-items: center;
+    padding: ${euiTheme.size.m};
   `;
+
   const contentStyles = css`
     width: 100%;
-    height: 100%;
+    flex: 1;
     max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight}px);
     display: flex;
     justify-content: center;
@@ -38,50 +43,18 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
     padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
   `;
 
-  const labels = {
-    header: i18n.translate('xpack.agentBuilder.conversationsView.header', {
-      defaultMessage: 'Conversation header',
-    }),
-    content: i18n.translate('xpack.agentBuilder.conversationsView.content', {
-      defaultMessage: 'Conversation content',
-    }),
-  };
-
   return (
     <RoutedConversationsProvider>
       <SendMessageProvider>
         <AgentBuilderTourProvider>
-          <KibanaPageTemplate
-            offset={0}
-            restrictWidth={false}
-            data-test-subj="agentBuilderPageConversations"
-            grow={false}
-            panelled={false}
-            mainProps={{
-              css: mainStyles,
-            }}
-            responsive={[]}
-          >
-            <KibanaPageTemplate.Header
-              css={headerStyles}
-              bottomBorder={false}
-              aria-label={labels.header}
-              paddingSize="m"
-              responsive={false}
-            >
+          <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
+            <div css={headerStyles}>
               <ConversationHeader />
-            </KibanaPageTemplate.Header>
-            <KibanaPageTemplate.Section
-              paddingSize="none"
-              grow
-              contentProps={{
-                css: contentStyles,
-              }}
-              aria-label={labels.content}
-            >
+            </div>
+            <div css={contentStyles}>
               <Conversation />
-            </KibanaPageTemplate.Section>
-          </KibanaPageTemplate>
+            </div>
+          </div>
         </AgentBuilderTourProvider>
       </SendMessageProvider>
     </RoutedConversationsProvider>
