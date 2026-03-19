@@ -9,18 +9,18 @@ import { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { AttackDetailsLeftPanelKey } from '../constants/panel_keys';
+import { INSIGHTS_TAB_ID, ENTITIES_TAB_ID } from '../constants/left_panel_paths';
 import { useAttackDetailsContext } from '../context';
-
-const INSIGHTS_TAB_ID = 'insights' as const;
-const ENTITIES_SUB_TAB_ID = 'entity' as const;
 
 export interface UseNavigateToAttackDetailsLeftPanelParams {
   /**
    * Optional tab to open in the left panel. Defaults to the Insights tab.
+   * Use 'notes' to open the Notes tab.
    */
-  tab?: string;
+  tab?: 'insights' | 'notes';
   /**
    * Optional sub-tab (e.g. 'entity' for Entities). When opening Insights, defaults to Entities.
+   * Ignored when tab is 'notes'.
    */
   subTab?: string;
 }
@@ -31,7 +31,7 @@ export interface UseNavigateToAttackDetailsLeftPanelParams {
 export const useNavigateToAttackDetailsLeftPanel = (
   params: UseNavigateToAttackDetailsLeftPanelParams = {}
 ): (() => void) => {
-  const { tab = INSIGHTS_TAB_ID, subTab = ENTITIES_SUB_TAB_ID } = params;
+  const { tab = INSIGHTS_TAB_ID, subTab = ENTITIES_TAB_ID } = params;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { attackId, indexName } = useAttackDetailsContext();
 
@@ -44,7 +44,7 @@ export const useNavigateToAttackDetailsLeftPanel = (
       },
       path: {
         tab,
-        subTab,
+        ...(tab === INSIGHTS_TAB_ID ? { subTab } : {}),
       },
     }),
     [attackId, indexName, tab, subTab]
