@@ -464,7 +464,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               total_indexing_duration_ms: Math.round(sum(result.bulkCreateTimes.map(Number))),
               total_enrichment_duration_ms: Math.round(sum(result.enrichmentTimes.map(Number))),
               frozen_indices_queried_count: frozenIndicesQueriedCount,
-              suppressed_alerts: suppressedAlertsCount,
+              alerts_suppressed_count: suppressedAlertsCount,
               gap_duration_s: remainingGap ? Math.round(remainingGap.asSeconds()) : undefined,
               gap_range: gap,
             });

@@ -125,7 +125,7 @@ export function createRuleExecutionLogClientForExecutors(
 
       // total_search_duration_ms gets calculated and logged at the Alerting Framework level
       ruleMonitoringService.setMetrics(
-        omitBy(metrics, (value, key) => !value || key === 'total_search_duration_ms')
+        omitBy(metrics, (value, key) => value == null || key === 'total_search_duration_ms')
       );
     },
 

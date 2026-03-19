@@ -796,13 +796,14 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
   if (consumerMetrics) {
     set(event, 'kibana.alert.rule.execution.metrics', {
       ...event.kibana?.alert?.rule?.execution?.metrics,
-      alerts_candidate_count: consumerMetrics.candidate_alerts_count,
-      alerts_suppressed_count: consumerMetrics.suppressed_alerts,
+      alerts_candidate_count: consumerMetrics.alerts_candidate_count,
+      alerts_suppressed_count: consumerMetrics.alerts_suppressed_count,
       frozen_indices_queried_count: consumerMetrics.frozen_indices_queried_count,
       total_indexing_duration_ms: consumerMetrics.total_indexing_duration_ms,
       total_enrichment_duration_ms: consumerMetrics.total_enrichment_duration_ms,
       execution_gap_duration_s: consumerMetrics.gap_duration_s,
-      gap_range: consumerMetrics.gap_range,
+      // Event Log schema doesn't expect null for gap_range
+      gap_range: consumerMetrics.gap_range ?? undefined,
     });
   }
 

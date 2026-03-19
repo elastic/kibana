@@ -456,8 +456,8 @@ export interface ConsumerExecutionMetrics {
   total_enrichment_duration_ms: number;
   gap_duration_s: number;
   gap_range: { lte: string; gte: string };
-  candidate_alerts_count: number;
-  suppressed_alerts: number;
+  alerts_candidate_count: number;
+  alerts_suppressed_count: number;
   frozen_indices_queried_count: number;
 }
 
