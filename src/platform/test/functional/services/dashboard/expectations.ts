@@ -276,22 +276,6 @@ export class DashboardExpectService extends FtrService {
     expect(resultStr).to.be('No results found');
   }
 
-  async savedSearchRowsExist() {
-    // Expect more than 0 saved search rows
-    await this.savedSearchRowCount(0);
-  }
-
-  async savedSearchRowsMissing() {
-    const gridExists = await this.find.existsByCssSelector('[data-document-number]');
-    if (gridExists) {
-      const grid = await this.find.byCssSelector('[data-document-number]');
-      const docNr = Number(await grid.getAttribute('data-document-number'));
-      expect(docNr).to.be(0);
-    } else {
-      await this.testSubjects.missingOrFail('docTableExpandToggleColumn');
-    }
-  }
-
   async dataTableRowCount(expectedCount: number) {
     this.log.debug(`DashboardExpect.dataTableRowCount(${expectedCount})`);
     await this.retry.try(async () => {

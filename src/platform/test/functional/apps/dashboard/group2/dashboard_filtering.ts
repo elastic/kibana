@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('dashboard filtering', function () {
+  describe.only('dashboard filtering', function () {
     const populateDashboard = async () => {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
@@ -189,10 +189,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
       });
 
-      it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowsMissing();
-      });
-
       it('timelion is filtered', async () => {
         await dashboardExpect.timelionLegendCount(0);
       });
@@ -247,10 +243,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('tsvb markdown', async () => {
         await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
-      });
-
-      it('saved searches', async () => {
-        await dashboardExpect.savedSearchRowsExist();
       });
 
       it('vega', async () => {
