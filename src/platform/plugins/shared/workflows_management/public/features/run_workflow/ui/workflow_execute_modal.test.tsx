@@ -110,10 +110,10 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(getByText('Provide custom JSON data manually.')).toBeInTheDocument();
-      expect(getByText('Choose a document from Elasticsearch.')).toBeInTheDocument();
-      expect(getByText('Choose an existing alert directly.')).toBeInTheDocument();
-      expect(getByText('Reuse input data from previous executions.')).toBeInTheDocument();
+      expect(getByText('Provide custom JSON data manually')).toBeInTheDocument();
+      expect(getByText('Choose a document from Elasticsearch')).toBeInTheDocument();
+      expect(getByText('Choose an existing alert directly')).toBeInTheDocument();
+      expect(getByText('Reuse input data from previous executions')).toBeInTheDocument();
     });
 
     it('renders the execute button', () => {

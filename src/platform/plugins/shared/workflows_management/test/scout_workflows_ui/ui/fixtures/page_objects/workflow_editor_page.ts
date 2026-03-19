@@ -111,6 +111,20 @@ export class WorkflowEditorPage {
   }
 
   /**
+   * Open the test step modal for a given step: wait for the step to be in the YAML editor,
+   * move the cursor to it so the run button appears, then click run and wait for the modal.
+   */
+  async openStepRunModal(stepId: string) {
+    const searchText = `name: ${stepId}`;
+    await this.setCursorToText(searchText);
+    await this.page.testSubj
+      .locator(`workflowStepActionsContainer-${stepId}`)
+      .waitFor({ state: 'visible', timeout: 10_000 });
+    await this.page.testSubj.click('workflowRunStep');
+    await this.page.testSubj.waitForSelector('workflowTestStepModal', { state: 'visible' });
+  }
+
+  /**
    * Set the Monaco cursor to the Nth occurrence of `searchText` in the YAML
    * editor and scroll it into view.
    */
@@ -221,7 +235,7 @@ export class WorkflowEditorPage {
    */
   async setTestStepInputs(inputs: Record<string, unknown>) {
     await this.waitForTestStepModal();
-    const stepInputsEditor = this.page.testSubj.locator('workflow-event-json-editor');
+    const stepInputsEditor = this.page.testSubj.locator('workflow-event-manual-json-editor');
     await stepInputsEditor.waitFor({ state: 'visible' });
     await this.setEditorValue(stepInputsEditor, JSON.stringify(inputs, null, 2));
   }
