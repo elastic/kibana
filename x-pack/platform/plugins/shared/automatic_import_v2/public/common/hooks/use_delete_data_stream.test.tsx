@@ -9,6 +9,7 @@ import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useDeleteDataStream } from './use_delete_data_stream';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { IntegrationResponse } from '../../../common';
 import * as api from '../lib/api';
 
 jest.mock('../lib/api');
@@ -17,6 +18,9 @@ const mockDeleteDataStream = api.deleteDataStream as jest.Mock;
 const mockToastsAddSuccess = jest.fn();
 const mockToastsAddError = jest.fn();
 const mockInvalidateQueries = jest.fn();
+const mockCancelQueries = jest.fn();
+const mockSetQueryData = jest.fn();
+const mockGetQueryData = jest.fn();
 
 jest.mock('./use_kibana', () => ({
   useKibana: () => ({
@@ -32,6 +36,29 @@ jest.mock('./use_kibana', () => ({
   }),
 }));
 
+const mockIntegrationData: IntegrationResponse = {
+  integrationId: 'integration-123',
+  title: 'Test Integration',
+  description: 'A test integration',
+  status: 'completed',
+  dataStreams: [
+    {
+      dataStreamId: 'data-stream-456',
+      title: 'Test Data Stream',
+      description: 'A test data stream',
+      inputTypes: [{ name: 'filestream' }],
+      status: 'completed',
+    },
+    {
+      dataStreamId: 'data-stream-789',
+      title: 'Another Data Stream',
+      description: 'Another test data stream',
+      inputTypes: [{ name: 'tcp' }],
+      status: 'completed',
+    },
+  ],
+};
+
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -45,8 +72,11 @@ const createWrapper = () => {
     },
   });
 
-  // Mock invalidateQueries on the query client
+  // Mock query client methods
   queryClient.invalidateQueries = mockInvalidateQueries;
+  queryClient.cancelQueries = mockCancelQueries;
+  queryClient.setQueryData = mockSetQueryData;
+  queryClient.getQueryData = mockGetQueryData;
 
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -196,7 +226,7 @@ describe('useDeleteDataStream', () => {
       consoleSpy.mockRestore();
     });
 
-    it('should not invalidate queries on failure', async () => {
+    it('should still invalidate queries on failure via onSettled', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       mockDeleteDataStream.mockRejectedValue(new Error('Server error'));
@@ -208,7 +238,7 @@ describe('useDeleteDataStream', () => {
       await act(async () => {
         try {
           await result.current.deleteDataStreamMutation.mutateAsync({
-            integrationId: 'i1',
+            integrationId: 'integration-123',
             dataStreamId: 'd1',
           });
         } catch {
@@ -216,7 +246,40 @@ describe('useDeleteDataStream', () => {
         }
       });
 
-      expect(mockInvalidateQueries).not.toHaveBeenCalled();
+      // onSettled is called on both success and error to refetch server state
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({
+        queryKey: ['integration', 'integration-123'],
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should rollback optimistic update on failure', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      mockGetQueryData.mockReturnValue(mockIntegrationData);
+      mockDeleteDataStream.mockRejectedValue(new Error('Server error'));
+
+      const { result } = renderHook(() => useDeleteDataStream(), {
+        wrapper: createWrapper(),
+      });
+
+      await act(async () => {
+        try {
+          await result.current.deleteDataStreamMutation.mutateAsync({
+            integrationId: 'integration-123',
+            dataStreamId: 'data-stream-456',
+          });
+        } catch {
+          // Expected to throw
+        }
+      });
+
+      // Should rollback to the original data
+      expect(mockSetQueryData).toHaveBeenLastCalledWith(
+        ['integration', 'integration-123'],
+        mockIntegrationData
+      );
 
       consoleSpy.mockRestore();
     });
@@ -255,6 +318,95 @@ describe('useDeleteDataStream', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
+    });
+  });
+
+  describe('optimistic updates', () => {
+    it('should cancel queries and set optimistic status to deleting on mutate', async () => {
+      mockGetQueryData.mockReturnValue(mockIntegrationData);
+      mockDeleteDataStream.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useDeleteDataStream(), {
+        wrapper: createWrapper(),
+      });
+
+      await act(async () => {
+        await result.current.deleteDataStreamMutation.mutateAsync({
+          integrationId: 'integration-123',
+          dataStreamId: 'data-stream-456',
+        });
+      });
+
+      // Should cancel queries before optimistic update
+      expect(mockCancelQueries).toHaveBeenCalledWith({
+        queryKey: ['integration', 'integration-123'],
+      });
+
+      // Should set optimistic data with status changed to 'deleting'
+      expect(mockSetQueryData).toHaveBeenCalledWith(
+        ['integration', 'integration-123'],
+        expect.objectContaining({
+          dataStreams: expect.arrayContaining([
+            expect.objectContaining({
+              dataStreamId: 'data-stream-456',
+              status: 'deleting',
+            }),
+          ]),
+        })
+      );
+    });
+
+    it('should not modify other data streams when setting optimistic status', async () => {
+      mockGetQueryData.mockReturnValue(mockIntegrationData);
+      mockDeleteDataStream.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useDeleteDataStream(), {
+        wrapper: createWrapper(),
+      });
+
+      await act(async () => {
+        await result.current.deleteDataStreamMutation.mutateAsync({
+          integrationId: 'integration-123',
+          dataStreamId: 'data-stream-456',
+        });
+      });
+
+      // The other data stream should remain unchanged
+      expect(mockSetQueryData).toHaveBeenCalledWith(
+        ['integration', 'integration-123'],
+        expect.objectContaining({
+          dataStreams: expect.arrayContaining([
+            expect.objectContaining({
+              dataStreamId: 'data-stream-789',
+              status: 'completed', // Should remain unchanged
+            }),
+          ]),
+        })
+      );
+    });
+
+    it('should handle missing integration data gracefully', async () => {
+      mockGetQueryData.mockReturnValue(undefined);
+      mockDeleteDataStream.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useDeleteDataStream(), {
+        wrapper: createWrapper(),
+      });
+
+      // Should not throw when integration data is not in cache
+      await act(async () => {
+        await result.current.deleteDataStreamMutation.mutateAsync({
+          integrationId: 'integration-123',
+          dataStreamId: 'data-stream-456',
+        });
+      });
+
+      // Should still call cancelQueries
+      expect(mockCancelQueries).toHaveBeenCalled();
+
+      // setQueryData should not be called for optimistic update when no previous data
+      // But it may be called once (or not at all) depending on context rollback
+      expect(mockDeleteDataStream).toHaveBeenCalled();
     });
   });
 });

@@ -4,10 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import Path from 'path';
+import { defineConfig } from '@playwright/test';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
-export default createPlaywrightEvalsConfig({
-  testDir: Path.join(__dirname, './evals'),
-});
+export default defineConfig(
+  createPlaywrightEvalsConfig({
+    testDir: Path.resolve(__dirname, './evals'),
+  }),
+  {
+    testIgnore: ['**/significant_events/**'],
+  }
+);

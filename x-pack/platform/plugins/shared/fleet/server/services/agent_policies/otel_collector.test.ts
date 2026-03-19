@@ -705,6 +705,9 @@ describe('generateOtelcolConfig', () => {
               'traces/otlp': {
                 receivers: ['otlp'],
               },
+              'profiles/otlp': {
+                receivers: ['otlp'],
+              },
             },
           },
         },
@@ -754,6 +757,9 @@ describe('generateOtelcolConfig', () => {
               traces: {
                 receivers: ['otlp'],
               },
+              profiles: {
+                receivers: ['otlp'],
+              },
             },
           },
         },
@@ -780,6 +786,36 @@ describe('generateOtelcolConfig', () => {
         } as any,
       ],
     ]);
+
+    it('should add elasticapm connector and processor when stream has traces pipeline and use_apm enabled even if data_stream.type is not traces', () => {
+      const inputWithUseApm: FullAgentPolicyInput = {
+        ...otelInputWithMultipleSignalTypes,
+        streams:
+          otelInputWithMultipleSignalTypes.streams?.map((stream) => ({
+            ...stream,
+            use_apm: true,
+          })) ?? [],
+      };
+      const inputs: FullAgentPolicyInput[] = [inputWithUseApm];
+      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
+
+      expect(result.connectors?.elasticapm).toEqual({});
+      expect(result.processors?.elasticapm).toEqual({});
+      expect(result.service?.pipelines?.['metrics/aggregated-otel-metrics']).toEqual({
+        receivers: ['elasticapm'],
+        exporters: ['forward'],
+      });
+      const tracesPipelineKey = 'traces/otlp/test-multi-signal-stream-id-1';
+      const tracesPipeline = result.service?.pipelines?.[tracesPipelineKey];
+      expect(tracesPipeline).toBeDefined();
+      expect(tracesPipeline?.exporters).toContain('elasticapm');
+      expect(tracesPipeline?.processors).toContain('elasticapm');
+      const metricsPipelineKey = 'metrics/otlp/test-multi-signal-stream-id-1';
+      const metricsPipeline = result.service?.pipelines?.[metricsPipelineKey];
+      expect(metricsPipeline).toBeDefined();
+      expect(metricsPipeline?.exporters).not.toContain('elasticapm');
+      expect(metricsPipeline?.processors).not.toContain('elasticapm');
+    });
 
     it('should generate transform with multiple signal type statements when dynamic_signal_types is true', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes];
@@ -819,6 +855,16 @@ describe('generateOtelcolConfig', () => {
             context: 'spanevent',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        profile_statements: [
+          {
+            context: 'profile',
+            statements: [
+              'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -864,6 +910,16 @@ describe('generateOtelcolConfig', () => {
             context: 'spanevent',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        profile_statements: [
+          {
+            context: 'profile',
+            statements: [
+              'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },

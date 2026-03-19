@@ -13,6 +13,10 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const EIS_MODELS_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
 
+// Whilst we're waiting on EIS returning metadata about which models can reason
+// and use tools, we need to manually exclude the smaller models
+const EXCLUDED_MODEL_IDS = ['google-gemini-2.5-flash-lite'];
+
 export interface DiscoveredModel {
   inferenceId: string;
   modelId: string;
@@ -24,7 +28,8 @@ export const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
   }
   try {
     const data = JSON.parse(readFileSync(EIS_MODELS_PATH, 'utf8'));
-    return data.models || [];
+    const models: DiscoveredModel[] = data.models || [];
+    return models.filter((model) => !EXCLUDED_MODEL_IDS.includes(model.modelId));
   } catch {
     return [];
   }

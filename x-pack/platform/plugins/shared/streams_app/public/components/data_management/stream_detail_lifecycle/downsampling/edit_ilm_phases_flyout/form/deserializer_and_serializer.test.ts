@@ -35,6 +35,7 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
         },
         // unknown fields should be preserved
         unknown: unknownValue,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       warm: {
         name: 'warm',
@@ -47,6 +48,7 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
           unknown_nested: unknownValue,
         },
         unknown: unknownValue,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       cold: {
         name: 'cold',
@@ -60,6 +62,7 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
         },
         searchable_snapshot: 'repo',
         unknown: unknownValue,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       frozen: {
         name: 'frozen',
@@ -67,12 +70,14 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
         min_age: '40d',
         searchable_snapshot: 'repo',
         unknown: unknownValue,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       delete: {
         name: 'delete',
         min_age: '60d',
         delete_searchable_snapshot: false,
         unknown: unknownValue,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
     };
 
@@ -111,6 +116,7 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
     internal._meta.warm.downsample.fixedIntervalValue = '6';
     internal._meta.warm.downsample.fixedIntervalUnit = 'd';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const out = serializer(internal) as any;
     expect(out.warm.downsample).toEqual({
       after: '20d',
@@ -151,7 +157,7 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
 
   it('defaults delete_searchable_snapshot to true when delete phase omits it', () => {
     const internal = deserializer({
-      delete: { name: 'delete', min_age: '1d' } as any,
+      delete: { name: 'delete', min_age: '1d' } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     });
     expect(internal._meta.delete.deleteSearchableSnapshotEnabled).toBe(true);
 
@@ -164,10 +170,12 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
       cold: {
         name: 'cold',
         searchable_snapshot: 'coldRepo',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       frozen: {
         name: 'frozen',
         searchable_snapshot: 'frozenRepo',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
     });
     expect(internal._meta.searchableSnapshot.repository).toBe('coldRepo');
@@ -177,6 +185,7 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
         name: 'frozen',
         min_age: '1d',
         searchable_snapshot: 'fRepo',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
     });
     expect(internal2._meta.searchableSnapshot.repository).toBe('fRepo');
@@ -184,7 +193,7 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
 
   it('computes minAgeToMilliSeconds from min_age when parsing succeeds', () => {
     const internal = deserializer({
-      warm: { name: 'warm', min_age: '2d' } as any,
+      warm: { name: 'warm', min_age: '2d' } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     });
     expect(internal._meta.warm.minAgeValue).toBe('2');
     expect(internal._meta.warm.minAgeUnit).toBe('d');
@@ -203,6 +212,7 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
           fixed_interval: '1500ms',
         },
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
 
     const internal = deserializer(input);
@@ -223,11 +233,13 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
     internal._meta.cold.searchableSnapshotEnabled = false;
     internal._meta.frozen.enabled = true;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const out = serializer(internal) as any;
     expect(out.cold.searchable_snapshot).toBeUndefined();
     expect(out.frozen.searchable_snapshot).toEqual('repo1');
 
     internal._meta.cold.searchableSnapshotEnabled = true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const out2 = serializer(internal) as any;
     expect(out2.cold.searchable_snapshot).toEqual('repo1');
     expect(out2.frozen.searchable_snapshot).toEqual('repo1');

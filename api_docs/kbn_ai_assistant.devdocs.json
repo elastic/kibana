@@ -1504,7 +1504,7 @@
                 "label": "title",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
                 "lineNumber": 55,
@@ -1520,7 +1520,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
                 "lineNumber": 56,
@@ -1536,7 +1536,7 @@
                 "label": "confirmButtonText",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
                 "lineNumber": 57,

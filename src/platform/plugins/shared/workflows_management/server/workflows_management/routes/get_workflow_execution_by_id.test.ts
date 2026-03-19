@@ -96,6 +96,7 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}', () => {
       const mockContext = {};
       const mockRequest = {
         params: { workflowExecutionId: 'execution-123' },
+        query: { includeInput: true, includeOutput: true },
         headers: {},
         url: { pathname: '/api/workflowExecutions/execution-123' },
       };
@@ -103,7 +104,10 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.getWorkflowExecution).toHaveBeenCalledWith('execution-123', 'default');
+      expect(workflowsApi.getWorkflowExecution).toHaveBeenCalledWith('execution-123', 'default', {
+        includeInput: true,
+        includeOutput: true,
+      });
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockExecution });
     });
 
@@ -113,6 +117,7 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}', () => {
       const mockContext = {};
       const mockRequest = {
         params: { workflowExecutionId: 'non-existent-execution' },
+        query: { includeInput: true, includeOutput: true },
         headers: {},
         url: { pathname: '/api/workflowExecutions/non-existent-execution' },
       };
@@ -122,7 +127,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}', () => {
 
       expect(workflowsApi.getWorkflowExecution).toHaveBeenCalledWith(
         'non-existent-execution',
-        'default'
+        'default',
+        { includeInput: true, includeOutput: true }
       );
       expect(mockResponse.notFound).toHaveBeenCalledWith();
     });
@@ -134,6 +140,7 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}', () => {
       const mockContext = {};
       const mockRequest = {
         params: { workflowExecutionId: 'execution-123' },
+        query: { includeInput: true, includeOutput: true },
         headers: {},
         url: { pathname: '/api/workflowExecutions/execution-123' },
       };
@@ -168,6 +175,7 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}', () => {
       const mockContext = {};
       const mockRequest = {
         params: { workflowExecutionId: 'execution-456' },
+        query: { includeInput: true, includeOutput: true },
         headers: {},
         url: { pathname: '/s/custom-space/api/workflowExecutions/execution-456' },
       };
@@ -177,7 +185,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}', () => {
 
       expect(workflowsApi.getWorkflowExecution).toHaveBeenCalledWith(
         'execution-456',
-        'custom-space'
+        'custom-space',
+        { includeInput: true, includeOutput: true }
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockExecution });
     });
@@ -191,6 +200,7 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}', () => {
       const mockContext = {};
       const mockRequest = {
         params: { workflowExecutionId: 'execution-123' },
+        query: { includeInput: true, includeOutput: true },
         headers: {},
         url: { pathname: '/api/workflowExecutions/execution-123' },
       };
@@ -213,6 +223,7 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}', () => {
       const mockContext = {};
       const mockRequest = {
         params: { workflowExecutionId: 'execution-123' },
+        query: { includeInput: true, includeOutput: true },
         headers: {},
         url: { pathname: '/api/workflowExecutions/execution-123' },
       };
@@ -225,6 +236,53 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}', () => {
         body: {
           message: 'Internal server error: Error: WorkflowsService not initialized',
         },
+      });
+    });
+
+    describe('includeInput / includeOutput query params', () => {
+      const mockExecution = {
+        id: 'execution-123',
+        status: 'completed',
+        steps: [],
+      };
+
+      it('should forward includeInput=false and includeOutput=false to the API', async () => {
+        workflowsApi.getWorkflowExecution = jest.fn().mockResolvedValue(mockExecution);
+
+        const mockRequest = {
+          params: { workflowExecutionId: 'execution-123' },
+          query: { includeInput: false, includeOutput: false },
+          headers: {},
+          url: { pathname: '/api/workflowExecutions/execution-123' },
+        };
+        const mockResponse = createMockResponse();
+
+        await routeHandler({}, mockRequest, mockResponse);
+
+        expect(workflowsApi.getWorkflowExecution).toHaveBeenCalledWith('execution-123', 'default', {
+          includeInput: false,
+          includeOutput: false,
+        });
+        expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockExecution });
+      });
+
+      it('should forward mixed includeInput=true and includeOutput=false to the API', async () => {
+        workflowsApi.getWorkflowExecution = jest.fn().mockResolvedValue(mockExecution);
+
+        const mockRequest = {
+          params: { workflowExecutionId: 'execution-123' },
+          query: { includeInput: true, includeOutput: false },
+          headers: {},
+          url: { pathname: '/api/workflowExecutions/execution-123' },
+        };
+        const mockResponse = createMockResponse();
+
+        await routeHandler({}, mockRequest, mockResponse);
+
+        expect(workflowsApi.getWorkflowExecution).toHaveBeenCalledWith('execution-123', 'default', {
+          includeInput: true,
+          includeOutput: false,
+        });
       });
     });
   });

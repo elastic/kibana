@@ -8,11 +8,13 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
-import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
+import { getSchemaAtPath, getShape } from '@kbn/workflows/common/utils/zod';
+import { z } from '@kbn/zod/v4';
 import {
   getWorkflowContextSchema,
   type WorkflowDefinitionForContext,
 } from './get_workflow_context_schema';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 describe('getWorkflowContextSchema - Nested Objects', () => {
   it('should handle nested object inputs for variable validation', () => {
@@ -294,5 +296,162 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
         expect(contextSchema).toBeDefined();
       }).not.toThrow();
     });
+  });
+});
+
+describe('getWorkflowContextSchema - Dynamic event schema based on triggers', () => {
+  const baseWorkflow: WorkflowYaml = {
+    version: '1',
+    name: 'Test Workflow',
+    description: undefined,
+    settings: undefined,
+    enabled: true,
+    tags: undefined,
+    triggers: [{ type: 'manual' }],
+    inputs: undefined,
+    consts: undefined,
+    steps: [{ name: 'step1', type: 'console' }],
+  };
+
+  function getEventKeys(workflow: WorkflowYaml | WorkflowDefinitionForContext): string[] {
+    const contextSchema = getWorkflowContextSchema(workflow);
+    const eventResult = getSchemaAtPath(contextSchema, 'event');
+    expect(eventResult.schema).toBeDefined();
+    return Object.keys(getShape(eventResult.schema!));
+  }
+
+  it.each<{
+    label: string;
+    triggers: WorkflowYaml['triggers'] | undefined | [];
+    expectedKeys: string[];
+    unexpectedKeys: string[];
+  }>([
+    {
+      label: 'manual trigger',
+      triggers: [{ type: 'manual' }],
+      expectedKeys: ['spaceId'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'params'],
+    },
+    {
+      label: 'scheduled trigger',
+      triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+      expectedKeys: ['spaceId'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'params'],
+    },
+    {
+      label: 'alert trigger',
+      triggers: [{ type: 'alert' }],
+      expectedKeys: ['spaceId', 'alerts', 'rule', 'params'],
+      unexpectedKeys: ['timestamp'],
+    },
+    {
+      label: 'manual + alert triggers',
+      triggers: [{ type: 'manual' }, { type: 'alert' }],
+      expectedKeys: ['spaceId', 'alerts', 'rule', 'params'],
+      unexpectedKeys: ['timestamp'],
+    },
+    {
+      label: 'manual + scheduled triggers',
+      triggers: [{ type: 'manual' }, { type: 'scheduled', with: { every: '1h' } }],
+      expectedKeys: ['spaceId'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'params'],
+    },
+    {
+      label: 'empty triggers array',
+      triggers: [] as any,
+      expectedKeys: ['spaceId'],
+      unexpectedKeys: ['timestamp'],
+    },
+    {
+      label: 'undefined triggers',
+      triggers: undefined as any,
+      expectedKeys: ['spaceId'],
+      unexpectedKeys: ['timestamp'],
+    },
+  ])(
+    'should produce correct event keys for $label',
+    ({ triggers, expectedKeys, unexpectedKeys }) => {
+      const workflow = {
+        ...baseWorkflow,
+        triggers,
+      } as WorkflowYaml | WorkflowDefinitionForContext;
+      const eventKeys = getEventKeys(workflow);
+
+      for (const key of expectedKeys) {
+        expect(eventKeys).toContain(key);
+      }
+      for (const key of unexpectedKeys) {
+        expect(eventKeys).not.toContain(key);
+      }
+      expect(eventKeys).toHaveLength(expectedKeys.length);
+    }
+  );
+
+  it('should allow accessing event.rule and event.spaceId when alert trigger is present', () => {
+    const workflow: WorkflowYaml = { ...baseWorkflow, triggers: [{ type: 'alert' }] };
+    const contextSchema = getWorkflowContextSchema(workflow);
+
+    expect(getSchemaAtPath(contextSchema, 'event.rule.id').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'event.rule.name').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'event.spaceId').schema).toBeDefined();
+  });
+
+  it('should not include timestamp when workflow has custom trigger type but no registered definition', () => {
+    const workflow = {
+      ...baseWorkflow,
+      triggers: [{ type: 'some.unknown_trigger' }],
+    } as unknown as WorkflowYaml;
+
+    const getTriggerDefinitionSpy = jest
+      .spyOn(triggerSchemas, 'getTriggerDefinition')
+      .mockReturnValue(undefined);
+
+    try {
+      const eventKeys = getEventKeys(workflow);
+
+      expect(eventKeys).toContain('spaceId');
+      expect(eventKeys).not.toContain('timestamp');
+      expect(eventKeys).toHaveLength(1);
+    } finally {
+      getTriggerDefinitionSpy.mockRestore();
+    }
+  });
+
+  it('should include timestamp and custom trigger eventSchema when workflow has a custom trigger', () => {
+    const customEventSchema = z.object({
+      severity: z.string(),
+      message: z.string(),
+    });
+    const workflow = {
+      ...baseWorkflow,
+      triggers: [{ type: 'example.custom_trigger' }],
+    } as unknown as WorkflowYaml;
+    const mockTriggerDefinition = {
+      id: 'example.custom_trigger',
+      title: 'Example custom trigger',
+      description: 'Test trigger for event schema merge',
+      eventSchema: customEventSchema,
+    };
+
+    const getTriggerDefinitionSpy = jest
+      .spyOn(triggerSchemas, 'getTriggerDefinition')
+      .mockImplementation((triggerType: string) =>
+        triggerType === 'example.custom_trigger' ? mockTriggerDefinition : undefined
+      );
+
+    try {
+      const eventKeys = getEventKeys(workflow);
+
+      expect(eventKeys).toContain('spaceId');
+      expect(eventKeys).toContain('timestamp');
+      expect(eventKeys).toContain('severity');
+      expect(eventKeys).toContain('message');
+
+      const contextSchema = getWorkflowContextSchema(workflow);
+      expect(getSchemaAtPath(contextSchema, 'event.severity').schema).toBeDefined();
+      expect(getSchemaAtPath(contextSchema, 'event.message').schema).toBeDefined();
+    } finally {
+      getTriggerDefinitionSpy.mockRestore();
+    }
   });
 });

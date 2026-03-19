@@ -16,6 +16,7 @@ import type {
   AttachmentAttributes,
   ConnectorMappings,
   EventAttachmentPayload,
+  UnifiedAttachmentAttributes,
   UserActionAttributes,
   UserCommentAttachmentPayload,
 } from '../common/types/domain';
@@ -571,6 +572,29 @@ export const mockCaseComments: Array<SavedObject<AttachmentAttributes>> = [
   },
 ];
 
+export const mockCaseUnifiedAttachments: Array<SavedObject<UnifiedAttachmentAttributes>> = [
+  {
+    type: 'cases-attachments',
+    id: 'mock-attachment-1',
+    attributes: {
+      type: 'comment',
+      data: { content: 'test' },
+      owner: 'securitySolution',
+      created_at: '2019-11-25T21:55:00.177Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+    },
+    references: [],
+  },
+];
+
 export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
   {
     type: 'cases-user-actions',
@@ -752,6 +776,7 @@ export const mockCasesContract = (): CasesServerStart => ({
   getCasesClientWithRequest: jest.fn().mockResolvedValue(casesClientMock),
   getExternalReferenceAttachmentTypeRegistry: jest.fn(),
   getPersistableStateAttachmentTypeRegistry: jest.fn(),
+  getUnifiedAttachmentTypeRegistry: jest.fn(),
   config: {
     enabled: true,
     stack: {

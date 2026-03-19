@@ -36,6 +36,11 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { CreatePrivilegesImportIndexRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/create_index.gen';
 import type { CreatePrivMonUserRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/create.gen';
+import type { CreateWatchlistRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/management/create.gen';
+import type {
+  CreateWatchlistEntitySourceRequestParamsInput,
+  CreateWatchlistEntitySourceRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/create.gen';
 import type { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
 import type {
   DeleteEntityEngineRequestQueryInput,
@@ -48,6 +53,7 @@ import type {
   DeleteSingleEntityRequestParamsInput,
   DeleteSingleEntityRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/delete_entity.gen';
+import type { DeleteWatchlistEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/delete.gen';
 import type {
   DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
   TriggerRiskScoreCalculationRequestBodyInput,
@@ -57,6 +63,8 @@ import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security
 import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import type { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
 import type { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
+import type { GetWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/management/get.gen';
+import type { GetWatchlistEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/get.gen';
 import type {
   InitEntityEngineRequestParamsInput,
   InitEntityEngineRequestBodyInput,
@@ -64,6 +72,10 @@ import type {
 import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
 import type { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import type { ListPrivMonUsersRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/list.gen';
+import type {
+  ListWatchlistEntitySourcesRequestQueryInput,
+  ListWatchlistEntitySourcesRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/list.gen';
 import type { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
 import type { SearchPrivilegesIndicesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/search_indices.gen';
 import type { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
@@ -72,6 +84,14 @@ import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/update.gen';
+import type {
+  UpdateWatchlistRequestParamsInput,
+  UpdateWatchlistRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/management/update.gen';
+import type {
+  UpdateWatchlistEntitySourceRequestParamsInput,
+  UpdateWatchlistEntitySourceRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/update.gen';
 import type {
   UpsertEntitiesBulkRequestQueryInput,
   UpsertEntitiesBulkRequestBodyInput,
@@ -185,6 +205,33 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  createWatchlist(props: CreateWatchlistProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/entity_analytics/watchlists', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  createWatchlistEntitySource(
+    props: CreateWatchlistEntitySourceProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/entity_analytics/watchlists/{watchlist_id}/entity_source',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
   /**
    * Delete the asset criticality record for a specific entity.
    */
@@ -269,6 +316,24 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
+  },
+  deleteWatchlistEntitySource(
+    props: DeleteWatchlistEntitySourceProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .delete(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
    * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
@@ -409,6 +474,33 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  getWatchlist(props: GetWatchlistProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  getWatchlistEntitySource(props: GetWatchlistEntitySourceProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
   initEntityEngine(props: InitEntityEngineProps, kibanaSpace: string = 'default') {
     return supertest
       .post(
@@ -499,6 +591,32 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
+  },
+  listWatchlistEntitySources(
+    props: ListWatchlistEntitySourcesProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/list',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  listWatchlists(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/entity_analytics/watchlists/list', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
    * Calculates and returns a list of Risk Scores, sorted by identifier_type and risk score.
@@ -649,6 +767,38 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  updateWatchlist(props: UpdateWatchlistProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  updateWatchlistEntitySource(
+    props: UpdateWatchlistEntitySourceProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .put(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
   uploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/asset_criticality/upload_csv', kibanaSpace))
@@ -728,6 +878,13 @@ export interface CreatePrivilegesImportIndexProps {
 export interface CreatePrivMonUserProps {
   body: CreatePrivMonUserRequestBodyInput;
 }
+export interface CreateWatchlistProps {
+  body: CreateWatchlistRequestBodyInput;
+}
+export interface CreateWatchlistEntitySourceProps {
+  params: CreateWatchlistEntitySourceRequestParamsInput;
+  body: CreateWatchlistEntitySourceRequestBodyInput;
+}
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
@@ -751,6 +908,9 @@ export interface DeleteSingleEntityProps {
   params: DeleteSingleEntityRequestParamsInput;
   body: DeleteSingleEntityRequestBodyInput;
 }
+export interface DeleteWatchlistEntitySourceProps {
+  params: DeleteWatchlistEntitySourceRequestParamsInput;
+}
 export interface DeprecatedTriggerRiskScoreCalculationProps {
   body: DeprecatedTriggerRiskScoreCalculationRequestBodyInput;
 }
@@ -772,6 +932,12 @@ export interface GetEntitySourceProps {
 export interface GetEntityStoreStatusProps {
   query: GetEntityStoreStatusRequestQueryInput;
 }
+export interface GetWatchlistProps {
+  params: GetWatchlistRequestParamsInput;
+}
+export interface GetWatchlistEntitySourceProps {
+  params: GetWatchlistEntitySourceRequestParamsInput;
+}
 export interface InitEntityEngineProps {
   params: InitEntityEngineRequestParamsInput;
   body: InitEntityEngineRequestBodyInput;
@@ -787,6 +953,10 @@ export interface ListEntitySourcesProps {
 }
 export interface ListPrivMonUsersProps {
   query: ListPrivMonUsersRequestQueryInput;
+}
+export interface ListWatchlistEntitySourcesProps {
+  query: ListWatchlistEntitySourcesRequestQueryInput;
+  params: ListWatchlistEntitySourcesRequestParamsInput;
 }
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
@@ -810,6 +980,14 @@ export interface UpdateEntitySourceProps {
 export interface UpdatePrivMonUserProps {
   params: UpdatePrivMonUserRequestParamsInput;
   body: UpdatePrivMonUserRequestBodyInput;
+}
+export interface UpdateWatchlistProps {
+  params: UpdateWatchlistRequestParamsInput;
+  body: UpdateWatchlistRequestBodyInput;
+}
+export interface UpdateWatchlistEntitySourceProps {
+  params: UpdateWatchlistEntitySourceRequestParamsInput;
+  body: UpdateWatchlistEntitySourceRequestBodyInput;
 }
 export interface UpsertEntitiesBulkProps {
   query: UpsertEntitiesBulkRequestQueryInput;

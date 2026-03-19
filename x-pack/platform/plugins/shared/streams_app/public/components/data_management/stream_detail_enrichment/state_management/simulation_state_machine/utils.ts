@@ -17,6 +17,7 @@ import { uniq } from 'lodash';
 import type {
   MappedSchemaField,
   SchemaField,
+  TypedMappedSchemaField,
   UnmappedSchemaField,
 } from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
@@ -85,7 +86,6 @@ export function collectDescendantProcessorIdsForCondition(
  */
 export function collectActiveDocumentsForSelectedCondition(
   documents: Simulation['documents'] | undefined,
-  steps: StreamlangStepWithUIAttributes[],
   selectedConditionId: string | undefined
 ): Simulation['documents'] {
   if (!documents) {
@@ -96,7 +96,10 @@ export function collectActiveDocumentsForSelectedCondition(
     return documents;
   }
 
-  const processorIds = collectDescendantProcessorIdsForCondition(steps, selectedConditionId);
+  // Condition filtering is based on the simulation-only noop processor that is tagged
+  // with the condition customIdentifier. This allows tracking match rates even when
+  // the subtree is empty or descendants are faulty.
+  const processorIds = [selectedConditionId];
 
   return collectDocumentsAffectedByProcessors(documents, processorIds);
 }
@@ -384,6 +387,48 @@ export function mapField(
   };
 }
 
+export function stageDocOnlyOverride(
+  context: SimulationContext,
+  params: { fieldName: string; description?: string }
+): {
+  detectedSchemaFields: SchemaField[];
+  detectedSchemaFieldsCache: Map<string, SchemaField>;
+} {
+  const updatedCache = new Map(context.detectedSchemaFieldsCache);
+
+  const updatedFields = (() => {
+    const existing = context.detectedSchemaFields.find((f) => f.name === params.fieldName);
+    if (!existing) {
+      const schemaField: SchemaField = {
+        name: params.fieldName,
+        parent: context.streamName,
+        status: 'unmapped',
+        description: params.description,
+      };
+      updatedCache.set(schemaField.name, schemaField);
+      return [...context.detectedSchemaFields, schemaField];
+    }
+
+    return context.detectedSchemaFields.map((field) => {
+      if (field.name !== params.fieldName) return field;
+
+      const schemaField: SchemaField = {
+        ...field,
+        status: 'unmapped',
+        type: undefined,
+        description: params.description,
+      };
+      updatedCache.set(schemaField.name, schemaField);
+      return schemaField;
+    });
+  })();
+
+  return {
+    detectedSchemaFields: updatedFields,
+    detectedSchemaFieldsCache: updatedCache,
+  };
+}
+
 export function unmapField(
   context: SimulationContext,
   fieldName: string
@@ -415,7 +460,7 @@ export function getUnmappedSchemaFields(fields: SchemaField[]) {
   return fields.filter((field) => field.status === 'unmapped');
 }
 
-export function convertToFieldDefinition(fields: MappedSchemaField[]): FieldDefinition {
+export function convertToFieldDefinition(fields: TypedMappedSchemaField[]): FieldDefinition {
   return fields.reduce(
     (mappedFields, field) =>
       Object.assign(mappedFields, { [field.name]: convertToFieldDefinitionConfig(field) }),

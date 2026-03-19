@@ -137,6 +137,11 @@ export function FeatureDetailsFlyout({
       ownFocus={false}
       size="40%"
       hideCloseButton
+      css={css`
+        // Temporary workaround for #253800 removing global push-flyout positioning.
+        // Remove once the platform team restores these rules.
+        top: var(--kbn-layout--application-top, 0px);
+      `}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -249,6 +254,13 @@ export function FeatureDetailsFlyout({
               )}
             </InfoPanel>
           </EuiFlexItem>
+          <EuiFlexItem data-test-subj="streamsAppFeatureDetailsFlyoutRawDocument">
+            <InfoPanel title={RAW_DOCUMENT_LABEL}>
+              <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
+                {JSON.stringify(feature, null, 2)}
+              </EuiCodeBlock>
+            </InfoPanel>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutBody>
       {isDeleteModalVisible && onDelete && (
@@ -275,6 +287,10 @@ const SUBTYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.subtype
 
 const PROPERTIES_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.propertiesLabel', {
   defaultMessage: 'Properties',
+});
+
+const RAW_DOCUMENT_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.rawDocumentLabel', {
+  defaultMessage: 'Raw document',
 });
 
 const TYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.typeLabel', {

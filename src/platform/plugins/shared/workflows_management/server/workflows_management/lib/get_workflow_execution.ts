@@ -13,35 +13,8 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
-import { searchStepExecutions } from './search_step_executions';
+import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
-
-/**
- * Fetches step executions by their IDs using mget (O(1) operation).
- * This is real-time (reads from translog) and doesn't require index refresh.
- */
-async function getStepExecutionsByIds(
-  esClient: ElasticsearchClient,
-  stepsExecutionIndex: string,
-  stepExecutionIds: string[]
-): Promise<EsWorkflowStepExecution[]> {
-  if (stepExecutionIds.length === 0) {
-    return [];
-  }
-
-  const mgetResponse = await esClient.mget<EsWorkflowStepExecution>({
-    index: stepsExecutionIndex,
-    ids: stepExecutionIds,
-  });
-
-  const steps: EsWorkflowStepExecution[] = [];
-  for (const doc of mgetResponse.docs) {
-    if ('found' in doc && doc.found && doc._source) {
-      steps.push(doc._source);
-    }
-  }
-  return steps;
-}
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
@@ -50,6 +23,8 @@ interface GetWorkflowExecutionParams {
   stepsExecutionIndex: string;
   workflowExecutionId: string;
   spaceId: string;
+  includeInput?: boolean;
+  includeOutput?: boolean;
 }
 
 export const getWorkflowExecution = async ({
@@ -59,6 +34,8 @@ export const getWorkflowExecution = async ({
   stepsExecutionIndex,
   workflowExecutionId,
   spaceId,
+  includeInput = false,
+  includeOutput = false,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
     // Use direct GET by _id for O(1) lookup performance instead of search
@@ -88,26 +65,17 @@ export const getWorkflowExecution = async ({
       return null;
     }
 
-    let stepExecutions: EsWorkflowStepExecution[];
+    const sourceExcludes: string[] = [];
+    if (!includeInput) sourceExcludes.push('input');
+    if (!includeOutput) sourceExcludes.push('output');
 
-    // Use mget if we have step execution IDs - this is O(1) and real-time
-    // (reads from translog, no refresh needed)
-    if (doc.stepExecutionIds && doc.stepExecutionIds.length > 0) {
-      stepExecutions = await getStepExecutionsByIds(
-        esClient,
-        stepsExecutionIndex,
-        doc.stepExecutionIds
-      );
-    } else {
-      // Fallback to search for backward compatibility (old workflows without stepExecutionIds)
-      stepExecutions = await searchStepExecutions({
-        esClient,
-        logger,
-        stepsExecutionIndex,
-        workflowExecutionId,
-        spaceId,
-      });
-    }
+    const stepExecutions = await getStepExecutionsByWorkflowExecution({
+      esClient,
+      stepsExecutionIndex,
+      workflowExecutionId,
+      stepExecutionIds: doc.stepExecutionIds,
+      sourceExcludes,
+    });
 
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
   } catch (error) {

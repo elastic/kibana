@@ -21,7 +21,7 @@ test.describe(
       const generateLogs = generateLogsData(logsSynthtraceEsClient);
 
       // Create a test stream with routing rules first
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
@@ -73,7 +73,7 @@ test.describe(
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
       // Clean up the test stream
       await apiServices.streams.deleteStream(TEST_STREAM);
       // Clean up synthetic logs
@@ -110,7 +110,7 @@ test.describe(
       await pageObjects.datePicker.setAbsoluteRange(mainTimeRange);
 
       // Go to Data Quality tab
-      await pageObjects.streams.clickStreamNameLink('logs.nginx');
+      await pageObjects.streams.clickStreamNameLink('logs.otel.nginx');
       await pageObjects.streams.clickDataQualityTab();
       await pageObjects.streams.verifyDatePickerTimeRange(mainTimeRange);
     });
@@ -198,7 +198,7 @@ test.describe(
       await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
 
       // Navigate to a different stream and verify time persists
-      await pageObjects.streams.clickStreamNameLink('logs.nginx');
+      await pageObjects.streams.clickStreamNameLink('logs.otel.nginx');
       await pageObjects.streams.clickDataQualityTab();
       await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
     });
@@ -277,15 +277,17 @@ test.describe(
       // Click on the expand button for log.level
       await logLevelRow.locator('button[aria-label="Expand"]').click();
 
-      // Flyout should be visible
-      await expect(page.getByTestId('datasetQualityDetailsDegradedFieldFlyout')).toBeVisible();
+      // Flyout should be visible and show the degraded field name
+      const flyout = page.getByTestId('datasetQualityDetailsDegradedFieldFlyout');
+      await expect(flyout).toBeVisible();
+      await expect(flyout).toContainText('log.level');
 
       // Click the link to Discover in the flyout
       await page.getByTestId('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover').click();
 
-      // Should navigate to Discover with _ignored filter for log.level
+      // Should navigate to Discover in ES|QL mode with field-specific _ignored query
       await expect(page).toHaveURL(/.*\/app\/discover/);
-      await expect(page).toHaveURL(/.*_ignored.*log\.level/);
+      await expect(page).toHaveURL(/.*esql.*FROM.*MV_CONTAINS.*_ignored.*log\.level/);
     });
 
     test('should edit failure store for wired streams', async ({ page }) => {

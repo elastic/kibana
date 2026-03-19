@@ -18,11 +18,12 @@ import {
   TEST_DASHBOARD_ID,
 } from '../fixtures';
 
-apiTest.describe('dashboards - delete', { tag: tags.stateful.classic }, () => {
+apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
-    editorCredentials = await requestAuth.getApiKey('editor');
+    // returns editor role in most deployment project and deployment types
+    editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
   });
 
@@ -42,11 +43,11 @@ apiTest.describe('dashboards - delete', { tag: tags.stateful.classic }, () => {
     expect(response.body).toStrictEqual({
       statusCode: 404,
       error: 'Not Found',
-      message: 'A dashboard with ID non-existent-dashboard was not found.',
+      message: 'A dashboard with ID [non-existent-dashboard] was not found.',
     });
   });
 
-  apiTest('should return 200 if the dashboard is deleted', async ({ apiClient }) => {
+  apiTest('should return 204 if the dashboard is deleted', async ({ apiClient }) => {
     const response = await apiClient.delete(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -55,6 +56,6 @@ apiTest.describe('dashboards - delete', { tag: tags.stateful.classic }, () => {
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(204);
   });
 });

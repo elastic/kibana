@@ -33,6 +33,8 @@ import {
   teardownServerlessClusterSync,
   verifyDockerInstalled,
   getESp12Volume,
+  getServerlessNodes,
+  getSharedServerlessParams,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { CA_CERT_PATH, ES_P12_PATH } from '@kbn/dev-utils';
@@ -135,6 +137,59 @@ const volumeCmdTest = async (volumeCmd: string[]) => {
   // eslint-disable-next-line no-bitwise
   expect((await Fsp.stat(serverlessObjectStorePath)).mode & 0o777).toBe(0o777);
 };
+
+describe('getServerlessNodes()', () => {
+  test('should return default node names and ports with no arguments', () => {
+    const nodes = getServerlessNodes();
+    expect(nodes).toHaveLength(3);
+    expect(nodes[0].name).toBe('es01');
+    expect(nodes[1].name).toBe('es02');
+    expect(nodes[2].name).toBe('es03');
+    expect(nodes[0].params).toEqual(expect.arrayContaining(['127.0.0.1:9300:9300']));
+    expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9202:9202']));
+    expect(nodes[2].params).toEqual(expect.arrayContaining(['127.0.0.1:9203:9203']));
+  });
+
+  test('should apply name suffix and port offset for linked cluster', () => {
+    const nodes = getServerlessNodes('-linked', 10);
+    expect(nodes).toHaveLength(3);
+    expect(nodes[0].name).toBe('es01-linked');
+    expect(nodes[1].name).toBe('es02-linked');
+    expect(nodes[2].name).toBe('es03-linked');
+    expect(nodes[0].params).toEqual(expect.arrayContaining(['127.0.0.1:9310:9310']));
+    expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9212:9212']));
+    expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9312:9312']));
+    expect(nodes[2].params).toEqual(expect.arrayContaining(['127.0.0.1:9213:9213']));
+    expect(nodes[2].params).toEqual(expect.arrayContaining(['127.0.0.1:9313:9313']));
+  });
+
+  test('should configure discovery hosts with suffixed names', () => {
+    const nodes = getServerlessNodes('-linked', 10);
+    expect(nodes[0].params).toEqual(
+      expect.arrayContaining([`discovery.seed_hosts=es02-linked,es03-linked`])
+    );
+    expect(nodes[1].params).toEqual(
+      expect.arrayContaining([`discovery.seed_hosts=es01-linked,es03-linked`])
+    );
+    expect(nodes[2].params).toEqual(
+      expect.arrayContaining([`discovery.seed_hosts=es01-linked,es02-linked`])
+    );
+  });
+});
+
+describe('getSharedServerlessParams()', () => {
+  test('should return default master nodes with no arguments', () => {
+    const params = getSharedServerlessParams();
+    expect(params).toEqual(expect.arrayContaining(['cluster.initial_master_nodes=es01,es02,es03']));
+  });
+
+  test('should return suffixed master nodes for linked cluster', () => {
+    const params = getSharedServerlessParams('-linked');
+    expect(params).toEqual(
+      expect.arrayContaining(['cluster.initial_master_nodes=es01-linked,es02-linked,es03-linked'])
+    );
+  });
+});
 
 describe('resolveDockerImage()', () => {
   const defaultRepo = 'another/repo';
@@ -624,15 +679,48 @@ describe('resolveEsArgs()', () => {
         "--env",
         "serverless.project_type=elasticsearch_general_purpose",
         "--env",
-        "serverless.project_id=abcde1234567890",
+        "serverless.project_id=abcdef12345678901234567890123456",
         "--env",
         "serverless.universal_iam_service.enabled=true",
         "--env",
-        "serverless.universal_iam_service.url=http://uiam:8080",
+        "serverless.universal_iam_service.url=https://uiam:8443",
+        "--env",
+        "serverless.universal_iam_service.ssl.verification_mode=none",
         "--env",
         "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
+  });
+
+  test('should use projectIdOverride when provided in UIAM mode', () => {
+    const overrideId = 'custom_project_id_123';
+    const esArgs = resolveEsArgs(
+      [],
+      {
+        ssl: true,
+        kibanaUrl: 'http://localhost:5601/',
+        projectType,
+        basePath: baseEsPath,
+        uiam: true,
+      },
+      overrideId
+    );
+
+    expect(findEnvValue(esArgs, 'serverless.project_id')).toBe(overrideId);
+    expect(findEnvValue(esArgs, 'serverless.organization_id')).toBeDefined();
+    expect(findEnvValue(esArgs, 'serverless.universal_iam_service.enabled')).toBe('true');
+  });
+
+  test('should use default project ID when no override is provided in UIAM mode', () => {
+    const esArgs = resolveEsArgs([], {
+      ssl: true,
+      kibanaUrl: 'http://localhost:5601/',
+      projectType,
+      basePath: baseEsPath,
+      uiam: true,
+    });
+
+    expect(findEnvValue(esArgs, 'serverless.project_id')).toBe('abcdef12345678901234567890123456');
   });
 
   test('should append refresh interval override when ES_JAVA_OPTS is provided', () => {
@@ -829,13 +917,13 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
+    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(14);
+    expect(execa.mock.calls).toHaveLength(17);
 
     // UIAM containers should not be started when `--uiam` is not passed
     expect(runUiamContainerMock).not.toHaveBeenCalled();
@@ -853,13 +941,13 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
+    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
     // docker network create (1)
     // docker pull (3 = 1 for ES nodes, 2 for UIAM containers)
     // docker inspect (2 = image info call for ES nodes is memoized in the previous test, 2 for UIAM containers)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(17);
+    expect(execa.mock.calls).toHaveLength(20);
 
     expect(runUiamContainerMock).toHaveBeenCalledTimes(2);
     expect(runUiamContainerMock).toHaveBeenCalledWith(
@@ -1021,12 +1109,12 @@ describe('runDockerContainer()', () => {
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
     // docker version (1)
     // docker ps (1)
-    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
+    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (1)
-    expect(execa.mock.calls).toHaveLength(11);
+    expect(execa.mock.calls).toHaveLength(14);
   });
 });
 

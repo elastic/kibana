@@ -12,19 +12,14 @@ import SimpleGit from 'simple-git';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getPackages } from '@kbn/repo-packages';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
-import { readFileSync } from 'fs';
-import { extname, join } from 'path';
+import { extname } from 'path';
 
-import { getFilesForCommit, checkFileCasing } from './precommit_hook';
+import { getFilesForCommit, runFileCasingCheck } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
 import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
-import { getExpectedCasing } from './precommit_hook/casing_check_config';
-
-const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, 'src/dev/precommit_hook/exceptions.json');
 
 class CheckResult {
   constructor(checkName) {
@@ -77,22 +72,7 @@ class FileCasingCheck extends PrecommitCheck {
   }
 
   async execute(log, files) {
-    const packages = getPackages(REPO_ROOT);
-    const packageRootDirs = new Set(
-      packages
-        .filter((pkg) => !pkg.isPlugin())
-        .map((pkg) => pkg.normalizedRepoRelativeDir.replace(/\\/g, '/'))
-    );
-
-    const rawExceptions = JSON.parse(readFileSync(EXCEPTIONS_JSON_PATH, 'utf8'));
-    const exceptions = Object.values(rawExceptions).flatMap((teamObject) =>
-      Object.keys(teamObject)
-    );
-
-    await checkFileCasing(log, files, getExpectedCasing, {
-      packageRootDirs,
-      exceptions,
-    });
+    await runFileCasingCheck(log, files);
   }
 }
 
@@ -186,7 +166,9 @@ run(
   async ({ log, flags }) => {
     process.env.IS_KIBANA_PRECOMIT_HOOK = 'true';
 
-    const files = await getFilesForCommit(flags.ref);
+    const files = await getFilesForCommit(flags.ref, {
+      includeUntracked: Boolean(flags['include-untracked']),
+    });
 
     const maxFilesCount = flags['max-files']
       ? Number.parseInt(String(flags['max-files']), 10)
@@ -235,16 +217,18 @@ run(
     Run checks on files that are staged for commit by default
   `,
     flags: {
-      boolean: ['fix', 'stage'],
+      boolean: ['fix', 'stage', 'include-untracked'],
       string: ['max-files', 'ref'],
       default: {
         fix: false,
         stage: true,
+        'include-untracked': false,
       },
       help: `
         --fix              Execute checks with possible fixes
         --max-files        Max files number to check against. If exceeded the script will skip the execution
         --ref              Run checks against any git ref files (example HEAD or <commit_sha>) instead of running against staged ones
+        --include-untracked Include untracked files in addition to diff files
         --no-stage         By default when using --fix the changes are staged, use --no-stage to disable that behavior
       `,
     },

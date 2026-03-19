@@ -27,10 +27,10 @@ export const CustomOptionsAdditionalSettings: React.FC<Props> = ({
   updateState,
 }) => {
   const [useGlobalFilters, setUseGlobalFilters] = useState<boolean>(
-    initialState.useGlobalFilters ?? DEFAULT_USE_GLOBAL_FILTERS
+    initialState.use_global_filters ?? DEFAULT_USE_GLOBAL_FILTERS
   );
   const [ignoreValidations, setIgnoreValidations] = useState<boolean>(
-    initialState.ignoreValidations ?? DEFAULT_IGNORE_VALIDATIONS
+    initialState.ignore_validations ?? DEFAULT_IGNORE_VALIDATIONS
   );
   return (
     <EuiFormRow label={DataControlEditorStrings.manageControl.getAdditionalSettingsTitle()}>
@@ -42,7 +42,7 @@ export const CustomOptionsAdditionalSettings: React.FC<Props> = ({
           onChange={() => {
             const newUseGlobalFilters = !useGlobalFilters;
             setUseGlobalFilters(newUseGlobalFilters);
-            updateState({ useGlobalFilters: newUseGlobalFilters });
+            updateState({ use_global_filters: newUseGlobalFilters });
           }}
           data-test-subj={'dataControl__useGlobalFiltersAdditionalSetting'}
         />
@@ -59,7 +59,7 @@ export const CustomOptionsAdditionalSettings: React.FC<Props> = ({
           onChange={() => {
             const newIgnoreValidations = !ignoreValidations;
             setIgnoreValidations(newIgnoreValidations);
-            updateState({ ignoreValidations: newIgnoreValidations });
+            updateState({ ignore_validations: newIgnoreValidations });
           }}
           data-test-subj={'dataControl__ignoreValidationsAdditionalSetting'}
         />

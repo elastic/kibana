@@ -11,3 +11,6 @@ export * as connectorsSpecs from './src/all_specs';
 export type * from './src/connector_spec';
 
 export * as authTypeSpecs from './src/all_auth_types';
+
+export { getConnectorSpec } from './src/get_connector_spec';
+export { getWorkflowTemplatesForConnector } from './src/get_workflow_templates';

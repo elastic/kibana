@@ -65,7 +65,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     >
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          iconType="copyClipboard"
+          iconType="copy"
           aria-label={labels.copy}
           onClick={handleCopy}
           color="text"

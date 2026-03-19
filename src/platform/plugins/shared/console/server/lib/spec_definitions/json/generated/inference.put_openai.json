@@ -25,6 +25,7 @@
       "_inference/{task_type}/{openai_inference_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-openai",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-inference-put-openai",
     "availability": {
       "stack": true,
       "serverless": true

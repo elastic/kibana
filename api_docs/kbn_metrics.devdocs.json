@@ -208,7 +208,7 @@
                 "tags": [],
                 "label": "res",
                 "description": [
-                  "{@link KibanaResponseFactory }"
+                  "{@link KibanaResponseFactory}"
                 ],
                 "signature": [
                   "KibanaResponseFactory"
@@ -261,7 +261,7 @@
             "tags": [],
             "label": "initMetricsOptions",
             "description": [
-              "{@link InitMetricsOptions }"
+              "{@link InitMetricsOptions}"
             ],
             "signature": [
               {

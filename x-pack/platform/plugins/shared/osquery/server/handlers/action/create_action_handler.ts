@@ -24,6 +24,19 @@ import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_interna
 
 interface Metadata {
   currentUser: string | undefined;
+  userProfileUid: string | undefined;
+}
+
+interface OsqueryActionQuery {
+  action_id?: string;
+  id?: string;
+  query?: string;
+  ecs_mapping?: Record<string, unknown>;
+  version?: string;
+  platform?: string;
+  timeout?: number;
+  agents?: string[];
+  error?: string;
 }
 
 interface CreateActionHandlerOptions {
@@ -95,12 +108,14 @@ export const createActionHandler = async (
     agent_policy_ids: params.agent_policy_ids,
     agents: selectedAgents,
     user_id: metadata?.currentUser,
+    user_profile_uid: metadata?.userProfileUid,
     metadata: params.metadata,
     pack_id: params.pack_id,
     pack_name: packSO?.attributes?.name,
     pack_prebuilt: params.pack_id
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
+    tags: [],
     space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
@@ -132,19 +147,22 @@ export const createActionHandler = async (
         }),
   };
 
+  const actionQueries = osqueryAction.queries as OsqueryActionQuery[];
   const fleetActions = !error
     ? map(
-        filter(osqueryAction.queries, (query) => !query.error),
+        filter(actionQueries, (query) => !query.error),
         (query) => ({
-          action_id: query.action_id,
+          action_id: query.action_id as string,
           '@timestamp': moment().toISOString(),
           expiration: moment().add(5, 'minutes').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'osquery',
-          agents: query.agents,
+          agents: query.agents as string[],
           user_id: metadata?.currentUser,
           ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
-          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']) as {
+            [k: string]: unknown;
+          },
         })
       )
     : [];
@@ -165,7 +183,7 @@ export const createActionHandler = async (
   }
 
   osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'error']),
+    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'user_profile_uid', 'error']),
     agents: osqueryAction.agents.length,
   });
 

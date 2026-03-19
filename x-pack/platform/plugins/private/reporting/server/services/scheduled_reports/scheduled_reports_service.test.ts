@@ -2379,7 +2379,7 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         [savedObjects[0].id],
         mockSchedule,
-        { request: fakeRawRequest }
+        { request: fakeRawRequest, regenerateApiKey: true }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -2466,7 +2466,7 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         [savedObjects[0].id],
         mockSchedule,
-        { request: fakeRawRequest }
+        { request: fakeRawRequest, regenerateApiKey: true }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);

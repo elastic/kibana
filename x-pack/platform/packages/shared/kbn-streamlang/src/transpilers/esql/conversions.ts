@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLAstCommand } from '@kbn/esql-language';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@elastic/esql/types';
+import { BasicPrettyPrinter, Builder } from '@elastic/esql';
 import { conditionToESQLAst } from './condition_to_esql';
 
 import type { ESQLTranspilationOptions } from '.';
@@ -28,7 +28,10 @@ import type {
   LowercaseProcessor,
   TrimProcessor,
   JoinProcessor,
+  SplitProcessor,
+  SortProcessor,
   ConcatProcessor,
+  NetworkDirectionProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import { convertRenameProcessorToESQL } from './processors/rename';
@@ -46,7 +49,10 @@ import { convertRedactProcessorToESQL } from './processors/redact';
 import { convertMathProcessorToESQL } from './processors/math';
 import { createTransformStringESQL } from './transform_string';
 import { convertJoinProcessorToESQL } from './processors/join';
+import { convertSplitProcessorToESQL } from './processors/split';
+import { convertSortProcessorToESQL } from './processors/sort';
 import { convertConcatProcessorToESQL } from './processors/concat';
+import { convertNetworkDirectionProcessorToESQL } from './processors/network_direction';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -104,8 +110,17 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
     case 'join':
       return convertJoinProcessorToESQL(processor as JoinProcessor);
 
+    case 'split':
+      return convertSplitProcessorToESQL(processor as SplitProcessor);
+
+    case 'sort':
+      return convertSortProcessorToESQL(processor as SortProcessor);
+
     case 'concat':
       return convertConcatProcessorToESQL(processor as ConcatProcessor);
+
+    case 'network_direction':
+      return convertNetworkDirectionProcessorToESQL(processor as NetworkDirectionProcessor);
 
     case 'manual_ingest_pipeline':
       return [

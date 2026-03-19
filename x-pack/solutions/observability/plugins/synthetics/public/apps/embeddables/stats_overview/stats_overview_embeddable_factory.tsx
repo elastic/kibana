@@ -8,7 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
-import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddableFactory,
+  HasDrilldowns,
+} from '@kbn/embeddable-plugin/public';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
@@ -21,18 +25,17 @@ import {
   fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
-import type {
-  MonitorFilters,
-  OverviewStatsEmbeddableState,
-} from '../../../../common/embeddables/stats_overview/types';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../common/embeddables/stats_overview/constants';
+import {
+  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+  SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
+} from '../../../../common/embeddables/stats_overview/constants';
+import type { MonitorFilters, OverviewStatsEmbeddableState } from '../../../../common/types';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
@@ -43,15 +46,15 @@ const DEFAULT_FILTERS: MonitorFilters = {
   projects: [],
   tags: [],
   locations: [],
-  monitorIds: [],
-  monitorTypes: [],
+  monitor_ids: [],
+  monitor_types: [],
 };
 
 export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
   HasEditCapabilities &
-  HasDynamicActions &
+  HasDrilldowns &
   HasSupportedTriggers;
 
 export const getStatsOverviewEmbeddableFactory = (
@@ -59,27 +62,32 @@ export const getStatsOverviewEmbeddableFactory = (
 ) => {
   const factory: EmbeddableFactory<OverviewStatsEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
+      // Client code uses REST API shape (snake_case) directly
+      // transformOut handles conversion from legacy camelCase if needed
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(initialState.filters);
+      const filters$ = new BehaviorSubject({
+        ...DEFAULT_FILTERS,
+        ...(initialState?.filters || {}),
+      });
 
-      const { embeddableEnhanced } = pluginStart;
-      const dynamicActionsManager = await embeddableEnhanced?.initializeEmbeddableDynamicActions(
-        uuid,
-        () => titleManager.api.title$.getValue(),
-        initialState
-      );
-      const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
-      function serializeState() {
+      function serializeState(): OverviewStatsEmbeddableState {
         return {
           ...titleManager.getLatestState(),
           filters: filters$.getValue(),
-          ...(dynamicActionsManager?.getLatestState() ?? {}),
+          ...drilldownsManager.getLatestState(),
         };
       }
 
@@ -90,18 +98,18 @@ export const getStatsOverviewEmbeddableFactory = (
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           filters$,
-          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : [])
+          drilldownsManager.anyStateChange$
         ).pipe(map(() => undefined)),
         getComparators: () => ({
           ...titleComparators,
           filters: 'referenceEquality',
-          ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
+          ...drilldownsManager.comparators,
         }),
         defaultState: {
           filters: DEFAULT_FILTERS,
         },
         onReset: (lastSaved) => {
-          dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+          drilldownsManager.reinitializeState(lastSaved ?? {});
           titleManager.reinitializeState(lastSaved);
           filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
         },
@@ -109,9 +117,9 @@ export const getStatsOverviewEmbeddableFactory = (
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...(dynamicActionsManager?.api ?? {}),
+        ...drilldownsManager.api,
         ...unsavedChangesApi,
-        supportedTriggers: () => [],
+        supportedTriggers: () => SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
         defaultTitle$,
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
@@ -153,8 +161,8 @@ export const getStatsOverviewEmbeddableFactory = (
 
           useEffect(() => {
             return () => {
+              drilldownsManager.cleanup();
               fetchSubscription.unsubscribe();
-              maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
           return (

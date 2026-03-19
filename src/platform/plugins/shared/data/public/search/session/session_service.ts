@@ -47,6 +47,7 @@ import type { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
 import type { ISearchSessionEBTManager } from './ebt_manager';
+import { addInProgressSessionId } from './in_progress_session';
 
 /**
  * Polling interval for keeping completed searches alive
@@ -605,6 +606,7 @@ export class SessionService {
       session: searchSessionSavedObject,
       ...trackingProps,
     });
+    addInProgressSessionId(sessionId);
 
     // if we are still interested in this result
     if (this.isCurrentSession(sessionId)) {

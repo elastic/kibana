@@ -163,7 +163,7 @@ function getErrorItem(
   entryWaterfallTransaction?: IWaterfallTransaction
 ): IWaterfallError {
   const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
-  const parent = items.find((waterfallItem) => waterfallItem.id === error.parent?.id) as
+  const parent = items?.find((waterfallItem) => waterfallItem.id === error.parent?.id) as
     | IWaterfallSpanOrTransaction
     | undefined;
 
@@ -387,7 +387,7 @@ const getEntryWaterfallTransaction = (
   entryTransactionId: string,
   waterfallItems: IWaterfallItem[]
 ): IWaterfallTransaction | undefined =>
-  waterfallItems.find(
+  waterfallItems?.find(
     (item) => item.docType === 'transaction' && item.id === entryTransactionId
   ) as IWaterfallTransaction;
 
@@ -431,6 +431,10 @@ function getWaterfallErrors(
   { 'parentId': 2 }
   */
 function getErrorCountByParentId(errorDocs: TraceAPIResponse['traceItems']['errorDocs']) {
+  if (!Array.isArray(errorDocs)) {
+    return {};
+  }
+
   return errorDocs.reduce<Record<string, number>>((acc, doc) => {
     const parentId = doc.parent?.id;
 
@@ -519,7 +523,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     traceItems.spanLinksCountById
   );
 
-  const entryWaterfallTransaction = getEntryWaterfallTransaction(
+  let entryWaterfallTransaction: IWaterfallTransaction | undefined = getEntryWaterfallTransaction(
     entryTransaction.transaction.id,
     waterfallItems
   );
@@ -529,10 +533,14 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     reparentOrphanItems(orphanItemsIds, reparentSpans(waterfallItems), entryWaterfallTransaction)
   );
 
+  const rootWaterfallTransaction = getRootWaterfallTransaction(childrenByParentId);
+
+  if (!entryWaterfallTransaction && rootWaterfallTransaction) {
+    entryWaterfallTransaction = rootWaterfallTransaction;
+  }
+
   const items = getOrderedWaterfallItems(childrenByParentId, entryWaterfallTransaction);
   const errorItems = getWaterfallErrors(traceItems.errorDocs, items, entryWaterfallTransaction);
-
-  const rootWaterfallTransaction = getRootWaterfallTransaction(childrenByParentId);
 
   const duration = getWaterfallDuration(items);
   const { legends, colorBy } = generateLegendsAndAssignColorsToWaterfall(items);

@@ -20,7 +20,7 @@ import { CloudConnectorTabs } from './cloud_connector_tabs';
 import { isCloudConnectorReusableEnabled } from './utils';
 import { CloudConnectorSetup, type CloudConnectorSetupProps } from './cloud_connector_setup';
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
-import { AWS_PROVIDER } from './constants';
+import { AWS_PROVIDER, ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from './constants';
 
 // Mock child components
 jest.mock('./form/new_cloud_connector_form', () => ({
@@ -70,7 +70,6 @@ const mockUpdatePolicyWithExistingCredentials = jest.fn();
 const mockUpdatePolicy = jest.fn();
 
 describe('CloudConnectorSetup', () => {
-  const mockInput = getMockPolicyAWS().inputs[0];
   const mockPackageInfo = getMockPackageInfoAWS();
   const mockPolicy = getMockPolicyAWS();
 
@@ -86,7 +85,6 @@ describe('CloudConnectorSetup', () => {
   } as CloudSetup;
 
   const defaultProps: CloudConnectorSetupProps = {
-    input: mockInput,
     newPolicy: mockPolicy,
     updatePolicy: mockUpdatePolicy,
     packageInfo: mockPackageInfo,
@@ -141,7 +139,6 @@ describe('CloudConnectorSetup', () => {
       setExistingConnectionCredentials: mockSetExistingConnectionCredentials,
       updatePolicyWithNewCredentials: mockUpdatePolicyWithNewCredentials,
       updatePolicyWithExistingCredentials: mockUpdatePolicyWithExistingCredentials,
-      accountTypeFromInputs: undefined,
     });
   };
 
@@ -356,54 +353,36 @@ describe('CloudConnectorSetup', () => {
       );
     });
 
-    it('should call useGetCloudConnectors hook with correct filter options', () => {
+    it('should call useGetCloudConnectors hook with default single account type', () => {
       setupMocks([]);
 
       renderComponent();
 
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AWS_PROVIDER,
-        accountType: undefined,
+        accountType: SINGLE_ACCOUNT,
       });
     });
 
-    it('should call useGetCloudConnectors hook with single-account filter', () => {
-      mockUseGetCloudConnectors.mockReturnValue(createMockQueryResult([]));
-      mockUseCloudConnectorSetup.mockReturnValue({
-        newConnectionCredentials: {},
-        setNewConnectionCredentials: mockSetNewConnectionCredentials,
-        existingConnectionCredentials: {},
-        setExistingConnectionCredentials: mockSetExistingConnectionCredentials,
-        updatePolicyWithNewCredentials: mockUpdatePolicyWithNewCredentials,
-        updatePolicyWithExistingCredentials: mockUpdatePolicyWithExistingCredentials,
-        accountTypeFromInputs: 'single-account',
-      });
+    it('should call useGetCloudConnectors hook with single-account when passed as prop', () => {
+      setupMocks([]);
 
-      renderComponent();
+      renderComponent({ accountType: SINGLE_ACCOUNT });
 
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AWS_PROVIDER,
-        accountType: 'single-account',
+        accountType: SINGLE_ACCOUNT,
       });
     });
 
-    it('should call useGetCloudConnectors hook with organization-account filter', () => {
-      mockUseGetCloudConnectors.mockReturnValue(createMockQueryResult([]));
-      mockUseCloudConnectorSetup.mockReturnValue({
-        newConnectionCredentials: {},
-        setNewConnectionCredentials: mockSetNewConnectionCredentials,
-        existingConnectionCredentials: {},
-        setExistingConnectionCredentials: mockSetExistingConnectionCredentials,
-        updatePolicyWithNewCredentials: mockUpdatePolicyWithNewCredentials,
-        updatePolicyWithExistingCredentials: mockUpdatePolicyWithExistingCredentials,
-        accountTypeFromInputs: 'organization-account',
-      });
+    it('should call useGetCloudConnectors hook with organization-account when passed as prop', () => {
+      setupMocks([]);
 
-      renderComponent();
+      renderComponent({ accountType: ORGANIZATION_ACCOUNT });
 
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AWS_PROVIDER,
-        accountType: 'organization-account',
+        accountType: ORGANIZATION_ACCOUNT,
       });
     });
 
@@ -559,7 +538,7 @@ describe('CloudConnectorSetup', () => {
 
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AZURE_PROVIDER,
-        accountType: undefined,
+        accountType: SINGLE_ACCOUNT,
       });
     });
 
@@ -636,7 +615,7 @@ describe('CloudConnectorSetup', () => {
 
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AWS_PROVIDER,
-        accountType: undefined,
+        accountType: SINGLE_ACCOUNT,
       });
     });
 
@@ -681,6 +660,7 @@ describe('CloudConnectorSetup', () => {
 
       renderComponent({ newPolicy: mockPolicyWithSupport });
 
+      // When supports_cloud_connector is already true, updatePolicy should not be called
       expect(mockUpdatePolicy).not.toHaveBeenCalled();
     });
 

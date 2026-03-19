@@ -7,8 +7,8 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { AttachmentRequest } from '../../../common/types/api';
-import { BulkCreateAttachmentsRequestRt } from '../../../common/types/api';
+import type { AttachmentRequestV2 } from '../../../common/types/api';
+import { BulkCreateAttachmentsRequestRtV2 } from '../../../common/types/api/attachment/v2';
 import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
@@ -16,7 +16,7 @@ import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 
-import { decodeCommentRequest } from '../utils';
+import { decodeCommentRequestV2 } from '../utils';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { BulkCreateArgs } from './types';
@@ -34,11 +34,12 @@ export const bulkCreate = async (
     authorization,
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     services: { userActionService },
   } = clientArgs;
 
   try {
-    decodeWithExcessOrThrow(BulkCreateAttachmentsRequestRt)(attachments);
+    decodeWithExcessOrThrow(BulkCreateAttachmentsRequestRtV2)(attachments);
     await validateMaxUserActions({
       caseId,
       userActionService,
@@ -46,18 +47,23 @@ export const bulkCreate = async (
     });
 
     attachments.forEach((attachment) => {
-      decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
+      decodeCommentRequestV2(
+        attachment,
+        externalReferenceAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry
+      );
       validateRegisteredAttachments({
         query: attachment,
         persistableStateAttachmentTypeRegistry,
         externalReferenceAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
       });
     });
 
     const [attachmentsWithIds, entities]: [
-      Array<{ id: string } & AttachmentRequest>,
+      Array<{ id: string } & AttachmentRequestV2>,
       OwnerEntity[]
-    ] = attachments.reduce<[Array<{ id: string } & AttachmentRequest>, OwnerEntity[]]>(
+    ] = attachments.reduce<[Array<{ id: string } & AttachmentRequestV2>, OwnerEntity[]]>(
       ([a, e], attachment) => {
         const savedObjectID = SavedObjectsUtils.generateId();
         return [

@@ -12,18 +12,18 @@ import {
   type HasParentApi,
   type PublishesSavedObjectId,
   type PublishesUnifiedSearch,
+  apiIsPresentationContainer,
 } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { getEsqlControls } from '@kbn/esql-utils';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverAppLocatorParams } from '../../../common';
-import { type PublishesSavedSearch } from '../types';
+import type { PublishesSavedSearch, PublishesSelectedTabId } from '../types';
 
 export const getDiscoverLocatorParams = (
   api: PublishesSavedSearch &
-    Partial<PublishesSavedObjectId & PublishesUnifiedSearch & HasParentApi>
+    Partial<PublishesSavedObjectId & PublishesSelectedTabId & PublishesUnifiedSearch & HasParentApi>
 ) => {
   const savedSearch = api.savedSearch$.getValue();
   const query = savedSearch?.searchSource.getField('query');
@@ -34,8 +34,12 @@ export const getDiscoverLocatorParams = (
     ? api.parentApi
     : undefined;
 
+  const selectedTabId = api.getSelectedTabId?.();
   const locatorParams: DiscoverAppLocatorParams = savedObjectId
-    ? { savedSearchId: savedObjectId }
+    ? {
+        savedSearchId: savedObjectId,
+        ...(selectedTabId ? { tab: { id: selectedTabId } } : {}),
+      }
     : {
         dataViewId: dataView?.id,
         dataViewSpec: dataView?.toMinimalSpec(),

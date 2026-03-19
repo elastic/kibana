@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { checkTestCodeOwnersCLI } from './check_test_code_owners';
 export { initializeReportDatastream } from './initialize_report_datastream';
 export { uploadEvents } from './upload_events';
 export { updateTestConfigStats } from './update_test_config_stats';

@@ -11,16 +11,25 @@ import React, {
   createContext,
   useContext,
   useState,
+  useEffect,
   useRef,
   useMemo,
   useCallback,
   type PropsWithChildren,
   type RefObject,
+  type MutableRefObject,
 } from 'react';
 
-import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
-import type { TimeRangeBounds, TimeRange, InitialFocus } from './types';
+import type {
+  TimeRangeBounds,
+  TimeRangeBoundsOption,
+  TimeRange,
+  InitialFocus,
+  CalendarOptions,
+  DateRangePickerSettings,
+} from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
 import {
@@ -30,6 +39,9 @@ import {
 } from './format';
 import type { DateRangePickerProps, DateRangePickerOnChangeProps } from './date_range_picker';
 import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
+
+// TODO agree on the final list
+const DEFAULT_PRESETS: TimeRangeBoundsOption[] = [{ start: 'now/d', end: 'now/d', label: 'Today' }];
 
 /** Public context value exposed to consumers via `useDateRangePickerContext`. */
 export interface DateRangePickerContextValue {
@@ -42,9 +54,10 @@ export interface DateRangePickerContextValue {
   /**
    * Apply the current text (or an explicit range) as the selected time range.
    * When called with a `TimeRangeBounds`, sets text to that range; otherwise applies current text.
+   * Pass an optional `textOverride` to control the input value instead of generating it from the bounds.
    * Calls parent `onChange` and exits editing mode.
    */
-  applyRange: (range?: TimeRangeBounds) => void;
+  applyRange: (range?: TimeRangeBounds, textOverride?: string) => void;
 }
 
 /** Internal context value used by sub-components. */
@@ -55,8 +68,12 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   setIsEditing: (value: boolean) => void;
   /** Whether to use EUI compressed form styling. */
   compressed: boolean;
-  /** Maximum width for the picker control, derived from EUI theme. */
-  maxWidth: string;
+  /** Whether the idle-state control hides its text label. */
+  collapsed: boolean;
+  /** Predefined time range options shown in the Presets section. */
+  presets: TimeRangeBoundsOption[];
+  /** Recently used time ranges shown in the Recent section. */
+  recent: TimeRangeBoundsOption[];
   /** Human-readable display text for the current time range (shown when idle). */
   displayText: string;
   /** Full formatted text including absolute dates, used for tooltips. */
@@ -68,7 +85,7 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   /** Ref to the trigger button for focus restoration. */
   buttonRef: RefObject<HTMLButtonElement>;
   /** Ref to the popover panel for click-outside detection. */
-  panelRef: RefObject<HTMLDivElement>;
+  panelRef: MutableRefObject<HTMLElement | null>;
   /** Generated HTML id for the dialog panel, used for ARIA `aria-controls`. */
   panelId: string;
   /** Optional initial focus target for the dialog panel. */
@@ -77,6 +94,32 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   timeRange: TimeRange;
   /** Resolved time window buttons config, or `false` when disabled. */
   timeWindowButtonsConfig: TimeWindowButtonsConfig | false;
+  /** Called when the user wants to save the current input time range as a preset. */
+  onPresetSave?: (option: TimeRangeBoundsOption) => void;
+  /** Called when the user wants to delete a saved preset. */
+  onPresetDelete?: (option: TimeRangeBoundsOption) => void;
+  /**
+   * Called when the editing input text changes.
+   * @beta
+   */
+  onInputChange?: (value: string) => void;
+  /** Horizontal sizing behavior of the picker. */
+  width: NonNullable<DateRangePickerProps['width']>;
+  /** Whether the picker is disabled. */
+  disabled: boolean;
+  /** Whether a loading spinner is shown inside the form control. */
+  isLoading: boolean;
+  /** Calendar-specific options (e.g. first day of week). */
+  calendarOptions?: CalendarOptions;
+  /** Current picker settings (e.g. rounding, refresh). */
+  settings: DateRangePickerSettings;
+  /** Called when the user changes a setting in the settings panel. */
+  onSettingsChange: (settings: DateRangePickerSettings) => void;
+  /**
+   * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
+   * Displayed informally in the panel footer.
+   */
+  timeZone?: string;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -98,24 +141,41 @@ export function useDateRangePickerContext(): DateRangePickerInternalContextValue
  */
 export function DateRangePickerProvider({
   children,
+  value,
   defaultValue,
   onChange,
   dateFormat,
   isInvalid = false,
+  disabled = false,
+  isLoading = false,
   compressed = true,
+  collapsed = false,
   showTimeWindowButtons = false,
+  presets = DEFAULT_PRESETS,
+  recent = [],
+  onPresetSave,
+  onPresetDelete,
+  onInputChange,
+  width = 'auto',
+  calendarOptions,
+  settings = { roundRelativeTime: true },
+  onSettingsChange,
+  timeZone,
 }: PropsWithChildren<DateRangePickerProps>) {
-  const { euiTheme } = useEuiTheme();
-  const maxWidth = euiTheme.components.forms.maxWidth;
-
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
   const panelId = useGeneratedHtmlId({ prefix: 'dateRangePickerPanel' });
   const lastValidText = useRef('');
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [text, setText] = useState<string>(() => defaultValue ?? '');
-  const timeRange: TimeRange = useMemo(() => textToTimeRange(text), [text]);
+  const isEditingRef = useRef(isEditing);
+  isEditingRef.current = isEditing;
+  const [text, setText] = useState<string>(() => value ?? defaultValue ?? '');
+  const timeRange: TimeRange = useMemo(
+    () =>
+      textToTimeRange(text, { presets, dateFormat, roundRelativeTime: settings.roundRelativeTime }),
+    [text, presets, dateFormat, settings]
+  );
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
     [dateFormat, timeRange]
@@ -132,6 +192,12 @@ export function DateRangePickerProvider({
     ? durationToDisplayShortText(duration.startDate, duration.endDate)
     : null;
 
+  useEffect(() => {
+    if (typeof value === 'string' && !isEditingRef.current) {
+      setText(value);
+    }
+  }, [value]);
+
   const timeWindowButtonsConfig: TimeWindowButtonsConfig | false = useMemo(
     () =>
       showTimeWindowButtons === false
@@ -147,22 +213,27 @@ export function DateRangePickerProvider({
       if (editing && text) {
         lastValidText.current = text;
       }
-      if (!editing && lastValidText.current) {
-        setText(lastValidText.current);
+      if (!editing) {
+        if (typeof value === 'string') {
+          setText(value);
+        } else if (lastValidText.current) {
+          setText(lastValidText.current);
+        }
         lastValidText.current = '';
       }
       setIsEditing(editing);
     },
-    [text]
+    [text, value]
   );
 
   /** Apply a range: parse it, call `onChange`, and exit editing mode. */
   const applyRange = useCallback(
-    (range?: TimeRangeBounds) => {
+    (range?: TimeRangeBounds, textOverride?: string) => {
       let rangeToApply: TimeRange;
 
       if (range) {
-        const rangeText = `${range.start} ${DATE_RANGE_INPUT_DELIMITER} ${range.end}`;
+        const rangeText =
+          textOverride ?? `${range.start} ${DATE_RANGE_INPUT_DELIMITER} ${range.end}`;
         rangeToApply = textToTimeRange(rangeText);
         setText(rangeText);
       } else {
@@ -191,7 +262,7 @@ export function DateRangePickerProvider({
       isEditing,
       setIsEditing: setIsEditingWithRestore,
       compressed,
-      maxWidth,
+      collapsed,
       displayText,
       displayFullFormattedText,
       displayShortDuration,
@@ -201,6 +272,18 @@ export function DateRangePickerProvider({
       panelId,
       timeRange,
       timeWindowButtonsConfig,
+      presets,
+      recent,
+      onPresetSave,
+      onPresetDelete,
+      onInputChange,
+      width,
+      disabled,
+      isLoading,
+      calendarOptions,
+      settings,
+      onSettingsChange,
+      timeZone,
     }),
     [
       text,
@@ -209,13 +292,25 @@ export function DateRangePickerProvider({
       isEditing,
       setIsEditingWithRestore,
       compressed,
-      maxWidth,
+      collapsed,
       displayText,
       displayFullFormattedText,
       displayShortDuration,
       panelId,
       timeRange,
       timeWindowButtonsConfig,
+      presets,
+      recent,
+      onPresetSave,
+      onPresetDelete,
+      onInputChange,
+      width,
+      disabled,
+      isLoading,
+      calendarOptions,
+      settings,
+      onSettingsChange,
+      timeZone,
     ]
   );
 

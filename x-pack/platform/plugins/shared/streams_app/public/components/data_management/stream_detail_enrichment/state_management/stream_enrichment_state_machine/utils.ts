@@ -113,7 +113,7 @@ export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefi
       : context.definition.stream.ingest.classic.field_overrides),
   };
 
-  const { detectedSchemaFields } = context.simulatorRef.getSnapshot().context;
+  const { detectedSchemaFields, docOnlyOverrides } = context.simulatorRef.getSnapshot().context;
 
   // Remove unmapped fields from original definition
   const unmappedSchemaFields = getUnmappedSchemaFields(detectedSchemaFields);
@@ -125,10 +125,11 @@ export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefi
 
   const simulationMappedFieldDefinition = convertToFieldDefinition(mappedSchemaFields);
 
-  return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
+  return { ...originalFieldDefinition, ...simulationMappedFieldDefinition, ...docOnlyOverrides };
 }
 
 export const spawnDataSource = <
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
   dataSource: EnrichmentDataSource,

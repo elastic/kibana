@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { synth } from '../../../..';
+import { synth } from '@elastic/esql';
 import { columnsAfter } from './columns_after';
 
 describe('PROMQL columnsAfter', () => {
@@ -58,6 +58,26 @@ describe('PROMQL columnsAfter', () => {
             { name: 'env', type: 'keyword', userDefined: false },
             { name: 'http_requests_total', type: 'double', userDefined: false },
             { name: 'extra_field', type: 'keyword', userDefined: false },
+          ]),
+      }
+    );
+
+    expect(result.map(({ name }) => name)).toEqual(['step', 'col0', 'job']);
+  });
+
+  it('returns step column when buckets param is used', async () => {
+    const result = await columnsAfter(
+      synth.cmd`PROMQL index=metrics buckets=6 col0=(sum by (job) (http_requests_total{env="prod"}))`,
+      [],
+      'PROMQL index=metrics buckets=6 col0=(sum by (job) (http_requests_total{env="prod"})) | KEEP job',
+      {
+        fromFrom: () => Promise.resolve([]),
+        fromJoin: () => Promise.resolve([]),
+        fromEnrich: () => Promise.resolve([]),
+        fromPromql: () =>
+          Promise.resolve([
+            { name: 'job', type: 'keyword', userDefined: false },
+            { name: 'http_requests_total', type: 'double', userDefined: false },
           ]),
       }
     );

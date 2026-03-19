@@ -46,14 +46,6 @@ jest.mock('../../../stream_detail_systems/stream_description/use_stream_descript
 }));
 
 // Mock hooks used by StreamDiscoveryConfiguration
-jest.mock('../../../stream_detail_systems/stream_systems/hooks/use_stream_systems', () => ({
-  useStreamSystems: () => ({
-    systems: [],
-    refreshSystems: jest.fn(),
-    systemsLoading: false,
-  }),
-}));
-
 jest.mock('../../../../hooks/use_stream_features', () => ({
   useStreamFeatures: () => ({
     features: [],
@@ -76,20 +68,6 @@ jest.mock('../../../../hooks/use_stream_features_api', () => ({
 jest.mock('../../../../hooks/use_ai_features', () => ({
   useAIFeatures: () => ({
     genAiConnectors: { selectedConnector: null },
-  }),
-}));
-
-jest.mock('../../../../hooks/use_stream_systems_api', () => ({
-  useStreamSystemsApi: () => ({
-    identifySystems: jest.fn(),
-    getSystemIdentificationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
-    scheduleSystemIdentificationTask: jest.fn(),
-    cancelSystemIdentificationTask: jest.fn(),
-    acknowledgeSystemIdentificationTask: jest.fn(),
-    addSystemsToStream: jest.fn(),
-    removeSystemsFromStream: jest.fn(),
-    upsertSystem: jest.fn(),
-    abort: jest.fn(),
   }),
 }));
 
@@ -137,6 +115,7 @@ jest.mock('../../../../hooks/use_kibana', () => ({
       start: {
         licensing: {
           license$: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             subscribe: (observer: any) => {
               const license = { hasAtLeast: () => true };
               if (typeof observer === 'function') observer(license);
@@ -218,6 +197,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -236,6 +216,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -254,6 +235,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -272,6 +254,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true, available: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -291,6 +274,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: undefined,
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -309,6 +293,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true, available: undefined },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -329,6 +314,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -346,6 +332,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -363,6 +350,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -380,6 +368,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -397,6 +386,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -414,6 +404,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -433,6 +424,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -450,6 +442,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -469,6 +462,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(

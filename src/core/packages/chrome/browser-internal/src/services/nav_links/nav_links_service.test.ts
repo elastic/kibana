@@ -46,7 +46,7 @@ const availableApps: ReadonlyMap<string, App> = new Map([
     {
       id: 'chromelessApp',
       order: 20,
-      title: 'Chromless App',
+      title: 'Chromeless App',
       chromeless: true,
       mount: () => () => undefined,
     },
@@ -110,7 +110,7 @@ describe('NavLinksService', () => {
       ).not.toContain('chromelessApp');
     });
 
-    it('does not include `inaccesible` applications', async () => {
+    it('does not include `inaccessible` applications', async () => {
       expect(
         await lastValueFrom(
           start.getNavLinks$().pipe(

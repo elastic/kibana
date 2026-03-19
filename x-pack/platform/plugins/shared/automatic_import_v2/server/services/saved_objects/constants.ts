@@ -15,6 +15,7 @@ export const TASK_STATUSES = {
   approved: 'approved',
   failed: 'failed',
   cancelled: 'cancelled',
+  deleting: 'deleting',
 } as const;
 
 export const INPUT_TYPES = {

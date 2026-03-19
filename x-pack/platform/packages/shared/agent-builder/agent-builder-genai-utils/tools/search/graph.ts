@@ -6,6 +6,7 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import type { BaseMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
@@ -35,6 +36,7 @@ const StateAnnotation = Annotation.Root({
   customInstructions: Annotation<string | undefined>(),
   /** When true, pattern targets (e.g. logs-*) search all matching indices. When false, a single index is chosen via index explorer. */
   allowPatternTarget: Annotation<boolean>(),
+  timeRange: Annotation<TimeRange>(),
   // inner
   indexIsValid: Annotation<boolean>(),
   searchTarget: Annotation<SearchTarget>(),
@@ -80,6 +82,7 @@ export const createSearchToolGraph = ({
       logger,
       rowLimit: state.rowLimit,
       customInstructions: state.customInstructions,
+      timeRange: state.timeRange,
     });
     return [relevanceTool, nlSearchTool];
   };

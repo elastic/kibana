@@ -27,6 +27,7 @@ import {
   getConfigurationRequest,
   updateCase,
   deleteAllCaseAnalyticsItems,
+  elasticUserProfileId,
 } from '../../../../../common/lib/api';
 import {
   postCaseReq,
@@ -129,7 +130,7 @@ export default ({ getService }: FtrProviderContext): void => {
           created_by: {
             email: null,
             full_name: null,
-            profile_uid: null,
+            profile_uid: elasticUserProfileId,
             username: 'elastic',
           },
           custom_fields: [
@@ -247,6 +248,7 @@ export default ({ getService }: FtrProviderContext): void => {
             email: null,
             full_name: null,
             username: 'elastic',
+            profile_uid: elasticUserProfileId,
           },
           owner: 'securitySolution',
           space_ids: ['default'],

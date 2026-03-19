@@ -6,11 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLAstPromqlCommand } from '../../../types';
+import type { ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
+import { isBinaryExpression, isIdentifier, Walker } from '@elastic/esql';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
-import { isBinaryExpression, isIdentifier } from '../../../ast/is';
-import { Walker } from '../../../ast/walker';
 import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
 import { PromqlParamName } from './utils';
 
@@ -67,11 +66,14 @@ function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedCol
 }
 
 function getStepColumn(command: ESQLAstPromqlCommand): ESQLColumnData | undefined {
-  const hasStep = command.params?.entries?.some(
-    ({ key }) => isIdentifier(key) && key.name.toLowerCase() === PromqlParamName.Step
+  const hasStepOrBuckets = command.params?.entries?.some(
+    ({ key }) =>
+      isIdentifier(key) &&
+      (key.name.toLowerCase() === PromqlParamName.Step ||
+        key.name.toLowerCase() === PromqlParamName.Buckets)
   );
 
-  if (!hasStep) {
+  if (!hasStepOrBuckets) {
     return undefined;
   }
 

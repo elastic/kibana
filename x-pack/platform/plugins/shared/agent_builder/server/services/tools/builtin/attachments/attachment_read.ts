@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { z } from '@kbn/zod/v4';
+import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
@@ -30,7 +30,7 @@ export const createAttachmentReadTool = ({
   attachmentsService,
   formatContext,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentReadSchema> => ({
-  id: platformCoreTools.attachmentRead,
+  id: attachmentTools.read,
   type: ToolType.builtin,
   description:
     'Read the content of a conversation attachment by ID. Use this to retrieve data you previously stored or to check the current state of an attachment.',
@@ -57,7 +57,7 @@ export const createAttachmentReadTool = ({
     let formattedData: unknown = versionData.data;
     if (attachmentsService && formatContext) {
       const definition = attachmentsService.getTypeDefinition(attachment.type);
-      const typeReadonly = definition?.isReadonly ?? true;
+      const typeReadonly = definition?.isReadonly ?? false;
       if (definition && typeReadonly) {
         try {
           const formatted = await definition.format(

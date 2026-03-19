@@ -599,6 +599,34 @@ describe('Agents CRUD test', () => {
         expect(searchMock).toHaveBeenCalledTimes(1);
       });
     });
+
+    describe('kuery replace attributes', () => {
+      beforeEach(() => {
+        searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
+      });
+
+      it('should replace .attributes in kuery', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'agent.attributes.agent.id:agent1',
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.filter[0].bool.should[0].match).toEqual({ 'agent.agent.id': 'agent1' });
+      });
+
+      it('should not replace identifying_attributes in kuery', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'agent.identifying_attributes.agent.id:agent1',
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.filter[0].bool.should[0].match).toEqual({
+          'agent.identifying_attributes.agent.id': 'agent1',
+        });
+      });
+    });
   });
 
   describe('update', () => {

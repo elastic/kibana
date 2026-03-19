@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { getFormattedError } from '../../../util/errors';
 import { ContentPackObjectsList } from './objects_list';
 import { previewContent } from './requests';
 import { ContentPackMetadata } from './manifest';
@@ -188,7 +189,7 @@ export function ExportContentPackFlyout({
                   );
                   onExport();
                 } catch (err) {
-                  notifications.toasts.addError(err, {
+                  notifications.toasts.addError(getFormattedError(err), {
                     title: i18n.translate('xpack.streams.failedToExportContentError', {
                       defaultMessage: 'Failed to export content pack',
                     }),

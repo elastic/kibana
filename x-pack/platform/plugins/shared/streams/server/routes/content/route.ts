@@ -6,7 +6,7 @@
  */
 
 import { Readable } from 'stream';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
 import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
@@ -24,6 +24,7 @@ import {
   scopeContentPackStreams,
   scopeIncludedObjects,
   withoutBaseFields,
+  withoutInheritedFieldMetadata,
 } from '../../lib/content/stream';
 import { asTree } from '../../lib/content/stream/tree';
 
@@ -82,10 +83,13 @@ const exportContentRoute = createServerRoute({
       streams: [root, ...descendants].map((stream) => {
         if (stream.name === params.path.name) {
           // merge non-base inherited mappings into the exported root
-          stream.ingest.wired.fields = withoutBaseFields({
-            ...inheritedFields,
-            ...stream.ingest.wired.fields,
-          });
+          // strip inherited field metadata (from, alias_for) so exports contain clean FieldDefinition
+          stream.ingest.wired.fields = withoutInheritedFieldMetadata(
+            withoutBaseFields({
+              ...inheritedFields,
+              ...stream.ingest.wired.fields,
+            })
+          );
         }
 
         return asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] });

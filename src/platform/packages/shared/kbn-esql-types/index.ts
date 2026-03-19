@@ -11,8 +11,6 @@ export {
   ESQLVariableType,
   EsqlControlType,
   VariableNamePrefix,
-  type ControlWidthOptions,
-  type ESQLControlState,
   type ESQLControlVariable,
   type PublishesESQLVariable,
   type PublishesESQLVariables,
@@ -30,7 +28,12 @@ export {
   type EsqlViewsResult,
 } from './src/sources_autocomplete_types';
 
-export { type RecommendedQuery, type RecommendedField } from './src/extensions_autocomplete_types';
+export {
+  type RecommendedQuery,
+  type RecommendedField,
+  type ESQLRegistrySolutionId,
+  ESQL_CLASSIC_SOLUTION_ID,
+} from './src/extensions_autocomplete_types';
 
 export {
   type InferenceEndpointsAutocompleteResult,
@@ -42,6 +45,7 @@ export {
   SOURCES_AUTOCOMPLETE_ROUTE,
   TIMEFIELD_ROUTE,
   VIEWS_ROUTE,
+  NL_TO_ESQL_ROUTE,
   SOURCES_TYPES,
   LOOKUP_INDEX_CREATE_ROUTE,
   LOOKUP_INDEX_UPDATE_ROUTE,

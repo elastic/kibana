@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { IlmPolicy, IlmPolicyPhases, IngestStreamLifecycleAll } from '@kbn/streams-schema';
 import { IlmField } from './ilm';
 import type { PhaseProps } from './ilm';
 import { getPhaseDescription } from './ilm';
@@ -15,11 +16,11 @@ import { getPhaseDescription } from './ilm';
 describe('getPhaseDescription', () => {
   const colors = { hot: 'hotC', warm: 'warmC', cold: 'coldC', frozen: 'frozenC' };
 
-  const collect = (phases: any) =>
+  const collect = (phases: IlmPolicyPhases) =>
     getPhaseDescription(phases, colors).map((p: PhaseProps) => p.description);
 
   it('returns empty array when no known phases', () => {
-    expect(collect({})).toEqual([]);
+    expect(collect({} as IlmPolicyPhases)).toEqual([]);
   });
 
   it('orders phases from hot->frozen input into original chronological order after reverse logic', () => {
@@ -30,7 +31,7 @@ describe('getPhaseDescription', () => {
         warm: { min_age: '30d' },
         cold: { min_age: '60d' },
         frozen: { min_age: '90d' },
-      } as any,
+      } as unknown as IlmPolicyPhases,
       colors
     );
     // After reverse, first should be hot... last frozen
@@ -46,7 +47,7 @@ describe('getPhaseDescription', () => {
         hot: { min_age: '0d' },
         warm: { min_age: '30d' },
         cold: { min_age: '60d' },
-      } as any,
+      } as unknown as IlmPolicyPhases,
       colors
     );
     // After reverse: hot, warm, cold
@@ -61,7 +62,7 @@ describe('getPhaseDescription', () => {
       {
         delete: { min_age: '180d' },
         hot: { min_age: '0d' },
-      } as any,
+      } as unknown as IlmPolicyPhases,
       colors
     );
     // After reverse only Hot phase in array
@@ -76,7 +77,7 @@ describe('IlmField', () => {
   const policies = [
     { name: 'policyA', phases: { hot: { min_age: '0d' } } },
     { name: 'policyB', phases: { hot: { min_age: '0d' }, warm: { min_age: '30d' } } },
-  ] as any;
+  ] as unknown as IlmPolicy[];
 
   it('loads and displays ILM policies', async () => {
     const getIlmPolicies = jest.fn().mockResolvedValue(policies);
@@ -85,7 +86,7 @@ describe('IlmField', () => {
     renderI18n(
       <IlmField
         getIlmPolicies={getIlmPolicies}
-        initialValue={{} as any}
+        initialValue={{} as unknown as IngestStreamLifecycleAll}
         setLifecycle={setLifecycle}
         setSaveButtonDisabled={setSaveDisabled}
         readOnly={false}
@@ -104,7 +105,7 @@ describe('IlmField', () => {
     renderI18n(
       <IlmField
         getIlmPolicies={getIlmPolicies}
-        initialValue={{ ilm: { policy: 'policyA' } } as any}
+        initialValue={{ ilm: { policy: 'policyA' } } as unknown as IngestStreamLifecycleAll}
         setLifecycle={jest.fn()}
         setSaveButtonDisabled={jest.fn()}
         readOnly
@@ -125,7 +126,7 @@ describe('IlmField', () => {
     renderI18n(
       <IlmField
         getIlmPolicies={getIlmPolicies}
-        initialValue={{} as any}
+        initialValue={{} as unknown as IngestStreamLifecycleAll}
         setLifecycle={setLifecycle}
         setSaveButtonDisabled={setSaveDisabled}
         readOnly={false}

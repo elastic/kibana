@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/data-visualizer-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-visualizer-plugin'
+  title: '@kbn/data-visualizer-plugin'
   description: Moon project for @kbn/data-visualizer-plugin
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/data_visualizer
+  sourceRoot: x-pack/platform/plugins/private/data_visualizer
 dependsOn:
   - '@kbn/aiops-components'
   - '@kbn/charts-plugin'
@@ -84,7 +83,6 @@ dependsOn:
   - '@kbn/unified-field-list'
   - '@kbn/content-management-utils'
   - '@kbn/core-lifecycle-browser'
-  - '@kbn/presentation-containers'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/file-upload-common'
   - '@kbn/charts-theme'
@@ -92,6 +90,7 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/presentation-util'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod
@@ -108,14 +107,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

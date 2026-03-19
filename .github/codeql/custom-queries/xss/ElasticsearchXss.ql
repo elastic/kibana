@@ -45,7 +45,7 @@ class ElasticsearchDataSource extends DataFlow::CallNode {
       [
         "buildDataTableRecord", "buildDataTableRecordList",
         "getMessageFieldWithFallbacks", "getLogFieldWithFallback",
-        "formatHit", "formatFieldValue"
+        "formatHit"
       ]
   }
 

@@ -123,6 +123,7 @@ export const ERROR_EXC_TYPE = 'error.exception.type';
 export const ERROR_PAGE_URL = 'error.page.url';
 export const ERROR_STACK_TRACE = 'error.stack_trace';
 export const ERROR_TYPE = 'error.type';
+export const ERROR_CODE = 'error.code';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
@@ -164,6 +165,7 @@ export const CONTAINER_IMAGE = 'container.image.name';
 
 export const KUBERNETES = 'kubernetes';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
+export const KUBERNETES_POD_NAME_OTEL = 'k8s.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
 export const KUBERNETES_NODE_NAME = 'kubernetes.node.name';

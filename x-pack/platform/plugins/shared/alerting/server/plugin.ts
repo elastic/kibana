@@ -53,7 +53,6 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
-
 import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -115,6 +114,7 @@ import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
+import { UiamApiKeyProvisioningTask } from './provisioning';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -249,6 +249,7 @@ export class AlertingPlugin {
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
+  private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -413,6 +414,12 @@ export class AlertingPlugin {
       plugins.taskManager,
       this.config
     );
+
+    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
+      logger: this.logger,
+      isServerless: this.isServerless,
+    });
+    this.uiamApiKeyProvisioningTask.register({ core, taskManager: plugins.taskManager });
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,
@@ -601,6 +608,8 @@ export class AlertingPlugin {
     } = this;
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
+    const shouldGrantUiam = this.getShouldGrantUiam(core);
+
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: [
         RULE_SAVED_OBJECT_TYPE,
@@ -654,6 +663,9 @@ export class AlertingPlugin {
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
       securityService: core.security,
+      shouldGrantUiam,
+      isServerless: this.isServerless,
+      featureFlags: core.featureFlags,
     });
 
     rulesSettingsClientFactory.initialize({
@@ -735,6 +747,7 @@ export class AlertingPlugin {
       getEventLogClient: (request: KibanaRequest) => plugins.eventLog.getClient(request),
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
+      shouldGrantUiam,
     });
 
     this.eventLogService!.registerSavedObjectProvider(
@@ -765,6 +778,10 @@ export class AlertingPlugin {
       () => {}
     ); // it shouldn't reject, but just in case
 
+    this.uiamApiKeyProvisioningTask
+      ?.start({ core, taskManager: plugins.taskManager })
+      .catch(() => {});
+
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
       getType: ruleTypeRegistry!.get.bind(this.ruleTypeRegistry),
@@ -776,6 +793,10 @@ export class AlertingPlugin {
       getFrameworkHealth: async () =>
         await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
     };
+  }
+
+  private getShouldGrantUiam(core: CoreStart): boolean {
+    return !!core.security.authc.apiKeys.uiam;
   }
 
   private createRouteHandlerContext = (
@@ -817,6 +838,7 @@ export class AlertingPlugin {
     if (this.licenseState) {
       this.licenseState.clean();
     }
+    this.uiamApiKeyProvisioningTask?.stop();
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }

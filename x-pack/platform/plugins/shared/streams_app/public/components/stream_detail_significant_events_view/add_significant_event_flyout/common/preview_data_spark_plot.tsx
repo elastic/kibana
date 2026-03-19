@@ -16,12 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  buildEsqlQuery,
-  getIndexPatternsForStream,
-  type StreamQueryKql,
-  type Streams,
-} from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -45,7 +40,7 @@ export function PreviewDataSparkPlot({
   timeRange,
 }: {
   definition: Streams.all.Definition;
-  query: StreamQueryKql;
+  query: StreamQuery;
   isQueryValid: boolean;
   showTitle?: boolean;
   compressed?: boolean;
@@ -60,8 +55,7 @@ export function PreviewDataSparkPlot({
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
-    feature: query.feature,
-    kqlQuery: query.kql.query,
+    esqlQuery: query.esql.query,
     timeRange: timeRange ?? timeState.asAbsoluteTimeRange,
     isQueryValid,
     noOfBuckets,
@@ -89,16 +83,18 @@ export function PreviewDataSparkPlot({
   } = useKibana();
   const useUrl = share.url.locators.useUrl;
 
+  const discoverEsqlQuery = query.esql.query;
+
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
     () => ({
       id: DISCOVER_APP_LOCATOR,
       params: {
         query: {
-          esql: isQueryValid ? buildEsqlQuery(getIndexPatternsForStream(definition), query) : '',
+          esql: discoverEsqlQuery,
         },
       },
     }),
-    [definition, query, isQueryValid]
+    [discoverEsqlQuery]
   );
 
   function renderContent() {
@@ -124,12 +120,12 @@ export function PreviewDataSparkPlot({
 
     if (previewFetch.error) {
       if (compressed) {
-        return <EuiIcon type="cross" color="danger" size="l" />;
+        return <EuiIcon type="cross" color="danger" size="l" aria-hidden={true} />;
       }
 
       return (
         <>
-          <EuiIcon type="cross" color="danger" size="xl" />
+          <EuiIcon type="cross" color="danger" size="xl" aria-hidden={true} />
           <EuiText size="s" textAlign="center">
             {i18n.translate(
               'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartError',
@@ -144,7 +140,9 @@ export function PreviewDataSparkPlot({
 
     if (noOccurrencesFound) {
       if (compressed) {
-        return <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" />;
+        return (
+          <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" aria-hidden={true} />
+        );
       }
 
       return (

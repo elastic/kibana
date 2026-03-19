@@ -149,7 +149,7 @@ export interface ESQLCallbacks {
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
   /** Enables the "Browse indices" suggestion and command integration. */
-  isResourceBrowserEnabled?: () => Promise<boolean>;
+  canSuggestResourceBrowser?: () => Promise<boolean>;
   getKqlSuggestions?: (
     kqlQuery: string,
     cursorPositionInKql: number

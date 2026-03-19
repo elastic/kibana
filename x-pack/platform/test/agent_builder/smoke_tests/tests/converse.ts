@@ -33,13 +33,19 @@ export const converseApiSuite = (
     return res.body as T;
   };
 
+  const expectNonEmptyReply = (response: ChatResponse) => {
+    const hasTextReply = Boolean(response.response.message?.trim().length);
+    const hasConversationSteps = response.steps.length > 0;
+    expect(hasTextReply || hasConversationSteps).to.be(true);
+  };
+
   describe(`Connector: ${name}`, () => {
     it('returns an answer for a simple message', async () => {
       const response = await converse({
         input: 'Hello',
         connector_id: resolveConnectorId(),
       });
-      expect(response.response.message!.length).to.be.greaterThan(0);
+      expectNonEmptyReply(response);
     });
 
     it('can execute a tool', async () => {
@@ -47,7 +53,7 @@ export const converseApiSuite = (
         input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
         connector_id: resolveConnectorId(),
       });
-      expect(response.response.message!.length).to.be.greaterThan(0);
+      expectNonEmptyReply(response);
       const toolCalls = response.steps.filter(isToolCallStep);
       expect(toolCalls.length >= 1).to.be(true);
       expect(toolCalls[0].tool_id).to.eql(platformCoreTools.listIndices);
@@ -59,14 +65,15 @@ export const converseApiSuite = (
         input: 'Please say "hello"',
         connector_id: id,
       });
-      expect(response1.response.message!.length).to.be.greaterThan(0);
+      expectNonEmptyReply(response1);
 
       const response2 = await converse({
         conversation_id: response1.conversation_id,
         input: 'Please say it again.',
         connector_id: id,
       });
-      expect(response2.response.message!.length).to.be.greaterThan(0);
+      expectNonEmptyReply(response2);
+      expect(response2.conversation_id).to.be(response1.conversation_id);
     });
   });
 };

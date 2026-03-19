@@ -26,7 +26,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { VisParams } from '@kbn/visualizations-common';
-import type { DrilldownsState } from '@kbn/embeddable-plugin/server';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import type { HasVisualizeConfig } from './interfaces/has_visualize_config';
 import type { Vis, VisSavedObject } from '../types';
@@ -44,7 +44,7 @@ export type ExtraSavedObjectProperties = Pick<
 
 export type VisualizeRuntimeState = SerializedTitles &
   SerializedTimeRange &
-  DrilldownsState & {
+  SerializedDrilldowns & {
     serializedVis: SerializedVis<VisParams>;
     savedObjectId?: string;
     savedObjectProperties?: ExtraSavedObjectProperties;

@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
-import { entityRiskScoreTool } from './entity_risk_score_tool';
+import { entityRiskScoreTool, getEntityTool, searchEntitiesTool } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
@@ -29,4 +29,6 @@ export const registerTools = async (
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
+  agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
 };

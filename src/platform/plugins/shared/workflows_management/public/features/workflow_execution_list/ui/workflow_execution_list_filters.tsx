@@ -43,6 +43,7 @@ interface ExecutionListFiltersProps {
     executedBy: string[];
   }) => void;
   availableExecutedByOptions?: string[];
+  showExecutor?: boolean;
 }
 
 interface ExecutionListFiltersItem {
@@ -55,6 +56,7 @@ export function ExecutionListFilters({
   filters,
   onFiltersChange,
   availableExecutedByOptions = [],
+  showExecutor = false,
 }: ExecutionListFiltersProps) {
   const styles = useMemoCss(componentStyles);
 
@@ -132,12 +134,13 @@ export function ExecutionListFilters({
     onFiltersChange({
       statuses: [],
       executionTypes: [],
-      executedBy: [],
+      executedBy: showExecutor ? [] : filters.executedBy,
     });
   };
 
   const numActiveFilters =
-    items.filter((item) => item.checked === 'on').length + filters.executedBy.length;
+    items.filter((item) => item.checked === 'on').length +
+    (showExecutor ? filters.executedBy.length : 0);
 
   return (
     <EuiFilterGroup compressed css={styles.filterGroup}>
@@ -164,7 +167,7 @@ export function ExecutionListFilters({
             )}
             css={styles.filterButtonStyle}
           >
-            <EuiIcon type="filter" />
+            <EuiIcon type="filter" aria-hidden={true} />
           </EuiFilterButton>
         }
         panelPaddingSize="none"
@@ -207,39 +210,50 @@ export function ExecutionListFilters({
         >
           {(list) => list}
         </EuiSelectable>
-        <div css={styles.comboBoxContainer}>
-          <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued">
-            <strong>
-              {i18n.translate('workflows.workflowExecutionList.filterIconButton.executedByLabel', {
-                defaultMessage: 'Executed by',
-              })}
-            </strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiComboBox
-            placeholder={i18n.translate(
-              'workflows.workflowExecutionList.filterIconButton.executedByPlaceholder',
-              {
-                defaultMessage: 'Filter by username',
-              }
-            )}
-            options={availableExecutedByOptions.map((user) => ({ label: user }))}
-            selectedOptions={filters.executedBy.map((user) => ({ label: user }))}
-            onChange={handleExecutedByChange}
-            onCreateOption={(searchValue) => {
-              const newOption = { label: searchValue };
-              handleExecutedByChange([
-                ...filters.executedBy.map((user) => ({ label: user })),
-                newOption,
-              ]);
-            }}
-            isClearable={true}
-            compressed
-            fullWidth
-          />
-          <EuiSpacer size="s" />
-        </div>
+        {showExecutor && (
+          <div css={styles.comboBoxContainer}>
+            <EuiSpacer size="s" />
+            <EuiText size="xs" color="subdued">
+              <strong>
+                {i18n.translate(
+                  'workflows.workflowExecutionList.filterIconButton.executedByLabel',
+                  {
+                    defaultMessage: 'Executed by',
+                  }
+                )}
+              </strong>
+            </EuiText>
+            <EuiSpacer size="xs" />
+            <EuiComboBox
+              aria-label={i18n.translate(
+                'workflows.workflowExecutionList.filterIconButton.executedByAriaLabel',
+                {
+                  defaultMessage: 'Filter by executor',
+                }
+              )}
+              placeholder={i18n.translate(
+                'workflows.workflowExecutionList.filterIconButton.executedByPlaceholder',
+                {
+                  defaultMessage: 'Filter by username',
+                }
+              )}
+              options={availableExecutedByOptions.map((user) => ({ label: user }))}
+              selectedOptions={filters.executedBy.map((user) => ({ label: user }))}
+              onChange={handleExecutedByChange}
+              onCreateOption={(searchValue) => {
+                const newOption = { label: searchValue };
+                handleExecutedByChange([
+                  ...filters.executedBy.map((user) => ({ label: user })),
+                  newOption,
+                ]);
+              }}
+              isClearable={true}
+              compressed
+              fullWidth
+            />
+            <EuiSpacer size="s" />
+          </div>
+        )}
       </EuiPopover>
     </EuiFilterGroup>
   );

@@ -29,6 +29,17 @@ export const SAVE_INTEGRATION_SUCCESS = i18n.translate(
   }
 );
 
+export const SAVE_PIPELINE_SUCCESS = i18n.translate(
+  'xpack.automaticImportV2.savePipeline.success',
+  {
+    defaultMessage: 'Pipeline saved successfully',
+  }
+);
+
+export const SAVE_PIPELINE_ERROR = i18n.translate('xpack.automaticImportV2.savePipeline.error', {
+  defaultMessage: 'Failed to save pipeline',
+});
+
 export const SAVE_INTEGRATION_SUCCESS_DESCRIPTION = (integrationId: string) =>
   i18n.translate('xpack.automaticImportV2.saveIntegration.successDescription', {
     defaultMessage: 'Integration {integrationId} is now being processed.',
@@ -80,5 +91,19 @@ export const DELETE_DATA_STREAM_ERROR = i18n.translate(
   'xpack.automaticImportV2.hooks.deleteDataStream.error',
   {
     defaultMessage: 'Failed to delete data stream',
+  }
+);
+
+export const REANALYZE_DATA_STREAM_SUCCESS = i18n.translate(
+  'xpack.automaticImportV2.hooks.reanalyzeDataStream.success',
+  {
+    defaultMessage: 'Data stream analysis restarted',
+  }
+);
+
+export const REANALYZE_DATA_STREAM_ERROR = i18n.translate(
+  'xpack.automaticImportV2.hooks.reanalyzeDataStream.error',
+  {
+    defaultMessage: 'Failed to restart data stream analysis',
   }
 );
