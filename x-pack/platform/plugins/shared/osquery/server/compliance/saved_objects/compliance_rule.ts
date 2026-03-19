@@ -17,13 +17,18 @@ export const complianceRuleType: SavedObjectsType = {
     dynamic: false,
     properties: {
       rule_id: { type: 'keyword' },
-      name: { type: 'text' },
+      name: { type: 'text', fields: { keyword: { type: 'keyword' } } },
       description: { type: 'text' },
       query: { type: 'text' },
       remediation: { type: 'text' },
-      benchmark_id: { type: 'keyword' },
-      benchmark_name: { type: 'text' },
-      benchmark_version: { type: 'keyword' },
+      benchmark: {
+        properties: {
+          id: { type: 'keyword' },
+          name: { type: 'text', fields: { keyword: { type: 'keyword' } } },
+          version: { type: 'keyword' },
+          posture_type: { type: 'keyword' },
+        },
+      },
       rule_number: { type: 'keyword' },
       section: { type: 'keyword' },
       level: { type: 'integer' },

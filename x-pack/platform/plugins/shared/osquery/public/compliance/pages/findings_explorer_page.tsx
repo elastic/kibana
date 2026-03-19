@@ -7,220 +7,284 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  EuiPageHeader,
-  EuiSpacer,
-  EuiBasicTable,
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
   EuiSuperSelect,
-  EuiLoadingSpinner,
+  EuiBasicTable,
+  EuiPanel,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
   EuiDescriptionList,
-  EuiCodeBlock,
+  EuiHealth,
+  EuiBadge,
+  EuiSpacer,
+  EuiCallOut,
   EuiText,
-  type EuiBasicTableColumn,
+  EuiButtonGroup,
 } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiSuperSelectOption, Criteria } from '@elastic/eui';
 import { useComplianceFindings, useBenchmarks } from '../hooks';
+import type { ComplianceFinding } from '../../../common/compliance';
 
-const ResultBadge: React.FC<{ value: string }> = ({ value }) => {
-  const colorMap: Record<string, string> = {
-    passed: 'success',
-    failed: 'danger',
-    not_applicable: 'default',
-  };
+type FindingRow = ComplianceFinding & { id: string };
 
-  return <EuiBadge color={colorMap[value] ?? 'default'}>{value}</EuiBadge>;
+const EVALUATION_COLORS: Record<string, string> = {
+  passed: 'success',
+  failed: 'danger',
+  not_applicable: 'subdued',
 };
 
-const DateCell: React.FC<{ value: string }> = ({ value }) => (
-  <>{value ? new Date(value).toLocaleString() : '—'}</>
-);
+const ALL_OPTION = '__all__';
 
-const BENCHMARK_ALL = '';
-const EVAL_ALL = '';
+const ResultBadge: React.FC<{ evaluation: string }> = React.memo(({ evaluation }) => (
+  <EuiHealth color={EVALUATION_COLORS[evaluation] ?? 'subdued'}>
+    {evaluation.replace('_', ' ')}
+  </EuiHealth>
+));
+ResultBadge.displayName = 'ResultBadge';
 
-const EVAL_OPTIONS = [
-  { value: EVAL_ALL, inputDisplay: 'All results' },
+const LevelBadge: React.FC<{ level: number }> = React.memo(({ level }) => (
+  <EuiBadge color={level === 1 ? 'primary' : 'warning'}>L{level}</EuiBadge>
+));
+LevelBadge.displayName = 'LevelBadge';
+
+const EVALUATION_OPTIONS: Array<EuiSuperSelectOption<string>> = [
+  { value: ALL_OPTION, inputDisplay: 'All results' },
   { value: 'passed', inputDisplay: 'Passed' },
   { value: 'failed', inputDisplay: 'Failed' },
   { value: 'not_applicable', inputDisplay: 'N/A' },
 ];
 
-const COLUMNS: Array<EuiBasicTableColumn<any>> = [
-  { field: 'rule.benchmark.rule_number', name: 'Rule #', width: '80px', sortable: true },
-  { field: 'rule.name', name: 'Rule Name', truncateText: true },
-  { field: 'host.name', name: 'Host', truncateText: true },
+const GROUP_BUTTONS = [
+  { id: 'flat', label: 'Flat' },
+  { id: 'rule', label: 'By Rule' },
+  { id: 'host', label: 'By Host' },
+];
+
+const FLAT_COLUMNS: Array<EuiBasicTableColumn<FindingRow>> = [
   {
     field: 'result.evaluation',
     name: 'Result',
-    width: '120px',
-    render: (val: string) => <ResultBadge value={val} />,
+    width: '100px',
+    render: (_: unknown, item: FindingRow) => <ResultBadge evaluation={item.result.evaluation} />,
   },
-  { field: 'rule.section', name: 'Section' },
+  { field: 'rule.name', name: 'Rule', truncateText: true },
+  { field: 'rule.section', name: 'Section', width: '120px' },
+  {
+    field: 'rule.level',
+    name: 'Level',
+    width: '60px',
+    render: (_: unknown, item: FindingRow) => <LevelBadge level={item.rule.level} />,
+  },
+  { field: 'host.name', name: 'Host', truncateText: true },
+  { field: 'host.os.name', name: 'OS' },
   {
     field: '@timestamp',
-    name: 'Evaluated',
-    render: (val: string) => <DateCell value={val} />,
+    name: 'Time',
+    render: (ts: string) => new Date(ts).toLocaleString(),
+    width: '180px',
   },
 ];
 
+const BENCHMARK_SELECT_CSS = { minWidth: 200 };
+const EVAL_SELECT_CSS = { minWidth: 150 };
+
 export const FindingsExplorerPage: React.FC = () => {
-  const [benchmarkId, setBenchmarkId] = useState<string>(BENCHMARK_ALL);
-  const [evaluation, setEvaluation] = useState<string>(EVAL_ALL);
-  const [search, setSearch] = useState<string>('');
-  const [page, setPage] = useState(1);
-  const [selectedFinding, setSelectedFinding] = useState<any>(null);
+  const { data: benchmarkData } = useBenchmarks();
+  const [selectedBenchmark, setSelectedBenchmark] = useState(ALL_OPTION);
+  const [evaluation, setEvaluation] = useState(ALL_OPTION);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const [groupBy, setGroupBy] = useState('flat');
+  const [flyoutFinding, setFlyoutFinding] = useState<FindingRow | null>(null);
 
-  const { data: benchmarksData } = useBenchmarks();
-  const benchmarks = useMemo(() => benchmarksData?.benchmarks ?? [], [benchmarksData?.benchmarks]);
+  const benchmarks = useMemo(() => benchmarkData?.benchmarks ?? [], [benchmarkData]);
 
-  const params = useMemo(() => {
-    const p: Record<string, unknown> = { page, per_page: 25 };
-    if (benchmarkId) p.benchmark_id = benchmarkId;
-    if (evaluation) p.evaluation = evaluation;
+  const benchmarkOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
+    const opts: Array<EuiSuperSelectOption<string>> = [
+      { value: ALL_OPTION, inputDisplay: 'All benchmarks' },
+    ];
+    for (const bm of benchmarks) {
+      opts.push({ value: bm.id, inputDisplay: bm.name });
+    }
 
-    return p;
-  }, [benchmarkId, evaluation, page]);
+    return opts;
+  }, [benchmarks]);
 
-  const { data, isLoading } = useComplianceFindings(params);
-  const findings = data?.findings ?? [];
+  const queryParams = useMemo(() => {
+    const params: Record<string, unknown> = { page: page + 1, per_page: 25 };
+    if (selectedBenchmark !== ALL_OPTION) params.benchmark_id = selectedBenchmark;
+    if (evaluation !== ALL_OPTION) params.evaluation = evaluation;
+    if (groupBy !== 'flat') params.group_by = groupBy;
 
-  const benchmarkOptions = useMemo(
-    () => [
-      { value: BENCHMARK_ALL, inputDisplay: 'All benchmarks' },
-      ...benchmarks.map((b: any) => ({ value: b.id, inputDisplay: b.name })),
-    ],
-    [benchmarks]
-  );
+    return params;
+  }, [selectedBenchmark, evaluation, page, groupBy]);
+
+  const { data, isLoading, error } = useComplianceFindings(queryParams);
 
   const pagination = useMemo(
     () => ({
-      pageIndex: page - 1,
+      pageIndex: page,
       pageSize: 25,
       totalItemCount: data?.total ?? 0,
+      showPerPageOptions: false,
     }),
     [page, data?.total]
   );
 
-  const handlePageChange = useCallback(({ page: p }: { page?: { index: number } }) => {
-    if (p) setPage(p.index + 1);
-  }, []);
-
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value),
+  const handlePageChange = useCallback(
+    (criteria: Criteria<FindingRow>) => setPage(criteria.page?.index ?? 0),
     []
   );
 
-  const closeFlyout = useCallback(() => setSelectedFinding(null), []);
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setPage(0);
+  }, []);
+
+  const handleBenchmarkChange = useCallback((value: string) => {
+    setSelectedBenchmark(value);
+    setPage(0);
+  }, []);
+
+  const handleEvaluationChange = useCallback((value: string) => {
+    setEvaluation(value);
+    setPage(0);
+  }, []);
+
+  const handleGroupChange = useCallback((id: string) => {
+    setGroupBy(id);
+    setPage(0);
+  }, []);
+
+  const closeFlyout = useCallback(() => setFlyoutFinding(null), []);
+
+  const rowProps = useCallback(
+    (item: FindingRow) => ({
+      onClick: () => setFlyoutFinding(item),
+      style: { cursor: 'pointer' as const },
+    }),
+    []
+  );
 
   const flyoutDescriptionItems = useMemo(() => {
-    if (!selectedFinding) return [];
-    const resultColor = selectedFinding.result?.evaluation === 'passed' ? 'success' : 'danger';
+    if (!flyoutFinding) return [];
 
     return [
+      { title: 'Result', description: flyoutFinding.result.evaluation },
+      { title: 'Rule ID', description: flyoutFinding.rule.id },
+      { title: 'Rule Name', description: flyoutFinding.rule.name },
+      { title: 'Description', description: flyoutFinding.rule.description },
+      { title: 'Section', description: flyoutFinding.rule.section },
+      { title: 'Level', description: String(flyoutFinding.rule.level) },
+      { title: 'Host', description: flyoutFinding.host.name },
+      { title: 'Host ID', description: flyoutFinding.host.id },
       {
-        title: 'Result',
-        description: <EuiBadge color={resultColor}>{selectedFinding.result?.evaluation}</EuiBadge>,
+        title: 'OS',
+        description: `${flyoutFinding.host.os.name} ${flyoutFinding.host.os.version}`,
       },
       {
         title: 'Benchmark',
-        description: `${selectedFinding.rule?.benchmark?.name} ${selectedFinding.rule?.benchmark?.version}`,
+        description: `${flyoutFinding.rule.benchmark.name} v${flyoutFinding.rule.benchmark.version}`,
       },
-      { title: 'Rule Number', description: selectedFinding.rule?.benchmark?.rule_number ?? '—' },
-      { title: 'Section', description: selectedFinding.rule?.section ?? '—' },
+      { title: 'Remediation', description: flyoutFinding.rule.remediation },
       {
-        title: 'Host',
-        description: `${selectedFinding.host?.name} (${selectedFinding.host?.os?.name} ${selectedFinding.host?.os?.version})`,
+        title: 'Evidence',
+        description: flyoutFinding.result.evidence
+          ? JSON.stringify(flyoutFinding.result.evidence, null, 2)
+          : 'None',
       },
     ];
-  }, [selectedFinding]);
+  }, [flyoutFinding]);
+
+  if (error) {
+    return (
+      <EuiCallOut title="Failed to load findings" color="danger" iconType="error">
+        <p>{String(error)}</p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <>
-      <EuiPageHeader
-        pageTitle="Findings"
-        description="Explore compliance check results across your fleet"
-      />
-      <EuiSpacer size="m" />
+      <EuiTitle size="l">
+        <h1>Compliance Findings</h1>
+      </EuiTitle>
+      <EuiText color="subdued" size="s">
+        <p>Explore individual compliance check results across managed endpoints</p>
+      </EuiText>
 
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={2}>
-          <EuiFieldSearch
-            placeholder="Search findings..."
-            value={search}
-            onChange={handleSearchChange}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false} css={BENCHMARK_SELECT_CSS}>
           <EuiSuperSelect
             options={benchmarkOptions}
-            valueOfSelected={benchmarkId}
-            onChange={setBenchmarkId}
+            valueOfSelected={selectedBenchmark}
+            onChange={handleBenchmarkChange}
+            compressed
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={EVAL_SELECT_CSS}>
+          <EuiSuperSelect
+            options={EVALUATION_OPTIONS}
+            valueOfSelected={evaluation}
+            onChange={handleEvaluationChange}
             compressed
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiSuperSelect
-            options={EVAL_OPTIONS}
-            valueOfSelected={evaluation}
-            onChange={setEvaluation}
+          <EuiFieldSearch
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Search findings..."
             compressed
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend="Group by"
+            options={GROUP_BUTTONS}
+            idSelected={groupBy}
+            onChange={handleGroupChange}
+            buttonSize="compressed"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
-      {isLoading ? (
-        <EuiLoadingSpinner size="xl" />
-      ) : (
-        <EuiBasicTable
-          items={findings}
-          columns={COLUMNS}
+      <EuiPanel hasBorder>
+        <EuiBasicTable<FindingRow>
+          items={(data?.findings ?? []) as FindingRow[]}
+          columns={FLAT_COLUMNS}
+          loading={isLoading}
           pagination={pagination}
           onChange={handlePageChange}
+          rowProps={rowProps}
+          itemId="id"
         />
-      )}
+      </EuiPanel>
 
-      {selectedFinding && (
+      {flyoutFinding && (
         <EuiFlyout onClose={closeFlyout} size="m">
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2>{selectedFinding.rule?.name}</h2>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <ResultBadge evaluation={flyoutFinding.result.evaluation} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="m">
+                  <h2>{flyoutFinding.rule.name}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiDescriptionList listItems={flyoutDescriptionItems} />
-            <EuiSpacer />
-            <EuiTitle size="xs">
-              <h4>Description</h4>
-            </EuiTitle>
-            <EuiText size="s">
-              <p>{selectedFinding.rule?.description}</p>
-            </EuiText>
-            <EuiSpacer />
-            <EuiTitle size="xs">
-              <h4>Remediation</h4>
-            </EuiTitle>
-            <EuiText size="s">
-              <p>{selectedFinding.rule?.remediation}</p>
-            </EuiText>
-            {selectedFinding.result?.evidence && (
-              <>
-                <EuiSpacer />
-                <EuiTitle size="xs">
-                  <h4>Evidence</h4>
-                </EuiTitle>
-                <EuiCodeBlock language="json" fontSize="s" paddingSize="m">
-                  {JSON.stringify(selectedFinding.result.evidence, null, 2)}
-                </EuiCodeBlock>
-              </>
-            )}
+            <EuiDescriptionList type="column" listItems={flyoutDescriptionItems} />
           </EuiFlyoutBody>
         </EuiFlyout>
       )}

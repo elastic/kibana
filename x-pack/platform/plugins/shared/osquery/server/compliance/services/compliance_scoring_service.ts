@@ -34,7 +34,6 @@ export const computeAndWriteScores = async (
       query: {
         bool: {
           must_not: mustNot,
-          filter: [{ terms: { 'result.evaluation': ['passed', 'failed'] } }],
         },
       },
       aggs: {
@@ -45,6 +44,7 @@ export const computeAndWriteScores = async (
             benchmark_version: { terms: { field: 'rule.benchmark.version', size: 1 } },
             passed: { filter: { term: { 'result.evaluation': 'passed' } } },
             failed: { filter: { term: { 'result.evaluation': 'failed' } } },
+            not_applicable: { filter: { term: { 'result.evaluation': 'not_applicable' } } },
             hosts: { cardinality: { field: 'host.id' } },
           },
         },
@@ -58,6 +58,7 @@ export const computeAndWriteScores = async (
     for (const bucket of benchmarkBuckets) {
       const passed = bucket.passed?.doc_count ?? 0;
       const failed = bucket.failed?.doc_count ?? 0;
+      const notApplicable = bucket.not_applicable?.doc_count ?? 0;
       const score = calculatePostureScore(passed, failed);
       const benchmarkName = bucket.benchmark_name?.buckets?.[0]?.key ?? bucket.key;
       const benchmarkVersion = bucket.benchmark_version?.buckets?.[0]?.key ?? 'v1.0.0';
@@ -65,10 +66,10 @@ export const computeAndWriteScores = async (
       scoreDocs.push({
         '@timestamp': now,
         score,
-        total_findings: passed + failed,
+        total_findings: passed + failed + notApplicable,
         passed_findings: passed,
         failed_findings: failed,
-        not_applicable_findings: 0,
+        not_applicable_findings: notApplicable,
         rule: {
           benchmark: { id: bucket.key, name: benchmarkName, version: benchmarkVersion },
         },
@@ -106,12 +107,12 @@ export const getDashboardStats = async (
       bool: {
         must: [{ term: { 'rule.benchmark.id': benchmarkId } }],
         must_not: mutedFilters,
-        filter: [{ terms: { 'result.evaluation': ['passed', 'failed'] } }],
       },
     },
     aggs: {
       passed: { filter: { term: { 'result.evaluation': 'passed' } } },
       failed: { filter: { term: { 'result.evaluation': 'failed' } } },
+      not_applicable: { filter: { term: { 'result.evaluation': 'not_applicable' } } },
       hosts: { cardinality: { field: 'host.id' } },
       sections: {
         terms: { field: 'rule.section', size: 20 },
@@ -151,6 +152,7 @@ export const getDashboardStats = async (
   const aggs = response.aggregations as any;
   const passed = aggs?.passed?.doc_count ?? 0;
   const failed = aggs?.failed?.doc_count ?? 0;
+  const notApplicable = aggs?.not_applicable?.doc_count ?? 0;
 
   const sections: ComplianceSectionScore[] = (aggs?.sections?.buckets ?? [])
     .map((b: any) => ({
@@ -178,10 +180,11 @@ export const getDashboardStats = async (
 
   return {
     score: calculatePostureScore(passed, failed),
-    total_findings: passed + failed,
+    posture_score: calculatePostureScore(passed, failed),
+    total_findings: passed + failed + notApplicable,
     passed_findings: passed,
     failed_findings: failed,
-    not_applicable_findings: 0,
+    not_applicable_findings: notApplicable,
     host_count: aggs?.hosts?.value ?? 0,
     sections,
     worst_hosts: worstHosts,

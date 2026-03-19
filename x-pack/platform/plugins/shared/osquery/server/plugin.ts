@@ -53,6 +53,7 @@ import { initializeComplianceIndices } from './compliance/create_indices';
 import { installPrebuiltRules } from './compliance/services/install_prebuilt_rules';
 import { computeAndWriteScores } from './compliance/services/compliance_scoring_service';
 import { getMutedRulesState } from './compliance/services/compliance_rules_service';
+import { FindingEvaluatorService } from './compliance/services/finding_evaluator_service';
 import { COMPLIANCE_SCORE_AGGREGATION_TASK_TYPE } from '../common/compliance';
 
 const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
@@ -67,6 +68,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private licenseSubscription: Subscription | null = null;
   private createActionService: ReturnType<typeof createActionService> | null = null;
   private config: ConfigType | null = null;
+  private findingEvaluator: FindingEvaluatorService | null = null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
@@ -218,8 +220,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         }
 
         if (this.config?.experimentalFeatures.endpointComplianceMonitoring) {
-          await initializeComplianceIndices(esClient, this.logger);
+          await initializeComplianceIndices(esClient, this.logger, plugins.dataViews);
           await installPrebuiltRules(client, this.logger);
+
+          this.findingEvaluator = new FindingEvaluatorService(esClient, client, this.logger);
+          this.findingEvaluator.start();
 
           plugins.taskManager
             ?.ensureScheduled({
@@ -312,6 +317,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.osqueryAppContextService.stop();
     this.licenseSubscription?.unsubscribe();
     this.createActionService?.stop();
+    this.findingEvaluator?.stop();
   }
 
   async initialize(core: CoreStart, dataViewsService: DataViewsService): Promise<void> {

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { findingsMapping } from './findings_mapping';
 import { scoresMapping } from './scores_mapping';
 import {
@@ -14,17 +15,22 @@ import {
   COMPLIANCE_ILM_POLICY_FINDINGS,
   COMPLIANCE_ILM_POLICY_SCORES,
   COMPLIANCE_FINDINGS_LATEST_INDEX,
-  COMPLIANCE_FINDINGS_INDEX,
+  COMPLIANCE_FINDINGS_DATA_VIEW_ID,
+  COMPLIANCE_SCORES_DATA_VIEW_ID,
 } from '../../../common/compliance';
 
 export const initializeComplianceIndices = async (
   esClient: ElasticsearchClient,
-  logger: Logger
+  logger: Logger,
+  dataViewsService?: DataViewsServerPluginStart
 ): Promise<void> => {
   try {
     await createIlmPolicies(esClient, logger);
     await createIndexTemplates(esClient, logger);
     await createFindingsTransform(esClient, logger);
+    if (dataViewsService) {
+      await createDataViews(dataViewsService, esClient, logger);
+    }
   } catch (error) {
     logger.error(`Failed to initialize compliance indices: ${error.message}`);
   }
@@ -100,7 +106,7 @@ const createFindingsTransform = async (esClient: ElasticsearchClient, logger: Lo
 
     await esClient.transform.putTransform({
       transform_id: transformId,
-      source: { index: [`${COMPLIANCE_FINDINGS_INDEX}-*`] },
+      source: { index: [COMPLIANCE_FINDINGS_INDEX_PATTERN] },
       dest: { index: COMPLIANCE_FINDINGS_LATEST_INDEX },
       latest: {
         unique_key: ['rule.id', 'host.id'],
@@ -113,5 +119,44 @@ const createFindingsTransform = async (esClient: ElasticsearchClient, logger: Lo
     logger.debug('Compliance findings transform created and started');
   } catch (error) {
     logger.warn(`Failed to create findings transform: ${error.message}`);
+  }
+};
+
+const createDataViews = async (
+  dataViewsService: DataViewsServerPluginStart,
+  esClient: ElasticsearchClient,
+  logger: Logger
+) => {
+  const dataViews = [
+    {
+      id: COMPLIANCE_FINDINGS_DATA_VIEW_ID,
+      title: COMPLIANCE_FINDINGS_INDEX_PATTERN,
+      name: 'Endpoint Compliance Findings',
+      timeFieldName: '@timestamp',
+    },
+    {
+      id: COMPLIANCE_SCORES_DATA_VIEW_ID,
+      title: COMPLIANCE_SCORES_INDEX_PATTERN,
+      name: 'Endpoint Compliance Scores',
+      timeFieldName: '@timestamp',
+    },
+  ];
+
+  for (const dv of dataViews) {
+    try {
+      const svc = await dataViewsService.dataViewsServiceFactory(
+        undefined as any,
+        esClient,
+        undefined,
+        true
+      );
+      const existing = await svc.find(dv.title).catch(() => []);
+      if (existing.length === 0) {
+        await svc.createAndSave({ ...dv });
+        logger.debug(`Created data view: ${dv.name}`);
+      }
+    } catch (error) {
+      logger.warn(`Failed to create data view ${dv.name}: ${error.message}`);
+    }
   }
 };

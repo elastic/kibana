@@ -5,182 +5,295 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
-  EuiPageHeader,
-  EuiSpacer,
-  EuiBasicTable,
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiFieldSearch,
   EuiSuperSelect,
-  EuiLoadingSpinner,
+  EuiBasicTable,
+  EuiPanel,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
   EuiDescriptionList,
-  EuiCodeBlock,
+  EuiHealth,
+  EuiBadge,
+  EuiSwitch,
+  EuiIcon,
+  EuiSpacer,
+  EuiButton,
+  EuiCallOut,
   EuiText,
-  type EuiBasicTableColumn,
-  type CriteriaWithPagination,
+  EuiToolTip,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { useComplianceRules, useBenchmarks, useBulkAction } from '../hooks';
+import type {
+  EuiBasicTableColumn,
+  EuiSuperSelectOption,
+  EuiTableSelectionType,
+  Criteria,
+} from '@elastic/eui';
+import { useBenchmarks, useComplianceRules, useBulkAction } from '../hooks';
+import type { ComplianceRuleMetadata } from '../../../common/compliance';
 
-const EMPTY_BENCHMARK = '';
+type RuleRow = ComplianceRuleMetadata & { id: string };
+
+const PLATFORM_ICONS: Record<string, string> = {
+  darwin: 'logoApple',
+  windows: 'logoWindows',
+  linux: 'logoLinux',
+};
+
+const ALL_BENCHMARKS_OPTION = '__all__';
+const BENCHMARK_SELECT_CSS = { minWidth: 220 };
+
+const PlatformCell: React.FC<{ platform: string }> = React.memo(({ platform }) => (
+  <EuiToolTip content={platform}>
+    <EuiIcon type={PLATFORM_ICONS[platform] ?? 'compute'} size="l" />
+  </EuiToolTip>
+));
+PlatformCell.displayName = 'PlatformCell';
+
+const LevelBadge: React.FC<{ level: number }> = React.memo(({ level }) => (
+  <EuiBadge color={level === 1 ? 'primary' : 'warning'}>L{level}</EuiBadge>
+));
+LevelBadge.displayName = 'LevelBadge';
+
+const EnabledCell: React.FC<{ enabled: boolean }> = React.memo(({ enabled }) => (
+  <EuiHealth color={enabled ? 'success' : 'subdued'}>{enabled ? 'Enabled' : 'Disabled'}</EuiHealth>
+));
+EnabledCell.displayName = 'EnabledCell';
+
+const PrebuiltBadge: React.FC<{ prebuilt: boolean }> = React.memo(({ prebuilt }) =>
+  prebuilt ? <EuiBadge color="hollow">Prebuilt</EuiBadge> : <EuiBadge>Custom</EuiBadge>
+);
+PrebuiltBadge.displayName = 'PrebuiltBadge';
+
+const FrameworksBadges: React.FC<{ frameworks: ComplianceRuleMetadata['frameworks'] }> = React.memo(
+  ({ frameworks }) => (
+    <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+      {(frameworks ?? []).slice(0, 3).map((fw) => (
+        <EuiFlexItem grow={false} key={`${fw.id}-${fw.control}`}>
+          <EuiBadge color="hollow">
+            {fw.id} {fw.control}
+          </EuiBadge>
+        </EuiFlexItem>
+      ))}
+      {(frameworks ?? []).length > 3 && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge>+{frameworks!.length - 3}</EuiBadge>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  )
+);
+FrameworksBadges.displayName = 'FrameworksBadges';
+
+const COLUMNS: Array<EuiBasicTableColumn<RuleRow>> = [
+  { field: 'rule_number', name: '#', width: '60px', sortable: true },
+  { field: 'name', name: 'Rule Name', truncateText: true, sortable: true },
+  {
+    field: 'platform',
+    name: 'OS',
+    width: '50px',
+    render: (_: unknown, item: RuleRow) => <PlatformCell platform={item.platform} />,
+  },
+  {
+    field: 'level',
+    name: 'Level',
+    width: '60px',
+    render: (_: unknown, item: RuleRow) => <LevelBadge level={item.level} />,
+  },
+  { field: 'section', name: 'Section', truncateText: true, sortable: true },
+  {
+    field: 'frameworks',
+    name: 'Frameworks',
+    render: (_: unknown, item: RuleRow) => <FrameworksBadges frameworks={item.frameworks} />,
+  },
+  {
+    field: 'enabled',
+    name: 'Status',
+    width: '100px',
+    render: (_: unknown, item: RuleRow) => <EnabledCell enabled={item.enabled} />,
+  },
+  {
+    field: 'prebuilt',
+    name: 'Source',
+    width: '90px',
+    render: (_: unknown, item: RuleRow) => <PrebuiltBadge prebuilt={item.prebuilt} />,
+  },
+];
 
 export const RulesManagementPage: React.FC = () => {
-  const [benchmarkId, setBenchmarkId] = useState<string>(EMPTY_BENCHMARK);
-  const [page, setPage] = useState(1);
-  const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
-  const [selectedRule, setSelectedRule] = useState<any>(null);
+  const { data: benchmarkData, isLoading: benchmarksLoading } = useBenchmarks();
+  const [selectedBenchmark, setSelectedBenchmark] = useState(ALL_BENCHMARKS_OPTION);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const [selectedRules, setSelectedRules] = useState<RuleRow[]>([]);
+  const [flyoutRule, setFlyoutRule] = useState<RuleRow | null>(null);
 
-  const { data: benchmarksData } = useBenchmarks();
+  const benchmarks = useMemo(() => benchmarkData?.benchmarks ?? [], [benchmarkData]);
 
-  const benchmarks = useMemo(() => benchmarksData?.benchmarks ?? [], [benchmarksData?.benchmarks]);
+  const benchmarkOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
+    const opts: Array<EuiSuperSelectOption<string>> = [
+      { value: ALL_BENCHMARKS_OPTION, inputDisplay: 'All benchmarks' },
+    ];
+    for (const bm of benchmarks) {
+      opts.push({ value: bm.id, inputDisplay: bm.name });
+    }
 
-  const params = useMemo<Record<string, unknown>>(() => {
-    const p: Record<string, unknown> = { page, per_page: 25 };
-    if (benchmarkId) p.benchmark_id = benchmarkId;
+    return opts;
+  }, [benchmarks]);
 
-    return p;
-  }, [page, benchmarkId]);
+  const queryParams = useMemo(() => {
+    const params: Record<string, unknown> = { page: page + 1, per_page: 25 };
+    if (selectedBenchmark !== ALL_BENCHMARKS_OPTION) params.benchmark_id = selectedBenchmark;
+    if (search) params.search = search;
 
-  const { data, isLoading, refetch } = useComplianceRules(params);
-  const rules = data?.rules ?? [];
+    return params;
+  }, [selectedBenchmark, search, page]);
+
+  const { data, isLoading, error } = useComplianceRules(queryParams);
   const bulkAction = useBulkAction();
 
-  const handleBulkEnable = useCallback(async () => {
-    if (selectedRuleIds.length === 0) return;
-    await bulkAction('enable', selectedRuleIds);
-    setSelectedRuleIds([]);
-    refetch();
-  }, [selectedRuleIds, bulkAction, refetch]);
-
-  const handleBulkDisable = useCallback(async () => {
-    if (selectedRuleIds.length === 0) return;
-    await bulkAction('disable', selectedRuleIds);
-    setSelectedRuleIds([]);
-    refetch();
-  }, [selectedRuleIds, bulkAction, refetch]);
-
-  const handleBulkMute = useCallback(async () => {
-    if (selectedRuleIds.length === 0) return;
-    await bulkAction('mute', selectedRuleIds);
-    setSelectedRuleIds([]);
-    refetch();
-  }, [selectedRuleIds, bulkAction, refetch]);
-
-  const handleBulkUnmute = useCallback(async () => {
-    if (selectedRuleIds.length === 0) return;
-    await bulkAction('unmute', selectedRuleIds);
-    setSelectedRuleIds([]);
-    refetch();
-  }, [selectedRuleIds, bulkAction, refetch]);
-
-  const closeFlyout = useCallback(() => setSelectedRule(null), []);
-  const handleSelectionChange = useCallback(
-    (items: any[]) => setSelectedRuleIds(items.map((i) => i.id)),
-    []
-  );
-
-  const columns = useMemo<Array<EuiBasicTableColumn<any>>>(
-    () => [
-      { field: 'rule_number', name: 'Rule #', width: '80px', sortable: true },
-      {
-        field: 'name',
-        name: 'Name',
-        truncateText: true,
-      },
-      { field: 'section', name: 'Section' },
-      {
-        field: 'level',
-        name: 'Level',
-        width: '70px',
-      },
-      {
-        field: 'platform',
-        name: 'Platform',
-        width: '90px',
-      },
-      {
-        field: 'enabled',
-        name: 'Enabled',
-        width: '80px',
-      },
-      {
-        field: 'frameworks',
-        name: 'NIST Controls',
-      },
-    ],
-    []
-  );
-
-  const benchmarkOptions = useMemo(
-    () => [
-      { value: EMPTY_BENCHMARK, inputDisplay: 'All benchmarks' },
-      ...benchmarks.map((b: any) => ({ value: b.id, inputDisplay: b.name })),
-    ],
-    [benchmarks]
-  );
-
-  const selection = useMemo(
-    () => ({
-      onSelectionChange: handleSelectionChange,
-      selectable: () => true as const,
-    }),
-    [handleSelectionChange]
-  );
+  const rules = useMemo(() => data?.rules ?? [], [data?.rules]);
 
   const pagination = useMemo(
     () => ({
-      pageIndex: page - 1,
+      pageIndex: page,
       pageSize: 25,
       totalItemCount: data?.total ?? 0,
+      showPerPageOptions: false,
     }),
     [page, data?.total]
   );
 
-  const handlePageChange = useCallback(({ page: p }: CriteriaWithPagination<any>) => {
-    if (p) setPage(p.index + 1);
+  const handlePageChange = useCallback((criteria: Criteria<RuleRow>) => {
+    setPage(criteria.page?.index ?? 0);
   }, []);
 
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setPage(0);
+  }, []);
+
+  const handleBenchmarkChange = useCallback((value: string) => {
+    setSelectedBenchmark(value);
+    setPage(0);
+  }, []);
+
+  const handleSelectionChange = useCallback(
+    (selection: RuleRow[]) => setSelectedRules(selection),
+    []
+  );
+
+  const handleBulk = useCallback(
+    (action: string) => {
+      if (selectedRules.length === 0) return;
+      bulkAction.mutate({ action, ruleIds: selectedRules.map((r) => r.id) });
+      setSelectedRules([]);
+    },
+    [selectedRules, bulkAction]
+  );
+
+  const handleBulkEnable = useCallback(() => handleBulk('enable'), [handleBulk]);
+  const handleBulkDisable = useCallback(() => handleBulk('disable'), [handleBulk]);
+  const handleBulkMute = useCallback(() => handleBulk('mute'), [handleBulk]);
+  const handleBulkUnmute = useCallback(() => handleBulk('unmute'), [handleBulk]);
+
+  const closeFlyout = useCallback(() => setFlyoutRule(null), []);
+
+  const selection = useMemo<EuiTableSelectionType<RuleRow>>(
+    () => ({ onSelectionChange: handleSelectionChange }),
+    [handleSelectionChange]
+  );
+
+  const rowProps = useCallback(
+    (item: RuleRow) => ({
+      onClick: () => setFlyoutRule(item),
+      style: { cursor: 'pointer' as const },
+    }),
+    []
+  );
+
+  const noOp = useCallback(() => {}, []);
+
   const flyoutDescriptionItems = useMemo(() => {
-    if (!selectedRule) return [];
+    if (!flyoutRule) return [];
 
     return [
+      { title: 'Rule ID', description: flyoutRule.rule_id },
       {
         title: 'Benchmark',
-        description: `${selectedRule.benchmark?.name} ${selectedRule.benchmark?.version}`,
+        description: `${flyoutRule.benchmark.name} v${flyoutRule.benchmark.version}`,
       },
-      { title: 'Rule Number', description: selectedRule.rule_number },
-      { title: 'Section', description: selectedRule.section },
-      { title: 'Level', description: `Level ${selectedRule.level}` },
-      { title: 'Platform', description: selectedRule.platform },
-      { title: 'Resource Type', description: selectedRule.resource_type ?? '—' },
+      { title: 'Section', description: flyoutRule.section },
+      { title: 'Level', description: String(flyoutRule.level) },
+      { title: 'Platform', description: flyoutRule.platform },
+      { title: 'Interval', description: `${flyoutRule.interval}s` },
+      { title: 'Query', description: flyoutRule.query },
+      { title: 'Remediation', description: flyoutRule.remediation },
+      {
+        title: 'Frameworks',
+        description:
+          (flyoutRule.frameworks ?? [])
+            .map((f) => `${f.id} ${f.version} ${f.control}`)
+            .join(', ') || 'None',
+      },
     ];
-  }, [selectedRule]);
+  }, [flyoutRule]);
+
+  if (error) {
+    return (
+      <EuiCallOut title="Failed to load rules" color="danger" iconType="error">
+        <p>{String(error)}</p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <>
-      <EuiPageHeader
-        pageTitle="Compliance Rules"
-        description="Manage CIS benchmark rules and framework mappings"
-      />
-      <EuiSpacer size="m" />
+      <EuiTitle size="l">
+        <h1>Compliance Rules</h1>
+      </EuiTitle>
+      <EuiText color="subdued" size="s">
+        <p>Manage endpoint compliance rules and benchmarks</p>
+      </EuiText>
 
-      <EuiFlexGroup gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false}>
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem grow={false} css={BENCHMARK_SELECT_CSS}>
           <EuiSuperSelect
             options={benchmarkOptions}
-            valueOfSelected={benchmarkId}
-            onChange={setBenchmarkId}
+            valueOfSelected={selectedBenchmark}
+            onChange={handleBenchmarkChange}
+            isLoading={benchmarksLoading}
             compressed
           />
         </EuiFlexItem>
-        {selectedRuleIds.length > 0 && (
-          <>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Search rules..."
+            compressed
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      {selectedRules.length > 0 && (
+        <>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>{selectedRules.length}</strong> rules selected
+              </EuiText>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton size="s" onClick={handleBulkEnable}>
                 Enable
@@ -192,82 +305,52 @@ export const RulesManagementPage: React.FC = () => {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={handleBulkMute}>
+              <EuiButtonEmpty size="s" onClick={handleBulkMute}>
                 Mute
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={handleBulkUnmute}>
+              <EuiButtonEmpty size="s" onClick={handleBulkUnmute}>
                 Unmute
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
-          </>
-        )}
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-
-      {isLoading ? (
-        <EuiLoadingSpinner size="xl" />
-      ) : (
-        <EuiBasicTable
-          items={rules}
-          itemId="id"
-          columns={columns}
-          isSelectable
-          selection={selection}
-          pagination={pagination}
-          onChange={handlePageChange}
-        />
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
       )}
 
-      {selectedRule && (
+      <EuiPanel hasBorder>
+        <EuiBasicTable<RuleRow>
+          items={rules}
+          columns={COLUMNS}
+          loading={isLoading}
+          pagination={pagination}
+          onChange={handlePageChange}
+          selection={selection}
+          rowProps={rowProps}
+          itemId="id"
+        />
+      </EuiPanel>
+
+      {flyoutRule && (
         <EuiFlyout onClose={closeFlyout} size="m">
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2>{selectedRule.name}</h2>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={PLATFORM_ICONS[flyoutRule.platform] ?? 'compute'} size="l" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="m">
+                  <h2>{flyoutRule.name}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch label="Enabled" checked={flyoutRule.enabled} disabled onChange={noOp} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiDescriptionList listItems={flyoutDescriptionItems} />
-            <EuiSpacer />
-            <EuiTitle size="xs">
-              <h4>Description</h4>
-            </EuiTitle>
-            <EuiText size="s">
-              <p>{selectedRule.description}</p>
-            </EuiText>
-            <EuiSpacer />
-            <EuiTitle size="xs">
-              <h4>Osquery SQL</h4>
-            </EuiTitle>
-            <EuiCodeBlock language="sql" fontSize="s" paddingSize="m" isCopyable>
-              {selectedRule.query}
-            </EuiCodeBlock>
-            <EuiSpacer />
-            <EuiTitle size="xs">
-              <h4>Remediation</h4>
-            </EuiTitle>
-            <EuiText size="s">
-              <p>{selectedRule.remediation}</p>
-            </EuiText>
-            {selectedRule.frameworks?.length > 0 && (
-              <>
-                <EuiSpacer />
-                <EuiTitle size="xs">
-                  <h4>Framework Mappings</h4>
-                </EuiTitle>
-                <EuiFlexGroup gutterSize="xs" wrap>
-                  {selectedRule.frameworks.map((f: any) => (
-                    <EuiFlexItem grow={false} key={f.control}>
-                      <EuiBadge>
-                        {f.id} {f.version}: {f.control}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-              </>
-            )}
+            <EuiDescriptionList type="column" listItems={flyoutDescriptionItems} />
           </EuiFlyoutBody>
         </EuiFlyout>
       )}

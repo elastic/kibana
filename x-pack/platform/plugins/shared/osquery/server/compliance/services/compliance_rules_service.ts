@@ -35,7 +35,7 @@ export const findComplianceRules = async (
   const filterParts: string[] = [];
   if (filters.benchmarkId) {
     filterParts.push(
-      `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark_id: "${filters.benchmarkId}"`
+      `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.id: "${filters.benchmarkId}"`
     );
   }
 
@@ -190,31 +190,43 @@ export const listBenchmarks = async (
 ): Promise<ComplianceBenchmarkInfo[]> => {
   const allRules = await soClient.find<ComplianceRuleMetadata>({
     type: COMPLIANCE_RULE_SO_TYPE,
-    perPage: 1000,
+    perPage: 0,
+    aggs: {
+      benchmarks: {
+        terms: { field: `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.id`, size: 50 },
+        aggs: {
+          benchmark_name: {
+            terms: {
+              field: `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.name.keyword`,
+              size: 1,
+            },
+          },
+          benchmark_version: {
+            terms: { field: `${COMPLIANCE_RULE_SO_TYPE}.attributes.benchmark.version`, size: 1 },
+          },
+          platforms: {
+            terms: { field: `${COMPLIANCE_RULE_SO_TYPE}.attributes.platform`, size: 10 },
+          },
+          levels: {
+            terms: { field: `${COMPLIANCE_RULE_SO_TYPE}.attributes.level`, size: 5 },
+          },
+          enabled_count: {
+            filter: { term: { [`${COMPLIANCE_RULE_SO_TYPE}.attributes.enabled`]: true } },
+          },
+        },
+      },
+    },
   });
 
-  const benchmarkMap = new Map<string, ComplianceBenchmarkInfo>();
+  const aggBuckets = (allRules.aggregations?.benchmarks as any)?.buckets ?? [];
 
-  for (const so of allRules.saved_objects) {
-    const { benchmark, platform, level, enabled } = so.attributes;
-    const existing = benchmarkMap.get(benchmark.id);
-    if (existing) {
-      existing.total_rules++;
-      if (enabled) existing.enabled_rules++;
-      if (!existing.platforms.includes(platform)) existing.platforms.push(platform);
-      if (!existing.levels.includes(level)) existing.levels.push(level);
-    } else {
-      benchmarkMap.set(benchmark.id, {
-        id: benchmark.id,
-        name: benchmark.name,
-        version: benchmark.version,
-        total_rules: 1,
-        enabled_rules: enabled ? 1 : 0,
-        platforms: [platform],
-        levels: [level],
-      });
-    }
-  }
-
-  return Array.from(benchmarkMap.values());
+  return aggBuckets.map((bucket: any) => ({
+    id: bucket.key,
+    name: bucket.benchmark_name?.buckets?.[0]?.key ?? bucket.key,
+    version: bucket.benchmark_version?.buckets?.[0]?.key ?? 'v1.0.0',
+    total_rules: bucket.doc_count,
+    enabled_rules: bucket.enabled_count?.doc_count ?? 0,
+    platforms: (bucket.platforms?.buckets ?? []).map((p: any) => p.key),
+    levels: (bucket.levels?.buckets ?? []).map((l: any) => l.key),
+  }));
 };

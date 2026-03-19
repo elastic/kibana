@@ -5,48 +5,67 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
+  ComplianceRuleMetadata,
+  ComplianceBenchmarkInfo,
+  ComplianceDashboardStats,
+  ComplianceFinding,
+} from '../../../common/compliance';
 
 const API_BASE = '/api/endpoint_compliance';
+const QUERY_KEY = 'endpointCompliance';
 
-const useFetch = <T>(path: string, params?: Record<string, unknown>) => {
+const useFetch = <T>(path: string, params?: Record<string, unknown>, enabled = true) => {
   const { http } = useKibana().services;
 
   return useQuery<T>({
-    queryKey: ['endpointCompliance', path, params],
-    queryFn: async () => {
-      const response = await http!.get<T>(path, { query: params as Record<string, string> });
-
-      return response;
-    },
+    queryKey: [QUERY_KEY, path, params],
+    queryFn: () => http!.get<T>(path, { query: params as Record<string, string>, version: '1' }),
+    enabled,
   });
 };
 
-export const useBenchmarks = () => useFetch<{ benchmarks: any[] }>(`${API_BASE}/benchmarks`);
+export const useBenchmarks = () =>
+  useFetch<{ benchmarks: ComplianceBenchmarkInfo[] }>(`${API_BASE}/benchmarks`);
 
 export const useComplianceRules = (params?: Record<string, unknown>) =>
-  useFetch<{ total: number; rules: any[] }>(`${API_BASE}/rules/_find`, params);
+  useFetch<{
+    total: number;
+    page: number;
+    per_page: number;
+    rules: Array<ComplianceRuleMetadata & { id: string }>;
+  }>(`${API_BASE}/rules/_find`, params);
 
-export const useComplianceRule = (id: string) => useFetch<any>(`${API_BASE}/rules/${id}`);
+export const useComplianceRule = (id: string) =>
+  useFetch<ComplianceRuleMetadata & { id: string }>(`${API_BASE}/rules/${id}`, undefined, !!id);
 
 export const useDashboardStats = (benchmarkId: string, timeRange?: string) =>
-  useFetch<any>(
+  useFetch<ComplianceDashboardStats & { trend: Array<{ timestamp: string; score: number }> }>(
     `${API_BASE}/stats/${benchmarkId}`,
-    timeRange ? { time_range: timeRange } : undefined
+    timeRange ? { time_range: timeRange } : undefined,
+    !!benchmarkId
   );
 
 export const useComplianceFindings = (params?: Record<string, unknown>) =>
-  useFetch<{ total: number; findings: any[] }>(`${API_BASE}/findings`, params);
+  useFetch<{ total: number; findings: Array<ComplianceFinding & { id: string }> }>(
+    `${API_BASE}/findings`,
+    params
+  );
 
 export const useBulkAction = () => {
   const { http } = useKibana().services;
+  const queryClient = useQueryClient();
 
-  return async (action: string, ruleIds: string[]) => {
-    const response = await http!.post(`${API_BASE}/rules/_bulk_action`, {
-      body: JSON.stringify({ action, rule_ids: ruleIds }),
-    });
-
-    return response;
-  };
+  return useMutation({
+    mutationFn: ({ action, ruleIds }: { action: string; ruleIds: string[] }) =>
+      http!.post(`${API_BASE}/rules/_bulk_action`, {
+        body: JSON.stringify({ action, rule_ids: ruleIds }),
+        version: '1',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+    },
+  });
 };

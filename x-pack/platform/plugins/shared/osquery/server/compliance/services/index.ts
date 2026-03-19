@@ -23,3 +23,10 @@ export {
   findComplianceFindings,
 } from './compliance_scoring_service';
 export { generateDetectionRuleTemplate, generateBulkDetectionRules } from './detection_rule_bridge';
+export { FindingEvaluatorService } from './finding_evaluator_service';
+export {
+  buildCompliancePack,
+  deployCompliancePack,
+  listDeployableAgentPolicies,
+} from './pack_deployment_service';
+export { runComplianceCheck } from './compliance_response_action';
