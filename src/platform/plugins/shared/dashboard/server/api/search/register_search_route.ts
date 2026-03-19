@@ -17,7 +17,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const searchRoute = router.get({
     path: `${basePath}`,
-    summary: `List dashboards`,
+    summary: `Search dashboards`,
     ...routeConfig,
   });
 
