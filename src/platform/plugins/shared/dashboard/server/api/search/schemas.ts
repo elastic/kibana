@@ -27,7 +27,7 @@ export const searchRequestParamsSchema = schema.object({
       },
     })
   ),
-  search: schema.maybe(
+  query: schema.maybe(
     schema.string({
       meta: {
         description:

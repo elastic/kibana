@@ -208,7 +208,7 @@ export const useDashboardListingTable = ({
 
       return findService
         .search({
-          search: searchTerm,
+          query: searchTerm,
           per_page: listingLimit,
           tags: (references ?? []).map(({ id }) => id),
           excluded_tags: (referencesToExclude ?? []).map(({ id }) => id),

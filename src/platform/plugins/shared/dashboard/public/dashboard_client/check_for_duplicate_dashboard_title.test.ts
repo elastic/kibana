@@ -43,7 +43,7 @@ describe('checkForDuplicateDashboardTitle', () => {
       isTitleDuplicateConfirmed: false,
     });
 
-    expect(mockSearchDashboards).toHaveBeenCalledWith({ per_page: 20, search: 'Shiny dashboard' });
+    expect(mockSearchDashboards).toHaveBeenCalledWith({ per_page: 20, query: 'Shiny dashboard' });
   });
 
   it('invokes onTitleDuplicate with a speculative collision free value when the new title provided is a duplicate match', async () => {
@@ -80,7 +80,7 @@ describe('checkForDuplicateDashboardTitle', () => {
       onTitleDuplicate,
     });
 
-    expect(mockSearchDashboards).toHaveBeenCalledWith({ per_page: 20, search: 'Shiny dashboard' });
+    expect(mockSearchDashboards).toHaveBeenCalledWith({ per_page: 20, query: 'Shiny dashboard' });
 
     expect(onTitleDuplicate).toHaveBeenCalledWith(`${baseDashboardName} (15)`);
   });

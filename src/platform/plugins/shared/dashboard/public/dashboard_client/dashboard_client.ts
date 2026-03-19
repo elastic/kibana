@@ -80,12 +80,12 @@ export const dashboardClient = {
     return result;
   },
   search: async (searchParams: DashboardSearchRequestParams) => {
-    const { search, ...query } = searchParams;
+    const { query, ...params } = searchParams;
     return await coreServices.http.get<DashboardSearchResponseBody>(`${DASHBOARD_API_PATH}`, {
       version: DASHBOARD_API_VERSION,
       query: {
-        ...query,
-        ...(search ? { search: `${search}*` } : {}),
+        ...params,
+        ...(query ? { query: `${query}*` } : {}),
       },
     });
   },

@@ -59,8 +59,8 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.dashboards[0].id).toBe('test-dashboard-00');
   });
 
-  apiTest('should narrow results by search', async ({ apiClient }) => {
-    const response = await apiClient.get(buildUrl({ search: '0*' }), {
+  apiTest('should narrow results by query', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ query: '0*' }), {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
@@ -122,16 +122,13 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
   });
 
   apiTest('should narrow results by tags with multiple values', async ({ apiClient }) => {
-    const response = await apiClient.get(
-      buildUrl({ tags: ['tag-1', 'tag-2'], search: 'tagged*' }),
-      {
-        headers: {
-          ...COMMON_HEADERS,
-          ...viewerCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      }
-    );
+    const response = await apiClient.get(buildUrl({ tags: ['tag-1', 'tag-2'], query: 'tagged*' }), {
+      headers: {
+        ...COMMON_HEADERS,
+        ...viewerCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(1);
@@ -158,7 +155,7 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
 
   apiTest('should narrow results by excluded_tags with multiple values', async ({ apiClient }) => {
     const response = await apiClient.get(
-      buildUrl({ excluded_tags: ['tag-1', 'tag-2'], search: 'tagged*' }),
+      buildUrl({ excluded_tags: ['tag-1', 'tag-2'], query: 'tagged*' }),
       {
         headers: {
           ...COMMON_HEADERS,
