@@ -106,11 +106,7 @@ export class SearchInferenceEndpointsPlugin
       },
     });
 
-    return {
-      features: {
-        register: this.featureRegistry.register.bind(this.featureRegistry),
-      },
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: SearchInferenceEndpointsPluginStartDependencies) {
@@ -131,6 +127,7 @@ export class SearchInferenceEndpointsPlugin
     }
 
     const featureRegistry = this.featureRegistry;
+    featureRegistry.setElasticsearchClient(core.elasticsearch.client.asInternalUser);
 
     return {
       features: {

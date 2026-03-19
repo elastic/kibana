@@ -22,20 +22,16 @@ export interface InferenceFeatureConfig {
   recommendedEndpoints: string[];
 }
 
-export type RegisterResult = { ok: true } | { ok: false; error: string };
+export type RegisterResult = { ok: true; warnings: string[] } | { ok: false; error: string };
 
-export interface InferenceFeatureRegistryContract {
-  register: (feature: InferenceFeatureConfig) => RegisterResult;
-}
-
-export interface InferenceFeatureRegistryStartContract extends InferenceFeatureRegistryContract {
+export interface InferenceFeatureRegistryStartContract {
+  register: (feature: InferenceFeatureConfig) => Promise<RegisterResult>;
   getAll: () => InferenceFeatureConfig[];
   get: (featureId: string) => InferenceFeatureConfig | undefined;
 }
 
-export interface SearchInferenceEndpointsPluginSetup {
-  features: InferenceFeatureRegistryContract;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SearchInferenceEndpointsPluginSetup {}
 
 export interface ResolvedInferenceEndpoints {
   endpoints: InferenceConnector[];

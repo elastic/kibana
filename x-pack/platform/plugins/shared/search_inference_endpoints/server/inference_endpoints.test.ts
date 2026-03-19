@@ -97,14 +97,14 @@ describe('getForFeature', () => {
   });
 
   it('returns empty result when no endpoints resolved', async () => {
-    registry.register(createValidFeature({ featureId: 'f1' }));
+    await registry.register(createValidFeature({ featureId: 'f1' }));
     await expect(
       getForFeature(registry, createSoClient(), createEsClient(), 'f1')
     ).resolves.toEqual({ endpoints: [], warnings: [] });
   });
 
   it('returns hydrated endpoints from SO override', async () => {
-    registry.register(createValidFeature({ featureId: 'f1' }));
+    await registry.register(createValidFeature({ featureId: 'f1' }));
     const info = createEndpointInfo('ep1');
     await expect(
       getForFeature(
@@ -117,7 +117,9 @@ describe('getForFeature', () => {
   });
 
   it('returns hydrated endpoints from recommendedEndpoints', async () => {
-    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    await registry.register(
+      createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] })
+    );
     const info = createEndpointInfo('rec1');
     await expect(
       getForFeature(registry, createSoClient(), createEsClient({ rec1: info }), 'f1')
@@ -125,8 +127,10 @@ describe('getForFeature', () => {
   });
 
   it('walks the fallback chain to parent recommendedEndpoints', async () => {
-    registry.register(createValidFeature({ featureId: 'parent', recommendedEndpoints: ['prec1'] }));
-    registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
+    await registry.register(
+      createValidFeature({ featureId: 'parent', recommendedEndpoints: ['prec1'] })
+    );
+    await registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
     const info = createEndpointInfo('prec1');
     await expect(
       getForFeature(registry, createSoClient(), createEsClient({ prec1: info }), 'child')
@@ -134,11 +138,13 @@ describe('getForFeature', () => {
   });
 
   it('walks the full chain: child -> parent -> grandparent', async () => {
-    registry.register(
+    await registry.register(
       createValidFeature({ featureId: 'grandparent', recommendedEndpoints: ['gp_ep'] })
     );
-    registry.register(createValidFeature({ featureId: 'parent', parentFeatureId: 'grandparent' }));
-    registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
+    await registry.register(
+      createValidFeature({ featureId: 'parent', parentFeatureId: 'grandparent' })
+    );
+    await registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
     const info = createEndpointInfo('gp_ep');
     await expect(
       getForFeature(registry, createSoClient(), createEsClient({ gp_ep: info }), 'child')
@@ -146,7 +152,9 @@ describe('getForFeature', () => {
   });
 
   it('prefers SO override over recommendedEndpoints', async () => {
-    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    await registry.register(
+      createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] })
+    );
     const soInfo = createEndpointInfo('so_ep');
     await expect(
       getForFeature(
@@ -159,7 +167,9 @@ describe('getForFeature', () => {
   });
 
   it('skips SO entry with empty endpoints and falls through to recommended', async () => {
-    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    await registry.register(
+      createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] })
+    );
     const info = createEndpointInfo('rec1');
     await expect(
       getForFeature(
@@ -172,7 +182,9 @@ describe('getForFeature', () => {
   });
 
   it('handles SO 404 and falls through to recommended', async () => {
-    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
+    await registry.register(
+      createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] })
+    );
     const info = createEndpointInfo('rec1');
     await expect(
       getForFeature(registry, createSoClient('not_found'), createEsClient({ rec1: info }), 'f1')
@@ -180,7 +192,7 @@ describe('getForFeature', () => {
   });
 
   it('returns warning for ES endpoints that no longer exist (404)', async () => {
-    registry.register(
+    await registry.register(
       createValidFeature({ featureId: 'f1', recommendedEndpoints: ['ep1', 'ep2'] })
     );
     const info = createEndpointInfo('ep2');
@@ -196,7 +208,7 @@ describe('getForFeature', () => {
   });
 
   it('propagates non-404 ES errors', async () => {
-    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['ep1'] }));
+    await registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['ep1'] }));
     const esClient = {
       inference: {
         get: jest
@@ -210,7 +222,7 @@ describe('getForFeature', () => {
   });
 
   it('propagates non-404 SO errors', async () => {
-    registry.register(createValidFeature({ featureId: 'f1' }));
+    await registry.register(createValidFeature({ featureId: 'f1' }));
     const soClient = {
       get: jest.fn().mockRejectedValue(new Error('Connection refused')),
     } as unknown as ISavedObjectsRepository;
@@ -220,8 +232,8 @@ describe('getForFeature', () => {
   });
 
   it('detects cycles and returns empty result with warning', async () => {
-    registry.register(createValidFeature({ featureId: 'a' }));
-    registry.register(createValidFeature({ featureId: 'b', parentFeatureId: 'a' }));
+    await registry.register(createValidFeature({ featureId: 'a' }));
+    await registry.register(createValidFeature({ featureId: 'b', parentFeatureId: 'a' }));
     (registry as any).features.get('a').parentFeatureId = 'b';
     const result = await getForFeature(registry, createSoClient(), createEsClient(), 'a');
     expect(result.endpoints).toEqual([]);
@@ -230,10 +242,10 @@ describe('getForFeature', () => {
   });
 
   it('prefers child recommendedEndpoints over parent recommendedEndpoints', async () => {
-    registry.register(
+    await registry.register(
       createValidFeature({ featureId: 'parent', recommendedEndpoints: ['parent_ep'] })
     );
-    registry.register(
+    await registry.register(
       createValidFeature({
         featureId: 'child',
         parentFeatureId: 'parent',
@@ -252,17 +264,17 @@ describe('getForFeature', () => {
   });
 
   it('uses first recommendedEndpoints found in chain when child has none', async () => {
-    registry.register(
+    await registry.register(
       createValidFeature({ featureId: 'grandparent', recommendedEndpoints: ['gp_ep'] })
     );
-    registry.register(
+    await registry.register(
       createValidFeature({
         featureId: 'parent',
         parentFeatureId: 'grandparent',
         recommendedEndpoints: ['parent_ep'],
       })
     );
-    registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
+    await registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
     const info = createEndpointInfo('parent_ep');
     await expect(
       getForFeature(
@@ -275,8 +287,8 @@ describe('getForFeature', () => {
   });
 
   it('prefers parent SO override over child recommendedEndpoints', async () => {
-    registry.register(createValidFeature({ featureId: 'parent' }));
-    registry.register(
+    await registry.register(createValidFeature({ featureId: 'parent' }));
+    await registry.register(
       createValidFeature({
         featureId: 'child',
         parentFeatureId: 'parent',
@@ -295,11 +307,13 @@ describe('getForFeature', () => {
   });
 
   it('uses grandparent recommendedEndpoints when parent has none', async () => {
-    registry.register(
+    await registry.register(
       createValidFeature({ featureId: 'grandparent', recommendedEndpoints: ['gp_ep'] })
     );
-    registry.register(createValidFeature({ featureId: 'parent', parentFeatureId: 'grandparent' }));
-    registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
+    await registry.register(
+      createValidFeature({ featureId: 'parent', parentFeatureId: 'grandparent' })
+    );
+    await registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
     const info = createEndpointInfo('gp_ep');
     await expect(
       getForFeature(registry, createSoClient(), createEsClient({ gp_ep: info }), 'child')
@@ -307,17 +321,17 @@ describe('getForFeature', () => {
   });
 
   it('prefers grandparent SO override over all recommendedEndpoints', async () => {
-    registry.register(
+    await registry.register(
       createValidFeature({ featureId: 'grandparent', recommendedEndpoints: ['gp_rec'] })
     );
-    registry.register(
+    await registry.register(
       createValidFeature({
         featureId: 'parent',
         parentFeatureId: 'grandparent',
         recommendedEndpoints: ['parent_rec'],
       })
     );
-    registry.register(
+    await registry.register(
       createValidFeature({
         featureId: 'child',
         parentFeatureId: 'parent',

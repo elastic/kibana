@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { InferenceFeatureConfig, RegisterResult } from './types';
 import { validateFeature } from './utils/validate_feature';
 
@@ -15,18 +15,25 @@ import { validateFeature } from './utils/validate_feature';
 export class InferenceFeatureRegistry {
   private features: Map<string, InferenceFeatureConfig> = new Map();
   private readonly logger: Logger;
+  private esClient?: ElasticsearchClient;
 
   constructor(logger: Logger) {
     this.logger = logger;
   }
 
+  setElasticsearchClient(client: ElasticsearchClient): void {
+    this.esClient = client;
+  }
+
   /**
    * Registers a new inference feature in the registry.
+   * Validates the feature config, checks recommended endpoints exist in Elasticsearch,
+   * and verifies task type consistency between the feature and its endpoints.
    *
    * @param feature - The feature configuration to register.
-   * @returns `{ ok: true }` on success, or `{ ok: false, error }` if validation fails or the feature is a duplicate.
+   * @returns `{ ok: true, warnings }` on success, or `{ ok: false, error }` if validation fails or the feature is a duplicate.
    */
-  register(feature: InferenceFeatureConfig): RegisterResult {
+  async register(feature: InferenceFeatureConfig): Promise<RegisterResult> {
     try {
       validateFeature(feature);
     } catch (e) {
@@ -49,8 +56,10 @@ export class InferenceFeatureRegistry {
       };
     }
 
+    const warnings = await this.checkRecommendedEndpoints(feature);
+
     this.features.set(feature.featureId, feature);
-    return { ok: true };
+    return { ok: true, warnings };
   }
 
   /**
@@ -70,5 +79,48 @@ export class InferenceFeatureRegistry {
    */
   get(featureId: string): InferenceFeatureConfig | undefined {
     return this.features.get(featureId);
+  }
+
+  /**
+   * Checks that recommended endpoints exist in Elasticsearch and that their
+   * task types are consistent with the feature's declared task type.
+   */
+  private async checkRecommendedEndpoints(feature: InferenceFeatureConfig): Promise<string[]> {
+    if (!this.esClient || feature.recommendedEndpoints.length === 0) {
+      return [];
+    }
+
+    const warnings: string[] = [];
+
+    const results = await Promise.all(
+      feature.recommendedEndpoints.map(async (endpointId) => {
+        try {
+          const response = await this.esClient!.inference.get({ inference_id: endpointId });
+          return { endpointId, endpoint: response.endpoints[0] ?? null };
+        } catch (e) {
+          if (e?.statusCode === 404) {
+            return { endpointId, endpoint: null };
+          }
+          this.logger.warn(
+            `Failed to check inference endpoint "${endpointId}" for feature "${feature.featureId}": ${e.message}`
+          );
+          return { endpointId, endpoint: null };
+        }
+      })
+    );
+
+    for (const { endpointId, endpoint } of results) {
+      if (!endpoint) {
+        const warning = `Recommended endpoint "${endpointId}" for feature "${feature.featureId}" was not found in Elasticsearch.`;
+        this.logger.warn(warning);
+        warnings.push(warning);
+      } else if (endpoint.task_type !== feature.taskType) {
+        const warning = `Recommended endpoint "${endpointId}" has task type "${endpoint.task_type}" but feature "${feature.featureId}" expects "${feature.taskType}".`;
+        this.logger.warn(warning);
+        warnings.push(warning);
+      }
+    }
+
+    return warnings;
   }
 }

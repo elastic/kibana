@@ -51,7 +51,7 @@ describe('Inference Features API', () => {
     });
 
     it('should return registered features', async () => {
-      featureRegistry.register({
+      await featureRegistry.register({
         featureId: 'agent_builder_general',
         featureName: 'Agent Builder — General Models',
         featureDescription: 'Large, capable models for agent reasoning.',
@@ -78,14 +78,14 @@ describe('Inference Features API', () => {
     });
 
     it('should return multiple features with parent-child relationships', async () => {
-      featureRegistry.register({
+      await featureRegistry.register({
         featureId: 'agent_builder',
         featureName: 'Agent Builder',
         featureDescription: 'Root feature for Agent Builder.',
         taskType: 'chat_completion',
         recommendedEndpoints: ['gemini-3.0-pro'],
       });
-      featureRegistry.register({
+      await featureRegistry.register({
         featureId: 'agent_builder_small',
         parentFeatureId: 'agent_builder',
         featureName: 'Agent Builder — Small Model',
