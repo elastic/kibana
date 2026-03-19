@@ -11,17 +11,15 @@ import { FormProvider } from 'react-hook-form';
 import type { LiveQueryQueryFieldProps } from '../live_queries/form/live_query_query_field';
 import type { ServicesWrapperProps } from './services_wrapper';
 import ServicesWrapper from './services_wrapper';
-import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 const LiveQueryField = lazy(() => import('../live_queries/form/live_query_query_field'));
 
 interface LazyLiveQueryFieldServices {
   services: ServicesWrapperProps['services'];
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const getLazyLiveQueryField =
-  ({ services, experimentalFeatures }: LazyLiveQueryFieldServices) =>
+  ({ services }: LazyLiveQueryFieldServices) =>
   // eslint-disable-next-line react/display-name
   ({
     formMethods,
@@ -35,7 +33,7 @@ export const getLazyLiveQueryField =
   }) =>
     (
       <Suspense fallback={null}>
-        <ServicesWrapper services={services} experimentalFeatures={experimentalFeatures}>
+        <ServicesWrapper services={services}>
           <FormProvider {...formMethods}>
             <LiveQueryField {...props} />
           </FormProvider>
