@@ -9,4 +9,4 @@
 export const MAX_CONSECUTIVE_BREACHES = 1000;
 
 /** Maximum allowed duration for schedule and timeframe fields */
-export const MAX_DURATION = '1y';
+export const MAX_DURATION = '365d';

@@ -200,28 +200,28 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('accepts schedule.every of exactly 1y', () => {
+    it('accepts schedule.every of exactly 365d', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        schedule: { every: '1y' },
+        schedule: { every: '365d' },
       });
 
       expect(result.success).toBe(true);
     });
 
-    it('rejects schedule.every exceeding 1y', () => {
+    it('rejects schedule.every exceeding 365d', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        schedule: { every: '2y' },
+        schedule: { every: '366d' },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects schedule.lookback exceeding 1y', () => {
+    it('rejects schedule.lookback exceeding 365d', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        schedule: { every: '5m', lookback: '2y' },
+        schedule: { every: '5m', lookback: '366d' },
       });
 
       expect(result.success).toBe(false);
@@ -458,10 +458,10 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects pending_timeframe exceeding 1y', () => {
+    it('rejects pending_timeframe exceeding 365d', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        state_transition: { pending_timeframe: '2y' },
+        state_transition: { pending_timeframe: '366d' },
       });
 
       expect(result.success).toBe(false);
@@ -476,10 +476,10 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects recovering_timeframe exceeding 1y', () => {
+    it('rejects recovering_timeframe exceeding 365d', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        state_transition: { recovering_timeframe: '2y' },
+        state_transition: { recovering_timeframe: '366d' },
       });
 
       expect(result.success).toBe(false);
@@ -687,8 +687,8 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects schedule.every exceeding 1y', () => {
-      const result = updateRuleDataSchema.safeParse({ schedule: { every: '2y' } });
+    it('rejects schedule.every exceeding 365d', () => {
+      const result = updateRuleDataSchema.safeParse({ schedule: { every: '366d' } });
       expect(result.success).toBe(false);
     });
 
@@ -697,8 +697,8 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects schedule.lookback exceeding 1y', () => {
-      const result = updateRuleDataSchema.safeParse({ schedule: { lookback: '2y' } });
+    it('rejects schedule.lookback exceeding 365d', () => {
+      const result = updateRuleDataSchema.safeParse({ schedule: { lookback: '366d' } });
       expect(result.success).toBe(false);
     });
 
@@ -759,17 +759,17 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects pending_timeframe exceeding 1y', () => {
+    it('rejects pending_timeframe exceeding 365d', () => {
       const result = updateRuleDataSchema.safeParse({
-        state_transition: { pending_timeframe: '2y' },
+        state_transition: { pending_timeframe: '366d' },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects recovering_timeframe exceeding 1y', () => {
+    it('rejects recovering_timeframe exceeding 365d', () => {
       const result = updateRuleDataSchema.safeParse({
-        state_transition: { recovering_timeframe: '2y' },
+        state_transition: { recovering_timeframe: '366d' },
       });
 
       expect(result.success).toBe(false);

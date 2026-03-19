@@ -7,7 +7,7 @@
 
 import { Parser } from '@elastic/esql';
 
-const DURATION_RE = /^(\d+)(ms|s|m|h|d|w|y)$/;
+const DURATION_RE = /^(\d+)(ms|s|m|h|d|w)$/;
 
 const DURATION_UNIT_TO_MS: Record<string, number> = {
   ms: 1,
@@ -16,7 +16,6 @@ const DURATION_UNIT_TO_MS: Record<string, number> = {
   h: 3_600_000,
   d: 86_400_000,
   w: 604_800_000,
-  y: 31_536_000_000,
 };
 
 function parseDurationToMs(value: string): number {
@@ -26,12 +25,12 @@ function parseDurationToMs(value: string): number {
 }
 
 /**
- * Validate a duration string format (e.g., "5m", "1h", "30s", "250ms", "1y")
+ * Validate a duration string format (e.g., "5m", "1h", "30s", "250ms")
  * @returns Error message if invalid, undefined if valid
  */
 export function validateDuration(value: string): string | void {
   if (!DURATION_RE.test(value)) {
-    return `Invalid duration "${value}". Expected format like "5m", "1h", "30s", "250ms", "1y"`;
+    return `Invalid duration "${value}". Expected format like "5m", "1h", "30s", "250ms"`;
   }
 }
 
