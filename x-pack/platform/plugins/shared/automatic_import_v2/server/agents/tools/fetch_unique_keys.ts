@@ -10,11 +10,11 @@ import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { ToolMessage } from '@langchain/core/messages';
 import { Command, getCurrentTaskInput } from '@langchain/langgraph';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { estypes } from '@elastic/elasticsearch';
 import type { JsonObject, JsonValue } from '@kbn/utility-types';
 
-import type { AutomaticImportAgentState } from '../state';
+import type { AutomaticImportAgentStateType } from '../state';
 
 const collectKeysWithSamples = (
   value: JsonValue,
@@ -95,7 +95,7 @@ export function fetchUniqueKeysTool(): DynamicStructuredTool {
       _runManager?: CallbackManagerForToolRun,
       config?: ToolRunnableConfig
     ) => {
-      const state = getCurrentTaskInput<z.infer<typeof AutomaticImportAgentState>>();
+      const state = getCurrentTaskInput<AutomaticImportAgentStateType>();
       const docs = state.pipeline_generation_results;
 
       if (docs.length === 0) {
