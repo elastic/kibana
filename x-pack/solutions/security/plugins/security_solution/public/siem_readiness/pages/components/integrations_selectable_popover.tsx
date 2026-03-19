@@ -31,11 +31,12 @@ interface StatusInfo {
 interface IntegrationSelectablePopoverProps extends Pick<EuiSelectableProps, 'options'> {
   showOnlySelectable?: boolean;
   statusMap?: Map<string, StatusInfo>;
+  disabled?: boolean;
 }
 
 export const IntegrationSelectablePopover = (props: IntegrationSelectablePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { options, showOnlySelectable, statusMap } = props;
+  const { options, showOnlySelectable, statusMap, disabled = false } = props;
   const { euiTheme } = useEuiTheme();
   const basePath = useBasePath();
 
@@ -117,7 +118,11 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
         <>
           <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
             <EuiFlexItem grow={false}>
-              <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+              <EuiLink
+                color={disabled ? 'subdued' : 'primary'}
+                onClick={() => !disabled && setIsPopoverOpen(!isPopoverOpen)}
+                style={disabled ? { cursor: 'default' } : undefined}
+              >
                 {i18n.translate(
                   'xpack.securitySolution.siemReadiness.integrationSelectablePopover.viewIntegrationsLabel',
                   {
@@ -128,7 +133,8 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                isDisabled={disabled}
+                onClick={() => !disabled && setIsPopoverOpen(!isPopoverOpen)}
                 color="text"
                 size="xs"
                 style={{
