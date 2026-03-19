@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
+import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
@@ -41,14 +42,6 @@ export interface SkillServiceStart {
    * existed at creation time.
    */
   registerSkill(skill: SkillDefinition): Promise<void>;
-
-  /**
-   * Unregister a previously registered skill by ID.
-   *
-   * Returns `true` if the skill was found and removed, `false` otherwise.
-   * Serialized with `registerSkill` to avoid races.
-   */
-  unregisterSkill(skillId: string): Promise<boolean>;
 }
 
 export interface SkillService {
@@ -80,6 +73,12 @@ class SkillServiceImpl implements SkillService {
   setup(): SkillServiceSetup {
     return {
       registerSkill: (skill) => {
+        if (!isAllowedBuiltinSkill(skill.id)) {
+          throw new Error(
+            `Built-in skill with id "${skill.id}" is not in the list of allowed built-in skills.
+             Please add it to the list of allowed built-in skills in the "@kbn/agent-builder-server/allow_lists.ts" file.`
+          );
+        }
         if (this.skills.has(skill.id)) {
           throw new Error(`Skill type with id ${skill.id} already registered`);
         }
@@ -141,21 +140,6 @@ class SkillServiceImpl implements SkillService {
           }
           this.skillFullPaths.add(fullPath);
           this.skills.set(skill.id, skill);
-        });
-        this.mutationQueue = op.catch(() => {});
-        return op;
-      },
-      unregisterSkill: (skillId) => {
-        const op = this.mutationQueue.then(async () => {
-          const skill = this.skills.get(skillId);
-          if (!skill) {
-            return false;
-          }
-
-          const fullPath = getSkillEntryPath({ skill });
-          this.skillFullPaths.delete(fullPath);
-          this.skills.delete(skillId);
-          return true;
         });
         this.mutationQueue = op.catch(() => {});
         return op;

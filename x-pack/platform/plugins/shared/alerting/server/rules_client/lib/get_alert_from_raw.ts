@@ -119,6 +119,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     executionStatus,
     monitoring,
     nextRun,
+    lastEnabledAt,
     schedule,
     actions,
     snoozeSchedule,
@@ -190,6 +191,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       : {}),
     ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
     ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
+    ...(lastEnabledAt ? { lastEnabledAt: new Date(lastEnabledAt) } : {}),
     ...(scheduledTaskId ? { scheduledTaskId } : {}),
     ...(executionStatus
       ? { executionStatus: ruleExecutionStatusFromRaw(opts.logger, opts.id, executionStatus) }

@@ -13,11 +13,11 @@ import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import { buildAutomaticImportResponse } from './utils';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
 import {
-  UploadSamplesToDataStreamRequestBody,
   UploadSamplesToDataStreamRequestParams,
   DeleteDataStreamRequestParams,
   ReanalyzeDataStreamRequestParams,
   ReanalyzeDataStreamRequestBody,
+  UploadSamplesToDataStreamRequestBody,
 } from '../../common';
 
 const isSecurityExceptionError = (err: unknown): boolean => {
@@ -83,11 +83,45 @@ const uploadSamplesRoute = (
           const currentUser = await automaticImportv2.getCurrentUser();
           const esClient = automaticImportv2.esClient;
           const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
-          const { samples, originalSource } = request.body;
+          const { samples, sourceIndex, originalSource } = request.body;
+
+          let rawSamples: string[];
+          if (sourceIndex) {
+            const searchResult = await esClient.search({
+              index: sourceIndex,
+              size: 100,
+              _source: ['event.original'],
+              query: {
+                function_score: {
+                  query: { exists: { field: 'event.original' } },
+                  functions: [{ random_score: {} }],
+                },
+              },
+            });
+            const hits = searchResult.hits.hits ?? [];
+            rawSamples = hits.flatMap((hit) => {
+              const original = (hit._source as { event?: { original?: string } } | undefined)?.event
+                ?.original;
+              return typeof original === 'string' && original.length > 0 ? [original] : [];
+            });
+
+            if (rawSamples.length === 0) {
+              return response.badRequest({
+                body: 'No documents with event.original found in the specified index.',
+              });
+            }
+          } else if (samples && samples.length > 0) {
+            rawSamples = samples;
+          } else {
+            return response.badRequest({
+              body: 'Either samples or sourceIndex must be provided.',
+            });
+          }
+
           const result = await automaticImportService.addSamplesToDataStream({
             integrationId,
             dataStreamId,
-            rawSamples: samples,
+            rawSamples,
             originalSource,
             authenticatedUser: currentUser,
             esClient,
