@@ -137,7 +137,7 @@ apiTest.describe('Osquery saved queries - editor', { tag: tags.deploymentAgnosti
       (q: { created_by: string }) => q.created_by
     );
     const uniqueCreators = [...new Set(creators)];
-    expect(uniqueCreators).toEqual([createdByUser]);
+    expect(uniqueCreators).toStrictEqual([createdByUser]);
 
     const noUserResponse = await apiClient.get(
       `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}?createdBy=nonexistentuser`,
