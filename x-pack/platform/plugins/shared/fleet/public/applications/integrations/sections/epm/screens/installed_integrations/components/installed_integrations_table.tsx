@@ -249,9 +249,8 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               const status = item.ui.installation_status;
               const review = item.installationInfo?.pending_upgrade_review;
               const showPendingReview = status === 'pending_upgrade_review' && review;
-              const showDeclinedReview = status === 'declined_review' && review;
 
-              if (!policyCount && !showPendingReview && !showDeclinedReview) {
+              if (!policyCount && !showPendingReview) {
                 return null;
               }
 
@@ -282,7 +281,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   </EuiLink>
                 </DisabledWrapperTooltip>
               ) : null;
-              if (showPendingReview) {
+              if (policyCount && showPendingReview) {
                 return (
                   <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap={true}>
                     {policiesLink && <EuiFlexItem grow={false}>{policiesLink}</EuiFlexItem>}
