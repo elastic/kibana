@@ -9,16 +9,13 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
-import type { AIFeatures } from '../../../hooks/use_ai_features';
 
 export function EmptyState({
   onManualEntryClick,
   onGenerateSuggestionsClick,
-  aiFeatures,
 }: {
   onManualEntryClick: () => void;
   onGenerateSuggestionsClick: () => void;
-  aiFeatures: AIFeatures | null;
 }) {
   return (
     <EuiEmptyPrompt
@@ -47,7 +44,6 @@ export function EmptyState({
               onManualEntryClick={onManualEntryClick}
               isGeneratingQueries={false}
               isSavingManualEntry={false}
-              aiFeatures={aiFeatures}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

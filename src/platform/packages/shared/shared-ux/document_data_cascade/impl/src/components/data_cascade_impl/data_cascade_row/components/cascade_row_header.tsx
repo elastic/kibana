@@ -170,7 +170,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 color="text"
-                iconType={rowIsExpanded ? 'arrowDown' : 'arrowRight'}
+                iconType={rowIsExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                 onClick={rowToggleFn}
                 aria-label={
                   rowIsExpanded
@@ -189,7 +189,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     color="text"
-                    iconType="expand"
+                    iconType="maximize"
                     onClick={onCascadeSecondaryExpansion}
                     aria-label={i18n.translate(
                       'sharedUXPackages.dataCascade.expandRowButtonLabel',

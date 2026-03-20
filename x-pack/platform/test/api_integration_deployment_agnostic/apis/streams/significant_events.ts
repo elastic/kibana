@@ -83,6 +83,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'aaa',
               title: 'OOM Error',
+              description: '',
               esql: { query: esqlQuery },
             },
           ],
@@ -94,6 +95,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
           title: 'OOM Error',
+          description: '',
           esql: { query: esqlQuery },
         });
       });
@@ -123,6 +125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'logs.otel.queries-test.query1',
               title: 'should not be deleted',
+              description: '',
               esql: {
                 query:
                   'FROM logs.queries-test,logs.queries-test.* | WHERE KQL("message:\\"irrelevant\\"")',
@@ -165,6 +168,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'logs.otel.queries-test.child.query1',
               title: 'must be deleted',
+              description: '',
               esql: {
                 query:
                   'FROM logs.queries-test.child,logs.queries-test.child.* | WHERE KQL("message:\\"irrelevant\\"")',
@@ -181,6 +185,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'logs.otel.queries-test.child.first.query1',
               title: 'must be deleted',
+              description: '',
               esql: {
                 query:
                   'FROM logs.queries-test.child.first,logs.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
@@ -189,6 +194,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'logs.otel.queries-test.child.first.query2',
               title: 'must be deleted',
+              description: '',
               esql: {
                 query:
                   'FROM logs.queries-test.child.first,logs.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
@@ -267,6 +273,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'aaa',
               title: 'OOM Error',
+              description: '',
               esql: { query: esqlQuery },
             },
           ],
@@ -278,6 +285,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
           title: 'OOM Error',
+          description: '',
           esql: { query: esqlQuery },
         });
 

@@ -75,7 +75,12 @@ export const processFieldCapsResponsePerIndex = (
       }
 
       const meta = extractMeta(capability);
-      const field: MappingField = { path, type: capability.type, meta };
+      const field: MappingField = {
+        path,
+        type: capability.type,
+        meta,
+        searchable: capability.searchable,
+      };
 
       const targetIndices =
         capability.indices == null
@@ -118,5 +123,6 @@ const processField = (
     path,
     type: fieldCaps.type,
     meta,
+    searchable: fieldCaps.searchable,
   };
 };
