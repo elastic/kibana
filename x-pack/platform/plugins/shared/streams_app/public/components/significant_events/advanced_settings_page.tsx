@@ -161,7 +161,7 @@ const TABS = [
   {
     id: 'jobs' as const,
     label: i18n.translate('xpack.streams.settings.tabs.jobs', {
-      defaultMessage: 'Jobs',
+      defaultMessage: 'Workflows',
     }),
   },
 ];

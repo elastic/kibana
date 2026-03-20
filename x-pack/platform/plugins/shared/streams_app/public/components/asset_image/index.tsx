@@ -114,8 +114,8 @@ const imageSets = {
     }),
   },
   significantEventsOnboarding: {
-    light: () => import('./significant_events_onboarding_light.svg'),
-    dark: () => import('./significant_events_onboarding_dark.svg'),
+    light: () => import('./significant_events_onboarding_screenshot.png'),
+    dark: () => import('./significant_events_onboarding_screenshot.png'),
     alt: i18n.translate('xpack.streams.significantEvents.onboardingImage', {
       defaultMessage: 'Illustration for the Significant events onboarding page',
     }),
@@ -125,6 +125,13 @@ const imageSets = {
     dark: () => import('./significant_events_listening_dark.svg'),
     alt: i18n.translate('xpack.streams.significantEvents.listeningImage', {
       defaultMessage: 'Illustration for the Significant events listening state',
+    }),
+  },
+  significantEventsDiscovering: {
+    light: () => import('./significant_events_discovering.png'),
+    dark: () => import('./significant_events_discovering.png'),
+    alt: i18n.translate('xpack.streams.significantEvents.discoveringImage', {
+      defaultMessage: 'Illustration for the Significant events discovering state',
     }),
   },
 };

@@ -16,6 +16,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiIcon,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -23,6 +25,29 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+
+type FlyoutTab = 'event_details' | 'correlation' | 'workflow';
+
+const FLYOUT_TABS: Array<{ id: FlyoutTab; label: string }> = [
+  {
+    id: 'event_details',
+    label: i18n.translate('xpack.streams.significantEvents.flyout.tab.eventDetails', {
+      defaultMessage: 'Event details',
+    }),
+  },
+  {
+    id: 'correlation',
+    label: i18n.translate('xpack.streams.significantEvents.flyout.tab.correlation', {
+      defaultMessage: 'Correlation',
+    }),
+  },
+  {
+    id: 'workflow',
+    label: i18n.translate('xpack.streams.significantEvents.flyout.tab.workflow', {
+      defaultMessage: 'Workflow',
+    }),
+  },
+];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -323,7 +348,7 @@ function ConditionText({ segments }: { segments: InlineSegment[] }) {
 /** One expandable recommendation card */
 function RecommendationItem({ rec }: { rec: Recommendation }) {
   const { euiTheme } = useEuiTheme();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div
@@ -534,6 +559,401 @@ function EventsTimeline() {
   );
 }
 
+// ─── Correlation tab ──────────────────────────────────────────────────────────
+
+const CORRELATION_SECTIONS = [
+  {
+    id: 'ki',
+    label: i18n.translate('xpack.streams.significantEvents.flyout.correlation.ki', {
+      defaultMessage: 'Related Knowledge indicators',
+    }),
+    count: 43,
+  },
+  {
+    id: 'rules',
+    label: i18n.translate('xpack.streams.significantEvents.flyout.correlation.rules', {
+      defaultMessage: 'Related Event rules',
+    }),
+    count: 629,
+  },
+];
+
+function CorrelationAccordionRow({
+  label,
+  count,
+}: {
+  label: string;
+  count: number;
+}) {
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div
+      css={css`
+        border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
+      `}
+    >
+      <button
+        type="button"
+        onClick={() => setIsOpen((v) => !v)}
+        css={css`
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
+          padding: 14px 16px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          text-align: left;
+        `}
+      >
+        <EuiIcon
+          type={isOpen ? 'arrowDown' : 'arrowRight'}
+          size="s"
+          color="subdued"
+          aria-hidden
+          css={css`
+            flex-shrink: 0;
+          `}
+        />
+        <span
+          css={css`
+            flex: 1;
+            font-family: ${euiTheme.font.family};
+            font-size: 14px;
+            font-weight: ${euiTheme.font.weight.semiBold};
+            color: ${euiTheme.colors.textHeading};
+            line-height: 20px;
+          `}
+        >
+          {label}
+        </span>
+        <EuiBadge color="hollow">{count}</EuiBadge>
+      </button>
+
+      {isOpen && (
+        <div
+          css={css`
+            padding: 8px 16px 16px 44px;
+          `}
+        >
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate('xpack.streams.significantEvents.flyout.correlation.placeholder', {
+                defaultMessage: 'Items will appear here.',
+              })}
+            </p>
+          </EuiText>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Workflow tab ─────────────────────────────────────────────────────────────
+
+interface WorkflowStep {
+  id: string;
+  label: string;
+  duration: string;
+  icon: string;
+  children: Array<{ label: string; duration: string }>;
+}
+
+const WORKFLOW_STEPS: WorkflowStep[] = [
+  {
+    id: 'ki_feature',
+    label: i18n.translate('xpack.streams.significantEvents.flyout.workflow.step.kiFeature', {
+      defaultMessage: 'Knowledge indicator: Feature extraction',
+    }),
+    duration: '124 ms',
+    icon: 'layers',
+    children: [
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEvents.flyout.workflow.step.fetchSampleDocs',
+          { defaultMessage: 'Fetch sample docs' }
+        ),
+        duration: '25 ms',
+      },
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEvents.flyout.workflow.step.extractFeatures',
+          { defaultMessage: 'Extract features' }
+        ),
+        duration: '5 m',
+      },
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEvents.flyout.workflow.step.deduplicate',
+          { defaultMessage: 'Deduplicate' }
+        ),
+        duration: '5 m',
+      },
+    ],
+  },
+  {
+    id: 'ki_query',
+    label: i18n.translate('xpack.streams.significantEvents.flyout.workflow.step.kiQuery', {
+      defaultMessage: 'Knowledge indicator: Query Extraction',
+    }),
+    duration: '124 ms',
+    icon: 'indexOpen',
+    children: [
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEvents.flyout.workflow.step.fetchKiFeatures',
+          { defaultMessage: 'Fetch KI features' }
+        ),
+        duration: '25 ms',
+      },
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEvents.flyout.workflow.step.generateQueries',
+          { defaultMessage: 'Generate queries' }
+        ),
+        duration: '5 ms',
+      },
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEvents.flyout.workflow.step.deduplicateQuery',
+          { defaultMessage: 'Deduplicate' }
+        ),
+        duration: '3 ms',
+      },
+    ],
+  },
+  {
+    id: 'sig_discovery',
+    label: i18n.translate('xpack.streams.significantEvents.flyout.workflow.step.sigDiscovery', {
+      defaultMessage: 'Significant Event Discovery',
+    }),
+    duration: '234 ms',
+    icon: 'visAreaStacked',
+    children: [
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEvents.flyout.workflow.step.createPlan',
+          { defaultMessage: 'Create Plan' }
+        ),
+        duration: '25 ms',
+      },
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEvents.flyout.workflow.step.executePlan',
+          { defaultMessage: 'Execute Plan' }
+        ),
+        duration: '65 ms',
+      },
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEvents.flyout.workflow.step.generateDiscoveries',
+          { defaultMessage: 'Generate Discoveries' }
+        ),
+        duration: '12 ms',
+      },
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEvents.flyout.workflow.step.evaluateDiscoveries',
+          { defaultMessage: 'Evaluate Discoveries' }
+        ),
+        duration: '55 ms',
+      },
+      {
+        label: i18n.translate(
+          'xpack.streams.significantEvents.flyout.workflow.step.generateSigEvent',
+          { defaultMessage: 'Generate Significant event' }
+        ),
+        duration: '91 ms',
+      },
+    ],
+  },
+];
+
+function WorkflowStepRow({
+  label,
+  duration,
+  icon,
+  isChild = false,
+}: {
+  label: string;
+  duration: string;
+  icon?: string;
+  isChild?: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css`
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        background: ${euiTheme.colors.backgroundBasePlain};
+        border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+        border-radius: 8px;
+        min-height: 44px;
+      `}
+    >
+      <EuiIcon
+        type="check"
+        size="s"
+        color="success"
+        css={css`
+          flex-shrink: 0;
+        `}
+      />
+      <div
+        css={css`
+          flex: 1 0 0;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 0;
+        `}
+      >
+        {icon && !isChild && (
+          <EuiIcon
+            type={icon}
+            size="s"
+            color="primary"
+            css={css`
+              flex-shrink: 0;
+            `}
+          />
+        )}
+        <span
+          css={css`
+            font-size: 12px;
+            font-weight: ${euiTheme.font.weight.regular};
+            line-height: 20px;
+            color: ${euiTheme.colors.textHeading};
+          `}
+        >
+          {label}
+        </span>
+      </div>
+      <span
+        css={css`
+          font-size: 12px;
+          color: ${euiTheme.colors.textDisabled};
+          white-space: nowrap;
+          flex-shrink: 0;
+        `}
+      >
+        {duration}
+      </span>
+      <EuiIcon
+        type="arrowDown"
+        size="s"
+        color="subdued"
+        css={css`
+          flex-shrink: 0;
+        `}
+      />
+    </div>
+  );
+}
+
+function WorkflowDetailsSection() {
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <div
+      css={css`
+        border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+        border-radius: 8px;
+        overflow: hidden;
+      `}
+    >
+      {/* Header row */}
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 12px;
+          border-bottom: ${isOpen ? `1px solid ${euiTheme.colors.borderBaseSubdued}` : 'none'};
+        `}
+      >
+        <button
+          type="button"
+          onClick={() => setIsOpen((v) => !v)}
+          css={css`
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+          `}
+        >
+          <EuiIcon
+            type={isOpen ? 'arrowDown' : 'arrowRight'}
+            size="s"
+            color="subdued"
+            aria-hidden
+          />
+          <EuiText size="s">
+            <strong>
+              {i18n.translate(
+                'xpack.streams.significantEvents.flyout.workflow.detailsSection',
+                { defaultMessage: 'Workflow details' }
+              )}
+            </strong>
+          </EuiText>
+        </button>
+
+        <EuiButton
+          size="s"
+          iconType="refresh"
+          color="primary"
+          fill={false}
+        >
+          {i18n.translate('xpack.streams.significantEvents.flyout.workflow.rerun', {
+            defaultMessage: 'Rerun workflow',
+          })}
+        </EuiButton>
+      </div>
+
+      {/* Step tree */}
+      {isOpen && (
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 12px;
+          `}
+        >
+          {WORKFLOW_STEPS.map((step) => (
+            <div key={step.id}>
+              <WorkflowStepRow label={step.label} duration={step.duration} icon={step.icon} />
+              <div
+                css={css`
+                  padding-left: 40px;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 6px;
+                  margin-top: 6px;
+                `}
+              >
+                {step.children.map((child, idx) => (
+                  <WorkflowStepRow key={idx} label={child.label} duration={child.duration} isChild />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main flyout component ────────────────────────────────────────────────────
 
 interface SignificantEventDetailFlyoutProps {
@@ -548,6 +968,7 @@ export function SignificantEventDetailFlyout({
   const { euiTheme } = useEuiTheme();
   const details = MOCK_DETAILS[event.id] ?? MOCK_DETAILS.default;
   const [isTimelineExpanded, setIsTimelineExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<FlyoutTab>('event_details');
 
   return (
     <EuiFlyout
@@ -562,45 +983,300 @@ export function SignificantEventDetailFlyout({
       <EuiFlyoutHeader hasBorder>
         <div
           css={css`
-            padding: 12px 16px;
+            padding: 16px 16px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
           `}
         >
-          {/* Top row: badge + timestamp + close */}
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          {/* Title + date */}
+          <div>
+            <EuiTitle size="s">
+              <h2 id="sigEventDetailFlyoutTitle">{event.title}</h2>
+            </EuiTitle>
+            <EuiText size="xs" color="subdued">
+              <span>
+                {i18n.translate('xpack.streams.significantEvents.flyout.generatedAt', {
+                  defaultMessage: 'Jan 16, 2025 @ 16:12:31 (5 minutes ago)',
+                })}
+              </span>
+            </EuiText>
+          </div>
+
+          {/* Metadata row: Severity | Relevance | Stream */}
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            {/* Severity */}
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color={SEVERITY_BADGE_COLOR[event.severity]}>
-                    {i18n.translate('xpack.streams.significantEvents.flyout.incidentBadge', {
-                      defaultMessage: 'Incident',
+              <div
+                css={css`
+                  display: flex;
+                  flex-direction: column;
+                  gap: 2px;
+                  padding-right: 16px;
+                `}
+              >
+                <EuiText size="xs" color="subdued">
+                  <span>
+                    {i18n.translate('xpack.streams.significantEvents.flyout.meta.severity', {
+                      defaultMessage: 'Severity',
                     })}
-                  </EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    <span>
-                      {i18n.translate('xpack.streams.significantEvents.flyout.generatedAt', {
-                        defaultMessage: 'Generated today at 11:22 AM',
-                      })}
-                    </span>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="iInCircle" size="s" color="subdued" aria-hidden />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>            
+                  </span>
+                </EuiText>
+                <EuiBadge color={SEVERITY_BADGE_COLOR[event.severity]}>
+                  {SEVERITY_LABEL[event.severity]}
+                </EuiBadge>
+              </div>
+            </EuiFlexItem>
+
+            {/* Divider */}
+            <div
+              css={css`
+                width: 1px;
+                height: 32px;
+                background: ${euiTheme.colors.borderBaseSubdued};
+                margin: 0 16px 0 0;
+                flex-shrink: 0;
+              `}
+            />
+
+            {/* Relevance */}
+            <EuiFlexItem grow={false}>
+              <div
+                css={css`
+                  display: flex;
+                  flex-direction: column;
+                  gap: 2px;
+                  padding-right: 16px;
+                `}
+              >
+                <EuiText size="xs" color="subdued">
+                  <span>
+                    {i18n.translate('xpack.streams.significantEvents.flyout.meta.relevance', {
+                      defaultMessage: 'Relevance',
+                    })}
+                  </span>
+                </EuiText>
+                <EuiText size="s">
+                  <strong>{details.relevance}</strong>
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+
+            {/* Divider */}
+            <div
+              css={css`
+                width: 1px;
+                height: 32px;
+                background: ${euiTheme.colors.borderBaseSubdued};
+                margin: 0 16px 0 0;
+                flex-shrink: 0;
+              `}
+            />
+
+            {/* Stream */}
+            <EuiFlexItem grow={false}>
+              <div
+                css={css`
+                  display: flex;
+                  flex-direction: column;
+                  gap: 2px;
+                `}
+              >
+                <EuiText size="xs" color="subdued">
+                  <span>
+                    {i18n.translate('xpack.streams.significantEvents.flyout.meta.stream', {
+                      defaultMessage: 'Stream',
+                    })}
+                  </span>
+                </EuiText>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="arrowLeft" size="s" color="subdued" aria-hidden />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <span>{details.statusDetail.replace('←1 ', '')}</span>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            </EuiFlexItem>
           </EuiFlexGroup>
 
-          {/* Title */}
-          <EuiTitle size="m">
-            <h2 id="sigEventDetailFlyoutTitle">{event.title}</h2>
-          </EuiTitle>
+          {/* Tabs */}
+          <EuiTabs bottomBorder={false} css={css`margin-bottom: -1px;`}>
+            {FLYOUT_TABS.map((tab) => (
+              <EuiTab
+                key={tab.id}
+                isSelected={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </EuiTab>
+            ))}
+          </EuiTabs>
         </div>
       </EuiFlyoutHeader>
 
       {/* ── Body ── */}
       <EuiFlyoutBody>
+        {activeTab === 'correlation' && (
+          <div
+            css={css`
+              border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
+            `}
+          >
+            {CORRELATION_SECTIONS.map((section) => (
+              <CorrelationAccordionRow
+                key={section.id}
+                label={section.label}
+                count={section.count}
+              />
+            ))}
+          </div>
+        )}
+        {activeTab === 'workflow' && (
+          <div
+            css={css`
+              display: flex;
+              flex-direction: column;
+              gap: 16px;
+              padding: 16px;
+            `}
+          >
+            {/* Summary card */}
+            <div
+              css={css`
+                border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+                border-radius: 8px;
+                overflow: hidden;
+              `}
+            >
+              {/* Card header */}
+              <div
+                css={css`
+                  padding: 10px 16px;
+                  background: ${euiTheme.colors.backgroundBaseSubdued};
+                  border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
+                `}
+              >
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate(
+                      'xpack.streams.significantEvents.flyout.workflow.detailsTitle',
+                      { defaultMessage: 'Workflow details' }
+                    )}
+                  </strong>
+                </EuiText>
+              </div>
+
+              {/* Card body */}
+              <div
+                css={css`
+                  display: flex;
+                  flex-direction: column;
+                  gap: 10px;
+                  padding: 14px 16px;
+                `}
+              >
+                {/* Result */}
+                <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+                  <EuiFlexItem
+                    css={css`
+                      min-width: 140px;
+                    `}
+                    grow={false}
+                  >
+                    <EuiText size="s" color="subdued">
+                      <span>
+                        {i18n.translate(
+                          'xpack.streams.significantEvents.flyout.workflow.result',
+                          { defaultMessage: 'Result' }
+                        )}
+                      </span>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="checkInCircleFilled" size="s" color="success" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <strong>
+                            {i18n.translate(
+                              'xpack.streams.significantEvents.flyout.workflow.success',
+                              { defaultMessage: 'Success' }
+                            )}
+                          </strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                {/* Execution time */}
+                <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+                  <EuiFlexItem
+                    css={css`
+                      min-width: 140px;
+                    `}
+                    grow={false}
+                  >
+                    <EuiText size="s" color="subdued">
+                      <span>
+                        {i18n.translate(
+                          'xpack.streams.significantEvents.flyout.workflow.executionTime',
+                          { defaultMessage: 'Execution time' }
+                        )}
+                      </span>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="clock" size="s" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <strong>283s</strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                {/* Executed by */}
+                <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+                  <EuiFlexItem
+                    css={css`
+                      min-width: 140px;
+                    `}
+                    grow={false}
+                  >
+                    <EuiText size="s" color="subdued">
+                      <span>
+                        {i18n.translate(
+                          'xpack.streams.significantEvents.flyout.workflow.executedBy',
+                          { defaultMessage: 'Executed by' }
+                        )}
+                      </span>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <span>ruflin@elastic.co</span>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            </div>
+
+            {/* Workflow details collapsible + Rerun button */}
+            <WorkflowDetailsSection />
+          </div>
+        )}
+        {activeTab === 'event_details' && (
         <div
           css={css`
             display: flex;
@@ -617,7 +1293,7 @@ export function SignificantEventDetailFlyout({
               })}
               actions={
                 <EuiButtonIcon
-                  iconType="pencil"
+                  iconType="info"
                   size="xs"
                   color="text"
                   aria-label={i18n.translate(
@@ -688,7 +1364,7 @@ export function SignificantEventDetailFlyout({
               })}
               actions={
                 <EuiButtonIcon
-                  iconType="pencil"
+                  iconType="info"
                   size="xs"
                   color="text"
                   aria-label={i18n.translate(
@@ -902,7 +1578,7 @@ export function SignificantEventDetailFlyout({
               >
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
-                    iconType="pencil"
+                    iconType="save"
                     size="s"
                     color="text"
                     aria-label={i18n.translate(
@@ -994,6 +1670,7 @@ export function SignificantEventDetailFlyout({
 
           <SectionGap />
         </div>
+        )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

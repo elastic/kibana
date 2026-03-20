@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
+  EuiCodeBlock,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -326,19 +327,13 @@ function StepRow({
 
 // ─── Job detail flyout ────────────────────────────────────────────────────────
 
-type FlyoutTab = 'table' | 'tracers' | 'json';
+type FlyoutTab = 'result' | 'json';
 
 const FLYOUT_TABS = [
   {
-    id: 'table' as const,
-    label: i18n.translate('xpack.streams.settings.jobFlyout.tab.table', {
-      defaultMessage: 'Table',
-    }),
-  },
-  {
-    id: 'tracers' as const,
-    label: i18n.translate('xpack.streams.settings.jobFlyout.tab.tracers', {
-      defaultMessage: 'Tracers',
+    id: 'result' as const,
+    label: i18n.translate('xpack.streams.settings.jobFlyout.tab.result', {
+      defaultMessage: 'Result',
     }),
   },
   {
@@ -347,9 +342,124 @@ const FLYOUT_TABS = [
   },
 ];
 
+const MOCK_RULES_JSON = JSON.stringify(
+  [
+    {
+      id: 'b70d8522-cd74-4325-b73c-b78793ed0a8f',
+      title: 'ZooKeeper unexpected exceptions',
+      description: 'hjgfhjg',
+      esql: {
+        query:
+          'FROM logs.ecs, logs.ecs.* METADATA _id, _source | WHERE (message : "ERROR") AND (message : "Unexpected") AND (message : "Exception")',
+      },
+      severity_score: 75,
+      evidence: [
+        'message: "ERROR [CommitProcessor:1:NIOServerCnxn@180] - Unexpected Exception:"',
+        'Entity: ZooKeeper (Java, confidence 92)',
+      ],
+      stream_name: 'logs.ecs',
+      occurrences: [],
+      change_points: { type: {} },
+      rule_backed: true,
+    },
+    {
+      id: '8ff5afbe-28ea-49fa-ab4f-6e16600d803f',
+      title: 'ZooKeeper connection broken errors',
+      description: '',
+      esql: {
+        query:
+          'FROM logs.ecs, logs.ecs.* METADATA _id, _source | WHERE (message : "Connection") AND (message : "broken")',
+      },
+      severity_score: 70,
+      evidence: [
+        'message: "Connection broken for id 188978561024, my id = 1, error ="',
+        'Entity: ZooKeeper (Java, confidence 92)',
+      ],
+      stream_name: 'logs.ecs',
+      occurrences: [],
+      change_points: { type: {} },
+      rule_backed: true,
+    },
+    {
+      id: '55fc0003-3fad-448a-af32-fe28241a4bcf',
+      title: 'HDFS DataNode exceptions while serving blocks',
+      description: '',
+      esql: {
+        query:
+          'FROM logs.ecs, logs.ecs.* METADATA _id, _source | WHERE (message : "DataNode") AND (message : "exception") AND (message : "serving")',
+      },
+      severity_score: 70,
+      evidence: [
+        'message: "WARN dfs.DataNode$DataXceiver: 10.250.10.144:50010:Got exception while serving blk_5126469776250053435 to /10.250.11.100:"',
+      ],
+      stream_name: 'logs.ecs',
+      occurrences: [],
+      change_points: { type: {} },
+      rule_backed: true,
+    },
+    {
+      id: '8ffde5b3-273a-4ea0-bccd-be01c44e0b0f',
+      title: 'Apache mod_jk initialization errors',
+      description: '',
+      esql: {
+        query:
+          'FROM logs.ecs, logs.ecs.* METADATA _id, _source | WHERE (message : "error") AND (message : "mod_jk")',
+      },
+      severity_score: 65,
+      evidence: [
+        'message: "[error] mod_jk child init 1 -2"',
+        'Entity: Apache HTTP Server (confidence 90)',
+      ],
+      stream_name: 'logs.ecs',
+      occurrences: [],
+      change_points: { type: {} },
+      rule_backed: true,
+    },
+    {
+      id: '06c4b1fe-6a43-42c2-8c32-c30226c76050',
+      title: 'Ganglia data thread no response from datasource',
+      description: '',
+      esql: {
+        query:
+          'FROM logs.ecs, logs.ecs.* METADATA _id, _source | WHERE MATCH_PHRASE(message, "got not answer from any")',
+      },
+      severity_score: 65,
+      evidence: [
+        'message: "data_thread() got not answer from any [Thunderbird_D8] datasource"',
+        'Log pattern count: 373',
+      ],
+      stream_name: 'logs.ecs',
+      occurrences: [],
+      change_points: { type: {} },
+      rule_backed: true,
+    },
+    {
+      id: '18425aca-d621-4362-85ea-d655b8abdcb3',
+      title: 'BGL hardware core generation events',
+      description: '',
+      esql: {
+        query:
+          'FROM logs.ecs, logs.ecs.* METADATA _id, _source | WHERE (message : "RAS") AND (message : "KERNEL") AND (message : "generating") AND (message : "core")',
+      },
+      severity_score: 70,
+      evidence: [
+        'message: "RAS KERNEL INFO generating core.15966"',
+        'Entity: BGL System (confidence 78)',
+        'Log pattern count: 788',
+      ],
+      stream_name: 'logs.ecs',
+      occurrences: [],
+      change_points: { type: {} },
+      rule_backed: true,
+    },
+  ],
+  null,
+  2
+);
+
 function JobDetailFlyout({ job, onClose }: { job: Job; onClose: () => void }) {
   const { euiTheme } = useEuiTheme();
-  const [activeTab, setActiveTab] = useState<FlyoutTab>('table');
+  const [activeTab, setActiveTab] = useState<FlyoutTab>('result');
 
   return (
     <EuiFlyout onClose={onClose} size="m" aria-labelledby="jobDetailFlyoutTitle" paddingSize="none">
@@ -558,7 +668,7 @@ function JobDetailFlyout({ job, onClose }: { job: Job; onClose: () => void }) {
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {activeTab === 'table' && (
+        {activeTab === 'result' && (
           <div
             css={css`
               display: flex;
@@ -569,10 +679,7 @@ function JobDetailFlyout({ job, onClose }: { job: Job; onClose: () => void }) {
           >
             {MOCK_EXECUTION_STEPS.map((step) => (
               <div key={step.id}>
-                {/* Parent step */}
                 <StepRow label={step.label} duration={step.duration} icon={step.icon} />
-
-                {/* Child steps — indented */}
                 <div
                   css={css`
                     padding-left: 45px;
@@ -591,24 +698,16 @@ function JobDetailFlyout({ job, onClose }: { job: Job; onClose: () => void }) {
           </div>
         )}
 
-        {activeTab === 'tracers' && (
-          <EuiText size="s" color="subdued" textAlign="center">
-            <p>
-              {i18n.translate('xpack.streams.settings.jobFlyout.tracersPlaceholder', {
-                defaultMessage: 'Tracer data will appear here.',
-              })}
-            </p>
-          </EuiText>
-        )}
-
         {activeTab === 'json' && (
-          <EuiText size="s" color="subdued" textAlign="center">
-            <p>
-              {i18n.translate('xpack.streams.settings.jobFlyout.jsonPlaceholder', {
-                defaultMessage: 'JSON output will appear here.',
-              })}
-            </p>
-          </EuiText>
+          <EuiCodeBlock
+            language="json"
+            fontSize="s"
+            paddingSize="m"
+            isCopyable
+            overflowHeight="100%"
+          >
+            {MOCK_RULES_JSON}
+          </EuiCodeBlock>
         )}
       </EuiFlyoutBody>
 

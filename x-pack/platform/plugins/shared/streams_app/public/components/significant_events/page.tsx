@@ -9,12 +9,12 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -56,162 +56,96 @@ export function SignificantEventsPage() {
   }, []);
 
   /*
-   * The page header always shows the Manager and More options buttons.
-   * "Continuous" badge, "15 min", and "Run a discovery" only appear
-   * once events have been detected.
+   * Page title — just the title + optional metadata badges.
+   * Action buttons live in rightSideItems to mirror the Discover / Dashboards app bar pattern.
    */
   const pageTitle = (
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      alignItems="center"
-      responsive={false}
-      gutterSize="s"
-    >
-      {/* Left side — title + optional metadata badges */}
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        {i18n.translate('xpack.streams.significantEvents.pageHeaderTitle', {
+          defaultMessage: 'Significant events',
+        })}
+      </EuiFlexItem>
+      {hasEvents && (
+        <>
           <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.streams.significantEvents.pageHeaderTitle', {
-              defaultMessage: 'Significant events',
-            })}
+            <EuiBadge color="hollow">
+              {i18n.translate('xpack.streams.significantEvents.continuousBadge', {
+                defaultMessage: 'Continuous',
+              })}
+            </EuiBadge>
           </EuiFlexItem>
-          {hasEvents && (
-            <>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {i18n.translate('xpack.streams.significantEvents.continuousBadge', {
-                    defaultMessage: 'Continuous',
-                  })}
-                </EuiBadge>
+                <EuiIcon type="clock" size="s" color="subdued" aria-hidden />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="clock" size="s" color="subdued" aria-hidden />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s" color="subdued">
-                      <span>15 min</span>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiText size="s" color="subdued">
+                  <span>15 min</span>
+                </EuiText>
               </EuiFlexItem>
-            </>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      {/* Right side — always-visible Manager + More options; Run a discovery when hasEvents */}
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          {hasEvents && (
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" iconType="sparkles" data-test-subj="streamsSignificantEventsRunDiscoveryButton">
-                {i18n.translate('xpack.streams.significantEvents.runDiscoveryButton', {
-                  defaultMessage: 'Run a discovery',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              iconType="gear"
-              onClick={() => router.push('/_significant_events_advanced_settings')}
-              data-test-subj="streamsSignificantEventsManagerButton"
-            >
-              {i18n.translate('xpack.streams.significantEvents.managerButton', {
-                defaultMessage: 'Manager',
-              })}
-            </EuiButton>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="boxesVertical"
-              size="s"
-              color="text"
-              aria-label={i18n.translate('xpack.streams.significantEvents.moreOptionsButton', {
-                defaultMessage: 'More options',
-              })}
-              data-test-subj="streamsSignificantEventsMoreOptionsButton"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 
+  /* Right-side items for the app bar — always visible, mirroring Discover/Dashboards pattern */
+  /* rightSideItems renders right-to-left, so index 0 = rightmost.
+   * Desired visual order (left → right): Run a discovery | Manager | More options
+   * Array order (right → left):           More options  | Manager  | Run a discovery
+   */
+  const headerRightSideItems = [
+    <EuiButtonIcon
+      key="more-options"
+      iconType="boxesVertical"
+      size="s"
+      color="text"
+      aria-label={i18n.translate('xpack.streams.significantEvents.moreOptionsButton', {
+        defaultMessage: 'More options',
+      })}
+      data-test-subj="streamsSignificantEventsMoreOptionsButton"
+    />,
+    <EuiButton
+      key="manager"
+      size="s"
+      iconType="gear"
+      color="text"
+      onClick={() => router.push('/_significant_events_advanced_settings', { path: {}, query: {} })}
+      data-test-subj="streamsSignificantEventsManagerButton"
+    >
+      {i18n.translate('xpack.streams.significantEvents.managerButton', {
+        defaultMessage: 'Manager',
+      })}
+    </EuiButton>,
+    ...(hasEvents
+      ? [
+          <EuiButton
+            key="run-discovery"
+            size="s"
+            iconType="sparkles"
+            data-test-subj="streamsSignificantEventsRunDiscoveryButton"
+          >
+            {i18n.translate('xpack.streams.significantEvents.runDiscoveryButton', {
+              defaultMessage: 'Run a discovery',
+            })}
+          </EuiButton>,
+        ]
+      : []),
+  ];
+
   return (
     <>
-      <StreamsAppPageTemplate.Header pageTitle={pageTitle} />
-      <StreamsAppPageTemplate.Body grow noPadding={hasEvents}>
-        {hasEvents ? (
-          /* Full events view after detection completes */
-          <SignificantEventsDetectedView />
-        ) : isListening ? (
-          /* Listening empty state — centered panel */
-          <div
-            css={css`
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              min-height: 100%;
-              padding: ${euiTheme.size.base} ${euiTheme.size.l};
-            `}
-          >
-            <div
-              css={css`
-                background: ${euiTheme.colors.backgroundBaseSubdued};
-                border-radius: 4px;
-                width: 660px;
-                height: 516px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: ${euiTheme.size.l};
-                padding: ${euiTheme.size.l};
-              `}
-            >
-              <AssetImage type="significantEventsListening" size={174} />
-              <div
-                css={css`
-                  display: flex;
-                  flex-direction: column;
-                  gap: ${euiTheme.size.s};
-                  align-items: center;
-                  text-align: center;
-                  width: 420px;
-                `}
-              >
-                <EuiTitle size="xs">
-                  <h3>
-                    {i18n.translate('xpack.streams.significantEvents.listening.title', {
-                      defaultMessage: 'Currently no insights detected',
-                    })}
-                  </h3>
-                </EuiTitle>
-                <EuiText size="s">
-                  <p>
-                    {i18n.translate('xpack.streams.significantEvents.listening.description', {
-                      defaultMessage:
-                        'We are listening for events, it seems your system is currently running smoothly.',
-                    })}
-                  </p>
-                </EuiText>
-              </div>
-              <EuiButton
-                size="s"
-                isDisabled
-                isLoading
-                data-test-subj="streamsSignificantEventsDetectingButton"
-              >
-                {i18n.translate('xpack.streams.significantEvents.listening.detectingButton', {
-                  defaultMessage: 'Detecting events ...',
-                })}
-              </EuiButton>
-            </div>
-          </div>
+      <StreamsAppPageTemplate.Header
+        pageTitle={pageTitle}
+        rightSideItems={headerRightSideItems}
+      />
+      <StreamsAppPageTemplate.Body grow noPadding={isListening}>
+        {isListening ? (
+          /* Listening state — full page layout with loading skeleton when events haven't arrived */
+          <SignificantEventsDetectedView isLoading={!hasEvents} />
         ) : (
           /* Onboarding flow — shared card for idle + CLI animation states */
           <div
@@ -234,195 +168,216 @@ export function SignificantEventsPage() {
                 overflow: hidden;
               `}
             >
-              {/* Main content area — fixed height so both states occupy exactly the same space */}
-              <div
-                css={[
-                  css`
-                    background: ${euiTheme.colors.backgroundBasePlain};
-                    height: ${CARD_HEIGHT}px;
-                    display: flex;
-                  `,
-                  onboardingStarted
-                    ? css`
-                        flex-direction: column;
-                        padding: ${euiTheme.size.l} ${euiTheme.size.xxl};
-                        gap: ${euiTheme.size.m};
-                      `
-                    : css`
-                        flex-direction: row;
-                        align-items: center;
-                        gap: 32px;
-                      `,
-                ]}
-              >
-                {onboardingStarted ? (
-                  <AiOnboardingPanel onStartListening={() => setIsListening(true)} />
-                ) : (
-                  <>
-                    {/* Left panel — fixed 375px per Figma, text + buttons */}
+              {onboardingStarted ? (
+                <>
+                  {/* CLI animation state — same fixed height as before */}
+                  <div
+                    css={css`
+                      background: ${euiTheme.colors.backgroundBasePlain};
+                      height: ${CARD_HEIGHT}px;
+                      display: flex;
+                      flex-direction: column;
+                      padding: ${euiTheme.size.l} ${euiTheme.size.xxl};
+                      gap: ${euiTheme.size.m};
+                    `}
+                  >
+                    <AiOnboardingPanel onStartListening={() => setIsListening(true)} />
+                  </div>
+
+                  <div
+                    css={css`
+                      height: 1px;
+                      background: ${euiTheme.colors.borderBaseSubdued};
+                    `}
+                  />
+
+                  <div
+                    css={css`
+                      background: ${euiTheme.colors.backgroundBaseSubdued};
+                      padding: ${euiTheme.size.l};
+                    `}
+                  >
+                    <EuiFlexGroup
+                      gutterSize="xs"
+                      alignItems="center"
+                      responsive={false}
+                      wrap={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <strong>
+                            {i18n.translate(
+                              'xpack.streams.significantEvents.emptyState.learnMore',
+                              { defaultMessage: 'Want to learn more?' }
+                            )}
+                          </strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiLink href="#" target="_blank" external>
+                          {i18n.translate('xpack.streams.significantEvents.emptyState.readMore', {
+                            defaultMessage: 'Read more',
+                          })}
+                        </EuiLink>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </div>
+                </>
+              ) : (
+                /* Idle state — EuiEmptyPrompt horizontal layout matching StreamsListEmptyPrompt */
+                <EuiEmptyPrompt
+                  css={{
+                    maxInlineSize: '100% !important',
+                    '.euiEmptyPrompt__content': {
+                      flexBasis: '35%',
+                    },
+                    '.euiEmptyPrompt__icon': {
+                      maxInlineSize: 'unset !important',
+                    },
+                    '.euiEmptyPrompt__icon .euiImageWrapper': {
+                      maxInlineSize: 'unset !important',
+                    },
+                  }}
+                  layout="horizontal"
+                  color="plain"
+                  icon={
+                    <AssetImage
+                      type="significantEventsOnboarding"
+                      size="fullWidth"
+                      css={css`
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        object-position: center center;
+                        display: block;
+                      `}
+                    />
+                  }
+                  title={
+                    <h2>
+                      {i18n.translate('xpack.streams.significantEvents.emptyState.title', {
+                        defaultMessage: 'Enable Significant events',
+                      })}
+                    </h2>
+                  }
+                  body={
+                    <p>
+                      {i18n.translate('xpack.streams.significantEvents.emptyState.body', {
+                        defaultMessage:
+                          'Get insights into the performance, error handling, data optimisation and current topology mapping and other insights that contribute to a great end-user experience for your system and architecture.',
+                      })}
+                    </p>
+                  }
+                  actions={
                     <div
                       css={css`
-                        width: 375px;
-                        flex-shrink: 0;
-                        height: 100%;
                         display: flex;
-                        flex-direction: column;
                         gap: ${euiTheme.size.base};
-                        padding: ${euiTheme.size.xl} ${euiTheme.size.l} ${euiTheme.size.l};
+                        align-items: center;
                       `}
                     >
-                      <EuiTitle size="l">
-                        <h2>
-                          {i18n.translate('xpack.streams.significantEvents.emptyState.title', {
-                            defaultMessage: 'Enable Significant events',
-                          })}
-                        </h2>
-                      </EuiTitle>
-                      <EuiText size="s">
-                        <p>
-                          {i18n.translate('xpack.streams.significantEvents.emptyState.body', {
-                            defaultMessage:
-                              'Get insights into the performance, error handling, data optimisation and current topology mapping and other insights that contribute to a great end-user experience for your system and architecture.',
-                          })}
-                        </p>
-                      </EuiText>
-                      {/* Extra top padding separates buttons from description */}
-                      <div
+                      {/* Gradient AI button — custom design per Figma */}
+                      <button
+                        type="button"
+                        data-test-subj="streamsSignificantEventsOnboardWithAiButton"
+                        onClick={() => setOnboardingStarted(true)}
                         css={css`
-                          display: flex;
-                          gap: ${euiTheme.size.base};
+                          display: inline-flex;
                           align-items: center;
-                          padding-top: ${euiTheme.size.base};
+                          gap: 6px;
+                          height: 32px;
+                          min-width: 96px;
+                          padding: 0 ${euiTheme.size.s};
+                          border: none;
+                          border-radius: 4px;
+                          background: linear-gradient(
+                            134.5deg,
+                            rgb(217, 232, 255) 3.97%,
+                            rgb(236, 226, 254) 65.6%
+                          );
+                          cursor: pointer;
+                          font-family: ${euiTheme.font.family};
+                          line-height: 20px;
+
+                          &:hover {
+                            filter: brightness(0.96);
+                          }
+                          &:focus-visible {
+                            outline: 2px solid ${euiTheme.colors.primary};
+                            outline-offset: 2px;
+                          }
                         `}
                       >
-                        {/* Gradient AI button — custom design per Figma */}
-                        <button
-                          type="button"
-                          data-test-subj="streamsSignificantEventsOnboardWithAiButton"
-                          onClick={() => setOnboardingStarted(true)}
+                        <EuiIcon
+                          type="sparkles"
+                          size="s"
+                          aria-hidden
                           css={css`
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 6px;
-                            height: 32px;
-                            min-width: 96px;
-                            padding: 0 ${euiTheme.size.s};
-                            border: none;
-                            border-radius: 4px;
-                            background: linear-gradient(
-                              134.5deg,
-                              rgb(217, 232, 255) 3.97%,
-                              rgb(236, 226, 254) 65.6%
-                            );
-                            cursor: pointer;
-                            font-family: ${euiTheme.font.family};
+                            color: #1750ba;
+                          `}
+                        />
+                        <span
+                          css={css`
+                            font-size: 14px;
+                            font-weight: ${euiTheme.font.weight.medium};
                             line-height: 20px;
-
-                            &:hover {
-                              filter: brightness(0.96);
-                            }
-                            &:focus-visible {
-                              outline: 2px solid ${euiTheme.colors.primary};
-                              outline-offset: 2px;
-                            }
+                            background: linear-gradient(
+                              171.56deg,
+                              #1750ba 2.98%,
+                              rgb(107, 60, 159) 66.24%
+                            );
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            background-clip: text;
+                            white-space: nowrap;
                           `}
                         >
-                          <EuiIcon
-                            type="sparkles"
-                            size="s"
-                            aria-hidden
-                            css={css`
-                              color: #1750ba;
-                            `}
-                          />
-                          <span
-                            css={css`
-                              font-size: 14px;
-                              font-weight: ${euiTheme.font.weight.medium};
-                              line-height: 20px;
-                              background: linear-gradient(
-                                171.56deg,
-                                #1750ba 2.98%,
-                                rgb(107, 60, 159) 66.24%
-                              );
-                              -webkit-background-clip: text;
-                              -webkit-text-fill-color: transparent;
-                              background-clip: text;
-                              white-space: nowrap;
-                            `}
-                          >
-                            {i18n.translate(
-                              'xpack.streams.significantEvents.emptyState.onboardAiButton',
-                              { defaultMessage: 'Onboard with Elastic AI' }
-                            )}
-                          </span>
-                        </button>
-
-                        <EuiButton
-                          size="s"
-                          data-test-subj="streamsSignificantEventsManualSetupButton"
-                        >
                           {i18n.translate(
-                            'xpack.streams.significantEvents.emptyState.manualSetupButton',
-                            { defaultMessage: 'Manual setup' }
+                            'xpack.streams.significantEvents.emptyState.onboardAiButton',
+                            { defaultMessage: 'Onboard with Elastic AI' }
                           )}
-                        </EuiButton>
-                      </div>
-                    </div>
+                        </span>
+                      </button>
 
-                    {/* Right — illustration fills remaining space */}
-                    <div
-                      css={css`
-                        flex: 1;
-                        min-width: 0;
-                        height: 100%;
-                        overflow: hidden;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        background: #e8f1ff;
-                      `}
+                      <EuiButton
+                        size="s"
+                        data-test-subj="streamsSignificantEventsManualSetupButton"
+                      >
+                        {i18n.translate(
+                          'xpack.streams.significantEvents.emptyState.manualSetupButton',
+                          { defaultMessage: 'Manual setup' }
+                        )}
+                      </EuiButton>
+                    </div>
+                  }
+                  footer={
+                    <EuiFlexGroup
+                      gutterSize="xs"
+                      alignItems="center"
+                      responsive={false}
+                      wrap={false}
                     >
-                      <AssetImage type="significantEventsOnboarding" size={360} />
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Separator */}
-              <div
-                css={css`
-                  height: 1px;
-                  background: ${euiTheme.colors.borderBaseSubdued};
-                `}
-              />
-
-              {/* Footer — shared by both onboarding states */}
-              <div
-                css={css`
-                  background: ${euiTheme.colors.backgroundBaseSubdued};
-                  padding: ${euiTheme.size.l};
-                `}
-              >
-                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <strong>
-                        {i18n.translate('xpack.streams.significantEvents.emptyState.learnMore', {
-                          defaultMessage: 'Want to learn more?',
-                        })}
-                      </strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiLink href="#" target="_blank" external>
-                      {i18n.translate('xpack.streams.significantEvents.emptyState.readMore', {
-                        defaultMessage: 'Read more',
-                      })}
-                    </EuiLink>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <strong>
+                            {i18n.translate(
+                              'xpack.streams.significantEvents.emptyState.learnMore',
+                              { defaultMessage: 'Want to learn more?' }
+                            )}
+                          </strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiLink href="#" target="_blank" external>
+                          {i18n.translate('xpack.streams.significantEvents.emptyState.readMore', {
+                            defaultMessage: 'Read more',
+                          })}
+                        </EuiLink>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  }
+                />
+              )}
             </div>
           </div>
         )}

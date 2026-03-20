@@ -17,6 +17,7 @@ import {
 } from '@elastic/charts';
 import {
   EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldSearch,
@@ -27,12 +28,15 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiPanel,
+  EuiProgress,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { AssetImage } from '../asset_image';
 import {
   SignificantEventDetailFlyout,
   type SignificantEvent,
@@ -309,6 +313,7 @@ function EventRow({
         <div
           css={css`
             width: 32px;
+            margin-left: 8px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
@@ -448,24 +453,31 @@ function EventRow({
           </span>
         </div>
 
-        {/* ── Actions — w:163px px:12px py:8px, gap:16px ── */}
+        {/* ── Actions — px:12px py:8px, gap:8px, no fixed width ── */}
         <div
           css={css`
-            width: 163px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end;
             align-self: stretch;
-            gap: 16px;
+            gap: 8px;
             padding: 8px 12px;
           `}
         >
           {/*
-           * "Start a chat": EuiButtonEmpty xs primary with sparkles icon.
-           * In Figma this uses the product_agent icon (AI icon).
+           * "Start a chat": EuiButtonEmpty xs primary with productAgent icon.
+           * white-space: nowrap prevents the label from wrapping.
            */}
-          <EuiButtonEmpty size="xs" iconType="sparkles" iconSide="left" color="primary">
+          <EuiButtonEmpty
+            size="xs"
+            iconType="productAgent"
+            iconSide="left"
+            color="primary"
+            css={css`
+              white-space: nowrap;
+            `}
+          >
             {i18n.translate('xpack.streams.significantEvents.detectedView.startChat', {
               defaultMessage: 'Start a chat',
             })}
@@ -496,9 +508,10 @@ function EventRow({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function SignificantEventsDetectedView() {
+export function SignificantEventsDetectedView({ isLoading = false }: { isLoading?: boolean }) {
   const { euiTheme, colorMode } = useEuiTheme();
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(true);
+  const [isHistogramOpen, setIsHistogramOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<SignificantEvent | null>(null);
 
   const chartTheme = colorMode === 'DARK' ? DARK_THEME : LIGHT_THEME;
@@ -522,6 +535,101 @@ export function SignificantEventsDetectedView() {
           flex: 1;
         `}
       >
+        {/* ── Search + filter + timepicker bar — always at the top ── */}
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+          {/* Search field */}
+          <EuiFlexItem>
+            <EuiFieldSearch
+              placeholder={i18n.translate(
+                'xpack.streams.significantEvents.detectedView.searchPlaceholder',
+                { defaultMessage: 'Significant event, query name ...' }
+              )}
+              fullWidth
+              compressed={false}
+            />
+          </EuiFlexItem>
+
+          {/* Severity + Status filters */}
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup>
+              <EuiFilterButton hasActiveFilters={false} iconType="arrowDown" iconSide="right">
+                {i18n.translate('xpack.streams.significantEvents.detectedView.severityFilter', {
+                  defaultMessage: 'Severity',
+                })}
+              </EuiFilterButton>
+              <EuiFilterButton hasActiveFilters={false} iconType="arrowDown" iconSide="right">
+                {i18n.translate('xpack.streams.significantEvents.detectedView.statusFilter', {
+                  defaultMessage: 'Status',
+                })}
+              </EuiFilterButton>
+            </EuiFilterGroup>
+          </EuiFlexItem>
+
+          {/* Timepicker group — calendar icon | "Last 15 minutes" | refresh */}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              gutterSize="none"
+              alignItems="center"
+              responsive={false}
+              css={css`
+                border: 1px solid ${euiTheme.colors.borderBasePlain};
+                border-radius: ${euiTheme.border.radius.medium};
+                overflow: hidden;
+              `}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="calendar"
+                  color="text"
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.streams.significantEvents.detectedView.calendarButton',
+                    { defaultMessage: 'Select date range' }
+                  )}
+                  css={css`
+                    border-radius: 0;
+                    border-right: 1px solid ${euiTheme.colors.borderBasePlain};
+                  `}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  iconType="arrowDown"
+                  iconSide="right"
+                  color="text"
+                  css={css`
+                    font-size: ${euiTheme.size.m};
+                    white-space: nowrap;
+                    border-radius: 0;
+                    padding-inline: ${euiTheme.size.s};
+                  `}
+                >
+                  {i18n.translate(
+                    'xpack.streams.significantEvents.detectedView.timeRangeLabel',
+                    { defaultMessage: 'Last 15 minutes' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="refresh"
+                  color="text"
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.streams.significantEvents.detectedView.refreshButton',
+                    { defaultMessage: 'Refresh' }
+                  )}
+                  css={css`
+                    border-radius: 0;
+                    border-left: 1px solid ${euiTheme.colors.borderBasePlain};
+                  `}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         {/*
          * Summary stats panel — matches Figma node 312:91439.
          * Outer card: white bg, border #e3e8f2, border-radius 6px, padding 16px.
@@ -588,7 +696,7 @@ export function SignificantEventsDetectedView() {
               >
                 {/* Stat 1: Ongoing Significant events — no dot, info icon */}
                 <StatBlock
-                  value="4"
+                  value={isLoading ? '–' : '4'}
                   label={i18n.translate(
                     'xpack.streams.significantEvents.detectedView.ongoingEvents',
                     { defaultMessage: 'Ongoing Significant events' }
@@ -637,14 +745,25 @@ export function SignificantEventsDetectedView() {
                   `}
                 >
                   <StatBlock
-                    value="4,432"
+                    value={isLoading ? '–' : '4,432'}
                     label={i18n.translate('xpack.streams.significantEvents.detectedView.events', {
                       defaultMessage: 'Events',
                     })}
-                    showDot
+                    showDot={!isLoading}
                     showInfo
                   />
-                  <MiniChart />
+                  {isLoading ? (
+                    <EuiText size="xs" color="subdued">
+                      <span>
+                        {i18n.translate(
+                          'xpack.streams.significantEvents.detectedView.noEventsYet',
+                          { defaultMessage: 'No events yet' }
+                        )}
+                      </span>
+                    </EuiText>
+                  ) : (
+                    <MiniChart />
+                  )}
                 </div>
               </div>
 
@@ -674,260 +793,267 @@ export function SignificantEventsDetectedView() {
             </div>
           )}
         </EuiPanel>
-        {/* Search + filter bar */}
-        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          <EuiFlexItem>
-            <EuiFieldSearch
-              placeholder={i18n.translate(
-                'xpack.streams.significantEvents.detectedView.searchPlaceholder',
-                { defaultMessage: 'Significant event, query name ...' }
-              )}
-              fullWidth
-              compressed={false}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFilterGroup>
-              <EuiFilterButton hasActiveFilters={false} iconType="arrowDown" iconSide="right">
-                {i18n.translate('xpack.streams.significantEvents.detectedView.severityFilter', {
-                  defaultMessage: 'Severity',
-                })}
-              </EuiFilterButton>
-              <EuiFilterButton hasActiveFilters={false} iconType="arrowDown" iconSide="right">
-                {i18n.translate('xpack.streams.significantEvents.detectedView.statusFilter', {
-                  defaultMessage: 'Status',
-                })}
-              </EuiFilterButton>
-            </EuiFilterGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        {/* Histogram panel */}
-        <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-          {/* Histogram toolbar */}
-          <div
+        {/* Histogram — collapsible, closed by default, always rendered for consistent spacing */}
+        <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+          <button
+            type="button"
+            onClick={() => setIsHistogramOpen((v) => !v)}
             css={css`
               display: flex;
               align-items: center;
-              justify-content: space-between;
-              padding: ${euiTheme.size.s} ${euiTheme.size.base};
-              border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
-              height: 48px;
-            `}
-          >
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="calendar"
-                  size="s"
-                  color="text"
-                  aria-label={i18n.translate(
-                    'xpack.streams.significantEvents.detectedView.timeRange',
-                    { defaultMessage: 'Time range' }
-                  )}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty size="s" iconType="arrowDown" iconSide="right">
-                  {i18n.translate(
-                    'xpack.streams.significantEvents.detectedView.breakdownBySeverity',
-                    { defaultMessage: 'Breakdown by severity' }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="pencil"
-                  size="s"
-                  color="text"
-                  aria-label={i18n.translate(
-                    'xpack.streams.significantEvents.detectedView.editChart',
-                    { defaultMessage: 'Edit chart' }
-                  )}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="save"
-                  size="s"
-                  color="text"
-                  aria-label={i18n.translate(
-                    'xpack.streams.significantEvents.detectedView.saveChart',
-                    { defaultMessage: 'Save chart' }
-                  )}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-
-          {/* Chart + Legend */}
-          <div
-            css={css`
-              display: flex;
               gap: ${euiTheme.size.base};
-              padding: ${euiTheme.size.s} ${euiTheme.size.base};
-              height: 192px;
+              width: 100%;
+              background: none;
+              border: none;
+              padding: 0;
+              cursor: pointer;
             `}
           >
-            <div
+            <EuiIcon type={isHistogramOpen ? 'arrowDown' : 'arrowRight'} size="s" aria-hidden />
+            <span
               css={css`
-                flex: 1;
-                min-width: 0;
+                font-family: ${euiTheme.font.family};
+                font-size: 14px;
+                font-weight: ${euiTheme.font.weight.semiBold};
+                line-height: 20px;
+                color: ${euiTheme.colors.textHeading};
               `}
             >
-              <Chart>
-                <Settings
-                  baseTheme={chartTheme}
-                  showLegend={false}
-                  theme={{
-                    chartMargins: { top: 4, bottom: 4, left: 0, right: 0 },
-                    chartPaddings: { top: 0, bottom: 0, left: 0, right: 0 },
-                  }}
-                />
-                <Axis
-                  id="time"
-                  position="bottom"
-                  tickFormat={timeFormatter('HH:mm')}
-                  style={{
-                    tickLabel: {
-                      fontSize: 11,
-                      fill: euiTheme.colors.textSubdued,
-                    },
-                    axisLine: { visible: false },
-                    tickLine: { visible: false },
-                  }}
-                />
-                <Axis
-                  id="count"
-                  position="left"
-                  style={{
-                    tickLabel: {
-                      fontSize: 11,
-                      fill: euiTheme.colors.textSubdued,
-                    },
-                    axisLine: { visible: false },
-                    tickLine: { visible: false },
-                  }}
-                  ticks={4}
-                />
-                <BarSeries
-                  id="low"
-                  name={i18n.translate('xpack.streams.significantEvents.detectedView.legend.low', {
-                    defaultMessage: 'Low',
-                  })}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="x"
-                  yAccessors={['y']}
-                  stackAccessors={['x']}
-                  data={lowData}
-                  color={euiTheme.colors.vis.euiColorVisSuccess0}
-                  timeZone="local"
-                />
-                <BarSeries
-                  id="medium"
-                  name={i18n.translate(
-                    'xpack.streams.significantEvents.detectedView.legend.medium',
-                    { defaultMessage: 'Medium' }
-                  )}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="x"
-                  yAccessors={['y']}
-                  stackAccessors={['x']}
-                  data={mediumData}
-                  color={euiTheme.colors.vis.euiColorVisWarning0}
-                  timeZone="local"
-                />
-                <BarSeries
-                  id="critical"
-                  name={i18n.translate(
-                    'xpack.streams.significantEvents.detectedView.legend.critical',
-                    { defaultMessage: 'Critical' }
-                  )}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="x"
-                  yAccessors={['y']}
-                  stackAccessors={['x']}
-                  data={criticalData}
-                  color={euiTheme.colors.vis.euiColorVisDanger0}
-                  timeZone="local"
-                />
-              </Chart>
-            </div>
+              {i18n.translate('xpack.streams.significantEvents.detectedView.histogram', {
+                defaultMessage: 'Histogram',
+              })}
+            </span>
+          </button>
 
-            {/* Legend */}
+          {isHistogramOpen && !isLoading && (
             <div
               css={css`
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                gap: ${euiTheme.size.m};
-                min-width: 80px;
+                margin-top: ${euiTheme.size.base};
               `}
             >
-              {[
-                {
-                  label: i18n.translate(
-                    'xpack.streams.significantEvents.detectedView.legend.critical',
-                    { defaultMessage: 'Critical' }
-                  ),
-                  color: euiTheme.colors.vis.euiColorVisDanger0,
-                },
-                {
-                  label: i18n.translate(
-                    'xpack.streams.significantEvents.detectedView.legend.medium',
-                    { defaultMessage: 'Medium' }
-                  ),
-                  color: euiTheme.colors.vis.euiColorVisWarning0,
-                },
-                {
-                  label: i18n.translate('xpack.streams.significantEvents.detectedView.legend.low', {
-                    defaultMessage: 'Low',
-                  }),
-                  color: euiTheme.colors.vis.euiColorVisSuccess0,
-                },
-              ].map(({ label, color }) => (
+              {/* Toolbar */}
+              <div
+                css={css`
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
+                  padding-bottom: ${euiTheme.size.s};
+                  margin-bottom: ${euiTheme.size.s};
+                `}
+              >
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="calendar"
+                      size="s"
+                      color="text"
+                      aria-label={i18n.translate(
+                        'xpack.streams.significantEvents.detectedView.timeRange',
+                        { defaultMessage: 'Time range' }
+                      )}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty size="s" iconType="arrowDown" iconSide="right">
+                      {i18n.translate(
+                        'xpack.streams.significantEvents.detectedView.breakdownBySeverity',
+                        { defaultMessage: 'Breakdown by severity' }
+                      )}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="pencil"
+                      size="s"
+                      color="text"
+                      aria-label={i18n.translate(
+                        'xpack.streams.significantEvents.detectedView.editChart',
+                        { defaultMessage: 'Edit chart' }
+                      )}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="save"
+                      size="s"
+                      color="text"
+                      aria-label={i18n.translate(
+                        'xpack.streams.significantEvents.detectedView.saveChart',
+                        { defaultMessage: 'Save chart' }
+                      )}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+
+              {/* Chart + Legend */}
+              <div
+                css={css`
+                  display: flex;
+                  gap: ${euiTheme.size.base};
+                  height: 192px;
+                `}
+              >
                 <div
-                  key={label}
                   css={css`
-                    display: flex;
-                    align-items: center;
-                    gap: ${euiTheme.size.xs};
+                    flex: 1;
+                    min-width: 0;
                   `}
                 >
-                  <span
-                    css={css`
-                      display: inline-block;
-                      width: 8px;
-                      height: 8px;
-                      border-radius: 50%;
-                      background: ${color};
-                      flex-shrink: 0;
-                    `}
-                  />
-                  <EuiText size="xs">
-                    <span>{label}</span>
-                  </EuiText>
+                  <Chart>
+                    <Settings
+                      baseTheme={chartTheme}
+                      showLegend={false}
+                      theme={{
+                        chartMargins: { top: 4, bottom: 4, left: 0, right: 0 },
+                        chartPaddings: { top: 0, bottom: 0, left: 0, right: 0 },
+                      }}
+                    />
+                    <Axis
+                      id="time"
+                      position="bottom"
+                      tickFormat={timeFormatter('HH:mm')}
+                      style={{
+                        tickLabel: { fontSize: 11, fill: euiTheme.colors.textSubdued },
+                        axisLine: { visible: false },
+                        tickLine: { visible: false },
+                      }}
+                    />
+                    <Axis
+                      id="count"
+                      position="left"
+                      style={{
+                        tickLabel: { fontSize: 11, fill: euiTheme.colors.textSubdued },
+                        axisLine: { visible: false },
+                        tickLine: { visible: false },
+                      }}
+                      ticks={4}
+                    />
+                    <BarSeries
+                      id="low"
+                      name={i18n.translate(
+                        'xpack.streams.significantEvents.detectedView.legend.low',
+                        { defaultMessage: 'Low' }
+                      )}
+                      xScaleType={ScaleType.Time}
+                      yScaleType={ScaleType.Linear}
+                      xAccessor="x"
+                      yAccessors={['y']}
+                      stackAccessors={['x']}
+                      data={lowData}
+                      color={euiTheme.colors.vis.euiColorVisSuccess0}
+                      timeZone="local"
+                    />
+                    <BarSeries
+                      id="medium"
+                      name={i18n.translate(
+                        'xpack.streams.significantEvents.detectedView.legend.medium',
+                        { defaultMessage: 'Medium' }
+                      )}
+                      xScaleType={ScaleType.Time}
+                      yScaleType={ScaleType.Linear}
+                      xAccessor="x"
+                      yAccessors={['y']}
+                      stackAccessors={['x']}
+                      data={mediumData}
+                      color={euiTheme.colors.vis.euiColorVisWarning0}
+                      timeZone="local"
+                    />
+                    <BarSeries
+                      id="critical"
+                      name={i18n.translate(
+                        'xpack.streams.significantEvents.detectedView.legend.critical',
+                        { defaultMessage: 'Critical' }
+                      )}
+                      xScaleType={ScaleType.Time}
+                      yScaleType={ScaleType.Linear}
+                      xAccessor="x"
+                      yAccessors={['y']}
+                      stackAccessors={['x']}
+                      data={criticalData}
+                      color={euiTheme.colors.vis.euiColorVisDanger0}
+                      timeZone="local"
+                    />
+                  </Chart>
                 </div>
-              ))}
+
+                {/* Legend */}
+                <div
+                  css={css`
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    gap: ${euiTheme.size.m};
+                    min-width: 80px;
+                  `}
+                >
+                  {[
+                    {
+                      label: i18n.translate(
+                        'xpack.streams.significantEvents.detectedView.legend.critical',
+                        { defaultMessage: 'Critical' }
+                      ),
+                      color: euiTheme.colors.vis.euiColorVisDanger0,
+                    },
+                    {
+                      label: i18n.translate(
+                        'xpack.streams.significantEvents.detectedView.legend.medium',
+                        { defaultMessage: 'Medium' }
+                      ),
+                      color: euiTheme.colors.vis.euiColorVisWarning0,
+                    },
+                    {
+                      label: i18n.translate(
+                        'xpack.streams.significantEvents.detectedView.legend.low',
+                        { defaultMessage: 'Low' }
+                      ),
+                      color: euiTheme.colors.vis.euiColorVisSuccess0,
+                    },
+                  ].map(({ label, color }) => (
+                    <div
+                      key={label}
+                      css={css`
+                        display: flex;
+                        align-items: center;
+                        gap: ${euiTheme.size.xs};
+                      `}
+                    >
+                      <span
+                        css={css`
+                          display: inline-block;
+                          width: 8px;
+                          height: 8px;
+                          border-radius: 50%;
+                          background: ${color};
+                          flex-shrink: 0;
+                        `}
+                      />
+                      <EuiText size="xs">
+                        <span>{label}</span>
+                      </EuiText>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </EuiPanel>
 
-        {/* Table header row: count + generate new */}
+        {/* Table header row — always rendered so spacing is identical between loading and loaded */}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <span>
-                {i18n.translate('xpack.streams.significantEvents.detectedView.showing', {
-                  defaultMessage: 'Showing 1–4 of 4 Significant events',
-                })}
-              </span>
-            </EuiText>
+            {!isLoading && (
+              <EuiText size="s" color="subdued">
+                <span>
+                  {i18n.translate('xpack.streams.significantEvents.detectedView.showing', {
+                    defaultMessage: 'Showing 1–4 of 4 Significant events',
+                  })}
+                </span>
+              </EuiText>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="s" iconType="arrowDown" iconSide="right">
@@ -938,11 +1064,72 @@ export function SignificantEventsDetectedView() {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        {/* Event rows */}
-        <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-          {MOCK_EVENTS.map((event) => (
-            <EventRow key={event.id} event={event} onExpand={setSelectedEvent} />
-          ))}
+        {/* Event rows — progress bar + empty state when loading, real rows when data is available */}
+        <EuiPanel
+          hasBorder
+          hasShadow={false}
+          paddingSize="none"
+          css={css`
+            position: relative;
+          `}
+        >
+          {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+          {isLoading ? (
+            <div
+              css={css`
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: ${euiTheme.size.l};
+                padding: ${euiTheme.size.xxl} ${euiTheme.size.l};
+                min-height: 340px;
+              `}
+            >
+              <AssetImage type="significantEventsDiscovering" size={160} />
+              <div
+                css={css`
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  gap: ${euiTheme.size.s};
+                  text-align: center;
+                  max-width: 400px;
+                `}
+              >
+                <EuiTitle size="xs">
+                  <h3>
+                    {i18n.translate('xpack.streams.significantEvents.detectedView.noEventsTitle', {
+                      defaultMessage: 'Currently no significant events discovered',
+                    })}
+                  </h3>
+                </EuiTitle>
+                <EuiText size="s" color="subdued">
+                  <p>
+                    {i18n.translate(
+                      'xpack.streams.significantEvents.detectedView.noEventsDescription',
+                      {
+                        defaultMessage:
+                          'We are listening for events, and correlating your results. Once something is discovered it will appear here.',
+                      }
+                    )}
+                  </p>
+                </EuiText>
+              </div>
+              <EuiButton size="s" isDisabled isLoading>
+                {i18n.translate('xpack.streams.significantEvents.detectedView.discoveringButton', {
+                  defaultMessage: 'Discovering ...',
+                })}
+              </EuiButton>
+            </div>
+          ) : (
+            <>
+              {/* Skeleton rows give a table-loading feel before rows appear */}
+              {MOCK_EVENTS.map((event) => (
+                <EventRow key={event.id} event={event} onExpand={setSelectedEvent} />
+              ))}
+            </>
+          )}
         </EuiPanel>
       </div>
 
