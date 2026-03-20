@@ -60,7 +60,7 @@ export class SnoozeNotificationPolicyRoute implements RouteHandler {
     try {
       const result = await this.notificationPolicyClient.snoozeNotificationPolicy({
         id: this.request.params.id,
-        snoozedUntil: this.request.body.snoozed_until,
+        snoozedUntil: this.request.body.snoozedUntil,
       });
 
       return this.response.ok({ body: result });

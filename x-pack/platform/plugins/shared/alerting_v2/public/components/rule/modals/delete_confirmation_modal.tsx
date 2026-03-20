@@ -10,28 +10,46 @@ import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-interface DeleteConfirmationModalProps {
+interface SingleDeleteProps {
   ruleName: string;
+  ruleCount?: undefined;
+}
+
+interface BulkDeleteProps {
+  ruleCount: number;
+  ruleName?: undefined;
+}
+
+type DeleteConfirmationModalProps = (SingleDeleteProps | BulkDeleteProps) & {
   onCancel: () => void;
   onConfirm: () => void;
   isLoading: boolean;
-}
+};
 
 export const DeleteConfirmationModal = ({
   ruleName,
+  ruleCount,
   onCancel,
   onConfirm,
   isLoading,
 }: DeleteConfirmationModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
+  const isBulk = ruleCount !== undefined;
 
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
-      title={i18n.translate('xpack.alertingV2.deleteConfirmationModal.title', {
-        defaultMessage: 'Delete rule',
-      })}
+      title={
+        isBulk
+          ? i18n.translate('xpack.alertingV2.deleteConfirmationModal.bulkTitle', {
+              defaultMessage: 'Delete {count, plural, one {# rule} other {# rules}}',
+              values: { count: ruleCount },
+            })
+          : i18n.translate('xpack.alertingV2.deleteConfirmationModal.title', {
+              defaultMessage: 'Delete rule',
+            })
+      }
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={i18n.translate('xpack.alertingV2.deleteConfirmationModal.cancelButton', {
@@ -44,11 +62,19 @@ export const DeleteConfirmationModal = ({
       isLoading={isLoading}
       data-test-subj="deleteRuleConfirmationModal"
     >
-      <FormattedMessage
-        id="xpack.alertingV2.deleteConfirmationModal.body"
-        defaultMessage='Are you sure you want to delete the rule "{ruleName}"? This action cannot be undone.'
-        values={{ ruleName }}
-      />
+      {isBulk ? (
+        <FormattedMessage
+          id="xpack.alertingV2.deleteConfirmationModal.bulkBody"
+          defaultMessage="Are you sure you want to delete {count, plural, one {# rule} other {# rules}}? This action cannot be undone."
+          values={{ count: ruleCount }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.alertingV2.deleteConfirmationModal.body"
+          defaultMessage='Are you sure you want to delete the rule "{ruleName}"? This action cannot be undone.'
+          values={{ ruleName }}
+        />
+      )}
     </EuiConfirmModal>
   );
 };

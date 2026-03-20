@@ -20,7 +20,7 @@ export const notificationPolicyDestinationSchema = z.discriminatedUnion('type', 
 export type NotificationPolicyDestination = z.infer<typeof notificationPolicyDestinationSchema>;
 
 export const snoozeNotificationPolicyBodySchema = z.object({
-  snoozed_until: z.string().datetime(),
+  snoozedUntil: z.string().datetime(),
 });
 
 export type SnoozeNotificationPolicyBody = z.infer<typeof snoozeNotificationPolicyBodySchema>;
@@ -38,7 +38,7 @@ const bulkDisableActionSchema = z.object({
 const bulkSnoozeActionSchema = z.object({
   id: z.string(),
   action: z.literal('snooze'),
-  snoozed_until: z.string().datetime(),
+  snoozedUntil: z.string().datetime(),
 });
 
 const bulkUnsnoozeActionSchema = z.object({
@@ -70,7 +70,7 @@ export const createNotificationPolicyDataSchema = z.object({
     .array(notificationPolicyDestinationSchema)
     .min(1, 'At least one destination must be provided'),
   matcher: z.string().optional(),
-  group_by: z.array(z.string()).optional(),
+  groupBy: z.array(z.string()).optional(),
   throttle: z.object({ interval: durationSchema }).optional(),
 });
 
@@ -83,9 +83,9 @@ export const updateNotificationPolicyDataSchema = z.object({
     .array(notificationPolicyDestinationSchema)
     .min(1, 'At least one destination must be provided')
     .optional(),
-  matcher: z.string().optional(),
-  group_by: z.array(z.string()).optional(),
-  throttle: z.object({ interval: durationSchema }).optional(),
+  matcher: z.string().optional().nullable(),
+  groupBy: z.array(z.string()).optional().nullable(),
+  throttle: z.object({ interval: durationSchema }).optional().nullable(),
 });
 
 export type UpdateNotificationPolicyData = z.infer<typeof updateNotificationPolicyDataSchema>;

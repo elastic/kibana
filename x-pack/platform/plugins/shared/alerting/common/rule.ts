@@ -98,6 +98,7 @@ export type SanitizedRuleConfig = Pick<
   | 'revision'
   | 'snoozeSchedule'
   | 'alertDelay'
+  | 'lastEnabledAt'
 > & {
   producer: string;
   ruleTypeId: string;

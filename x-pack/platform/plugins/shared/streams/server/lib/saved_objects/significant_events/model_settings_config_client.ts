@@ -20,6 +20,7 @@ export interface ModelSettings {
   connectorIdKnowledgeIndicatorExtraction?: string;
   connectorIdRuleGeneration?: string;
   connectorIdDiscovery?: string;
+  indexPatterns?: string;
 }
 
 export interface ModelSettingsConfigClient {
@@ -59,6 +60,7 @@ export class ModelSettingsConfigClientImpl implements ModelSettingsConfigClient 
         connectorIdKnowledgeIndicatorExtraction: undefined,
         connectorIdRuleGeneration: undefined,
         connectorIdDiscovery: undefined,
+        indexPatterns: undefined,
       };
     }
 
@@ -69,6 +71,7 @@ export class ModelSettingsConfigClientImpl implements ModelSettingsConfigClient 
       ),
       connectorIdRuleGeneration: toOptional(attributes.connectorIdRuleGeneration),
       connectorIdDiscovery: toOptional(attributes.connectorIdDiscovery),
+      indexPatterns: toOptional(attributes.indexPatterns),
     };
   }
 

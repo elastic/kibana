@@ -40,7 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: 'original-policy-description',
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
           matcher: "env == 'production' && region == 'us-east-1'",
-          group_by: ['service.name'],
+          groupBy: ['service.name'],
           throttle: { interval: '1m' },
         });
 
@@ -58,7 +58,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           destinations: [{ type: 'workflow', id: 'updated-workflow-id' }],
           description: 'updated-policy-description',
           matcher: "env == 'production' && region == 'us-west-2'",
-          group_by: ['service.name', 'environment'],
+          groupBy: ['service.name', 'environment'],
           throttle: { interval: '5m' },
           version: currentVersion,
         });
@@ -70,7 +70,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'updated-workflow-id' }]);
       expect(response.body.description).to.be('updated-policy-description');
       expect(response.body.matcher).to.be("env == 'production' && region == 'us-west-2'");
-      expect(response.body.group_by).to.eql(['service.name', 'environment']);
+      expect(response.body.groupBy).to.eql(['service.name', 'environment']);
       expect(response.body.throttle).to.eql({ interval: '5m' });
       expect(response.body.updatedAt).to.be.a('string');
       expect(response.body.auth).to.be.an('object');
@@ -89,7 +89,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: 'original-policy-description',
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
           matcher: "env == 'production' && region == 'us-east-1'",
-          group_by: ['service.name'],
+          groupBy: ['service.name'],
           throttle: { interval: '1m' },
         });
 
@@ -110,7 +110,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.description).to.be('original-policy-description');
       expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'original-workflow-id' }]);
       expect(response.body.matcher).to.be("env == 'production' && region == 'us-east-1'");
-      expect(response.body.group_by).to.eql(['service.name']);
+      expect(response.body.groupBy).to.eql(['service.name']);
       expect(response.body.throttle).to.eql({ interval: '1m' });
     });
 
@@ -124,7 +124,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: 'original-policy-description',
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
           matcher: "env == 'production' && region == 'us-east-1'",
-          group_by: ['service.name'],
+          groupBy: ['service.name'],
           throttle: { interval: '1m' },
         });
 
@@ -145,11 +145,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.description).to.be('only-description-updated');
       expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'original-workflow-id' }]);
       expect(response.body.matcher).to.be("env == 'production' && region == 'us-east-1'");
-      expect(response.body.group_by).to.eql(['service.name']);
+      expect(response.body.groupBy).to.eql(['service.name']);
       expect(response.body.throttle).to.eql({ interval: '1m' });
     });
 
-    it('should update only matcher, group_by, and throttle', async () => {
+    it('should update only matcher, groupBy, and throttle', async () => {
       const createResponse = await supertestWithoutAuth
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
@@ -159,7 +159,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: 'original-policy-description',
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
           matcher: "env == 'production' && region == 'us-east-1'",
-          group_by: ['service.name'],
+          groupBy: ['service.name'],
           throttle: { interval: '1m' },
         });
 
@@ -174,7 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .send({
           matcher: "env == 'staging' && region == 'eu-central-1'",
-          group_by: ['service.name', 'host.name'],
+          groupBy: ['service.name', 'host.name'],
           throttle: { interval: '15m' },
           version: currentVersion,
         });
@@ -185,7 +185,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.description).to.be('original-policy-description');
       expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'original-workflow-id' }]);
       expect(response.body.matcher).to.be("env == 'staging' && region == 'eu-central-1'");
-      expect(response.body.group_by).to.eql(['service.name', 'host.name']);
+      expect(response.body.groupBy).to.eql(['service.name', 'host.name']);
       expect(response.body.throttle).to.eql({ interval: '15m' });
     });
 

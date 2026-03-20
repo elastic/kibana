@@ -14,7 +14,8 @@ import { QueryResultsGrid } from './query_results_grid';
  * Rule results preview panel.
  *
  * Displays a live preview of the evaluation ES|QL query results as the user
- * configures the rule form. Delegates grid rendering to `QueryResultsGrid`.
+ * configures the rule form. Includes a chart histogram above the data grid
+ * when results are available. Delegates rendering to `QueryResultsGrid`.
  */
 export const RuleResultsPreview = () => {
   const {
@@ -27,6 +28,9 @@ export const RuleResultsPreview = () => {
     groupingFields,
     uniqueGroupCount,
     hasValidQuery,
+    query,
+    timeField,
+    lookback,
   } = useRulePreview();
 
   return (
@@ -52,6 +56,9 @@ export const RuleResultsPreview = () => {
       groupingFields={groupingFields}
       uniqueGroupCount={uniqueGroupCount}
       hasValidQuery={hasValidQuery}
+      query={query}
+      timeField={timeField}
+      lookback={lookback}
     />
   );
 };

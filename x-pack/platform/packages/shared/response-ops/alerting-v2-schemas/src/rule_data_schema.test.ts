@@ -431,6 +431,15 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('rejects recovering_count greater than 1000', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        state_transition: { recovering_count: 1001 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
     it('rejects an invalid pending_operator', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -746,6 +755,14 @@ describe('updateRuleDataSchema', () => {
     it('rejects pending_count greater than 1000', () => {
       const result = updateRuleDataSchema.safeParse({
         state_transition: { pending_count: 1001 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovering_count greater than 1000', () => {
+      const result = updateRuleDataSchema.safeParse({
+        state_transition: { recovering_count: 1001 },
       });
 
       expect(result.success).toBe(false);

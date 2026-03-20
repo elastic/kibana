@@ -12,3 +12,4 @@ export { validateDuration, validateMaxDuration, validateEsqlQuery } from './vali
 export * from './notification_policy_data_schema';
 export type { NotificationPolicyResponse } from './notification_policy_response';
 export * from './alert_action_schema';
+export * from './bulk_operation_schema';
