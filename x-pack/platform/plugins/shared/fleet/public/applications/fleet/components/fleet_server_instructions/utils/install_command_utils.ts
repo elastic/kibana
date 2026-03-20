@@ -13,6 +13,10 @@ import {
 import type { PLATFORM_TYPE } from '../../../hooks';
 import { PLATFORM_WITH_INSTALL_SERVERS } from '../../../hooks';
 
+type ProxyConfig = Pick<FleetProxy, 'url'> & {
+  proxy_headers?: FleetProxy['proxy_headers'];
+};
+
 export type CommandsByPlatform = {
   [key in PLATFORM_TYPE]: string;
 };
@@ -21,7 +25,7 @@ function getArtifact(
   platform: PLATFORM_TYPE,
   kibanaVersion: string,
   downloadSource?: DownloadSource,
-  downloadSourceProxy?: FleetProxy
+  downloadSourceProxy?: ProxyConfig
 ) {
   const ARTIFACT_BASE_URL = `${getDownloadBaseUrl(downloadSource)}/beats/elastic-agent`;
   const { windows: windowsDownloadSourceProxyArgs, curl: curlDownloadSourceProxyArgs } =
@@ -125,14 +129,14 @@ export function getInstallCommandForPlatform({
   platform: PLATFORM_TYPE;
   esOutputHost: string;
   serviceToken: string;
-  esOutputProxy?: FleetProxy | undefined;
+  esOutputProxy?: ProxyConfig | undefined;
   policyId?: string;
   fleetServerHost?: FleetServerHost | null;
   isProductionDeployment?: boolean;
   sslCATrustedFingerprint?: string;
   kibanaVersion?: string;
   downloadSource?: DownloadSource;
-  downloadSourceProxy?: FleetProxy;
+  downloadSourceProxy?: ProxyConfig;
 }): string {
   const newLineSeparator = platform === 'windows' || platform === 'windows_msi' ? '`\n' : '\\\n';
 
