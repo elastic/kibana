@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 
 import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
 
@@ -184,11 +184,7 @@ export const getDownloadSource = async (
 function sanitizeEnrollmentProxy(
   proxy: FleetProxy
 ): NonNullable<GetEnrollmentSettingsResponse['download_source_proxy']> {
-  return {
-    id: proxy.id,
-    name: proxy.name,
-    url: proxy.url,
-  };
+  return pick(proxy, ['id', 'name', 'url']);
 }
 
 function sanitizeEnrollmentFleetServerHost(host: FleetServerHost): FleetServerHost {

@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { DownloadSource, FleetProxy, FleetServerHost } from '../../../../../../common/types';
+import type { DownloadSource, ProxyConfig, FleetServerHost } from '../../../../../../common/types';
 import {
   getDownloadBaseUrl,
   getDownloadSourceProxyArgs,
 } from '../../../../../components/enrollment_instructions/manual';
 import type { PLATFORM_TYPE } from '../../../hooks';
 import { PLATFORM_WITH_INSTALL_SERVERS } from '../../../hooks';
-
-type ProxyConfig = Pick<FleetProxy, 'url'> & {
-  proxy_headers?: FleetProxy['proxy_headers'];
-};
 
 export type CommandsByPlatform = {
   [key in PLATFORM_TYPE]: string;

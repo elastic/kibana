@@ -7,11 +7,7 @@
 
 import { DEFAULT_DOWNLOAD_SOURCE_URI } from '../../../../common/constants';
 import { PLATFORM_WITH_INSTALL_SERVERS, type EXTENDED_PLATFORM_TYPE } from '../../../hooks';
-import type { DownloadSource, FleetProxy, FleetServerHost } from '../../../types';
-
-type ProxyConfig = Pick<FleetProxy, 'url'> & {
-  proxy_headers?: FleetProxy['proxy_headers'];
-};
+import type { DownloadSource, ProxyConfig, FleetServerHost } from '../../../types';
 
 function getFleetServerHostsEnrollArgs({
   apiKey,

@@ -164,6 +164,7 @@ export type {
   AwsCloudConnectorVars,
   CloudConnectorSecretReference,
   ComponentHealth,
+  ProxyConfig,
 } from '../../common/types';
 export {
   entries,
