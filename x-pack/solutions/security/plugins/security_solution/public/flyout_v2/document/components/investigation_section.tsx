@@ -11,6 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
@@ -50,7 +51,7 @@ export const InvestigationSection = memo(({ hit }: InvestigationSectionProps) =>
   const history = useHistory();
 
   const isAlert = useMemo(
-    () => (getFieldValue(hit, 'event.kind') as string) === EventKind.signal,
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
     [hit]
   );
 

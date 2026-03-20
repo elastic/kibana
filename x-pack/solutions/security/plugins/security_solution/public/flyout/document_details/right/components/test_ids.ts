@@ -164,14 +164,6 @@ export const ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID =
 export const ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}Vulnerabilities` as const;
 
-/* Threat intelligence */
-
-export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID = `${PREFIX}InsightsThreatIntelligence` as const;
-export const INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID =
-  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ThreatMatches` as const;
-export const INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID =
-  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}EnrichedWithThreatIntelligence` as const;
-
 /* Correlations */
 
 export const CORRELATIONS_TEST_ID = `${PREFIX}Correlations` as const;

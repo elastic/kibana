@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ReactElement, VFC } from 'react';
-import React, { useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
@@ -54,81 +54,83 @@ export interface InsightsSummaryRowProps {
  * The left and right section can accept a ReactElement to allow for more complex display.
  * Should be used for Entities, Threat intelligence, Prevalence, Correlations and Results components under the Insights section.
  */
-export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
-  loading = false,
-  error = false,
-  value,
-  text,
-  onShowDetails,
-  'data-test-subj': dataTestSubj,
-}) => {
-  const textDataTestSubj = useMemo(() => `${dataTestSubj}Text`, [dataTestSubj]);
-  const loadingDataTestSubj = useMemo(() => `${dataTestSubj}Loading`, [dataTestSubj]);
+export const InsightsSummaryRow = memo(
+  ({
+    loading = false,
+    error = false,
+    value,
+    text,
+    onShowDetails,
+    'data-test-subj': dataTestSubj,
+  }: InsightsSummaryRowProps) => {
+    const textDataTestSubj = useMemo(() => `${dataTestSubj}Text`, [dataTestSubj]);
+    const loadingDataTestSubj = useMemo(() => `${dataTestSubj}Loading`, [dataTestSubj]);
 
-  const button = useMemo(() => {
-    const buttonDataTestSubj = `${dataTestSubj}Button`;
-    const valueDataTestSubj = `${dataTestSubj}Value`;
+    const button = useMemo(() => {
+      const buttonDataTestSubj = `${dataTestSubj}Button`;
+      const valueDataTestSubj = `${dataTestSubj}Value`;
+
+      return (
+        <>
+          {typeof value === 'number' ? (
+            <EuiBadge color="hollow">
+              <EuiButtonEmpty
+                aria-label={BUTTON}
+                onClick={onShowDetails}
+                disabled={!onShowDetails}
+                flush={'both'}
+                size="xs"
+                data-test-subj={buttonDataTestSubj}
+              >
+                <FormattedCount count={value} />
+              </EuiButtonEmpty>
+            </EuiBadge>
+          ) : (
+            <div data-test-subj={valueDataTestSubj}>{value}</div>
+          )}
+        </>
+      );
+    }, [dataTestSubj, onShowDetails, value]);
+
+    if (loading) {
+      return (
+        <EuiSkeletonText
+          lines={1}
+          size="m"
+          isLoading={loading}
+          contentAriaLabel={LOADING}
+          data-test-subj={loadingDataTestSubj}
+        />
+      );
+    }
+
+    if (error) {
+      return null;
+    }
 
     return (
-      <>
-        {typeof value === 'number' ? (
-          <EuiBadge color="hollow">
-            <EuiButtonEmpty
-              aria-label={BUTTON}
-              onClick={onShowDetails}
-              disabled={!onShowDetails}
-              flush={'both'}
-              size="xs"
-              data-test-subj={buttonDataTestSubj}
-            >
-              <FormattedCount count={value} />
-            </EuiButtonEmpty>
-          </EuiBadge>
-        ) : (
-          <div data-test-subj={valueDataTestSubj}>{value}</div>
-        )}
-      </>
-    );
-  }, [dataTestSubj, onShowDetails, value]);
-
-  if (loading) {
-    return (
-      <EuiSkeletonText
-        lines={1}
-        size="m"
-        isLoading={loading}
-        contentAriaLabel={LOADING}
-        data-test-subj={loadingDataTestSubj}
-      />
-    );
-  }
-
-  if (error) {
-    return null;
-  }
-
-  return (
-    <EuiFlexGroup
-      gutterSize="none"
-      justifyContent={'spaceBetween'}
-      alignItems={'center'}
-      responsive={false}
-    >
-      <EuiFlexItem
-        data-test-subj={textDataTestSubj}
-        css={css`
-          word-break: break-word;
-          display: -webkit-box;
-          -webkit-line-clamp: 1;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        `}
+      <EuiFlexGroup
+        gutterSize="none"
+        justifyContent={'spaceBetween'}
+        alignItems={'center'}
+        responsive={false}
       >
-        {text}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>{button}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+        <EuiFlexItem
+          data-test-subj={textDataTestSubj}
+          css={css`
+            word-break: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          `}
+        >
+          {text}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 InsightsSummaryRow.displayName = 'InsightsSummaryRow';
