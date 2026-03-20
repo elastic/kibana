@@ -7,7 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
+import { getConversationAttachmentsSection } from '../../utils/attachment_presentation';
 import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
@@ -31,9 +31,6 @@ export const getAnswerAgentPrompt = async (
 
   return [
     ['system', getAnswerSystemMessage(params)],
-    ...getConversationAttachmentsSystemMessages(
-      params.processedConversation.versionedAttachmentPresentation
-    ),
     ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
     ...formatAnswerActionHistory({ actions: answerActions }),
@@ -46,7 +43,7 @@ export const getAnswerSystemMessage = ({
   },
   conversationTimestamp,
   capabilities,
-  processedConversation: { attachmentTypes },
+  processedConversation: { attachmentTypes, versionedAttachmentPresentation },
 }: AnswerAgentPromptParams): string => {
   const visEnabled = capabilities.visualizations;
 
@@ -71,6 +68,8 @@ Your role is to be the **final answering agent** in a multi-agent flow. Your **O
 ${customInstructionsBlock(customInstructions)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
+
+${getConversationAttachmentsSection(versionedAttachmentPresentation)}
 
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.
@@ -110,7 +109,7 @@ export const getStructuredAnswerPrompt = async (
     processedConversation,
     resultTransformer,
   } = params;
-  const { attachmentTypes } = processedConversation;
+  const { attachmentTypes, versionedAttachmentPresentation } = processedConversation;
   const visEnabled = capabilities.visualizations;
 
   // Generate messages from the conversation's rounds
@@ -144,6 +143,8 @@ ${customInstructionsBlock(customInstructions)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
 
+${getConversationAttachmentsSection(versionedAttachmentPresentation)}
+
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.
 - Use custom rendering when appropriate.
@@ -164,9 +165,6 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
 - [ ] No internal tool process or names revealed (unless user asked).`),
     ],
-    ...getConversationAttachmentsSystemMessages(
-      processedConversation.versionedAttachmentPresentation
-    ),
     ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
     ...formatAnswerActionHistory({ actions: answerActions }),

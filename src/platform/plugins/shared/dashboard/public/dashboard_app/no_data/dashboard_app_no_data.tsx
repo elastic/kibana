@@ -68,14 +68,13 @@ export const DashboardAppNoDataPage = ({
     abortController?.abort(AbortReason.REPLACED);
     if (lensHelpersAsync.value) {
       const abc = new AbortController();
-      const { dataViews } = dataService;
-      const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
+      const indexName = (await getIndexForESQLQuery({ http: coreServices.http })) ?? '*';
       const dataView = await getESQLAdHocDataview({
-        dataViewsService: dataViews,
+        dataViewsService: dataService.dataViews,
         query: `FROM ${indexName}`,
         http: coreServices.http,
       });
-      const esqlQuery = getInitialESQLQuery(dataView, true);
+      const esqlQuery = getInitialESQLQuery(dataView);
 
       try {
         const columns = await getESQLQueryColumns({

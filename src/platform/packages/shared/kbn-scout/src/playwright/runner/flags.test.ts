@@ -151,6 +151,7 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: undefined,
       headed: false,
+      repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
@@ -180,6 +181,7 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: 'snapshot',
       headed: true,
+      repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
@@ -208,6 +210,7 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: undefined,
       headed: false,
+      repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
@@ -237,6 +240,7 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: 'snapshot',
       headed: true,
+      repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
       serverConfigSet: 'default',
@@ -246,6 +250,87 @@ describe('parseTestFlags', () => {
         location: 'cloud',
       },
     });
+  });
+
+  it(`should parse with --repeatEach flag`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      headed: false,
+      repeatEach: '5',
+      serverConfigSet: 'default',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      configPath: '/path/to/config',
+      esFrom: undefined,
+      headed: false,
+      repeatEach: 5,
+      installDir: undefined,
+      logsDir: undefined,
+      serverConfigSet: 'default',
+      testTarget: {
+        arch: 'stateful',
+        domain: 'classic',
+        location: 'local',
+      },
+    });
+  });
+
+  it(`should throw an error when '--repeatEach' is not a number`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      headed: false,
+      repeatEach: 'abc',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `unable to parse --repeatEach value [abc] as a number`
+    );
+  });
+
+  it(`should throw an error when '--repeatEach' is zero`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      headed: false,
+      repeatEach: '0',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--repeatEach' must be a positive integer, got '0'`
+    );
+  });
+
+  it(`should throw an error when '--repeatEach' is a decimal`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      headed: false,
+      repeatEach: '2.5',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--repeatEach' must be a positive integer, got '2.5'`
+    );
   });
 
   describe('testFiles flag', () => {
@@ -282,6 +367,7 @@ describe('parseTestFlags', () => {
         configPath: derivedConfig,
         esFrom: undefined,
         headed: false,
+        repeatEach: undefined,
         installDir: undefined,
         logsDir: undefined,
         serverConfigSet: 'default',
@@ -325,6 +411,7 @@ describe('parseTestFlags', () => {
         configPath: derivedConfig,
         esFrom: undefined,
         headed: false,
+        repeatEach: undefined,
         installDir: undefined,
         logsDir: undefined,
         serverConfigSet: 'default',

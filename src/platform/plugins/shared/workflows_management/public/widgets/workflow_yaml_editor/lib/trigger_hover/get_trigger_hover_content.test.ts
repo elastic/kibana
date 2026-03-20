@@ -54,6 +54,34 @@ describe('getTriggerHoverContent', () => {
     expect(result!.value).toContain('The action that triggered');
   });
 
+  it('includes nested event schema properties as a tree in trigger hover', () => {
+    const eventSchema = z.object({
+      message: z.string(),
+      foo: z
+        .object({
+          bar: z.object({
+            baz: z.string(),
+          }),
+        })
+        .optional(),
+    });
+    const definition = {
+      id: 'example.nested',
+      title: 'Nested example',
+      description: 'Trigger with nested event shape.',
+      eventSchema,
+    };
+    const result = getTriggerHoverContent('example.nested', definition);
+    expect(result).not.toBeNull();
+    expect(result!.value).toContain('`message`');
+    expect(result!.value).toContain('`foo`');
+    expect(result!.value).toContain('`bar`');
+    expect(result!.value).toContain('`baz`');
+    // Nested segments are indented (tree format)
+    expect(result!.value).toMatch(/\n  - `bar`/);
+    expect(result!.value).toMatch(/\n    - `baz`/);
+  });
+
   it('returns content for custom trigger with documentation', () => {
     const eventSchema = z.object({ severity: z.string() });
     const getTriggerDefinition = (id: string) =>
@@ -66,8 +94,8 @@ describe('getTriggerHoverContent', () => {
             documentation: {
               details: 'Filter when this workflow runs using KQL on event properties.',
               examples: [
-                '## Exact severity\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    with:\n      condition: \'event.severity == "high"\'\n```',
-                '## Multiple severities\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    with:\n      condition: \'event.severity in ["high", "critical"]\'\n```',
+                '## Exact severity\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    on:\n      condition: \'event.severity == "high"\'\n```',
+                '## Multiple severities\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    on:\n      condition: \'event.severity in ["high", "critical"]\'\n```',
               ],
             },
           }

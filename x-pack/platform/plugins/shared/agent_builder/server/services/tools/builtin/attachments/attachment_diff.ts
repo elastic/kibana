@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { getVersion } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';

@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: Get Evaluation Run Scores API endpoint
+  version: "1"
+paths:
+  /internal/evals/runs/{runId}/scores:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetEvaluationRunScores
+      description: Get individual score documents for an evaluation run
+      summary: Get evaluation run scores
+      tags:
+        - Evals API
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: suite_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by suite ID
+        - name: model_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by task model ID
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scores:
+                    type: array
+                    items:
+                      $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluationScoreDocument'
+                  total:
+                    type: integer
+                required:
+                  - scores
+                  - total

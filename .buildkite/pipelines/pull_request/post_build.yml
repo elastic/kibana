@@ -3,7 +3,6 @@ steps:
     continue_on_failure: true
 
   - command: .buildkite/scripts/lifecycle/post_build.sh
-    cancel_on_build_failing: true
     label: Post-Build
     agents:
       machineType: n2-standard-2

@@ -8,7 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { FunctionComponent, PropsWithChildren } from 'react';
+import type { FunctionComponent } from 'react';
 import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
@@ -114,11 +114,6 @@ export interface SecuritySolutionCellRendererFeature {
   >;
 }
 
-export interface SecuritySolutionAppWrapperFeature {
-  id: 'security-solution-app-wrapper';
-  getWrapper: () => Promise<() => FunctionComponent<PropsWithChildren<{}>>>;
-}
-
 export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
   id: 'security-solution-alert-flyout-overview-tab';
   render: (hit: DataTableRecord) => JSX.Element;
@@ -126,7 +121,6 @@ export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
 
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
-  | SecuritySolutionAppWrapperFeature
   | SecuritySolutionAlertFlyoutOverviewTabFeature;
 
 /** ****************************************************************************************/

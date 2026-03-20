@@ -65,6 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Kubernetes Dashboard', () => {
+      // dashboard-summary-section element not rendered in test environment
       it.skip('displays accurate summary compliance score', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {

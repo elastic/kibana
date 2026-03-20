@@ -10,6 +10,7 @@ import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
 import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
+  AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   AI_CHAT_EXPERIENCE_TYPE,
   DATA_SOURCES_ENABLED_SETTING_ID,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
@@ -23,6 +24,7 @@ const READ_ONLY_SETTINGS: string[] = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AI_CHAT_EXPERIENCE_TYPE,
+  AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   DATA_SOURCES_ENABLED_SETTING_ID,
 ];
 

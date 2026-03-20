@@ -163,6 +163,10 @@ export const SettingsPage: React.FC<Props> = memo(
       keepPoliciesUpToDate ?? false
     );
 
+    useEffect(() => {
+      setKeepPoliciesUpToDateSwitchValue(keepPoliciesUpToDate ?? false);
+    }, [keepPoliciesUpToDate]);
+
     const handleKeepPoliciesUpToDateSwitchChange = useCallback(() => {
       setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
 
@@ -245,14 +249,6 @@ export const SettingsPage: React.FC<Props> = memo(
           <SideBarColumn grow={1} />
           <EuiFlexItem grow={7}>
             <EuiText>
-              <EuiTitle>
-                <h3>
-                  <FormattedMessage
-                    id="xpack.fleet.integrations.settings.packageSettingsTitle"
-                    defaultMessage="Settings"
-                  />
-                </h3>
-              </EuiTitle>
               <EuiSpacer size="s" />
               <DeprecationCallout packageInfo={packageInfo} integrationInfo={integrationInfo} />
               <DeprecatedFeaturesCallout packageInfo={packageInfo} />

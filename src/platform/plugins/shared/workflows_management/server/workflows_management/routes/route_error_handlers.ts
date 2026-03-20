@@ -9,6 +9,7 @@
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
 import {
+  WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
   WorkflowNotFoundError,
 } from '@kbn/workflows/common/errors';
@@ -33,6 +34,14 @@ export function handleRouteError(
 ) {
   if (options?.checkNotFound && error instanceof WorkflowExecutionNotFoundError) {
     return response.notFound();
+  }
+
+  if (error instanceof WorkflowExecutionInvalidStatusError) {
+    return response.conflict({
+      body: {
+        message: error.message,
+      },
+    });
   }
 
   if (error instanceof InvalidYamlSyntaxError || error instanceof InvalidYamlSchemaError) {

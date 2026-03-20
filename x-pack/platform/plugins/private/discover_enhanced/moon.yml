@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/discover-enhanced-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/discover-enhanced-plugin'
+  title: '@kbn/discover-enhanced-plugin'
   description: Moon project for @kbn/discover-enhanced-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/discover_enhanced
+  sourceRoot: x-pack/platform/plugins/private/discover_enhanced
 dependsOn:
   - '@kbn/core'
   - '@kbn/discover-plugin'
@@ -49,14 +48,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

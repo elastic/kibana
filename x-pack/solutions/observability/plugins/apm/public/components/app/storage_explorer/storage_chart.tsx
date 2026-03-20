@@ -79,7 +79,7 @@ export function StorageChart() {
   const max = Math.max(...xValues);
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const timeZone = getTimeZone(core.uiSettings);
+  const timeZone = getTimeZone(core?.uiSettings);
   const isEmpty = isTimeseriesEmpty(storageTimeSeries);
 
   return (

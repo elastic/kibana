@@ -12,6 +12,7 @@ Features are stable facts about real system components that are explicitly suppo
 - `properties` (object): Stable, low-cardinality properties for deduplication (e.g., entity name, cloud provider, library name)
 - `confidence` (number): 0-100 score
 - `evidence` (array of strings): Supporting evidence from logs
+- `evidence_doc_ids` (array of strings): Elasticsearch document `_id` values of sample documents that directly support the evidence (for traceability)
 - `tags` (array of strings): Descriptive tags
 - `meta` (object): High-cardinality or variable data (e.g., availability zones, API endpoints, runtime details), can be empty {}
 

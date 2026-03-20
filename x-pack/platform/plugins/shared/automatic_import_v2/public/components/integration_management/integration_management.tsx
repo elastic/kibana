@@ -11,20 +11,33 @@ import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { ManagementContents } from './management_contents/management_contents';
 import { ButtonsFooter } from '../../common/components/button_footer';
 import { ConnectorSelector } from '../../common/components/connector_selector';
-import { IntegrationFormProvider, useIntegrationForm } from './forms/integration_form';
+import { IntegrationFormProvider } from './forms/integration_form';
 import type { IntegrationFormData } from './forms/types';
 import { PAGE_RESTRICT_WIDTH } from './constants';
 import * as i18n from './translations';
-import { useGetIntegrationById } from '../../common';
+import { useGetIntegrationById, useKibana } from '../../common';
 import { normalizeTitleName } from '../../common/lib/helper_functions';
 
-const IntegrationManagementContents: React.FC = () => {
-  const { submit, isValid } = useIntegrationForm();
+const INTEGRATIONS_APP_ID = 'integrations';
+const INTEGRATIONS_MANAGE_PATH = '/browse?view=manage';
 
-  const handleCancel = () => {
-    // TODO: Link back to integrations later
-    window.history.back();
-  };
+const IntegrationManagementContents: React.FC = () => {
+  const { application } = useKibana().services;
+  const { integrationId } = useParams<{ integrationId?: string }>();
+  const { integration } = useGetIntegrationById(integrationId);
+  const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
+
+  const navigateToManage = useCallback(() => {
+    application.navigateToApp(INTEGRATIONS_APP_ID, { path: INTEGRATIONS_MANAGE_PATH });
+  }, [application]);
+
+  const handleCancel = useCallback(() => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigateToManage();
+    }
+  }, [navigateToManage]);
 
   return (
     <>
@@ -35,12 +48,17 @@ const IntegrationManagementContents: React.FC = () => {
           <ManagementContents />
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
-      <ButtonsFooter onAction={submit} isActionDisabled={!isValid} onCancel={handleCancel} />
+      <ButtonsFooter
+        onAction={navigateToManage}
+        isActionDisabled={!hasDataStreams}
+        onCancel={handleCancel}
+      />
     </>
   );
 };
 
 export const IntegrationManagement = React.memo(() => {
+  const { application } = useKibana().services;
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
 
@@ -55,10 +73,7 @@ export const IntegrationManagement = React.memo(() => {
     };
   }, [integration]);
 
-  const handleSubmit = useCallback(async (data: IntegrationFormData) => {
-    // eslint-disable-next-line no-console
-    console.log('Form submitted with done button:', data);
-  }, []);
+  const handleSubmit = useCallback(async (_data: IntegrationFormData) => {}, []);
 
   const existingDataStreamTitles = useMemo(
     () =>
@@ -73,7 +88,6 @@ export const IntegrationManagement = React.memo(() => {
     return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />;
   }
 
-  // TODO: Refactor into separate component
   if (integrationId && (isError || (!isLoading && !integration))) {
     return (
       <EuiEmptyPrompt
@@ -82,7 +96,15 @@ export const IntegrationManagement = React.memo(() => {
         title={<h2>{i18n.INTEGRATION_NOT_FOUND_TITLE}</h2>}
         body={<p>{i18n.INTEGRATION_NOT_FOUND_DESCRIPTION}</p>}
         actions={
-          <EuiButton color="primary" fill onClick={() => window.history.back()}>
+          <EuiButton
+            color="primary"
+            fill
+            onClick={() =>
+              application.navigateToApp(INTEGRATIONS_APP_ID, {
+                path: INTEGRATIONS_MANAGE_PATH,
+              })
+            }
+          >
             {i18n.GO_BACK_BUTTON}
           </EuiButton>
         }

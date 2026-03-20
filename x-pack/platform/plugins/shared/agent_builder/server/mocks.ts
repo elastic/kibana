@@ -32,6 +32,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     hooks: {
       register: jest.fn(),
     },
+    sml: {
+      registerType: jest.fn(),
+    },
   };
 };
 
@@ -47,9 +50,20 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
       execute: jest.fn(),
       getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),
     },
+    skills: {
+      getRegistry: jest.fn(),
+      register: jest.fn(),
+    },
     execution: {
       executeAgent: jest.fn(),
       getExecution: jest.fn(),
+      findExecutions: jest.fn(),
+    },
+    runtime: {
+      createModelProvider: jest.fn(),
+    },
+    sml: {
+      indexAttachment: jest.fn(),
     },
   };
 };

@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import Path from 'path';
-import { node } from 'execa';
-import { REPO_ROOT } from '@kbn/repo-info';
+import type { Client } from '@elastic/elasticsearch';
 import kbnDatemath from '@kbn/datemath';
 import { tags } from '@kbn/scout';
-import type { ScoutTestConfig } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ProcessingSimulationResponse, FlattenRecord } from '@kbn/streams-schema';
-import { extractGrokPatternDangerouslySlow } from '@kbn/grok-heuristics';
+import { extractGrokPatternDangerouslySlow, type GrokPatternNode } from '@kbn/grok-heuristics';
 import { groupMessagesByPattern as groupMessagesByDissectPattern } from '@kbn/dissect-heuristics';
+import type { DefaultEvaluators } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import {
   PIPELINE_SUGGESTION_DATASETS,
@@ -25,6 +23,7 @@ import {
   calculatePipelineSuggestionMetrics,
   type PipelineSuggestionMetrics,
 } from './pipeline_suggestion_metrics';
+import { indexSynthtraceScenario } from './synthtrace_helpers';
 
 /**
  * Pipeline suggestion quality evaluation.
@@ -41,70 +40,31 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
   const from = kbnDatemath.parse('now-2m')!;
   const to = kbnDatemath.parse('now')!;
 
-  function getSharedArgs({ config }: { config: ScoutTestConfig }) {
-    const esUrl = new URL(config.hosts.elasticsearch);
-    const kbnUrl = new URL(config.hosts.kibana);
-
-    esUrl.username = config.auth.username;
-    esUrl.password = config.auth.password;
-
-    kbnUrl.username = config.auth.username;
-    kbnUrl.password = config.auth.password;
-
-    return [
-      `--from=${from.toISOString()}`,
-      `--to=${to.toISOString()}`,
-      `--kibana=${kbnUrl.toString()}`,
-      `--target=${esUrl.toString()}`,
-      '--assume-package-version=9.2.0',
-      '--workers=1',
-    ];
-  }
-
-  const synthtraceScript = Path.join(REPO_ROOT, 'scripts/synthtrace.js');
-
   /**
    * Flatten nested objects into dot notation.
    * E.g., { attributes: { filepath: 'Apache.log' } } => { 'attributes.filepath': 'Apache.log' }
    */
-  function flattenObject(obj: any, prefix = ''): FlattenRecord {
-    const flattened: Record<string, any> = {};
+  function flattenObject(obj: Record<string, unknown>, prefix = ''): FlattenRecord {
+    const flattened: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(obj)) {
       const newKey = prefix ? `${prefix}.${key}` : key;
 
       if (value && typeof value === 'object' && !Array.isArray(value)) {
-        Object.assign(flattened, flattenObject(value, newKey));
+        Object.assign(flattened, flattenObject(value as Record<string, unknown>, newKey));
       } else {
         flattened[newKey] = value;
       }
     }
 
-    return flattened;
-  }
-
-  /**
-   * Index logs for a specific system using synthtrace.
-   */
-  async function indexSystemLogs({ config, system }: { config: ScoutTestConfig; system: string }) {
-    await node(
-      require.resolve(synthtraceScript),
-      [
-        'sample_logs',
-        ...getSharedArgs({ config }),
-        `--scenarioOpts.systems="${system}"`,
-        '--scenarioOpts.rpm=100',
-        '--scenarioOpts.streamType=wired',
-      ],
-      { stdio: 'inherit' }
-    );
+    return flattened as FlattenRecord;
   }
 
   /**
    * Fetch sample documents from a stream.
    */
   async function fetchSampleDocuments(
-    esClient: any,
+    esClient: Client,
     streamName: string,
     count: number
   ): Promise<FlattenRecord[]> {
@@ -116,7 +76,9 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
 
     const hits = response.hits?.hits || [];
     // Flatten nested objects to dot notation for the API
-    return hits.map((hit: any) => flattenObject(hit._source));
+    return hits.map(
+      (hit) => flattenObject((hit._source ?? {}) as Record<string, unknown>) as FlattenRecord
+    );
   }
 
   /**
@@ -127,7 +89,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
       fieldName: string;
       patternGroups: Array<{
         messages: string[];
-        nodes: any[];
+        nodes: GrokPatternNode[];
       }>;
     } | null;
     dissect: {
@@ -241,7 +203,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
   async function runPipelineSuggestion(
     example: PipelineSuggestionEvaluationExample,
     kbnClient: KbnClient,
-    esClient: any,
+    esClient: Client,
     connector: { id: string }
   ): Promise<{
     input: typeof example.input;
@@ -278,7 +240,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
 
         if (!documents || documents.length === 0) {
           // Check if parent stream has documents
-          const parentDocs = await fetchSampleDocuments(esClient, 'logs', 10);
+          const parentDocs = await fetchSampleDocuments(esClient, 'logs.otel', 10);
           const parentCount = parentDocs.length;
 
           // Get some sample filepaths from parent to help debug routing
@@ -289,7 +251,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
 
           throw new Error(
             `No documents found in stream ${input.stream_name}. ` +
-              `Parent stream 'logs' has ${parentCount} documents. ` +
+              `Parent stream 'logs.otel' has ${parentCount} documents. ` +
               `Sample filepaths: ${sampleFilepaths.join(', ')}. ` +
               `Expected filepath: ${input.system}.log`
           );
@@ -468,10 +430,11 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
   const codeBasedEvaluator = {
     name: 'pipeline_quality_score',
     kind: 'CODE' as const,
-    evaluate: async ({ output }: { output: any }) => {
+    evaluate: async ({ output }: { output: unknown }) => {
       // Handle both direct and nested output structures
-      const actualOutput = output?.output || output;
-      const metrics: PipelineSuggestionMetrics = actualOutput?.metrics;
+      const out = output as Record<string, unknown>;
+      const actualOutput = (out?.output ?? out) as Record<string, unknown>;
+      const metrics = actualOutput?.metrics as PipelineSuggestionMetrics | undefined;
 
       if (!metrics) {
         // eslint-disable-next-line no-console
@@ -516,22 +479,36 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
   /**
    * LLM-based evaluator with clear criteria.
    */
-  function createLlmEvaluator(evaluators: any) {
+  function createLlmEvaluator(evaluators: DefaultEvaluators) {
     return {
       name: 'llm_pipeline_quality',
       kind: 'LLM' as const,
-      evaluate: async ({ input, output, expected }: any) => {
+      evaluate: async ({
+        input,
+        output,
+        expected,
+        metadata,
+      }: {
+        input: unknown;
+        output: unknown;
+        expected: unknown;
+        metadata: unknown;
+      }) => {
         // Handle both direct and nested output structures
-        const actualOutput = output?.output || output;
+        const out = output as Record<string, unknown>;
+        const actualOutput = (out?.output ?? out) as Record<string, unknown>;
         const pipeline = actualOutput?.suggestedPipeline;
         const metrics = actualOutput?.metrics;
 
         // Check if no pipeline is expected (structured data that needs no processing)
+        const exp = expected as Record<string, unknown>;
+        const expProcessors = exp?.expected_processors as Record<string, unknown> | undefined;
         const expectsNoPipeline =
-          expected?.expected_processors?.parsing === undefined &&
-          (expected?.expected_processors?.normalization?.length ?? 0) === 0;
+          expProcessors?.parsing === undefined &&
+          ((expProcessors?.normalization as unknown[])?.length ?? 0) === 0;
 
-        const isEmptyPipeline = !pipeline || (pipeline.steps?.length ?? 0) === 0;
+        const pipelineObj = pipeline as StreamlangDSL | null | undefined;
+        const isEmptyPipeline = !pipelineObj || (pipelineObj.steps?.length ?? 0) === 0;
 
         // If no pipeline was expected and LLM returned empty/no pipeline, that's perfect
         if (expectsNoPipeline && isEmptyPipeline) {
@@ -580,30 +557,35 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
            - Simulation should show acceptable error handling`,
         ];
 
-        const steps = pipeline?.steps || [];
-        const processorTypes = steps.map((s: any) => s.action).join(', ');
+        const steps = pipelineObj?.steps ?? [];
+        const processorTypes = steps.map((s) => (s as { action?: string }).action).join(', ');
 
+        const inp = input as Record<string, unknown>;
+        const qualityThresholds = exp?.quality_thresholds as Record<string, unknown> | undefined;
+        const schemaExpectations = exp?.schema_expectations as Record<string, unknown> | undefined;
+        const metricsObj = metrics as PipelineSuggestionMetrics | undefined;
         return evaluators.criteria(criteria).evaluate({
           input: {
-            system: input?.system,
-            sample_document_count: input?.sample_document_count,
+            system: inp?.system,
+            sample_document_count: inp?.sample_document_count,
           },
           output: {
             pipeline_steps: steps,
             processor_types: processorTypes,
-            step_count: metrics?.stepCount,
-            step_efficiency: metrics?.stepEfficiency,
-            parse_rate: metrics?.parseRate,
-            processor_failure_rates: metrics?.processorFailureRates,
-            semantic_field_coverage: metrics?.semanticFieldCoverage,
-            otel_compliance: metrics?.otelCompliance,
+            step_count: metricsObj?.stepCount,
+            step_efficiency: metricsObj?.stepEfficiency,
+            parse_rate: metricsObj?.parseRate,
+            processor_failure_rates: metricsObj?.processorFailureRates,
+            semantic_field_coverage: metricsObj?.semanticFieldCoverage,
+            otel_compliance: metricsObj?.otelCompliance,
           },
           expected: {
-            min_parse_rate: expected?.quality_thresholds?.min_parse_rate,
-            required_fields: expected?.quality_thresholds?.required_semantic_fields,
-            expected_schema_fields: expected?.schema_expectations?.expected_schema_fields,
-            expected_processors: expected?.expected_processors,
+            min_parse_rate: qualityThresholds?.min_parse_rate,
+            required_fields: qualityThresholds?.required_semantic_fields,
+            expected_schema_fields: schemaExpectations?.expected_schema_fields,
+            expected_processors: exp?.expected_processors,
           },
+          metadata: (metadata as Record<string, unknown> | null) ?? null,
         });
       },
     };
@@ -645,21 +627,25 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
               example.input.sample_documents && example.input.sample_documents.length > 0;
 
             if (isInlineMode) {
-              // INLINE MODE: Use parent 'logs' stream directly, pass documents in API call
+              // INLINE MODE: Use parent 'logs.otel' stream directly, pass documents in API call
               // No need to fork or index - documents are passed directly
-              example.input.stream_name = 'logs';
+              example.input.stream_name = 'logs.otel';
             } else {
               // INDEX MODE: Create system-specific stream AND index data
+              // stream_name in dataset must be logs.otel.<system> (child of logs.otel per API)
               // Route based on attributes.filepath which is set to "{System}.log" by synthtrace
-              await apiServices.streams.forkStream('logs', example.input.stream_name, {
+              await apiServices.streams.forkStream('logs.otel', example.input.stream_name, {
                 field: 'attributes.filepath',
                 eq: `${example.input.system}.log`,
               });
 
               // Index logs for this system - this will route to the child stream
-              await indexSystemLogs({
+              await indexSynthtraceScenario({
+                scenario: 'sample_logs',
+                scenarioOpts: { systems: example.input.system, rpm: 100, streamType: 'wired' },
                 config,
-                system: example.input.system,
+                from,
+                to,
               });
 
               // Wait for documents to be indexed and routed

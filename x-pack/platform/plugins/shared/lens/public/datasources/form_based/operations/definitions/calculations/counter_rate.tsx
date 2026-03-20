@@ -73,8 +73,8 @@ export const counterRateOperation: OperationDefinition<
       column.timeShift
     );
   },
-  toExpression: (layer, columnId) => {
-    return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
+  toExpression: (layer, columnId, indexPattern) => {
+    return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate', {}, indexPattern);
   },
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];

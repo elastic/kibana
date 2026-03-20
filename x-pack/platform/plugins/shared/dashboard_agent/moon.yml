@@ -4,22 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dashboard-agent-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-ai-infra'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/dashboard-agent-plugin'
+  title: '@kbn/dashboard-agent-plugin'
   description: Moon project for @kbn/dashboard-agent-plugin
   channel: ''
   owner: '@elastic/appex-ai-infra'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/dashboard_agent
+  sourceRoot: x-pack/platform/plugins/shared/dashboard_agent
 dependsOn:
   - '@kbn/core'
-  - '@kbn/logging'
   - '@kbn/i18n'
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-browser'
@@ -29,14 +27,12 @@ dependsOn:
   - '@kbn/dashboard-agent-common'
   - '@kbn/zod'
   - '@kbn/lens-embeddable-utils'
-  - '@kbn/lens-common-2'
-  - '@kbn/agent-builder-genai-utils'
-  - '@kbn/share-plugin'
-  - '@kbn/react-kibana-mount'
-  - '@kbn/react-kibana-context-render'
-  - '@kbn/deeplinks-analytics'
   - '@kbn/dashboard-markdown'
-  - '@kbn/management-settings-ids'
+  - '@kbn/lens-plugin'
+  - '@kbn/unified-search-plugin'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/share-plugin'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
@@ -51,14 +47,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

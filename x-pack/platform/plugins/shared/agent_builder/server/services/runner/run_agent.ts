@@ -42,6 +42,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     toolsService,
     attachmentsService,
     resultStore,
+    skillsStore,
     attachmentStateManager,
     logger,
     promptManager,
@@ -80,6 +81,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       request,
     }),
     resultStore,
+    skillsStore,
     attachmentStateManager,
     filestore,
     stateManager,
@@ -91,7 +93,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       spaceId,
       runner: manager.getRunner(),
     }),
-    skills: createSkillsService({
+    skills: await createSkillsService({
       skillServiceStart,
       toolsServiceStart: toolsService,
       request,
@@ -112,9 +114,14 @@ export const runAgent = async ({
   agentExecutionParams: ScopedRunnerRunAgentParams;
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
-  const { agentId, agentParams } = agentExecutionParams;
+  const { agentId, agentParams, executionId } = agentExecutionParams;
 
-  const forkedContext = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
+  const forkedContext = forkContextForAgentRun({
+    parentContext: parentManager.context,
+    agentId,
+    executionId,
+    conversationId: agentParams.conversation?.id,
+  });
   const manager = parentManager.createChild(forkedContext);
 
   const { agentsService, request } = manager.deps;

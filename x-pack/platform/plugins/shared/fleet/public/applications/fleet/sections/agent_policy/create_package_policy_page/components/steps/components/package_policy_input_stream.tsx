@@ -67,6 +67,7 @@ import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
 import { VarGroupSelector } from './var_group_selector';
+import { MigrationTooltip } from './package_policy_input_panel';
 
 const ScrollAnchor = styled.div`
   display: none;
@@ -81,7 +82,9 @@ interface Props {
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  isUpgrade?: boolean;
   totalStreams?: number;
+  showDescriptionColumn?: boolean;
   varGroupSelections?: Record<string, string>;
 }
 
@@ -94,7 +97,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     inputStreamValidationResults,
     forceShowErrors,
     isEditPage,
+    isUpgrade,
     totalStreams,
+    showDescriptionColumn = true,
     varGroupSelections = {},
   }) => {
     const { docLinks } = useStartServices();
@@ -264,7 +269,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     return (
       <>
         <EuiFlexGrid
-          columns={2}
+          columns={showDescriptionColumn ? 2 : 1}
           data-test-subj={`streamOptions.inputStreams.${packageInputStream.data_stream.dataset}`}
         >
           <ScrollAnchor ref={containerRef} />
@@ -306,6 +311,14 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             </span>
                           </EuiFlexItem>
                         )}
+                        {isUpgrade &&
+                          packagePolicyInputStream.migrate_from &&
+                          !showStreamDeprecationIcon && (
+                            <MigrationTooltip
+                              migrateFrom={packagePolicyInputStream.migrate_from}
+                              isStream
+                            />
+                          )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   )}

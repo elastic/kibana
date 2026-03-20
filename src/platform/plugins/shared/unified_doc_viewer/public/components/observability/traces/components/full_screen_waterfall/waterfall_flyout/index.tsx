@@ -75,16 +75,26 @@ export interface Props {
   hit: DataTableRecord | null;
   loading: boolean;
   dataView: DocViewRenderProps['dataView'];
+  dataTestSubj?: string;
   children: React.ReactNode;
 }
 
-export function WaterfallFlyout({ onCloseFlyout, dataView, hit, loading, children, title }: Props) {
+export function WaterfallFlyout({
+  onCloseFlyout,
+  dataView,
+  hit,
+  loading,
+  children,
+  title,
+  dataTestSubj,
+}: Props) {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const flyoutTitleId = useGeneratedHtmlId();
   const flyoutId = useGeneratedHtmlId({ prefix: 'documentDetailFlyout' });
 
   return (
     <EuiFlyout
+      data-test-subj={dataTestSubj}
       size="s"
       includeFixedHeadersInFocusTrap={false}
       onClose={onCloseFlyout}

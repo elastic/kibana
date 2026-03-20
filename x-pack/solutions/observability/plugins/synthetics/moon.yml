@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/synthetics-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/actionable-obs-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/synthetics-plugin'
+  title: '@kbn/synthetics-plugin'
   description: Moon project for @kbn/synthetics-plugin
   channel: ''
   owner: '@elastic/actionable-obs-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/synthetics
+  sourceRoot: x-pack/solutions/observability/plugins/synthetics
 dependsOn:
   - '@kbn/alerting-plugin'
   - '@kbn/ml-plugin'
@@ -86,7 +85,6 @@ dependsOn:
   - '@kbn/securitysolution-io-ts-types'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/serverless'
-  - '@kbn/repo-info'
   - '@kbn/index-management-plugin'
   - '@kbn/license-management-plugin'
   - '@kbn/react-kibana-mount'
@@ -129,6 +127,9 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/maintenance-windows-plugin'
+  - '@kbn/scout-oblt'
+  - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod
@@ -142,17 +143,28 @@ fileGroups:
     - scripts/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

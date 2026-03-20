@@ -6,7 +6,7 @@
  */
 
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import featuresUserPrompt from './user_prompt.text';
 import featuresSystemPrompt from './system_prompt.text';
 
@@ -41,6 +41,10 @@ const featuresSchema = {
           properties: {
             type: 'object',
             properties: {},
+            minProperties: 1,
+            description:
+              'Core identifying properties of the feature (e.g. {"name": "order-service"}). Empty properties are invalid — every feature must have at least one stable identifying property.',
+            additionalProperties: true,
           },
           confidence: {
             type: 'number',
@@ -55,6 +59,14 @@ const featuresSchema = {
             description:
               'The evidences that support the feature. Can be a short sentence or a `key: value` string.',
           },
+          evidence_doc_ids: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description:
+              'Evidence sources for traceability. This must be the Elasticsearch document `_id` values of sample documents that directly support the listed evidence. Keep an empty array when not applicable.',
+          },
           tags: {
             type: 'array',
             items: {
@@ -62,10 +74,49 @@ const featuresSchema = {
             },
             description: 'The tags that describe the feature.',
           },
+          filter: {
+            type: 'object',
+            properties: {
+              field: {
+                type: 'string',
+                description: 'Field name for single equality filter.',
+              },
+              eq: {
+                type: 'string',
+                description:
+                  'Equality value for single filter. For numbers/booleans, string representation is allowed.',
+              },
+              and: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    field: { type: 'string' },
+                    eq: { type: 'string' },
+                  },
+                  required: ['field', 'eq'],
+                },
+              },
+              or: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    field: { type: 'string' },
+                    eq: { type: 'string' },
+                  },
+                  required: ['field', 'eq'],
+                },
+              },
+            },
+            description:
+              'Optional condition used to scope filtering to the corresponding feature. Allowed forms: single equality `{field, eq}` or one-level `{and: [...]}` / `{or: [...]}` of equality conditions.',
+          },
           meta: {
             type: 'object',
             properties: {},
             description: 'Useful metadata that is not captured in other properties.',
+            additionalProperties: true,
           },
         },
         required: [
@@ -78,7 +129,6 @@ const featuresSchema = {
           'confidence',
           'evidence',
           'tags',
-          'meta',
         ],
       },
     },

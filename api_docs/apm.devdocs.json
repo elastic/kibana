@@ -6529,6 +6529,8 @@
           "Type",
           "<number, number, unknown>; serviceName: ",
           "StringC",
+          "; entryTransactionId: ",
+          "StringC",
           "; }>]>; }>, ",
           "APMRouteHandlerResources",
           ", { traceItems: ",
@@ -6541,7 +6543,15 @@
             "section": "def-common.Error",
             "text": "Error"
           },
-          "[]; agentMarks: Record<string, number>; }, ",
+          "[]; agentMarks: Record<string, number>; entryTransaction?: ",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Transaction",
+            "text": "Transaction"
+          },
+          " | undefined; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/traces/{traceId}\": ",
           {
