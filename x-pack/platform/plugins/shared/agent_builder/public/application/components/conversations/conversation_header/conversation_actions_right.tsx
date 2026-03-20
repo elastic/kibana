@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiTourStep } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { MoreActionsButton } from './more_actions_button';
 import { CloseDockedViewButton } from './close_docked_view_button';
-import { TourStep, useAgentBuilderTour } from '../../../context/agent_builder_tour_context';
 
 const labels = {
   container: i18n.translate('xpack.agentBuilder.conversationActions.container', {
@@ -30,8 +29,6 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
 }) => {
   const { isEmbeddedContext } = useConversationContext();
 
-  const { getStepProps } = useAgentBuilderTour();
-
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -40,9 +37,7 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       aria-label={labels.container}
       responsive={false}
     >
-      <EuiTourStep {...getStepProps(TourStep.ConversationActions)}>
-        <MoreActionsButton onRenameConversation={onRenameConversation} />
-      </EuiTourStep>
+      <MoreActionsButton onRenameConversation={onRenameConversation} />
       {isEmbeddedContext ? <CloseDockedViewButton onClose={onClose} /> : null}
     </EuiFlexGroup>
   );

@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
-import { AgentBuilderTourProvider } from '../../context/agent_builder_tour_context';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { SendMessageProvider } from '../../context/send_message/send_message_context';
 import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
@@ -46,16 +45,14 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
   return (
     <RoutedConversationsProvider>
       <SendMessageProvider>
-        <AgentBuilderTourProvider>
-          <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
-            <div css={headerStyles}>
-              <ConversationHeader />
-            </div>
-            <div css={contentStyles}>
-              <Conversation />
-            </div>
+        <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
+          <div css={headerStyles}>
+            <ConversationHeader />
           </div>
-        </AgentBuilderTourProvider>
+          <div css={contentStyles}>
+            <Conversation />
+          </div>
+        </div>
       </SendMessageProvider>
     </RoutedConversationsProvider>
   );
