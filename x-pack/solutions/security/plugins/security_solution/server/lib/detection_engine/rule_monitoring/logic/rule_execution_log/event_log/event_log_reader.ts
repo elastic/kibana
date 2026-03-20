@@ -374,7 +374,7 @@ const mapUnifiedSortField = (sortField: string): string => {
   switch (sortField) {
     case 'timestamp':
       return '@timestamp';
-    case 'execution_duration_ms':
+    case 'duration_ms':
       return 'event.duration';
     default:
       return '@timestamp';

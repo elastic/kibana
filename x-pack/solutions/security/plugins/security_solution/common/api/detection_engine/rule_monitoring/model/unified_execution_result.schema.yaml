@@ -11,7 +11,7 @@ components:
       description: |-
         A single unified rule execution result read from the Alerting Framework's "execute" event
         in the event log. Contains execution metadata,
-        dynamic metrics, and any errors or warnings that occurred during execution.
+        structured metrics, and any errors or warnings that occurred during execution.
       properties:
         execution_uuid:
           type: string
@@ -20,9 +20,6 @@ components:
           type: string
           format: date-time
           description: Timestamp of the execution event.
-        execution_duration_ms:
-          type: integer
-          description: Total execution duration in milliseconds (converted from event.duration nanoseconds).
         status:
           type: string
           description: |-
@@ -30,10 +27,76 @@ components:
             Values: succeeded, warning, failed.
         metrics:
           type: object
-          additionalProperties: true
-          description: |-
-            Dynamic bag of execution metrics. Keys are metric names, values are numbers or strings.
-            The set of metrics may vary by rule type.
+          description: Structured execution metrics extracted from the event log.
+          properties:
+            duration_ms:
+              type: integer
+              nullable: true
+              description: Total execution duration in milliseconds (converted from event.duration nanoseconds).
+            candidate_alerts_count:
+              type: integer
+              nullable: true
+              description: Number of candidate alerts evaluated during execution.
+            scheduling_delay:
+              type: integer
+              nullable: true
+              description: Scheduling delay in nanoseconds (kibana.task.schedule_delay).
+            search_duration:
+              type: integer
+              nullable: true
+              description: Total search duration in milliseconds.
+            backfill:
+              nullable: true
+              type: object
+              description: Source event time range for backfill (manual) executions, computed from start and interval.
+              properties:
+                from:
+                  type: string
+                  format: date-time
+                to:
+                  type: string
+                  format: date-time
+              required:
+                - from
+                - to
+            indices_found:
+              type: integer
+              nullable: true
+              description: Number of indices found during execution.
+            indexed_alerts_count:
+              type: integer
+              nullable: true
+              description: Number of alerts indexed. Not populated from the execute event currently.
+            alerts_created_count:
+              type: integer
+              nullable: true
+              description: Number of alerts created. Not populated from the execute event currently.
+            gap_duration:
+              type: integer
+              nullable: true
+              description: Gap duration. Not populated from the execute event currently.
+            index_duration:
+              type: integer
+              nullable: true
+              description: Indexing duration in milliseconds. Not populated from the execute event currently.
+            matched_indices:
+              type: array
+              nullable: true
+              items:
+                type: string
+              description: List of matched index names. Not populated from the execute event currently.
+          required:
+            - duration_ms
+            - candidate_alerts_count
+            - scheduling_delay
+            - search_duration
+            - backfill
+            - indices_found
+            - indexed_alerts_count
+            - alerts_created_count
+            - gap_duration
+            - index_duration
+            - matched_indices
         errors:
           type: array
           items:
@@ -57,7 +120,6 @@ components:
       required:
         - execution_uuid
         - timestamp
-        - execution_duration_ms
         - status
         - metrics
         - errors
@@ -68,4 +130,4 @@ components:
       description: Fields available for sorting unified execution results.
       enum:
         - timestamp
-        - execution_duration_ms
+        - duration_ms

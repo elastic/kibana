@@ -1,0 +1,171 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
+import { ReadRuleExecutionResultsRequestBody } from './read_rule_execution_results_route.gen';
+
+const validFilter = {
+  from: '2026-03-11T00:00:00.000Z',
+  to: '2026-03-12T00:00:00.000Z',
+};
+
+describe('ReadRuleExecutionResultsRequestBody', () => {
+  describe('Required fields', () => {
+    it('should fail when body is empty', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({});
+      expectParseError(result);
+    });
+
+    it('should fail when filter is empty object (missing from/to)', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({ filter: {} });
+      expectParseError(result);
+    });
+
+    it('should succeed when filter has from and to', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({ filter: validFilter });
+      expectParseSuccess(result);
+    });
+  });
+
+  describe('Defaults', () => {
+    it('should apply defaults for optional fields', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({ filter: validFilter });
+      expectParseSuccess(result);
+      expect(result.data).toEqual({
+        filter: {
+          ...validFilter,
+          status: [],
+          run_type: [],
+        },
+        page: 1,
+        per_page: 20,
+      });
+    });
+  });
+
+  describe('filter.status', () => {
+    it('should accept valid status values', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({
+        filter: { ...validFilter, status: ['succeeded', 'failed'] },
+      });
+      expectParseSuccess(result);
+      expect(result.data?.filter.status).toEqual(['succeeded', 'failed']);
+    });
+
+    it('should reject invalid status values', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({
+        filter: { ...validFilter, status: ['invalid'] },
+      });
+      expectParseError(result);
+    });
+
+    it('should accept empty status array', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({
+        filter: { ...validFilter, status: [] },
+      });
+      expectParseSuccess(result);
+      expect(result.data?.filter.status).toEqual([]);
+    });
+  });
+
+  describe('filter.run_type', () => {
+    it('should accept valid run_type values', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({
+        filter: { ...validFilter, run_type: ['standard'] },
+      });
+      expectParseSuccess(result);
+      expect(result.data?.filter.run_type).toEqual(['standard']);
+    });
+
+    it('should accept backfill run_type', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({
+        filter: { ...validFilter, run_type: ['backfill'] },
+      });
+      expectParseSuccess(result);
+      expect(result.data?.filter.run_type).toEqual(['backfill']);
+    });
+  });
+
+  describe('sort.field', () => {
+    it('should accept valid sort field values', () => {
+      const cases = ['timestamp', 'duration_ms'];
+      cases.forEach((field) => {
+        const result = ReadRuleExecutionResultsRequestBody.safeParse({
+          filter: validFilter,
+          sort: { field },
+        });
+        expectParseSuccess(result);
+        expect(result.data?.sort?.field).toEqual(field);
+      });
+    });
+
+    it('should reject invalid sort field values', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({
+        filter: validFilter,
+        sort: { field: 'invalid_field' },
+      });
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain(
+        'Invalid option: expected one of "timestamp"|"duration_ms"'
+      );
+    });
+
+    it('should default sort field to timestamp', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({
+        filter: validFilter,
+        sort: {},
+      });
+      expectParseSuccess(result);
+      expect(result.data?.sort?.field).toEqual('timestamp');
+    });
+  });
+
+  describe('sort.order', () => {
+    it('should accept asc and desc', () => {
+      const cases = ['asc', 'desc'] as const;
+      cases.forEach((order) => {
+        const result = ReadRuleExecutionResultsRequestBody.safeParse({
+          filter: validFilter,
+          sort: { order },
+        });
+        expectParseSuccess(result);
+        expect(result.data?.sort?.order).toEqual(order);
+      });
+    });
+
+    it('should default sort order to desc', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({
+        filter: validFilter,
+        sort: {},
+      });
+      expectParseSuccess(result);
+      expect(result.data?.sort?.order).toEqual('desc');
+    });
+  });
+
+  describe('page and per_page', () => {
+    it('should accept page and per_page as numbers', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({
+        filter: validFilter,
+        page: 3,
+        per_page: 50,
+      });
+      expectParseSuccess(result);
+      expect(result.data?.page).toEqual(3);
+      expect(result.data?.per_page).toEqual(50);
+    });
+
+    it('should default page to 1 and per_page to 20', () => {
+      const result = ReadRuleExecutionResultsRequestBody.safeParse({
+        filter: validFilter,
+      });
+      expectParseSuccess(result);
+      expect(result.data?.page).toEqual(1);
+      expect(result.data?.per_page).toEqual(20);
+    });
+  });
+});
