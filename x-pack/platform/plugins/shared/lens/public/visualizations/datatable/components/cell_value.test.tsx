@@ -158,6 +158,49 @@ describe('datatable cell renderer', () => {
     expect(screen.getByRole('button')).toHaveTextContent('formatted 123');
   });
 
+  it('should pass the correct colIndex to handleFilterClick for a non-first column', async () => {
+    const handleFilterClick = jest.fn();
+    const MultiColumnCellRenderer = createGridCell(
+      {
+        a: { convert: (x) => `formatted ${x}` } as FieldFormat,
+        b: { convert: (x) => `formatted ${x}` } as FieldFormat,
+      },
+      {
+        columns: [
+          { columnId: 'a', type: 'lens_datatable_column' },
+          { columnId: 'b', type: 'lens_datatable_column', oneClickFilter: true },
+        ],
+        sortingColumnId: '',
+        sortingDirection: 'none',
+      },
+      DataContext,
+      false,
+      cellColorFnMock
+    );
+
+    const multiColTable: Datatable = {
+      ...table,
+      columns: [...table.columns, { id: 'b', name: 'b', meta: { type: 'number' } }],
+      rows: [{ a: 123, b: 456 }],
+    };
+
+    render(
+      <MultiColumnCellRenderer
+        rowIndex={0}
+        colIndex={1}
+        columnId="b"
+        setCellProps={setCellProps}
+        isExpandable={false}
+        isDetails={false}
+        isExpanded={false}
+      />,
+      { wrapper: DataContextProviderWrapper({ handleFilterClick, table: multiColTable }) }
+    );
+
+    await userEvent.click(screen.getByRole('button'));
+    expect(handleFilterClick).toHaveBeenCalledWith('b', 456, 1, 0);
+  });
+
   describe('dynamic coloring', () => {
     function getCellRenderer(columnConfig: DatatableArgs) {
       return createGridCell(
@@ -334,6 +377,22 @@ describe('datatable cell renderer', () => {
       expect(setCellProps).not.toHaveBeenCalled();
     });
 
+    it('should render a link for null values in badge mode when oneClickFilter is enabled', async () => {
+      const handleFilterClick = jest.fn();
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'badge';
+      columnConfig.columns[0].oneClickFilter = true;
+
+      renderCellComponent(columnConfig, {
+        handleFilterClick,
+        table: { ...table, rows: [{ a: null }] },
+      });
+
+      expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button'));
+      expect(handleFilterClick).toHaveBeenCalledWith('a', null, 0, 0);
+    });
+
     it('should invoke handleFilterClick when badge with oneClickFilter is clicked', async () => {
       const handleFilterClick = jest.fn();
       const columnConfig = getColumnConfiguration();
@@ -363,6 +422,53 @@ describe('datatable cell renderer', () => {
       columnConfig.columns[0].colorMode = 'cell';
 
       renderCellComponent(columnConfig, {});
+
+      expect(setCellProps).not.toHaveBeenCalled();
+    });
+
+    it('should clean up cell coloring on unmount to prevent stale styles', () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'cell';
+
+      const { unmount } = renderCellComponent(columnConfig);
+
+      expect(setCellProps).toHaveBeenCalledWith({
+        style: expect.objectContaining({ backgroundColor: 'blue' }),
+      });
+
+      setCellProps.mockClear();
+      unmount();
+
+      expect(setCellProps).toHaveBeenCalledWith({
+        style: { backgroundColor: undefined, color: undefined },
+      });
+    });
+
+    it('should not clean up cell styles when the cell is expanded', () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'cell';
+      const CellRendererWithPalette = getCellRenderer(columnConfig);
+
+      const { unmount } = render(
+        <CellRendererWithPalette
+          rowIndex={0}
+          colIndex={0}
+          columnId="a"
+          setCellProps={setCellProps}
+          isExpandable={false}
+          isDetails={false}
+          isExpanded={true}
+        />,
+        {
+          wrapper: DataContextProviderWrapper({
+            table,
+            minMaxByColumnId: new Map([['a', { min: 12, max: 155 }]]),
+          }),
+        }
+      );
+
+      setCellProps.mockClear();
+      unmount();
 
       expect(setCellProps).not.toHaveBeenCalled();
     });
