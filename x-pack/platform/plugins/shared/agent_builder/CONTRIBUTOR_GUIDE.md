@@ -672,6 +672,63 @@ class MyPlugin {
 
 This is useful when the save operation happens outside the attachment's UI, such as when a separate "Save to library" workflow completes asynchronously. It is your responsibility to pass the `conversationId` and `attachmentId` to your plugin when navigating away from the chat - how you do this is up to you (e.g., URL parameters, local storage, or other mechanisms).
 
+#### Attachment lifecycle hook: onAttachmentMount
+
+The `onAttachmentMount` lifecycle hook allows you to run side effects when an attachment is mounted to a conversation, and clean them up when the attachment is removed.
+
+**When to use `onAttachmentMount`:**
+
+- Setting up subscriptions that should live for the duration of the attachment's presence in the conversation
+- Syncing attachment state with external systems
+- Any side effect that needs cleanup when the attachment is removed
+
+**Important:** This hook is called once per attachment (not per version). The framework tracks attachment presence at the conversation level, so you don't need to handle deduplication.
+
+**Parameters:**
+
+```ts
+interface AttachmentLifecycleParams<TAttachment> {
+  /** The attachment instance */
+  attachment: TAttachment;
+  /** The conversation ID containing this attachment */
+  conversationId: string;
+  /** Whether the attachment is rendered in the sidebar context */
+  isSidebar: boolean;
+}
+```
+
+**Example: Syncing attachment origin when a dashboard is saved**
+
+```tsx
+export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  getLabel: () => 'My attachment',
+  getIcon: () => 'document',
+
+  onAttachmentMount: ({ attachment, conversationId }) => {
+    // Set up a subscription when the attachment is added
+    const subscription = someObservable$.subscribe((newValue) => {
+      if (newValue !== attachment.origin) {
+        // Update the attachment's origin using the plugin API
+        agentBuilder.updateAttachmentOrigin(conversationId, attachment.id, newValue);
+      }
+    });
+
+    // Return cleanup function - called when the attachment is removed from the conversation
+    return () => {
+      subscription.unsubscribe();
+    };
+  },
+
+  // ... other definition properties
+};
+```
+
+**Cleanup behavior:**
+
+- The cleanup function is called when the attachment is removed from the conversation
+- It's also called when the conversation component unmounts (e.g., navigating away)
+- If `onAttachmentMount` returns `undefined` or `void`, no cleanup is performed
+
 ## Registering skills
 
 **Note**: Skills are currently an experimental feature. You need to enable the `agentBuilder:experimentalFeatures` uiSetting to enable and use them.
