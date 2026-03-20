@@ -10,7 +10,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import type { ObservabilityOnboardingPluginStartDeps } from '../plugin';
-import { createCallApi } from '../services/rest/create_call_api';
 
 export interface IngestFlowDeps {
   core: CoreStart;
@@ -22,8 +21,6 @@ export const createIngestFlowComponent = (
   deps: IngestFlowDeps,
   Content: React.ComponentType
 ): React.FC => {
-  createCallApi(deps.core);
-
   const services = {
     ...deps.core,
     ...deps.plugins,

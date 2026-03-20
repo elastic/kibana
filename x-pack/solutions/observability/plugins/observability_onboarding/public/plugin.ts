@@ -47,6 +47,7 @@ import {
   OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_WIRED_STREAMS_AUTO_ENABLED_EVENT,
 } from '../common/telemetry_events';
+import { createCallApi } from './services/rest/create_call_api';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
@@ -110,10 +111,6 @@ export class ObservabilityOnboardingPlugin
           core.getStartServices(),
         ]);
 
-        const { createCallApi } = await import('./services/rest/create_call_api');
-
-        createCallApi(core);
-
         return renderApp({
           core: coreStart,
           deps: pluginSetupDeps,
@@ -151,6 +148,7 @@ export class ObservabilityOnboardingPlugin
     };
   }
   public start(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
+    createCallApi(core);
     this.registerIngestFlows(core, plugins);
     return {
       locators: this.locators,
