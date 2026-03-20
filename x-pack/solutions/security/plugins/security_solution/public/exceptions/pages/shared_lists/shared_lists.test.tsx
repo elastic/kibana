@@ -245,7 +245,7 @@ describe('SharedLists', () => {
       );
     });
 
-    it('should display callout when FF is enabled', () => {
+    it('should display dismissible callout when FF is enabled', () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
 
       const { getByTestId } = render(
@@ -257,6 +257,8 @@ describe('SharedLists', () => {
       const callout = getByTestId('EndpointExceptionsMovedCallout');
       expect(callout).toBeInTheDocument();
       expect(callout).toHaveTextContent('Endpoint exceptions have moved.');
+
+      expect(getByTestId('euiDismissCalloutButton')).toBeTruthy();
     });
 
     it('should fetch "endpoint_list" but hide other endpoint artifacts when Endpoint exceptions moved FF is disabled', async () => {

@@ -452,7 +452,7 @@ describe('ExceptionsViewer', () => {
       ).toBeFalsy();
     });
 
-    it('should render EndpointExceptionsMovedCallout when rule is an endpoint security rule', () => {
+    it('should render non-dismissible EndpointExceptionsMovedCallout when rule is an endpoint security rule', () => {
       const wrapper = mount(
         <TestProviders>
           <ExceptionsViewer
@@ -479,9 +479,12 @@ describe('ExceptionsViewer', () => {
       expect(
         wrapper.find('[data-test-subj="EndpointExceptionsMovedCallout"]').exists()
       ).toBeTruthy();
+      expect(
+        wrapper.find('[data-test-subj="EndpointExceptionsMovedCallout"]').first().prop('onDismiss')
+      ).toBeFalsy();
     });
 
-    it('should render EndpointExceptionsMovedCallout when rule is has endpoint_list linked', () => {
+    it('should render dismissible EndpointExceptionsMovedCallout when rule has endpoint_list linked', () => {
       const wrapper = mount(
         <TestProviders>
           <ExceptionsViewer
@@ -504,6 +507,9 @@ describe('ExceptionsViewer', () => {
 
       expect(
         wrapper.find('[data-test-subj="EndpointExceptionsMovedCallout"]').exists()
+      ).toBeTruthy();
+      expect(
+        wrapper.find('[data-test-subj="EndpointExceptionsMovedCallout"]').first().prop('onDismiss')
       ).toBeTruthy();
     });
   });
