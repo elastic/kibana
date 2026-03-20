@@ -59,17 +59,15 @@ spaceTest.describe(
           await pageObjects.discover.waitUntilSearchingHasFinished();
         });
 
-        await spaceTest.step('time range should have narrowed', async () => {
-          await expect(
-            page.testSubj.locator('superDatePickerstartDatePopoverButton')
-          ).not.toHaveText(timeConfigBefore.start);
-        });
-
         await spaceTest.step(
           'first chart should re-render with the narrowed time range',
           async () => {
             await metricsExperience.waitForCardRenderComplete(0);
             await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+
+            const timeConfigAfter = await pageObjects.datePicker.getTimeConfig();
+            expect(timeConfigAfter.start).not.toBe(timeConfigBefore.start);
+            expect(timeConfigAfter.end).not.toBe(timeConfigBefore.end);
           }
         );
 
