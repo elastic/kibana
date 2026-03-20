@@ -8,3 +8,5 @@
  */
 
 export const ENABLE_ESQL = 'enableESQL';
+
+export const DEFAULT_ESQL_LIMIT = 1000;

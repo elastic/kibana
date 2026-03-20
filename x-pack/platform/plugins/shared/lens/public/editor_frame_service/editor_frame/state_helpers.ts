@@ -369,6 +369,7 @@ export async function persistedStateToExpression(
     nowProvider: DataPublicPluginStart['nowProvider'];
     eventAnnotationService: EventAnnotationServiceType;
     forceDSL?: boolean;
+    maxDataPoints?: number;
   }
 ): Promise<DocumentToExpressionReturnType> {
   const {
@@ -466,6 +467,7 @@ export async function persistedStateToExpression(
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
       forceDSL: services.forceDSL,
       nowInstant: services.nowProvider.get(),
+      maxDataPoints: services.maxDataPoints,
     }),
     activeVisualizationState,
     activeDatasourceState: datasourceStates[datasourceId]?.state,

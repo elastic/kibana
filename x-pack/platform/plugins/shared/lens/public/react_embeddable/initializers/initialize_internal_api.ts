@@ -75,6 +75,7 @@ export function initializeInternalApi(
     : new BehaviorSubject<ESQLControlVariable[]>([]);
 
   const isEditingInProgress$ = new BehaviorSubject<boolean>(false);
+  const containerWidth$ = new BehaviorSubject<number>(0);
 
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
@@ -147,6 +148,8 @@ export function initializeInternalApi(
 
       return displayOptions;
     },
+    containerWidth$,
+    updateContainerWidth: (width: number) => containerWidth$.next(width),
     getVisualizationContext: () => visualizationContext$.getValue(),
     updateVisualizationContext: (newVisualizationContext: Partial<VisualizationContext>) => {
       visualizationContext$.next({

@@ -18,6 +18,7 @@ interface Args extends QueryState {
   inputQuery?: Query;
   titleForInspector?: string;
   descriptionForInspector?: string;
+  maxDataPoints?: number;
 }
 
 /**
@@ -38,6 +39,7 @@ export function textBasedQueryStateToExpressionAst({
   timeFieldName,
   titleForInspector,
   descriptionForInspector,
+  maxDataPoints,
 }: Args) {
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   let q;
@@ -57,6 +59,7 @@ export function textBasedQueryStateToExpressionAst({
       timeField: timeFieldName,
       titleForInspector,
       descriptionForInspector,
+      maxDataPoints,
     });
 
     if (esql) {
