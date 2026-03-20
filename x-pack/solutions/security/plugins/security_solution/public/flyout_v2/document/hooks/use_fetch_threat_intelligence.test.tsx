@@ -7,38 +7,26 @@
 
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type {
   UseThreatIntelligenceParams,
   UseThreatIntelligenceResult,
 } from './use_fetch_threat_intelligence';
 import { useFetchThreatIntelligence } from './use_fetch_threat_intelligence';
-import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
+import { useInvestigationTimeEnrichment } from './use_investigation_enrichment';
 
-jest.mock('../../shared/hooks/use_investigation_enrichment');
+jest.mock('./use_investigation_enrichment');
 
-const dataFormattedForFieldBrowser = [
-  {
-    category: 'kibana',
-    field: 'kibana.alert.rule.uuid',
-    isObjectArray: false,
-    originalValue: ['uuid'],
-    values: ['uuid'],
+const hit = {
+  id: '1',
+  raw: {},
+  flattened: {
+    'kibana.alert.rule.uuid': ['uuid'],
+    'threat.enrichments': ['{"indicator.file.hash.sha256":["sha256"]}'],
+    'threat.enrichments.indicator.file.hash.sha256': ['sha256'],
   },
-  {
-    category: 'threat',
-    field: 'threat.enrichments',
-    isObjectArray: true,
-    originalValue: ['{"indicator.file.hash.sha256":["sha256"]}'],
-    values: ['{"indicator.file.hash.sha256":["sha256"]}'],
-  },
-  {
-    category: 'threat',
-    field: 'threat.enrichments.indicator.file.hash.sha256',
-    isObjectArray: false,
-    originalValue: ['sha256'],
-    values: ['sha256'],
-  },
-];
+  isAnchor: false,
+} as DataTableRecord;
 
 describe('useFetchThreatIntelligence', () => {
   let hookResult: RenderHookResult<UseThreatIntelligenceResult, UseThreatIntelligenceParams>;
@@ -68,7 +56,7 @@ describe('useFetchThreatIntelligence', () => {
       loading: false,
     });
 
-    hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() => useFetchThreatIntelligence({ hit }));
 
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.threatMatches).toHaveLength(1);
@@ -117,7 +105,7 @@ describe('useFetchThreatIntelligence', () => {
       loading: false,
     });
 
-    hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() => useFetchThreatIntelligence({ hit }));
 
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.threatMatches).toHaveLength(2);
@@ -143,7 +131,7 @@ describe('useFetchThreatIntelligence', () => {
       loading: false,
     });
 
-    hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() => useFetchThreatIntelligence({ hit }));
 
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.threatMatches).toHaveLength(1);
@@ -170,7 +158,7 @@ describe('useFetchThreatIntelligence', () => {
       loading: false,
     });
 
-    hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() => useFetchThreatIntelligence({ hit }));
 
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.threatMatches).toEqual(undefined);
@@ -185,7 +173,7 @@ describe('useFetchThreatIntelligence', () => {
       loading: true,
     });
 
-    hookResult = renderHook(() => useFetchThreatIntelligence({ dataFormattedForFieldBrowser }));
+    hookResult = renderHook(() => useFetchThreatIntelligence({ hit }));
 
     expect(hookResult.result.current.loading).toEqual(true);
     expect(hookResult.result.current.threatMatches).toEqual(undefined);

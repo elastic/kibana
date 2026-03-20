@@ -14,16 +14,16 @@ import { useEventEnrichmentComplete } from '../services/threat_intelligence';
 import type {
   CtiEventEnrichmentStrategyResponse,
   EventFields,
-} from '../../../../../common/search_strategy';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
+} from '../../../../common/search_strategy';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,
-} from '../../../../../common/cti/constants';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useKibana } from '../../../../common/lib/kibana';
-import { inputsActions } from '../../../../common/store/actions';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
+} from '../../../../common/cti/constants';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../common/lib/kibana';
+import { inputsActions } from '../../../common/store/actions';
+import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 
 const INVESTIGATION_ENRICHMENT_REQUEST_ERROR = i18n.translate(
