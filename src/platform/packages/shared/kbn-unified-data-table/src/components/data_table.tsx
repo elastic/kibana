@@ -138,7 +138,7 @@ export interface DocViewerSnapshot {
 }
 
 export interface GetDocViewerExternalStore {
-  subscribe: (onDocViewerSnapshotChange: () => void) => () => void;
+  subscribe: (onStoreChange: () => void) => () => void;
   getSnapshot: () => DocViewerSnapshot;
   getServerSnapshot: () => DocViewerSnapshot;
 }
@@ -332,14 +332,20 @@ interface InternalUnifiedDataTableProps {
     data: DataPublicPluginStart;
   };
   /**
-   * Callback to render DocumentView when the document is expanded
+   * Callback that allows the data table instance connect to the document view flyout
    */
-  renderDocumentViewFlyout?: (
+  documentViewFlyoutConnectionHandler?: (
     displayedRows: DataTableRecord[],
     displayedColumns: string[],
     columnsMeta?: DataTableColumnsMeta
   ) => {
+    /**
+     * External store that enables the data table instance to subscribe to the document view flyout and get the current state of the document view flyout
+     */
     externalStore: GetDocViewerExternalStore;
+    /**
+     * Function to set the expanded document, which is displayed in the document view flyout
+     */
     setExpandedDoc: (doc?: DataTableRecord) => void;
   };
 
@@ -554,7 +560,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
       totalHits,
       onFetchMoreRecords,
-      renderDocumentViewFlyout: renderDocumentView,
+      documentViewFlyoutConnectionHandler,
       configRowHeight,
       showMultiFields = true,
       maxDocFieldsDisplayed = 50,
@@ -747,8 +753,8 @@ const InternalUnifiedDataTable = React.forwardRef<
     ]);
 
     const docViewerHelpers = useMemo(
-      () => renderDocumentView?.(displayedRows, displayedColumns, columnsMeta),
-      [renderDocumentView, displayedRows, displayedColumns, columnsMeta]
+      () => documentViewFlyoutConnectionHandler?.(displayedRows, displayedColumns, columnsMeta),
+      [documentViewFlyoutConnectionHandler, displayedRows, displayedColumns, columnsMeta]
     );
 
     const docViewerSnapshot = useSyncExternalStore(
@@ -1072,7 +1078,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
       const { leadColumns, leadColumnsExtraContent } = getLeadControlColumns({
         rows: displayedRows,
-        canSetExpandedDoc: Boolean(renderDocumentView),
+        canSetExpandedDoc: Boolean(documentViewFlyoutConnectionHandler),
       });
 
       const filteredLeadColumns = leadColumns.filter((column) =>
@@ -1101,7 +1107,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       displayedRows,
       externalControlColumns,
       getRowIndicator,
-      renderDocumentView,
+      documentViewFlyoutConnectionHandler,
       rowAdditionalLeadingControls,
     ]);
 

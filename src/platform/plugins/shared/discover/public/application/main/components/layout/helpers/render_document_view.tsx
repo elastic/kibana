@@ -10,8 +10,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
-import { debounce } from 'lodash';
-import useLatest from 'react-use/lib/useLatest';
 import type {
   DocViewerSnapshot,
   GetDocViewerExternalStore,
@@ -40,9 +38,13 @@ export function useGetDiscoverGridFlyoutRenderer() {
   const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
 
-  const latestExpandedDocRef = useLatest(expandedDoc);
+  // Holds reference to the latest expanded doc
+  const latestExpandedDocRef = useRef(expandedDoc);
 
-  const setExpandedRowsRef = useRef<{
+  // Holds reference to the meta information of the connected grid (columns, rows, columns meta)
+  // without causing unnecessary re-renders when the connected grid changes,
+  // or copying over potentially large data (displayed rows).
+  const connectedGridMetaInfo = useRef<{
     customColumnsMeta?: DataTableColumnsMeta;
     displayedColumns: string[];
     displayedRows: DataTableRecord[];
@@ -58,18 +60,24 @@ export function useGetDiscoverGridFlyoutRenderer() {
 
   /** Notifies all subscribed listeners that the store snapshot may have changed. */
   const notifyListeners = useMemo(
-    () =>
-      debounce(() => {
-        storeRef.current.snapshot = {
-          expandedDoc: latestExpandedDocRef.current,
-        };
+    () => () => {
+      storeRef.current.snapshot = {
+        expandedDoc: latestExpandedDocRef.current,
+      };
 
-        storeRef.current.listeners.forEach((listener) => listener());
-      }, 100),
-    [latestExpandedDocRef]
+      storeRef.current.listeners.forEach((listener) => listener());
+    },
+    []
   );
 
-  useEffect(() => () => notifyListeners.cancel(), [notifyListeners]);
+  // Sync the ref with Redux state when expandedDoc changes externally
+  // (e.g. via inspector, data view change, or saved search reset)
+  useEffect(() => {
+    if (latestExpandedDocRef.current !== expandedDoc) {
+      latestExpandedDocRef.current = expandedDoc;
+      notifyListeners();
+    }
+  }, [expandedDoc, notifyListeners]);
 
   const setExpandedDoc = useCallback(
     (
@@ -90,15 +98,18 @@ export function useGetDiscoverGridFlyoutRenderer() {
         docViewerRef.current?.setSelectedTabId(options.initialTabId);
       }
 
+      // Update the latest expanded doc reference
+      latestExpandedDocRef.current = doc;
+
       notifyListeners();
     },
     [dispatch, setExpandedDocAction, notifyListeners]
   );
 
-  const subscribe = useCallback((onUISnapshotChange: () => void) => {
-    storeRef.current.listeners.add(onUISnapshotChange);
+  const subscribe = useCallback((listener: () => void) => {
+    storeRef.current.listeners.add(listener);
     return () => {
-      storeRef.current.listeners.delete(onUISnapshotChange);
+      storeRef.current.listeners.delete(listener);
     };
   }, []);
 
@@ -119,25 +130,27 @@ export function useGetDiscoverGridFlyoutRenderer() {
     setExpandedDoc(undefined);
   }, [setExpandedDoc]);
 
-  const renderDocumentView = useCallback<
-    NonNullable<UnifiedDataTableProps['renderDocumentViewFlyout']>
+  const flyoutConnectionHandler = useCallback<
+    NonNullable<UnifiedDataTableProps['documentViewFlyoutConnectionHandler']>
   >(
     (displayedRows, displayedColumns, customColumnsMeta) => {
-      if (setExpandedRowsRef.current?.displayedRows[0]?.id !== displayedRows[0]?.id) {
-        setExpandedDoc(undefined);
-      }
+      // when connecting a new grid, we signal to the grid that no rows should be considered expanded by default, and provide the meta info of the connected grid to the flyout
+      latestExpandedDocRef.current = undefined;
 
-      setExpandedRowsRef.current = {
+      connectedGridMetaInfo.current = {
         customColumnsMeta,
         displayedColumns,
         displayedRows,
       };
+
+      notifyListeners();
+
       return {
         externalStore: getStateStore,
         setExpandedDoc,
       };
     },
-    [getStateStore, setExpandedDoc]
+    [getStateStore, notifyListeners, setExpandedDoc]
   );
 
   const curriedDiscoverGridFlyout = useCallback(
@@ -150,9 +163,9 @@ export function useGetDiscoverGridFlyoutRenderer() {
       expandedDoc ? (
         <DiscoverGridFlyout
           hit={expandedDoc}
-          hits={setExpandedRowsRef.current!.displayedRows}
-          columns={setExpandedRowsRef.current!.displayedColumns}
-          columnsMeta={setExpandedRowsRef.current!.customColumnsMeta}
+          hits={connectedGridMetaInfo?.current?.displayedRows}
+          columns={connectedGridMetaInfo?.current?.displayedColumns || []}
+          columnsMeta={connectedGridMetaInfo?.current?.customColumnsMeta}
           docViewerRef={docViewerRef}
           setExpandedDoc={setExpandedDoc}
           onClose={onCloseDocViewer}
@@ -167,5 +180,5 @@ export function useGetDiscoverGridFlyoutRenderer() {
     [curriedDiscoverGridFlyout]
   );
 
-  return { DiscoverGridFlyoutRenderer, renderDocumentView };
+  return { DiscoverGridFlyoutRenderer, flyoutConnectionHandler };
 }

@@ -225,7 +225,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       sort={sortOrder}
       ariaLabelledBy="esqlDataGrid"
       maxDocFieldsDisplayed={100}
-      renderDocumentViewFlyout={renderDocumentView}
+      documentViewFlyoutConnectionHandler={renderDocumentView}
       showFullScreenButton={false}
       configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
       rowHeightState={rowHeight}

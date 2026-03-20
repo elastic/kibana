@@ -242,7 +242,7 @@ export function ContextAppContent({
             configRowHeight={configRowHeight}
             showMultiFields={services.uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-            renderDocumentViewFlyout={renderDocumentView}
+            documentViewFlyoutConnectionHandler={renderDocumentView}
             services={services}
             configHeaderRowHeight={3}
             settings={grid}

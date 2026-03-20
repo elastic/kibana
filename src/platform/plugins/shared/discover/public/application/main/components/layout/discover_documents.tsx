@@ -207,7 +207,8 @@ function DiscoverDocumentsComponent({
     [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
-  const { DiscoverGridFlyoutRenderer, renderDocumentView } = useGetDiscoverGridFlyoutRenderer();
+  const { DiscoverGridFlyoutRenderer, flyoutConnectionHandler } =
+    useGetDiscoverGridFlyoutRenderer();
 
   const latestGrid = useLatest(grid);
   const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
@@ -559,7 +560,7 @@ function DiscoverDocumentsComponent({
             configRowHeight={configRowHeight}
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-            renderDocumentViewFlyout={renderDocumentView}
+            documentViewFlyoutConnectionHandler={flyoutConnectionHandler}
             renderCustomToolbar={renderCustomToolbarWithElements}
             services={services}
             totalHits={totalHits}

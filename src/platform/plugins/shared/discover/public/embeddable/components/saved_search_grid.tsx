@@ -160,7 +160,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         hideFilteringOnComputedColumns={true}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-        renderDocumentViewFlyout={enableDocumentViewer ? renderDocumentView : undefined}
+        documentViewFlyoutConnectionHandler={enableDocumentViewer ? renderDocumentView : undefined}
         renderCustomToolbar={renderCustomToolbarWithElements}
         externalCustomRenderers={cellRenderers}
         enableComparisonMode
