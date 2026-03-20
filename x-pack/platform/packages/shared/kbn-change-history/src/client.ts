@@ -183,20 +183,17 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
 
     for (const change of changes) {
       // Create document and populate
-      const { id, objectType, objectId, index, timestamp, sequence } = change;
+      const { objectType, objectId, index, timestamp, sequence } = change;
       const hash = sha256(JSON.stringify(change.after));
       const masked = maskSensitiveFields(change.after, opts.maskFields);
       const { event, metadata, tags } = opts.data ?? {};
       const created = new Date().toISOString();
-      // `eventId` should be scoped by module and dataset so two features do not clash on the same `event.id`
-      // If not provided, fallback to uuid v7 to make 'same millisecond' event order deterministic (helps with integration tests)
-      const eventId = id ? `${module}${SEPARATOR_CHAR}${dataset}${SEPARATOR_CHAR}${id}` : uuidv7();
       const document: ChangeHistoryDocument = {
         '@timestamp': new Date(timestamp || created).toISOString(),
         ecs: { version: ECS_VERSION },
         user: { name: username, id: userProfileId },
         event: {
-          id: eventId,
+          id: uuidv7(), // <-- uuid v7 helps making 'same millisecond' event order deterministic
           created,
           type: event?.type ?? 'change',
           reason: event?.reason,

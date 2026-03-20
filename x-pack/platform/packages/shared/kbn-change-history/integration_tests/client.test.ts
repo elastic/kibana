@@ -253,25 +253,24 @@ describe('ChangeHistoryClient', () => {
     it('should not throw on partial success when some bulk items fail', async () => {
       const changes: ObjectChange[] = [
         {
-          id: 'duplicate-event-id',
           objectType: 'rule',
           objectId: 'rule-id',
           after: { name: 'First Rule' },
         },
         {
-          id: 'duplicate-event-id',
           objectType: 'rule',
           objectId: 'rule-id',
-          after: { name: 'Duplicate Event ID' },
+          after: { name: 'Unindexable — bad sequence type' },
+          // Intentionally wrong runtime type for ES (integration test only).
+          sequence: 'not-an-integer' as unknown as number,
         },
         {
-          id: 'duplicate-event-id',
           objectType: 'rule',
           objectId: 'rule-id',
-          after: { name: 'Another Duplicate Event ID' },
+          after: { name: 'Also unindexable — bad sequence type' },
+          sequence: {} as unknown as number,
         },
         {
-          id: 'valid-event-id',
           objectType: 'rule',
           objectId: 'rule-id',
           after: { name: 'Last Rule' },
