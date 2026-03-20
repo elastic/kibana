@@ -39,6 +39,11 @@ export const useModelSettingsForm = () => {
     });
   }, [registeredFeatures]);
 
+  const parentEndpointsMap = useMemo(
+    () => new Map(registeredFeatures.map((f) => [f.featureId, f.recommendedEndpoints])),
+    [registeredFeatures]
+  );
+
   const defaultAssignments = useMemo(() => {
     const savedMap = new Map(
       (settingsData?.data?.features ?? [])
@@ -48,10 +53,20 @@ export const useModelSettingsForm = () => {
 
     return Object.fromEntries(
       sections.flatMap(({ children }) =>
-        children.map((f) => [f.featureId, savedMap.get(f.featureId) ?? [...f.recommendedEndpoints]])
+        children.map((f) => {
+          const saved = savedMap.get(f.featureId);
+          if (saved) return [f.featureId, saved];
+          const recommended =
+            f.recommendedEndpoints.length > 0
+              ? f.recommendedEndpoints
+              : f.parentFeatureId
+              ? parentEndpointsMap.get(f.parentFeatureId) ?? []
+              : [];
+          return [f.featureId, [...recommended]];
+        })
       )
     );
-  }, [settingsData, sections]);
+  }, [settingsData, sections, parentEndpointsMap]);
 
   const [assignments, setAssignments] = useState<Assignments>(defaultAssignments);
 
@@ -78,13 +93,21 @@ export const useModelSettingsForm = () => {
       if (!section) return;
 
       const resetEntries = Object.fromEntries(
-        section.children.map((f) => [f.featureId, [...f.recommendedEndpoints]])
+        section.children.map((f) => {
+          const recommended =
+            f.recommendedEndpoints.length > 0
+              ? f.recommendedEndpoints
+              : f.parentFeatureId
+              ? parentEndpointsMap.get(f.parentFeatureId) ?? []
+              : [];
+          return [f.featureId, [...recommended]];
+        })
       );
       const updated = { ...assignments, ...resetEntries };
       setAssignments(updated);
       saveSettings({ features: toApiFormat(updated) });
     },
-    [assignments, sections, saveSettings]
+    [assignments, sections, saveSettings, parentEndpointsMap]
   );
 
   return {
