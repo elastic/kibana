@@ -2621,7 +2621,11 @@
       "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
       "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"],
       "vega-lite": ["typings/vega/vega_lite"],
-      "vega-tooltip": ["typings/vega/vega_tooltip"]
+      "vega-tooltip": ["typings/vega/vega_tooltip"],
+      "zod": ["node_modules/zod/v4/index.d.ts"],
+      "zod/v3": ["node_modules/zod/v3/index.d.ts"],
+      "zod/v4": ["node_modules/zod/v4/index.d.ts"],
+      "zod/v4/core": ["node_modules/zod/v4/core/index.d.ts"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
