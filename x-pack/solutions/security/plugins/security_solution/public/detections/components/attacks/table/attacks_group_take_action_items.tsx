@@ -146,8 +146,8 @@ export function AttacksGroupTakeActionItems({
     () => ({
       id: 0,
       items: [
-        ...runWorkflowItems,
         ...workflowItems,
+        ...runWorkflowItems,
         ...assignItems,
         ...tagsItems,
         ...investigateInTimelineItems,
