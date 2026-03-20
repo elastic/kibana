@@ -190,7 +190,7 @@ test.describe(
         await inventoryPage.selectPalette('temperature');
 
         const nodesWithValues = [
-          { name: HOST6_NAME, color: '#dbe9ff' },
+          { name: HOST6_NAME, color: '#e3eeff' },
           { name: HOST5_NAME, color: '#61a2ff' },
           { name: HOST4_NAME, color: '#bbd4ff' },
           { name: HOST3_NAME, color: '#f6726a' },
