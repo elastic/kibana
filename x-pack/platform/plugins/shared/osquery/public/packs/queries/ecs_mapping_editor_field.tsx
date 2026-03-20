@@ -92,6 +92,7 @@ const SINGLE_SELECTION = { asPlainText: true };
 
 interface ECSComboboxFieldProps {
   euiFieldProps: EuiComboBoxProps<ECSSchemaOption>;
+  ecsSchemaOptions: ECSSchemaOption[];
   control: ECSMappingFormReturn['control'];
   watch: ECSMappingFormReturn['watch'];
   index: number;
@@ -101,12 +102,12 @@ interface ECSComboboxFieldProps {
 
 const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   euiFieldProps = {},
+  ecsSchemaOptions,
   idAria,
   index,
   watch,
   control,
 }) => {
-  const ecsSchemaOptions = useEcsSchemaOptions();
   const { ecsMappingArray } = watch();
   const ecsCurrentMapping = get(ecsMappingArray, `[${index}].result.value`);
 
@@ -313,6 +314,7 @@ const EMPTY_ARRAY: EuiComboBoxOptionOption[] = [];
 
 interface OsqueryColumnFieldProps {
   euiFieldProps: EuiComboBoxProps<OsquerySchemaOption>;
+  ecsSchemaOptions: ECSSchemaOption[];
   index: number;
   control: ECSMappingFormReturn['control'];
   watch: ECSMappingFormReturn['watch'];
@@ -323,6 +325,7 @@ interface OsqueryColumnFieldProps {
 
 const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   euiFieldProps,
+  ecsSchemaOptions,
   idAria,
   index,
   isLastItem,
@@ -330,7 +333,6 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   watch,
   trigger,
 }) => {
-  const ecsSchemaOptions = useEcsSchemaOptions();
   const { ecsMappingArray } = watch();
 
   const osqueryResultFieldValidator = useCallback(
@@ -586,6 +588,7 @@ export interface ECSMappingEditorFieldProps {
 interface ECSMappingEditorFormProps {
   isDisabled?: boolean;
   osquerySchemaOptions: OsquerySchemaOption[];
+  ecsSchemaOptions: ECSSchemaOption[];
   index: number;
   isLastItem: boolean;
   control: ECSMappingFormReturn['control'];
@@ -605,6 +608,7 @@ export const defaultEcsFormData = {
 export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   isDisabled,
   osquerySchemaOptions,
+  ecsSchemaOptions,
   isLastItem,
   index,
   onDelete,
@@ -627,6 +631,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
               <ECSComboboxField
                 control={control}
                 watch={watch}
+                ecsSchemaOptions={ecsSchemaOptions}
                 index={index}
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{
@@ -646,6 +651,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                 control={control}
                 watch={watch}
                 trigger={trigger}
+                ecsSchemaOptions={ecsSchemaOptions}
                 index={index}
                 isLastItem={isLastItem}
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
@@ -704,6 +710,7 @@ interface OsqueryColumn {
 
 // eslint-disable-next-line react/display-name
 export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEditorFieldProps) => {
+  const ecsSchemaOptions = useEcsSchemaOptions();
   const { data: osquerySchemaData } = useOsquerySchema();
 
   const osquerySchemaRef = useMemo(
@@ -1059,6 +1066,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
         <div key={item.id}>
           <ECSMappingEditorForm
             osquerySchemaOptions={osquerySchemaOptions}
+            ecsSchemaOptions={ecsSchemaOptions}
             index={index}
             isLastItem={index === array.length - 1}
             onDelete={remove}

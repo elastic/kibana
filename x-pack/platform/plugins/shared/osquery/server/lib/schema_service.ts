@@ -21,17 +21,9 @@ interface CacheEntry<T> {
   data: T[];
 }
 
-interface InstallationCache {
-  version: string;
-  fetchedAt: number;
-}
-
-const INSTALLATION_TTL_MS = 60_000;
-
 export class SchemaService {
   private osqueryCache: CacheEntry<OsqueryTable> | null = null;
   private ecsCache: CacheEntry<EcsField> | null = null;
-  private installationCache: InstallationCache | null = null;
 
   constructor(private readonly logger: Logger) {}
 
@@ -107,29 +99,13 @@ export class SchemaService {
     packageService: PackageService | undefined,
     savedObjectsClient: SavedObjectsClientContract
   ): Promise<string | undefined> {
-    if (
-      this.installationCache &&
-      Date.now() - this.installationCache.fetchedAt < INSTALLATION_TTL_MS
-    ) {
-      return this.installationCache.version;
-    }
-
     try {
       const installation = await packageService?.asInternalUser.getInstallation(
         OSQUERY_INTEGRATION_NAME,
         savedObjectsClient
       );
 
-      if (installation?.version) {
-        this.installationCache = {
-          version: installation.version,
-          fetchedAt: Date.now(),
-        };
-
-        return installation.version;
-      }
-
-      return undefined;
+      return installation?.version;
     } catch (e) {
       this.logger.debug(`Failed to get osquery_manager installation: ${e.message}`);
 
@@ -159,7 +135,15 @@ export class SchemaService {
         return undefined;
       }
 
-      return JSON.parse(rawData) as T[];
+      const parsed = JSON.parse(rawData);
+
+      if (!Array.isArray(parsed)) {
+        this.logger.warn(`Asset ${assetPath} did not contain an array`);
+
+        return undefined;
+      }
+
+      return parsed as T[];
     } catch (error) {
       this.logger.warn(`Failed to fetch asset ${assetPath}: ${error.message}`);
 

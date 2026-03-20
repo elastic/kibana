@@ -10,7 +10,6 @@ import type { IRouter } from '@kbn/core/server';
 import { API_VERSIONS, SCHEMAS_ROUTE } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import type { SchemaType } from '../../../common/types/schema';
 import type { SchemaService } from '../../lib/schema_service';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
@@ -44,7 +43,7 @@ export const createGetSchemasRoute = (
       },
       async (context, request, response) => {
         try {
-          const schemaType = request.params.schemaType as SchemaType;
+          const { schemaType } = request.params;
           const packageService = osqueryContext.service.getPackageService();
           const savedObjectsClient = await createInternalSavedObjectsClientForSpaceId(
             osqueryContext,
