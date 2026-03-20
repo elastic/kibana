@@ -20,8 +20,8 @@ import {
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
 import { addDynamicConnectorsToCache, getAllConnectors } from '../../../common/schema';
-import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
+import type { AgentBuilderPluginSetupContract } from '../../types';
 
 export const GET_STEP_DEFINITIONS_TOOL_ID = 'platform.workflows.get_step_definitions';
 

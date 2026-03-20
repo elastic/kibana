@@ -41,7 +41,7 @@ const createMockWorkflowApi = (): WorkflowApi =>
     exportWorkflows: jest
       .fn()
       .mockResolvedValue(new Blob(['zip-data'], { type: 'application/zip' })),
-  }) as unknown as WorkflowApi;
+  } as unknown as WorkflowApi);
 
 describe('export_workflows', () => {
   beforeEach(() => {

@@ -21,8 +21,8 @@ jest.mock('../../../features/import_workflows/lib/parse_import_file');
 jest.mock('../../../hooks/use_telemetry');
 
 // var avoids TDZ when the hoisted jest.mock factory assigns these before `let` would init
-var mockGetBatchWorkflows: jest.Mock;
-var mockBulkCreateWorkflows: jest.Mock;
+let mockGetBatchWorkflows: jest.Mock;
+let mockBulkCreateWorkflows: jest.Mock;
 
 jest.mock('@kbn/workflows-ui', () => {
   mockGetBatchWorkflows = jest.fn();

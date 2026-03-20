@@ -30,8 +30,8 @@ jest.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () =
 const mockParseImportFile = parseImportFile as jest.MockedFunction<typeof parseImportFile>;
 
 // var avoids TDZ when the hoisted jest.mock factory assigns these before `let` would init
-var mockGetBatchWorkflows: jest.Mock;
-var mockBulkCreateWorkflows: jest.Mock;
+let mockGetBatchWorkflows: jest.Mock;
+let mockBulkCreateWorkflows: jest.Mock;
 
 jest.mock('@kbn/workflows-ui', () => {
   mockGetBatchWorkflows = jest.fn();

@@ -76,7 +76,10 @@ export function useLazyStepExecutionFetcher(
     }
 
     try {
-      const stepExecution = await api.getStepExecution(currentExecutionId, stepDocId) as EsWorkflowStepExecution;
+      const stepExecution = (await api.getStepExecution(
+        currentExecutionId,
+        stepDocId
+      )) as EsWorkflowStepExecution;
       if (!stepExecution) {
         return null;
       }
