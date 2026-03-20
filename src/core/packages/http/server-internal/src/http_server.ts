@@ -43,6 +43,7 @@ import type {
   RouterDeprecatedApiDetails,
   RouterRoute,
   SessionStorageCookieOptions,
+  TimingEvent,
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
@@ -539,6 +540,29 @@ export class HttpServer {
     this.server.events.on('response', this.handleServerResponseEvent);
   }
 
+  private formatServerTimingHeader(
+    totalTime: number,
+    customEvents: readonly TimingEvent[]
+  ): string {
+    // Format: metric1;dur=X.XX;desc="...", metric2;dur=Y.YY;desc="..."
+    const timingMetrics = [
+      `apptotal;dur=${totalTime.toFixed(2)};desc="Application Server Processing Time"`,
+    ];
+
+    // Limit to 20 events, sanitize names, escape descriptions
+    for (const event of customEvents.slice(0, 20)) {
+      const safeName = event.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+      let metric = `${safeName};dur=${event.duration.toFixed(2)}`;
+      if (event.description) {
+        const safeDesc = event.description.replace(/"/g, '\\"').slice(0, 100);
+        metric += `;desc="${safeDesc}"`;
+      }
+      timingMetrics.push(metric);
+    }
+
+    return timingMetrics.join(', ');
+  }
+
   private setupRequestStateAssignment(
     config: HttpConfig,
     executionContext?: InternalExecutionContextSetup,
@@ -551,12 +575,12 @@ export class HttpServer {
         return responseToolkit.continue;
       }
 
-      // Add Server-Timing header with total request time
-      const startTime = (request.app as KibanaRequestState).startTime;
+      // Add Server-Timing header with total request time and custom events
+      const appState = request.app as KibanaRequestState;
+      const startTime = appState.startTime;
       const totalTime = performance.now() - startTime;
-      const serverTimingValue = `apptotal;dur=${totalTime.toFixed(
-        2
-      )};desc="Application Server Processing Time"`;
+      const customEvents = appState.timingState?.events ?? [];
+      const serverTimingValue = this.formatServerTimingHeader(totalTime, customEvents);
 
       if (isBoom(request.response)) {
         stop();

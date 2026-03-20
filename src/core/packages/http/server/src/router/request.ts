@@ -16,6 +16,7 @@ import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
 import type { RouteMethod, RouteConfigOptions, RouteSecurity, RouteDeprecationInfo } from './route';
 import type { Headers } from './headers';
+import type { RequestTiming, TimingEvent } from './timing';
 
 export type RouteSecurityGetter = (request?: {
   headers: KibanaRequest['headers'];
@@ -35,6 +36,14 @@ export interface KibanaRouteOptions extends RouteOptionsApp {
 }
 
 /**
+ * Internal state for request timing
+ * @internal
+ */
+export interface RequestTimingState {
+  events: TimingEvent[];
+}
+
+/**
  * @public
  */
 export interface KibanaRequestState extends RequestApplicationState {
@@ -47,6 +56,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   measureElu?: () => void;
   startTime: number;
   redactedSessionId?: string;
+  timingState?: RequestTimingState;
 }
 
 /**
@@ -218,6 +228,12 @@ export interface KibanaRequest<
    * The body payload of this request.
    */
   readonly body: Body;
+
+  /**
+   * API for recording custom timing events during request processing.
+   * These events are automatically included in the Server-Timing response header.
+   */
+  readonly timing: RequestTiming;
 }
 
 /**

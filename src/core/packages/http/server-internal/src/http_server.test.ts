@@ -2187,3 +2187,39 @@ test('exposes authentication details of incoming request to a route handler', as
       },
     });
 });
+
+test('includes Server-Timing header with custom events', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/timing-test',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => {
+      // Use timing API
+      const timer = req.timing.start('test-operation', 'Test operation');
+      timer.end();
+      req.timing.measure('manual-metric', 42.5, 'Manual measurement');
+
+      return res.ok({ body: 'ok' });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
+  registerRouter(router);
+  await server.start();
+
+  const response = await supertest(innerServer.listener).get('/foo/timing-test').expect(200);
+
+  // Verify Server-Timing header exists and contains expected metrics
+  expect(response.headers['server-timing']).toBeDefined();
+  const headerValue = response.headers['server-timing'];
+  expect(headerValue).toMatch(/apptotal;dur=[\d.]+;desc="Application Server Processing Time"/);
+  expect(headerValue).toMatch(/test-operation;dur=[\d.]+;desc="Test operation"/);
+  expect(headerValue).toContain('manual-metric;dur=42.50;desc="Manual measurement"');
+});
