@@ -873,6 +873,8 @@ export default function (providerContext: FtrProviderContext) {
           is_protected: false,
           space_ids: ['default'],
           supports_agentless: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 
