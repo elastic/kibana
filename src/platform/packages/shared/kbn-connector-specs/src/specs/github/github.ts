@@ -43,7 +43,9 @@ import {
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
 
-const parseJsonTextFromContentParts = (content: Array<{ type: string; text?: string }>): unknown => {
+const parseJsonTextFromContentParts = (
+  content: Array<{ type: string; text?: string }>
+): unknown => {
   const text = content
     .filter((part) => part.type === 'text' && typeof part.text === 'string')
     .map((part) => part.text)
