@@ -90,6 +90,7 @@ const PackagePolicyStreamsSchema = {
   config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
   deprecated: schema.maybe(DeprecationInfoSchema),
+  migrate_from: schema.maybe(schema.string()),
 };
 
 export const PackagePolicyInputsSchema = {
@@ -102,6 +103,7 @@ export const PackagePolicyInputsSchema = {
   config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 }),
   deprecated: schema.maybe(DeprecationInfoSchema),
+  migrate_from: schema.maybe(schema.string()),
 };
 
 export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
