@@ -54,16 +54,16 @@ export const useModelSettingsForm = () => {
     [registeredFeatures]
   );
 
-  const defaultAssignments = useMemo(() => {
-    const savedMap = new Map(
+  const defaultAssignments = useMemo((): Assignments => {
+    const savedMap = new Map<string, string[]>(
       (settingsData?.data?.features ?? [])
-        .map((f) => [f.feature_id, (f.endpoints ?? []).map((e) => e.id)])
+        .map((f): [string, string[]] => [f.feature_id, (f.endpoints ?? []).map((e) => e.id)])
         .filter(([, ids]) => ids.length > 0)
     );
 
     return Object.fromEntries(
       sections.flatMap(({ children }) =>
-        children.map((f) => [
+        children.map((f): [string, string[]] => [
           f.featureId,
           savedMap.get(f.featureId) ?? [...getEffectiveEndpoints(f, parentEndpointsMap)],
         ])
