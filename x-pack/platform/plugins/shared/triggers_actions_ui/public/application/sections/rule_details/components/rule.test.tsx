@@ -9,6 +9,7 @@ import * as React from 'react';
 import { Suspense } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -150,11 +151,13 @@ const queryClient = new QueryClient({
 
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(
-    <IntlProvider locale="en" messages={{}}>
-      <Suspense fallback={null}>
-        <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-      </Suspense>
-    </IntlProvider>
+    <MemoryRouter>
+      <IntlProvider locale="en" messages={{}}>
+        <Suspense fallback={null}>
+          <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+        </Suspense>
+      </IntlProvider>
+    </MemoryRouter>
   );
 };
 
@@ -347,23 +350,25 @@ describe('rules', () => {
     jest.setSystemTime(fakeNow);
 
     rerender(
-      <IntlProvider locale="en" messages={{}}>
-        <Suspense fallback={null}>
-          <QueryClientProvider client={queryClient}>
-            <RuleComponent
-              {...mockAPIs}
-              rule={rule}
-              ruleType={ruleType}
-              ruleSummary={ruleSummary}
-              readOnly={false}
-              refreshToken={{
-                resolve: () => undefined,
-                reject: () => undefined,
-              }}
-            />
-          </QueryClientProvider>
-        </Suspense>
-      </IntlProvider>
+      <MemoryRouter>
+        <IntlProvider locale="en" messages={{}}>
+          <Suspense fallback={null}>
+            <QueryClientProvider client={queryClient}>
+              <RuleComponent
+                {...mockAPIs}
+                rule={rule}
+                ruleType={ruleType}
+                ruleSummary={ruleSummary}
+                readOnly={false}
+                refreshToken={{
+                  resolve: () => undefined,
+                  reject: () => undefined,
+                }}
+              />
+            </QueryClientProvider>
+          </Suspense>
+        </IntlProvider>
+      </MemoryRouter>
     );
 
     expect(mockAlertsTable).toHaveBeenCalledWith(
