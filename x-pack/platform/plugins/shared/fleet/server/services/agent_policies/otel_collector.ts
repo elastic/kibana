@@ -102,6 +102,7 @@ export function generateOtelcolConfig(
         if (shouldAddAPMConfig) {
           otelConfig.connectors ??= {};
           otelConfig.processors ??= {};
+          otelConfig.service ??= { pipelines: {} };
           otelConfig.connectors[`elasticapm/${namespace}`] = {};
           otelConfig.processors[`elasticapm/${namespace}`] = {};
           otelConfig.processors[`transform/${namespace}-apm-namespace-routing`] = {
