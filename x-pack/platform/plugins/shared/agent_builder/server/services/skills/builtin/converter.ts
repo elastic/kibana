@@ -13,6 +13,7 @@ export const convertBuiltinSkill = (skill: SkillDefinition): InternalSkillDefini
   description: skill.description,
   content: skill.content,
   readonly: true,
+  experimental: skill.experimental ?? false,
   referencedContent: skill.referencedContent,
   referencedContentCount: skill.referencedContent?.length ?? 0,
   basePath: skill.basePath,
