@@ -12,6 +12,7 @@ import { CloudSetup, type CloudSetupConfig } from '@kbn/cloud-security-posture';
 
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
+import { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from '@kbn/fleet-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { ASSET_POLICY_TEMPLATE, CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from './constants';
 
@@ -37,6 +38,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
     }) => {
       const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AWS = '0.18.0';
       const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE = '1.1.3';
+
       const { cloud, uiSettings } = useKibana().services;
       const isValidFormState = !hasErrors(validationResults);
 
@@ -76,6 +78,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
             enableOrganization: true,
             getStartedPath: `https://www.elastic.co/docs/solutions/security/cloud/asset-disc-gcp`,
             enabled: true,
+            cloudConnectorEnabledVersion: CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
           },
           azure: {
             type: CLOUDBEAT_AZURE,

@@ -39,6 +39,8 @@ export const lensAttachmentPanelSchema = z.object({
   query: z.string().optional(),
   /** ES|QL query used (if applicable) */
   esql: z.string().optional(),
+  /** The visualization attachment ID this panel was resolved from */
+  sourceAttachmentId: z.string().optional(),
   /** Layout hint: width/height and position in dashboard grid units. */
   grid: panelGridSchema,
 });
@@ -147,17 +149,9 @@ export const dashboardAttachmentDataSchema = z.object({
 export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSchema>;
 
 /**
- * Zod schema for dashboard attachment origin references.
+ * Origin payload for dashboard attachments is a saved object ID string.
  */
-export const dashboardAttachmentOriginSchema = z.object({
-  /** Saved object id for the persisted dashboard */
-  savedObjectId: z.string(),
-});
-
-/**
- * Origin payload for dashboard attachments.
- */
-export type DashboardAttachmentOrigin = z.infer<typeof dashboardAttachmentOriginSchema>;
+export type DashboardAttachmentOrigin = string;
 
 /**
  * Data payload for a panel added event.
@@ -185,6 +179,4 @@ export type DashboardUiEvent =
 export type DashboardAttachment = Attachment<
   typeof DASHBOARD_ATTACHMENT_TYPE,
   DashboardAttachmentData
-> & {
-  origin?: DashboardAttachmentOrigin;
-};
+>;

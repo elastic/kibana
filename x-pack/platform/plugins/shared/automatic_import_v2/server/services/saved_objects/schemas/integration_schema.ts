@@ -95,6 +95,7 @@ export const integrationSchemaV2 = schema.object({
       logo: schema.maybe(schema.string()),
       description: schema.string(),
       created_at: schema.maybe(schema.string()),
+      categories: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
     },
     { unknowns: 'allow' }
   ),

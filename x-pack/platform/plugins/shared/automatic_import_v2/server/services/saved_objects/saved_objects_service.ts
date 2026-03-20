@@ -40,7 +40,7 @@ export interface FieldMappingEntry {
 export interface UpdateDataStreamParams {
   integrationId: string;
   dataStreamId: string;
-  ingestPipeline: Pipeline;
+  ingestPipeline?: Pipeline;
   pipelineDocs?: Array<NonNullable<estypes.IngestSimulateDocumentResult['doc']>['_source']>;
   fieldMapping?: FieldMappingEntry[];
   status: keyof typeof TASK_STATUSES;
@@ -539,9 +539,10 @@ export class AutomaticImportSavedObjectService {
   }
 
   /**
-   * Resets a data stream's status to pending, clears previous results, and updates the job info
-   * for a reanalysis run. This preserves existing metadata (title, description, input_types, etc.)
-   * while scheduling a fresh analysis task.
+   * Resets a data stream's status to pending and updates the job info for a reanalysis run.
+   * Preserves existing metadata (title, description, input_types, etc.) and the existing
+   * pipeline/results. The result is kept so that if the reanalysis task fails, the user
+   * still sees the previous pipeline and results instead of empty values.
    */
   public async resetDataStreamForReanalysis(params: {
     integrationId: string;
@@ -561,7 +562,6 @@ export class AutomaticImportSavedObjectService {
 
       const updatedAttributes: DataStreamAttributes = {
         ...dataStream.attributes,
-        result: undefined,
         job_info: {
           job_id: newTaskId,
           job_type: jobType,
@@ -606,13 +606,17 @@ export class AutomaticImportSavedObjectService {
         `Updating data stream ${dataStreamId} with pipeline docs: ${JSON.stringify(pipelineDocs)}`
       );
 
+      const updatedResult = ingestPipeline
+        ? {
+            ingest_pipeline: ingestPipeline,
+            ...(pipelineDocs ? { pipeline_docs: pipelineDocs } : {}),
+            ...(fieldMapping ? { field_mapping: fieldMapping } : {}),
+          }
+        : dataStream.attributes.result;
+
       const updatedDataStreamData: DataStreamAttributes = {
         ...dataStream.attributes,
-        result: {
-          ingest_pipeline: ingestPipeline,
-          ...(pipelineDocs ? { pipeline_docs: pipelineDocs } : {}),
-          ...(fieldMapping ? { field_mapping: fieldMapping } : {}),
-        },
+        result: updatedResult,
         job_info: {
           ...dataStream.attributes.job_info,
           status,

@@ -20,6 +20,7 @@ import {
 // Mock dependencies
 jest.mock('./suggestions/get_suggestions', () => ({
   getSuggestions: jest.fn(() => []),
+  isInsideLoopBody: jest.fn(() => false),
 }));
 
 jest.mock('./context/build_autocomplete_context', () => ({

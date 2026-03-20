@@ -1,5 +1,5 @@
 {
-  "sha1": "a375aaa96217df36408651341ff80efa0c121843",
+  "sha1": "0fd2142a6de18976e8079018290e435c6181cae2",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -31,6 +31,42 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/internal_actions/national_parks.spec.ts",
         "line": 43,
         "column": 7
+      }
+    },
+    {
+      "id": "44500196ae15bcc-e237d01d0946069",
+      "title": "Variable validation: data.map item and index bindings item and index references inside data.map with.fields are valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/data_map_variable_validation.spec.ts",
+        "line": 33,
+        "column": 9
+      }
+    },
+    {
+      "id": "44500196ae15bcc-eebb2585dd38aa4",
+      "title": "Variable validation: data.map item and index bindings invalid variable inside data.map with.fields is still flagged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/data_map_variable_validation.spec.ts",
+        "line": 42,
+        "column": 9
       }
     },
     {
@@ -167,6 +203,20 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
         "line": 210,
         "column": 9
+      }
+    },
+    {
+      "id": "f4e4fdce94026fa-cfea30731e1cb4b",
+      "title": "Workflow execution - Step scroll clicking a step in execution tree scrolls YAML editor to that step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/execution_step_scroll.spec.ts",
+        "line": 26,
+        "column": 7
       }
     },
     {

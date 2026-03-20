@@ -213,7 +213,6 @@ const getElasticsearchClient = async (
     ),
     kibanaVersion,
     onRequest: getRequestHandlerFactory(false)({
-      projectRouting: 'origin-only',
       logger: loggerFactory.get('elasticsearch'),
     }),
   });
