@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common';
 import {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   SECURITY_GET_ENTITY_TOOL_ID,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
 } from '../tools';
+
 import { createEntityAttachmentType } from './entity';
 
 describe('createEntityAttachmentType', () => {
   const experimentalFeatures = { entityAnalyticsEntityStoreV2: true } as ExperimentalFeatures;
   const attachmentType = createEntityAttachmentType(experimentalFeatures);
-  const formatContext = agentBuilderMocks.attachments.createFormatContextMock();
 
   describe('validate', () => {
     it('returns valid when entity data is valid with host identifierType', async () => {
@@ -142,36 +139,6 @@ describe('createEntityAttachmentType', () => {
       if (!result.valid) {
         expect(result.error).toBeDefined();
       }
-    });
-  });
-
-  describe('format', () => {
-    it('returns correct string format', async () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: SecurityAgentBuilderAttachments.entity,
-        data: 'identifier: hostname-1, identifierType: host',
-      };
-
-      const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: attachment.data };
-
-      expect(representation.type).toBe('text');
-      expect(representation.value).toBe('identifier: hostname-1, identifierType: host');
-    });
-
-    it('throws error when attachment data is invalid', () => {
-      const attachment: Attachment<string, unknown> = {
-        id: 'test-id',
-        type: SecurityAgentBuilderAttachments.entity,
-        data: 'invalid data',
-      };
-
-      expect(() => attachmentType.format(attachment, formatContext)).toThrow(
-        'Invalid risk entity attachment data for attachment test-id'
-      );
     });
   });
 

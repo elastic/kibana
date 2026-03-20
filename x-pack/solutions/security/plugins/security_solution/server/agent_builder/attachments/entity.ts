@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ExperimentalFeatures } from '../../../common';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
@@ -14,15 +13,6 @@ import {
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
 } from '../tools';
 import { entityAttachmentDataSchema } from '../utils/entity_utils';
-
-/**
- * Type guard to check if data is a formatted risk entity string
- */
-const isEntityRiskFormattedData = (data: unknown): data is string => {
-  return (
-    typeof data === 'string' && data.includes('identifier:') && data.includes('identifierType:')
-  );
-};
 
 /**
  * Creates the definition for the `entity` attachment type.
@@ -40,21 +30,7 @@ export const createEntityAttachmentType = (
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: (attachment: Attachment<string, unknown>) => {
-      console.log(`Formatting entity attachment ${JSON.stringify(attachment)}`);
-      // Extract data to allow proper type narrowing
-      const data = attachment.data;
-      // Necessary because we cannot currently use the AttachmentType type as agent is not
-      // registered with enum AttachmentType in agentBuilder attachment_types.ts
-      if (!isEntityRiskFormattedData(data)) {
-        throw new Error(`Invalid risk entity attachment data for attachment ${attachment.id}`);
-      }
-      return {
-        getRepresentation: () => {
-          return { type: 'text', value: data };
-        },
-      };
-    },
+    format: () => ({}),
     getTools: () =>
       experimentalFeatures.entityAnalyticsEntityStoreV2
         ? [SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID]
