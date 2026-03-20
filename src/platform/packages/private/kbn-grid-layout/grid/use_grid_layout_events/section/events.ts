@@ -44,6 +44,7 @@ export const useGridLayoutSectionEvents = ({ sectionId }: { sectionId: string })
   );
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
+      console.log(isLayoutInteractive(gridLayoutStateManager), 'isLayoutInteractive');
       if (!isLayoutInteractive(gridLayoutStateManager)) {
         return;
       }

@@ -83,10 +83,11 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
   const handleSectionDragStart = useCallback(
     (e: UserInteractionEvent) => {
-      if (shouldIgnoreHeaderClick((e as unknown as React.MouseEvent).target)) return;
+      if (shouldIgnoreHeaderClick(e.target)) return;
+      if (readOnly) toggleIsCollapsed(); // if the layout is read-only, allow click to toggle collapse instead of starting drag
       startDrag(e);
     },
-    [startDrag]
+    [startDrag, toggleIsCollapsed, readOnly]
   );
 
   useEffect(() => {
@@ -157,13 +158,14 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       switch (type) {
         case 'init':
           hasDraggedHeaderRef.current = false;
+          console.log('init ', hasDraggedHeaderRef.current, event); // logs for testing purposes
           break;
 
         case 'update':
           if (!hasDraggedHeaderRef.current) {
             handleFirstDrag();
           }
-
+          console.log('update', hasDraggedHeaderRef.current, event); // logs for testing purposes
           headerRef.style.transform = `translate(${event!.translate.left}px, ${
             event!.translate.top
           }px)`;
@@ -171,8 +173,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
         case 'finish':
           const isClick = !hasDraggedHeaderRef.current;
-
+          console.log('finish ', hasDraggedHeaderRef.current, event); // logs for testing purposes
           if (isClick) {
+            console.log('click detected, toggling collapse'); // logs for testing purposes
             toggleIsCollapsed();
           }
 
@@ -343,7 +346,9 @@ const styles = {
       gridRowEnd: `start-${sectionId}`,
       height: `${euiTheme.size.xl}`,
       ...(readOnly
-        ? {}
+        ? {
+            cursor: 'pointer',
+          }
         : {
             touchAction: 'none',
             '&:hover': {
