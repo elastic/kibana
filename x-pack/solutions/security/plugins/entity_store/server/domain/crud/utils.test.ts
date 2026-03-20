@@ -6,6 +6,7 @@
  */
 
 import { isNotEmptyCondition } from '../../../common/domain/definitions/common_fields';
+import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import {
   type EntityField,
   type EntityType,
@@ -64,29 +65,29 @@ describe('crud_client utils', () => {
 
   describe('validateUpdateDocIdentification', () => {
     it('passes when doc has entity.id and no generatedId', () => {
-      const doc = { 'entity.id': 'my-id' };
+      const doc: Entity = { entity: { id: 'my-id' } };
       expect(() => validateUpdateDocIdentification(doc, undefined)).not.toThrow();
     });
 
     it('passes when doc has no entity.id but generatedId is provided', () => {
-      const doc = { 'host.name': 'some-host' };
+      const doc = { host: { name: 'some-host' } } as Entity;
       expect(() => validateUpdateDocIdentification(doc, 'generated-id')).not.toThrow();
     });
 
     it('passes when doc entity.id matches generatedId', () => {
-      const doc = { 'entity.id': 'same-id' };
+      const doc: Entity = { entity: { id: 'same-id' } };
       expect(() => validateUpdateDocIdentification(doc, 'same-id')).not.toThrow();
     });
 
     it('throws when doc has no entity.id and generatedId is undefined', () => {
-      const doc = { 'host.name': 'some-host' };
+      const doc = { host: { name: 'some-host' } } as Entity;
       expect(() => validateUpdateDocIdentification(doc, undefined)).toThrow(
         new BadCRUDRequestError('Could not derive EUID from document or find it in entity.id')
       );
     });
 
     it('throws when doc entity.id does not match generatedId', () => {
-      const doc = { 'entity.id': 'supplied-id' };
+      const doc: Entity = { entity: { id: 'supplied-id' } };
       expect(() => validateUpdateDocIdentification(doc, 'different-id')).toThrow(
         new BadCRUDRequestError(
           'Supplied ID supplied-id does not match generated EUID different-id'
@@ -99,7 +100,7 @@ describe('crud_client utils', () => {
     it('returns ValidatedDoc with id and transformed doc', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
-      const doc = { 'entity.id': 'entity-generic' };
+      const doc: Entity = { entity: { id: 'entity-generic' } };
       const result = validateAndTransformDocForUpsert(
         'generic',
         'default',
@@ -112,7 +113,7 @@ describe('crud_client utils', () => {
       expect(result.doc).toEqual(
         expect.objectContaining({
           '@timestamp': expect.any(String),
-          'entity.id': 'entity-generic',
+          entity: { id: 'entity-generic' },
         })
       );
     });
@@ -120,7 +121,7 @@ describe('crud_client utils', () => {
     it('uses generatedId when doc has no entity.id', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
-      const doc = { 'host.name': 'some-host' };
+      const doc = { host: { name: 'some-host' } } as Entity;
       const result = validateAndTransformDocForUpsert(
         'generic',
         'default',
@@ -130,13 +131,13 @@ describe('crud_client utils', () => {
       );
 
       expect(result.id).toBe('generated-id');
-      expect(doc['entity.id']).toBe('generated-id');
+      expect(doc.entity?.id).toBe('generated-id');
     });
 
     it('uses doc entity.id when generatedId is undefined', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
-      const doc = { 'entity.id': 'doc-id' };
+      const doc: Entity = { entity: { id: 'doc-id' } };
       const result = validateAndTransformDocForUpsert(
         'generic',
         'default',
@@ -148,10 +149,39 @@ describe('crud_client utils', () => {
       expect(result.id).toBe('doc-id');
     });
 
+    it('nests entity under typed field for non-generic types', () => {
+      mockGetEntityDefinition.mockReturnValue(
+        createDefinition('host', [createField('host.name')])
+      );
+
+      const doc: Entity = {
+        entity: { id: 'entity-host' },
+        host: { name: 'original-host-name' },
+      };
+      const result = validateAndTransformDocForUpsert('host', 'default', doc, undefined, false);
+
+      expect(result.doc['@timestamp']).toEqual(expect.any(String));
+      expect(result.doc).not.toHaveProperty('entity');
+      expect(result.doc).toHaveProperty('host.entity.id', 'entity-host');
+      expect(result.doc).toHaveProperty('host.name', 'original-host-name');
+    });
+
+    it('sets type.name from entity.id when not present', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
+
+      const doc: Entity = { entity: { id: 'entity-host' } };
+      const result = validateAndTransformDocForUpsert('host', 'default', doc, undefined, true);
+
+      expect(result.doc).toHaveProperty('host.name', 'entity-host');
+    });
+
     it('ignores identity source fields from validation', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
 
-      const doc = { 'entity.id': 'entity-host-identity', 'host.name': 'identity-host' };
+      const doc: Entity = {
+        entity: { id: 'entity-host-identity' },
+        host: { name: 'identity-host' },
+      };
 
       expect(() =>
         validateAndTransformDocForUpsert('host', 'default', doc, undefined, false)
@@ -164,9 +194,13 @@ describe('crud_client utils', () => {
       );
 
       const doc = {
-        'entity.id': 'entity-allow-update',
-        'entity.attributes.watchlists': ['privileged_watchlist_id'],
-      };
+        entity: {
+          id: 'entity-allow-update',
+          attributes: {
+            watchlists: ['privileged_watchlist_id'],
+          },
+        },
+      } as Entity;
       const result = validateAndTransformDocForUpsert(
         'generic',
         'default',
@@ -175,15 +209,19 @@ describe('crud_client utils', () => {
         false
       );
 
-      expect(result.doc['entity.attributes.watchlists']).toEqual(['privileged_watchlist_id']);
+      expect(result.doc).toHaveProperty('entity.attributes.watchlists', [
+        'privileged_watchlist_id',
+      ]);
     });
 
     it('throws for fields missing from definition', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
-      const doc = {
-        'entity.id': 'entity-invalid-field',
-        'entity.attributes.managed': true,
+      const doc: Entity = {
+        entity: {
+          id: 'entity-invalid-field',
+          attributes: { managed: true },
+        },
       };
 
       expect(() =>
@@ -200,9 +238,11 @@ describe('crud_client utils', () => {
         createDefinition('generic', [createField('entity.attributes.managed', false)])
       );
 
-      const doc = {
-        'entity.id': 'entity-restricted-update',
-        'entity.attributes.managed': true,
+      const doc: Entity = {
+        entity: {
+          id: 'entity-restricted-update',
+          attributes: { managed: true },
+        },
       };
 
       expect(() =>
@@ -219,9 +259,11 @@ describe('crud_client utils', () => {
         createDefinition('generic', [createField('entity.attributes.managed', false)])
       );
 
-      const doc = {
-        'entity.id': 'entity-force-update',
-        'entity.attributes.managed': true,
+      const doc: Entity = {
+        entity: {
+          id: 'entity-force-update',
+          attributes: { managed: true },
+        },
       };
 
       expect(() =>

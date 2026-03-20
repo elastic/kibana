@@ -31,16 +31,16 @@ export function hashEuid(id: string): string {
 // expected by updateEntity() method. updateEntity() and bulkUpdateEntity()
 // methods are the only ones that consume this validator.
 export function validateUpdateDocIdentification(
-  doc: Record<string, unknown>,
+  doc: Entity,
   generatedId: string | undefined
 ): void {
-  if (!doc[ENTITY_ID_FIELD] && generatedId === undefined) {
+  if (!doc.entity?.id && generatedId === undefined) {
     throw new BadCRUDRequestError(`Could not derive EUID from document or find it in entity.id`);
   }
 
-  if (doc[ENTITY_ID_FIELD] && generatedId !== undefined && doc[ENTITY_ID_FIELD] !== generatedId) {
+  if (doc.entity?.id && generatedId !== undefined && doc.entity.id !== generatedId) {
     throw new BadCRUDRequestError(
-      `Supplied ID ${doc[ENTITY_ID_FIELD]} does not match generated EUID ${generatedId}`
+      `Supplied ID ${doc.entity.id} does not match generated EUID ${generatedId}`
     );
   }
 }
@@ -53,12 +53,16 @@ export interface ValidatedDoc {
 export function validateAndTransformDocForUpsert(
   entityType: EntityType,
   namespace: string,
-  doc: Record<string, unknown>,
+  doc: Entity,
   generatedId: string | undefined,
   force: boolean
 ): ValidatedDoc {
-  if (!doc[ENTITY_ID_FIELD] && generatedId) {
-    doc[ENTITY_ID_FIELD] = generatedId;
+  if (!doc.entity?.id && generatedId) {
+    if (!doc.entity) {
+      doc.entity = { id: generatedId };
+    } else {
+      doc.entity.id = generatedId;
+    }
   }
   const definition = getEntityDefinition(entityType, namespace);
   if (!force) {
@@ -66,7 +70,7 @@ export function validateAndTransformDocForUpsert(
     const fieldDescriptions = getFieldDescriptions(flat, definition);
     assertOnlyNonForcedAttributesInReq(fieldDescriptions);
   }
-  return { id: doc[ENTITY_ID_FIELD] as string, doc: transformDocForUpsert(entityType, doc) };
+  return { id: doc.entity!.id!, doc: transformDocForUpsert(entityType, doc) };
 }
 
 function getFieldDescriptions(
@@ -127,7 +131,7 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
   }
 }
 
-function transformDocForUpsert(type: EntityType, data: Partial<Entity>): Record<string, unknown> {
+function transformDocForUpsert(type: EntityType, data: Entity): Record<string, unknown> {
   const doc: Record<string, unknown> = {
     ...data,
     '@timestamp': new Date().toISOString(),

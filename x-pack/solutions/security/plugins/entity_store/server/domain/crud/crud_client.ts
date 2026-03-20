@@ -12,12 +12,9 @@ import type {
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getFlattenedObject } from '@kbn/std';
-import { omit } from 'lodash';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { getEuidFromObject } from '../../../common/domain/euid';
-import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { BadCRUDRequestError, EntityNotFoundError } from '../errors';
 import {
@@ -175,12 +172,11 @@ export class CRUDClient {
   // 3. Identity only - no ID and identifying data - ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     const generatedId = getEuidFromObject(entityType, doc);
-    const flatDoc = getFlattenedObject(doc);
-    validateUpdateDocIdentification(flatDoc, generatedId);
+    validateUpdateDocIdentification(doc, generatedId);
     const valid = validateAndTransformDocForUpsert(
       entityType,
       this.namespace,
-      flatDoc,
+      doc,
       generatedId,
       force
     );
@@ -219,18 +215,17 @@ export class CRUDClient {
     this.logger.debug(`Preparing ${objects.length} entities for bulk update`);
     for (const { type: entityType, doc } of objects) {
       const generatedId = getEuidFromObject(entityType, doc);
-      const flatDoc = getFlattenedObject(doc);
-      validateUpdateDocIdentification(flatDoc, generatedId);
+      validateUpdateDocIdentification(doc, generatedId);
       const valid = validateAndTransformDocForUpsert(
         entityType,
         this.namespace,
-        flatDoc,
+        doc,
         generatedId,
         force
       );
       operations.push(
         { update: { _id: hashEuid(valid.id), retry_on_conflict: RETRY_ON_CONFLICT } },
-        valid.doc
+        { doc: valid.doc }
       );
     }
     this.logger.debug(`Bulk updating ${objects.length} entities`);
@@ -265,8 +260,7 @@ export class CRUDClient {
     if (!id) {
       throw new BadCRUDRequestError(`Could not derive EUID from document`);
     }
-    const flatDoc = omit(getFlattenedObject(doc), ENTITY_ID_FIELD);
-    const valid = validateAndTransformDocForUpsert(entityType, this.namespace, flatDoc, id, true);
+    const valid = validateAndTransformDocForUpsert(entityType, this.namespace, doc, id, true);
     const { result } = await this.esClient.create({
       index: getLatestEntitiesIndexName(this.namespace),
       id: hashEuid(valid.id),
