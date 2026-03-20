@@ -13,6 +13,7 @@ import { createHash } from 'crypto';
 import { finished } from 'stream/promises';
 import { Readable } from 'stream';
 import type { ReadableStream as WebReadableStream } from 'stream/web';
+import type { ReadStream } from 'fs';
 import { handleProcessInterruptions } from './nodejs_utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { SettingsStorage } from './settings_storage';
@@ -38,8 +39,10 @@ export const fetchExpectedHash = async (shaUrl: string): Promise<string> => {
  */
 export const computeFileHash = async (filePath: string): Promise<string> => {
   const hash = createHash('sha512');
-  const stream = fs.createReadStream(filePath);
-  await finished(stream.pipe(hash));
+  const stream: ReadStream = fs.createReadStream(filePath);
+  for await (const chunk of stream) {
+    hash.update(chunk);
+  }
   return hash.digest('hex');
 };
 
@@ -171,6 +174,8 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
       }
     }
 
+    let downloadedFileHash: string | undefined;
+
     try {
       await pRetry(
         async (attempt) => {
@@ -199,8 +204,8 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
           );
 
           // Validate hash after download
+          const actualHash = await computeFileHash(newDownloadInfo.fullFilePath);
           if (expectedHash) {
-            const actualHash = await computeFileHash(newDownloadInfo.fullFilePath);
             if (expectedHash !== actualHash) {
               throw new Error(
                 `Integrity check failed: expected SHA512 ${expectedHash}, got ${actualHash}`
@@ -208,6 +213,9 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
             }
             this.log.info(`SHA512 integrity check passed for [${newDownloadInfo.fullFilePath}]`);
           }
+
+          // Store computed hash for sidecar (use remote hash if available, otherwise local)
+          downloadedFileHash = expectedHash || actualHash;
 
           this.log.info(`Successfully downloaded agent to [${newDownloadInfo.fullFilePath}]`);
         },
@@ -224,9 +232,9 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
       throw new Error(`Download failed after multiple attempts: ${(error as Error).message}`);
     }
 
-    // Write sidecar hash file
-    if (expectedHash) {
-      await writeFile(sidecarPath, expectedHash, 'utf-8');
+    // Write sidecar hash file (always write — use remote hash if available, otherwise local)
+    if (downloadedFileHash) {
+      await writeFile(sidecarPath, downloadedFileHash, 'utf-8');
     }
 
     await this.cleanupDownloads();

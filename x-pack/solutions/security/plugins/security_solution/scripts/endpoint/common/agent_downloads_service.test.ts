@@ -44,15 +44,7 @@ jest.mock('stream', () => {
 jest.mock('crypto', () => ({
   createHash: jest.fn(() => ({
     digest: mockDigest,
-    pipe: jest.fn().mockReturnThis(),
-    on: jest.fn().mockReturnThis(),
-    once: jest.fn().mockReturnThis(),
-    emit: jest.fn().mockReturnThis(),
-    removeListener: jest.fn().mockReturnThis(),
-    removeAllListeners: jest.fn().mockReturnThis(),
-    write: jest.fn(),
-    end: jest.fn(),
-    writable: true,
+    update: jest.fn(),
   })),
 }));
 jest.mock('../../../common/endpoint/data_loaders/utils', () => ({
@@ -114,14 +106,11 @@ describe('AgentDownloadStorage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDigest.mockReturnValue(expectedHash);
-    // Mock createReadStream used by computeFileHash
+    // Mock createReadStream used by computeFileHash — supports async iteration
     const mockReadStream = {
-      pipe: jest.fn().mockReturnThis(),
-      on: jest.fn().mockReturnThis(),
-      once: jest.fn().mockReturnThis(),
-      emit: jest.fn().mockReturnThis(),
-      removeListener: jest.fn().mockReturnThis(),
-      removeAllListeners: jest.fn().mockReturnThis(),
+      [Symbol.asyncIterator]: async function* () {
+        yield Buffer.from('mock-data');
+      },
     };
     (fs.createReadStream as unknown as jest.Mock).mockReturnValue(mockReadStream);
   });
@@ -290,10 +279,11 @@ describe('AgentDownloadStorage', () => {
       );
     });
 
-    it('proceeds without validation when sha_url fetch fails', async () => {
+    it('proceeds without validation when sha_url fetch fails but still writes local hash sidecar', async () => {
       mockExistsSync({ [fileName]: false });
       (fs.createWriteStream as unknown as jest.Mock).mockReturnValue(mockWriteStream);
       mockReadFile({});
+      mockDigest.mockReturnValue(expectedHash);
 
       mockedFetch
         .mockResolvedValueOnce({
@@ -316,6 +306,12 @@ describe('AgentDownloadStorage', () => {
         directory: expect.any(String),
         fullFilePath: expect.stringContaining(fileName),
       });
+      // Sidecar should be written with locally computed hash even when remote hash is unavailable
+      expect(writeFile).toHaveBeenCalledWith(
+        expect.stringContaining('.sha512'),
+        expectedHash,
+        'utf-8'
+      );
     });
   });
 
