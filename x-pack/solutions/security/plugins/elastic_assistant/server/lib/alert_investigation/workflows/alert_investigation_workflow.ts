@@ -132,39 +132,14 @@ export const alertInvestigationWorkflowDefinition = {
  */
 
 /**
- * Register workflow with Elastic Workflows
+ * Workflow registration notes:
  *
- * This should be called during plugin setup to register the complete pipeline
- * as a scheduled workflow.
- */
-export function registerAlertInvestigationWorkflow(
-  workflowsExtensions: any // TODO: Add proper type from @kbn/workflows-extensions
-): void {
-  // Check if Elastic Workflows supports workflow registration
-  // (not just step registration)
-
-  if (typeof workflowsExtensions.registerWorkflow === 'function') {
-    workflowsExtensions.registerWorkflow(alertInvestigationWorkflowDefinition);
-    console.log(
-      `✅ Registered Alert Investigation Pipeline workflow: ${ALERT_INVESTIGATION_WORKFLOW_ID}`
-    );
-  } else {
-    console.warn(
-      '⚠️ Elastic Workflows does not support workflow registration yet. ' +
-        'Workflow definition created but not registered. ' +
-        'Pipeline must be triggered manually via API or custom Task Manager job.'
-    );
-  }
-}
-
-/**
- * Feature flag integration
+ * This workflow definition is ready to be registered with Elastic Workflows
+ * when workflow registration API is available.
  *
- * Elastic Workflows should check the feature flag before executing the workflow.
- * If Workflows doesn't support this natively, we check in each step handler.
+ * For now, the 6 workflow steps are registered individually and can be
+ * composed into workflows via the Elastic Workflows UI or API.
+ *
+ * Feature flag: elasticAssistant:alertInvestigationPipeline_enabled
+ * Each workflow step checks the feature flag before execution.
  */
-export const WORKFLOW_FEATURE_FLAG_CONFIG = {
-  flagKey: 'elasticAssistant:alertInvestigationPipeline_enabled',
-  checkBeforeExecution: true,
-  skipWorkflowIfDisabled: true,
-};
