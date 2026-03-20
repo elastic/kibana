@@ -38,7 +38,45 @@ export interface CallToolParams {
 }
 
 /**
- * Non-text content as part of a tool call response.
+ * Resource annotations returned by MCP servers. These hints can be used by
+ * clients/UI for prioritization and audience targeting.
+ */
+export interface ResourceAnnotations {
+  audience?: Array<'user' | 'assistant'>;
+  priority?: number;
+  lastModified?: string;
+}
+
+/**
+ * A resource link returned as part of a tool call response.
+ * Links are references to resources that can be fetched via resources/read.
+ */
+export interface ResourceLinkPart {
+  type: 'resource_link';
+  uri: string;
+  name?: string;
+  description?: string;
+  mimeType?: string;
+  annotations?: ResourceAnnotations;
+}
+
+/**
+ * Embedded resource returned as part of a tool call response.
+ * Servers may embed resource contents (text or base64 blob) inline.
+ */
+export interface EmbeddedResourcePart {
+  type: 'resource';
+  resource: {
+    uri: string;
+    mimeType?: string;
+    text?: string;
+    blob?: string;
+    annotations?: ResourceAnnotations;
+  };
+}
+
+/**
+ * Non-text (or otherwise unknown) content returned as part of a tool call response.
  */
 export interface NonTextPart {
   type: string;
@@ -53,7 +91,7 @@ export interface TextPart {
   text: string;
 }
 
-export type ContentPart = TextPart | NonTextPart;
+export type ContentPart = TextPart | ResourceLinkPart | EmbeddedResourcePart | NonTextPart;
 
 /**
  * Type guard to check if a content part is a valid text part.
@@ -62,6 +100,29 @@ export type ContentPart = TextPart | NonTextPart;
 export function isTextPart(part: ContentPart | null | undefined): part is TextPart {
   return (
     part !== null && part !== undefined && part.type === 'text' && typeof part.text === 'string'
+  );
+}
+
+export function isResourceLinkPart(part: ContentPart | null | undefined): part is ResourceLinkPart {
+  return (
+    part !== null &&
+    part !== undefined &&
+    part.type === 'resource_link' &&
+    typeof (part as ResourceLinkPart).uri === 'string'
+  );
+}
+
+export function isEmbeddedResourcePart(
+  part: ContentPart | null | undefined
+): part is EmbeddedResourcePart {
+  const resource = (part as EmbeddedResourcePart | null | undefined)?.resource;
+  return (
+    part !== null &&
+    part !== undefined &&
+    part.type === 'resource' &&
+    typeof resource === 'object' &&
+    resource !== null &&
+    typeof resource.uri === 'string'
   );
 }
 
