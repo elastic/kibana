@@ -13,6 +13,7 @@ import { useCasesToast } from '../common/use_cases_toast';
 import { casesQueriesKeys } from './constants';
 import { useReplaceCustomField } from './use_replace_custom_field';
 import { basicCaseFixture } from './test_fixtures';
+import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 
 jest.mock('./api', () => ({
   getCase: jest.fn(),
@@ -169,7 +170,7 @@ describe('useReplaceCustomField', () => {
       .mockRejectedValueOnce(conflictError)
       .mockResolvedValueOnce({
         key: sampleData.customFieldId,
-        type: 'text',
+        type: CustomFieldTypes.TEXT,
         value: sampleData.customFieldValue,
       });
     const getCaseSpy = jest.spyOn(api, 'getCase').mockResolvedValue(latestCase);
