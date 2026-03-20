@@ -13,6 +13,9 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/shared-ux-router",
+    "@kbn/spaces-plugin",
+    "@kbn/cloud-plugin"
   ]
 }
