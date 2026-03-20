@@ -18,7 +18,14 @@ import {
   ensureMinikubeRunning,
 } from '@kbn/otel-demo';
 import type { DemoType, FailureScenario } from '@kbn/otel-demo';
-import { GCS_BUCKET, BASELINE_WAIT_MS, FAILURE_WAIT_MS } from './lib/constants';
+import {
+  GCS_BUCKET,
+  BASELINE_WAIT_MS,
+  FAILURE_WAIT_MS,
+  HEALTHY_BASELINE_SCENARIO,
+  DEFAULT_LOGS_INDEX,
+  DEFAULT_DEMO_APP,
+} from './lib/constants';
 import { getConnectionConfig, type ConnectionConfig } from './lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from './lib/gcs';
 import { sleep } from './lib/sleep';
@@ -28,11 +35,12 @@ import {
   configureModelSelectionSettings,
   disableStreams,
   enableSignificantEvents,
-  logSigEventsExtractedKIs,
+  logSigEventsExtractedKIFeatures,
   persistSigEventsExtractedKIsForSnapshot,
-  triggerSigEventsKIsExtraction,
-  waitForSigEventsKIsExtraction,
+  triggerSigEventsKIFeatureExtraction,
+  waitForSigEventsKIFeatureExtraction,
 } from './lib/significant_events_workflow';
+import type { Scenario } from './lib/types';
 
 run(
   async ({ log, flags }) => {
@@ -41,6 +49,8 @@ run(
       node: config.esUrl,
       auth: { username: config.username, password: config.password },
     });
+
+    const logsIndex = String(flags['logs-index'] || DEFAULT_LOGS_INDEX);
 
     const connectorId = String(flags['connector-id'] || '');
     const runId = String(flags['run-id'] || moment().format('YYYY-MM-DD'));
@@ -61,7 +71,7 @@ run(
     }
 
     // Validate --demo-app
-    const demoType = String(flags['demo-app'] || 'otel-demo');
+    const demoType = String(flags['demo-app'] || DEFAULT_DEMO_APP);
     const availableDemos = listAvailableDemos();
     if (!availableDemos.includes(demoType as DemoType)) {
       throw new Error(
@@ -76,11 +86,8 @@ run(
     );
     const failureWaitMs = parseDurationFlag(flags['failure-wait'], 'failure-wait', FAILURE_WAIT_MS);
 
-    const allScenarios = getDemoScenarios(demoType as DemoType);
-    if (allScenarios.length === 0) {
-      log.warning(`No scenarios registered for demo app "${demoType}". Aborting.`);
-      return;
-    }
+    const failureScenarios = getDemoScenarios(demoType as DemoType);
+    const allScenarios: Scenario[] = [HEALTHY_BASELINE_SCENARIO, ...failureScenarios];
 
     const selectedScenarios =
       scenariosToRun.length > 0
@@ -127,7 +134,8 @@ run(
         log,
         demoType as DemoType,
         baselineWaitMs,
-        failureWaitMs
+        failureWaitMs,
+        logsIndex
       );
     }
 
@@ -188,9 +196,11 @@ run(
         'demo-app',
         'baseline-wait',
         'failure-wait',
+        'logs-index',
       ],
       boolean: ['dry-run'],
       help: `
+        --logs-index       Logs index to use (default: logs)
         --connector-id     (required) LLM connector ID for feature extraction (e.g.: bedrock-opus-46)
         --run-id           Run identifier used as GCS subfolder (default: today's date in format YYYY-MM-DD)
         --scenario         Process only specific scenario(s) - can be repeated. Omit for all.
@@ -207,8 +217,11 @@ run(
   }
 );
 
+const isFailureScenario = (scenario: Scenario): scenario is FailureScenario =>
+  'category' in scenario;
+
 async function processScenario(
-  scenario: FailureScenario,
+  scenario: Scenario,
   config: ConnectionConfig,
   connectorId: string,
   runId: string,
@@ -216,9 +229,10 @@ async function processScenario(
   log: ToolingLog,
   demoType: DemoType,
   baselineWaitMs: number,
-  failureWaitMs: number
+  failureWaitMs: number,
+  logsIndex: string
 ): Promise<void> {
-  const isFailure = scenario.steps.length > 0;
+  const isFailure = isFailureScenario(scenario);
 
   log.info('');
   log.info('='.repeat(70));
@@ -227,11 +241,13 @@ async function processScenario(
 
   // Step 0 — Ensure the `logs` data stream exists so that feature extraction can run.
   // (Streams' /internal/streams/{name}/features/_task requires a concrete data stream to exist.)
-  await ensureLogsDataStream(esClient, log);
+  if (logsIndex === 'logs') {
+    await ensureLogsDataStream(esClient, log);
+  }
 
   // Step 1+2 — Deploy the demo app. Resolves once pods are ready (no log streaming).
   log.info('[1/7] Deploying demo app...');
-  await deployDemo({ demoType, log, logsIndex: 'logs' });
+  await deployDemo({ demoType, log, logsIndex });
   log.info('[2/7] Deployment complete');
 
   try {
@@ -255,9 +271,9 @@ async function processScenario(
     log.info('[5/7] Running feature extraction...');
     await enableSignificantEvents(config, log);
     await configureModelSelectionSettings(config, log, connectorId);
-    await triggerSigEventsKIsExtraction(config, log);
-    await waitForSigEventsKIsExtraction(config, log);
-    await logSigEventsExtractedKIs(config, log);
+    await triggerSigEventsKIFeatureExtraction(config, log, logsIndex);
+    await waitForSigEventsKIFeatureExtraction(config, log, logsIndex);
+    await logSigEventsExtractedKIFeatures(config, log, logsIndex);
     await persistSigEventsExtractedKIsForSnapshot(config, esClient, log, scenario.id);
 
     // Step 6 — Create a snapshot of the logs and extracted features

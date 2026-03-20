@@ -10,7 +10,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Feature } from '@kbn/streams-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
-import { FEATURE_EXTRACTION_POLL_INTERVAL_MS, FEATURE_EXTRACTION_TIMEOUT_MS } from './constants';
+import {
+  FEATURE_EXTRACTION_POLL_INTERVAL_MS,
+  FEATURE_EXTRACTION_TIMEOUT_MS,
+  DEFAULT_LOGS_INDEX,
+} from './constants';
 import {
   getSigeventsSnapshotKIFeaturesIndex,
   SIGEVENTS_FEATURES_INDEX_PATTERN,
@@ -65,9 +69,10 @@ export async function configureModelSelectionSettings(
     `Failed to configure model selection settings: ${status} ${JSON.stringify(data)}`
   );
 }
-export async function triggerSigEventsKIsExtraction(
+export async function triggerSigEventsKIFeatureExtraction(
   config: ConnectionConfig,
-  log: ToolingLog
+  log: ToolingLog,
+  streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
   log.info('Triggering feature extraction on stream "logs"...');
 
@@ -75,7 +80,7 @@ export async function triggerSigEventsKIsExtraction(
   const { status, data } = await kibanaRequest(
     config,
     'POST',
-    '/internal/streams/logs/features/_task',
+    `/internal/streams/${streamName}/features/_task`,
     {
       action: 'schedule',
       from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
@@ -88,18 +93,23 @@ export async function triggerSigEventsKIsExtraction(
     return;
   }
 
-  throw new Error(`Failed to trigger KIs extraction: ${status} ${JSON.stringify(data)}`);
+  throw new Error(`Failed to trigger KI feature extraction: ${status} ${JSON.stringify(data)}`);
 }
 
-export async function waitForSigEventsKIsExtraction(
+export async function waitForSigEventsKIFeatureExtraction(
   config: ConnectionConfig,
-  log: ToolingLog
+  log: ToolingLog,
+  streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
   log.info('Polling feature extraction status...');
   const deadline = Date.now() + FEATURE_EXTRACTION_TIMEOUT_MS;
 
   while (Date.now() < deadline) {
-    const { data } = await kibanaRequest(config, 'GET', '/internal/streams/logs/features/_status');
+    const { data } = await kibanaRequest(
+      config,
+      'GET',
+      `/internal/streams/${streamName}/features/_status`
+    );
 
     const taskStatus = (data as Record<string, unknown>)?.status;
 
@@ -119,15 +129,16 @@ export async function waitForSigEventsKIsExtraction(
   }
 
   throw new Error(
-    `KIs extraction did not complete within ${FEATURE_EXTRACTION_TIMEOUT_MS / 1000}s`
+    `KI feature extraction did not complete within ${FEATURE_EXTRACTION_TIMEOUT_MS / 1000}s`
   );
 }
 
-export async function logSigEventsExtractedKIs(
+export async function logSigEventsExtractedKIFeatures(
   config: ConnectionConfig,
-  log: ToolingLog
+  log: ToolingLog,
+  streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
-  const kis = await fetchSigEventsExtractedKIs(config, log, 'logs');
+  const kis = await fetchSigEventsExtractedKIs(config, log, streamName);
   log.info(`Extracted ${kis.length} KIs:`);
   for (const f of kis) {
     log.info(`  - ${f.title || f.description} (${f.type})`);
@@ -152,7 +163,7 @@ export async function persistSigEventsExtractedKIsForSnapshot(
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
-  streamName: string = 'logs'
+  streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<{ index: string; count: number }> {
   const kis = await fetchSigEventsExtractedKIs(config, log, streamName);
   const index = getSigeventsSnapshotKIFeaturesIndex(snapshotName);
