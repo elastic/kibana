@@ -16,7 +16,6 @@ interface UseFetchNotificationPoliciesParams {
   page: number;
   perPage: number;
   search?: string;
-  destinationType?: string;
   enabled?: boolean;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
@@ -26,7 +25,6 @@ export const useFetchNotificationPolicies = ({
   page,
   perPage,
   search,
-  destinationType,
   enabled,
   sortField,
   sortOrder,
@@ -39,7 +37,6 @@ export const useFetchNotificationPolicies = ({
       page,
       perPage,
       search,
-      destinationType,
       enabled,
       sortField,
       sortOrder,
@@ -49,7 +46,6 @@ export const useFetchNotificationPolicies = ({
         page,
         perPage,
         search,
-        destinationType,
         enabled,
         sortField,
         sortOrder,

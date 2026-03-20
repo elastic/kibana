@@ -315,6 +315,7 @@ export enum RegistryInputKeys {
   deployment_modes = 'deployment_modes',
   hide_in_var_group_options = 'hide_in_var_group_options',
   deprecated = 'deprecated',
+  migrate_from = 'migrate_from',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -331,6 +332,7 @@ export interface RegistryInput {
   [RegistryInputKeys.deployment_modes]?: string[];
   [RegistryInputKeys.hide_in_var_group_options]?: Record<string, string[]>;
   [RegistryInputKeys.deprecated]?: DeprecationInfo;
+  [RegistryInputKeys.migrate_from]?: string;
 }
 
 export enum RegistryStreamKeys {
@@ -344,6 +346,7 @@ export enum RegistryStreamKeys {
   ingestion_method = 'ingestion_method',
   var_groups = 'var_groups',
   deprecated = 'deprecated',
+  migrate_from = 'migrate_from',
 }
 
 export interface RegistryStream {
@@ -357,6 +360,7 @@ export interface RegistryStream {
   [RegistryStreamKeys.ingestion_method]?: string;
   [RegistryStreamKeys.var_groups]?: RegistryVarGroup[];
   [RegistryStreamKeys.deprecated]?: DeprecationInfo;
+  [RegistryStreamKeys.migrate_from]?: string;
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
@@ -719,6 +723,9 @@ export interface StateContext<T> {
 
 export type PackageDependencies = { name: string; version: string }[];
 
+/** Packages (name, version) that have this package as a dependency */
+export type IsDependencyOf = PackageDependencies;
+
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
   additional_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
@@ -754,6 +761,10 @@ export interface Installation {
     action?: 'accepted' | 'declined' | 'pending';
   };
   dependencies?: PackageDependencies | null;
+  /** Packages (name, version) that have this package as a dependency */
+  is_dependency_of?: IsDependencyOf | null;
+  /** Whether the package was installed as a dependency (not manually by a user) */
+  installed_as_dependency?: boolean;
 }
 
 export interface PackageUsageStats {

@@ -21,6 +21,15 @@ function nullToUndefined<T>(value: T | null | undefined, existing: T | undefined
   return value;
 }
 
+function nullToEmptyArray<T>(
+  value: T[] | null | undefined,
+  existing: T[] | undefined
+): T[] | undefined {
+  if (value === null) return [];
+  if (value === undefined) return existing;
+  return value;
+}
+
 /**
  * Converts a create-rule API body into saved object attributes.
  *
@@ -60,6 +69,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     state_transition: data.state_transition,
     grouping: data.grouping,
     no_data: data.no_data,
+    artifacts: data.artifacts,
     ...serverFields,
   };
 }
@@ -96,6 +106,7 @@ export function buildUpdateRuleAttributes(
     state_transition: nullToUndefined(updateData.state_transition, existingAttrs.state_transition),
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
+    artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
     enabled: updateData.enabled ?? existingAttrs.enabled,
     // Server-managed fields — preserved as-is except timestamps and user.
     createdBy: existingAttrs.createdBy,
@@ -135,6 +146,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     state_transition: attrs.state_transition,
     grouping: attrs.grouping,
     no_data: attrs.no_data,
+    artifacts: attrs.artifacts,
     enabled: attrs.enabled,
     createdBy: attrs.createdBy,
     createdAt: attrs.createdAt,

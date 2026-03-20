@@ -279,7 +279,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           body: {
             title: 'Init Query',
-            esql: { query: 'FROM logs.otel METADATA _id, _source | LIMIT 1' },
+            esql: { query: 'FROM logs.otel, logs.otel.* METADATA _id, _source | LIMIT 1' },
           },
         },
       });

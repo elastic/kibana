@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { FieldGroup } from './field_group';
 
 describe('FieldGroup', () => {
@@ -64,5 +65,41 @@ describe('FieldGroup', () => {
 
     const strong = screen.getByText('Test Section').closest('strong');
     expect(strong).toBeInTheDocument();
+  });
+
+  it('supports a controlled collapsible state', async () => {
+    const user = userEvent.setup();
+    const onToggle = jest.fn();
+
+    render(
+      <FieldGroup title="Test Section" isOpen={false} onToggle={onToggle}>
+        <div>Child content</div>
+      </FieldGroup>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Toggle Test Section' }));
+
+    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('heading', { name: 'Test Section' })).toBeInTheDocument();
+    expect(screen.queryByText('Child content')).not.toBeInTheDocument();
+  });
+
+  it('supports uncontrolled collapsible state with defaultOpen', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <FieldGroup title="Test Section" defaultOpen={false}>
+        <div>Toggleable child content</div>
+      </FieldGroup>
+    );
+
+    expect(screen.getByRole('heading', { name: 'Test Section' })).toBeInTheDocument();
+    expect(screen.queryByText('Toggleable child content')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Toggle Test Section' }));
+    expect(screen.getByText('Toggleable child content')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Toggle Test Section' }));
+    expect(screen.queryByText('Toggleable child content')).not.toBeInTheDocument();
   });
 });

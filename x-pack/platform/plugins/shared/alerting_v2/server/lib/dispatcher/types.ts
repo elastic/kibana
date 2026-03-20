@@ -90,6 +90,14 @@ export interface NotificationGroup {
   episodes: AlertEpisode[];
 }
 
+export interface NotificationPolicyWorkflowPayload {
+  id: NotificationGroupId;
+  ruleId: RuleId;
+  policyId: NotificationPolicyId;
+  groupKey: Record<string, unknown>;
+  episodes: AlertEpisode[];
+}
+
 export interface LastNotifiedRecord {
   notification_group_id: NotificationGroupId;
   last_notified: string;

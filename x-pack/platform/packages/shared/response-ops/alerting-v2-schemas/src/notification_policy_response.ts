@@ -14,16 +14,18 @@ export interface NotificationPolicyResponse {
   description: string;
   enabled: boolean;
   destinations: NotificationPolicyDestination[];
-  matcher?: string;
-  group_by?: string[];
-  throttle?: { interval: string };
-  snoozedUntil?: string | null;
+  matcher: string | null;
+  groupBy: string[] | null;
+  throttle: { interval: string } | null;
+  snoozedUntil: string | null;
   auth: {
     owner: string;
     createdByUser: boolean;
   };
   createdBy: string | null;
+  createdByUsername: string | null;
   createdAt: string;
   updatedBy: string | null;
+  updatedByUsername: string | null;
   updatedAt: string;
 }

@@ -67,6 +67,7 @@
     "@kbn/react-query",
     "@kbn/es-query",
     "@kbn/react-hooks",
+    "@kbn/deeplinks-workflows",
     "@kbn/lens-plugin",
     "@kbn/core-security-server-mocks"
   ],
