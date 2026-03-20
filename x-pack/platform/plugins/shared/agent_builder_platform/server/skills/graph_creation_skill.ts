@@ -6,8 +6,8 @@
  */
 
 import { attachmentTools } from '@kbn/agent-builder-common';
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { GRAPH_ATTACHMENT_TYPE } from '../../common/attachments';
 
 export const graphCreationSkill = defineSkillType({
   id: 'graph-creation',
@@ -32,7 +32,7 @@ Do **not** use this skill when:
 
 ## Target Attachment Type
 
-- Use attachment type: **${AttachmentType.graph}**
+- Use attachment type: **${GRAPH_ATTACHMENT_TYPE}**
 - Graph attachment data must follow the schema exactly:
   - \`nodes\`: array of node objects (required)
     - each node must include:
@@ -96,7 +96,7 @@ Do **not** use this skill when:
 
 5. **Create graph attachment**
    - Call ${attachmentTools.add} with:
-     - \`type: "${AttachmentType.graph}"\`
+     - \`type: "${GRAPH_ATTACHMENT_TYPE}"\`
      - \`data: { nodes, edges, title?, description? }\`
 
 6. **Return render instructions to the user**

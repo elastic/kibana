@@ -8,6 +8,7 @@
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { GRAPH_ATTACHMENT_TYPE } from '../../common/attachments';
 import { createEsqlAttachmentDefinition } from './esql_attachment';
 import { textAttachmentDefinition } from './text_attachment';
 import { screenContextAttachmentDefinition } from './screen_context_attachment';
@@ -23,5 +24,5 @@ export const registerAttachmentUiDefinitions = ({
   attachments.addAttachmentType(AttachmentType.text, textAttachmentDefinition);
   attachments.addAttachmentType(AttachmentType.screenContext, screenContextAttachmentDefinition);
   attachments.addAttachmentType(AttachmentType.esql, createEsqlAttachmentDefinition({ locators }));
-  attachments.addAttachmentType(AttachmentType.graph, graphAttachmentDefinition);
+  attachments.addAttachmentType(GRAPH_ATTACHMENT_TYPE, graphAttachmentDefinition);
 };
