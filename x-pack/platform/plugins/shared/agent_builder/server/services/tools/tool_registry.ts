@@ -129,9 +129,14 @@ class ToolRegistryImpl implements ToolRegistry {
   }
 
   async list(opts?: ToolListParams | undefined) {
+    const providerFilters = {
+      types: opts?.types && opts.types.length > 0 ? opts.types : undefined,
+      tags: opts?.tags && opts.tags.length > 0 ? opts.tags : undefined,
+    };
+
     const allTools: InternalToolDefinition[] = [];
     for (const provider of this.orderedProviders) {
-      const toolsFromType = await provider.list();
+      const toolsFromType = await provider.list(providerFilters);
       for (const tool of toolsFromType) {
         if (await this.isAvailable(tool)) {
           allTools.push(tool);
