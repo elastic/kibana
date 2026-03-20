@@ -18,7 +18,7 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { InvestigationGuide } from './investigation_guide';
-import { InvestigationGuide as InvestigationGuideToolsFlyout } from '../../investigation_guide/investigation_guide';
+import { InvestigationGuide as InvestigationGuideToolsFlyout } from '../../investigation_guide';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
