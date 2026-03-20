@@ -657,7 +657,7 @@ describe('McpClient', () => {
             resource: {
               uri: 'file:///project/src/main.rs',
               mimeType: 'text/x-rust',
-              text: 'fn main() {\\n  println!(\"Hello world!\");\\n}',
+              text: 'fn main() {\\n  println!("Hello world!");\\n}',
             },
           },
         ],
@@ -675,7 +675,7 @@ describe('McpClient', () => {
           resource: {
             uri: 'file:///project/src/main.rs',
             mimeType: 'text/x-rust',
-            text: 'fn main() {\\n  println!(\"Hello world!\");\\n}',
+            text: 'fn main() {\\n  println!("Hello world!");\\n}',
           },
         },
       ]);
