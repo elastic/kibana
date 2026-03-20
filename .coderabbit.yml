@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+inheritance: true
 reviews:
-  inheritance: true
   review_status: false
   poem: false
   auto_review:
