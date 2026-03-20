@@ -723,59 +723,28 @@ export class DataGridService extends FtrService {
     const cellSelector = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(actionName)
       ? `tableDocViewRow-${fieldName}-value`
       : `tableDocViewRow-${fieldName}-name`;
-    await this.retry.try(async () => {
-      const cell = await this.testSubjects.find(cellSelector);
-      await cell.scrollIntoViewIfNecessary();
+    const cell = await this.testSubjects.find(cellSelector);
+    await this.activateWithKeyboard(cell);
 
-      const activateCell = async () => {
-        await this.browser.execute(
-          'arguments[0].setAttribute("tabindex", "-1"); arguments[0].focus();',
-          cell._webElement
-        );
-        const active = await this.find.activeElement();
-
-        try {
-          await active.pressKeys(Key.ENTER);
-        } catch (error) {
-          // Fallback to browser-level key events when element-level keys are rejected
-          await this.browser.pressKeys(this.browser.keys.SPACE);
-          await this.browser.pressKeys(this.browser.keys.ENTER);
-        }
-      };
-
-      await activateCell();
-
-      const actionVisible = await this.testSubjects.exists(`${actionName}-${fieldName}`);
-      if (!actionVisible) {
-        await activateCell();
-      }
-
-      if (!(await this.testSubjects.exists(`${actionName}-${fieldName}`))) {
-        throw new Error(`Unable to show flyout action ${actionName} for ${fieldName}`);
-      }
-    });
+    if (!(await this.testSubjects.exists(`${actionName}-${fieldName}`))) {
+      throw new Error(`Unable to show flyout action ${actionName} for ${fieldName}`);
+    }
   }
 
   public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
     await this.showFieldCellActionInFlyout(fieldName, actionName);
 
     const actionSelector = `${actionName}-${fieldName}`;
-    await this.retry.try(async () => {
-      const action = await this.testSubjects.find(actionSelector);
-      await action.scrollIntoViewIfNecessary();
-      await this.browser.execute(
-        'arguments[0].setAttribute("tabindex", "-1"); arguments[0].focus();',
-        action._webElement
-      );
-      const active = await this.find.activeElement();
+    const action = await this.testSubjects.find(actionSelector);
+    await this.activateWithKeyboard(action);
+  }
 
-      try {
-        await active.pressKeys(Key.ENTER);
-      } catch (error) {
-        await this.browser.pressKeys(this.browser.keys.SPACE);
-        await this.browser.pressKeys(this.browser.keys.ENTER);
-      }
-    });
+  private async activateWithKeyboard(element: WebElementWrapper): Promise<void> {
+    await this.browser.execute(
+      'arguments[0].setAttribute("tabindex", "-1"); arguments[0].focus();',
+      element._webElement
+    );
+    await this.browser.pressKeys(this.browser.keys.ENTER);
   }
 
   public async isFieldPinnedInFlyout(fieldName: string): Promise<boolean> {
