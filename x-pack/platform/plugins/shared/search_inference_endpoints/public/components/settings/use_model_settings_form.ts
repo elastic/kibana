@@ -11,6 +11,16 @@ import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 
 type Assignments = Record<string, string[]>;
 
+const getEffectiveEndpoints = (
+  feature: { recommendedEndpoints: string[]; parentFeatureId?: string },
+  parentEndpointsMap: Map<string, string[]>
+): string[] =>
+  feature.recommendedEndpoints.length > 0
+    ? feature.recommendedEndpoints
+    : feature.parentFeatureId
+    ? parentEndpointsMap.get(feature.parentFeatureId) ?? []
+    : [];
+
 const toApiFormat = (assignments: Assignments) =>
   Object.entries(assignments).map(([featureId, ids]) => ({
     feature_id: featureId,
@@ -47,23 +57,16 @@ export const useModelSettingsForm = () => {
   const defaultAssignments = useMemo(() => {
     const savedMap = new Map(
       (settingsData?.data?.features ?? [])
-        .map((f) => [f.feature_id, (f.endpoints ?? []).map((e) => e.id)] as const)
+        .map((f) => [f.feature_id, (f.endpoints ?? []).map((e) => e.id)])
         .filter(([, ids]) => ids.length > 0)
     );
 
     return Object.fromEntries(
       sections.flatMap(({ children }) =>
-        children.map((f) => {
-          const saved = savedMap.get(f.featureId);
-          if (saved) return [f.featureId, saved];
-          const recommended =
-            f.recommendedEndpoints.length > 0
-              ? f.recommendedEndpoints
-              : f.parentFeatureId
-              ? parentEndpointsMap.get(f.parentFeatureId) ?? []
-              : [];
-          return [f.featureId, [...recommended]];
-        })
+        children.map((f) => [
+          f.featureId,
+          savedMap.get(f.featureId) ?? [...getEffectiveEndpoints(f, parentEndpointsMap)],
+        ])
       )
     );
   }, [settingsData, sections, parentEndpointsMap]);
@@ -93,21 +96,18 @@ export const useModelSettingsForm = () => {
       if (!section) return;
 
       const resetEntries = Object.fromEntries(
-        section.children.map((f) => {
-          const recommended =
-            f.recommendedEndpoints.length > 0
-              ? f.recommendedEndpoints
-              : f.parentFeatureId
-              ? parentEndpointsMap.get(f.parentFeatureId) ?? []
-              : [];
-          return [f.featureId, [...recommended]];
-        })
+        section.children.map((f) => [
+          f.featureId,
+          [...getEffectiveEndpoints(f, parentEndpointsMap)],
+        ])
       );
-      const updated = { ...assignments, ...resetEntries };
-      setAssignments(updated);
-      saveSettings({ features: toApiFormat(updated) });
+      setAssignments((prev) => {
+        const updated = { ...prev, ...resetEntries };
+        saveSettings({ features: toApiFormat(updated) });
+        return updated;
+      });
     },
-    [assignments, sections, saveSettings, parentEndpointsMap]
+    [sections, saveSettings, parentEndpointsMap]
   );
 
   return {

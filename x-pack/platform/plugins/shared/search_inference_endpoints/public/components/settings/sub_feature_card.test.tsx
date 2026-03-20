@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SubFeatureCard } from './sub_feature_card';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
-import type { InferenceFeatureConfig } from './feature_metadata';
+import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 jest.mock('../../hooks/use_inference_endpoints');
 jest.mock('./add_model_popover', () => ({
@@ -131,10 +131,10 @@ describe('SubFeatureCard', () => {
     expect(badges).toHaveLength(1);
   });
 
-  it('hides remove button when only one endpoint', () => {
+  it('disables remove button when only one endpoint', () => {
     renderCard(['ep-1']);
 
-    expect(screen.queryByTestId('remove-endpoint-ep-1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('remove-endpoint-ep-1')).toBeDisabled();
   });
 
   it('shows remove button when multiple endpoints and expanded', () => {

@@ -90,7 +90,6 @@ export const ModelSettings: React.FC = () => {
             {i18n.SETTINGS_SAVE_BUTTON}
           </EuiButton>,
           <EuiButtonEmpty
-            aria-label={i18n.API_DOCUMENTATION_LINK}
             iconType="popout"
             iconSide="right"
             iconSize="s"

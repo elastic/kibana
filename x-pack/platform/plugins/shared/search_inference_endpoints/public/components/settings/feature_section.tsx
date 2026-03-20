@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import * as i18n from '../../../common/translations';
-import type { InferenceFeatureConfig } from './feature_metadata';
+import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { SubFeatureCard } from './sub_feature_card';
 
 interface FeatureSettingItem {
@@ -33,43 +33,39 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
 }) => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
-      <EuiFlexItem>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="flexEnd"
-          data-test-subj={`featureSection-${parentName}`}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h3>{parentName}</h3>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
-              <p>{parentDescription}</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink onClick={onReset} data-test-subj={`reset-${parentName}`}>
-              {i18n.SETTINGS_RESET_DEFAULTS}
-            </EuiLink>
-          </EuiFlexItem>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="flexEnd"
+        data-test-subj={`featureSection-${parentName}`}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h3>{parentName}</h3>
+          </EuiTitle>
+          <EuiText size="s" color="subdued">
+            <p>{parentDescription}</p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink onClick={onReset} data-test-subj={`reset-${parentName}`}>
+            {i18n.SETTINGS_RESET_DEFAULTS}
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiPanel hasBorder paddingSize="l">
+        <EuiFlexGroup direction="column" gutterSize="xl">
+          {features.map(({ endpointIds, feature }) => (
+            <EuiFlexItem key={feature.featureId} grow={false}>
+              <SubFeatureCard
+                featureId={feature.featureId}
+                feature={feature}
+                endpointIds={endpointIds}
+                onEndpointsChange={onEndpointsChange}
+              />
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel hasBorder paddingSize="l">
-          <EuiFlexGroup direction="column" gutterSize="xl">
-            {features.map(({ endpointIds, feature }) => (
-              <EuiFlexItem key={feature.featureId} grow={false}>
-                <SubFeatureCard
-                  featureId={feature.featureId}
-                  feature={feature}
-                  endpointIds={endpointIds}
-                  onEndpointsChange={onEndpointsChange}
-                />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
+      </EuiPanel>
     </EuiFlexGroup>
   );
 };

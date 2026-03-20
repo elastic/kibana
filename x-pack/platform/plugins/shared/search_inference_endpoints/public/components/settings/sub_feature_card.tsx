@@ -33,7 +33,7 @@ import * as translations from '../../../common/translations';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getModelId } from '../../utils/get_model_id';
-import type { InferenceFeatureConfig } from './feature_metadata';
+import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
 
@@ -81,10 +81,8 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     [inferenceEndpoints]
   );
 
-  const hasOtherSubFeatures = useMemo(
-    () =>
-      registeredFeatures.some((f) => f.featureId !== featureId && f.parentFeatureId !== undefined),
-    [registeredFeatures, featureId]
+  const hasOtherSubFeatures = registeredFeatures.some(
+    (f) => f.featureId !== featureId && f.parentFeatureId !== undefined
   );
 
   const hasOverflow = endpointIds.length > COLLAPSED_COUNT;
@@ -190,89 +188,83 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                         customDragHandle
                         hasInteractiveChildren
                       >
-                        {(provided) => (
-                          <>
-                            <EuiSplitPanel.Inner
-                              paddingSize="s"
-                              data-test-subj={`endpoint-row-${endpointId}`}
-                            >
-                              <EuiFlexGroup alignItems="center" gutterSize="s">
-                                <EuiFlexItem grow={false}>
-                                  <EuiPanel
-                                    color="transparent"
-                                    paddingSize="none"
-                                    {...provided.dragHandleProps}
-                                    aria-label={i18n.translate(
-                                      'xpack.searchInferenceEndpoints.settings.dragHandle',
-                                      { defaultMessage: 'Drag to reorder' }
-                                    )}
-                                  >
-                                    <EuiIcon type="grab" size="s" color="subdued" aria-hidden />
-                                  </EuiPanel>
-                                </EuiFlexItem>
-                                <EuiFlexItem grow={false}>
-                                  <EuiIcon
-                                    type={endpointDisplayMap.get(endpointId)?.icon ?? 'compute'}
-                                    size="m"
-                                    aria-hidden
-                                  />
-                                </EuiFlexItem>
-                                <EuiFlexItem
-                                  grow
-                                  css={css`
-                                    min-width: 0;
-                                  `}
-                                >
-                                  <EuiToolTip
-                                    title={endpointDisplayMap.get(endpointId)?.label ?? endpointId}
-                                    content={endpointId}
-                                    position="top"
-                                  >
-                                    <EuiText
-                                      size="s"
-                                      tabIndex={0}
-                                      css={css`
-                                        overflow: hidden;
-                                        text-overflow: ellipsis;
-                                        white-space: nowrap;
-                                      `}
-                                    >
-                                      <span>
-                                        {endpointDisplayMap.get(endpointId)?.label ?? endpointId}
-                                      </span>
-                                    </EuiText>
-                                  </EuiToolTip>
-                                </EuiFlexItem>
-                                {index === 0 && (
+                        {(provided) => {
+                          const { icon = 'compute', label = endpointId } =
+                            endpointDisplayMap.get(endpointId) ?? {};
+                          return (
+                            <>
+                              <EuiSplitPanel.Inner
+                                paddingSize="s"
+                                data-test-subj={`endpoint-row-${endpointId}`}
+                              >
+                                <EuiFlexGroup alignItems="center" gutterSize="s">
                                   <EuiFlexItem grow={false}>
-                                    <EuiBadge color="hollow">
-                                      {translations.SETTINGS_DEFAULT_BADGE}
-                                    </EuiBadge>
+                                    <EuiPanel
+                                      color="transparent"
+                                      paddingSize="none"
+                                      {...provided.dragHandleProps}
+                                      aria-label={i18n.translate(
+                                        'xpack.searchInferenceEndpoints.settings.dragHandle',
+                                        { defaultMessage: 'Drag to reorder' }
+                                      )}
+                                    >
+                                      <EuiIcon type="grab" size="s" color="subdued" aria-hidden />
+                                    </EuiPanel>
                                   </EuiFlexItem>
-                                )}
-                                <EuiFlexItem grow={false}>
-                                  <EuiButtonIcon
-                                    iconType="cross"
-                                    aria-label={i18n.translate(
-                                      'xpack.searchInferenceEndpoints.settings.removeModel',
-                                      {
-                                        defaultMessage: 'Remove model',
-                                      }
-                                    )}
-                                    size="s"
-                                    color="text"
-                                    onClick={() => handleRemove(index)}
-                                    isDisabled={endpointIds.length <= 1}
-                                    data-test-subj={`remove-endpoint-${endpointId}`}
-                                  />
-                                </EuiFlexItem>
-                              </EuiFlexGroup>
-                            </EuiSplitPanel.Inner>
-                            {index !== visibleEndpoints.length - 1 && (
-                              <EuiHorizontalRule margin="none" />
-                            )}
-                          </>
-                        )}
+                                  <EuiFlexItem grow={false}>
+                                    <EuiIcon type={icon} size="m" aria-hidden />
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    grow
+                                    css={css`
+                                      min-width: 0;
+                                    `}
+                                  >
+                                    <EuiToolTip title={label} content={endpointId} position="top">
+                                      <EuiText
+                                        size="s"
+                                        tabIndex={0}
+                                        css={css`
+                                          overflow: hidden;
+                                          text-overflow: ellipsis;
+                                          white-space: nowrap;
+                                        `}
+                                      >
+                                        <span>{label}</span>
+                                      </EuiText>
+                                    </EuiToolTip>
+                                  </EuiFlexItem>
+                                  {index === 0 && (
+                                    <EuiFlexItem grow={false}>
+                                      <EuiBadge color="hollow">
+                                        {translations.SETTINGS_DEFAULT_BADGE}
+                                      </EuiBadge>
+                                    </EuiFlexItem>
+                                  )}
+                                  <EuiFlexItem grow={false}>
+                                    <EuiButtonIcon
+                                      iconType="cross"
+                                      aria-label={i18n.translate(
+                                        'xpack.searchInferenceEndpoints.settings.removeModel',
+                                        {
+                                          defaultMessage: 'Remove model',
+                                        }
+                                      )}
+                                      size="s"
+                                      color="text"
+                                      onClick={() => handleRemove(index)}
+                                      isDisabled={endpointIds.length <= 1}
+                                      data-test-subj={`remove-endpoint-${endpointId}`}
+                                    />
+                                  </EuiFlexItem>
+                                </EuiFlexGroup>
+                              </EuiSplitPanel.Inner>
+                              {index !== visibleEndpoints.length - 1 && (
+                                <EuiHorizontalRule margin="none" />
+                              )}
+                            </>
+                          );
+                        }}
                       </EuiDraggable>
                     ))}
                   </EuiDroppable>
@@ -303,7 +295,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                   <AddModelPopover
                     existingEndpointIds={endpointIds}
                     onAdd={handleAdd}
-                    taskType={feature.taskType || undefined}
+                    taskType={feature.taskType}
                     panelWidth={listWidth}
                   />
                 </EuiFlexItem>

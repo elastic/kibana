@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { useInferenceSettings, useSaveInferenceSettings } from '../../hooks/use_inference_settings';
-import type { InferenceFeatureConfig } from './feature_metadata';
+import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 jest.mock('../../hooks/use_registered_features');
 jest.mock('../../hooks/use_inference_settings');

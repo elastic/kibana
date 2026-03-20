@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
-import type { InferenceFeatureConfig } from './feature_metadata';
+import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 interface CopyToModalProps {
   sourceFeatureName: string;
