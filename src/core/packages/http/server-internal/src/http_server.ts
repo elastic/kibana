@@ -551,9 +551,18 @@ export class HttpServer {
         return responseToolkit.continue;
       }
 
+      // Add Server-Timing header with total request time
+      const startTime = (request.app as KibanaRequestState).startTime;
+      const totalTime = performance.now() - startTime;
+      const serverTimingValue = `apptotal;dur=${totalTime.toFixed(
+        2
+      )};desc="Application Server Processing Time"`;
+
       if (isBoom(request.response)) {
         stop();
+        request.response.output.headers['Server-Timing'] = serverTimingValue;
       } else {
+        request.response.header('Server-Timing', serverTimingValue);
         request.response.events.once('finish', () => {
           stop();
         });
