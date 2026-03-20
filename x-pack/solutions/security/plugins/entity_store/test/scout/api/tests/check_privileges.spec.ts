@@ -8,8 +8,7 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { getLatestEntitiesIndexName } from '../../../../server/domain/asset_manager/latest_index';
+import { FF_ENABLE_ENTITY_STORE_V2, getLatestEntitiesIndexName } from '../../../../common';
 
 apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }, () => {
   const ENTITIES_INDEX = getLatestEntitiesIndexName('default');

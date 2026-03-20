@@ -66,12 +66,12 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         field: 'level',
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.threatHunting.riskLevelBreakdown.riskLevel"
+            id="xpack.securitySolution.entityAnalytics.homePage.riskLevelBreakdown.riskLevel"
             defaultMessage="Risk level"
           />
         ),
         render: (level: RiskSeverity) => (
-          <EuiText size="s">
+          <EuiText className="eui-textTruncate" size="s">
             <RiskScoreLevel hideBackgroundColor severity={level} />
           </EuiText>
         ),
@@ -80,10 +80,11 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         field: 'scoreRange',
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.threatHunting.riskLevelBreakdown.riskScore"
+            id="xpack.securitySolution.entityAnalytics.homePage.riskLevelBreakdown.riskScore"
             defaultMessage="Risk score"
           />
         ),
+        align: 'right',
         render: (scoreRange: string) => (
           <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.medium }}>
             {scoreRange}
@@ -94,11 +95,11 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         field: 'count',
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.threatHunting.riskLevelBreakdown.numberOfEntities"
-            defaultMessage="Number of entities"
+            id="xpack.securitySolution.entityAnalytics.homePage.riskLevelBreakdown.numberOfEntities"
+            defaultMessage="Entities"
           />
         ),
-        dataType: 'number',
+        align: 'right',
         render: (count: number) => (
           <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.semiBold }}>
             {count.toLocaleString()}
@@ -112,6 +113,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
   return (
     <EuiBasicTable
       items={tableItems}
+      compressed={true}
       columns={columns}
       loading={loading}
       tableCaption="Risk level breakdown by entity count"

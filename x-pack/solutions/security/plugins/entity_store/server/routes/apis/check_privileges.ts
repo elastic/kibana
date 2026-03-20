@@ -5,11 +5,10 @@
  * 2.0.
  */
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { ENTITY_STORE_ROUTES } from '../../../common';
+import { ENTITY_STORE_ROUTES, getLatestEntitiesIndexName } from '../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { getLatestEntitiesIndexName } from '../../domain/asset_manager/latest_index';
 import { checkAndFormatPrivileges } from './utils/check_and_format_privileges';
 
 export function registerCheckPrivileges(router: EntityStorePluginRouter) {

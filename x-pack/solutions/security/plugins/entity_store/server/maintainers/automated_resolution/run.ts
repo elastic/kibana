@@ -17,8 +17,8 @@ import type {
   AggregationsStringTermsBucket,
   AggregationsTopHitsAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
+import { getLatestEntitiesIndexName } from '../../../common';
 import type { ResolutionClient } from '../../domain/resolution';
-import { getLatestEntitiesIndexName } from '../../domain/asset_manager/latest_index';
 import { getFieldValue } from '../../../common/domain/euid/commons';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import type { AutomatedResolutionState, MatchBucket, EntityHit } from './types';
