@@ -226,7 +226,7 @@ export function DateRangePickerProvider({
       }
       setIsEditing(editing);
     },
-    [text, value]
+    [text, value, presets]
   );
 
   /** Apply a range: parse it, call `onChange`, and exit editing mode. */
