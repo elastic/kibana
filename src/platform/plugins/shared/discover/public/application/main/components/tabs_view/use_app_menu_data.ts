@@ -29,6 +29,7 @@ import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 import { isDataViewSource } from '../../../../../common/data_sources';
 import { getInspectorRequestAdapters } from '../../hooks/use_inspector';
+import { createContextsAdapter } from '../../../../context_awareness/hooks';
 
 const APP_MENU_COLLAPSE_THRESHOLD = 800;
 
@@ -61,6 +62,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
   const transitionFromESQLToDataView = useCurrentTabAction(
     internalStateActions.transitionFromESQLToDataView
   );
+  const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
 
   const onResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
     if (!dimensions) return;
@@ -86,21 +88,37 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
             defaultMessage: 'Inspect',
           }),
           onClick: () => {
+            dispatch(setExpandedDoc({ expandedDoc: undefined }));
+
             const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
             const dataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
 
-            if (!dataStateContainer) {
+            if (!dataStateContainer || !tabRuntimeState) {
               return;
             }
 
             const cascadedDocumentsFetcher = tabRuntimeState.cascadedDocumentsFetcher$.getValue();
+            const scopedProfilesManager = tabRuntimeState.scopedProfilesManager$.getValue();
+            const getContextsAdapter = createContextsAdapter({
+              scopedProfilesManager,
+              dataDocuments$: dataStateContainer.data$.documents$,
+            });
+
             const requestAdapters = getInspectorRequestAdapters(
               dataStateContainer,
               cascadedDocumentsFetcher
             );
 
-            services.inspector.open(
-              { requests: requestAdapters },
+            const session = services.inspector.open(
+              {
+                requests: requestAdapters,
+                contexts: getContextsAdapter({
+                  onOpenDocDetails: (record) => {
+                    session?.close();
+                    dispatch(setExpandedDoc({ expandedDoc: record }));
+                  },
+                }),
+              },
               { title: persistedDiscoverSession?.title }
             );
           },
@@ -131,7 +149,6 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
             onClick: () => {
               services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
 
-              // Determine if we should show the ES|QL to Data View transition modal
               const shouldShowESQLToDataViewTransitionModal =
                 !persistedDiscoverSession || unsavedTabIds.includes(tab.id);
 
@@ -160,6 +177,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
       services,
       transitionFromDataViewToESQL,
       transitionFromESQLToDataView,
+      setExpandedDoc,
       unsavedTabIds,
     ]
   );
