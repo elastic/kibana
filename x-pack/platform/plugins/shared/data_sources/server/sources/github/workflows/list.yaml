@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.github.list'
-description: 'List GitHub resources in a repository (issues, pull requests, commits, branches, releases, tags). All list actions use cursor-based pagination with first/after. Actions and inputs: list_type (required choice), owner (required), repo (required), optional state (for issues/PRs), optional sha (for commits), optional first, optional after.'
+description: 'List GitHub resources in a repository (issues, pull requests, commits, branches, releases, tags). '
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
