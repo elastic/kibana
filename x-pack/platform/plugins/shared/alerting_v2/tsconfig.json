@@ -69,7 +69,8 @@
     "@kbn/react-hooks",
     "@kbn/deeplinks-workflows",
     "@kbn/lens-plugin",
-    "@kbn/core-security-server-mocks"
+    "@kbn/core-security-server-mocks",
+    "@kbn/kql"
   ],
   "exclude": ["target/**/*"]
 }
