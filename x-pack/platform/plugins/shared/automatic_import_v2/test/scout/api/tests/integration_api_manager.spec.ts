@@ -141,7 +141,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'POST /integrations/{id}/approve: returns 500 for non-existent integration',
+      'POST /integrations/{id}/approve: returns 404 for non-existent integration',
       async ({ apiClient }) => {
         const response = await apiClient.post(
           `${INTEGRATION_API_BASE_PATH}/${NON_EXISTENT_INTEGRATION_ID}/approve`,
@@ -151,7 +151,7 @@ apiTest.describe(
             responseType: 'json',
           }
         );
-        expect(response).toHaveStatusCode(500);
+        expect(response).toHaveStatusCode(404);
       }
     );
 
