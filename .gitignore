@@ -220,3 +220,13 @@ DEMO_TESTING_GUIDE.md
 
 # RFC documents (planning phase)
 docs/rfc_*.md
+
+# Spike documentation (stored in separate docs branch)
+docs/alert_investigation_pipeline_spike.md
+docs/alert_*.md
+docs/llm_*.md
+docs/QA_CHECKLIST.md
+docs/demo/
+docs/discovery/
+docs/validation/
+capture_spike_screenshots.sh
