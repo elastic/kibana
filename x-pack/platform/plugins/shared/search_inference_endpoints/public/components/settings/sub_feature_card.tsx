@@ -196,7 +196,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                               paddingSize="s"
                               data-test-subj={`endpoint-row-${endpointId}`}
                             >
-                              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                              <EuiFlexGroup alignItems="center" gutterSize="s">
                                 <EuiFlexItem grow={false}>
                                   <EuiPanel
                                     color="transparent"
