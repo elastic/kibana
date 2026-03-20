@@ -269,7 +269,7 @@ describe('getESQLAdHocDataview', () => {
   });
 
   describe('createNewInstanceEvenIfCachedOneAvailable', () => {
-    it('should onle clear the dataview instance cache', async () => {
+    it('should only clear the dataview instance cache', async () => {
       const http = createMockHttp('@timestamp');
       const query = uniqueQuery();
 
