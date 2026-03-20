@@ -284,7 +284,7 @@ describe('SidebarService (integration)', () => {
       registerApp(service, { appId: APP_ID_A });
 
       const MIN_WIDTH = 320;
-      const MAX_WIDTH = Math.floor(1000 * 0.4);
+      const MAX_WIDTH = Math.floor(1000 * 0.5);
       const TOO_SMALL_WIDTH = 100;
       const TOO_LARGE_WIDTH = 999;
 
