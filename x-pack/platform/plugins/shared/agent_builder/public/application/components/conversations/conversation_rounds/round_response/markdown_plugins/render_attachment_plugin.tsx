@@ -25,53 +25,20 @@ interface ResolveAttachmentVersionParams {
   attachmentId: string;
   attachmentRefs: AttachmentVersionRef[] | undefined;
   attachment: VersionedAttachment;
-  conversationAttachments: VersionedAttachment[] | undefined;
 }
-
-/**
- * Gets the latest created_at timestamp from any version referenced in attachmentRefs.
- * This serves as a "time boundary" for the round - if other attachments in this round
- * have refs up to time T, then any attachment rendered should show the version
- * that was current at time T.
- */
-const getLatestRefTime = (
-  attachmentRefs: AttachmentVersionRef[] | undefined,
-  conversationAttachments: VersionedAttachment[] | undefined
-): number | undefined => {
-  if (!attachmentRefs?.length || !conversationAttachments?.length) {
-    return undefined;
-  }
-
-  let latestTime: number | undefined;
-
-  for (const ref of attachmentRefs) {
-    const refAttachment = conversationAttachments.find((a) => a.id === ref.attachment_id);
-    const version = refAttachment?.versions.find((v) => v.version === ref.version);
-    if (version) {
-      const time = new Date(version.created_at).getTime();
-      if (latestTime === undefined || time > latestTime) {
-        latestTime = time;
-      }
-    }
-  }
-
-  return latestTime;
-};
 
 /**
  * Resolves the version to use for an attachment.
  * Priority:
  * 1. Explicit version from tag attributes
- * 2. Highest version from this round's attachment refs
- * 3. Highest version created at or before the latest ref time (to avoid showing future versions)
- * 4. Latest available version as fallback
+ * 2. Version from cumulative attachment refs (highest version seen up to this round)
+ * 3. Latest available version as fallback
  */
 export const resolveAttachmentVersion = ({
   explicitVersion,
   attachmentId,
   attachmentRefs,
   attachment,
-  conversationAttachments,
 }: ResolveAttachmentVersionParams): number | undefined => {
   if (explicitVersion !== undefined) {
     const parsed =
@@ -81,26 +48,9 @@ export const resolveAttachmentVersion = ({
     }
   }
 
-  const highestRefVersion = attachmentRefs
-    ?.filter((r) => r.attachment_id === attachmentId)
-    .reduce<number | undefined>(
-      (max, r) => (max === undefined || r.version > max ? r.version : max),
-      undefined
-    );
-
-  if (highestRefVersion !== undefined) {
-    return highestRefVersion;
-  }
-
-  // No refs for this attachment - infer time boundary from other refs in this round
-  const latestRefTime = getLatestRefTime(attachmentRefs, conversationAttachments);
-  if (latestRefTime !== undefined) {
-    const eligibleVersions = attachment.versions.filter(
-      (v) => new Date(v.created_at).getTime() <= latestRefTime
-    );
-    if (eligibleVersions.length > 0) {
-      return Math.max(...eligibleVersions.map((v) => v.version));
-    }
+  const ref = attachmentRefs?.find((r) => r.attachment_id === attachmentId);
+  if (ref) {
+    return ref.version;
   }
 
   // Final fallback: use the latest version
@@ -181,7 +131,6 @@ export const createRenderAttachmentRenderer = ({
       attachmentId,
       attachmentRefs,
       attachment,
-      conversationAttachments,
     });
 
     if (versionToUse === undefined) {
