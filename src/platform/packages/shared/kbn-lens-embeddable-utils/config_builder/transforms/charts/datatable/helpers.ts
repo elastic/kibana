@@ -34,7 +34,9 @@ type ApiColorTarget = (typeof COLOR_MODE_TO_API)[keyof typeof COLOR_MODE_TO_API]
 export const colorModeToApplyColorTo = (mode: ColumnState['colorMode']): ApiColorTarget =>
   COLOR_MODE_TO_API[mode as keyof typeof COLOR_MODE_TO_API] ?? 'background';
 
-export const applyColorToToColorMode = (target: string): NonNullable<ColumnState['colorMode']> =>
+export const applyColorToToColorMode = (
+  target: ApiColorTarget
+): NonNullable<ColumnState['colorMode']> =>
   API_TO_COLOR_MODE[target as keyof typeof API_TO_COLOR_MODE] ?? 'cell';
 
 /**
