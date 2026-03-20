@@ -128,5 +128,62 @@ apiTest.describe(
         expect(esqlResult.documents[0]['location.city']).toBe('New York');
       }
     );
+
+    apiTest('should override the existing value if override is true', async ({ testBed, esql }) => {
+      const indexName = 'streams-e2e-test-enrich-override';
+
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'enrich',
+            policy_name: ENRICH_POLICY_NAME,
+            to: 'location',
+            override: true,
+          } as EnrichProcessor,
+        ],
+      };
+
+      const { query } = await transpile(streamlangDSL, undefined, {
+        enrich: mockEnrichPolicyResolver,
+      });
+
+      const docs = [{ ip: '10.0.0.1', location: { city: 'Test city', country: 'Test country' } }];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
+
+      expect(esqlResult.documents).toHaveLength(1);
+      expect(esqlResult.documents[0]['location.city']).toBe('New York');
+      expect(esqlResult.documents[0]['location.country']).toBe('US');
+    });
+
+    apiTest(
+      'should preserve the existing value if override is false',
+      async ({ testBed, esql }) => {
+        const indexName = 'streams-e2e-test-enrich-preserve-existing';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'enrich',
+              policy_name: ENRICH_POLICY_NAME,
+              to: 'location',
+              override: false,
+            } as EnrichProcessor,
+          ],
+        };
+
+        const { query } = await transpile(streamlangDSL, undefined, {
+          enrich: mockEnrichPolicyResolver,
+        });
+
+        const docs = [{ ip: '10.0.0.1', location: { city: 'Test city', country: 'Test country' } }];
+        await testBed.ingest(indexName, docs);
+        const esqlResult = await esql.queryOnIndex(indexName, query);
+
+        expect(esqlResult.documents).toHaveLength(1);
+        expect(esqlResult.documents[0]['location.city']).toBe('Test city');
+        expect(esqlResult.documents[0]['location.country']).toBe('Test country');
+      }
+    );
   }
 );

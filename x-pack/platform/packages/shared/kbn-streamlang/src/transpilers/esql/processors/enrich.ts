@@ -6,10 +6,45 @@
  */
 
 import { Builder } from '@elastic/esql';
-import type { ESQLAstCommand } from '@elastic/esql/types';
+import type { ESQLAstCommand, ESQLAstItem } from '@elastic/esql/types';
 import type { EnrichPolicyResolver } from '../../../../types/resolvers';
 import type { EnrichProcessor } from '../../../../types/processors';
 import { buildIgnoreMissingFilter } from './common';
+
+const internalPrevColumn = (index: number) => `__streamlang_enrich_prev_${index}`;
+const internalNewColumn = (index: number) => `__streamlang_enrich_new_${index}`;
+
+const targetColumnName = (to: string, policyField: string) => `${to}.${policyField}`;
+
+function pushEnrichCommand(
+  commands: ESQLAstCommand[],
+  policy_name: string,
+  matchField: string,
+  withAssignments: ESQLAstItem[]
+): void {
+  const policySource = Builder.expression.source.node({
+    sourceType: 'policy',
+    name: policy_name,
+    index: policy_name,
+  });
+
+  const onOption = Builder.option({
+    name: 'on',
+    args: [Builder.expression.column(matchField)],
+  });
+
+  const withOption = Builder.option({
+    name: 'with',
+    args: withAssignments,
+  });
+
+  commands.push(
+    Builder.command({
+      name: 'enrich',
+      args: [policySource, onOption, withOption],
+    })
+  );
+}
 
 /**
  * Converts a Streamlang EnrichProcessor into a list of ES|QL AST commands.
@@ -33,6 +68,7 @@ import { buildIgnoreMissingFilter } from './common';
  *   matchField: 'ip',
  *   enrichFields: ['city', 'country'],
  * }
+ *
  * Output:
  * | ENRICH ip_location ON ip WITH location.city = city, location.country = country
  */
@@ -40,8 +76,8 @@ export const convertEnrichProcessorToESQL = async (
   processor: EnrichProcessor,
   resolver: EnrichPolicyResolver
 ): Promise<ESQLAstCommand[]> => {
-  // TODO - add support for the "override" option
   const { policy_name, to, ignore_missing = false } = processor;
+  const preserveExistingTargets = processor.override === false;
   const commands: ESQLAstCommand[] = [];
 
   const policyMetadata = await resolver(policy_name);
@@ -65,34 +101,70 @@ export const convertEnrichProcessorToESQL = async (
     commands.push(missingFieldFilter);
   }
 
-  const policySource = Builder.expression.source.node({
-    sourceType: 'policy',
-    name: policy_name,
-    index: policy_name,
-  });
+  if (preserveExistingTargets) {
+    enrichFields.forEach((field, index) => {
+      commands.push(
+        Builder.command({
+          name: 'eval',
+          args: [
+            Builder.expression.func.binary('=', [
+              Builder.expression.column(internalPrevColumn(index)),
+              Builder.expression.column(targetColumnName(to, field)),
+            ]),
+          ],
+        })
+      );
+    });
 
-  const onOption = Builder.option({
-    name: 'on',
-    args: [Builder.expression.column(matchField)],
-  });
+    const withAssignmentsToTemp = enrichFields.map((field, index) =>
+      Builder.expression.func.binary('=', [
+        Builder.expression.column(internalNewColumn(index)),
+        Builder.expression.column(field),
+      ])
+    );
 
-  const withAssignments = enrichFields.map((field) =>
-    Builder.expression.func.binary('=', [
-      Builder.expression.column(`${to}.${field}`),
-      Builder.expression.column(field),
-    ])
-  );
+    pushEnrichCommand(commands, policy_name, matchField, withAssignmentsToTemp);
 
-  const withOption = Builder.option({
-    name: 'with',
-    args: withAssignments,
-  });
+    enrichFields.forEach((field, index) => {
+      commands.push(
+        Builder.command({
+          name: 'eval',
+          args: [
+            Builder.expression.func.binary('=', [
+              Builder.expression.column(targetColumnName(to, field)),
+              Builder.expression.func.call('COALESCE', [
+                Builder.expression.column(internalPrevColumn(index)),
+                Builder.expression.column(internalNewColumn(index)),
+              ]),
+            ]),
+          ],
+        })
+      );
+    });
 
-  const enrichCmd = Builder.command({
-    name: 'enrich',
-    args: [policySource, onOption, withOption],
-  });
+    enrichFields.forEach((_, index) => {
+      commands.push(
+        Builder.command({
+          name: 'drop',
+          args: [Builder.expression.column(internalPrevColumn(index))],
+        })
+      );
+      commands.push(
+        Builder.command({
+          name: 'drop',
+          args: [Builder.expression.column(internalNewColumn(index))],
+        })
+      );
+    });
+  } else {
+    const withAssignments = enrichFields.map((field) =>
+      Builder.expression.func.binary('=', [
+        Builder.expression.column(targetColumnName(to, field)),
+        Builder.expression.column(field),
+      ])
+    );
+    pushEnrichCommand(commands, policy_name, matchField, withAssignments);
+  }
 
-  commands.push(enrichCmd);
   return commands;
 };
