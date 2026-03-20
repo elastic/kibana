@@ -40,9 +40,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   ) {
     const step = {
       name: node.id,
-      type: node.type,
-      stepId: node.id,
-      spaceId: '',
+      type: node.stepType,
+      stepId: node.stepId,
       'max-step-size': node.configuration['max-step-size'],
     };
     super(step, stepExecutionRuntime, undefined, workflowRuntime);

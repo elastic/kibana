@@ -169,18 +169,17 @@ export class WorkflowExecutionState {
     });
   }
 
-  private updateStep(step: Partial<EsWorkflowStepExecution>) {
-    const stepId = step.id as string; // the existence of step id is guaranteed by the caller
-    const existingStep = this.stepExecutions.get(stepId);
+  private updateStep(step: Partial<EsWorkflowStepExecution> & Pick<EsWorkflowStepExecution, 'id'>) {
+    const existingStep = this.stepExecutions.get(step.id);
     const updatedStep = {
       ...existingStep,
       ...step,
     } as EsWorkflowStepExecution;
-    this.stepExecutions.set(stepId, updatedStep);
+    this.stepExecutions.set(step.id, updatedStep);
     // Accumulate changes for the next flush — merge with any pending changes
     // ES partial update (doc_as_upsert) preserves fields not included in the update
-    this.stepDocumentsChanges.set(stepId, {
-      ...(this.stepDocumentsChanges.get(stepId) || {}),
+    this.stepDocumentsChanges.set(step.id, {
+      ...(this.stepDocumentsChanges.get(step.id) || {}),
       ...step,
     });
   }

@@ -51,7 +51,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       | undefined;
 
     if (!retryState) {
-      throw new Error('Retry state missing for step "${this.node.stepId}" during catch error');
+      throw new Error(`Retry state missing for step "${this.node.stepId}" during catch error`);
     }
 
     if (retryState.attempt < this.node.configuration['max-attempts']) {
