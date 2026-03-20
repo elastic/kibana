@@ -49,8 +49,8 @@ export const BulkDeleteConfirmationModal = ({
     >
       <FormattedMessage
         id="xpack.alertingV2.notificationPolicy.bulkDeleteModal.body"
-        defaultMessage="Are you sure you want to delete {count} {count, plural, one {notification policy} other {notification policies}}? This action cannot be undone."
-        values={{ count: <strong>{count}</strong> }}
+        defaultMessage="Are you sure you want to delete <strong>{count}</strong> {count, plural, one {notification policy} other {notification policies}}? This action cannot be undone."
+        values={{ count, strong: (chunks) => <strong>{chunks}</strong> }}
       />
     </EuiConfirmModal>
   );
