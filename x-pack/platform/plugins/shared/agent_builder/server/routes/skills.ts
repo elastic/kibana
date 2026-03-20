@@ -78,7 +78,10 @@ export function registerSkillsRoutes({
         validate: {
           request: {
             query: schema.object({
-              include_plugins: schema.boolean({ defaultValue: false }),
+              include_plugins: schema.boolean({
+                defaultValue: false,
+                meta: { description: 'Set to true to include skills from plugins.' },
+              }),
             }),
           },
         },
