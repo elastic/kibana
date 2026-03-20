@@ -73,13 +73,12 @@ describe('Metric Flyout Overview Tab', () => {
       expect(getByText('Milliseconds')).toBeInTheDocument();
     });
 
-    it('does not render unit section when unit is undefined', () => {
+    it('renders NoValueBadge when units are empty', () => {
       const metricItem = createMockMetric({ units: [] });
-      const { queryByTestId } = render(<OverviewTab metricItem={metricItem} />);
+      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
 
-      expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabMetricUnitLabel')
-      ).not.toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricUnitLabel')).toBeInTheDocument();
+      expect(getByText('No value')).toBeInTheDocument();
     });
   });
 
@@ -92,13 +91,12 @@ describe('Metric Flyout Overview Tab', () => {
       expect(getByText('counter')).toBeInTheDocument();
     });
 
-    it('does not render instrument section when not present', () => {
+    it('renders NoValueBadge when metricTypes is undefined', () => {
       const metricItem = createMockMetric({ metricTypes: undefined });
-      const { queryByTestId } = render(<OverviewTab metricItem={metricItem} />);
+      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
 
-      expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')
-      ).not.toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')).toBeInTheDocument();
+      expect(getByText('No value')).toBeInTheDocument();
     });
 
     it('handles different instrument types', () => {
@@ -255,14 +253,6 @@ describe('Metric Flyout Overview Tab', () => {
 
       expect(getByText('Milliseconds')).toBeInTheDocument();
       expect(getByText('Bytes')).toBeInTheDocument();
-    });
-
-    it('renders null unit elements as NoValueBadge', () => {
-      const metricItem = createMockMetric({ units: [null, 'ms'] });
-      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
-
-      expect(getByText('No value')).toBeInTheDocument();
-      expect(getByText('Milliseconds')).toBeInTheDocument();
     });
 
     it('renders null field type as NoValueBadge', () => {

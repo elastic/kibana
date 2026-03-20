@@ -109,9 +109,8 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
         }),
         <BadgeGroup
           items={metricItem.units}
-          isNoValue={(unit) => unit == null}
           renderItem={(unit, index) => (
-            <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit: unit! })}</EuiBadge>
+            <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
           )}
         />,
         'metricsExperienceFlyoutOverviewTabMetricUnitLabel'

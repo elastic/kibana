@@ -50,12 +50,10 @@ export type MetricUnit =
   | 'count'
   | `{${string}}`; // otel special units of count
 
-export type NullableMetricUnit = MetricUnit | null;
-
 export interface MetricsESQLResponse {
   metric_name: string;
   data_stream: string[] | string;
-  unit: NullableMetricUnit[] | null;
+  unit: MetricUnit[] | null;
   metric_type: MappingTimeSeriesMetricType[] | MappingTimeSeriesMetricType;
   field_type: ES_FIELD_TYPES[] | ES_FIELD_TYPES;
   dimension_fields: string[] | string;
@@ -64,7 +62,7 @@ export interface MetricsESQLResponse {
 export interface ParsedMetricItem {
   metricName: string;
   dataStream: string;
-  readonly units: NullableMetricUnit[];
+  readonly units: MetricUnit[];
   readonly metricTypes: MappingTimeSeriesMetricType[];
   readonly fieldTypes: ES_FIELD_TYPES[];
   readonly dimensionFields: Dimension[];
