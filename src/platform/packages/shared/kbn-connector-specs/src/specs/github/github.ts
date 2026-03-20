@@ -395,10 +395,11 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: GetIssueInputSchema,
       handler: async (ctx, input: GetIssueInput) => {
-        return callToolJson(ctx, 'get_issue', {
+        return callToolJson(ctx, 'issue_read', {
           owner: input.owner,
           repo: input.repo,
-          issueNumber: input.issueNumber,
+          issue_number: input.issueNumber,
+          method: 'get',
         });
       },
     },
@@ -410,10 +411,11 @@ export const GithubConnector: ConnectorSpec = {
       }),
       input: GetIssueCommentsInputSchema,
       handler: async (ctx, input: GetIssueCommentsInput) => {
-        return callToolJson(ctx, 'get_issue_comments', {
+        return callToolJson(ctx, 'issue_read', {
           owner: input.owner,
           repo: input.repo,
-          issueNumber: input.issueNumber,
+          issue_number: input.issueNumber,
+          method: 'get_comments',
         });
       },
     },

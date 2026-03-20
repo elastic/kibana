@@ -357,7 +357,7 @@ describe('GithubConnector', () => {
   });
 
   describe('getIssue action', () => {
-    it('calls get_issue with required args', async () => {
+    it('calls issue_read with required args', async () => {
       await GithubConnector.actions.getIssue.handler(mockContext, {
         owner: 'elastic',
         repo: 'kibana',
@@ -365,8 +365,8 @@ describe('GithubConnector', () => {
       });
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'get_issue',
-        arguments: { owner: 'elastic', repo: 'kibana', issueNumber: 123 },
+        name: 'issue_read',
+        arguments: { owner: 'elastic', repo: 'kibana', issue_number: 123, method: 'get' },
       });
     });
   });
@@ -380,8 +380,8 @@ describe('GithubConnector', () => {
       });
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'get_issue_comments',
-        arguments: { owner: 'elastic', repo: 'kibana', issueNumber: 123 },
+        name: 'issue_read',
+        arguments: { owner: 'elastic', repo: 'kibana', issue_number: 123, method: 'get_comments' },
       });
     });
   });
