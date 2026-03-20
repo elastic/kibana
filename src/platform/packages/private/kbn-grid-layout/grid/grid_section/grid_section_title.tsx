@@ -31,12 +31,14 @@ export const GridSectionTitle = React.memo(
     editTitleOpen,
     setEditTitleOpen,
     collapseButtonRef,
+    toggleIsCollapsed,
   }: {
     readOnly: boolean;
     sectionId: string;
     editTitleOpen: boolean;
     setEditTitleOpen: (value: boolean) => void;
     collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
+    toggleIsCollapsed: () => void;
   }) => {
     const { gridLayoutStateManager } = useGridLayoutContext();
 
@@ -94,24 +96,17 @@ export const GridSectionTitle = React.memo(
       [sectionId, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
     );
 
-    const moveLabel = i18n.translate('kbnGridLayout.section.moveRow', {
-      defaultMessage: 'Move section',
-    });
-
-    const toggleLabel = i18n.translate('kbnGridLayout.section.toggleCollapse', {
-      defaultMessage: 'Toggle collapse',
-    });
-
-    const combinedAriaLabel = `${sectionTitle}. ${toggleLabel}. ${moveLabel}.`;
-
     return (
       <>
         <EuiFlexItem grow={false} css={styles.titleButton}>
           <EuiButtonEmpty
             buttonRef={collapseButtonRef}
             color="text"
-            aria-label={combinedAriaLabel}
+            aria-label={i18n.translate('kbnGridLayout.section.toggleCollapse', {
+              defaultMessage: 'Toggle collapse',
+            })}
             iconType={'arrowDown'}
+            onClick={toggleIsCollapsed}
             size="m"
             id={`kbnGridSectionTitle-${sectionId}`}
             aria-controls={`kbnGridSection-${sectionId}`}

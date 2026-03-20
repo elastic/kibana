@@ -56,7 +56,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
    * Callback for collapsing and/or expanding the section when the title button is clicked
    */
   const toggleIsCollapsed = useCallback(() => {
-    // console.log('toggleIsCollapsed fires');
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
     const section = newLayout[sectionId];
     if (section.isMainSection) return;
@@ -77,7 +76,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
   const shouldIgnoreHeaderClick = (target: EventTarget | null) => {
     if (!(target instanceof Element)) return false;
-    // console.log(Boolean(target.closest('[data-no-drag]')));
     return Boolean(target.closest('[data-no-drag]'));
   };
 
@@ -165,14 +163,12 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       switch (type) {
         case 'init':
           hasDraggedHeaderRef.current = false;
-          console.log('init ', hasDraggedHeaderRef.current, event); // logs for testing purposes
           break;
 
         case 'update':
           if (!hasDraggedHeaderRef.current) {
             handleFirstDrag();
           }
-          console.log('update', hasDraggedHeaderRef.current, event); // logs for testing purposes
           headerRef.style.transform = `translate(${event!.translate.left}px, ${
             event!.translate.top
           }px)`;
@@ -180,9 +176,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
         case 'finish':
           const isClick = !hasDraggedHeaderRef.current;
-          console.log('finish ', hasDraggedHeaderRef.current, event); // logs for testing purposes
           if (isClick) {
-            console.log('click detected, toggling collapse'); // logs for testing purposes
             toggleIsCollapsed();
           }
 
@@ -260,7 +254,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         }}
         onMouseDown={readOnly ? undefined : handleSectionDragStart}
         onTouchStart={readOnly ? undefined : handleSectionDragStart}
-        onKeyDown={readOnly ? undefined : handleSectionDragStart}
         onClick={readOnly ? handleHeaderClick : undefined}
       >
         <GridSectionTitle
@@ -269,6 +262,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           editTitleOpen={editTitleOpen}
           setEditTitleOpen={setEditTitleOpen}
           collapseButtonRef={collapseButtonRef}
+          toggleIsCollapsed={toggleIsCollapsed}
         />
         {
           /**
@@ -309,6 +303,18 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       />
                     </EuiFlexItem>
                   )}
+                  <EuiFlexItem grow={false} css={isActive && [styles.floatToRight]}>
+                    <EuiButtonIcon
+                      iconType="move"
+                      color="text"
+                      onKeyDown={handleSectionDragStart}
+                      className="kbnGridSection--dragHandle"
+                      aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
+                        defaultMessage: 'Move section',
+                      })}
+                      data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
+                    />
+                  </EuiFlexItem>
                 </>
               )}
             </>
