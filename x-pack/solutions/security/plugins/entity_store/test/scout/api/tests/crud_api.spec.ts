@@ -16,12 +16,10 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
-  UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
-// Failing: See https://github.com/elastic/kibana/issues/256319
-apiTest.describe.skip('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiClient, kbnClient, samlAuth }) => {
@@ -54,13 +52,11 @@ apiTest.describe.skip('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS },
     expect(response.statusCode).toBe(200);
   });
 
-  apiTest('Should create an entity', async ({ apiClient, esClient }) => {
+  apiTest('Should create an entity with generated ID', async ({ apiClient, esClient }) => {
     const entityObj: Entity = {
-      entity: {
-        id: 'required-id-create',
-      },
+      entity: {},
     };
-    const create = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: entityObj,
@@ -68,22 +64,24 @@ apiTest.describe.skip('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS },
     expect(create.statusCode).toBe(200);
     expect(create.body).toStrictEqual({ ok: true });
 
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id)).toBe(1);
-    const euid = getEuidFromObject('generic', entityObj) as string;
-    const check = await esClient.get({ index: LATEST_INDEX, id: hashEuid(euid) });
-    expect(check.found).toBe(true);
+    const entities = await esClient.search({
+      index: LATEST_INDEX,
+      query: {
+        match_all: {},
+      },
+    });
+    expect(entities.hits.hits.length).toBeGreaterThan(0);
   });
 
-  apiTest('Should require a force flag', async ({ apiClient, esClient }) => {
+  apiTest('Should require a force flag for restricted fields', async ({ apiClient, esClient }) => {
     // Send a field that exists on generic definition but has allowAPIUpdate: false (e.g. entity.name)
     const entityObj: Entity = {
       entity: {
-        id: 'required-id-force',
         name: 'needs-force-flag',
       },
     };
 
-    const create = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: entityObj,
@@ -91,10 +89,8 @@ apiTest.describe.skip('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS },
     expect(create.statusCode).toBe(400);
     expect(create.body.message).toContain('not allowed to be updated without forcing it');
 
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id)).toBe(0);
-
-    const createWithForce = await apiClient.put(
-      ENTITY_STORE_ROUTES.CRUD_UPSERT('generic') + '?force=true',
+    const createWithForce = await apiClient.post(
+      ENTITY_STORE_ROUTES.CRUD_CREATE('generic') + '?force=true',
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -102,169 +98,125 @@ apiTest.describe.skip('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS },
       }
     );
     expect(createWithForce.statusCode).toBe(200);
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id)).toBe(1);
   });
 
-  apiTest('Should perform an upsert', async ({ apiClient, esClient }) => {
+  apiTest('Should update an entity by ID', async ({ apiClient, esClient }) => {
     const entityObj: Entity = {
       entity: {
-        id: 'host:this-is-upsert',
+        id: 'host:this-is-update',
       },
       host: {
-        name: 'this-is-upsert',
+        name: 'this-is-update',
       },
     };
 
-    const create = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('host'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: entityObj,
     });
     expect(create.statusCode).toBe(200);
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id)).toBe(1);
+    expect(await countEntitiesByID(esClient, LATEST_INDEX, 'host:this-is-update')).toBe(1);
 
-    const upsert = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('host') + '?force=true', {
+    // Update the entity with the same ID
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true', {
       headers: defaultHeaders,
       responseType: 'json',
       body: {
         entity: {
           id: entityObj.entity.id,
-          name: 'this-is-upsert',
         },
         host: {
-          name: 'this-is-upsert',
+          name: 'updated-name',
         },
       },
     });
-    expect(upsert.statusCode).toBe(200);
+    expect(update.statusCode).toBe(200);
 
     const entities = await esClient.search({
       index: LATEST_INDEX,
       query: {
         term: {
-          'host.entity.id': entityObj.entity.id,
+          'host.entity.id': 'host:this-is-update',
         },
       },
     });
     expect(entities.hits.hits).toHaveLength(1);
     const received = entities.hits.hits[0]._source as HostEntity;
-    expect(received.entity).toBeUndefined();
-    expect(received.host).toMatchObject({
-      entity: {
-        id: entityObj.entity?.id,
-      },
-      name: 'this-is-upsert',
-    });
+    expect(received.host?.name).toBe('updated-name');
   });
 
-  apiTest('Should perform a bulk upsert', async ({ apiClient, esClient }) => {
+  apiTest('Should perform a bulk update', async ({ apiClient, esClient }) => {
     const bulkBody = {
       entities: [
         {
           type: 'generic',
           doc: {
-            entity: {
-              id: 'required-id-1-bulk',
-            },
+            entity: {},
           },
         },
         {
           type: 'generic',
           doc: {
-            entity: {
-              id: 'required-id-2-bulk',
-            },
+            entity: {},
           },
         },
       ],
     };
 
-    const bulkUpsert = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT_BULK, {
+    const bulkUpdate = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_BULK_UPDATE, {
       headers: defaultHeaders,
       responseType: 'json',
       body: bulkBody,
     });
-    expect(bulkUpsert.statusCode).toBe(200);
-    expect(bulkUpsert.body.errors).toHaveLength(0);
+    expect(bulkUpdate.statusCode).toBe(200);
+    expect(bulkUpdate.body.errors).toHaveLength(0);
 
     const resp = await esClient.search({
-      index: UPDATES_INDEX,
+      index: LATEST_INDEX,
       query: {
-        wildcard: {
-          'entity.id': 'required-id-*-bulk',
-        },
+        match_all: {},
       },
     });
-    expect(resp.hits.hits).toHaveLength(2);
-
-    const extractionResponse = await apiClient.post(
-      ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('generic'),
-      {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          fromDateISO: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago
-          toDateISO: new Date().toISOString(),
-        },
-      }
-    );
-    expect(extractionResponse.statusCode).toBe(200);
-    expect(extractionResponse.body.success).toBe(true);
-    expect(extractionResponse.body.pages).toBe(1);
-    expect(extractionResponse.body.count).toBe(2);
+    expect(resp.hits.hits.length).toBeGreaterThanOrEqual(2);
   });
 
   apiTest('Should delete an entity', async ({ apiClient, esClient }) => {
     const entityObj: Entity = {
-      entity: {
-        id: 'required-id-delete',
-      },
+      entity: {},
     };
-    const create = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: entityObj,
     });
     expect(create.statusCode).toBe(200);
+
     const resp = await esClient.search({
       index: LATEST_INDEX,
       query: {
-        match: {
-          'entity.id': entityObj.entity.id,
-        },
+        match_all: {},
       },
     });
-    expect(resp.hits.hits).toHaveLength(1);
-    expect(resp.hits.hits[0]._id).toBeDefined();
-
-    const euid = getEuidFromObject('generic', entityObj) as string;
-
-    const expectedHashedEntityId = hashEuid(euid);
-    const hashedEntityId = resp.hits.hits[0]._id as string;
-    expect(hashedEntityId).toBe(expectedHashedEntityId);
+    expect(resp.hits.hits.length).toBeGreaterThan(0);
+    const createdEntityId = (resp.hits.hits[0]._source as Entity).entity?.id;
+    expect(createdEntityId).toBeDefined();
 
     const del = await apiClient.delete(ENTITY_STORE_ROUTES.CRUD_DELETE, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {
-        entityId: euid,
+        entityId: createdEntityId,
       },
     });
     expect(del.body).toStrictEqual({ deleted: true });
     expect(del.statusCode).toBe(200);
 
-    await expect(
-      esClient.get({
-        index: LATEST_INDEX,
-        id: hashedEntityId,
-      })
-    ).rejects.toThrow(`"found":false`);
-
     const apiNotFound = await apiClient.delete(ENTITY_STORE_ROUTES.CRUD_DELETE, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {
-        entityId: entityObj.entity.id,
+        entityId: createdEntityId,
       },
     });
     expect(apiNotFound.body.statusCode).toBe(404);

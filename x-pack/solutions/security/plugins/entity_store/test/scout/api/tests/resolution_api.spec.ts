@@ -349,7 +349,7 @@ async function seedEntity(
   headers: Record<string, string>,
   entityId: string
 ): Promise<void> {
-  const response = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
+  const response = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('generic') + '?force=true', {
     headers,
     responseType: 'json',
     body: { entity: { id: entityId } },
