@@ -25,6 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { PreviewColumn } from '../hooks/use_preview';
+import { PreviewChart } from './rule_preview_chart';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -63,6 +64,12 @@ export interface QueryResultsGridProps {
   uniqueGroupCount?: number | null;
   /** Whether the current query is syntactically valid (distinguishes "no query" from "valid query with 0 results") */
   hasValidQuery?: boolean;
+  /** The assembled ES|QL query string for the chart preview */
+  query?: string;
+  /** The time field name for the chart bucketing */
+  timeField?: string;
+  /** The lookback duration string for the chart time range (e.g. '5m', '1h') */
+  lookback?: string;
 }
 
 /**
@@ -88,6 +95,9 @@ export const QueryResultsGrid = ({
   groupingFields = [],
   uniqueGroupCount,
   hasValidQuery = false,
+  query,
+  timeField,
+  lookback,
 }: QueryResultsGridProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
 
@@ -161,12 +171,38 @@ export const QueryResultsGrid = ({
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        {isLoading && (
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+            {lookback && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('xpack.alertingV2.ruleForm.queryResultsGrid.timeRangeLabel', {
+                    defaultMessage: 'Last {lookback}',
+                    values: { lookback },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+            {isLoading && (
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
+
+      {rows.length > 0 && query && timeField && lookback && (
+        <>
+          <EuiSpacer size="s" />
+          <PreviewChart
+            query={query}
+            timeField={timeField}
+            lookback={lookback}
+            esqlColumns={columns}
+          />
+        </>
+      )}
 
       <EuiSpacer size="m" />
 

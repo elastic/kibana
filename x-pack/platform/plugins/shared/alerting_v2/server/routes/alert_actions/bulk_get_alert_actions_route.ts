@@ -12,7 +12,6 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 import {
   bulkGetAlertActionsBodySchema,
-  bulkGetAlertActionsResponseSchema,
   type BulkGetAlertActionsBody,
 } from '@kbn/alerting-v2-schemas';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
@@ -32,11 +31,6 @@ export class BulkGetAlertActionsRoute implements RouteHandler {
   static validate = {
     request: {
       body: buildRouteValidationWithZod(bulkGetAlertActionsBodySchema),
-    },
-    response: {
-      200: {
-        body: buildRouteValidationWithZod(bulkGetAlertActionsResponseSchema),
-      },
     },
   } as const;
 

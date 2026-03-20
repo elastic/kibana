@@ -26,7 +26,7 @@ export class StoreActionsStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { suppressed = [], throttled = [], dispatch = [], dispatchable = [] } = state;
+    const { suppressed = [], throttled = [], dispatch = [], dispatchable = [], policies } = state;
 
     const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled);
 
@@ -67,17 +67,19 @@ export class StoreActionsStep implements DispatcherStep {
             })
           )
         ),
-        ...dispatch.map((group) => ({
-          '@timestamp': now.toISOString(),
-          actor: 'system',
-          action_type: 'notified',
-          rule_id: group.ruleId,
-          group_hash: 'irrelevant',
-          last_series_event_timestamp: now.toISOString(),
-          notification_group_id: group.id,
-          source: 'internal',
-          reason: `notified by policy ${group.policyId} with throttle interval`,
-        })),
+        ...dispatch
+          .filter((group) => policies?.get(group.policyId)?.throttle?.interval)
+          .map((group) => ({
+            '@timestamp': now.toISOString(),
+            actor: 'system',
+            action_type: 'notified',
+            rule_id: group.ruleId,
+            group_hash: 'irrelevant',
+            last_series_event_timestamp: now.toISOString(),
+            notification_group_id: group.id,
+            source: 'internal',
+            reason: `notified by policy ${group.policyId} with throttle interval`,
+          })),
         ...unmatched.map((episode) =>
           toAction({
             episode,

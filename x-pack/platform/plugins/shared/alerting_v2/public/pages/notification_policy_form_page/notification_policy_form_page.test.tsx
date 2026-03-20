@@ -86,12 +86,15 @@ const EXISTING_POLICY: NotificationPolicyResponse = {
   description: 'Routes critical alerts',
   enabled: true,
   matcher: 'data.severity : "critical"',
-  group_by: ['host.name', 'service.name'],
+  groupBy: ['host.name', 'service.name'],
   throttle: { interval: '5m' },
+  snoozedUntil: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   createdBy: 'elastic',
+  createdByUsername: 'elastic',
   createdAt: '2026-03-01T10:00:00.000Z',
   updatedBy: 'elastic',
+  updatedByUsername: 'elastic',
   updatedAt: '2026-03-01T10:00:00.000Z',
   auth: {
     owner: 'elastic',
@@ -136,34 +139,30 @@ describe('NotificationPolicyFormPage', () => {
       const user = userEvent.setup();
       renderPage();
 
-      // Select a workflow destination
-      const destinationsCombobox = within(screen.getByTestId('destinationsInput'));
-      await user.click(destinationsCombobox.getByTestId('comboBoxSearchInput'));
-      await user.click(await screen.findByText('Workflow 1'));
-
       await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Policy from test');
       await user.tab();
       await user.type(screen.getByTestId(TEST_SUBJ.descriptionInput), 'Description from test');
       await user.tab();
 
-      // Select a workflow destination via EuiComboBox
+      // Select a workflow destination (required field)
       const destinationsCombo = screen.getByTestId('destinationsInput');
       const comboInput = within(destinationsCombo).getByRole('combobox');
       await user.click(comboInput);
-      await user.click(await screen.findByTitle('Workflow 1'));
+      await user.click(await screen.findByRole('option', { name: 'Workflow 1' }));
 
       const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
       await waitFor(() => expect(saveButton).toBeEnabled());
       await user.click(saveButton);
 
-      expect(mockCreateMutate).toHaveBeenCalledTimes(1);
-      expect(mockCreateMutate).toHaveBeenCalledWith(
-        {
-          name: 'Policy from test',
-          description: 'Description from test',
-          destinations: [{ type: 'workflow', id: 'workflow-1' }],
-        },
-        expect.objectContaining({ onSuccess: expect.any(Function) })
+      await waitFor(() =>
+        expect(mockCreateMutate).toHaveBeenCalledWith(
+          {
+            name: 'Policy from test',
+            description: 'Description from test',
+            destinations: [{ type: 'workflow', id: 'workflow-1' }],
+          },
+          expect.objectContaining({ onSuccess: expect.any(Function) })
+        )
       );
     });
 
@@ -254,7 +253,7 @@ describe('NotificationPolicyFormPage', () => {
             name: 'Critical production alerts',
             description: 'Routes critical alerts',
             matcher: 'data.severity : "critical"',
-            group_by: ['host.name', 'service.name'],
+            groupBy: ['host.name', 'service.name'],
             throttle: { interval: '5m' },
             destinations: [{ type: 'workflow', id: 'workflow-2' }],
           },

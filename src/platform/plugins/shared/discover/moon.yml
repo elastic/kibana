@@ -116,7 +116,6 @@ dependsOn:
   - '@kbn/file-upload-plugin'
   - '@kbn/timerange'
   - '@kbn/unified-chart-section-viewer'
-  - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/control-group-renderer'
   - '@kbn/react-query'
   - '@kbn/shared-ux-document-data-cascade'
@@ -135,6 +134,7 @@ dependsOn:
   - '@kbn/synthtrace-client'
   - '@kbn/alerting-v2-rule-form'
   - '@kbn/cps-utils'
+  - '@kbn/as-code-data-views-schema'
 tags:
   - plugin
   - prod

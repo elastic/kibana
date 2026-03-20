@@ -222,7 +222,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
     return {
       title: (
         <EuiButtonEmpty
-          iconType={'documentEdit'}
+          iconType={'pencil'}
           iconSide={'left'}
           onClick={() => {
             onAlertEdit(rule);
