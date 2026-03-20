@@ -12,17 +12,17 @@ import { useQuery } from '@kbn/react-query';
 import { useSelector } from 'react-redux';
 import { useFetchPrevalence } from './use_fetch_prevalence';
 import { createFetchData } from '../utils/fetch_data';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useKibana } from '../../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
 
 jest.mock('@kbn/es-query');
 jest.mock('@kbn/react-query');
 jest.mock('react-redux');
 jest.mock('../utils/fetch_data');
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('../../../data_view_manager/hooks/use_security_default_patterns');
 
 const highlightedFieldsFilters: Record<string, QueryDslQueryContainer> = {
   'host.name': { term: { 'host.name': 'host-1' } },

@@ -9,10 +9,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
-
-const mockNavigateToLeftPanel = jest.fn();
-jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 
 const testId = 'test';
 const textTestId = `${testId}Text`;
@@ -21,12 +17,6 @@ const valueTestId = `${testId}Value`;
 const loadingTestId = `${testId}Loading`;
 
 describe('<InsightsSummaryRow />', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
-  });
-
   it('should render loading skeleton if loading is true', () => {
     const { getByTestId } = render(
       <InsightsSummaryRow
@@ -65,9 +55,15 @@ describe('<InsightsSummaryRow />', () => {
   });
 
   it('should render the value as EuiBadge and EuiButtonEmpty', () => {
+    const mockCallback = jest.fn();
     const { getByTestId, queryByTestId } = render(
       <IntlProvider locale="en">
-        <InsightsSummaryRow text={'this is a test for red'} value={2} data-test-subj={testId} />
+        <InsightsSummaryRow
+          text={'this is a test for red'}
+          value={2}
+          onShowDetails={mockCallback}
+          data-test-subj={testId}
+        />
       </IntlProvider>
     );
 
@@ -77,28 +73,45 @@ describe('<InsightsSummaryRow />', () => {
   });
 
   it('should render big numbers formatted correctly', () => {
+    const mockCallback = jest.fn();
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <InsightsSummaryRow text={'this is a test for red'} value={2000} data-test-subj={testId} />
+        <InsightsSummaryRow
+          text={'this is a test for red'}
+          value={2000}
+          onShowDetails={mockCallback}
+          data-test-subj={testId}
+        />
       </IntlProvider>
     );
 
     expect(getByTestId(buttonTestId)).toHaveTextContent('2k');
   });
 
-  it('should open the expanded section to the correct tab when the number is clicked', () => {
+  it('should call the callback when button is clicked', () => {
+    const mockCallback = jest.fn();
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <InsightsSummaryRow
           text={'this is a test for red'}
           value={2}
-          expandedSubTab={'subTab'}
+          onShowDetails={mockCallback}
           data-test-subj={testId}
         />
       </IntlProvider>
     );
     getByTestId(buttonTestId).click();
 
-    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
+    expect(mockCallback).toHaveBeenCalled();
+  });
+
+  it('should disable button when no callback is provided', () => {
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <InsightsSummaryRow text={'this is a test for red'} value={2} data-test-subj={testId} />
+      </IntlProvider>
+    );
+
+    expect(getByTestId(buttonTestId)).toBeDisabled();
   });
 });
