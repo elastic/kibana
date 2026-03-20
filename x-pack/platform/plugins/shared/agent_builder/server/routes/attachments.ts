@@ -196,6 +196,13 @@ export function registerAttachmentRoutes({
           resolveContext
         );
         const staleCount = staleResults.filter((result) => result.is_stale).length;
+        for (const result of staleResults) {
+          if (!result.is_stale && result.error) {
+            logger.warn(
+              `Attachment staleness check failed for attachment "${result.id}" in conversation "${conversationId}": ${result.error}`
+            );
+          }
+        }
         logger.debug(
           `Attachment staleness check completed for conversation "${conversationId}" (checked=${staleResults.length}, stale=${staleCount})`
         );

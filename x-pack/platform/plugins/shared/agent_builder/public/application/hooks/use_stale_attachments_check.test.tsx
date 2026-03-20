@@ -16,6 +16,12 @@ jest.mock('./use_agent_builder_service', () => ({
   }),
 }));
 
+const mockAddErrorToast = jest.fn();
+
+jest.mock('./use_toasts', () => ({
+  useToasts: () => ({ addErrorToast: mockAddErrorToast }),
+}));
+
 jest.mock('react-use/lib/useEvent', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -24,6 +30,7 @@ jest.mock('react-use/lib/useEvent', () => ({
 describe('useStaleAttachments', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAddErrorToast.mockClear();
     jest.useFakeTimers();
   });
 
@@ -134,5 +141,28 @@ describe('useStaleAttachments', () => {
 
     expect(mockCheckStale).toHaveBeenCalledTimes(2);
     expect(mockCheckStale).toHaveBeenLastCalledWith('conv-x');
+  });
+
+  it('shows an error toast when the stale check returns per-attachment errors', async () => {
+    mockCheckStale.mockResolvedValue({
+      attachments: [
+        { id: 'bad', is_stale: false, error: 'resolve failed' },
+        { id: 'good', is_stale: false },
+      ],
+    });
+
+    renderHook(() => useStaleAttachments('conv-err'));
+
+    await act(async () => {
+      jest.advanceTimersByTime(400);
+    });
+
+    expect(mockAddErrorToast).toHaveBeenCalledTimes(1);
+    expect(mockAddErrorToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: expect.any(String),
+        text: expect.stringContaining('bad: resolve failed'),
+      })
+    );
   });
 });

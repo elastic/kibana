@@ -7,6 +7,7 @@ responses:
           checkStaleAttachmentsResponseExample:
             description: >-
               Mixed conversation: attachments without a stale source return only id and is_stale.
+              When a staleness check fails for one attachment, is_stale is false and error explains why.
               When an origin-backed attachment is out of date, the response includes type, origin,
               and resolved data (here a simple text body) for resync.
             value:
@@ -15,6 +16,9 @@ responses:
                   is_stale: false
                 - id: att-lens-active-users
                   is_stale: false
+                - id: att-query-attachment
+                  is_stale: false
+                  error: "Origin could not be resolved"
                 - id: att-text-runbook
                   type: text
                   origin: document:hr-onboarding-v2

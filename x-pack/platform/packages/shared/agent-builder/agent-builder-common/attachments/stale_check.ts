@@ -12,6 +12,19 @@ export type StaleAttachment = Attachment & { is_stale: true; origin: string };
 export interface FreshAttachment {
   id: string;
   is_stale: false;
+  /**
+   * When present, the staleness check failed for this attachment (e.g. `isStale` or `resolve` threw).
+   */
+  error?: string;
 }
 
 export type AttachmentStaleCheckResult = StaleAttachment | FreshAttachment;
+
+/** Fresh result where the server reported that staleness evaluation failed for this attachment. */
+export type FreshAttachmentStalenessCheckError = FreshAttachment & { error: string };
+
+export function isFreshAttachmentStalenessCheckError(
+  result: AttachmentStaleCheckResult
+): result is FreshAttachmentStalenessCheckError {
+  return result.is_stale === false && typeof result.error === 'string' && result.error.length > 0;
+}

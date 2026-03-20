@@ -8,10 +8,15 @@
 import { useEffect, useRef, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 import { useDebounceFn } from '@kbn/react-hooks';
-import { hashContent } from '@kbn/agent-builder-common/attachments';
+import {
+  hashContent,
+  isFreshAttachmentStalenessCheckError,
+} from '@kbn/agent-builder-common/attachments';
 import type { StaleAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ConverseAttachmentInput } from '../../../common/http_api/chat';
+import { labels } from '../utils/i18n';
 import { useAgentBuilderServices } from './use_agent_builder_service';
+import { useToasts } from './use_toasts';
 
 const STALE_CHECK_DEBOUNCE_MS = 300;
 const STALE_CHECK_DEBOUNCE_OPTIONS = { wait: STALE_CHECK_DEBOUNCE_MS } as const;
@@ -32,6 +37,7 @@ export const useStaleAttachments = (
   conversationId: string | undefined
 ): UseStaleAttachmentsCheckResult => {
   const { attachmentsService } = useAgentBuilderServices();
+  const { addErrorToast } = useToasts();
   const [staleAttachments, setStaleAttachments] = useState<ConverseAttachmentInput[]>([]);
 
   // Always hold the latest stale attachments to avoid stale-closure issues in the debounced fn.
@@ -45,7 +51,18 @@ export const useStaleAttachments = (
     }
 
     const response = await attachmentsService.checkStale(conversationId);
-    const stale = (response.attachments ?? [])
+    const attachments = response.attachments ?? [];
+
+    const checkFailed = attachments.filter(isFreshAttachmentStalenessCheckError);
+    const errorLines = checkFailed.map(({ id, error }) => `${id}: ${error}`).sort();
+    if (errorLines.length > 0) {
+      addErrorToast({
+        title: labels.conversations.staleCheckPartialFailureTitle,
+        text: labels.conversations.staleCheckPartialFailureBody(errorLines.join('\n')),
+      });
+    }
+
+    const stale = attachments
       .filter((attachment): attachment is StaleAttachment => attachment.is_stale)
       .map(({ is_stale, origin, ...attachment }) => attachment);
 

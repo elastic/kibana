@@ -15,7 +15,13 @@ export type {
   VisualizationAttachment,
 } from './attachments';
 
-export type { StaleAttachment, FreshAttachment, AttachmentStaleCheckResult } from './stale_check';
+export type {
+  StaleAttachment,
+  FreshAttachment,
+  AttachmentStaleCheckResult,
+  FreshAttachmentStalenessCheckError,
+} from './stale_check';
+export { isFreshAttachmentStalenessCheckError } from './stale_check';
 export {
   AttachmentType,
   textAttachmentDataSchema,

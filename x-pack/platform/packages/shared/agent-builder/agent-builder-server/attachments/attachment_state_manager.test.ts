@@ -915,6 +915,44 @@ describe('AttachmentStateManager', () => {
       expect(results.find((r) => r.id === 'att-stale')?.is_stale).toBe(true);
       expect(results.find((r) => r.id === 'att-plain')?.is_stale).toBe(false);
     });
+
+    it('returns per-attachment error when isStale throws and still evaluates other attachments', async () => {
+      await manager.add({ id: 'att-ok', type: 'staleable', data: { content: 'x' } as any });
+      await manager.updateOrigin('att-ok', 'origin-ok');
+
+      await manager.add({ id: 'att-bad', type: 'staleable', data: { content: 'x' } as any });
+      await manager.updateOrigin('att-bad', 'origin-bad');
+
+      const customManager = createAttachmentStateManager(manager.getAll(), {
+        getTypeDefinition: (type) => {
+          if (type === 'staleable') {
+            return {
+              id: 'staleable',
+              validate: (input: unknown) => ({ valid: true, data: input as any }),
+              format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+              resolve: async () => ({ ok: true }),
+              isStale: async (attachment: any) => {
+                if (attachment.id === 'att-bad') {
+                  throw new Error('stale check failed');
+                }
+                return false;
+              },
+            } as any;
+          }
+          return getTypeDefinition(type);
+        },
+      });
+
+      const results = await customManager.evaluateStalenessForActiveAttachments(mockContext);
+
+      expect(results).toHaveLength(2);
+      expect(results.find((r) => r.id === 'att-ok')).toEqual({ id: 'att-ok', is_stale: false });
+      expect(results.find((r) => r.id === 'att-bad')).toEqual({
+        id: 'att-bad',
+        is_stale: false,
+        error: 'stale check failed',
+      });
+    });
   });
 
   describe('updateOrigin()', () => {

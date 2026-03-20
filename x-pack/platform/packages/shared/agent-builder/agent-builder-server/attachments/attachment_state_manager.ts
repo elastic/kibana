@@ -31,6 +31,21 @@ import {
 import type { AttachmentResolveContext, AttachmentTypeDefinition } from './type_definition';
 
 /**
+ * Best-effort message when `Promise.allSettled` reports `rejected` (rejection payloads vary by caller).
+ */
+function messageFromRejectionReason(
+  reason: Error | string | null | undefined | number | boolean | bigint | symbol | object
+): string {
+  if (reason instanceof Error) {
+    return reason.message;
+  }
+  if (typeof reason === 'string') {
+    return reason;
+  }
+  return 'Unexpected error';
+}
+
+/**
  * Input for updating an existing attachment.
  */
 export interface AttachmentUpdateInput {
@@ -538,36 +553,58 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   async evaluateStalenessForActiveAttachments(
     resolveContext: AttachmentResolveContext
   ): Promise<AttachmentStaleCheckResult[]> {
-    const activeAttachments = this.getActive();
-
-    return Promise.all(
-      activeAttachments.map(async (attachment): Promise<AttachmentStaleCheckResult> => {
-        if (attachment.origin === undefined) {
-          return { id: attachment.id, is_stale: false };
-        }
-
-        const typeDefinition = this.options.getTypeDefinition(attachment.type);
-        const isStale = await typeDefinition?.isStale?.(attachment, resolveContext);
-
-        if (!isStale) {
-          return { id: attachment.id, is_stale: false };
-        }
-
-        const resolvedData = await typeDefinition?.resolve?.(attachment.origin, resolveContext);
-        if (!resolvedData) {
-          return { id: attachment.id, is_stale: false };
-        }
-
-        return {
-          id: attachment.id,
-          is_stale: true,
-          data: resolvedData as Record<string, unknown>,
-          type: attachment.type,
-          hidden: attachment.hidden,
-          origin: attachment.origin,
-        };
-      })
+    const active = this.getActive();
+    const outcomes = await Promise.allSettled(
+      active.map((attachment) =>
+        this.evaluateStalenessForSingleActiveAttachment(attachment, resolveContext)
+      )
     );
+
+    return outcomes.map((outcome, index) => {
+      if (outcome.status === 'fulfilled') {
+        return outcome.value;
+      }
+      return {
+        id: active[index].id,
+        is_stale: false as const,
+        error: messageFromRejectionReason(outcome.reason),
+      };
+    });
+  }
+
+  /**
+   * Staleness for one attachment: by-value (no origin) is never stale; otherwise delegates to the type's `isStale` / `resolve`.
+   */
+  private async evaluateStalenessForSingleActiveAttachment(
+    attachment: VersionedAttachment,
+    resolveContext: AttachmentResolveContext
+  ): Promise<AttachmentStaleCheckResult> {
+    const { id, origin, type, hidden } = attachment;
+
+    if (origin === undefined) {
+      return { id, is_stale: false };
+    }
+
+    const definition = this.options.getTypeDefinition(type);
+    const originIsOutdated = await definition?.isStale?.(attachment, resolveContext);
+
+    if (!originIsOutdated) {
+      return { id, is_stale: false };
+    }
+
+    const latestFromOrigin = await definition?.resolve?.(origin, resolveContext);
+    if (latestFromOrigin === undefined) {
+      return { id, is_stale: false };
+    }
+
+    return {
+      id,
+      is_stale: true,
+      data: latestFromOrigin as Record<string, unknown>,
+      type,
+      hidden,
+      origin,
+    };
   }
 
   private recordAccess(
