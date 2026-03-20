@@ -59,7 +59,6 @@ export interface FooterProps {
   children: FooterChildren;
   isCollapsed: boolean;
   collapseButton?: ReactNode;
-  hideCollapseButton?: boolean;
 }
 
 interface FooterComponent
@@ -68,7 +67,7 @@ interface FooterComponent
 }
 
 const FooterBase = forwardRef<HTMLElement, FooterProps>(
-  ({ children, isCollapsed, collapseButton, hideCollapseButton = false }, ref) => {
+  ({ children, isCollapsed, collapseButton }, ref) => {
     const euiThemeContext = useEuiTheme();
     const footerNavigationInstructionsId = useGeneratedHtmlId({
       prefix: 'footer-navigation-instructions',
@@ -121,7 +120,7 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
           data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
         >
           {renderChildren()}
-          {!hideCollapseButton && (
+          {collapseButton && (
             <>
               <EuiHorizontalRule margin="xs" css={wrapperStyles.collapseDivider} />
               {collapseButton}

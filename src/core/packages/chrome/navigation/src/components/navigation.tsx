@@ -11,6 +11,7 @@ import React, { useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useIsWithinBreakpoints } from '@elastic/eui';
 
 import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
 import {
@@ -24,7 +25,6 @@ import { SideNav } from './side_nav';
 import { SideNavCollapseButton } from './collapse_button';
 import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
-import { useForcedCollapse } from '../hooks/use_forced_collapse';
 import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
@@ -87,7 +87,7 @@ export const Navigation = ({
   sidePanelFooter,
   ...rest
 }: NavigationProps) => {
-  const forcedCollapsed = useForcedCollapse();
+  const forcedCollapsed = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = forcedCollapsed || isCollapsedProp;
   const popoverItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverItem`;
   const popoverFooterItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverFooterItem`;
@@ -118,10 +118,11 @@ export const Navigation = ({
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
 
-  // Create the collapse button if a toggle callback is provided
-  const collapseButton = onToggleCollapsed ? (
-    <SideNavCollapseButton isCollapsed={isCollapsed} toggle={onToggleCollapsed} />
-  ) : null;
+  // Create the collapse button if a toggle callback is provided or if the navigation is not forced to be collapsed (e.g. on mobile)
+  const collapseButton =
+    onToggleCollapsed && !forcedCollapsed ? (
+      <SideNavCollapseButton isCollapsed={isCollapsed} toggle={onToggleCollapsed} />
+    ) : null;
 
   return (
     <div
@@ -340,11 +341,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer
-          isCollapsed={isCollapsed}
-          collapseButton={collapseButton}
-          hideCollapseButton={forcedCollapsed}
-        >
+        <SideNav.Footer isCollapsed={isCollapsed} collapseButton={collapseButton}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
