@@ -25,6 +25,7 @@ import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in
 import { spanFlyoutId } from '../full_screen_waterfall/waterfall_flyout/span_flyout';
 import { logsFlyoutId } from '../full_screen_waterfall/waterfall_flyout/logs_flyout';
 import type { DocumentType } from '../full_screen_waterfall/waterfall_flyout/document_detail_flyout';
+import { useFlyoutCover } from '../../../../doc_viewer_flyout/flyout_cover_context';
 
 interface Props {
   traceId: string;
@@ -62,6 +63,7 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
 function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
   const { data, discoverShared } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
+  const flyoutCover = useFlyoutCover();
 
   const [restoredTraceId, setRestoredTraceId] = useRestorableState('restoredTraceId', null);
 
@@ -109,6 +111,12 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
       isRestoringRef.current = false;
     }
   }, [renderReady]);
+
+  // setting the flyout cover state will prevent the doc detail flyout
+  // from being reported as viewed while hidden
+  useEffect(() => {
+    flyoutCover?.setIsFlyoutCovered(showFullScreenWaterfall);
+  }, [flyoutCover, showFullScreenWaterfall]);
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 

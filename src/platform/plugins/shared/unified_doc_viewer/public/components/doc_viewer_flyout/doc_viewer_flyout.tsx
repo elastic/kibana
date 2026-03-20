@@ -36,6 +36,7 @@ import { getUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 import { FlyoutContentId, reportFlyoutViewedEvent } from '../../analytics/flyout_viewed_event';
+import { FlyoutCoverProvider, type FlyoutCoverState } from './flyout_cover_context';
 
 export interface UnifiedDocViewerFlyoutProps
   extends Pick<
@@ -263,7 +264,17 @@ export function UnifiedDocViewerFlyout({
   const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
 
   const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
+  const [isFlyoutCovered, setIsFlyoutCovered] = useState(false);
+
   const lastReportedEventRef = useRef<string | undefined>(undefined);
+
+  const flyoutCoverValue = useMemo<FlyoutCoverState>(
+    () => ({
+      isFlyoutCovered,
+      setIsFlyoutCovered,
+    }),
+    [isFlyoutCovered]
+  );
 
   // setting the selected tab id will trigger reporting the event
   const onUpdateSelectedTabIdWithTracking = useCallback(
@@ -275,6 +286,12 @@ export function UnifiedDocViewerFlyout({
   );
 
   useEffect(() => {
+    // if the flyout is covered by another UI element, we don't want to report the event
+    if (isFlyoutCovered) {
+      lastReportedEventRef.current = undefined;
+      return;
+    }
+
     if (!flyoutContentId || !selectedTabId) return;
 
     const eventKey = `${flyoutContentId}|${selectedTabId}|${hit.id}`;
@@ -286,7 +303,7 @@ export function UnifiedDocViewerFlyout({
       contentId: flyoutContentId,
       tabId: selectedTabId,
     });
-  }, [analytics, flyoutContentId, hit.id, selectedTabId]);
+  }, [analytics, flyoutContentId, hit.id, isFlyoutCovered, selectedTabId]);
 
   return (
     <EuiPortal>
@@ -356,14 +373,16 @@ export function UnifiedDocViewerFlyout({
               <EuiSpacer size="m" />
             </>
           )}
-          <UnifiedDocViewer
-            ref={docViewerRef}
-            initialTabId={initialTabId}
-            initialDocViewerState={initialDocViewerState}
-            onInitialDocViewerStateChange={onInitialDocViewerStateChange}
-            onUpdateSelectedTabId={onUpdateSelectedTabIdWithTracking}
-            {...docViewRenderProps}
-          />
+          <FlyoutCoverProvider value={flyoutCoverValue}>
+            <UnifiedDocViewer
+              ref={docViewerRef}
+              initialTabId={initialTabId}
+              initialDocViewerState={initialDocViewerState}
+              onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+              onUpdateSelectedTabId={onUpdateSelectedTabIdWithTracking}
+              {...docViewRenderProps}
+            />
+          </FlyoutCoverProvider>
         </EuiFlyoutBody>
       </EuiFlyout>
     </EuiPortal>
