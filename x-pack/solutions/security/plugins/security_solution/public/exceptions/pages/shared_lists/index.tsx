@@ -28,6 +28,7 @@ import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-i
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
+import { ProjectRoutingAccess, useCpsPickerAccess } from '@kbn/cps-utils';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
@@ -95,13 +96,10 @@ export const SharedLists = React.memo(() => {
   const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const {
-    services: {
-      http,
-      notifications,
-      timelines,
-      application: { navigateToApp },
-    },
+    services: { http, application, cps, notifications, timelines },
   } = useKibana();
+  const { navigateToApp } = application;
+  useCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
