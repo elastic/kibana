@@ -107,12 +107,21 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     async cleanTransformIndices() {
       // Delete all transforms using the API since we mustn't just delete
       // all `.transform-*` indices since this might result in orphaned ES tasks.
-      const { body: getRspBody, status: getRspStatus } = await esSupertest.get(`/_transform/`);
-      this.assertResponseStatusCode(200, getRspStatus, getRspBody);
+      const pageSize = 1000;
+      const transformIdSet = new Set<string>();
+      for (let from = 0; ; from += pageSize) {
+        const { body: getRspBody, status: getRspStatus } = await esSupertest.get(
+          `/_transform/_all?from=${from}&size=${pageSize}`
+        );
+        this.assertResponseStatusCode(200, getRspStatus, getRspBody);
 
-      const transformIds = getRspBody.transforms.map((t: { id: string }) => t.id);
+        const ids = (getRspBody.transforms as Array<{ id: string }>).map((t) => t.id);
+        for (const id of ids) transformIdSet.add(id);
 
-      await asyncForEach(transformIds, async (transformId: string) => {
+        if (ids.length < pageSize) break;
+      }
+
+      await asyncForEach([...transformIdSet], async (transformId: string) => {
         const { body: stopRspBody, status: stopRspStatus } = await esSupertest.post(
           `/_transform/${transformId}/_stop?force=true&wait_for_completion`
         );
@@ -198,7 +207,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async getTransformList(size: number = 10): Promise<GetTransformsResponseSchema> {
-      const { body, status } = await esSupertest.get(`/_transform`);
+      const { body, status } = await esSupertest.get(`/_transform/_all?from=0&size=${size}`);
       this.assertResponseStatusCode(200, status, body);
 
       return body as GetTransformsResponseSchema;
