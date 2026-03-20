@@ -23,12 +23,10 @@ import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
-import { getUnitLabel } from '../../common/utils';
-import { TabTitleAndDescription } from './tab_title_and_description';
-import { MetricTypeBadge } from './metric_type_badge';
-import { NoValueBadge, renderBadgeGroup } from './badge_group';
-import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
-import type { Dimension, ParsedMetricItem } from '../../types';
+import { getUnitLabel } from '../../../common/utils';
+import { TabTitleAndDescription, MetricTypeBadge, NoValueBadge, BadgeGroup } from '../components';
+import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
+import type { Dimension, ParsedMetricItem } from '../../../types';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -96,30 +94,39 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
         i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
           defaultMessage: 'Field type',
         }),
-        renderBadgeGroup(metricItem.fieldTypes, (fieldType, index) => (
-          <EuiBadge key={`${fieldType}-${index}`}>{fieldType}</EuiBadge>
-        ))
+        <BadgeGroup
+          items={metricItem.fieldTypes}
+          renderItem={(fieldType, index) => (
+            <EuiBadge key={`${fieldType}-${index}`}>{fieldType}</EuiBadge>
+          )}
+        />
       ),
       createDescriptionListItem(
         i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
           defaultMessage: 'Metric unit',
         }),
-        renderBadgeGroup(metricItem.units, (unit, index) =>
-          unit != null ? (
-            <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
-          ) : (
-            <NoValueBadge key={`${unit}-${index}`} />
-          )
-        ),
+        <BadgeGroup
+          items={metricItem.units}
+          renderItem={(unit, index) =>
+            unit != null ? (
+              <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
+            ) : (
+              <NoValueBadge key={`${unit}-${index}`} />
+            )
+          }
+        />,
         'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
       ),
       createDescriptionListItem(
         i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
           defaultMessage: 'Metric type',
         }),
-        renderBadgeGroup(metricItem.metricTypes, (metricType, index) => (
-          <MetricTypeBadge key={`${metricType}-${index}`} instrument={metricType} />
-        )),
+        <BadgeGroup
+          items={metricItem.metricTypes}
+          renderItem={(metricType, index) => (
+            <MetricTypeBadge key={`${metricType}-${index}`} instrument={metricType} />
+          )}
+        />,
         'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
       ),
     ],

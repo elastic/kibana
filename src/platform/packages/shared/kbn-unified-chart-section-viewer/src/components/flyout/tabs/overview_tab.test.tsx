@@ -10,12 +10,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ParsedMetricItem } from '../../types';
+import type { ParsedMetricItem } from '../../../types';
 import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { METRIC_TYPE_DESCRIPTIONS } from './metric_type_badge';
+import { METRIC_TYPE_DESCRIPTIONS } from '../components';
 
-jest.mock('../../common/utils', () => ({
+jest.mock('../../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
     const unitLabels: Record<string, string | undefined> = {
       ms: 'Milliseconds',

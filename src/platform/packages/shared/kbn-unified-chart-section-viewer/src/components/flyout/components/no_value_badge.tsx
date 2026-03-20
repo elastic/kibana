@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -17,13 +17,4 @@ export const NoValueBadge = () => (
       defaultMessage: '-',
     })}
   </EuiBadge>
-);
-
-export const renderBadgeGroup = <T,>(
-  items: T[] | undefined,
-  renderItem: (item: T, index: number) => React.ReactNode
-) => (
-  <EuiBadgeGroup gutterSize="xs">
-    {items?.length ? items.map(renderItem) : <NoValueBadge />}
-  </EuiBadgeGroup>
 );
