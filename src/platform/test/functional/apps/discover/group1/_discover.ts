@@ -295,7 +295,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const getRequestTimestamp = async () => {
           // check inspector panel request stats for timestamp
-          await inspector.open();
+          await discover.openInspectorFromTabMenu();
           const requestStats = await inspector.getTableData();
           const requestStatsRow = requestStats.filter(
             (r) => r && r[0] && r[0].includes('Request timestamp')

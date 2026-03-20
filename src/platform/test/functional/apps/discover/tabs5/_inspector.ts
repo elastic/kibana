@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { unifiedTabs } = getPageObjects(['unifiedTabs']);
+  const { discover } = getPageObjects(['discover']);
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
 
@@ -21,15 +21,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open the inspector from the tab context menu', async () => {
-      await unifiedTabs.openTabMenu(0);
-      await testSubjects.click('unifiedTabs_tabMenuItem_inspect');
+      await discover.openInspectorFromTabMenu();
       const isOpen = await testSubjects.exists('inspectorPanel');
       expect(isOpen).to.be(true);
     });
 
     it('should display request stats in the inspector', async () => {
-      await unifiedTabs.openTabMenu(0);
-      await testSubjects.click('unifiedTabs_tabMenuItem_inspect');
+      await discover.openInspectorFromTabMenu();
       await testSubjects.click('inspectorRequestChooser');
       await testSubjects.click('inspectorRequestChooserDocuments');
       await testSubjects.click('inspectorRequestDetailStatistics');

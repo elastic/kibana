@@ -766,6 +766,31 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async openInspectorFromTabMenu() {
+    const isOpen = await this.testSubjects.exists('inspectorPanel');
+    if (isOpen) return;
+
+    // Find the selected tab and open its menu
+    const tabElements = await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+    for (const tabElement of tabElements) {
+      const tabRoleElement = await tabElement.findByCssSelector('[role="tab"]');
+      if ((await tabRoleElement.getAttribute('aria-selected')) === 'true') {
+        const menuButton = await tabElement.findByCssSelector(
+          '[data-test-subj^="unifiedTabs_tabMenuBtn_"]'
+        );
+        await menuButton.click();
+        await this.retry.waitFor('tab menu to open', async () => {
+          return await this.testSubjects.exists('unifiedTabs_tabMenuItem_inspect');
+        });
+        await this.testSubjects.click('unifiedTabs_tabMenuItem_inspect');
+        await this.retry.waitFor('inspector panel to open', async () => {
+          return await this.testSubjects.exists('inspectorPanel');
+        });
+        return;
+      }
+    }
+  }
+
   public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
     // Find the selected tab and open its menu
     const tabElements = await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
