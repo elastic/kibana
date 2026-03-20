@@ -17,6 +17,20 @@ export interface FindRulesResponse {
   perPage: number;
 }
 
+export interface BulkOperationError {
+  id: string;
+  error: { message: string; statusCode: number };
+}
+
+export interface BulkOperationResponse {
+  rules: RuleResponse[];
+  errors: BulkOperationError[];
+}
+
+export type BulkOperationParams =
+  | { ids: string[]; filter?: undefined }
+  | { filter: string; ids?: undefined };
+
 const RULE_API_PATH = '/internal/alerting/v2/rule' as const;
 
 export const listRules = (http: HttpStart, params: { page?: number; perPage?: number }) =>
@@ -31,3 +45,18 @@ export const updateRule = (http: HttpStart, id: string, payload: UpdateRuleData)
 
 export const deleteRule = (http: HttpStart, id: string) =>
   http.delete<RuleResponse>(`${RULE_API_PATH}/${id}`);
+
+export const bulkDeleteRules = (http: HttpStart, params: BulkOperationParams) =>
+  http.post<BulkOperationResponse>(`${RULE_API_PATH}/_bulk_delete`, {
+    body: JSON.stringify(params),
+  });
+
+export const bulkEnableRules = (http: HttpStart, params: BulkOperationParams) =>
+  http.post<BulkOperationResponse>(`${RULE_API_PATH}/_bulk_enable`, {
+    body: JSON.stringify(params),
+  });
+
+export const bulkDisableRules = (http: HttpStart, params: BulkOperationParams) =>
+  http.post<BulkOperationResponse>(`${RULE_API_PATH}/_bulk_disable`, {
+    body: JSON.stringify(params),
+  });

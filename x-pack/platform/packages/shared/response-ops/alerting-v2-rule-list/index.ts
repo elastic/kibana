@@ -11,4 +11,10 @@ export type { RuleListProps } from './rule_list';
 export { RuleListProvider, useRuleListServices, useRuleListPaths } from './rule_list_context';
 export type { RuleListServices, RuleListPaths } from './rule_list_context';
 
-export type { RuleApiResponse, FindRulesResponse } from './rules_api';
+export type {
+  RuleApiResponse,
+  FindRulesResponse,
+  BulkOperationParams,
+  BulkOperationResponse,
+  BulkOperationError,
+} from './rules_api';
