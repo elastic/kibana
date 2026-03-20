@@ -281,6 +281,56 @@ describe('datatable cell renderer', () => {
       renderCellComponent(columnConfig, {});
 
       expect(screen.getByText('formatted 123')).toBeInTheDocument();
+      expect(screen.getByTestId('lnsTableCellContentBadge')).toBeInTheDocument();
+      expect(setCellProps).not.toHaveBeenCalled();
+    });
+
+    it('should not render badge for null values', () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'badge';
+
+      setCellProps.mockClear();
+      renderCellComponent(columnConfig, {
+        table: {
+          ...table,
+          rows: [{ a: null }],
+        },
+      });
+
+      expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
+      expect(setCellProps).not.toHaveBeenCalled();
+    });
+
+    it('should not render badge for blank values', () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'badge';
+
+      setCellProps.mockClear();
+      renderCellComponent(columnConfig, {
+        table: {
+          ...table,
+          rows: [{ a: '' }],
+        },
+      });
+
+      expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
+      expect(setCellProps).not.toHaveBeenCalled();
+    });
+
+    it('should not render badge for NaN values', () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'badge';
+
+      setCellProps.mockClear();
+      renderCellComponent(columnConfig, {
+        table: {
+          ...table,
+          rows: [{ a: Number.NaN }],
+        },
+      });
+
+      expect(screen.getByText('formatted NaN')).toBeInTheDocument();
+      expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
       expect(setCellProps).not.toHaveBeenCalled();
     });
 

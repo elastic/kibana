@@ -7,50 +7,22 @@
 
 import React, { useContext, useEffect, useMemo } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { makeHighContrastColor } from '@elastic/eui';
-import { EuiBadge, EuiLink, useEuiTheme } from '@elastic/eui';
-import classNames from 'classnames';
+import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
-import { i18n } from '@kbn/i18n';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
-import { getContrastColor } from '../../../shared_components/coloring/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-
-const getBadgeLabel = (value: unknown) =>
-  i18n.translate('xpack.lens.table.dynamicColoring.badge.filterLabel', {
-    defaultMessage: 'Filter by value: {value}',
-    values: { value: String(value) },
-  });
-
-type ColumnConfigWithIndex = DatatableColumnConfig['columns'][number] & { colIndex: number };
-
-const buildColumnConfigLookup = (
-  columns: DatatableColumnConfig['columns']
-): Map<string, ColumnConfigWithIndex> => {
-  const lookup = new Map<string, ColumnConfigWithIndex>();
-  columns.forEach((column, colIndex) => {
-    // Keep the first matching column to preserve previous findIndex() behavior.
-    if (!lookup.has(column.columnId)) {
-      lookup.set(column.columnId, { ...column, colIndex });
-    }
-  });
-  return lookup;
-};
-
-const getCellClassName = (
-  alignment: 'left' | 'right' | 'center' | undefined,
-  fitRowToContent?: boolean,
-  isColored = false
-) =>
-  classNames({
-    'lnsTableCell--multiline': fitRowToContent,
-    'lnsTableCell--colored': isColored,
-    [`lnsTableCell--${alignment}`]: true,
-  });
+import {
+  buildColumnConfigLookup,
+  getRenderMode,
+  applyCellColoring,
+  HtmlCell,
+  LinkCell,
+  BadgeCell,
+} from './cell_value_helpers';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
@@ -68,124 +40,104 @@ export const createGridCell = (
 
   return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, handleFilterClick } = useContext(DataContext);
-    const formatter = formatters[columnId];
+    const { euiTheme } = useEuiTheme();
+
     const rawValue: RawValue = table?.rows[rowIndex]?.[columnId];
+    const formatter = formatters[columnId];
     const currentColumnConfig = columnConfigLookup.get(columnId);
     const colIndex = currentColumnConfig?.colIndex ?? -1;
-    const { euiTheme } = useEuiTheme();
     const { oneClickFilter, colorMode = 'none', palette, colorMapping } = currentColumnConfig ?? {};
-    const filterOnClick = Boolean(oneClickFilter && handleFilterClick);
-    const shouldUseTextContent = colorMode === 'badge' || filterOnClick;
+
+    const isClickable = Boolean(oneClickFilter && handleFilterClick);
+    const renderMode = getRenderMode(colorMode, isClickable);
+
+    // Badge and link modes need plain text; html mode uses the formatter's html output.
+    const contentFormat = renderMode !== 'html' ? 'text' : 'html';
     const fallbackText = rawValue == null ? '' : String(rawValue);
-    const content =
-      formatter?.convert(rawValue, shouldUseTextContent ? 'text' : 'html') ?? fallbackText;
-    const currentAlignment = alignments?.get(columnId);
+    const content = formatter?.convert(rawValue, contentFormat) ?? fallbackText;
+
+    const alignment = alignments?.get(columnId);
+
+    const onFilter = () => handleFilterClick?.(columnId, rawValue, colIndex, rowIndex);
 
     const badgeColor = useMemo(() => {
-      if (colorMode !== 'badge' || (!palette && !colorMapping)) return null;
+      if (renderMode !== 'badge' || (!palette && !colorMapping)) return null;
       const color = getCellColor(columnId, palette, colorMapping)(rawValue);
       return color || null;
-    }, [colorMode, columnId, palette, colorMapping, rawValue]);
+    }, [renderMode, columnId, palette, colorMapping, rawValue]);
 
     useEffect(() => {
-      let colorSet = false;
-      // Apply coloring when colorMode is set -> getCellColor will apply defaults if no config provided
-      if (colorMode !== 'none' && colorMode !== 'badge') {
-        const color = getCellColor(columnId, palette, colorMapping)(rawValue);
+      // Cell/text coloring is applied via setCellProps (affects the EuiDataGrid cell container).
+      // Badge mode handles its own color inline; none means no coloring.
+      const style = applyCellColoring({
+        colorMode,
+        columnId,
+        palette,
+        colorMapping,
+        rawValue,
+        getCellColor,
+        isDarkMode,
+      });
 
-        if (color) {
-          const style = { [colorMode === 'cell' ? 'backgroundColor' : 'color']: color };
-          if (colorMode === 'cell' && color) {
-            style.color = getContrastColor(color, isDarkMode);
-          }
-          colorSet = true;
-          setCellProps({ style });
-        }
-      }
+      if (!style) return;
 
-      // Clean up styles when something changes, this avoids cell's styling to stick forever
-      // Checks isExpanded to prevent clearing style after expanding cell
-      if (colorSet && !isExpanded) {
-        return () => {
-          setCellProps({
-            style: {
-              backgroundColor: undefined,
-              color: undefined,
-            },
-          });
-        };
+      setCellProps({ style });
+
+      // Clean up styles when dependencies change to avoid stale colors sticking.
+      // Skip cleanup when the cell is expanded — it would clear the expanded panel's style.
+      if (!isExpanded) {
+        return () => setCellProps({ style: { backgroundColor: undefined, color: undefined } });
       }
     }, [rawValue, columnId, setCellProps, colorMode, palette, colorMapping, isExpanded]);
 
-    if (colorMode === 'badge') {
-      const badgeTextColor = badgeColor ? getContrastColor(badgeColor, isDarkMode) : undefined;
-      const label = content ?? '';
-      const clickProps = filterOnClick
-        ? {
-            onClick: () => {
-              handleFilterClick?.(columnId, rawValue, colIndex, rowIndex);
-            },
-            onClickAriaLabel: getBadgeLabel(label),
-          }
-        : {};
+    switch (renderMode) {
+      case 'badge':
+        return (
+          <BadgeCell
+            label={content}
+            rawValue={rawValue}
+            badgeColor={badgeColor}
+            isClickable={isClickable}
+            onClick={onFilter}
+            isDarkMode={isDarkMode}
+            alignment={alignment}
+            fitRowToContent={fitRowToContent}
+          />
+        );
 
-      return (
-        <div
-          data-test-subj="lnsTableCellContent"
-          className={getCellClassName(currentAlignment, fitRowToContent)}
-        >
-          <EuiBadge
-            data-test-subj="lnsTableCellContentBadge"
-            color={badgeColor ?? 'hollow'}
-            style={badgeTextColor ? { color: badgeTextColor } : undefined}
-            {...clickProps}
-          >
-            {label}
-          </EuiBadge>
-        </div>
-      );
+      case 'link': {
+        const backgroundColor = getCellColor(columnId, palette, colorMapping)(rawValue);
+        const baseColor = euiTheme.colors.link;
+        // Only adjust link contrast when the cell background is colored (colorMode: cell).
+        const linkColor =
+          colorMode === 'cell' && backgroundColor
+            ? makeHighContrastColor(
+                isDarkMode ? euiTheme.colors.highlight : baseColor, // preferred foreground
+                4.5 // WCAG AA contrast ratio (default in EUI)
+              )(backgroundColor)
+            : baseColor;
+
+        return (
+          <LinkCell
+            content={content}
+            linkColor={linkColor}
+            onClick={onFilter}
+            alignment={alignment}
+            fitRowToContent={fitRowToContent}
+          />
+        );
+      }
+
+      case 'html':
+      default:
+        return (
+          <HtmlCell
+            content={content}
+            alignment={alignment}
+            fitRowToContent={fitRowToContent}
+            isColored={colorMode !== 'none'}
+          />
+        );
     }
-
-    if (filterOnClick) {
-      const backgroundColor = getCellColor(columnId, palette, colorMapping)(rawValue);
-      const linkColor = euiTheme.colors.link;
-
-      // Only adjust the color for colorMode: cell
-      const adjustedLinkColor =
-        colorMode === 'cell' && backgroundColor
-          ? makeHighContrastColor(
-              isDarkMode ? euiTheme.colors.highlight : linkColor, // preferred foreground color
-              4.5 // WCAG AA contrast ratio (default in EUI)
-            )(backgroundColor)
-          : linkColor;
-
-      return (
-        <div
-          data-test-subj="lnsTableCellContent"
-          className={getCellClassName(currentAlignment, fitRowToContent)}
-        >
-          <EuiLink
-            style={{ color: adjustedLinkColor }}
-            onClick={() => {
-              handleFilterClick?.(columnId, rawValue, colIndex, rowIndex);
-            }}
-          >
-            {content}
-          </EuiLink>
-        </div>
-      );
-    }
-
-    return (
-      <div
-        /*
-         * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
-         * which is produced in a safe way.
-         */
-        dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
-        data-test-subj="lnsTableCellContent"
-        className={getCellClassName(currentAlignment, fitRowToContent, colorMode !== 'none')}
-      />
-    );
   };
 };
