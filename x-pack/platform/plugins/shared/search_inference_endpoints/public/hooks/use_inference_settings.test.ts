@@ -90,7 +90,7 @@ describe('useSaveInferenceSettings', () => {
     const responseData = { data: { features: [] } };
     mockPut.mockResolvedValue(responseData);
 
-    const { Wrapper, queryClient } = createWrapper();
+    const { queryClient } = createWrapper();
     jest.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
 
     const { result } = renderHook(() => useSaveInferenceSettings(), {
@@ -116,7 +116,7 @@ describe('useSaveInferenceSettings', () => {
     const responseData = { data: { features: [] } };
     mockPut.mockResolvedValue(responseData);
 
-    const { Wrapper, queryClient } = createWrapper();
+    const { queryClient } = createWrapper();
     jest.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
 
     const { result } = renderHook(() => useSaveInferenceSettings(), {
