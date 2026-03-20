@@ -13,7 +13,7 @@ import { useCasesToast } from '../common/use_cases_toast';
 import { casesQueriesKeys } from './constants';
 import { useReplaceCustomField } from './use_replace_custom_field';
 import { basicCaseFixture } from './test_fixtures';
-import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { CustomFieldTypes } from '../../common/types/domain';
 
 jest.mock('./api', () => ({
   getCase: jest.fn(),
