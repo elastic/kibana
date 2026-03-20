@@ -31,7 +31,7 @@ export const EntityRiskLevelsEnum = EntityRiskLevels.enum;
 export type EntityField = z.infer<typeof EntityField>;
 export const EntityField = z
   .object({
-    id: z.string(),
+    id: z.string().optional(),
     name: z.string().optional(),
     type: z.string().optional(),
     sub_type: z.string().optional(),
