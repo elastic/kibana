@@ -71,16 +71,6 @@ export function generateOtelcolConfig(
           signalTypes
         );
 
-        if (shouldAddAPMConfig) {
-          const [, routingTransformConfig] = Object.entries(attributesTransform)[0];
-          routingTransformConfig.metric_statements = [
-            {
-              context: 'datapoint',
-              statements: [`set(attributes["data_stream.namespace"], "${namespace}")`],
-            },
-          ];
-        }
-
         let otelConfig: OTelCollectorConfig = {
           ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
           ...addSuffixToOtelcolComponentsConfig('receivers', suffix, stream?.receivers),
@@ -98,29 +88,33 @@ export function generateOtelcolConfig(
                       addSuffixToOtelcolPipelinesComponents(stream.service.pipelines, suffix)
                     ).pipelines ?? {},
                     shouldAddAPMConfig,
-                    suffix
+                    namespace
                   ),
                 },
               }
             : {}),
         };
 
+        // Must run before the APM block below so the aggregated metrics pipeline
+        // does not receive the per-stream routing transform.
         otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
 
         if (shouldAddAPMConfig) {
-          if (!otelConfig?.connectors) {
-            otelConfig.connectors = {};
-          }
-          if (!otelConfig?.processors) {
-            otelConfig.processors = {};
-          }
-
-          otelConfig.connectors[`elasticapm/${suffix}`] = {};
-          otelConfig.processors[`elasticapm/${suffix}`] = {};
-
-          otelConfig.service!.pipelines![`metrics/${suffix}-aggregated-apm-metrics`] = {
-            receivers: [`elasticapm/${suffix}`],
-            processors: [`transform/${suffix}-routing`],
+          otelConfig.connectors ??= {};
+          otelConfig.processors ??= {};
+          otelConfig.connectors[`elasticapm/${namespace}`] = {};
+          otelConfig.processors[`elasticapm/${namespace}`] = {};
+          otelConfig.processors[`transform/${namespace}-apm-namespace-routing`] = {
+            metric_statements: [
+              {
+                context: 'datapoint',
+                statements: [`set(attributes["data_stream.namespace"], "${namespace}")`],
+              },
+            ],
+          };
+          otelConfig.service.pipelines![`metrics/${namespace}-aggregated-apm-metrics`] = {
+            receivers: [`elasticapm/${namespace}`],
+            processors: [`transform/${namespace}-apm-namespace-routing`],
           };
         }
 
@@ -294,7 +288,7 @@ function addSuffixToOtelcolComponentsConfig(
 function conditionallyAddApmToPipelines(
   pipelines: Record<OTelCollectorPipelineID, any>,
   shouldAddAPMConfig: boolean,
-  suffix: string
+  namespace: string
 ): Record<OTelCollectorPipelineID, any> {
   if (!shouldAddAPMConfig) {
     return pipelines;
@@ -304,8 +298,8 @@ function conditionallyAddApmToPipelines(
     ([pipelineID, pipeline]) => {
       const signalType = getSignalType(pipelineID);
       if (signalType === 'traces') {
-        pipeline.exporters = [...(pipeline.exporters || []), `elasticapm/${suffix}`];
-        pipeline.processors = [...(pipeline.processors || []), `elasticapm/${suffix}`];
+        pipeline.exporters = [...(pipeline.exporters || []), `elasticapm/${namespace}`];
+        pipeline.processors = [...(pipeline.processors || []), `elasticapm/${namespace}`];
       }
       result[pipelineID] = pipeline;
     }
