@@ -53,6 +53,7 @@ export const createMockResponse = () => ({
   notFound: jest.fn().mockReturnThis(),
   badRequest: jest.fn().mockReturnThis(),
   conflict: jest.fn().mockReturnThis(),
+  forbidden: jest.fn().mockReturnThis(),
   customError: jest.fn().mockReturnThis(),
 });
 
