@@ -115,7 +115,7 @@ const mergeCurrentAndParentFilters = (
   return [...currentGroupFilters, ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])];
 };
 
-const groupFilterMap = (filter: Filter | null): Filter | null => {
+export const groupFilterMap = (filter: Filter | null): Filter | null => {
   const query = filter?.query;
   return query?.match_phrase || query?.bool?.should || query?.bool?.filter ? filter : null;
 };
@@ -126,7 +126,7 @@ const groupFilterMap = (filter: Filter | null): Filter | null => {
  * aliases (by resolved_to). Without this, expanding a resolution group only shows
  * aliases because the target entity doesn't have resolved_to set.
  */
-const transformResolutionFilter = (filter: Filter): Filter => {
+export const transformResolutionFilter = (filter: Filter): Filter => {
   const matchPhrase = filter?.query?.match_phrase as
     | Record<string, string | { query: string }>
     | undefined;
@@ -264,13 +264,13 @@ const getDataGridFilter = (filter: Filter | null) => {
   };
 };
 
-const extractMatchPhraseValue = (filter: Filter): string | undefined => {
+export const extractMatchPhraseValue = (filter: Filter): string | undefined => {
   const matchPhrase = filter?.query?.match_phrase as Record<string, { query: string }> | undefined;
   if (!matchPhrase) return undefined;
   return Object.values(matchPhrase)[0]?.query;
 };
 
-const buildResolutionGroupFilter = (
+export const buildResolutionGroupFilter = (
   filters: Filter[]
 ): Array<NonNullable<Filter['query']>> | undefined => {
   const targetEntityId = filters.map(extractMatchPhraseValue).find(Boolean);
@@ -301,16 +301,22 @@ const DataTableWithLocalPagination = ({
   const isResolutionGrouping = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
 
   const combinedFilters = useMemo(() => {
-    const allFilters = mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters)
-      .map(transformResolutionFilter)
-      .map(groupFilterMap)
-      .filter(filterTypeGuard);
+    const mergedFilters = mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters);
 
     if (isResolutionGrouping) {
-      return buildResolutionGroupFilter(allFilters) ?? [];
+      // Use raw filters — buildResolutionGroupFilter extracts the match_phrase
+      // value and builds its own bool/should. Applying transformResolutionFilter
+      // first would remove the match_phrase, causing it to return undefined.
+      const rawFilters = mergedFilters.map(groupFilterMap).filter(filterTypeGuard);
+      return buildResolutionGroupFilter(rawFilters) ?? [];
     }
 
-    return allFilters
+    // For non-resolution leaf, transform resolution filters first
+    // (handles case where resolution is a parent group level)
+    return mergedFilters
+      .map(transformResolutionFilter)
+      .map(groupFilterMap)
+      .filter(filterTypeGuard)
       .map(getDataGridFilter)
       .filter((filter): filter is NonNullable<Filter['query']> => Boolean(filter));
   }, [currentGroupFilters, parentGroupFilters, isResolutionGrouping]);

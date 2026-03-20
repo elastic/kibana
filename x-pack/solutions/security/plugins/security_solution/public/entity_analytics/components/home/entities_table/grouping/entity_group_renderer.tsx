@@ -24,6 +24,8 @@ import {
   EntityPanelParamByType,
 } from '../../../../../flyout/entity_details/shared/constants';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
+import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_engine';
+import { RISK_SEVERITY_COLOUR } from '../../../../common/utils';
 import type { EntitiesGroupingAggregation } from './use_fetch_grouped_data';
 import { ENTITY_GROUPING_OPTIONS } from '../constants';
 
@@ -143,7 +145,7 @@ export const groupStatsRenderer = (
       component: (
         <EuiBadge
           style={{ marginLeft: 10, width: 55 }}
-          color={riskScore != null ? '#a83632' : 'hollow'}
+          color={riskScore != null ? RISK_SEVERITY_COLOUR[getRiskLevel(riskScore)] : 'hollow'}
         >
           {riskScore != null ? riskScore.toFixed(2) : '\u2013'}
         </EuiBadge>
