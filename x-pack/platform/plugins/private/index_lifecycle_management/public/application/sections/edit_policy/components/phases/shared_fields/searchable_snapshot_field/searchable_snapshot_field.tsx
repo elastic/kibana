@@ -108,8 +108,8 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     )
   );
   const fullyMountedSearchableSnapshotLink = docLinks.links.elasticsearch.ilmSearchableSnapshot;
-  const partiallyMountedSearchableSnapshotLink =
-    docLinks.links.elasticsearch.searchableSnapshotSharedCache;
+  const partiallyMountedSearchableSnapshotLink = docLinks.links.snapshotRestore.searchableSnapshot;
+
   const i18nTexts = geti18nTexts(
     phase,
     fullyMountedSearchableSnapshotLink,
