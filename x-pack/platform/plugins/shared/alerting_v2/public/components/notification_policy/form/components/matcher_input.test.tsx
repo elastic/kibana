@@ -36,7 +36,7 @@ const getSuggestionsPanel = () => screen.queryByTestId('matcherSuggestionsPanel'
 
 const getSuggestionItems = () => screen.queryAllByTestId(/^matcherSuggestion-/);
 
-const getSuggestionByPath = (path: string) => screen.queryByTestId(`matcherSuggestion-${path}`);
+const getSuggestionByLabel = (label: string) => screen.queryByTestId(`matcherSuggestion-${label}`);
 
 const typeInInput = async (text: string) => {
   const user = userEvent.setup();
@@ -71,9 +71,9 @@ describe('MatcherInput', () => {
       await typeInInput('ep');
 
       expect(getSuggestionsPanel()).toBeInTheDocument();
-      expect(getSuggestionByPath('episode_id')).toBeInTheDocument();
-      expect(getSuggestionByPath('episode_status')).toBeInTheDocument();
-      expect(getSuggestionByPath('rule_id')).not.toBeInTheDocument();
+      expect(getSuggestionByLabel('episode_id')).toBeInTheDocument();
+      expect(getSuggestionByLabel('episode_status')).toBeInTheDocument();
+      expect(getSuggestionByLabel('rule_id')).not.toBeInTheDocument();
     });
 
     it('shows nested rule fields when typing "rule."', async () => {
@@ -81,9 +81,9 @@ describe('MatcherInput', () => {
       await typeInInput('rule.');
 
       expect(getSuggestionsPanel()).toBeInTheDocument();
-      expect(getSuggestionByPath('rule.id')).toBeInTheDocument();
-      expect(getSuggestionByPath('rule.name')).toBeInTheDocument();
-      expect(getSuggestionByPath('rule.labels')).toBeInTheDocument();
+      expect(getSuggestionByLabel('rule.id')).toBeInTheDocument();
+      expect(getSuggestionByLabel('rule.name')).toBeInTheDocument();
+      expect(getSuggestionByLabel('rule.labels')).toBeInTheDocument();
     });
 
     it('shows all fields starting with "r"', async () => {
@@ -98,8 +98,8 @@ describe('MatcherInput', () => {
       render(<ControlledMatcherInput />);
       await typeInInput('EP');
 
-      expect(getSuggestionByPath('episode_id')).toBeInTheDocument();
-      expect(getSuggestionByPath('episode_status')).toBeInTheDocument();
+      expect(getSuggestionByLabel('episode_id')).toBeInTheDocument();
+      expect(getSuggestionByLabel('episode_status')).toBeInTheDocument();
     });
 
     it('hides suggestions when no fields match', async () => {
@@ -113,15 +113,15 @@ describe('MatcherInput', () => {
       render(<ControlledMatcherInput />);
       await typeInInput('episode_id : "foo" and ep');
 
-      expect(getSuggestionByPath('episode_id')).toBeInTheDocument();
-      expect(getSuggestionByPath('episode_status')).toBeInTheDocument();
+      expect(getSuggestionByLabel('episode_id')).toBeInTheDocument();
+      expect(getSuggestionByLabel('episode_status')).toBeInTheDocument();
     });
 
     it('displays field type badge and description in each suggestion', async () => {
       render(<ControlledMatcherInput />);
       await typeInInput('rule.lab');
 
-      const suggestion = getSuggestionByPath('rule.labels')!;
+      const suggestion = getSuggestionByLabel('rule.labels')!;
       expect(suggestion).toBeInTheDocument();
       expect(within(suggestion).getByText('rule.labels')).toBeInTheDocument();
       expect(within(suggestion).getByText('string[]')).toBeInTheDocument();
@@ -208,7 +208,7 @@ describe('MatcherInput', () => {
       render(<ControlledMatcherInput onChange={onChange} />);
       await typeInInput('ep');
 
-      fireEvent.mouseDown(getSuggestionByPath('episode_status')!);
+      fireEvent.mouseDown(getSuggestionByLabel('episode_status')!);
 
       expect(onChange).toHaveBeenCalledWith('episode_status');
     });
@@ -218,7 +218,7 @@ describe('MatcherInput', () => {
       render(<ControlledMatcherInput />);
       await typeInInput('episode_id : "foo" and ru');
 
-      fireEvent.mouseDown(getSuggestionByPath('rule.name')!);
+      fireEvent.mouseDown(getSuggestionByLabel('rule.name')!);
 
       expect(getInput()).toHaveValue('episode_id : "foo" and rule.name');
     });
@@ -228,11 +228,61 @@ describe('MatcherInput', () => {
       await typeInInput('ep');
       expect(getSuggestionsPanel()).toBeInTheDocument();
 
-      fireEvent.mouseDown(getSuggestionByPath('episode_id')!);
+      fireEvent.mouseDown(getSuggestionByLabel('episode_id')!);
 
       await waitFor(() => {
         expect(getSuggestionsPanel()).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('value suggestions', () => {
+    it('shows value suggestions after "episode_status : "', async () => {
+      render(<ControlledMatcherInput />);
+      await typeInInput('episode_status : ');
+
+      expect(getSuggestionsPanel()).toBeInTheDocument();
+      expect(getSuggestionByLabel('"inactive"')).toBeInTheDocument();
+      expect(getSuggestionByLabel('"pending"')).toBeInTheDocument();
+      expect(getSuggestionByLabel('"active"')).toBeInTheDocument();
+      expect(getSuggestionByLabel('"recovering"')).toBeInTheDocument();
+    });
+
+    it('shows boolean value suggestions without quotes for rule.enabled', async () => {
+      render(<ControlledMatcherInput />);
+      await typeInInput('rule.enabled : ');
+
+      expect(getSuggestionsPanel()).toBeInTheDocument();
+      expect(getSuggestionByLabel('true')).toBeInTheDocument();
+      expect(getSuggestionByLabel('false')).toBeInTheDocument();
+    });
+
+    it('does not show value suggestions for fields without known values', async () => {
+      render(<ControlledMatcherInput />);
+      await typeInInput('episode_id : ');
+
+      expect(getSuggestionByLabel('"inactive"')).not.toBeInTheDocument();
+      expect(getSuggestionByLabel('"active"')).not.toBeInTheDocument();
+    });
+
+    it('inserts the selected value into the expression', async () => {
+      const onChange = jest.fn();
+      render(<ControlledMatcherInput onChange={onChange} />);
+      await typeInInput('episode_status : ');
+
+      fireEvent.mouseDown(getSuggestionByLabel('"active"')!);
+
+      expect(onChange).toHaveBeenCalledWith('episode_status : "active"');
+    });
+
+    it('inserts boolean value without quotes', async () => {
+      const onChange = jest.fn();
+      render(<ControlledMatcherInput onChange={onChange} />);
+      await typeInInput('rule.enabled : ');
+
+      fireEvent.mouseDown(getSuggestionByLabel('true')!);
+
+      expect(onChange).toHaveBeenCalledWith('rule.enabled : true');
     });
   });
 

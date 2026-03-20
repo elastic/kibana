@@ -16,7 +16,6 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import { MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -25,8 +24,6 @@ import { FREQUENCY_OPTIONS, THROTTLE_INTERVAL_PATTERN } from './constants';
 import { MatcherInput } from './components/matcher_input';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { NotificationPolicyFormState } from './types';
-
-const groupByOptions = MATCHER_CONTEXT_FIELDS.map((f) => ({ label: f.path }));
 
 export const NotificationPolicyForm = () => {
   const { control } = useFormContext<NotificationPolicyFormState>();
@@ -195,7 +192,7 @@ export const NotificationPolicyForm = () => {
                     { defaultMessage: 'Select or type a field name' }
                   )}
                   selectedOptions={field.value.map((g: string) => ({ label: g }))}
-                  options={groupByOptions}
+                  noSuggestions
                   onCreateOption={(val) => {
                     field.onChange([...field.value, val]);
                   }}

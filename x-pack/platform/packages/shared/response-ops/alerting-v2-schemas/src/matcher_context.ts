@@ -27,6 +27,7 @@ export interface MatcherContextFieldDescriptor {
   path: string;
   type: 'string' | 'boolean' | 'string[]';
   description: string;
+  values?: string[];
 }
 
 export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
@@ -35,6 +36,7 @@ export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
     path: 'episode_status',
     type: 'string',
     description: 'Episode status (inactive, pending, active, recovering)',
+    values: ['inactive', 'pending', 'active', 'recovering'],
   },
   { path: 'group_hash', type: 'string', description: 'Alert group hash' },
   {
@@ -46,7 +48,12 @@ export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
   { path: 'rule.name', type: 'string', description: 'Rule name' },
   { path: 'rule.description', type: 'string', description: 'Rule description' },
   { path: 'rule.labels', type: 'string[]', description: 'Rule labels' },
-  { path: 'rule.enabled', type: 'boolean', description: 'Whether the rule is enabled' },
+  {
+    path: 'rule.enabled',
+    type: 'boolean',
+    description: 'Whether the rule is enabled',
+    values: ['true', 'false'],
+  },
   { path: 'rule.createdAt', type: 'string', description: 'Rule creation date' },
   { path: 'rule.updatedAt', type: 'string', description: 'Rule last update date' },
 ];
