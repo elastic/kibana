@@ -21,6 +21,7 @@ const createMockInternalSkillDefinition = (
   basePath: 'skills/platform',
   getRegistryTools: () => [],
   referencedContentCount: 0,
+  experimental: false,
   ...overrides,
 });
 
@@ -69,6 +70,7 @@ const createMockPersistedProvider = (
       basePath: '/skills',
       getRegistryTools: () => params.tool_ids ?? [],
       referencedContentCount: params.referenced_content?.length ?? 0,
+      experimental: false,
     })),
     update: jest.fn(async (id, update) => ({
       id,
@@ -79,6 +81,7 @@ const createMockPersistedProvider = (
       basePath: '/skills',
       getRegistryTools: () => update.tool_ids ?? [],
       referencedContentCount: 0,
+      experimental: false,
     })),
     delete: jest.fn(async (_skillId: string) => undefined),
   };
