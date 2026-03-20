@@ -681,6 +681,47 @@ describe('Package policy service', () => {
       );
     });
 
+    it('should store package_agent_version_condition on saved object when package manifest has agent version condition', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet();
+
+      await packagePolicyService.create(
+        soClient,
+        esClient,
+        {
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: {
+            name: 'apache',
+            title: 'Apache',
+            version: '1.3.2',
+          },
+        },
+        { id: 'test-package-policy', skipUniqueNameVerification: true }
+      );
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          package_agent_version_condition: '>=9.3.0',
+        }),
+        expect.anything()
+      );
+    });
+
     it('should set hasAgentVersionConditions in bumpRevision when package has agent version condition in hbs template', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
@@ -8047,9 +8088,1688 @@ describe('Package policy service', () => {
         expect(disabledInputs[0]?.policy_template).toBe('gmail');
       });
     });
+
+    describe('when input has migrate_from', () => {
+      const makeBasePolicy = (overrides?: Partial<NewPackagePolicyInput>): NewPackagePolicy => ({
+        name: 'base-package-policy',
+        description: 'Base Package Policy',
+        namespace: 'default',
+        enabled: true,
+        policy_id: 'xxxx',
+        policy_ids: ['xxxx'],
+        package: { name: 'test-package', title: 'Test Package', version: '0.0.1' },
+        inputs: [
+          {
+            type: 'httpjson',
+            policy_template: 'template_1',
+            enabled: true,
+            vars: {
+              url: { type: 'text', value: 'http://example.com' },
+              interval: { type: 'text', value: '10s' },
+            },
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test_package.httpjson_log', type: 'logs' },
+                vars: {
+                  tags: { type: 'text', value: 'httpjson-tag' },
+                  stale_var: { type: 'text', value: 'should-be-removed' },
+                },
+              },
+            ],
+            ...overrides,
+          },
+        ],
+      });
+
+      const makeCelPackageInfo = (extraInputProps?: Record<string, unknown>): PackageInfo =>
+        ({
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.2',
+          latestVersion: '0.0.2',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'cel',
+                  title: 'CEL',
+                  description: 'CEL Input',
+                  migrate_from: 'httpjson',
+                  vars: [
+                    { name: 'url', type: 'text' },
+                    { name: 'interval', type: 'text' },
+                  ],
+                  ...extraInputProps,
+                },
+              ],
+            },
+          ],
+          assets: {},
+        } as unknown as PackageInfo);
+
+      const makeCelInputsOverride = (extraProps?: Record<string, unknown>): InputsOverride[] => [
+        {
+          type: 'cel',
+          policy_template: 'template_1',
+          enabled: false,
+          migrate_from: 'httpjson',
+          vars: {
+            url: { type: 'text', value: 'http://new-default.com' },
+            interval: { type: 'text', value: '30s' },
+          },
+          streams: [
+            {
+              enabled: true,
+              data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+              vars: {
+                tags: { type: 'text', value: 'cel-default-tag' },
+              },
+            },
+          ],
+          ...extraProps,
+        } as unknown as InputsOverride,
+      ];
+
+      it('carries input-level vars from the old input type to the new one', () => {
+        const result = updatePackageInputs(
+          makeBasePolicy(),
+          makeCelPackageInfo(),
+          makeCelInputsOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        expect(celInput).toBeDefined();
+        // User-configured value from httpjson should override the new package default
+        expect(celInput?.vars?.url.value).toBe('http://example.com');
+        expect(celInput?.vars?.interval.value).toBe('10s');
+      });
+
+      it('enables the new input when migration succeeds and the old input was enabled', () => {
+        const result = updatePackageInputs(
+          makeBasePolicy(), // httpjson input has enabled: true
+          makeCelPackageInfo(),
+          makeCelInputsOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        expect(celInput?.enabled).toBe(true);
+      });
+
+      it('keeps the new input disabled when migration succeeds but the old input was disabled', () => {
+        const result = updatePackageInputs(
+          makeBasePolicy({ enabled: false }), // httpjson input disabled by the user
+          makeCelPackageInfo(),
+          makeCelInputsOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        expect(celInput?.enabled).toBe(false);
+      });
+
+      it('removes the old input type from the policy after migration', () => {
+        const result = updatePackageInputs(
+          makeBasePolicy(),
+          makeCelPackageInfo(),
+          makeCelInputsOverride(),
+          false
+        );
+
+        const httpjsonInput = result.inputs.find((i) => i.type === 'httpjson');
+        expect(httpjsonInput).toBeUndefined();
+      });
+
+      it('carries stream-level vars by position from old streams to new streams', () => {
+        const result = updatePackageInputs(
+          makeBasePolicy(),
+          makeCelPackageInfo(),
+          makeCelInputsOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // The new stream's dataset should be from the new package
+        expect(celInput?.streams[0]?.data_stream.dataset).toBe('test_package.cel_log');
+        // But the var value should come from the old httpjson stream
+        expect(celInput?.streams[0]?.vars?.tags?.value).toBe('httpjson-tag');
+        // Vars not in the new stream template should be removed
+        expect(celInput?.streams[0]?.vars?.stale_var).toBeUndefined();
+      });
+
+      it('carries stream enabled state from old streams even when new package defaults to disabled', () => {
+        // The new CEL stream override starts with enabled: false (package default disabled)
+        const celOverrideWithDisabledStream: InputsOverride[] = [
+          {
+            ...makeCelInputsOverride()[0],
+            streams: [
+              {
+                ...makeCelInputsOverride()[0].streams![0],
+                enabled: false,
+              },
+            ],
+          } as unknown as InputsOverride,
+        ];
+
+        const result = updatePackageInputs(
+          makeBasePolicy(), // old httpjson stream has enabled: true
+          makeCelPackageInfo(),
+          celOverrideWithDisabledStream,
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // Should carry over enabled: true from the old httpjson stream
+        expect(celInput?.streams[0]?.enabled).toBe(true);
+      });
+
+      it('falls back to new input defaults when the old input type is not found', () => {
+        const policyWithoutHttpjson: NewPackagePolicy = {
+          ...makeBasePolicy(),
+          inputs: [
+            {
+              type: 'logfile',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {},
+              streams: [],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          policyWithoutHttpjson,
+          makeCelPackageInfo(),
+          makeCelInputsOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        expect(celInput).toBeDefined();
+        // No old input found, so the new package defaults are used
+        expect(celInput?.vars?.url.value).toBe('http://new-default.com');
+        // New input should NOT be auto-enabled when no migration source found
+        expect(celInput?.enabled).toBe(false);
+      });
+
+      it('does not migrate vars or enable the new input when it is deprecated (input-level migrate_from)', () => {
+        const deprecationInfo = { description: 'Use cel instead', replaced_by: { type: 'cel' } };
+        const result = updatePackageInputs(
+          makeBasePolicy(), // httpjson input with user-configured vars
+          makeCelPackageInfo(),
+          // cel input is deprecated — migration should be skipped entirely
+          makeCelInputsOverride({ deprecated: deprecationInfo }),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        expect(celInput).toBeDefined();
+        // Vars should NOT be carried over from the old httpjson input
+        expect(celInput?.vars?.url.value).toBe('http://new-default.com');
+        // The new input should not have been enabled by the migration logic
+        expect(celInput?.enabled).toBe(false);
+      });
+
+      it('does not enable the new input for limited packages even when migration succeeds', () => {
+        const limitedPackageInfo = makeCelPackageInfo();
+        // Make it a limited (single-policy) package
+        (limitedPackageInfo as any).policy_templates![0].multiple = false;
+        (limitedPackageInfo as any).type = 'logrt';
+
+        const result = updatePackageInputs(
+          makeBasePolicy(),
+          limitedPackageInfo,
+          makeCelInputsOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // Limited packages should have inputs disabled regardless of migration
+        expect(celInput?.enabled).toBe(false);
+      });
+
+      it('removes the old input from inputs even when it has no policy_template set', () => {
+        // Old input without policy_template — the initial filter would normally keep it
+        const policyWithNoPolicyTemplate = makeBasePolicy({ policy_template: undefined });
+
+        const result = updatePackageInputs(
+          policyWithNoPolicyTemplate,
+          makeCelPackageInfo(),
+          makeCelInputsOverride(),
+          false
+        );
+
+        const httpjsonInput = result.inputs.find((i) => i.type === 'httpjson');
+        expect(httpjsonInput).toBeUndefined();
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        expect(celInput).toBeDefined();
+        expect(celInput?.vars?.url.value).toBe('http://example.com');
+      });
+
+      it('migrates each cel input from its own policy_template httpjson input in a multi-template package', () => {
+        // Two policy templates each having an httpjson input that migrates to cel.
+        // The cel input for template_1 must pick up template_1's httpjson vars, and
+        // the cel input for template_2 must pick up template_2's httpjson vars.
+        const basePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'test-package', title: 'Test Package', version: '0.0.1' },
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'text', value: 'http://template1.example.com' },
+                interval: { type: 'text', value: '10s' },
+              },
+              streams: [],
+            },
+            {
+              type: 'httpjson',
+              policy_template: 'template_2',
+              enabled: false,
+              vars: {
+                url: { type: 'text', value: 'http://template2.example.com' },
+                interval: { type: 'text', value: '30s' },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.2',
+          latestVersion: '0.0.2',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'cel',
+                  title: 'CEL',
+                  description: 'CEL Input',
+                  migrate_from: 'httpjson',
+                  vars: [
+                    { name: 'url', type: 'text' },
+                    { name: 'interval', type: 'text' },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'template_2',
+              title: 'Template 2',
+              description: 'Template 2',
+              inputs: [
+                {
+                  type: 'cel',
+                  title: 'CEL',
+                  description: 'CEL Input',
+                  migrate_from: 'httpjson',
+                  vars: [
+                    { name: 'url', type: 'text' },
+                    { name: 'interval', type: 'text' },
+                  ],
+                },
+              ],
+            },
+          ],
+          assets: {},
+        } as unknown as PackageInfo;
+
+        const inputsOverride: InputsOverride[] = [
+          {
+            type: 'cel',
+            policy_template: 'template_1',
+            enabled: false,
+            migrate_from: 'httpjson',
+            vars: {
+              url: { type: 'text', value: 'http://new-default.com' },
+              interval: { type: 'text', value: '60s' },
+            },
+            streams: [],
+          } as unknown as InputsOverride,
+          {
+            type: 'cel',
+            policy_template: 'template_2',
+            enabled: false,
+            migrate_from: 'httpjson',
+            vars: {
+              url: { type: 'text', value: 'http://new-default.com' },
+              interval: { type: 'text', value: '60s' },
+            },
+            streams: [],
+          } as unknown as InputsOverride,
+        ];
+
+        const result = updatePackageInputs(basePolicy, packageInfo, inputsOverride, false);
+
+        // Both old httpjson inputs should have been removed
+        expect(result.inputs.filter((i) => i.type === 'httpjson')).toHaveLength(0);
+
+        const celT1 = result.inputs.find(
+          (i) => i.type === 'cel' && i.policy_template === 'template_1'
+        );
+        const celT2 = result.inputs.find(
+          (i) => i.type === 'cel' && i.policy_template === 'template_2'
+        );
+
+        // Each cel input must carry vars and enabled state from its OWN template's httpjson input
+        expect(celT1?.vars?.url.value).toBe('http://template1.example.com');
+        expect(celT1?.vars?.interval.value).toBe('10s');
+        expect(celT1?.enabled).toBe(true);
+
+        expect(celT2?.vars?.url.value).toBe('http://template2.example.com');
+        expect(celT2?.vars?.interval.value).toBe('30s');
+        expect(celT2?.enabled).toBe(false);
+      });
+
+      describe('null-value variable migration priority', () => {
+        // Build a base policy where the old httpjson input has a mix of:
+        //  - a value the user explicitly set (url)
+        //  - a bool var that was never configured (null)
+        //  - a non-bool var that was never configured (null)
+        const makeBasePolicyWithNullVars = (): NewPackagePolicy => ({
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'test-package', title: 'Test Package', version: '0.0.1' },
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'text', value: 'http://user-set.com' },
+                enable_tracer: { type: 'bool', value: null }, // never configured
+                proxy_url: { type: 'text', value: null }, // never configured
+              },
+              streams: [],
+            },
+          ],
+        });
+
+        // New CEL package defines url, enable_tracer (bool, default false), proxy_url (no default).
+        const makeCelPackageWithNullDefaults = (): PackageInfo =>
+          ({
+            name: 'test-package',
+            description: 'Test Package',
+            title: 'Test Package',
+            version: '0.0.2',
+            latestVersion: '0.0.2',
+            release: 'experimental',
+            format_version: '1.0.0',
+            owner: { github: 'elastic/fleet' },
+            policy_templates: [
+              {
+                name: 'template_1',
+                title: 'Template 1',
+                description: 'Template 1',
+                inputs: [
+                  {
+                    type: 'cel',
+                    title: 'CEL',
+                    description: 'CEL Input',
+                    migrate_from: 'httpjson',
+                    vars: [
+                      { name: 'url', type: 'text' },
+                      { name: 'enable_tracer', type: 'bool' },
+                      { name: 'proxy_url', type: 'text' },
+                    ],
+                  },
+                ],
+              },
+            ],
+            assets: {},
+          } as unknown as PackageInfo);
+
+        const makeCelOverrideWithDefaults = (): InputsOverride[] => [
+          {
+            type: 'cel',
+            policy_template: 'template_1',
+            enabled: false,
+            migrate_from: 'httpjson',
+            vars: {
+              url: { type: 'text', value: 'http://new-default.com' },
+              enable_tracer: { type: 'bool', value: false }, // package default = false
+              proxy_url: { type: 'text', value: null }, // package has no default
+            },
+            streams: [],
+          } as unknown as InputsOverride,
+        ];
+
+        it('priority 1: preserves old value when it was explicitly set (non-null)', () => {
+          const result = updatePackageInputs(
+            makeBasePolicyWithNullVars(),
+            makeCelPackageWithNullDefaults(),
+            makeCelOverrideWithDefaults(),
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          expect(celInput?.vars?.url.value).toBe('http://user-set.com');
+        });
+
+        it('priority 2: uses new package default when old value was null', () => {
+          const result = updatePackageInputs(
+            makeBasePolicyWithNullVars(),
+            makeCelPackageWithNullDefaults(),
+            makeCelOverrideWithDefaults(),
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          // Old value was null → falls through to new package default (false)
+          expect(celInput?.vars?.enable_tracer.value).toBe(false);
+        });
+
+        it('priority 3: falls back to false for bool vars when both old and new default are null', () => {
+          // Override has null default for enable_tracer (no package default defined)
+          const overrideWithNullDefault: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              migrate_from: 'httpjson',
+              vars: {
+                url: { type: 'text', value: 'http://new-default.com' },
+                enable_tracer: { type: 'bool', value: null }, // no package default either
+                proxy_url: { type: 'text', value: null },
+              },
+              streams: [],
+            } as unknown as InputsOverride,
+          ];
+
+          const result = updatePackageInputs(
+            makeBasePolicyWithNullVars(),
+            makeCelPackageWithNullDefaults(),
+            overrideWithNullDefault,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          // Both old and new default are null → sanitizeMigratedVars forces false for bool
+          expect(celInput?.vars?.enable_tracer.value).toBe(false);
+        });
+
+        it('leaves non-bool vars as null when neither old nor new has a value', () => {
+          const result = updatePackageInputs(
+            makeBasePolicyWithNullVars(),
+            makeCelPackageWithNullDefaults(),
+            makeCelOverrideWithDefaults(),
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          // proxy_url: old=null, new default=null, type=text → stays null (no bool fallback)
+          expect(celInput?.vars?.proxy_url.value).toBeNull();
+        });
+
+        it('applies same null-value priority to stream-level vars during migration', () => {
+          const baseWithNullStreamVars: NewPackagePolicy = {
+            name: 'base-package-policy',
+            description: 'Base Package Policy',
+            namespace: 'default',
+            enabled: true,
+            policy_id: 'xxxx',
+            policy_ids: ['xxxx'],
+            package: { name: 'test-package', title: 'Test Package', version: '0.0.1' },
+            inputs: [
+              {
+                type: 'httpjson',
+                policy_template: 'template_1',
+                enabled: true,
+                vars: {},
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { dataset: 'test_package.httpjson_log', type: 'logs' },
+                    vars: {
+                      site_ids: { type: 'text', value: '1234' }, // explicitly set
+                      enable_tracer: { type: 'bool', value: null }, // never set
+                    },
+                  },
+                ],
+              },
+            ],
+          };
+
+          const overrideWithStreamMigrateFrom: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              migrate_from: 'httpjson',
+              vars: {},
+              streams: [
+                {
+                  enabled: false,
+                  data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                  vars: {
+                    site_ids: { type: 'text', value: null }, // new default null
+                    enable_tracer: { type: 'bool', value: false }, // new default false
+                  },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const result = updatePackageInputs(
+            baseWithNullStreamVars,
+            makeCelPackageWithNullDefaults(),
+            overrideWithStreamMigrateFrom,
+            false
+          );
+
+          const celStream = result.inputs.find((i) => i.type === 'cel')?.streams[0];
+          // site_ids was explicitly set → preserved
+          expect(celStream?.vars?.site_ids.value).toBe('1234');
+          // enable_tracer old=null, new default=false → uses new default (false)
+          expect(celStream?.vars?.enable_tracer.value).toBe(false);
+        });
+      });
+
+      describe('when individual streams have migrate_from inside the datastream', () => {
+        it('should support stream-level migrate_from an input-level migration', () => {
+          const overrideWithBothLevels: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              migrate_from: 'httpjson',
+              vars: { url: { type: 'text', value: 'http://new-default.com' } },
+              streams: [
+                {
+                  enabled: true,
+                  migrate_from: 'httpjson',
+                  data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                  vars: { tags: { type: 'text', value: 'cel-default-tag' } },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const result = updatePackageInputs(
+            makeBasePolicy(), // has httpjson with tags: 'httpjson-tag'
+            makeCelPackageInfo(),
+            overrideWithBothLevels,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          expect(celInput?.streams[0]?.vars?.tags?.value).toBe('httpjson-tag');
+        });
+
+        const makeStreamOnlyMigrationFixtures = (oldInputEnabled: boolean) => {
+          const policyWithHttpjsonOnly: NewPackagePolicy = {
+            name: 'stream-only-migration-policy',
+            description: '',
+            namespace: 'default',
+            enabled: true,
+            policy_id: 'xxxx',
+            policy_ids: ['xxxx'],
+            package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+            inputs: [
+              {
+                type: 'httpjson',
+                policy_template: 'template_1',
+                enabled: oldInputEnabled,
+                vars: {},
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { dataset: 'test_package.httpjson_log', type: 'logs' },
+                    vars: { paths: { type: 'text', value: '/var/log/app.log' } },
+                  },
+                ],
+              },
+            ],
+          };
+
+          const celOverrideStreamOnlyMigration: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {},
+              streams: [
+                {
+                  enabled: true,
+                  migrate_from: 'httpjson',
+                  data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                  vars: { paths: { type: 'text', value: '/default/path.log' } },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const celPackageInfoNoInputMigration = {
+            ...makeCelPackageInfo(),
+            policy_templates: [
+              {
+                name: 'template_1',
+                title: 'Template 1',
+                description: 'Template 1',
+                inputs: [
+                  {
+                    type: 'cel',
+                    title: 'CEL',
+                    description: 'CEL Input',
+                    // No input-level migrate_from — only the stream declares it
+                    vars: [],
+                  },
+                ],
+              },
+            ],
+          } as unknown as PackageInfo;
+
+          return {
+            policyWithHttpjsonOnly,
+            celOverrideStreamOnlyMigration,
+            celPackageInfoNoInputMigration,
+          };
+        };
+
+        it('should enable a new input when stream-level migrate_from is declared and the old input was enabled', () => {
+          const {
+            policyWithHttpjsonOnly,
+            celOverrideStreamOnlyMigration,
+            celPackageInfoNoInputMigration,
+          } = makeStreamOnlyMigrationFixtures(true);
+
+          const result = updatePackageInputs(
+            policyWithHttpjsonOnly,
+            celPackageInfoNoInputMigration,
+            celOverrideStreamOnlyMigration,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          expect(celInput).toBeDefined();
+
+          // Old httpjson input was enabled → new cel input should be enabled too
+          expect(celInput?.enabled).toBe(true);
+
+          // Stream vars and enabled state should be carried over from the old httpjson stream
+          expect(celInput?.streams[0]?.vars?.paths?.value).toBe('/var/log/app.log');
+          expect(celInput?.streams[0]?.enabled).toBe(true);
+        });
+
+        it('should keep the new input disabled when stream-level migrate_from is declared but the old input was disabled', () => {
+          const {
+            policyWithHttpjsonOnly,
+            celOverrideStreamOnlyMigration,
+            celPackageInfoNoInputMigration,
+          } = makeStreamOnlyMigrationFixtures(false);
+
+          const result = updatePackageInputs(
+            policyWithHttpjsonOnly,
+            celPackageInfoNoInputMigration,
+            celOverrideStreamOnlyMigration,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          expect(celInput).toBeDefined();
+
+          // Old httpjson input was disabled → new cel input should remain disabled
+          expect(celInput?.enabled).toBe(false);
+
+          // Stream vars should still be migrated even though the input is disabled
+          expect(celInput?.streams[0]?.vars?.paths?.value).toBe('/var/log/app.log');
+        });
+
+        it('should not migrate stream vars or enable the input when the new input is deprecated', () => {
+          const { policyWithHttpjsonOnly, celPackageInfoNoInputMigration } =
+            makeStreamOnlyMigrationFixtures(true);
+
+          // Mark the new cel input as deprecated
+          const deprecatedCelOverride: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              deprecated: { description: 'Use filestream instead' },
+              vars: {},
+              streams: [
+                {
+                  enabled: true,
+                  migrate_from: 'httpjson',
+                  data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                  vars: { paths: { type: 'text', value: '/default/path.log' } },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const result = updatePackageInputs(
+            policyWithHttpjsonOnly,
+            celPackageInfoNoInputMigration,
+            deprecatedCelOverride,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          expect(celInput).toBeDefined();
+
+          // Deprecated input should not be enabled by the migration logic
+          expect(celInput?.enabled).toBe(false);
+
+          // Stream vars should NOT be carried over from the old httpjson stream
+          expect(celInput?.streams[0]?.vars?.paths?.value).toBe('/default/path.log');
+        });
+      });
+
+      describe('when vars move from input-level in the old input to stream-level in the new input', () => {
+        // Mirrors the real-world httpjson→CEL scenario where site_ids and
+        // enable_request_tracer live at input-level in httpjson but at stream-level in CEL.
+        const makePolicyWithInputLevelVars = (): NewPackagePolicy => ({
+          name: 'input-level-vars-policy',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'text', value: 'http://example.com' },
+                site_ids: { type: 'text', value: '1392053568582758390' },
+                enable_request_tracer: { type: 'bool', value: true },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.httpjson_log', type: 'logs' },
+                  vars: { interval: { type: 'text', value: '1m' } },
+                },
+              ],
+            },
+          ],
+        });
+
+        // CEL input: only `url` at input level; `site_ids` and `enable_request_tracer`
+        // moved to stream-level in the new package version.
+        const makeCelOverrideWithStreamLevelVars = (
+          extraStreamProps?: Record<string, unknown>
+        ): InputsOverride[] => [
+          {
+            type: 'cel',
+            policy_template: 'template_1',
+            enabled: false,
+            migrate_from: 'httpjson',
+            vars: { url: { type: 'text', value: 'http://new-default.com' } },
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                vars: {
+                  interval: { type: 'text', value: '30s' },
+                  site_ids: { type: 'text', value: '' },
+                  enable_request_tracer: { type: 'bool', value: false },
+                },
+                ...extraStreamProps,
+              },
+            ],
+          } as unknown as InputsOverride,
+        ];
+
+        it('carries old input-level var values into the new stream-level vars', () => {
+          const result = updatePackageInputs(
+            makePolicyWithInputLevelVars(),
+            makeCelPackageInfo(),
+            makeCelOverrideWithStreamLevelVars(),
+            false
+          );
+
+          const celStream = result.inputs.find((i) => i.type === 'cel')?.streams[0];
+          expect(celStream?.vars?.site_ids?.value).toBe('1392053568582758390');
+          expect(celStream?.vars?.enable_request_tracer?.value).toBe(true);
+        });
+
+        it('gives old stream-level vars priority over old input-level vars when both define the same key', () => {
+          // interval exists at input-level in httpjson (with a different value) AND
+          // at stream-level in the old httpjson stream. The stream value should win.
+          const policyWithCollision: NewPackagePolicy = {
+            ...makePolicyWithInputLevelVars(),
+            inputs: [
+              {
+                type: 'httpjson',
+                policy_template: 'template_1',
+                enabled: true,
+                vars: {
+                  url: { type: 'text', value: 'http://example.com' },
+                  interval: { type: 'text', value: 'input-level-value' },
+                },
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { dataset: 'test_package.httpjson_log', type: 'logs' },
+                    vars: { interval: { type: 'text', value: 'stream-level-value' } },
+                  },
+                ],
+              },
+            ],
+          };
+
+          const celOverride: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              migrate_from: 'httpjson',
+              vars: { url: { type: 'text', value: 'http://new-default.com' } },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                  vars: { interval: { type: 'text', value: 'new-default' } },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const result = updatePackageInputs(
+            policyWithCollision,
+            makeCelPackageInfo(),
+            celOverride,
+            false
+          );
+
+          const celStream = result.inputs.find((i) => i.type === 'cel')?.streams[0];
+          // Old stream-level value must win over old input-level value
+          expect(celStream?.vars?.interval?.value).toBe('stream-level-value');
+        });
+
+        it('does not introduce vars from the old input that are absent from the new stream schema', () => {
+          // orphaned_var exists in the old httpjson input but is not defined in any cel stream
+          const policyWithOrphanedVar: NewPackagePolicy = {
+            ...makePolicyWithInputLevelVars(),
+            inputs: [
+              {
+                type: 'httpjson',
+                policy_template: 'template_1',
+                enabled: true,
+                vars: {
+                  url: { type: 'text', value: 'http://example.com' },
+                  orphaned_var: { type: 'text', value: 'should-not-appear' },
+                },
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { dataset: 'test_package.httpjson_log', type: 'logs' },
+                    vars: {},
+                  },
+                ],
+              },
+            ],
+          };
+
+          const result = updatePackageInputs(
+            policyWithOrphanedVar,
+            makeCelPackageInfo(),
+            makeCelOverrideWithStreamLevelVars(),
+            false
+          );
+
+          const celStream = result.inputs.find((i) => i.type === 'cel')?.streams[0];
+          // removeStaleVars must have stripped the key not present in the new stream schema
+          expect(celStream?.vars?.orphaned_var).toBeUndefined();
+        });
+
+        it('seeds old input-level vars into a new stream that has no positional old stream', () => {
+          // New CEL input has 2 streams; old httpjson only had 1.
+          // The second CEL stream has no old counterpart, but old input-level vars should
+          // still be seeded where the new stream schema defines them.
+          const celOverrideTwoStreams: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              migrate_from: 'httpjson',
+              vars: { url: { type: 'text', value: 'http://new-default.com' } },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.cel_log_a', type: 'logs' },
+                  vars: {
+                    interval: { type: 'text', value: '30s' },
+                    site_ids: { type: 'text', value: '' },
+                  },
+                },
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.cel_log_b', type: 'logs' },
+                  vars: {
+                    interval: { type: 'text', value: '60s' },
+                    site_ids: { type: 'text', value: '' },
+                  },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const result = updatePackageInputs(
+            makePolicyWithInputLevelVars(),
+            makeCelPackageInfo(),
+            celOverrideTwoStreams,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          // First stream: has an old positional counterpart — gets both old stream + old input vars
+          expect(celInput?.streams[0]?.vars?.site_ids?.value).toBe('1392053568582758390');
+          // Second stream: no old counterpart stream, but old input-level vars are still seeded
+          expect(celInput?.streams[1]?.vars?.site_ids?.value).toBe('1392053568582758390');
+        });
+
+        it('does not carry old input-level vars to stream level when the new input is deprecated', () => {
+          const deprecatedCelOverride: InputsOverride[] = [
+            {
+              ...makeCelOverrideWithStreamLevelVars()[0],
+              deprecated: { description: 'Use filestream instead' },
+            } as unknown as InputsOverride,
+          ];
+
+          const result = updatePackageInputs(
+            makePolicyWithInputLevelVars(),
+            makeCelPackageInfo(),
+            deprecatedCelOverride,
+            false
+          );
+
+          const celStream = result.inputs.find((i) => i.type === 'cel')?.streams[0];
+          // Values should remain at new-package defaults, not the old user-configured values
+          expect(celStream?.vars?.site_ids?.value).toBe('');
+          expect(celStream?.vars?.enable_request_tracer?.value).toBe(false);
+        });
+      });
+    });
+
+    describe('when new input already exists alongside old input (partial migration)', () => {
+      // Mirrors real-world integrations like sentinel_one / cisco_duo where BOTH httpjson AND
+      // cel existed in the old policy. In the new package httpjson is removed and its streams
+      // are transferred to cel via stream-level migrate_from.
+      //
+      // The input-level migrate_from path (originalInput === undefined) is NOT triggered here
+      // because cel already exists in the old policy. Instead, the normal merge path runs but
+      // must handle new streams that carry migrate_from declarations.
+
+      const makePartialMigrationBasePolicy = (): NewPackagePolicy => ({
+        name: 'partial-migration-policy',
+        description: '',
+        namespace: 'default',
+        enabled: true,
+        policy_id: 'xxxx',
+        policy_ids: ['xxxx'],
+        package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+        inputs: [
+          {
+            // Old httpjson input — will be removed in the new package version
+            type: 'httpjson',
+            policy_template: 'template_1',
+            enabled: true,
+            vars: {
+              url: { type: 'text', value: 'http://user-configured.com' },
+              api_token: { type: 'password', value: 'secret-token' },
+              // These two live at input-level in httpjson but at stream-level in cel
+              site_ids: { type: 'text', value: '1392053568582758390' },
+              enable_request_tracer: { type: 'bool', value: true },
+            },
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                vars: {
+                  interval: { type: 'text', value: '5m' },
+                  tags: { type: 'text', value: 'custom-tag' },
+                },
+              },
+              {
+                // User explicitly disabled this stream
+                enabled: false,
+                data_stream: { dataset: 'test_package.agent', type: 'logs' },
+                vars: { interval: { type: 'text', value: '10m' } },
+              },
+            ],
+          },
+          {
+            // Pre-existing cel input — stays in policy and gets new streams via migrate_from
+            type: 'cel',
+            policy_template: 'template_1',
+            enabled: true,
+            vars: {
+              url: { type: 'text', value: 'http://cel-configured.com' },
+              api_token: { type: 'password', value: 'cel-secret' },
+            },
+            streams: [
+              {
+                // This stream already existed in cel — must NOT be reset
+                enabled: true,
+                data_stream: { dataset: 'test_package.application', type: 'logs' },
+                vars: {
+                  batch_size: { type: 'text', value: '500' }, // user changed from default 1000
+                  interval: { type: 'text', value: '2m' },
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      const makePartialMigrationPackageInfo = (): PackageInfo =>
+        ({
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '1.0.2',
+          latestVersion: '1.0.2',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  // httpjson is gone — only cel remains
+                  type: 'cel',
+                  title: 'CEL',
+                  description: 'CEL Input',
+                  vars: [
+                    { name: 'url', type: 'text' },
+                    { name: 'api_token', type: 'password' },
+                  ],
+                },
+              ],
+            },
+          ],
+          assets: {},
+        } as unknown as PackageInfo);
+
+      // The cel InputsOverride with 3 streams: 2 new (migrating from httpjson) + 1 existing
+      const makePartialMigrationOverride = (): InputsOverride[] => [
+        {
+          type: 'cel',
+          policy_template: 'template_1',
+          enabled: false,
+          // No input-level migrate_from — streams declare it individually
+          vars: {
+            url: { type: 'text', value: 'http://new-package-default.com' },
+            api_token: { type: 'password', value: '' },
+          },
+          streams: [
+            {
+              // New stream that migrates from httpjson
+              enabled: true,
+              migrate_from: 'httpjson',
+              data_stream: { dataset: 'test_package.activity', type: 'logs' },
+              vars: {
+                interval: { type: 'text', value: '30s' },
+                tags: { type: 'text', value: 'default-tag' },
+                site_ids: { type: 'text', value: '' },
+                enable_request_tracer: { type: 'bool', value: false },
+              },
+            },
+            {
+              // New stream that migrates from httpjson
+              enabled: true,
+              migrate_from: 'httpjson',
+              data_stream: { dataset: 'test_package.agent', type: 'logs' },
+              vars: {
+                interval: { type: 'text', value: '30s' },
+                tags: { type: 'text', value: 'default-tag' },
+                site_ids: { type: 'text', value: '' },
+                enable_request_tracer: { type: 'bool', value: false },
+              },
+            },
+            {
+              // Existing cel stream — matched by dataset, goes through normal merge
+              enabled: true,
+              data_stream: { dataset: 'test_package.application', type: 'logs' },
+              vars: {
+                batch_size: { type: 'text', value: '1000' },
+                interval: { type: 'text', value: '60s' },
+              },
+            },
+          ],
+        } as unknown as InputsOverride,
+      ];
+
+      it('carries stream-level vars from old httpjson stream to the new migrating cel stream', () => {
+        const result = updatePackageInputs(
+          makePartialMigrationBasePolicy(),
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        const activityStream = celInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.activity'
+        );
+        // Old httpjson activity stream had interval: '5m' and tags: 'custom-tag'
+        expect(activityStream?.vars?.interval?.value).toBe('5m');
+        expect(activityStream?.vars?.tags?.value).toBe('custom-tag');
+      });
+
+      it('seeds old input-level vars into stream-level vars of the migrating stream', () => {
+        const result = updatePackageInputs(
+          makePartialMigrationBasePolicy(),
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        const activityStream = celInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.activity'
+        );
+        // site_ids and enable_request_tracer were at input-level in httpjson but stream-level in cel
+        expect(activityStream?.vars?.site_ids?.value).toBe('1392053568582758390');
+        expect(activityStream?.vars?.enable_request_tracer?.value).toBe(true);
+      });
+
+      it('preserves the enabled state from the old httpjson stream on the new cel stream', () => {
+        const result = updatePackageInputs(
+          makePartialMigrationBasePolicy(),
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        const agentStream = celInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.agent'
+        );
+        // Old httpjson agent stream was disabled by the user → new cel stream must stay disabled
+        expect(agentStream?.enabled).toBe(false);
+      });
+
+      it('leaves existing cel streams completely untouched during partial migration', () => {
+        const result = updatePackageInputs(
+          makePartialMigrationBasePolicy(),
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        const appStream = celInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.application'
+        );
+        // User had changed batch_size from 1000 → 500; it must not be reset to the package default
+        expect(appStream?.vars?.batch_size?.value).toBe('500');
+        expect(appStream?.vars?.interval?.value).toBe('2m');
+      });
+
+      it('falls back to package defaults when migrate_from points to a non-existent input type', () => {
+        const overrideWithBadMigrateFrom: InputsOverride[] = [
+          {
+            ...makePartialMigrationOverride()[0],
+            streams: [
+              {
+                enabled: true,
+                migrate_from: 'nonexistent',
+                data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                vars: {
+                  interval: { type: 'text', value: 'package-default' },
+                  site_ids: { type: 'text', value: '' },
+                },
+              },
+            ],
+          } as unknown as InputsOverride,
+        ];
+
+        const result = updatePackageInputs(
+          makePartialMigrationBasePolicy(),
+          makePartialMigrationPackageInfo(),
+          overrideWithBadMigrateFrom,
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        const activityStream = celInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.activity'
+        );
+        // Old input type not found → stream gets package defaults, not the httpjson values
+        expect(activityStream?.vars?.interval?.value).toBe('package-default');
+        expect(activityStream?.vars?.site_ids?.value).toBe('');
+      });
+
+      it('does not touch a third input type during partial migration', () => {
+        const policyWithThreeInputs: NewPackagePolicy = {
+          ...makePartialMigrationBasePolicy(),
+          inputs: [
+            ...makePartialMigrationBasePolicy().inputs,
+            {
+              type: 'azure-eventhub',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {},
+              streams: [
+                {
+                  enabled: false,
+                  data_stream: { dataset: 'test_package.event', type: 'logs' },
+                  vars: {
+                    connection_string: { type: 'password', value: 'user-connection-string' },
+                    consumer_group: { type: 'text', value: 'my-group' },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfoWithThreeInputs: PackageInfo = {
+          ...makePartialMigrationPackageInfo(),
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'cel',
+                  title: 'CEL',
+                  description: 'CEL Input',
+                  vars: [{ name: 'url', type: 'text' }],
+                },
+                {
+                  type: 'azure-eventhub',
+                  title: 'Azure Event Hub',
+                  description: 'Azure Event Hub Input',
+                  vars: [],
+                },
+              ],
+            },
+          ],
+        } as unknown as PackageInfo;
+
+        const overrideWithAzure: InputsOverride[] = [
+          ...makePartialMigrationOverride(),
+          {
+            type: 'azure-eventhub',
+            policy_template: 'template_1',
+            enabled: false,
+            vars: {},
+            streams: [
+              {
+                enabled: false,
+                data_stream: { dataset: 'test_package.event', type: 'logs' },
+                vars: {
+                  connection_string: { type: 'password', value: '' },
+                  consumer_group: { type: 'text', value: '$default' },
+                },
+              },
+            ],
+          } as unknown as InputsOverride,
+        ];
+
+        const result = updatePackageInputs(
+          policyWithThreeInputs,
+          packageInfoWithThreeInputs,
+          overrideWithAzure,
+          false
+        );
+
+        const azureInput = result.inputs.find((i) => i.type === 'azure-eventhub');
+        const eventStream = azureInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.event'
+        );
+        // azure-eventhub input and streams must be completely unaffected by the httpjson→cel migration
+        expect(eventStream?.vars?.connection_string?.value).toBe('user-connection-string');
+        expect(eventStream?.vars?.consumer_group?.value).toBe('my-group');
+      });
+
+      it('migrates old httpjson input-level vars to new cel stream-level vars when going through packageToPackagePolicyInputs end-to-end', () => {
+        // 2.5.0 packageInfo: only cel input remains; activity stream declares migrate_from: httpjson
+        const packageInfo250: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '2.5.0',
+          latestVersion: '2.5.0',
+          release: 'ga',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'cel',
+                  title: 'CEL',
+                  description: 'CEL input',
+                  vars: [
+                    { name: 'url', type: 'url' },
+                    { name: 'api_token', type: 'password' },
+                  ],
+                },
+              ],
+            },
+          ],
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'test_package.activity',
+              path: 'activity',
+              title: 'Activity',
+              release: 'ga',
+              ingest_pipeline: 'default',
+              package: 'test-package',
+              streams: [
+                {
+                  input: 'cel',
+                  migrate_from: 'httpjson',
+                  title: 'Activity',
+                  vars: [
+                    { name: 'interval', type: 'text', default: '30s' },
+                    { name: 'site_ids', type: 'text' },
+                    { name: 'enable_request_tracer', type: 'bool', default: false },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'logs',
+              dataset: 'test_package.application',
+              path: 'application',
+              title: 'Application',
+              release: 'ga',
+              ingest_pipeline: 'default',
+              package: 'test-package',
+              streams: [
+                {
+                  input: 'cel',
+                  title: 'Application',
+                  vars: [{ name: 'batch_size', type: 'text', default: '1000' }],
+                },
+              ],
+            },
+          ],
+          assets: {},
+        } as unknown as PackageInfo;
+
+        // 2.4.1 base policy: old cel (application only) + old httpjson (activity + more)
+        // The httpjson input stores site_ids and enable_request_tracer at input level.
+        const basePolicy241: NewPackagePolicy = {
+          name: 'sentinel-one-policy',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'test-package', title: 'Test Package', version: '2.4.1' },
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'url', value: 'http://sentinelone.example.com' },
+                api_token: { type: 'password', value: 'user-token' },
+                site_ids: { type: 'text', value: '1111,2222' },
+                enable_request_tracer: { type: 'bool', value: true },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                  vars: { interval: { type: 'text', value: '1m' } },
+                },
+              ],
+            },
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'url', value: 'http://sentinelone.example.com' },
+                api_token: { type: 'password', value: 'user-token' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.application', type: 'logs' },
+                  vars: { batch_size: { type: 'text', value: '500' } },
+                },
+              ],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          basePolicy241,
+          packageInfo250,
+          packageToPackagePolicyInputs(packageInfo250) as InputsOverride[]
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        const activityStream = celInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.activity'
+        );
+
+        // site_ids and enable_request_tracer lived at httpjson INPUT level in 2.4.1,
+        // and at cel STREAM level in 2.5.0 — they must be carried over by the migration.
+        expect(activityStream?.vars?.site_ids?.value).toBe('1111,2222');
+        expect(activityStream?.vars?.enable_request_tracer?.value).toBe(true);
+
+        // Stream-level vars from the old httpjson stream are also migrated.
+        expect(activityStream?.vars?.interval?.value).toBe('1m');
+
+        // Existing application stream must keep its user-configured value.
+        const appStream = celInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.application'
+        );
+        expect(appStream?.vars?.batch_size?.value).toBe('500');
+      });
+    });
+
+    describe('when re-upgrading to a package version that removes deprecated/migrate_from', () => {
+      it('clears deprecated and migrate_from on an existing input when new package no longer declares them', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'test-package', title: 'Test Package', version: '0.0.1' },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              // Simulates a policy stored after a previous upgrade that added these fields
+              deprecated: { description: 'Use cel input instead' },
+              migrate_from: 'httpjson',
+              vars: { path: { type: 'text', value: '/var/log/logfile.log' } },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.2',
+          latestVersion: '0.0.2',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  // New package version no longer marks the input as deprecated or migrate_from
+                  vars: [{ name: 'path', type: 'text' }],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: InputsOverride[] = [
+          {
+            type: 'logs',
+            policy_template: 'template_1',
+            enabled: true,
+            // No deprecated, no migrate_from in the new package definition
+            vars: { path: { type: 'text', value: '/var/log/new-default.log' } },
+            streams: [],
+          } as unknown as InputsOverride,
+        ];
+
+        const result = updatePackageInputs(basePackagePolicy, packageInfo, inputsOverride, false);
+
+        const logsInput = result.inputs.find((i) => i.type === 'logs');
+        expect(logsInput).toBeDefined();
+        expect(logsInput?.deprecated).toBeUndefined();
+        expect(logsInput?.migrate_from).toBeUndefined();
+        // User-configured var should still be preserved
+        expect(logsInput?.vars?.path?.value).toBe('/var/log/logfile.log');
+      });
+
+      it('clears migrate_from on an existing stream when new package no longer declares it', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'test-package', title: 'Test Package', version: '0.0.1' },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.logs', type: 'logs' },
+                  // Simulates a stream stored with migrate_from from a previous upgrade
+                  migrate_from: 'httpjson',
+                  vars: { tags: { type: 'text', value: 'user-tag' } },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.2',
+          latestVersion: '0.0.2',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [{ type: 'logs', title: 'Log', description: 'Log Input', vars: [] }],
+            },
+          ],
+          data_streams: [
+            {
+              dataset: 'test_package.logs',
+              type: 'logs',
+              title: 'Logs',
+              release: 'experimental' as any,
+              package: 'test-package',
+              path: 'logs',
+              streams: [
+                {
+                  input: 'logs',
+                  title: 'Logs',
+                  vars: [{ name: 'tags', type: 'text' }],
+                  template_path: 'agent.yml',
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: InputsOverride[] = [
+          {
+            type: 'logs',
+            policy_template: 'template_1',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test_package.logs', type: 'logs' },
+                // New package version stream no longer declares migrate_from
+                vars: { tags: { type: 'text', value: 'default-tag' } },
+              },
+            ],
+          } as unknown as InputsOverride,
+        ];
+
+        const result = updatePackageInputs(basePackagePolicy, packageInfo, inputsOverride, false);
+
+        const logsInput = result.inputs.find((i) => i.type === 'logs');
+        const logsStream = logsInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.logs'
+        );
+        expect(logsStream?.migrate_from).toBeUndefined();
+        // User-configured var should still be preserved
+        expect(logsStream?.vars?.tags?.value).toBe('user-tag');
+      });
+    });
   });
 
-  describe('enrich package policy on create', () => {
+  describe('Enrich package policy on create', () => {
     beforeEach(() => {
       (packageToPackagePolicy as jest.Mock).mockReturnValue({
         package: { name: 'apache', title: 'Apache', version: '1.0.0' },
