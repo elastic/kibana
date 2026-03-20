@@ -10,11 +10,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { EntityStoreCoreSetup } from '../types';
 import { LogsExtractionClient } from '../domain/logs_extraction';
 import { CcsLogsExtractionClient } from '../domain/logs_extraction';
-import { CRUDClient } from '../domain/crud_client';
-import {
-  EngineDescriptorClient,
-  EntityStoreGlobalStateClient,
-} from '../domain/definitions/saved_objects';
+import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
 
 export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;
@@ -43,12 +39,7 @@ export async function createLogsExtractionClient({
   );
 
   const esClient = clusterClient.asCurrentUser;
-  const crudClient = new CRUDClient({
-    logger,
-    esClient,
-    namespace,
-  });
-  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, crudClient);
+  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, namespace);
 
   const logsExtractionClient = new LogsExtractionClient({
     logger,

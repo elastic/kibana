@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { convertLegacyInputsToJsonSchema } from './input_conversion';
+import { convertLegacyFieldsToJsonSchema } from './field_conversion';
 import { type ConnectorContractUnion } from '../..';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
@@ -19,11 +19,17 @@ import {
   getMergeStepSchema,
   getOnFailureStepSchema,
   getParallelStepSchema,
+  getSwitchStepSchema,
   getTriggerSchema,
+  getWhileStepSchema,
   getWorkflowSettingsSchema,
+  LoopBreakStepSchema,
+  LoopContinueStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
+  WorkflowOutputStepSchema,
   WorkflowSchemaBase,
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
@@ -79,7 +85,7 @@ export function generateYamlSchemaFromConnectors(
         ) {
           normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
         } else if (Array.isArray(data.inputs)) {
-          normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+          normalizedInputs = convertLegacyFieldsToJsonSchema(data.inputs);
         }
       }
       const { inputs: _, ...rest } = data;
@@ -101,7 +107,9 @@ function createRecursiveStepSchema(
     // Create step schemas with the recursive reference
     // Use the same stepSchema reference to maintain consistency
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
+    const whileSchema = getWhileStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
+    const switchSchema = getSwitchStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
 
@@ -117,13 +125,19 @@ function createRecursiveStepSchema(
     // This creates proper JSON schema validation that Monaco YAML can handle
     return z.discriminatedUnion('type', [
       forEachSchema,
+      whileSchema,
       ifSchema,
+      switchSchema,
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
       DataSetStepSchema,
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,
+      WorkflowOutputStepSchema,
+      WorkflowFailStepSchema,
+      LoopBreakStepSchema,
+      LoopContinueStepSchema,
       ...connectorSchemas,
       ...aliasSchemas,
     ]);

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/response-ops-retry-service'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/response-ops-retry-service'
+  title: '@kbn/response-ops-retry-service'
   description: Moon project for @kbn/response-ops-retry-service
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/response-ops/retry-service
+  sourceRoot: x-pack/platform/packages/shared/response-ops/retry-service
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-logging-server-mocks'
@@ -33,14 +32,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

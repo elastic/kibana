@@ -8,46 +8,13 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject, of } from 'rxjs';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
-import { Header } from './header';
-
-function mockProps() {
-  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
-  const application = applicationServiceMock.createInternalStartContract();
-
-  return {
-    application,
-    kibanaVersion: '1.0.0',
-    appTitle$: new BehaviorSubject('test'),
-    badge$: new BehaviorSubject(undefined),
-    breadcrumbs$: new BehaviorSubject([]),
-    breadcrumbsAppendExtension$: new BehaviorSubject(undefined),
-    homeHref: '/',
-    customBranding$: new BehaviorSubject({}),
-    kibanaDocLink: '/docs',
-    docLinks: docLinksServiceMock.createStartContract(),
-    navLinks$: new BehaviorSubject([]),
-    customNavLink$: new BehaviorSubject(undefined),
-    recentlyAccessed$: new BehaviorSubject([]),
-    globalHelpExtensionMenuLinks$: new BehaviorSubject([]),
-    helpExtension$: new BehaviorSubject(undefined),
-    helpSupportUrl$: new BehaviorSubject(''),
-    navControlsLeft$: new BehaviorSubject([]),
-    navControlsCenter$: new BehaviorSubject([]),
-    navControlsRight$: new BehaviorSubject([]),
-    navControlsExtension$: new BehaviorSubject([]),
-    basePath: http.basePath,
-    isLocked$: new BehaviorSubject(false),
-    loadingCount$: new BehaviorSubject(0),
-    appMenu$: new BehaviorSubject(undefined),
-  };
-}
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
+import { ClassicHeader } from './header';
 
 describe('Header', () => {
   beforeAll(() => {
@@ -57,18 +24,13 @@ describe('Header', () => {
   });
 
   it('renders', () => {
+    const deps = createMockChromeComponentsDeps();
+    const chrome = chromeServiceMock.createStartContract();
+
     const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
-    const isLocked$ = new BehaviorSubject(false);
-    const navLinks$ = new BehaviorSubject([
-      {
-        id: 'kibana',
-        title: 'kibana',
-        baseUrl: '',
-        href: '',
-        url: '',
-        visibleIn: ['globalSearch' as const],
-      },
-    ]);
+    chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs$);
+    chrome.getBreadcrumbs.mockReturnValue([{ text: 'test' }]);
+
     const customNavLink$ = new BehaviorSubject({
       id: 'cloud-deployment-link',
       title: 'Manage cloud deployment',
@@ -77,51 +39,47 @@ describe('Header', () => {
       href: '',
       visibleIn: ['globalSearch' as const],
     });
+    chrome.getCustomNavLink$.mockReturnValue(customNavLink$);
+
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },
     ]);
+    chrome.recentlyAccessed.get$.mockReturnValue(recentlyAccessed$);
+
+    chrome.navLinks.getNavLinks$.mockReturnValue(
+      new BehaviorSubject([
+        {
+          id: 'kibana',
+          title: 'kibana',
+          baseUrl: '',
+          href: '',
+          url: '',
+          visibleIn: ['globalSearch' as const],
+        },
+      ])
+    );
+
     const breadcrumbsAppendExtensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>(
       []
     );
+    chrome.getBreadcrumbsAppendExtensionsWithBadges$.mockReturnValue(breadcrumbsAppendExtensions$);
+
     const component = mountWithIntl(
-      <Header
-        {...mockProps()}
-        breadcrumbs$={breadcrumbs$}
-        navLinks$={navLinks$}
-        recentlyAccessed$={recentlyAccessed$}
-        customNavLink$={customNavLink$}
-        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
-        helpMenuLinks$={of([])}
-        isServerless={false}
-        appMenu$={new BehaviorSubject(undefined)}
-      />
+      <TestChromeProviders deps={deps} chrome={chrome}>
+        <ClassicHeader />
+      </TestChromeProviders>
     );
     expect(component.find('EuiHeader').exists()).toBeTruthy();
     expect(component.find('nav[aria-label="Primary"]').exists()).toBeFalsy();
-
-    act(() => isLocked$.next(true));
-    component.update();
-    expect(component.find('[data-test-subj="collapsibleNav"]').exists()).toBeTruthy();
     expect(component.render()).toMatchSnapshot();
 
     act(() =>
       breadcrumbsAppendExtensions$.next([
-        {
-          mount: (root: HTMLDivElement) => {
-            root.innerHTML = '<div class="my-extension1">__render__</div>';
-            return () => (root.innerHTML = '');
-          },
-        },
-        {
-          mount: (root: HTMLDivElement) => {
-            root.innerHTML = '<div class="my-extension2">__render__</div>';
-            return () => (root.innerHTML = '');
-          },
-        },
+        { content: <div className="my-extension1">__render__</div> },
+        { content: <div className="my-extension2">__render__</div> },
       ])
     );
     component.update();
-    expect(component.find('HeaderExtension').length).toBe(2);
     const rootNode = component.getDOMNode();
     expect(rootNode.querySelector('.my-extension1')).toBeTruthy();
     expect(rootNode.querySelector('.my-extension2')).toBeTruthy();

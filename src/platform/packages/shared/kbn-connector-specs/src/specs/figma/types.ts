@@ -1,0 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export interface GetFileInput {
+  fileKey: string;
+  nodeIds?: string;
+  depth?: number;
+}
+
+export interface RenderNodesInput {
+  fileKey: string;
+  nodeIds: string;
+  format?: 'png' | 'jpg' | 'svg' | 'pdf';
+  scale?: number;
+}
+
+export interface ListProjectFilesInput {
+  projectId: string;
+}
+
+export interface ListTeamProjectsInput {
+  teamId?: string;
+  url?: string;
+}
+
+export interface WhoAmIResult {
+  id?: string;
+  handle?: string;
+  email?: string;
+  img_url?: string;
+}

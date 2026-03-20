@@ -41,13 +41,17 @@ export interface InternalSkillDefinition {
    */
   readonly: boolean;
   /**
+   * When true, this skill is only available when experimental features are enabled.
+   */
+  experimental: boolean;
+  /**
    * Referenced content for the skill.
    */
   referencedContent?: ReferencedContent[];
   /**
-   * Base path for filesystem mounting. Only defined for builtin skills.
+   * Base path for filesystem mounting.
    */
-  basePath?: string;
+  basePath: string;
   /**
    * Returns tool IDs from the tool registry that this skill can use.
    * - Builtin skills: returns from the skill definition's getRegistryTools()
@@ -59,4 +63,12 @@ export interface InternalSkillDefinition {
    * Only available for builtin skills.
    */
   getInlineTools?: () => MaybePromise<SkillBoundedTool[]>;
+  /**
+   * If this skill was installed from a plugin, the plugin name.
+   */
+  plugin_id?: string;
+  /**
+   * Number of referenced content items.
+   */
+  referencedContentCount: number;
 }

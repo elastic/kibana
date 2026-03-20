@@ -84,7 +84,7 @@ Array [
               <a
                 class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-text-isClickable"
                 data-test-subj="homeLink"
-                href="/"
+                href="/test/app/home"
                 rel="noreferrer"
               >
                 <span
@@ -150,7 +150,7 @@ Array [
             aria-hidden="true"
             class="euiButtonIcon__icon"
             color="inherit"
-            data-euiicon-type="arrowRight"
+            data-euiicon-type="chevronSingleRight"
           />
         </button>
       </div>
@@ -274,7 +274,7 @@ Array [
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </div>
@@ -405,7 +405,7 @@ Array [
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </div>
@@ -519,7 +519,7 @@ Array [
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </div>
@@ -616,7 +616,7 @@ Array [
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </div>
@@ -698,157 +698,10 @@ Array [
 
 exports[`CollapsibleNav renders the default nav 1`] = `
 <CollapsibleNav
-  appId$={
-    BehaviorSubject {
-      "_value": "test",
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  basePath={
-    BasePath {
-      "assetsHrefBase": "/test",
-      "basePath": "/test",
-      "get": [Function],
-      "prepend": [Function],
-      "publicBaseUrl": undefined,
-      "remove": [Function],
-      "serverBasePath": "/test",
-    }
-  }
   button={<button />}
   closeNav={[Function]}
-  customNavLink$={
-    BehaviorSubject {
-      "_value": undefined,
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  homeHref="/"
   id="collapsibe-nav"
-  isLocked={false}
   isNavOpen={false}
-  navLinks$={
-    BehaviorSubject {
-      "_value": Array [],
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  navigateToApp={[Function]}
-  navigateToUrl={[Function]}
-  recentlyAccessed$={
-    BehaviorSubject {
-      "_value": Array [],
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
   storage={
     StubBrowserStorage {
       "keys": Array [],
@@ -857,7 +710,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "values": Array [],
     }
   }
-  url="/"
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -883,7 +735,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
             "css-1751mc5-navCss": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
           },
           "sheet": StyleSheet {
-            "_alreadyInsertedOrderInsensitiveRule": true,
             "_insertTag": [Function],
             "before": null,
             "container": <head>
@@ -892,19 +743,11 @@ exports[`CollapsibleNav renders the default nav 1`] = `
                 data-s=""
               >
                 
-                .css-1751mc5-navCss{}
-              </style>
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
-                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>
             </head>,
             "ctr": 2,
             "insertionPoint": undefined,
-            "isSpeedy": false,
+            "isSpeedy": true,
             "key": "css",
             "nonce": undefined,
             "prepend": undefined,
@@ -914,14 +757,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
                 data-s=""
               >
                 
-                .css-1751mc5-navCss{}
-              </style>,
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
-                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>,
             ],
           },
@@ -963,158 +798,11 @@ exports[`CollapsibleNav renders the default nav 1`] = `
 
 exports[`CollapsibleNav renders the default nav 2`] = `
 <CollapsibleNav
-  appId$={
-    BehaviorSubject {
-      "_value": "test",
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  basePath={
-    BasePath {
-      "assetsHrefBase": "/test",
-      "basePath": "/test",
-      "get": [Function],
-      "prepend": [Function],
-      "publicBaseUrl": undefined,
-      "remove": [Function],
-      "serverBasePath": "/test",
-    }
-  }
   button={<button />}
   closeNav={[Function]}
-  customNavLink$={
-    BehaviorSubject {
-      "_value": undefined,
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  homeHref="/"
   id="collapsibe-nav"
-  isLocked={false}
   isNavOpen={false}
   isOpen={true}
-  navLinks$={
-    BehaviorSubject {
-      "_value": Array [],
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  navigateToApp={[Function]}
-  navigateToUrl={[Function]}
-  recentlyAccessed$={
-    BehaviorSubject {
-      "_value": Array [],
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
   storage={
     StubBrowserStorage {
       "keys": Array [],
@@ -1123,7 +811,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "values": Array [],
     }
   }
-  url="/"
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -1149,7 +836,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
             "css-1751mc5-navCss": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
           },
           "sheet": StyleSheet {
-            "_alreadyInsertedOrderInsensitiveRule": true,
             "_insertTag": [Function],
             "before": null,
             "container": <head>
@@ -1158,19 +844,11 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                 data-s=""
               >
                 
-                .css-1751mc5-navCss{}
-              </style>
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
-                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>
             </head>,
             "ctr": 2,
             "insertionPoint": undefined,
-            "isSpeedy": false,
+            "isSpeedy": true,
             "key": "css",
             "nonce": undefined,
             "prepend": undefined,
@@ -1180,14 +858,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                 data-s=""
               >
                 
-                .css-1751mc5-navCss{}
-              </style>,
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
-                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>,
             ],
           },

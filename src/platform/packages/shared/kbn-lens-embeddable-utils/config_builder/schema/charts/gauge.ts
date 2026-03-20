@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
-  esqlColumnOperationWithLabelAndFormatSchema,
+  esqlColumnWithFormatSchema,
   esqlColumnSchema,
   metricOperationDefinitionSchema,
 } from '../metric_ops';
@@ -42,7 +42,7 @@ const gaugeStateSharedOptionsSchema = {
           {
             type: schema.oneOf([
               schema.literal('circle'),
-              schema.literal('semiCircle'),
+              schema.literal('semi_circle'),
               schema.literal('arc'),
             ]),
           },
@@ -81,17 +81,14 @@ const gaugeStateMetricInnerNoESQLOpsSchema = {
 const gaugeStateMetricInnerESQLOpsSchema = {
   /**
    * Minimum value for the gauge
-   * Note: label, format and other visual options are ignored
    */
   min: schema.maybe(esqlColumnSchema),
   /**
    * Maximum value for the gauge
-   * Note: label, format and other visual options are ignored
    */
   max: schema.maybe(esqlColumnSchema),
   /**
    * Goal value for the gauge
-   * Note: label, format and other visual options are ignored
    */
   goal: schema.maybe(esqlColumnSchema),
 };
@@ -154,7 +151,7 @@ export const gaugeStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema.extends({
+    metric: esqlColumnWithFormatSchema.extends({
       ...gaugeStateMetricOptionsSchema,
       ...gaugeStateMetricInnerESQLOpsSchema,
     }),

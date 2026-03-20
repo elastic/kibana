@@ -30,6 +30,14 @@ import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
+import {
+  ChromeComponentsProvider,
+  ChromelessHeader,
+  ClassicHeader,
+} from '@kbn/core-chrome-browser-components';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+
 import { ChromeService } from './chrome_service';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
@@ -233,22 +241,40 @@ describe('start', () => {
     });
   });
 
-  describe('getHeaderComponent', () => {
-    it('returns a renderable React component', async () => {
-      const { chrome } = await start();
-
-      // Have to do some fanagling to get the type system and enzyme to accept this.
-      // Don't capture the snapshot because it's 600+ lines long.
-      // Render and assert that no error is thrown
-      render(React.createElement(() => chrome.getClassicHeaderComponent()));
+  describe('render smoke tests', () => {
+    const buildComponentDeps = (startDeps: ReturnType<typeof defaultStartDeps>) => ({
+      application: startDeps.application,
+      http: startDeps.http,
+      docLinks: startDeps.docLinks,
+      customBranding: startDeps.customBranding,
     });
 
-    it('renders chromeless header', async () => {
-      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
+    it('ClassicHeader renders within ChromeComponentsProvider', async () => {
+      const startDeps = defaultStartDeps();
+      const { chrome } = await start({ startDeps });
 
       render(
         <KibanaRenderContextProvider {...startDeps}>
-          {chrome.getChromelessHeader()}
+          <CoreEnvContextProvider value={coreContextMock.create().env}>
+            <ChromeServiceProvider value={{ chrome }}>
+              <ChromeComponentsProvider value={buildComponentDeps(startDeps)}>
+                <ClassicHeader />
+              </ChromeComponentsProvider>
+            </ChromeServiceProvider>
+          </CoreEnvContextProvider>
+        </KibanaRenderContextProvider>
+      );
+    });
+
+    it('ChromelessHeader renders within ChromeComponentsProvider', async () => {
+      const startDeps = defaultStartDeps();
+      await start({ startDeps });
+
+      render(
+        <KibanaRenderContextProvider {...startDeps}>
+          <ChromeComponentsProvider value={buildComponentDeps(startDeps)}>
+            <ChromelessHeader />
+          </ChromeComponentsProvider>
         </KibanaRenderContextProvider>
       );
 
@@ -465,15 +491,15 @@ describe('start', () => {
       );
 
       const ext1 = chrome.setBreadcrumbsAppendExtension({
-        mount: () => () => {},
+        content: null,
       });
       chrome.setBreadcrumbsAppendExtension({
         order: 0,
-        mount: () => () => {},
+        content: null,
       });
       const ext3 = chrome.setBreadcrumbsAppendExtension({
         order: 100,
-        mount: () => () => {},
+        content: null,
       });
       ext3();
       ext1();
@@ -484,43 +510,43 @@ describe('start', () => {
           Array [],
           Array [
             Object {
-              "mount": [Function],
+              "content": null,
             },
           ],
           Array [
             Object {
-              "mount": [Function],
+              "content": null,
               "order": 0,
             },
             Object {
-              "mount": [Function],
+              "content": null,
             },
           ],
           Array [
             Object {
-              "mount": [Function],
+              "content": null,
               "order": 0,
             },
             Object {
-              "mount": [Function],
+              "content": null,
             },
             Object {
-              "mount": [Function],
+              "content": null,
               "order": 100,
             },
           ],
           Array [
             Object {
-              "mount": [Function],
+              "content": null,
               "order": 0,
             },
             Object {
-              "mount": [Function],
+              "content": null,
             },
           ],
           Array [
             Object {
-              "mount": [Function],
+              "content": null,
               "order": 0,
             },
           ],
@@ -577,7 +603,7 @@ describe('start', () => {
       const { chrome, service } = await start();
       const promise = firstValueFrom(chrome.hasHeaderBanner$().pipe(Rx.take(3), toArray()));
 
-      chrome.setHeaderBanner({ mount: () => () => undefined });
+      chrome.setHeaderBanner({ content: <></> });
       chrome.setHeaderBanner(undefined);
       service.stop();
 

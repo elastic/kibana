@@ -9,7 +9,7 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
 import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
-import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
+import { xyStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
 import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
 import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
 import { datatableStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/datatable';
@@ -54,7 +54,7 @@ export const chartTypeRegistry = {
     },
   },
   [SupportedChartType.XY]: {
-    schema: xyStateSchema,
+    schema: xyStateSchemaESQL,
     guidance: {
       description:
         'For displaying time series, trends, comparisons, or distributions using line charts, bar charts, or area charts. Best for showing data over time, comparing multiple series, histograms, or any visualization with X and Y axes (e.g., "show request count over time", "compare sales by region as a bar chart", "display CPU usage trend as a line chart").',

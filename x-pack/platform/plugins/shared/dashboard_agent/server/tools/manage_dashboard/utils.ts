@@ -8,16 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  isGenericAttachmentPanel,
-  type GenericAttachmentPanel,
-  type LensAttachmentPanel,
+import type {
+  AttachmentPanel,
+  DashboardAttachmentData,
+  LensAttachmentPanel,
 } from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
 
@@ -42,7 +40,12 @@ const visualizationAttachmentDataSchema = z.object({
   query: z.string().optional(),
 });
 
-const resolvePanelsFromVisualizationAttachment = (data: unknown): LensAttachmentPanel[] => {
+type ResolvedPanelWithoutGrid = Omit<LensAttachmentPanel, 'grid'>;
+
+const resolvePanelsFromVisualizationAttachment = (
+  data: unknown,
+  attachmentId: string
+): ResolvedPanelWithoutGrid[] => {
   const parseResult = visualizationAttachmentDataSchema.safeParse(data);
   if (!parseResult.success) {
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
@@ -61,13 +64,18 @@ const resolvePanelsFromVisualizationAttachment = (data: unknown): LensAttachment
       visualization: visualization as LensApiSchemaType,
       title,
       ...(query ? { query } : {}),
+      sourceAttachmentId: attachmentId,
     },
   ];
 };
 
-const resolvePanelsFromAttachment = (type: string, data: unknown): AttachmentPanel[] => {
+const resolvePanelsFromAttachment = (
+  type: string,
+  data: unknown,
+  attachmentId: string
+): ResolvedPanelWithoutGrid[] => {
   if (type === AttachmentType.visualization) {
-    return resolvePanelsFromVisualizationAttachment(data);
+    return resolvePanelsFromVisualizationAttachment(data, attachmentId);
   }
 
   throw new Error(
@@ -79,23 +87,23 @@ const resolvePanelsFromAttachment = (type: string, data: unknown): AttachmentPan
  * Resolves attachment ids into dashboard panel entries.
  * Supports visualization attachments and dashboard-compatible panel payloads.
  */
-export const resolvePanelsFromAttachments = async ({
-  attachmentIds,
+export const resolvePanelsFromAttachments = ({
+  attachmentInputs,
   attachments,
   logger,
 }: {
-  attachmentIds?: string[];
+  attachmentInputs?: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>;
   attachments: AttachmentStateManager;
   logger: Logger;
-}): Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }> => {
-  if (!attachmentIds || attachmentIds.length === 0) {
+}): { panels: AttachmentPanel[]; failures: VisualizationFailure[] } => {
+  if (!attachmentInputs || attachmentInputs.length === 0) {
     return { panels: [], failures: [] };
   }
 
   const panels: AttachmentPanel[] = [];
   const failures: VisualizationFailure[] = [];
 
-  for (const attachmentId of attachmentIds) {
+  for (const { attachmentId, grid } of attachmentInputs) {
     try {
       const attachmentRecord = attachments.getAttachmentRecord(attachmentId);
       if (!attachmentRecord) {
@@ -107,8 +115,12 @@ export const resolvePanelsFromAttachments = async ({
         throw new Error(`Attachment "${attachmentId}" does not have a readable version.`);
       }
 
-      const resolvedPanels = resolvePanelsFromAttachment(attachmentRecord.type, latestVersion.data);
-      panels.push(...resolvedPanels);
+      const resolvedPanels = resolvePanelsFromAttachment(
+        attachmentRecord.type,
+        latestVersion.data,
+        attachmentId
+      );
+      panels.push(...resolvedPanels.map((panel) => ({ ...panel, grid })));
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       logger.error(
@@ -123,76 +135,10 @@ export const resolvePanelsFromAttachments = async ({
   }
 
   logger.debug(
-    `Resolved ${panels.length} panels from ${attachmentIds.length} attachment references`
+    `Resolved ${panels.length} panels from ${attachmentInputs.length} attachment references`
   );
 
   return { panels, failures };
-};
-
-interface UpsertMarkdownPanelResult {
-  panels: AttachmentPanel[];
-  changedPanel?: AttachmentPanel;
-}
-
-const isDashboardMarkdownPanel = (
-  panel: AttachmentPanel
-): panel is GenericAttachmentPanel & { type: typeof MARKDOWN_EMBEDDABLE_TYPE } => {
-  return isGenericAttachmentPanel(panel) && panel.type === MARKDOWN_EMBEDDABLE_TYPE;
-};
-
-const getMarkdownContent = (panel: AttachmentPanel): string | undefined => {
-  if (!isDashboardMarkdownPanel(panel)) {
-    return undefined;
-  }
-
-  const { content } = panel.rawConfig;
-  return typeof content === 'string' ? content : undefined;
-};
-
-export const upsertMarkdownPanel = (
-  panels: AttachmentPanel[],
-  markdownContent?: string
-): UpsertMarkdownPanelResult => {
-  if (!markdownContent) {
-    return { panels };
-  }
-
-  const existingMarkdownPanelIndex = panels.findIndex((panel) => isDashboardMarkdownPanel(panel));
-  if (existingMarkdownPanelIndex === -1) {
-    const markdownPanel: AttachmentPanel = {
-      type: MARKDOWN_EMBEDDABLE_TYPE,
-      panelId: uuidv4(),
-      rawConfig: { content: markdownContent },
-    };
-    return {
-      panels: [markdownPanel, ...panels],
-      changedPanel: markdownPanel,
-    };
-  }
-
-  const existingMarkdownPanel = panels[existingMarkdownPanelIndex];
-  if (!isDashboardMarkdownPanel(existingMarkdownPanel)) {
-    return { panels };
-  }
-
-  if (getMarkdownContent(existingMarkdownPanel) === markdownContent) {
-    return { panels };
-  }
-
-  const updatedMarkdownPanel: AttachmentPanel = {
-    ...existingMarkdownPanel,
-    rawConfig: {
-      ...existingMarkdownPanel.rawConfig,
-      content: markdownContent,
-    },
-  };
-  const updatedPanels = [...panels];
-  updatedPanels[existingMarkdownPanelIndex] = updatedMarkdownPanel;
-
-  return {
-    panels: updatedPanels,
-    changedPanel: updatedMarkdownPanel,
-  };
 };
 
 export const getRemovedPanels = (

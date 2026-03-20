@@ -688,10 +688,11 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ") => any"
+          ") => ",
+          "QueryDslQueryContainer"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/condition_to_query_dsl.ts",
-        "lineNumber": 80,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -713,7 +714,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/condition_to_query_dsl.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -1308,6 +1309,29 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.getConditionMonacoSchemaConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "getConditionMonacoSchemaConfig",
+        "description": [
+          "\nGet Monaco YAML schema configuration for the standalone condition editor.\n\nThis generates a JSON Schema from the condition Zod schema and applies\nthe same fixups used for the full Streamlang schema (enum dedup,\nadditionalProperties enforcement) plus condition-specific transforms\n(anyOf flattening, operator snippets).\n"
+        ],
+        "signature": [
+          "() => { uri: string; fileMatch: string[]; schema: Record<string, unknown>; } | null"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/schema/get_json_schema_from_streamlang_schema.ts",
+        "lineNumber": 1068,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "Schema configuration object for monaco-yaml, or null if generation fails"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.getDefaultFormValueForOperator",
         "type": "Function",
         "tags": [],
@@ -1490,14 +1514,10 @@
         "tags": [],
         "label": "getJsonSchemaFromStreamlangSchema",
         "description": [
-          "\nConvert the Streamlang Zod schema into JSON Schema and run our fixup pipeline\nso the result is consumable by Monaco YAML and other validation tooling.\n\nThe raw output of `zod-to-json-schema` contains recursive references that\nMonaco cannot resolve, and it omits strict `additionalProperties` flags.\nThis helper normalises those quirks before returning the schema artifact.\n"
+          "\nConvert the Streamlang Zod schema into JSON Schema and run our fixup pipeline\nso the result is consumable by Monaco YAML and other validation tooling.\n\nUses Zod v4's native `z.toJSONSchema()` for the conversion. The fixup\npipeline enforces strict `additionalProperties` and enhances the schema\nwith editor-friendly metadata (titles, snippets, etc.).\n"
         ],
         "signature": [
-          "(streamlangSchema: ",
-          "ZodType",
-          "<any, ",
-          "ZodTypeDef",
-          ", any>, streamType: ",
+          "(streamlangSchema: z.ZodType, streamType: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -1508,7 +1528,7 @@
           " | undefined) => StreamlangJsonSchema"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/schema/get_json_schema_from_streamlang_schema.ts",
-        "lineNumber": 33,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1516,20 +1536,17 @@
           {
             "parentPluginId": "@kbn/streamlang",
             "id": "def-common.getJsonSchemaFromStreamlangSchema.$1",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "streamlangSchema",
             "description": [
               "- The Zod schema to convert"
             ],
             "signature": [
-              "ZodType",
-              "<any, ",
-              "ZodTypeDef",
-              ", any>"
+              "z.ZodType"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/schema/get_json_schema_from_streamlang_schema.ts",
-            "lineNumber": 45,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1555,7 +1572,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/schema/get_json_schema_from_streamlang_schema.ts",
-            "lineNumber": 46,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1757,7 +1774,7 @@
           "(processor: TProcessorDefinition) => \"sort\" | \"concat\" | \"replace\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"math\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"convert\" | \"dissect\" | \"drop_document\" | \"remove_by_prefix\" | \"redact\" | \"network_direction\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 792,
+        "lineNumber": 810,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1773,7 +1790,7 @@
               "TProcessorDefinition"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 796,
+            "lineNumber": 814,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1957,7 +1974,7 @@
           ">(obj?: TBlock | undefined) => obj is Extract<TBlock, { action: string; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 75,
+        "lineNumber": 80,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1973,7 +1990,7 @@
               "TBlock | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-            "lineNumber": 76,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1991,18 +2008,10 @@
         "label": "isAlwaysCondition",
         "description": [],
         "signature": [
-          "<TValue extends ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">(value: TValue) => value is Extract<TValue, { always: {}; }>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 226,
+        "lineNumber": 225,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2018,7 +2027,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2035,26 +2044,10 @@
         "label": "isAndCondition",
         "description": [],
         "signature": [
-          "<TValue extends ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">(value: TValue) => value is Extract<TValue, { and: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "[]; }>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 223,
+        "lineNumber": 222,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2070,7 +2063,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2139,18 +2132,10 @@
         "label": "isBinaryFilterCondition",
         "description": [],
         "signature": [
-          "<TValue extends ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">(value: TValue) => value is Extract<TValue, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 213,
+        "lineNumber": 212,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2166,7 +2151,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2183,18 +2168,10 @@
         "label": "isCondition",
         "description": [],
         "signature": [
-          "<TValue extends unknown>(value: TValue) => value is Extract<TValue, ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 229,
+        "lineNumber": 228,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2210,7 +2187,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2227,7 +2204,7 @@
         "label": "isConditionBlock",
         "description": [],
         "signature": [
-          "(obj: any) => obj is ",
+          "(obj: unknown) => obj is ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -2245,12 +2222,12 @@
           {
             "parentPluginId": "@kbn/streamlang",
             "id": "def-common.isConditionBlock.$1",
-            "type": "Any",
+            "type": "Unknown",
             "tags": [],
             "label": "obj",
             "description": [],
             "signature": [
-              "any"
+              "unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
             "lineNumber": 57,
@@ -2319,16 +2296,52 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.isConditionStrict",
+        "type": "Function",
+        "tags": [],
+        "label": "isConditionStrict",
+        "description": [],
+        "signature": [
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 235,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.isConditionStrict.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
+            "lineNumber": 17,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.isDateProcessorDefinition",
         "type": "Function",
         "tags": [],
         "label": "isDateProcessorDefinition",
         "description": [],
         "signature": [
-          "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 752,
+        "lineNumber": 758,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2344,7 +2357,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2361,10 +2374,10 @@
         "label": "isDissectProcessorDefinition",
         "description": [],
         "signature": [
-          "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 747,
+        "lineNumber": 753,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2380,7 +2393,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2397,18 +2410,10 @@
         "label": "isFilterCondition",
         "description": [],
         "signature": [
-          "<TValue extends ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">(value: TValue) => value is Extract<TValue, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; } | { field: string; exists?: boolean | undefined; }>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 221,
+        "lineNumber": 220,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2424,7 +2429,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2492,10 +2497,10 @@
         "label": "isGrokProcessorDefinition",
         "description": [],
         "signature": [
-          "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 742,
+        "lineNumber": 748,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2511,7 +2516,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2571,18 +2576,10 @@
         "label": "isNeverCondition",
         "description": [],
         "signature": [
-          "<TValue extends ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">(value: TValue) => value is Extract<TValue, { never: {}; }>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 225,
+        "lineNumber": 224,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2598,7 +2595,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2615,26 +2612,10 @@
         "label": "isNotCondition",
         "description": [],
         "signature": [
-          "<TValue extends ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">(value: TValue) => value is Extract<TValue, { not: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 227,
+        "lineNumber": 226,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2650,7 +2631,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2667,26 +2648,10 @@
         "label": "isOrCondition",
         "description": [],
         "signature": [
-          "<TValue extends ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">(value: TValue) => value is Extract<TValue, { or: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "[]; }>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 224,
+        "lineNumber": 223,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2702,7 +2667,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2719,10 +2684,10 @@
         "label": "isProcessWithIgnoreMissingOption",
         "description": [],
         "signature": [
-          "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 728,
+        "lineNumber": 734,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2738,7 +2703,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2755,10 +2720,10 @@
         "label": "isProcessWithOverrideOption",
         "description": [],
         "signature": [
-          "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 723,
+        "lineNumber": 729,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2774,7 +2739,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2791,10 +2756,10 @@
         "label": "isRedactProcessorDefinition",
         "description": [],
         "signature": [
-          "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 757,
+        "lineNumber": 763,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2810,7 +2775,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -2827,18 +2792,10 @@
         "label": "isUnaryFilterCondition",
         "description": [],
         "signature": [
-          "<TValue extends ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">(value: TValue) => value is Extract<TValue, { field: string; exists?: boolean | undefined; }>"
+          "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 217,
+        "lineNumber": 216,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2854,7 +2811,7 @@
             "signature": [
               "TValue"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
             "lineNumber": 17,
             "columnNumber": 5,
             "deprecated": false,
@@ -3427,7 +3384,7 @@
         "label": "AlwaysCondition",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 142,
+        "lineNumber": 141,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3443,7 +3400,7 @@
               "{}"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 143,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3459,7 +3416,7 @@
         "label": "AndCondition",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 134,
+        "lineNumber": 133,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3482,7 +3439,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 135,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3517,7 +3474,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 247,
+        "lineNumber": 253,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3533,7 +3490,7 @@
               "\"append\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 252,
+            "lineNumber": 258,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3546,7 +3503,7 @@
             "label": "to",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 253,
+            "lineNumber": 259,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3562,7 +3519,7 @@
               "unknown[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 254,
+            "lineNumber": 260,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3578,7 +3535,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 255,
+            "lineNumber": 261,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3613,7 +3570,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 271,
+        "lineNumber": 277,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3629,7 +3586,7 @@
               "\"convert\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 276,
+            "lineNumber": 282,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3642,7 +3599,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 277,
+            "lineNumber": 283,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3658,7 +3615,7 @@
               "\"string\" | \"boolean\" | \"integer\" | \"long\" | \"double\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 278,
+            "lineNumber": 284,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3674,7 +3631,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 279,
+            "lineNumber": 285,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3755,7 +3712,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 613,
+        "lineNumber": 619,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3771,7 +3728,7 @@
               "\"concat\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 614,
+            "lineNumber": 620,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3787,7 +3744,7 @@
               "ConcatFrom[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 615,
+            "lineNumber": 621,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3800,7 +3757,7 @@
             "label": "to",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 616,
+            "lineNumber": 622,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3816,7 +3773,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 617,
+            "lineNumber": 623,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3849,7 +3806,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 282,
+        "lineNumber": 288,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3865,7 +3822,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 283,
+            "lineNumber": 289,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3888,7 +3845,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 284,
+            "lineNumber": 290,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3923,7 +3880,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 157,
+        "lineNumber": 163,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3939,7 +3896,7 @@
               "\"date\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 162,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3952,7 +3909,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 163,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3968,7 +3925,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 164,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3984,7 +3941,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 165,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4000,7 +3957,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 166,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4016,7 +3973,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 167,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4032,7 +3989,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 168,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4067,7 +4024,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 129,
+        "lineNumber": 135,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4083,7 +4040,7 @@
               "\"dissect\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 134,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4096,7 +4053,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 135,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4109,7 +4066,7 @@
             "label": "pattern",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 136,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4125,7 +4082,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 137,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4141,7 +4098,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 138,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4176,7 +4133,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 356,
+        "lineNumber": 362,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4192,7 +4149,7 @@
               "\"drop_document\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 361,
+            "lineNumber": 367,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4227,7 +4184,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 101,
+        "lineNumber": 107,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4243,7 +4200,7 @@
               "\"grok\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 105,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4256,7 +4213,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 106,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4272,7 +4229,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 107,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4288,7 +4245,7 @@
               "Record<string, string> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 108,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4304,7 +4261,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 109,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4337,7 +4294,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 499,
+        "lineNumber": 505,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4353,7 +4310,7 @@
               "\"join\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 500,
+            "lineNumber": 506,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4369,7 +4326,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 501,
+            "lineNumber": 507,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4382,7 +4339,7 @@
             "label": "delimiter",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 502,
+            "lineNumber": 508,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4395,7 +4352,7 @@
             "label": "to",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 503,
+            "lineNumber": 509,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4411,7 +4368,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 504,
+            "lineNumber": 510,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4444,7 +4401,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 471,
+        "lineNumber": 477,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4460,7 +4417,7 @@
               "\"lowercase\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 472,
+            "lineNumber": 478,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4473,7 +4430,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 473,
+            "lineNumber": 479,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4489,7 +4446,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 474,
+            "lineNumber": 480,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4505,7 +4462,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 475,
+            "lineNumber": 481,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4538,7 +4495,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 75,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4554,7 +4511,7 @@
               "\"manual_ingest_pipeline\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 76,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4570,7 +4527,7 @@
               "Partial<Record<\"enrich\" | \"inference\" | \"sort\" | \"geo_grid\" | \"script\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"circle\" | \"user_agent\" | \"pipeline\" | \"json\" | \"csv\" | \"cef\" | \"remove\" | \"attachment\" | \"rename\" | \"drop\" | \"bytes\" | \"uppercase\" | \"fail\" | \"grok\" | \"reroute\" | \"convert\" | \"fingerprint\" | \"dissect\" | \"redact\" | \"network_direction\" | \"community_id\" | \"date_index_name\" | \"dot_expander\" | \"foreach\" | \"ip_location\" | \"geoip\" | \"gsub\" | \"html_strip\" | \"kv\" | \"registered_domain\" | \"set_security_user\" | \"terminate\" | \"urldecode\" | \"uri_parts\", unknown>>[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 77,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4586,7 +4543,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 79,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4602,7 +4559,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 80,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4618,7 +4575,7 @@
               "Record<string, unknown>[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 81,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4784,7 +4741,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 439,
+        "lineNumber": 445,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4800,7 +4757,7 @@
               "\"math\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 444,
+            "lineNumber": 450,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4813,7 +4770,7 @@
             "label": "expression",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 445,
+            "lineNumber": 451,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4826,7 +4783,7 @@
             "label": "to",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 446,
+            "lineNumber": 452,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4842,7 +4799,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 447,
+            "lineNumber": 453,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4875,7 +4832,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 647,
+        "lineNumber": 653,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4891,7 +4848,7 @@
               "\"network_direction\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 648,
+            "lineNumber": 654,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4904,7 +4861,7 @@
             "label": "source_ip",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 649,
+            "lineNumber": 655,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4917,7 +4874,7 @@
             "label": "destination_ip",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 650,
+            "lineNumber": 656,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4933,7 +4890,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 651,
+            "lineNumber": 657,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4949,7 +4906,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 652,
+            "lineNumber": 658,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4967,7 +4924,7 @@
           "\nNetwork direction processor"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 627,
+        "lineNumber": 633,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4983,7 +4940,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 632,
+            "lineNumber": 638,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4999,7 +4956,7 @@
         "label": "NetworkDirectionWithInternalNetworksField",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 639,
+        "lineNumber": 645,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5012,7 +4969,7 @@
             "label": "internal_networks_field",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 640,
+            "lineNumber": 646,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5028,7 +4985,7 @@
         "label": "NeverCondition",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 146,
+        "lineNumber": 145,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5044,7 +5001,7 @@
               "{}"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 147,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5060,7 +5017,7 @@
         "label": "NotCondition",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 150,
+        "lineNumber": 149,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5122,7 +5079,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 151,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5138,7 +5095,7 @@
         "label": "OrCondition",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 138,
+        "lineNumber": 137,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5161,7 +5118,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 139,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5179,7 +5136,7 @@
           "\nBase processor"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 27,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5195,7 +5152,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 35,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5211,7 +5168,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 36,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5227,7 +5184,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 37,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5262,7 +5219,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 52,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5285,7 +5242,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 56,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5301,7 +5258,7 @@
         "label": "RangeCondition",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 41,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5324,7 +5281,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 42,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5347,7 +5304,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 43,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5370,7 +5327,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 44,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5393,7 +5350,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 45,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5428,7 +5385,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 394,
+        "lineNumber": 400,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5444,7 +5401,7 @@
               "\"redact\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 403,
+            "lineNumber": 409,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5457,7 +5414,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 404,
+            "lineNumber": 410,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5473,7 +5430,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 405,
+            "lineNumber": 411,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5489,7 +5446,7 @@
               "Record<string, string> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 406,
+            "lineNumber": 412,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5505,7 +5462,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 407,
+            "lineNumber": 413,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5521,7 +5478,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 408,
+            "lineNumber": 414,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5537,7 +5494,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 409,
+            "lineNumber": 415,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5572,7 +5529,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 316,
+        "lineNumber": 322,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5588,7 +5545,7 @@
               "\"remove_by_prefix\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 321,
+            "lineNumber": 327,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5601,7 +5558,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 322,
+            "lineNumber": 328,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5636,7 +5593,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 334,
+        "lineNumber": 340,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5652,7 +5609,7 @@
               "\"remove\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 339,
+            "lineNumber": 345,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5665,7 +5622,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 340,
+            "lineNumber": 346,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5681,7 +5638,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 341,
+            "lineNumber": 347,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5716,7 +5673,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 189,
+        "lineNumber": 195,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5732,7 +5689,7 @@
               "\"rename\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 194,
+            "lineNumber": 200,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5745,7 +5702,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 195,
+            "lineNumber": 201,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5758,7 +5715,7 @@
             "label": "to",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 196,
+            "lineNumber": 202,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5774,7 +5731,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 197,
+            "lineNumber": 203,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5790,7 +5747,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 198,
+            "lineNumber": 204,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5825,7 +5782,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 372,
+        "lineNumber": 378,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5841,7 +5798,7 @@
               "\"replace\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 377,
+            "lineNumber": 383,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5854,7 +5811,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 378,
+            "lineNumber": 384,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5867,7 +5824,7 @@
             "label": "pattern",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 379,
+            "lineNumber": 385,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5880,7 +5837,7 @@
             "label": "replacement",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 380,
+            "lineNumber": 386,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5896,7 +5853,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 381,
+            "lineNumber": 387,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5912,7 +5869,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 382,
+            "lineNumber": 388,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5947,7 +5904,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 215,
+        "lineNumber": 221,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5963,7 +5920,7 @@
               "\"set\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 220,
+            "lineNumber": 226,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5976,7 +5933,7 @@
             "label": "to",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 221,
+            "lineNumber": 227,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5992,7 +5949,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 222,
+            "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6008,7 +5965,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 225,
+            "lineNumber": 231,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6024,7 +5981,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 226,
+            "lineNumber": 232,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6040,7 +5997,7 @@
         "label": "ShorthandBinaryFilterCondition",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 47,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6053,7 +6010,7 @@
             "label": "field",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 48,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6076,7 +6033,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 49,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6099,7 +6056,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 50,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6122,7 +6079,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 51,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6145,7 +6102,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 52,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6168,7 +6125,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 53,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6191,7 +6148,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 54,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6214,7 +6171,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 55,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6237,7 +6194,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 56,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6260,7 +6217,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 57,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6283,7 +6240,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 58,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6306,7 +6263,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 59,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6322,7 +6279,7 @@
         "label": "ShorthandUnaryFilterCondition",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 115,
+        "lineNumber": 114,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6335,7 +6292,7 @@
             "label": "field",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 116,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6351,7 +6308,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 117,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6384,7 +6341,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 562,
+        "lineNumber": 568,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6400,7 +6357,7 @@
               "\"sort\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 563,
+            "lineNumber": 569,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6413,7 +6370,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 564,
+            "lineNumber": 570,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6429,7 +6386,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 565,
+            "lineNumber": 571,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6452,7 +6409,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 566,
+            "lineNumber": 572,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6468,7 +6425,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 567,
+            "lineNumber": 573,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6501,7 +6458,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 515,
+        "lineNumber": 521,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6517,7 +6474,7 @@
               "\"split\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 516,
+            "lineNumber": 522,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6530,7 +6487,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 517,
+            "lineNumber": 523,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6543,7 +6500,7 @@
             "label": "separator",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 518,
+            "lineNumber": 524,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6559,7 +6516,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 519,
+            "lineNumber": 525,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6575,7 +6532,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 520,
+            "lineNumber": 526,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6591,7 +6548,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 521,
+            "lineNumber": 527,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6668,7 +6625,7 @@
           "\nStreamlang DSL Root Type"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 81,
+        "lineNumber": 86,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6685,7 +6642,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-            "lineNumber": 85,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7015,7 +6972,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 485,
+        "lineNumber": 491,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7031,7 +6988,7 @@
               "\"trim\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 486,
+            "lineNumber": 492,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7044,7 +7001,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 487,
+            "lineNumber": 493,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7060,7 +7017,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 488,
+            "lineNumber": 494,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7076,7 +7033,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 489,
+            "lineNumber": 495,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7154,7 +7111,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 457,
+        "lineNumber": 463,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7170,7 +7127,7 @@
               "\"uppercase\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 458,
+            "lineNumber": 464,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7183,7 +7140,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 459,
+            "lineNumber": 465,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7199,7 +7156,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 460,
+            "lineNumber": 466,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7215,7 +7172,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 461,
+            "lineNumber": 467,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7254,6 +7211,40 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.alwaysConditionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "alwaysConditionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 199,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.andConditionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "andConditionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 176,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.appendProcessorSchema",
         "type": "Any",
         "tags": [],
@@ -7263,7 +7254,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 258,
+        "lineNumber": 264,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7280,7 +7271,7 @@
           "(\"range\" | \"includes\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 39,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7297,7 +7288,7 @@
           "(\"range\" | \"includes\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 23,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7314,7 +7305,7 @@
           "\"range\" | \"includes\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 19,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7331,7 +7322,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 620,
+        "lineNumber": 626,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7394,8 +7385,52 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 154,
+        "lineNumber": 153,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.conditionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "conditionSchema",
+        "description": [],
+        "signature": [
+          "z.Schema<",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 161,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.conditionSchemaStrict",
+        "type": "Any",
+        "tags": [],
+        "label": "conditionSchemaStrict",
+        "description": [
+          "\nStrict version of conditionSchema that rejects excess/unknown keys.\nPre-constructed for performance as DeepStrict creates proxy wrappers."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 234,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7411,7 +7446,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 287,
+        "lineNumber": 293,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7428,7 +7463,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 171,
+        "lineNumber": 177,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7445,7 +7480,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 141,
+        "lineNumber": 147,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7462,7 +7497,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 364,
+        "lineNumber": 370,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7479,7 +7514,7 @@
           "{ enrich?: unknown; inference?: unknown; sort?: unknown; geo_grid?: unknown; script?: unknown; split?: unknown; trim?: unknown; date?: unknown; join?: unknown; append?: unknown; set?: unknown; lowercase?: unknown; circle?: unknown; user_agent?: unknown; pipeline?: unknown; json?: unknown; csv?: unknown; cef?: unknown; remove?: unknown; attachment?: unknown; rename?: unknown; drop?: unknown; bytes?: unknown; uppercase?: unknown; fail?: unknown; grok?: unknown; reroute?: unknown; convert?: unknown; fingerprint?: unknown; dissect?: unknown; redact?: unknown; network_direction?: unknown; community_id?: unknown; date_index_name?: unknown; dot_expander?: unknown; foreach?: unknown; ip_location?: unknown; geoip?: unknown; gsub?: unknown; html_strip?: unknown; kv?: unknown; registered_domain?: unknown; set_security_user?: unknown; terminate?: unknown; urldecode?: unknown; uri_parts?: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 73,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7556,8 +7591,25 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 128,
+        "lineNumber": 127,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.filterConditionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "filterConditionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 129,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7573,7 +7625,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 112,
+        "lineNumber": 118,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7590,7 +7642,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 507,
+        "lineNumber": 513,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7607,7 +7659,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 478,
+        "lineNumber": 484,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7624,7 +7676,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 84,
+        "lineNumber": 81,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7641,7 +7693,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 450,
+        "lineNumber": 456,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7681,7 +7733,7 @@
           ")"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 663,
+        "lineNumber": 669,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7698,7 +7750,41 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 666,
+        "lineNumber": 672,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.neverConditionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "neverConditionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 194,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.notConditionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "notConditionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 206,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7715,8 +7801,25 @@
           "\"exists\" | \"range\" | \"includes\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 21,
+        "lineNumber": 20,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.orConditionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "orConditionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 185,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7732,7 +7835,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 59,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7751,7 +7854,7 @@
           "\"sort\" | \"concat\" | \"replace\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"math\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"convert\" | \"dissect\" | \"drop_document\" | \"remove_by_prefix\" | \"redact\" | \"network_direction\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 762,
+        "lineNumber": 768,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7770,7 +7873,24 @@
           "(\"sort\" | \"concat\" | \"replace\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"math\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"convert\" | \"dissect\" | \"drop_document\" | \"remove_by_prefix\" | \"redact\" | \"network_direction\" | \"manual_ingest_pipeline\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 770,
+        "lineNumber": 786,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.rangeConditionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "rangeConditionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 80,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7787,7 +7907,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 412,
+        "lineNumber": 418,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7804,7 +7924,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 325,
+        "lineNumber": 331,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7821,7 +7941,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 344,
+        "lineNumber": 350,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7838,7 +7958,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 201,
+        "lineNumber": 207,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7855,7 +7975,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 385,
+        "lineNumber": 391,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7872,7 +7992,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 67,
+        "lineNumber": 64,
         "columnNumber": 5,
         "deprecated": false,
         "trackAdoption": false,
@@ -7889,8 +8009,42 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 67,
+        "lineNumber": 64,
         "columnNumber": 17,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.shorthandBinaryFilterConditionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "shorthandBinaryFilterConditionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 89,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.shorthandUnaryFilterConditionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "shorthandUnaryFilterConditionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 120,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7908,7 +8062,7 @@
           "\"asc\" | \"desc\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 556,
+        "lineNumber": 562,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7925,7 +8079,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 570,
+        "lineNumber": 576,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7942,7 +8096,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 524,
+        "lineNumber": 530,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8000,6 +8154,71 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
         "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.streamlangDSLSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "streamlangDSLSchema",
+        "description": [
+          "\nZod schema for the Streamlang DSL root"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
+        "lineNumber": 96,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.streamlangDSLSchemaStrict",
+        "type": "Any",
+        "tags": [],
+        "label": "streamlangDSLSchemaStrict",
+        "description": [
+          "\nStrict version of streamlangDSLSchema that rejects excess/unknown keys.\nPre-constructed for performance as DeepStrict creates proxy wrappers,"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
+        "lineNumber": 104,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.StreamlangOasDefinitions",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamlangOasDefinitions",
+        "description": [],
+        "signature": [
+          "{ readonly Condition: z.Schema<",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ">; readonly StreamlangDSL: any; readonly StreamlangStep: z.ZodType<",
+          "StreamlangStep",
+          ">; readonly StreamlangProcessor: any; readonly GrokProcessor: any; readonly DissectProcessor: any; readonly DateProcessor: any; readonly RenameProcessor: any; readonly AppendProcessor: any; readonly ConvertProcessor: any; readonly RemoveByPrefixProcessor: any; readonly RemoveProcessor: any; readonly DropDocumentProcessor: any; readonly ReplaceProcessor: any; readonly RedactProcessor: any; readonly MathProcessor: any; readonly UppercaseProcessor: any; readonly LowercaseProcessor: any; readonly TrimProcessor: any; readonly JoinProcessor: any; readonly SplitProcessor: any; readonly SortProcessor: any; readonly ConcatProcessor: any; readonly NetworkDirectionProcessor: any; readonly ManualIngestPipelineProcessor: any; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/oas_definitions.ts",
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8190,7 +8409,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 674,
+        "lineNumber": 680,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8238,7 +8457,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 698,
+        "lineNumber": 704,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8296,6 +8515,23 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.stringOrNumberOrBoolean",
+        "type": "Any",
+        "tags": [],
+        "label": "stringOrNumberOrBoolean",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.StringOrNumberOrBoolean",
         "type": "Type",
         "tags": [],
@@ -8305,7 +8541,7 @@
           "string | number | boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 17,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8322,7 +8558,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 492,
+        "lineNumber": 498,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8339,7 +8575,7 @@
           "\"exists\"[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 37,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8356,7 +8592,7 @@
           "\"exists\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8373,7 +8609,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 464,
+        "lineNumber": 470,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8390,7 +8626,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 67,
+        "lineNumber": 64,
         "columnNumber": 15,
         "deprecated": false,
         "trackAdoption": false,
@@ -10229,89 +10465,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 231,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.alwaysConditionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "alwaysConditionSchema",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ always: ",
-          "ZodObject",
-          "<{}, \"strict\", ",
-          "ZodTypeAny",
-          ", {}, {}>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { always: {}; }, { always: {}; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 200,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.andConditionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "andConditionSchema",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ and: ",
-          "ZodArray",
-          "<",
-          "ZodType",
-          "<",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ", ",
-          "ZodTypeDef",
-          ", ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">, \"many\">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { and: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "[]; }, { and: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "[]; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 177,
+        "lineNumber": 237,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10350,228 +10504,6 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
         "lineNumber": 213,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.conditionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "conditionSchema",
-        "description": [],
-        "signature": [
-          "ZodType",
-          "<",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ", ",
-          "ZodTypeDef",
-          ", ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 162,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.filterConditionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "filterConditionSchema",
-        "description": [],
-        "signature": [
-          "ZodUnion",
-          "<[",
-          "ZodEffects",
-          "<",
-          "ZodObject",
-          "<{ field: ",
-          "ZodEffects",
-          "<",
-          "ZodString",
-          ", string, string>; eq: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; neq: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; lt: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; lte: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; gt: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; gte: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; contains: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; startsWith: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; endsWith: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; range: ",
-          "ZodOptional",
-          "<",
-          "ZodObject",
-          "<{ gt: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; gte: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; lt: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; lte: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; includes: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, ",
-          "ZodObject",
-          "<{ field: ",
-          "ZodEffects",
-          "<",
-          "ZodString",
-          ", string, string>; exists: ",
-          "ZodOptional",
-          "<",
-          "ZodBoolean",
-          ">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { field: string; exists?: boolean | undefined; }, { field: string; exists?: boolean | undefined; }>]>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 130,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10632,109 +10564,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 233,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.neverConditionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "neverConditionSchema",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ never: ",
-          "ZodObject",
-          "<{}, \"strict\", ",
-          "ZodTypeAny",
-          ", {}, {}>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { never: {}; }, { never: {}; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 195,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.NonEmptyString",
-        "type": "Object",
-        "tags": [],
-        "label": "NonEmptyString",
-        "description": [],
-        "signature": [
-          "ZodEffects",
-          "<",
-          "ZodString",
-          ", string, string>"
-        ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
-        "lineNumber": 21,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.notConditionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "notConditionSchema",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ not: ",
-          "ZodLazy",
-          "<",
-          "ZodType",
-          "<",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ", ",
-          "ZodTypeDef",
-          ", ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { not: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }, { not: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 207,
+        "lineNumber": 239,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10748,7 +10578,7 @@
         "label": "operatorToHumanReadableNameMap",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 62,
+        "lineNumber": 61,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10761,7 +10591,7 @@
             "label": "eq",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 63,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10774,7 +10604,7 @@
             "label": "neq",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 64,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10787,7 +10617,7 @@
             "label": "lt",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 65,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10800,7 +10630,7 @@
             "label": "lte",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 66,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10813,7 +10643,7 @@
             "label": "gt",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 69,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10826,7 +10656,7 @@
             "label": "gte",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 70,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10839,7 +10669,7 @@
             "label": "contains",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 73,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10852,7 +10682,7 @@
             "label": "startsWith",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 74,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10865,7 +10695,7 @@
             "label": "endsWith",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 75,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10878,7 +10708,7 @@
             "label": "exists",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 76,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10891,7 +10721,7 @@
             "label": "range",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 77,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10904,330 +10734,12 @@
             "label": "includes",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-            "lineNumber": 78,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.orConditionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "orConditionSchema",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ or: ",
-          "ZodArray",
-          "<",
-          "ZodType",
-          "<",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ", ",
-          "ZodTypeDef",
-          ", ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">, \"many\">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { or: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "[]; }, { or: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "[]; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 186,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.rangeConditionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "rangeConditionSchema",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ gt: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; gte: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; lt: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; lte: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 81,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.shorthandBinaryFilterConditionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "shorthandBinaryFilterConditionSchema",
-        "description": [],
-        "signature": [
-          "ZodEffects",
-          "<",
-          "ZodObject",
-          "<{ field: ",
-          "ZodEffects",
-          "<",
-          "ZodString",
-          ", string, string>; eq: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; neq: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; lt: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; lte: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; gt: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; gte: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; contains: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; startsWith: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; endsWith: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; range: ",
-          "ZodOptional",
-          "<",
-          "ZodObject",
-          "<{ gt: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; gte: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; lt: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; lte: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; includes: ",
-          "ZodOptional",
-          "<",
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 90,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.shorthandUnaryFilterConditionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "shorthandUnaryFilterConditionSchema",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ field: ",
-          "ZodEffects",
-          "<",
-          "ZodString",
-          ", string, string>; exists: ",
-          "ZodOptional",
-          "<",
-          "ZodBoolean",
-          ">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { field: string; exists?: boolean | undefined; }, { field: string; exists?: boolean | undefined; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 121,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -11241,7 +10753,7 @@
           "readonly [\"asc\", \"desc\"]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 560,
+        "lineNumber": 566,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11249,95 +10761,26 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.streamlangDSLSchema",
+        "id": "def-common.streamlangOasDefinitions",
         "type": "Object",
         "tags": [],
-        "label": "streamlangDSLSchema",
-        "description": [
-          "\nZod schema for the Streamlang DSL root"
-        ],
-        "signature": [
-          "ZodObject",
-          "<{ steps: ",
-          "ZodArray",
-          "<",
-          "ZodType",
-          "<",
-          "StreamlangStep",
-          ", ",
-          "ZodTypeDef",
-          ", ",
-          "StreamlangStep",
-          ">, \"many\">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { steps: ",
-          "StreamlangStep",
-          "[]; }, { steps: ",
-          "StreamlangStep",
-          "[]; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 91,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.streamlangDSLSchemaStrict",
-        "type": "Object",
-        "tags": [],
-        "label": "streamlangDSLSchemaStrict",
-        "description": [
-          "\nStrict version of streamlangDSLSchema that rejects excess/unknown keys.\nPre-constructed for performance as DeepStrict creates proxy wrappers,"
-        ],
-        "signature": [
-          "ZodObject",
-          "<{ steps: ",
-          "ZodArray",
-          "<",
-          "ZodType",
-          "<",
-          "StreamlangStep",
-          ", ",
-          "ZodTypeDef",
-          ", ",
-          "StreamlangStep",
-          ">, \"many\">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { steps: ",
-          "StreamlangStep",
-          "[]; }, { steps: ",
-          "StreamlangStep",
-          "[]; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 99,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streamlang",
-        "id": "def-common.stringOrNumberOrBoolean",
-        "type": "Object",
-        "tags": [],
-        "label": "stringOrNumberOrBoolean",
+        "label": "streamlangOasDefinitions",
         "description": [],
         "signature": [
-          "ZodUnion",
-          "<[",
-          "ZodString",
-          ", ",
-          "ZodNumber",
-          ", ",
-          "ZodBoolean",
-          "]>"
+          "{ readonly Condition: z.Schema<",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ">; readonly StreamlangDSL: any; readonly StreamlangStep: z.ZodType<",
+          "StreamlangStep",
+          ">; readonly StreamlangProcessor: any; readonly GrokProcessor: any; readonly DissectProcessor: any; readonly DateProcessor: any; readonly RenameProcessor: any; readonly AppendProcessor: any; readonly ConvertProcessor: any; readonly RemoveByPrefixProcessor: any; readonly RemoveProcessor: any; readonly DropDocumentProcessor: any; readonly ReplaceProcessor: any; readonly RedactProcessor: any; readonly MathProcessor: any; readonly UppercaseProcessor: any; readonly LowercaseProcessor: any; readonly TrimProcessor: any; readonly JoinProcessor: any; readonly SplitProcessor: any; readonly SortProcessor: any; readonly ConcatProcessor: any; readonly NetworkDirectionProcessor: any; readonly ManualIngestPipelineProcessor: any; }"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
-        "lineNumber": 13,
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/oas_definitions.ts",
+        "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

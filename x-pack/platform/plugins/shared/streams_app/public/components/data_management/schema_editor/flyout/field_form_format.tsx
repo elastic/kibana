@@ -9,8 +9,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FieldDefinitionConfig } from '@kbn/streams-schema';
-import type { SchemaField } from '../types';
+import type { SchemaField, SchemaFieldType } from '../types';
 
 interface FieldFormFormatProps {
   value: SchemaField['format'];
@@ -24,7 +23,7 @@ const POPULAR_FORMATS_SUGGESTIONS = [
   { label: 'basic_date_time' },
 ];
 
-export const typeSupportsFormat = (type?: FieldDefinitionConfig['type']) => {
+export const typeSupportsFormat = (type?: SchemaFieldType) => {
   if (!type) return false;
   return ['date'].includes(type);
 };

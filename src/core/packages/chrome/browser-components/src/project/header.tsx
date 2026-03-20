@@ -8,38 +8,22 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
-import {
-  EuiHeader,
-  EuiHeaderLogo,
-  EuiHeaderSection,
-  EuiHeaderSectionItem,
-  EuiImage,
-  EuiLoadingSpinner,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import type {
-  ChromeBreadcrumb,
-  ChromeGlobalHelpExtensionMenuLink,
-  ChromeHelpExtension,
-  ChromeHelpMenuLink,
-  ChromeNavControl,
-} from '@kbn/core-chrome-browser/src';
-import { type ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser/src';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
-import { i18n } from '@kbn/i18n';
-import React, { type ComponentProps, useCallback } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
-import { debounceTime } from 'rxjs';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import React, { useCallback } from 'react';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../shared/header_help_menu';
 import { HeaderNavControls } from '../shared/header_nav_controls';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
+import { LoadingIndicator } from '../shared/loading_indicator';
+import {
+  useProjectBreadcrumbs,
+  useProjectHome,
+  useNavigateToUrl,
+  useBasePath,
+  useCustomBranding,
+} from '../shared/chrome_hooks';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
@@ -49,10 +33,6 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
       justify-content: center;
       min-width: ${size.xxl};
       cursor: pointer;
-    `,
-    logo: css`
-      min-width: 0; /* overrides min-width: 40px */
-      padding: 0;
     `,
   },
   leftHeaderSection: css`
@@ -84,138 +64,44 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
 
-const headerStrings = {
-  logo: {
-    ariaLabel: i18n.translate('core.ui.primaryNav.goToHome.ariaLabel', {
-      defaultMessage: 'Go to home page',
-    }),
-  },
-  nav: {
-    closeNavAriaLabel: i18n.translate('core.ui.primaryNav.project.toggleNavAriaLabel', {
-      defaultMessage: 'Toggle primary navigation',
-    }),
-  },
-};
-
-export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isServerless'> {
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
-  docLinks: DocLinksStart;
-  customBranding$: Observable<CustomBranding>;
-  globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
-  helpExtension$: Observable<ChromeHelpExtension | undefined>;
-  helpSupportUrl$: Observable<string>;
-  helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
-  homeHref$: Observable<string | undefined>;
-  kibanaVersion: string;
-  application: InternalApplicationStart;
-  loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
-  navControlsLeft$: Observable<ChromeNavControl[]>;
-  navControlsCenter$: Observable<ChromeNavControl[]>;
-  navControlsRight$: Observable<ChromeNavControl[]>;
-  prependBasePath: (url: string) => string;
-}
-
-const LOADING_DEBOUNCE_TIME = 80;
-
-type LogoProps = Pick<
-  Props,
-  'application' | 'homeHref$' | 'loadingCount$' | 'prependBasePath' | 'customBranding$'
-> & {
-  logoCss: HeaderCss['logo'];
-};
-
-const Logo = ({
-  loadingCount$,
-  homeHref$,
-  prependBasePath,
-  application,
-  logoCss,
-  customBranding$,
-}: LogoProps) => {
-  const loadingCount = useObservable(loadingCount$.pipe(debounceTime(LOADING_DEBOUNCE_TIME)), 0);
-  const homeHref = useObservable(homeHref$, '/app/home');
-  const customBranding = useObservable(customBranding$, {});
+const Logo = ({ logoCss }: { logoCss: HeaderCss['logo'] }) => {
+  const navigateToUrl = useNavigateToUrl();
+  const basePath = useBasePath();
+  const homeHref = useProjectHome();
+  const customBranding = useCustomBranding();
   const { logo } = customBranding;
 
   let fullHref: string | undefined;
   if (homeHref) {
-    fullHref = prependBasePath(homeHref);
+    fullHref = basePath.prepend(homeHref);
   }
 
   const navigateHome = useCallback(
     (event: React.MouseEvent) => {
       if (fullHref) {
-        application.navigateToUrl(fullHref);
+        navigateToUrl(fullHref);
       }
       event.preventDefault();
     },
-    [fullHref, application]
+    [fullHref, navigateToUrl]
   );
-
-  const renderLogo = () => {
-    if (logo) {
-      return (
-        <a href={fullHref} onClick={navigateHome} data-test-subj="globalLoadingIndicator-hidden">
-          <EuiImage
-            src={logo}
-            css={logoCss}
-            data-test-subj="globalLoadingIndicator-hidden customLogo"
-            size={24}
-            alt="logo"
-            aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.customLogoAriaLabel', {
-              defaultMessage: 'User logo',
-            })}
-          />
-        </a>
-      );
-    }
-
-    return (
-      <EuiHeaderLogo
-        iconType="logoElastic"
-        onClick={navigateHome}
-        href={fullHref}
-        css={logoCss}
-        data-test-subj="globalLoadingIndicator-hidden"
-        aria-label={headerStrings.logo.ariaLabel}
-      />
-    );
-  };
 
   return (
     <span css={logoCss.container} data-test-subj="nav-header-logo">
-      {loadingCount === 0 ? (
-        renderLogo()
-      ) : (
-        <a onClick={navigateHome} href={fullHref}>
-          <EuiLoadingSpinner
-            size="l"
-            aria-hidden={false}
-            onClick={navigateHome}
-            data-test-subj="globalLoadingIndicator"
-          />
-        </a>
-      )}
+      <a onClick={navigateHome} href={fullHref}>
+        <LoadingIndicator customLogo={logo} />
+      </a>
     </span>
   );
 };
 
-export const ProjectHeader = ({
-  application,
-  kibanaVersion,
-  prependBasePath,
-  docLinks,
-  customBranding$,
-  isServerless,
-  breadcrumbsAppendExtensions$,
-  ...observables
-}: Props) => {
+export const ProjectHeader = () => {
+  const breadcrumbs = useProjectBreadcrumbs();
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
 
-  const topBarStyles = () => css`
+  const topBarStyles = css`
     box-shadow: none !important;
     background-color: ${euiTheme.colors.backgroundTransparent};
     border-bottom-color: ${euiTheme.colors.backgroundTransparent};
@@ -229,54 +115,31 @@ export const ProjectHeader = ({
           <EuiHeader position={'static'} className="header__firstBar" css={topBarStyles}>
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               <EuiHeaderSectionItem>
-                <HeaderPageAnnouncer
-                  breadcrumbs$={observables.breadcrumbs$}
-                  customBranding$={customBranding$}
-                />
-                <Logo
-                  prependBasePath={prependBasePath}
-                  application={application}
-                  homeHref$={observables.homeHref$}
-                  loadingCount$={observables.loadingCount$}
-                  customBranding$={customBranding$}
-                  logoCss={logoCss}
-                />
+                <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />
+                <Logo logoCss={logoCss} />
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>
                 <HeaderNavControls
-                  side="left"
-                  navControls$={observables.navControlsLeft$}
+                  position="left"
                   append={<div className="navcontrols__separator" />}
                 />
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
-                <BreadcrumbsWithExtensionsWrapper
-                  breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
-                >
-                  <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                <BreadcrumbsWithExtensionsWrapper>
+                  <Breadcrumbs breadcrumbs={breadcrumbs} />
                 </BreadcrumbsWithExtensionsWrapper>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
-                <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                <HeaderNavControls position="center" />
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem>
-                <HeaderHelpMenu
-                  isServerless={isServerless}
-                  globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
-                  helpExtension$={observables.helpExtension$}
-                  helpSupportUrl$={observables.helpSupportUrl$}
-                  defaultContentLinks$={observables.helpMenuLinks$}
-                  kibanaDocLink={docLinks.links.elasticStackGetStarted}
-                  docLinks={docLinks}
-                  kibanaVersion={kibanaVersion}
-                  navigateToUrl={application.navigateToUrl}
-                />
+                <HeaderHelpMenu />
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem
@@ -284,7 +147,7 @@ export const ProjectHeader = ({
                   gap: ${euiTheme.size.s};
                 `}
               >
-                <HeaderNavControls navControls$={observables.navControlsRight$} />
+                <HeaderNavControls position="right" />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>

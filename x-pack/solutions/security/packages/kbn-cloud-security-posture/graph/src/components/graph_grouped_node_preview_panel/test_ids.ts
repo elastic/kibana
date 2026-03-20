@@ -31,3 +31,6 @@ export const GROUPED_ITEM_IP_TEST_ID = `${GROUPED_ITEM_TEST_ID}Ip` as const;
 export const GROUPED_ITEM_GEO_TEST_ID = `${GROUPED_ITEM_TEST_ID}Geo` as const;
 export const GROUPED_ITEM_RISK_TEST_ID = `${GROUPED_ITEM_TEST_ID}Risk` as const;
 export const GROUPED_ITEM_SKELETON_TEST_ID = `${GROUPED_ITEM_TEST_ID}Skeleton` as const;
+export const GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID = `${GROUPED_ITEM_TEST_ID}ActionsButton` as const;
+export const GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID =
+  `${GROUPED_ITEM_TEST_ID}ActionsPopover` as const;

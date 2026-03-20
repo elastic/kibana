@@ -33,6 +33,8 @@ export class DiscoverPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly timeToVisualize = this.ctx.getPageObject('timeToVisualize');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly dashboardPanelActions = this.ctx.getService('dashboardPanelActions');
+  private readonly dashboard = this.ctx.getPageObject('dashboard');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -1109,4 +1111,54 @@ export class DiscoverPageObject extends FtrService {
   public setQueryMode(mode: string) {
     return this.browser.setLocalStorageItem(DISCOVER_QUERY_MODE_KEY, JSON.stringify(mode));
   }
+
+  /** Discover Embeddable helper methods   */
+
+  public async editEmbeddableInDiscover() {
+    await this.dashboardPanelActions.clickEdit();
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.click('discoverEmbeddableInlineEditEditInDiscoverLink');
+    await this.waitForDiscoverAppOnScreen();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async enterInlineEditing() {
+    const isAlreadyActive = await this.testSubjects.exists(
+      'discoverEmbeddableInlineEditSelectTabAction'
+    );
+    if (!isAlreadyActive) {
+      await this.dashboardPanelActions.clickPanelAction('embeddablePanelAction-editPanel');
+      await this.header.waitUntilLoadingHasFinished();
+    }
+  }
+
+  public async selectTabFromPopover(tabLabel: string) {
+    await this.testSubjects.click('discoverEmbeddableInlineEditSelectTabAction');
+    const popover = await this.testSubjects.find('discoverEmbeddableInlineEditSelectTabPopover');
+    await this.find.clickByButtonText(tabLabel, popover);
+    await this.header.waitUntilLoadingHasFinished();
+    await this.dashboard.waitForRenderComplete();
+  }
+
+  public async selectEmbeddableTab(tabLabel: string) {
+    await this.retry.try(async () => {
+      await this.enterInlineEditing();
+      await this.selectTabFromPopover(tabLabel);
+
+      await this.testSubjects.click('discoverEmbeddableInlineEditApplyButton');
+      await this.header.waitUntilLoadingHasFinished();
+      await this.dashboard.waitForRenderComplete();
+    });
+  }
+
+  /**
+   * Returns the ID of the first tab in the Discover session
+   * @returns The ID of the first tab in the Discover session
+   */
+  public async getFirstTabId() {
+    const tabEls = await this.testSubjects.findAll('*unifiedTabs_tab_');
+    return (await tabEls[0].getAttribute('data-test-subj'))?.replace('unifiedTabs_tab_', '');
+  }
+
+  /** Discover Embeddable helper methods end   */
 }

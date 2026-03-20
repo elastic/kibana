@@ -19,10 +19,9 @@ import {
 import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
-
 /**
  * Wrapper component that reads breakdownField from Discover's app state
- * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector
+ * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
  */
 const MetricsExperienceGridWrapper = (
   props: ChartSectionProps & { actions: ChartSectionConfigurationExtensionParams['actions'] }

@@ -9,14 +9,30 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { combineLatest, map } from 'rxjs';
 import type { ChromeLayoutConfig } from '@kbn/core-chrome-layout-components';
 import {
   ChromeLayout,
   ChromeLayoutConfigProvider,
   SimpleDebugOverlay,
 } from '@kbn/core-chrome-layout-components';
-import useObservable from 'react-use/lib/useObservable';
+import {
+  ChromeComponentsProvider,
+  ClassicHeader,
+  ProjectHeader,
+  GridLayoutProjectSideNav,
+  HeaderTopBanner,
+  ChromelessHeader,
+  AppMenuBar,
+  Sidebar,
+  useHasAppMenu,
+} from '@kbn/core-chrome-browser-components';
+import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
+import {
+  useChromeStyle,
+  useIsChromeVisible,
+  useSidebarWidth,
+} from '@kbn/core-chrome-browser-hooks';
+import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
   LayoutService,
@@ -64,47 +80,26 @@ export class GridLayout implements LayoutService {
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    const { application, chrome, overlays } = this.deps;
+    const { application, overlays, http, docLinks, customBranding } = this.deps;
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
-    const hasHeaderBanner$ = chrome.hasHeaderBanner$();
-    const chromeVisible$ = chrome.getIsVisible$();
-    const chromeStyle$ = chrome.getChromeStyle$();
     const debug = this.params.debug ?? false;
 
-    const classicChromeHeader = chrome.getClassicHeaderComponent();
-    const projectChromeHeader = chrome.getProjectHeaderComponent();
-    const headerBanner = chrome.getHeaderBanner();
+    const componentDeps: ChromeComponentsDeps = {
+      application,
+      http,
+      docLinks,
+      customBranding,
+    };
 
-    // chromeless header is used when chrome is not visible and responsible for displaying the data-test-subj and fixed loading bar
-    const chromelessHeader = chrome.getChromelessHeader();
-
-    // in project style, the project app menu is displayed at the top of application area
-    const projectAppMenu = chrome.getProjectAppMenuComponent();
-    const hasAppMenu$ = combineLatest([application.currentActionMenu$, chrome.getAppMenu$()]).pipe(
-      map(([menu, appMenu]) => !!menu || !!appMenu)
-    );
-
-    const projectSideNavigation = chrome.getProjectSideNavComponent();
-
-    const sidebar = chrome.getSidebarComponent();
-
-    const footer$ = chrome.getGlobalFooter$();
-
-    const sidebarWidth$ = combineLatest([
-      chrome.sidebar.getWidth$(),
-      chrome.sidebar.isOpen$(),
-    ]).pipe(map(([width, isOpen]) => (isOpen ? width : 0)));
-
-    return React.memo(() => {
-      // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
-      const chromeVisible = useObservable(chromeVisible$, false);
-      const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
-      const chromeStyle = useObservable(chromeStyle$, 'classic');
-      const hasAppMenu = useObservable(hasAppMenu$, false);
-      const footer: ReactNode = useObservable(footer$, null);
-      const sidebarWidth = useObservable(sidebarWidth$, 0);
+    const GridLayoutContent = React.memo(({ debug: showDebug }: { debug: boolean }) => {
+      const chromeVisible = useIsChromeVisible();
+      const hasHeaderBanner = useHasHeaderBanner();
+      const chromeStyle = useChromeStyle();
+      const hasAppMenu = useHasAppMenu();
+      const footer = useGlobalFooter();
+      const sidebarWidth = useSidebarWidth();
 
       const layoutConfig = {
         ...layoutConfigs[chromeStyle],
@@ -119,33 +114,27 @@ export class GridLayout implements LayoutService {
 
       if (chromeVisible) {
         if (chromeStyle === 'classic') {
-          // If classic style, we use the classic header and no navigation, since it is part of the header
-          header = classicChromeHeader;
+          header = <ClassicHeader />;
         } else {
-          // If project style, we use the project header and navigation
-          header = projectChromeHeader;
+          header = <ProjectHeader />;
           if (hasAppMenu) {
-            // If project app menu is present, we use it as the application top bar
-            applicationTopBar = projectAppMenu;
+            applicationTopBar = <AppMenuBar />;
           }
 
-          navigation = projectSideNavigation;
+          navigation = <GridLayoutProjectSideNav />;
         }
       }
 
       if (hasHeaderBanner) {
-        // If header banner is present, we use it, even if chrome is not visible
-        banner = headerBanner;
+        banner = <HeaderTopBanner position="static" />;
       }
 
-      // If debug, override/add debug overlays
-      if (debug) {
+      if (showDebug) {
         if (chromeVisible) {
           if (!navigation) {
             navigation = <SimpleDebugOverlay label="Debug Navigation" />;
           }
         }
-        // banner is visible even when chrome is not visible
         if (!banner) {
           banner = <SimpleDebugOverlay label="Debug Banner" />;
         }
@@ -157,23 +146,18 @@ export class GridLayout implements LayoutService {
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
               header={header}
-              sidebar={sidebar}
+              sidebar={<Sidebar />}
               footer={footer}
               navigation={navigation}
               banner={banner}
               applicationTopBar={applicationTopBar}
             >
               <>
-                {/* If chrome is not visible, we use the chromeless header to display the*/}
-                {/* data-test-subj and fixed loading bar*/}
-                {!chromeVisible && chromelessHeader}
+                {!chromeVisible && <ChromelessHeader />}
 
                 <div id="globalBannerList">{appBannerComponent}</div>
                 <AppWrapper chromeVisible={chromeVisible}>
-                  {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
                   <div id={APP_FIXED_VIEWPORT_ID} />
-
-                  {/* The actual plugin/app */}
                   {appComponent}
                 </AppWrapper>
               </>
@@ -182,5 +166,11 @@ export class GridLayout implements LayoutService {
         </>
       );
     });
+
+    return () => (
+      <ChromeComponentsProvider value={componentDeps}>
+        <GridLayoutContent debug={debug} />
+      </ChromeComponentsProvider>
+    );
   }
 }

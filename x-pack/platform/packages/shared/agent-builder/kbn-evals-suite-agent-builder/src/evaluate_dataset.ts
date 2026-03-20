@@ -15,6 +15,7 @@ import {
   selectEvaluators,
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
+  createSkillInvocationEvaluator,
   createRagEvaluators,
   type GroundTruth,
   type ExperimentTask,
@@ -189,6 +190,11 @@ function configureExperiment({
         spanName: 'Converse',
       }),
     }),
+    createSkillInvocationEvaluator({
+      traceEsClient,
+      log,
+      skillName: 'data-exploration',
+    }),
   ]);
 
   return { task, evaluators: selectedEvaluators };
@@ -253,6 +259,7 @@ export function createEvaluateExternalDataset({
   log: ToolingLog;
 }): EvaluateExternalDataset {
   return async function evaluateExternalDataset(datasetName: string) {
+    const resolvesFromPhoenix = process.env.KBN_EVALS_EXECUTOR === 'phoenix';
     const { task, evaluators: selectedEvaluators } = configureExperiment({
       evaluators,
       chatClient,
@@ -264,8 +271,11 @@ export function createEvaluateExternalDataset({
       {
         dataset: {
           name: datasetName,
-          description: 'External dataset resolved from Phoenix by name',
-          examples: [], // Examples will be loaded from Phoenix, not provided in code
+          description: resolvesFromPhoenix
+            ? 'External dataset resolved from Phoenix by name'
+            : 'External dataset resolved from Elasticsearch by name',
+          // Examples are resolved from upstream dataset storage, not provided in code.
+          examples: [],
         },
         task,
         trustUpstreamDataset: true,

@@ -1,6 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
+    key: osquery-cypress
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -8,7 +9,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 7
     retry:
       automatic:
         - exit_status: '-1'
@@ -18,6 +19,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Osquery Cypress Tests on Serverless'
+    key: osquery-serverless
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -25,7 +27,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 5
     retry:
       automatic:
         - exit_status: '-1'

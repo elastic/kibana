@@ -21,6 +21,7 @@ import { Filters } from './filters';
 import { parseFiltersFromQuery } from './filters/query_parser';
 import type { QueryParser } from './filters/query_parser';
 import { useTagQueryParser } from './filters/tags/use_tag_query_parser';
+import { useStarredQueryParser } from './filters/starred/use_starred_query_parser';
 import { useFilters } from './hooks';
 import { SelectionBar } from './selection_bar';
 
@@ -98,9 +99,11 @@ const ContentListToolbarComponent = ({
   // text and maps it to `ActiveFilters`. Add new parsers here as filter PRs land —
   // `handleSearchChange` itself never needs to change.
   const tagParser = useTagQueryParser();
+  const starredParser = useStarredQueryParser();
   const queryParsers = useMemo(
-    (): ReadonlyArray<QueryParser> => [tagParser].filter((p): p is QueryParser => p !== null),
-    [tagParser]
+    (): ReadonlyArray<QueryParser> =>
+      [tagParser, starredParser].filter((p): p is QueryParser => p !== null),
+    [tagParser, starredParser]
   );
 
   const handleSearchChange = useCallback(

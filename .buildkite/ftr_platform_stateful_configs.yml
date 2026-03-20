@@ -96,6 +96,8 @@ enabled:
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs2/config.ts
   - src/platform/test/functional/apps/discover/tabs3/config.ts
+  - src/platform/test/functional/apps/discover/tabs4/config.ts
+  - src/platform/test/functional/apps/discover/tabs5/config.ts
   - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
@@ -109,7 +111,9 @@ enabled:
   - src/platform/test/functional/apps/visualize/group4/config.ts
   - src/platform/test/functional/apps/visualize/group5/config.ts
   - src/platform/test/functional/apps/visualize/group6/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/group1/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/group2/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/group3/config.ts
   - src/platform/test/functional/config.ccs.ts
   - src/platform/test/functional/firefox/console.config.ts
   - src/platform/test/functional/firefox/dashboard.config.ts
@@ -237,7 +241,9 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group9/config.ts
   - x-pack/platform/test/functional/apps/lens/group10/config.ts
   - x-pack/platform/test/functional/apps/lens/group11/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb/config.ts
+  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb/group1/config.ts
+  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb/group2/config.ts
+  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb/group3/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/platform/test/functional/apps/license_management/config.ts
@@ -266,7 +272,8 @@ enabled:
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
   - x-pack/platform/test/functional/apps/saved_objects_management/config.ts
-  - x-pack/platform/test/functional/apps/saved_query_management/config.ts
+  - x-pack/platform/test/functional/apps/saved_query_management/group1/config.ts
+  - x-pack/platform/test/functional/apps/saved_query_management/group2/config.ts
   - x-pack/platform/test/functional/apps/saved_query_management/config.v2.ts
   - x-pack/platform/test/functional/apps/security/config.ts
   - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
@@ -401,6 +408,7 @@ enabled:
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
   - x-pack/platform/test/api_integration/apis/search/config.ts
+  - x-pack/platform/test/api_integration/apis/search_inference_endpoints/config.ts
   - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
   - x-pack/platform/test/api_integration/apis/spaces/config.ts
