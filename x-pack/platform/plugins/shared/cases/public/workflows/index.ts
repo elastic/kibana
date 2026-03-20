@@ -35,9 +35,10 @@ export function registerCasesSteps(
     import('./simple_steps').then((m) => m.updateCasesStepDefinition)
   );
 
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./set_custom_field').then((m) => m.setCustomFieldStepDefinition)
-  );
+  // TODO: enable once https://github.com/elastic/security-team/issues/15982 has been resolved
+  // workflowsExtensions.registerStepDefinition(() =>
+  //   import('./set_custom_field').then((m) => m.setCustomFieldStepDefinition)
+  // );
 
   workflowsExtensions.registerStepDefinition(() =>
     import('./simple_steps').then((m) => m.findCasesStepDefinition)

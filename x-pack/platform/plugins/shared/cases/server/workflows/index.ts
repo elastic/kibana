@@ -46,7 +46,7 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions.registerStepDefinition(createCaseStepDefinition(getCasesClient));
   // TODO: enable once https://github.com/elastic/security-team/issues/15982 has been resolved
   // workflowsExtensions.registerStepDefinition(createCaseFromTemplateStepDefinition(getCasesClient));
-  workflowsExtensions.registerStepDefinition(setCustomFieldStepDefinition(getCasesClient));
+  // workflowsExtensions.registerStepDefinition(setCustomFieldStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(updateCaseStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(updateCasesStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addCommentStepDefinition(getCasesClient));
