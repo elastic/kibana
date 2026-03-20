@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PREBUILT_WATCHLIST_NAMES } from '../../../../common/constants';
+import { PREBUILT_WATCHLIST_NAMES } from '../../../../common/entity_analytics/watchlists/constants';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskScoreDonutChart } from '../risk_score_donut_chart';
@@ -39,13 +39,6 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
     watchlistId: watchlistId ?? '',
     skip: skip || useLegacy,
     spaceId: spaceId ?? '',
-  });
-
-  // eslint-disable-next-line no-console
-  console.log('DynamicRiskLevelPanel Data:', {
-    useLegacy,
-    combinedRiskStats,
-    riskLevelsStats,
   });
 
   const severityCount = useMemo(() => {

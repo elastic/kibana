@@ -12,7 +12,7 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { PREBUILT_WATCHLIST_NAMES } from '../../../../../../common/constants';
+import { PREBUILT_WATCHLIST_NAMES } from '../../../../../../common/entity_analytics/watchlists/constants';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
