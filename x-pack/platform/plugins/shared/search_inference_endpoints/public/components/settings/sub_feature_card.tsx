@@ -37,7 +37,7 @@ import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../.
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
 
-const COLLAPSED_COUNT = 1;
+const COLLAPSED_COUNT = 5;
 
 interface SubFeatureCardProps {
   featureId: string;

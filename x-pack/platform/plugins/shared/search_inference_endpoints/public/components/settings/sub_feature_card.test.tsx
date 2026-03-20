@@ -12,9 +12,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SubFeatureCard } from './sub_feature_card';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
+import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 jest.mock('../../hooks/use_inference_endpoints');
+jest.mock('../../hooks/use_registered_features');
 jest.mock('./add_model_popover', () => ({
   AddModelPopover: ({
     existingEndpointIds,
@@ -30,6 +32,7 @@ jest.mock('./add_model_popover', () => ({
 }));
 
 const mockUseQueryInferenceEndpoints = useQueryInferenceEndpoints as jest.Mock;
+const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
 
 const mockEndpoints = [
   {
@@ -49,6 +52,24 @@ const mockEndpoints = [
     service: 'openai',
     task_type: 'chat_completion',
     service_settings: { model_id: 'gpt-4o' },
+  },
+  {
+    inference_id: 'ep-4',
+    service: 'openai',
+    task_type: 'chat_completion',
+    service_settings: { model_id: 'gpt-4o-mini' },
+  },
+  {
+    inference_id: 'ep-5',
+    service: 'openai',
+    task_type: 'chat_completion',
+    service_settings: { model_id: 'gpt-3.5-turbo' },
+  },
+  {
+    inference_id: 'ep-6',
+    service: 'openai',
+    task_type: 'chat_completion',
+    service_settings: { model_id: 'o1' },
   },
   {
     inference_id: 'ep-embed',
@@ -84,6 +105,7 @@ describe('SubFeatureCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryInferenceEndpoints.mockReturnValue({ data: mockEndpoints });
+    mockUseRegisteredFeatures.mockReturnValue({ features: [], isLoading: false });
   });
 
   const renderCard = (endpointIds: string[], overrides?: Partial<InferenceFeatureConfig>) =>
@@ -106,24 +128,31 @@ describe('SubFeatureCard', () => {
     expect(screen.getByText('chat_completion')).toBeInTheDocument();
   });
 
-  it('renders the first endpoint row in collapsed state', () => {
+  it('renders all endpoint rows within collapsed count', () => {
     renderCard(['ep-1', 'ep-2']);
-
-    expect(screen.getByTestId('endpoint-row-ep-1')).toBeInTheDocument();
-    expect(screen.queryByTestId('endpoint-row-ep-2')).not.toBeInTheDocument();
-  });
-
-  it('renders all endpoint rows when expanded', () => {
-    renderCard(['ep-1', 'ep-2']);
-
-    fireEvent.click(screen.getByTestId('show-more-test_feature'));
 
     expect(screen.getByTestId('endpoint-row-ep-1')).toBeInTheDocument();
     expect(screen.getByTestId('endpoint-row-ep-2')).toBeInTheDocument();
   });
 
+  it('hides endpoints beyond collapsed count', () => {
+    renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
+
+    expect(screen.getByTestId('endpoint-row-ep-5')).toBeInTheDocument();
+    expect(screen.queryByTestId('endpoint-row-ep-6')).not.toBeInTheDocument();
+  });
+
+  it('renders all endpoint rows when expanded', () => {
+    renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
+
+    fireEvent.click(screen.getByTestId('show-more-test_feature'));
+
+    expect(screen.getByTestId('endpoint-row-ep-1')).toBeInTheDocument();
+    expect(screen.getByTestId('endpoint-row-ep-6')).toBeInTheDocument();
+  });
+
   it('shows Default badge only on the first endpoint', () => {
-    renderCard(['ep-1', 'ep-2']);
+    renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
 
     fireEvent.click(screen.getByTestId('show-more-test_feature'));
 
@@ -137,39 +166,36 @@ describe('SubFeatureCard', () => {
     expect(screen.getByTestId('remove-endpoint-ep-1')).toBeDisabled();
   });
 
-  it('shows remove button when multiple endpoints and expanded', () => {
+  it('shows remove buttons when multiple endpoints', () => {
     renderCard(['ep-1', 'ep-2']);
-
-    fireEvent.click(screen.getByTestId('show-more-test_feature'));
 
     expect(screen.getByTestId('remove-endpoint-ep-1')).toBeInTheDocument();
     expect(screen.getByTestId('remove-endpoint-ep-2')).toBeInTheDocument();
   });
 
   it('shows "Show N more" when endpoints exceed collapsed count', () => {
-    renderCard(['ep-1', 'ep-2', 'ep-3']);
+    renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
 
     expect(screen.getByTestId('show-more-test_feature')).toBeInTheDocument();
-    expect(screen.queryByTestId('endpoint-row-ep-2')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('endpoint-row-ep-6')).not.toBeInTheDocument();
   });
 
   it('expands to show all endpoints on "Show more" click', () => {
-    renderCard(['ep-1', 'ep-2', 'ep-3']);
+    renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
 
     fireEvent.click(screen.getByTestId('show-more-test_feature'));
 
-    expect(screen.getByTestId('endpoint-row-ep-2')).toBeInTheDocument();
-    expect(screen.getByTestId('endpoint-row-ep-3')).toBeInTheDocument();
+    expect(screen.getByTestId('endpoint-row-ep-6')).toBeInTheDocument();
     expect(screen.queryByTestId('show-more-test_feature')).not.toBeInTheDocument();
   });
 
   it('hides add-model button when collapsed', () => {
-    renderCard(['ep-1', 'ep-2']);
+    renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
 
     expect(screen.queryByTestId('add-model-button')).not.toBeInTheDocument();
   });
 
-  it('shows add-model button when expanded and under max', () => {
+  it('shows add-model button when not collapsed and under max', () => {
     renderCard(['ep-1'], { maxNumberOfEndpoints: 3 });
 
     expect(screen.getByTestId('add-model-button')).toBeInTheDocument();
