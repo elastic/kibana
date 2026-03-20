@@ -232,8 +232,9 @@ const decorationsSchema = schema.object(
 const xScaleSchema = schema.maybe(
   schema.oneOf([schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')], {
     meta: {
+      // IMPORTANT: This description guides LLM agents - modify with caution and test agent behavior after changes
       description:
-        'X-axis scale type. Only used in ES|QL charts. Data view based charts fall back to the X operation type.',
+        "X-axis scale type for ES|QL charts. Use 'temporal' for timestamp/date fields (e.g., @timestamp, DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
     },
   })
 );
