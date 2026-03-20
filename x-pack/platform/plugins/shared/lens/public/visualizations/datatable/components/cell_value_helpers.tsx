@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiTextColor } from '@elastic/eui';
 import classNames from 'classnames';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import { getContrastColor } from '../../../shared_components/coloring/utils';
@@ -62,9 +63,16 @@ export const getRenderMode = (colorMode: string, isClickable: boolean): RenderMo
   return 'html';
 };
 
-/** Badge mode skips rendering for null, empty, or NaN values. */
-export const isRenderableValue = (rawValue: RawValue): boolean =>
-  rawValue != null && rawValue !== '' && !(typeof rawValue === 'number' && Number.isNaN(rawValue));
+/**
+ * Values that are rendered as "empty" placeholders in the table should never receive
+ * dynamic coloring (cell/text/badge). They should remain subdued, consistent with
+ * the non-colored ("none") mode.
+ */
+export const isNonColorableValue = (rawValue: RawValue): boolean =>
+  rawValue == null ||
+  rawValue === MISSING_TOKEN ||
+  rawValue === '' ||
+  (typeof rawValue === 'number' && Number.isNaN(rawValue));
 
 export interface ApplyColoringArgs {
   colorMode: string;
@@ -90,6 +98,7 @@ export const applyCellColoring = ({
   isDarkMode,
 }: ApplyColoringArgs): React.CSSProperties | null => {
   if (colorMode === 'none' || colorMode === 'badge') return null;
+  if (isNonColorableValue(rawValue)) return null;
 
   const color = getCellColor(columnId, palette, colorMapping)(rawValue);
   if (!color) return null;
@@ -177,10 +186,18 @@ export const BadgeCell = ({
   const cellClassName = getCellClassName(alignment, fitRowToContent);
 
   // Null, empty, or NaN values don't get a badge — fall back to text or link.
-  if (!isRenderableValue(rawValue)) {
+  if (isNonColorableValue(rawValue)) {
     return (
       <div data-test-subj="lnsTableCellContent" className={cellClassName}>
-        {isClickable ? <EuiLink onClick={onClick}>{label}</EuiLink> : label}
+        <EuiTextColor color="subdued">
+          {isClickable ? (
+            <EuiLink onClick={onClick} style={{ color: 'inherit' }}>
+              {label}
+            </EuiLink>
+          ) : (
+            label
+          )}
+        </EuiTextColor>
       </div>
     );
   }

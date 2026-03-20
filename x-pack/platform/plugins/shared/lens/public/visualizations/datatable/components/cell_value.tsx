@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import type { PaletteOutput } from '@kbn/coloring';
@@ -19,6 +19,7 @@ import {
   buildColumnConfigLookup,
   getRenderMode,
   applyCellColoring,
+  isNonColorableValue,
   HtmlCell,
   LinkCell,
   BadgeCell,
@@ -41,6 +42,7 @@ export const createGridCell = (
   return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, handleFilterClick } = useContext(DataContext);
     const { euiTheme } = useEuiTheme();
+    const hasColorStyleRef = useRef(false);
 
     const rawValue: RawValue = table?.rows[rowIndex]?.[columnId];
     const formatter = formatters[columnId];
@@ -60,8 +62,23 @@ export const createGridCell = (
 
     const onFilter = () => handleFilterClick?.(columnId, rawValue, colIndex, rowIndex);
 
+    const cellStyle = useMemo(
+      () =>
+        applyCellColoring({
+          colorMode,
+          columnId,
+          palette,
+          colorMapping,
+          rawValue,
+          getCellColor,
+          isDarkMode,
+        }),
+      [colorMode, columnId, palette, colorMapping, rawValue]
+    );
+
     const badgeColor = useMemo(() => {
       if (renderMode !== 'badge' || (!palette && !colorMapping)) return null;
+      if (isNonColorableValue(rawValue)) return null;
       const color = getCellColor(columnId, palette, colorMapping)(rawValue);
       return color || null;
     }, [renderMode, columnId, palette, colorMapping, rawValue]);
@@ -69,26 +86,28 @@ export const createGridCell = (
     useEffect(() => {
       // Cell/text coloring is applied via setCellProps (affects the EuiDataGrid cell container).
       // Badge mode handles its own color inline; none means no coloring.
-      const style = applyCellColoring({
-        colorMode,
-        columnId,
-        palette,
-        colorMapping,
-        rawValue,
-        getCellColor,
-        isDarkMode,
-      });
+      if (!cellStyle) {
+        // EuiDataGrid virtualizes/reuses cells, so ensure we clear any previously applied styles
+        // when this cell should not be colored (e.g. null/blank/NaN, or coloring disabled).
+        if (hasColorStyleRef.current) {
+          setCellProps({ style: { backgroundColor: undefined, color: undefined } });
+          hasColorStyleRef.current = false;
+        }
+        return;
+      }
 
-      if (!style) return;
-
-      setCellProps({ style });
+      setCellProps({ style: cellStyle });
+      hasColorStyleRef.current = true;
 
       // Clean up styles when dependencies change to avoid stale colors sticking.
       // Skip cleanup when the cell is expanded — it would clear the expanded panel's style.
       if (!isExpanded) {
-        return () => setCellProps({ style: { backgroundColor: undefined, color: undefined } });
+        return () => {
+          setCellProps({ style: { backgroundColor: undefined, color: undefined } });
+          hasColorStyleRef.current = false;
+        };
       }
-    }, [rawValue, columnId, setCellProps, colorMode, palette, colorMapping, isExpanded]);
+    }, [cellStyle, setCellProps, isExpanded]);
 
     switch (renderMode) {
       case 'badge':
@@ -106,7 +125,10 @@ export const createGridCell = (
         );
 
       case 'link': {
-        const backgroundColor = getCellColor(columnId, palette, colorMapping)(rawValue);
+        const backgroundColor =
+          colorMode === 'cell' && !isNonColorableValue(rawValue)
+            ? getCellColor(columnId, palette, colorMapping)(rawValue)
+            : null;
         const baseColor = euiTheme.colors.link;
         // Only adjust link contrast when the cell background is colored (colorMode: cell).
         const linkColor =
@@ -135,7 +157,7 @@ export const createGridCell = (
             content={content}
             alignment={alignment}
             fitRowToContent={fitRowToContent}
-            isColored={colorMode !== 'none'}
+            isColored={Boolean(cellStyle)}
           />
         );
     }

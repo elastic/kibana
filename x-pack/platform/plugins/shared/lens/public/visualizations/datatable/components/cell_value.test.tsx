@@ -11,6 +11,7 @@ import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
 import { getTransposeId } from '@kbn/transpose-utils';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DatatableArgs } from '../../../../common/expressions';
 import type { DataContextType } from './types';
@@ -299,6 +300,7 @@ describe('datatable cell renderer', () => {
               id: columnId,
             },
           ],
+          rows: [{ [columnId]: 123 }],
         },
       });
 
@@ -342,6 +344,39 @@ describe('datatable cell renderer', () => {
 
       expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
       expect(setCellProps).not.toHaveBeenCalled();
+      expect(screen.getByText('formatted null').className).toMatch(/euiTextColor-subdued/);
+    });
+
+    it('should treat missing bucket token as non-colorable', () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'cell';
+      setCellProps.mockClear();
+
+      renderCellComponent(columnConfig, {
+        table: {
+          ...table,
+          rows: [{ a: MISSING_TOKEN }],
+        },
+      });
+
+      expect(setCellProps).not.toHaveBeenCalled();
+      expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--colored');
+    });
+
+    it('should not mark empty values as colored when colorMode is text', () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'text';
+      setCellProps.mockClear();
+
+      renderCellComponent(columnConfig, {
+        table: {
+          ...table,
+          rows: [{ a: '' }],
+        },
+      });
+
+      expect(setCellProps).not.toHaveBeenCalled();
+      expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--colored');
     });
 
     it('should not render badge for blank values', () => {
@@ -358,6 +393,7 @@ describe('datatable cell renderer', () => {
 
       expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
       expect(setCellProps).not.toHaveBeenCalled();
+      expect(screen.getByText(/^formatted\s*$/).className).toMatch(/euiTextColor-subdued/);
     });
 
     it('should not render badge for NaN values', () => {
@@ -375,6 +411,7 @@ describe('datatable cell renderer', () => {
       expect(screen.getByText('formatted NaN')).toBeInTheDocument();
       expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
       expect(setCellProps).not.toHaveBeenCalled();
+      expect(screen.getByText('formatted NaN').className).toMatch(/euiTextColor-subdued/);
     });
 
     it('should render a link for null values in badge mode when oneClickFilter is enabled', async () => {
@@ -424,6 +461,60 @@ describe('datatable cell renderer', () => {
       renderCellComponent(columnConfig, {});
 
       expect(setCellProps).not.toHaveBeenCalled();
+    });
+
+    it('should clear previously applied cell styles when value becomes null', () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'cell';
+      innerCellColorFnMock.mockReturnValue('blue');
+
+      const CellRendererWithPalette = getCellRenderer(columnConfig);
+      let currentTable: Datatable = { ...table, rows: [{ a: 123 }] };
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <DataContext.Provider
+          value={{
+            table: currentTable,
+            alignments: new Map([['a', 'right']]),
+          }}
+        >
+          {children}
+        </DataContext.Provider>
+      );
+
+      const { rerender } = render(
+        <CellRendererWithPalette
+          rowIndex={0}
+          colIndex={0}
+          columnId="a"
+          setCellProps={setCellProps}
+          isExpandable={false}
+          isDetails={false}
+          isExpanded={false}
+        />,
+        { wrapper }
+      );
+
+      expect(setCellProps).toHaveBeenCalledWith({
+        style: expect.objectContaining({ backgroundColor: 'blue' }),
+      });
+
+      setCellProps.mockClear();
+      currentTable = { ...table, rows: [{ a: null }] };
+      rerender(
+        <CellRendererWithPalette
+          rowIndex={0}
+          colIndex={0}
+          columnId="a"
+          setCellProps={setCellProps}
+          isExpandable={false}
+          isDetails={false}
+          isExpanded={false}
+        />
+      );
+
+      expect(setCellProps).toHaveBeenCalledWith({
+        style: { backgroundColor: undefined, color: undefined },
+      });
     });
 
     it('should clean up cell coloring on unmount to prevent stale styles', () => {
