@@ -7,23 +7,21 @@
 
 import { useMemo } from 'react';
 import { groupBy } from 'lodash';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { CtiEnrichment } from '../../../../../common/search_strategy';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { CtiEnrichment } from '../../../../common/search_strategy';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
   parseExistingEnrichments,
-  timelineDataToEnrichment,
-} from '../../shared/utils/threat_intelligence';
-import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
-import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+} from '../utils/threat_intelligence_helpers';
+import { useInvestigationTimeEnrichment } from './use_investigation_enrichment';
+import { ENRICHMENT_TYPES } from '../../../../common/cti/constants';
 
 export interface UseThreatIntelligenceParams {
   /**
-   * An array of field objects with category and value
+   * Document record used to retrieve threat intelligence data
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  hit: DataTableRecord;
 }
 
 export interface UseThreatIntelligenceResult {
@@ -53,26 +51,21 @@ export interface UseThreatIntelligenceResult {
  * Hook to retrieve threat intelligence data for the expandable flyout right and left sections.
  */
 export const useFetchThreatIntelligence = ({
-  dataFormattedForFieldBrowser,
+  hit,
 }: UseThreatIntelligenceParams): UseThreatIntelligenceResult => {
-  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const alertRuleUuid = hit.flattened['kibana.alert.rule.uuid'];
+  const isAlert = Array.isArray(alertRuleUuid)
+    ? alertRuleUuid.some((value) => value != null)
+    : alertRuleUuid != null;
 
   // retrieve the threat enrichment fields with value for the current document
   // (see https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/common/cti/constants.ts#L35)
-  const eventFields = useMemo(
-    () => getEnrichmentFields(dataFormattedForFieldBrowser || []),
-    [dataFormattedForFieldBrowser]
-  );
+  const eventFields = useMemo(() => getEnrichmentFields(hit), [hit]);
 
   // retrieve existing enrichment fields and their value
   const existingEnrichments = useMemo(
-    () =>
-      isAlert
-        ? parseExistingEnrichments(dataFormattedForFieldBrowser || []).map((enrichmentData) =>
-            timelineDataToEnrichment(enrichmentData)
-          )
-        : [],
-    [dataFormattedForFieldBrowser, isAlert]
+    () => (isAlert ? parseExistingEnrichments(hit) : []),
+    [hit, isAlert]
   );
 
   // api call to retrieve all documents that match the eventFields
