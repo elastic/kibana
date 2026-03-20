@@ -31,7 +31,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { isTriggerType } from '@kbn/workflows';
 import { useWorkflows } from '@kbn/workflows-ui';
+import { ExportReferencesModal } from './export_references_modal';
 import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
+import { useExportWithReferences } from './use_export_with_references';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
@@ -64,6 +66,20 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const modalTitleId = useGeneratedHtmlId();
   const telemetry = useTelemetry();
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
+
+  const allWorkflowsMap = useMemo(
+    () => new Map((workflows?.results ?? []).map((w) => [w.id, w])),
+    [workflows?.results]
+  );
+
+  const {
+    exportModalState: singleExportModal,
+    startExport: startSingleExport,
+    handleIgnore: handleSingleExportIgnore,
+    handleAddDirect: handleSingleExportAddDirect,
+    handleAddAll: handleSingleExportAddAll,
+    handleCancel: handleSingleExportCancel,
+  } = useExportWithReferences({ allWorkflowsMap });
 
   // Report list viewed telemetry when workflows are loaded
   React.useEffect(() => {
@@ -167,6 +183,14 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       );
     },
     [cloneWorkflow, notifications?.toasts]
+  );
+
+  const handleExportWorkflow = useCallback(
+    (item: WorkflowListItemDto) => {
+      if (!item.definition) return;
+      startSingleExport([item]);
+    },
+    [startSingleExport]
   );
 
   const handleToggleWorkflow = useCallback(
@@ -384,7 +408,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             },
           },
           {
-            enabled: () => false,
+            enabled: (item) => item.definition !== null,
             type: 'icon',
             color: 'primary',
             name: i18n.translate('workflows.workflowList.export', {
@@ -395,6 +419,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             description: i18n.translate('workflows.workflowList.export', {
               defaultMessage: 'Export workflow',
             }),
+            onClick: (item: WorkflowListItemDto) => {
+              handleExportWorkflow(item);
+            },
           },
           {
             enabled: () => !!canDeleteWorkflow,
@@ -420,6 +447,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       application,
       canCreateWorkflow,
       handleCloneWorkflow,
+      handleExportWorkflow,
       canDeleteWorkflow,
       handleDeleteWorkflow,
       setExecuteWorkflow,
@@ -504,6 +532,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       <WorkflowsUtilityBar
         totalWorkflows={workflows?.total || 0}
         selectedWorkflows={selectedItems}
+        allWorkflows={workflows?.results ?? []}
         deselectWorkflows={deselectWorkflows}
         onRefresh={onRefresh}
         showStart={showStart}
@@ -548,6 +577,15 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflowId={executeWorkflow.id}
           onClose={() => setExecuteWorkflow(null)}
           onSubmit={(data, triggerTab) => handleRunWorkflow(executeWorkflow.id, data, triggerTab)}
+        />
+      )}
+      {singleExportModal && (
+        <ExportReferencesModal
+          missingWorkflows={singleExportModal.missingWorkflows}
+          onIgnore={handleSingleExportIgnore}
+          onAddDirect={handleSingleExportAddDirect}
+          onAddAll={handleSingleExportAddAll}
+          onCancel={handleSingleExportCancel}
         />
       )}
       {workflowToDelete && (

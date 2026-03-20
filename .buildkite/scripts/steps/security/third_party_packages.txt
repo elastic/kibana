@@ -39,3 +39,4 @@ lightningcss
 tar-fs
 browserslist
 react-day-picker
+jszip

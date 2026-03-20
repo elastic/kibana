@@ -1386,6 +1386,7 @@
     "json-schema-to-ts": "3.1.1",
     "jsonwebtoken": "9.0.2",
     "jsts": "1.6.2",
+    "jszip": "3.10.1",
     "kea": "2.6.0",
     "langchain": "0.3.35",
     "langsmith": "0.4.6",

@@ -922,6 +922,116 @@ describe('WorkflowsService', () => {
     });
   });
 
+  describe('getWorkflowsByIds', () => {
+    it('should return workflows matching the given IDs and spaceId', async () => {
+      const doc1 = {
+        _id: 'w-1',
+        _source: { ...mockWorkflowDocument._source, name: 'Workflow One' },
+      };
+      const doc2 = {
+        _id: 'w-2',
+        _source: { ...mockWorkflowDocument._source, name: 'Workflow Two' },
+      };
+
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [doc1, doc2], total: { value: 2 } },
+      } as any);
+
+      const result = await service.getWorkflowsByIds(['w-1', 'w-2'], 'default');
+
+      expect(result).toHaveLength(2);
+      expect(result[0].id).toBe('w-1');
+      expect(result[1].id).toBe('w-2');
+
+      const searchCall = mockEsClient.search.mock.calls[0][0] as Record<string, unknown>;
+      const query = searchCall.query as { bool: { must: unknown[]; must_not: unknown[] } };
+      expect(query.bool.must).toEqual(
+        expect.arrayContaining([
+          { ids: { values: ['w-1', 'w-2'] } },
+          { term: { spaceId: 'default' } },
+        ])
+      );
+      expect(query.bool.must_not).toEqual([{ exists: { field: 'deleted_at' } }]);
+    });
+
+    it('should return empty array when given no IDs', async () => {
+      const result = await service.getWorkflowsByIds([], 'default');
+
+      expect(result).toEqual([]);
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('should return only found workflows when some IDs are missing', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [{ _id: 'w-1', _source: { ...mockWorkflowDocument._source, name: 'Found' } }],
+          total: { value: 1 },
+        },
+      } as any);
+
+      const result = await service.getWorkflowsByIds(['w-1', 'w-missing'], 'default');
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('w-1');
+    });
+  });
+
+  describe('checkWorkflowConflicts', () => {
+    it('should return matching IDs with names for existing workflows', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [{ _id: 'w-1', _source: { name: 'Existing One' } }],
+          total: { value: 1 },
+        },
+      } as any);
+
+      const result = await service.checkWorkflowConflicts(['w-1', 'w-new'], 'my-space');
+
+      expect(result).toEqual([{ id: 'w-1', name: 'Existing One' }]);
+
+      const searchCall = mockEsClient.search.mock.calls[0][0] as Record<string, unknown>;
+      const query = searchCall.query as { bool: { must: unknown[]; must_not: unknown[] } };
+      expect(query.bool.must).toEqual(
+        expect.arrayContaining([
+          { ids: { values: ['w-1', 'w-new'] } },
+          { term: { spaceId: 'my-space' } },
+        ])
+      );
+      expect(query.bool.must_not).toEqual([{ exists: { field: 'deleted_at' } }]);
+      expect(searchCall._source).toEqual(['name']);
+    });
+
+    it('should return empty array when no IDs exist', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      const result = await service.checkWorkflowConflicts(['w-1'], 'default');
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array when given no IDs', async () => {
+      const result = await service.checkWorkflowConflicts([], 'default');
+
+      expect(result).toEqual([]);
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to _id when _source.name is missing', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [{ _id: 'w-1', _source: {} }],
+          total: { value: 1 },
+        },
+      } as any);
+
+      const result = await service.checkWorkflowConflicts(['w-1'], 'default');
+
+      expect(result).toEqual([{ id: 'w-1', name: 'w-1' }]);
+    });
+  });
+
   describe('createWorkflow', () => {
     it('should create workflow with valid yaml successfully', async () => {
       const mockRequest = {
@@ -1238,7 +1348,7 @@ steps:
       expect(result.created[1].name).toBe('workflow two');
       expect(mockEsClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          refresh: true,
+          refresh: 'wait_for',
           require_alias: true,
         })
       );
@@ -1447,6 +1557,74 @@ steps:
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to schedule trigger')
       );
+    });
+
+    it('should use index operation when overwrite is true', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'workflow-1', status: 200 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: workflow one
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest, {
+        overwrite: true,
+      });
+
+      expect(result.created).toHaveLength(1);
+      expect(result.failed).toHaveLength(0);
+
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0];
+      const firstOp = bulkCall.operations?.[0];
+      expect(firstOp).toHaveProperty('index');
+      expect(firstOp).not.toHaveProperty('create');
+    });
+
+    it('should use index operation by default (no overwrite)', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'workflow-1', status: 201 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: workflow one
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(1);
+      expect(result.failed).toHaveLength(0);
+
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0];
+      const firstOp = bulkCall.operations?.[0];
+      expect(firstOp).toHaveProperty('index');
+      expect(firstOp).not.toHaveProperty('create');
     });
   });
 
