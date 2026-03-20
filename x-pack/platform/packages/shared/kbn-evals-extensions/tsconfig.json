@@ -17,11 +17,5 @@
   ],
   "kbn_references": [
     "@kbn/evals",
-    "@kbn/inference-common",
-    "@kbn/scout",
-    "@kbn/dev-cli-runner",
-    "@kbn/tooling-log",
-    "@kbn/zod",
-    "@kbn/test"
   ]
 }
