@@ -89,6 +89,40 @@ function truncateTraceDocuments({
   };
 }
 
+function truncateTraces(
+  rawTraces: Array<{
+    traceId: string;
+    items: Record<string, unknown>[];
+    services: ServiceAggregate[];
+    totalHits: number;
+    error?: string;
+  }>,
+  maxDocsPerTrace: number,
+  maxOutputChars: number
+) {
+  let remainingChars = maxOutputChars;
+  return rawTraces.map((trace) => {
+    if (trace.error) {
+      return {
+        traceId: trace.traceId,
+        items: [],
+        error: trace.error,
+        services: [],
+        isTruncated: false,
+      };
+    }
+    const { items, isTruncated, message, remainingOutputChars } = truncateTraceDocuments({
+      traceId: trace.traceId,
+      items: trace.items,
+      totalHits: trace.totalHits,
+      maxDocsPerTrace,
+      maxOutputChars: remainingChars,
+    });
+    remainingChars = remainingOutputChars;
+    return { traceId: trace.traceId, items, services: trace.services, isTruncated, message };
+  });
+}
+
 export async function getTraceDocuments({
   esClient,
   traceIds,
@@ -150,8 +184,7 @@ export async function getTraceDocuments({
   const msearchResponse = await esClient.asCurrentUser.msearch({
     searches,
   });
-  let maxOutputChars = DEFAULT_MAX_OUTPUT_CHARS;
-  const traces = msearchResponse.responses.map((response, responseIndex) => {
+  const rawTraces = msearchResponse.responses.map((response, responseIndex) => {
     const traceId = traceIds[responseIndex];
     if ('error' in response) {
       return {
@@ -159,7 +192,7 @@ export async function getTraceDocuments({
         items: [],
         error: `Failed to fetch trace documents for trace.id ${traceId}: ${response.error.type}: ${response.error.reason}`,
         services: [],
-        isTruncated: false,
+        totalHits: 0,
       };
     }
     const serviceAggs = (response.aggregations?.services as ServicesAgg)?.buckets ?? [];
@@ -170,27 +203,13 @@ export async function getTraceDocuments({
         errorCount: bucket.error_count?.doc_count ?? 0,
       }))
       .sort((a, b) => b.count - a.count);
-    const {
-      items,
-      isTruncated,
-      message = undefined,
-      remainingOutputChars,
-    } = truncateTraceDocuments({
-      traceId,
-      items: response.hits.hits.map((hit) => unwrapEsFields(hit.fields)),
-      totalHits: getTotalHits(response),
-      maxDocsPerTrace,
-      maxOutputChars,
-    });
-    maxOutputChars = remainingOutputChars;
     return {
       traceId,
-      items,
+      items: response.hits.hits.map((hit) => unwrapEsFields(hit.fields)),
       services,
-      isTruncated,
-      message,
+      totalHits: getTotalHits(response),
     };
   });
 
-  return traces;
+  return truncateTraces(rawTraces, maxDocsPerTrace, DEFAULT_MAX_OUTPUT_CHARS);
 }
