@@ -25,8 +25,6 @@ import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpe
 import { pkgToPkgKey } from '../epm/registry';
 import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 
-const AGGREGATED_OTEL_METRICS_PIPELINE = 'metrics/aggregated-otel-metrics';
-
 // Generate OTel Collector policy
 export function generateOtelcolConfig(
   inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[],
@@ -50,25 +48,38 @@ export function generateOtelcolConfig(
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((stream) => {
         // Avoid dots in keys, as they can create subobjects in agent config.
         const suffix = (input.id + '-' + stream.id).replaceAll('.', '-');
+        const namespace =
+          'data_stream' in input
+            ? (input as FullAgentPolicyInput).data_stream.namespace
+            : 'default';
         // Extract signal types from pipeline IDs
         const signalTypes = stream.service?.pipelines
           ? extractSignalTypesFromPipelines(stream.service?.pipelines)
           : [];
-        const attributesTransform = generateOTelAttributesTransform(
-          stream.data_stream.type ? stream.data_stream.type : 'logs',
-          stream.data_stream.dataset,
-          'data_stream' in input
-            ? (input as FullAgentPolicyInput).data_stream.namespace
-            : 'default',
-          suffix,
-          packageInfo,
-          signalTypes
-        );
         const hasTracesPipeline = signalTypes.includes('traces');
 
         const shouldAddAPMConfig =
           (stream.data_stream.type === dataTypes.Traces || hasTracesPipeline) &&
           stream[USE_APM_VAR_NAME] === true;
+
+        const attributesTransform = generateOTelAttributesTransform(
+          stream.data_stream.type ? stream.data_stream.type : 'logs',
+          stream.data_stream.dataset,
+          namespace,
+          suffix,
+          packageInfo,
+          signalTypes
+        );
+
+        if (shouldAddAPMConfig) {
+          const [, routingTransformConfig] = Object.entries(attributesTransform)[0];
+          routingTransformConfig.metric_statements = [
+            {
+              context: 'datapoint',
+              statements: [`set(attributes["data_stream.namespace"], "${namespace}")`],
+            },
+          ];
+        }
 
         let otelConfig: OTelCollectorConfig = {
           ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
@@ -86,7 +97,8 @@ export function generateOtelcolConfig(
                       suffix,
                       addSuffixToOtelcolPipelinesComponents(stream.service.pipelines, suffix)
                     ).pipelines ?? {},
-                    shouldAddAPMConfig
+                    shouldAddAPMConfig,
+                    suffix
                   ),
                 },
               }
@@ -103,11 +115,12 @@ export function generateOtelcolConfig(
             otelConfig.processors = {};
           }
 
-          otelConfig.connectors.elasticapm = {};
-          otelConfig.processors.elasticapm = {};
+          otelConfig.connectors[`elasticapm/${suffix}`] = {};
+          otelConfig.processors[`elasticapm/${suffix}`] = {};
 
-          otelConfig.service!.pipelines![AGGREGATED_OTEL_METRICS_PIPELINE] = {
-            receivers: ['elasticapm'],
+          otelConfig.service!.pipelines![`metrics/${suffix}-aggregated-apm-metrics`] = {
+            receivers: [`elasticapm/${suffix}`],
+            processors: [`transform/${suffix}-routing`],
           };
         }
 
@@ -280,7 +293,8 @@ function addSuffixToOtelcolComponentsConfig(
 
 function conditionallyAddApmToPipelines(
   pipelines: Record<OTelCollectorPipelineID, any>,
-  shouldAddAPMConfig: boolean
+  shouldAddAPMConfig: boolean,
+  suffix: string
 ): Record<OTelCollectorPipelineID, any> {
   if (!shouldAddAPMConfig) {
     return pipelines;
@@ -290,8 +304,8 @@ function conditionallyAddApmToPipelines(
     ([pipelineID, pipeline]) => {
       const signalType = getSignalType(pipelineID);
       if (signalType === 'traces') {
-        pipeline.exporters = [...(pipeline.exporters || []), 'elasticapm'];
-        pipeline.processors = [...(pipeline.processors || []), 'elasticapm'];
+        pipeline.exporters = [...(pipeline.exporters || []), `elasticapm/${suffix}`];
+        pipeline.processors = [...(pipeline.processors || []), `elasticapm/${suffix}`];
       }
       result[pipelineID] = pipeline;
     }

@@ -214,7 +214,7 @@ describe('generateOtelcolConfig', () => {
     name: 'test-traces',
     revision: 0,
     data_stream: {
-      namespace: 'default',
+      namespace: 'apmtest',
     },
     use_output: 'default',
     package_policy_id: 'tracespolicy',
@@ -614,22 +614,28 @@ describe('generateOtelcolConfig', () => {
               statements: [
                 'set(attributes["data_stream.type"], "traces")',
                 'set(attributes["data_stream.dataset"], "zipkinreceiver")',
-                'set(attributes["data_stream.namespace"], "default")',
+                'set(attributes["data_stream.namespace"], "apmtest")',
               ],
             },
             {
               context: 'spanevent',
               statements: [
                 'set(attributes["data_stream.type"], "logs")',
-                'set(attributes["data_stream.namespace"], "default")',
+                'set(attributes["data_stream.namespace"], "apmtest")',
               ],
             },
           ],
+          metric_statements: [
+            {
+              context: 'datapoint',
+              statements: ['set(attributes["data_stream.namespace"], "apmtest")'],
+            },
+          ],
         },
-        elasticapm: {},
+        'elasticapm/test-traces-stream-id-1': {},
       },
       connectors: {
-        elasticapm: {},
+        'elasticapm/test-traces-stream-id-1': {},
         forward: {},
       },
       exporters: {
@@ -641,11 +647,15 @@ describe('generateOtelcolConfig', () => {
         pipelines: {
           'traces/test-traces-stream-id-1': {
             receivers: ['zipkin/test-traces-stream-id-1'],
-            exporters: ['elasticapm', 'forward'],
-            processors: ['elasticapm', 'transform/test-traces-stream-id-1-routing'],
+            exporters: ['elasticapm/test-traces-stream-id-1', 'forward'],
+            processors: [
+              'elasticapm/test-traces-stream-id-1',
+              'transform/test-traces-stream-id-1-routing',
+            ],
           },
-          'metrics/aggregated-otel-metrics': {
-            receivers: ['elasticapm'],
+          'metrics/test-traces-stream-id-1-aggregated-apm-metrics': {
+            receivers: ['elasticapm/test-traces-stream-id-1'],
+            processors: ['transform/test-traces-stream-id-1-routing'],
             exporters: ['forward'],
           },
           traces: {
@@ -659,6 +669,68 @@ describe('generateOtelcolConfig', () => {
         },
       },
     });
+  });
+
+  it('should produce separate aggregated-apm-metrics pipelines for two APM package policies with different namespaces', () => {
+    const inputA: FullAgentPolicyInput = {
+      ...otelTracesInputWithAPM,
+      id: 'policy-a',
+      name: 'policy-a',
+      package_policy_id: 'policy-a',
+      data_stream: { namespace: 'ns-a' },
+      streams: [
+        {
+          id: 'stream-id-1',
+          data_stream: { dataset: 'apm', type: 'traces' },
+          use_apm: true,
+          receivers: { otlp: { protocols: { grpc: { endpoint: '0.0.0.0:4317' } } } },
+          service: { pipelines: { traces: { receivers: ['otlp'] } } },
+        },
+      ],
+    };
+    const inputB: FullAgentPolicyInput = {
+      ...otelTracesInputWithAPM,
+      id: 'policy-b',
+      name: 'policy-b',
+      package_policy_id: 'policy-b',
+      data_stream: { namespace: 'ns-b' },
+      streams: [
+        {
+          id: 'stream-id-1',
+          data_stream: { dataset: 'apm', type: 'traces' },
+          use_apm: true,
+          receivers: { otlp: { protocols: { grpc: { endpoint: '0.0.0.0:4318' } } } },
+          service: { pipelines: { traces: { receivers: ['otlp'] } } },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig([inputA, inputB], defaultOutput);
+
+    expect(
+      result.service?.pipelines?.['metrics/policy-a-stream-id-1-aggregated-apm-metrics']
+    ).toEqual({
+      receivers: ['elasticapm/policy-a-stream-id-1'],
+      processors: ['transform/policy-a-stream-id-1-routing'],
+      exporters: ['forward'],
+    });
+    expect(
+      result.service?.pipelines?.['metrics/policy-b-stream-id-1-aggregated-apm-metrics']
+    ).toEqual({
+      receivers: ['elasticapm/policy-b-stream-id-1'],
+      processors: ['transform/policy-b-stream-id-1-routing'],
+      exporters: ['forward'],
+    });
+    expect(
+      result.processors?.['transform/policy-a-stream-id-1-routing']?.metric_statements
+    ).toEqual([
+      { context: 'datapoint', statements: ['set(attributes["data_stream.namespace"], "ns-a")'] },
+    ]);
+    expect(
+      result.processors?.['transform/policy-b-stream-id-1-routing']?.metric_statements
+    ).toEqual([
+      { context: 'datapoint', statements: ['set(attributes["data_stream.namespace"], "ns-b")'] },
+    ]);
   });
 
   describe('with dynamic_signal_types (multiple signal types)', () => {
@@ -799,17 +871,20 @@ describe('generateOtelcolConfig', () => {
       const inputs: FullAgentPolicyInput[] = [inputWithUseApm];
       const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
 
-      expect(result.connectors?.elasticapm).toEqual({});
-      expect(result.processors?.elasticapm).toEqual({});
-      expect(result.service?.pipelines?.['metrics/aggregated-otel-metrics']).toEqual({
-        receivers: ['elasticapm'],
+      expect(result.connectors?.['elasticapm/test-multi-signal-stream-id-1']).toEqual({});
+      expect(result.processors?.['elasticapm/test-multi-signal-stream-id-1']).toEqual({});
+      expect(
+        result.service?.pipelines?.['metrics/test-multi-signal-stream-id-1-aggregated-apm-metrics']
+      ).toEqual({
+        receivers: ['elasticapm/test-multi-signal-stream-id-1'],
+        processors: ['transform/test-multi-signal-stream-id-1-routing'],
         exporters: ['forward'],
       });
       const tracesPipelineKey = 'traces/otlp/test-multi-signal-stream-id-1';
       const tracesPipeline = result.service?.pipelines?.[tracesPipelineKey];
       expect(tracesPipeline).toBeDefined();
-      expect(tracesPipeline?.exporters).toContain('elasticapm');
-      expect(tracesPipeline?.processors).toContain('elasticapm');
+      expect(tracesPipeline?.exporters).toContain('elasticapm/test-multi-signal-stream-id-1');
+      expect(tracesPipeline?.processors).toContain('elasticapm/test-multi-signal-stream-id-1');
       const metricsPipelineKey = 'metrics/otlp/test-multi-signal-stream-id-1';
       const metricsPipeline = result.service?.pipelines?.[metricsPipelineKey];
       expect(metricsPipeline).toBeDefined();
