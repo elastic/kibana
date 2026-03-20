@@ -2397,7 +2397,7 @@
           "\nUI components and services to add spaces capabilities to an application."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2421,7 +2421,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2447,7 +2447,7 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2469,7 +2469,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-                "lineNumber": 52,
+                "lineNumber": 53,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2501,7 +2501,7 @@
               "<Services>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2521,7 +2521,7 @@
           "\nReact UI components to be used to display the Spaces feature in any application."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-        "lineNumber": 59,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2547,7 +2547,7 @@
               ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2564,7 +2564,7 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-                "lineNumber": 26,
+                "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2592,7 +2592,7 @@
               ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2609,7 +2609,7 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-                "lineNumber": 26,
+                "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2637,7 +2637,7 @@
               ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2654,7 +2654,7 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-                "lineNumber": 26,
+                "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2682,7 +2682,7 @@
               ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2699,7 +2699,7 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-                "lineNumber": 26,
+                "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2727,7 +2727,7 @@
               ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-            "lineNumber": 88,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2744,7 +2744,7 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-                "lineNumber": 26,
+                "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2772,7 +2772,7 @@
               ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-            "lineNumber": 94,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2789,7 +2789,7 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-                "lineNumber": 26,
+                "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2817,7 +2817,7 @@
               ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-            "lineNumber": 112,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2834,7 +2834,46 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-                "lineNumber": 26,
+                "lineNumber": 27,
+                "columnNumber": 35,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesApiUiComponent.getSolutionViewSwitchCallout",
+            "type": "Function",
+            "tags": [],
+            "label": "getSolutionViewSwitchCallout",
+            "description": [
+              "\nDisplays a callout to prompt the user to switch from a classic view to a solution view."
+            ],
+            "signature": [
+              "(props: ",
+              "SolutionViewSwitchCalloutProps",
+              ") => React.ReactElement<any>"
+            ],
+            "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesApiUiComponent.getSolutionViewSwitchCallout.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+                "lineNumber": 27,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3202,7 +3241,7 @@
           "(props: T) => React.ReactElement<any>"
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-        "lineNumber": 23,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3219,7 +3258,7 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false
