@@ -7,7 +7,7 @@
 
 import { filter, map, mapValues } from 'lodash';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { ReadPacksRequestParamsSchema } from '../../../common/api';
@@ -47,51 +47,61 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         },
       },
       async (context, request, response) => {
-        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
-          osqueryContext,
-          request
-        );
+        try {
+          const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+            osqueryContext,
+            request
+          );
 
-        const { attributes, references, id, ...rest } =
-          await spaceScopedClient.get<PackSavedObject>(packSavedObjectType, request.params.id);
+          const { attributes, references, id, ...rest } =
+            await spaceScopedClient.get<PackSavedObject>(packSavedObjectType, request.params.id);
 
-        const policyIds = map(
-          filter(references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
-          'id'
-        );
-        const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset']);
+          const policyIds = map(
+            filter(references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
+            'id'
+          );
+          const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset']);
 
-        const data: ReadPackResponseData = {
-          type: rest.type,
-          namespaces: rest.namespaces,
-          migrationVersion: rest.migrationVersion,
-          managed: rest.managed,
-          coreMigrationVersion: rest.coreMigrationVersion,
-          name: attributes.name,
-          description: attributes.description,
-          version: attributes.version,
-          enabled: attributes.enabled,
-          created_at: attributes.created_at,
-          created_by: attributes.created_by,
-          created_by_profile_uid: attributes.created_by_profile_uid,
-          updated_at: attributes.updated_at,
-          updated_by: attributes.updated_by,
-          updated_by_profile_uid: attributes.updated_by_profile_uid,
-          saved_object_id: id,
-          queries: mapValues(
-            convertSOQueriesToPack(attributes.queries),
-            ({ schedule_id: _s, start_date: _d, ...restQuery }) => restQuery
-          ),
-          shards: convertShardsToObject(attributes.shards),
-          policy_ids: policyIds,
-          read_only: attributes.version !== undefined && osqueryPackAssetReference,
-        };
+          const data: ReadPackResponseData = {
+            type: rest.type,
+            namespaces: rest.namespaces,
+            migrationVersion: rest.migrationVersion,
+            managed: rest.managed,
+            coreMigrationVersion: rest.coreMigrationVersion,
+            name: attributes.name,
+            description: attributes.description,
+            version: attributes.version,
+            enabled: attributes.enabled,
+            created_at: attributes.created_at,
+            created_by: attributes.created_by,
+            created_by_profile_uid: attributes.created_by_profile_uid,
+            updated_at: attributes.updated_at,
+            updated_by: attributes.updated_by,
+            updated_by_profile_uid: attributes.updated_by_profile_uid,
+            saved_object_id: id,
+            queries: mapValues(
+              convertSOQueriesToPack(attributes.queries),
+              ({ schedule_id: _s, start_date: _d, ...restQuery }) => restQuery
+            ),
+            shards: convertShardsToObject(attributes.shards),
+            policy_ids: policyIds,
+            read_only: attributes.version !== undefined && osqueryPackAssetReference,
+          };
 
-        return response.ok({
-          body: {
-            data,
-          },
-        });
+          return response.ok({
+            body: {
+              data,
+            },
+          });
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Pack ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
       }
     );
 };

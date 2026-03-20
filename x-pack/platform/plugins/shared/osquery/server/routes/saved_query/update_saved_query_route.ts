@@ -7,7 +7,7 @@
 
 import { filter, some } from 'lodash';
 
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -57,70 +57,27 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         },
       },
       async (context, request, response) => {
-        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
-          osqueryContext,
-          request
-        );
+        try {
+          const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+            osqueryContext,
+            request
+          );
 
-        const space = await osqueryContext.service.getActiveSpace(request);
-        const spaceId = space?.id ?? DEFAULT_SPACE_ID;
+          const space = await osqueryContext.service.getActiveSpace(request);
+          const spaceId = space?.id ?? DEFAULT_SPACE_ID;
 
-        const [, startPlugins] = await osqueryContext.getStartServices();
-        const currentUser = await getUserInfo({
-          request,
-          security: (startPlugins as StartPlugins).security,
-          logger: osqueryContext.logFactory.get('savedQuery'),
-        });
-        const username = currentUser?.username ?? undefined;
-        const profileUid = currentUser?.profile_uid ?? undefined;
+          const [, startPlugins] = await osqueryContext.getStartServices();
+          const currentUser = await getUserInfo({
+            request,
+            security: (startPlugins as StartPlugins).security,
+            logger: osqueryContext.logFactory.get('savedQuery'),
+          });
+          const username = currentUser?.username ?? undefined;
+          const profileUid = currentUser?.profile_uid ?? undefined;
 
-        const {
-          id,
-          description,
-          platform,
-          query,
-          version,
-          interval,
-          timeout,
-          snapshot,
-          removed,
-          ecs_mapping,
-        } = request.body;
-
-        const isPrebuilt = await isSavedQueryPrebuilt(
-          osqueryContext.service.getPackageService()?.asInternalUser,
-          request.params.id,
-          spaceScopedClient,
-          spaceId
-        );
-
-        if (isPrebuilt) {
-          return response.conflict({ body: `Elastic prebuilt Saved query cannot be updated.` });
-        }
-
-        const conflictingEntries = await spaceScopedClient.find<{ id: string }>({
-          type: savedQuerySavedObjectType,
-          filter: `${savedQuerySavedObjectType}.attributes.id: "${id}"`,
-        });
-
-        if (
-          some(
-            filter(
-              conflictingEntries.saved_objects,
-              (soObject) => soObject.id !== request.params.id
-            ),
-            ['attributes.id', id]
-          )
-        ) {
-          return response.conflict({ body: `Saved query with id "${id}" already exists.` });
-        }
-
-        const updatedSavedQuerySO = await spaceScopedClient.update(
-          savedQuerySavedObjectType,
-          request.params.id,
-          {
+          const {
             id,
-            description: description || '',
+            description,
             platform,
             query,
             version,
@@ -128,50 +85,103 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             timeout,
             snapshot,
             removed,
-            ecs_mapping: convertECSMappingToArray(ecs_mapping),
-            updated_by: username,
-            updated_by_profile_uid: profileUid,
-            updated_at: new Date().toISOString(),
-          },
-          {
-            refresh: 'wait_for',
+            ecs_mapping,
+          } = request.body;
+
+          const isPrebuilt = await isSavedQueryPrebuilt(
+            osqueryContext.service.getPackageService()?.asInternalUser,
+            request.params.id,
+            spaceScopedClient,
+            spaceId
+          );
+
+          if (isPrebuilt) {
+            return response.conflict({ body: `Elastic prebuilt Saved query cannot be updated.` });
           }
-        );
 
-        if (ecs_mapping || updatedSavedQuerySO.attributes.ecs_mapping) {
-          // @ts-expect-error update types
-          updatedSavedQuerySO.attributes.ecs_mapping =
-            ecs_mapping ||
-            (updatedSavedQuerySO.attributes.ecs_mapping &&
-              // @ts-expect-error update types
-              convertECSMappingToObject(updatedSavedQuerySO.attributes.ecs_mapping)) ||
-            {};
+          const conflictingEntries = await spaceScopedClient.find<{ id: string }>({
+            type: savedQuerySavedObjectType,
+            filter: `${savedQuerySavedObjectType}.attributes.id: "${id}"`,
+          });
+
+          if (
+            some(
+              filter(
+                conflictingEntries.saved_objects,
+                (soObject) => soObject.id !== request.params.id
+              ),
+              ['attributes.id', id]
+            )
+          ) {
+            return response.conflict({ body: `Saved query with id "${id}" already exists.` });
+          }
+
+          const updatedSavedQuerySO = await spaceScopedClient.update(
+            savedQuerySavedObjectType,
+            request.params.id,
+            {
+              id,
+              description: description || '',
+              platform,
+              query,
+              version,
+              interval,
+              timeout,
+              snapshot,
+              removed,
+              ecs_mapping: convertECSMappingToArray(ecs_mapping),
+              updated_by: username,
+              updated_by_profile_uid: profileUid,
+              updated_at: new Date().toISOString(),
+            },
+            {
+              refresh: 'wait_for',
+            }
+          );
+
+          if (ecs_mapping || updatedSavedQuerySO.attributes.ecs_mapping) {
+            // @ts-expect-error update types
+            updatedSavedQuerySO.attributes.ecs_mapping =
+              ecs_mapping ||
+              (updatedSavedQuerySO.attributes.ecs_mapping &&
+                // @ts-expect-error update types
+                convertECSMappingToObject(updatedSavedQuerySO.attributes.ecs_mapping)) ||
+              {};
+          }
+
+          const { attributes } = updatedSavedQuerySO;
+
+          const data: Partial<UpdateSavedQueryResponse> = {
+            description: attributes.description,
+            id: attributes.id,
+            removed: attributes.removed,
+            snapshot: attributes.snapshot,
+            version: attributes.version,
+            ecs_mapping: attributes.ecs_mapping,
+            interval: attributes.interval,
+            timeout: attributes.timeout,
+            platform: attributes.platform,
+            query: attributes.query,
+            updated_at: attributes.updated_at,
+            updated_by: attributes.updated_by,
+            updated_by_profile_uid: attributes.updated_by_profile_uid,
+            saved_object_id: updatedSavedQuerySO.id,
+          };
+
+          return response.ok({
+            body: {
+              data,
+            },
+          });
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Saved query ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
         }
-
-        const { attributes } = updatedSavedQuerySO;
-
-        const data: Partial<UpdateSavedQueryResponse> = {
-          description: attributes.description,
-          id: attributes.id,
-          removed: attributes.removed,
-          snapshot: attributes.snapshot,
-          version: attributes.version,
-          ecs_mapping: attributes.ecs_mapping,
-          interval: attributes.interval,
-          timeout: attributes.timeout,
-          platform: attributes.platform,
-          query: attributes.query,
-          updated_at: attributes.updated_at,
-          updated_by: attributes.updated_by,
-          updated_by_profile_uid: attributes.updated_by_profile_uid,
-          saved_object_id: updatedSavedQuerySO.id,
-        };
-
-        return response.ok({
-          body: {
-            data,
-          },
-        });
       }
     );
 };
