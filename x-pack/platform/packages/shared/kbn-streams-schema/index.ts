@@ -6,10 +6,21 @@
  */
 
 export { Streams } from './src/models/streams';
-export { IngestBase } from './src/models/ingest/base';
-export { Ingest } from './src/models/ingest';
-export { WiredIngest } from './src/models/ingest/wired';
-export { ClassicIngest } from './src/models/ingest/classic';
+export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
+export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
+export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
+export {
+  ClassicIngest,
+  ClassicStream,
+  ClassicIngestUpsertRequest,
+} from './src/models/ingest/classic';
+export { Query, QueryStream } from './src/models/query';
+export {
+  ESQL_VIEW_PREFIX,
+  getEsqlViewName,
+  getStreamNameFromViewName,
+  getWiredStreamViewQuery,
+} from './src/models/query/view_name';
 
 export {
   type RoutingDefinition,
@@ -21,9 +32,10 @@ export {
 
 export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_definition';
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
-export { isRootStreamDefinition } from './src/helpers/is_root';
+export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
 export { isOtelStream } from './src/helpers/is_otel_stream';
-export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
+export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
   convertGetResponseIntoUpsertRequest,
@@ -32,13 +44,23 @@ export {
 export {
   keepFields,
   namespacePrefixes,
+  otelReservedFields,
   isNamespacedEcsField,
+  isOtelReservedField,
   getRegularEcsField,
 } from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
 export { getInheritedSettings } from './src/helpers/get_inherited_settings';
-export { buildEsqlQuery } from './src/helpers/query';
+export {
+  buildMetadataOption,
+  ensureMetadata,
+  extractWhereExpression,
+  getFromSources,
+  normalizeEsqlQuery,
+  replaceFromSources,
+  rewriteFromSources,
+} from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
 
@@ -48,35 +70,51 @@ export {
   flattenRecord,
   recursiveRecord,
 } from './src/shared/record_types';
-export { isSchema, createIsNarrowSchema } from './src/shared/type_guards';
+export { isSchema, createIsNarrowSchema, isRecord } from './src/shared/type_guards';
 
 export {
   isChildOf,
   isDescendantOf,
+  isParentName,
   getAncestors,
   getAncestorsAndSelf,
   getParentId,
   getSegments,
+  getRoot,
   MAX_NESTING_LEVEL,
   isRoot,
+  ROOT_STREAM_NAMES,
+  LOGS_ROOT_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+  LOGS_ECS_STREAM_NAME,
+  type RootStreamName,
 } from './src/shared/hierarchy';
 
 export {
   type FieldDefinition,
   type NamedFieldDefinitionConfig,
   type FieldDefinitionConfig,
+  type ClassicFieldDefinition,
+  type ClassicFieldDefinitionConfig,
   type InheritedFieldDefinitionConfig,
   type InheritedFieldDefinition,
   type FieldDefinitionConfigAdvancedParameters,
+  type FieldDefinitionType,
+  type AllFieldDefinitionType,
+  FIELD_DEFINITION_TYPES,
+  ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
 } from './src/fields';
 
 export {
+  type EsqlQuery,
+  esqlQuerySchema,
   type StreamQuery,
-  type StreamQueryKql,
+  type QueryLink,
+  type QueriesGetResponse,
+  type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
-  streamQueryKqlSchema,
   streamQuerySchema,
 } from './src/queries';
 
@@ -104,6 +142,9 @@ export {
   type IngestStreamLifecycleInherit,
   type IngestStreamEffectiveLifecycle,
   type PhaseName,
+  type IlmPolicy,
+  type IlmPolicyWithUsage,
+  type IlmPolicyUsage,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
@@ -138,18 +179,31 @@ export type {
 } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';
+export {
+  validateStreamName,
+  type StreamNameValidationError,
+  type StreamNameValidationResult,
+  MAX_STREAM_NAME_LENGTH,
+  INVALID_STREAM_NAME_CHARACTERS,
+} from './src/helpers/stream_name_validation';
 
 export {
   type Feature,
   type BaseFeature,
   type FeatureStatus,
+  DATASET_ANALYSIS_FEATURE_TYPE,
+  LOG_SAMPLES_FEATURE_TYPE,
+  LOG_PATTERNS_FEATURE_TYPE,
+  ERROR_LOGS_FEATURE_TYPE,
+  COMPUTED_FEATURE_TYPES,
   isFeature,
+  isComputedFeature,
+  isDuplicateFeature,
+  hasSameFingerprint,
   featureSchema,
   baseFeatureSchema,
   featureStatusSchema,
 } from './src/feature';
-
-export { type System, systemSchema, isSystem } from './src/system';
 
 export {
   type BaseSimulationError,
@@ -165,4 +219,35 @@ export {
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
 
-export { TaskStatus } from './src/tasks/types';
+export { TaskStatus, type TaskResult } from './src/tasks/types';
+
+export type { GenerateDescriptionResult } from './src/api/description_generation';
+export type { IdentifyFeaturesResult } from './src/api/features';
+
+export {
+  type GenerateInsightsResult,
+  type Insight,
+  type InsightCore,
+  type InsightEvidence,
+  type InsightImpactLevel,
+  type InsightImpactLevelNumeric,
+  type InsightUserEvaluation,
+  type InsightMeta,
+  type SaveInsightBody,
+  insightSchema,
+  insightCoreSchema,
+  insightMetaSchema,
+  insightEvidenceSchema,
+  insightImpactLevelSchema,
+  insightImpactLevelNumericSchema,
+  insightUserEvaluationSchema,
+  INSIGHT_IMPACT_LEVEL_MAP,
+  getImpactLevel,
+} from './src/insights';
+export type { OnboardingResult } from './src/onboarding';
+export { OnboardingStep } from './src/onboarding';
+export { streamsOasDefinitions } from './src/oas_definitions';
+export type { StreamsOasDefinitions } from './src/oas_definitions';
+
+export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
+export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';

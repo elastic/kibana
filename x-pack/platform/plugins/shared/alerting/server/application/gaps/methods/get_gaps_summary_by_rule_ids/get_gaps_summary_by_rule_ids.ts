@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
@@ -15,10 +14,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { findRulesSo } from '../../../../data/rule';
-import {
-  alertingAuthorizationFilterOpts,
-  RULE_TYPE_CHECKS_CONCURRENCY,
-} from '../../../../rules_client/common/constants';
+import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import {
   extractGapDurationSums,
   calculateHighestPriorityGapFillStatus,
@@ -82,28 +78,26 @@ export async function getGapsSummaryByRuleIds(
       throw Boom.badRequest(`No rules matching ids ${ruleIds} found to get gaps summary`);
     }
 
-    await pMap(
-      buckets,
-      async ({ key: [ruleType, consumer] }) => {
-        try {
-          await context.authorization.ensureAuthorized({
-            ruleTypeId: ruleType,
-            consumer,
-            operation: ReadOperations.FindGaps,
-            entity: AlertingAuthorizationEntity.Rule,
-          });
-        } catch (error) {
-          context.auditLogger?.log(
-            ruleAuditEvent({
-              action: RuleAuditAction.GET_GAPS_SUMMARY_BY_RULE_IDS,
-              error,
-            })
-          );
-          throw error;
-        }
-      },
-      { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
-    );
+    const ruleTypeIdConsumersPairs = buckets.map(({ key: [ruleTypeId, consumer] }) => ({
+      ruleTypeId,
+      consumers: [consumer],
+    }));
+
+    try {
+      await context.authorization.bulkEnsureAuthorized({
+        ruleTypeIdConsumersPairs,
+        operation: ReadOperations.FindGaps,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      context.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_GAPS_SUMMARY_BY_RULE_IDS,
+          error,
+        })
+      );
+      throw error;
+    }
 
     const filter = buildGapsFilter({
       start,

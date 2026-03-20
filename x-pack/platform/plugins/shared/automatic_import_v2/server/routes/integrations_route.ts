@@ -7,7 +7,7 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import type {
   CreateAutoImportIntegrationResponse,
@@ -17,7 +17,11 @@ import type {
   IntegrationResponse,
 } from '../../common';
 import {
+  ApproveAutoImportIntegrationRequestBody,
+  ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
+  DeleteAutoImportIntegrationRequestParams,
+  DownloadAutoImportIntegrationRequestParams,
   GetAutoImportIntegrationRequestParams,
 } from '../../common';
 import { buildAutomaticImportResponse } from './utils';
@@ -31,6 +35,9 @@ export const registerIntegrationRoutes = (
   getAllIntegrationsRoute(router, logger);
   getIntegrationByIdRoute(router, logger);
   createIntegrationRoute(router, logger);
+  approveIntegrationRoute(router, logger);
+  deleteIntegrationRoute(router, logger);
+  downloadIntegrationRoute(router, logger);
 };
 
 const getAllIntegrationsRoute = (
@@ -62,10 +69,14 @@ const getAllIntegrationsRoute = (
             (integration) => ({
               integrationId: integration.integrationId,
               title: integration.title,
+              logo: integration.logo,
               totalDataStreamCount: integration.dataStreams.length,
               successfulDataStreamCount: integration.dataStreams.filter(
                 (dataStream) => dataStream.status === 'completed'
               ).length,
+              version: integration.version,
+              createdBy: integration.createdBy,
+              createdByProfileUid: integration.createdByProfileUid,
               status: integration.status,
             })
           ) as AllIntegrationsResponseIntegration[];
@@ -113,7 +124,7 @@ const getIntegrationByIdRoute = (
           const body: GetAutoImportIntegrationResponse = { integrationResponse: integration };
           return response.ok({ body });
         } catch (err) {
-          logger.error(`getIntegrationByIdRoute: Caught error:`, err);
+          logger.error(`getIntegrationByIdRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
           const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
@@ -150,7 +161,15 @@ const createIntegrationRoute = (
       async (context, request, response) => {
         const { automaticImportService, getCurrentUser, esClient } =
           await context.automaticImportv2;
-        const { integrationId, title, logo, description, connectorId, dataStreams } = request.body;
+        const {
+          integrationId,
+          title,
+          logo,
+          description,
+          connectorId,
+          dataStreams,
+          langSmithOptions,
+        } = request.body;
         try {
           const authenticatedUser = await getCurrentUser();
 
@@ -161,7 +180,10 @@ const createIntegrationRoute = (
             description,
           };
 
-          await automaticImportService.createIntegration({ authenticatedUser, integrationParams });
+          await automaticImportService.createUpdateIntegration({
+            authenticatedUser,
+            integrationParams,
+          });
 
           if (dataStreams) {
             const dataStreamsParams: DataStreamParams[] = dataStreams.map((dataStream) => ({
@@ -177,6 +199,7 @@ const createIntegrationRoute = (
                     dataStreamParams,
                     esClient,
                     connectorId,
+                    langSmithOptions,
                   },
                   request
                 )
@@ -189,11 +212,167 @@ const createIntegrationRoute = (
           };
           return response.ok({ body });
         } catch (err) {
-          await automaticImportService.deleteIntegration(integrationId);
-          logger.error(`createIntegrationRoute: Caught error:`, err);
+          logger.error(`createIntegrationRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,
+            body: err,
+          });
+        }
+      }
+    );
+
+const approveIntegrationRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .post({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}/approve',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(ApproveAutoImportIntegrationRequestParams),
+            body: buildRouteValidationWithZod(ApproveAutoImportIntegrationRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { automaticImportService, getCurrentUser } = await context.automaticImportv2;
+          const authenticatedUser = await getCurrentUser();
+
+          const { integration_id: integrationId } = request.params;
+          const { version, categories } = request.body;
+
+          await automaticImportService.approveIntegration({
+            integrationId,
+            authenticatedUser,
+            version,
+            categories,
+          });
+
+          return response.ok({ body: { message: 'Integration approved successfully' } });
+        } catch (err) {
+          logger.error(`approveIntegrationRoute: Caught error: ${err}`);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          return automaticImportResponse.error({
+            statusCode: 500,
+            body: err,
+          });
+        }
+      }
+    );
+
+const deleteIntegrationRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .delete({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(DeleteAutoImportIntegrationRequestParams),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { automaticImportService } = await context.automaticImportv2;
+          const { integration_id: integrationId } = request.params;
+          const result = await automaticImportService.deleteIntegration(integrationId);
+
+          if (result.errors.length > 0) {
+            logger.warn(
+              `deleteIntegrationRoute: Integration ${integrationId} deleted with ${result.errors.length} errors`
+            );
+          }
+
+          return response.ok({
+            body: {
+              success: result.success,
+              dataStreamsDeleted: result.dataStreamsDeleted,
+              errors: result.errors,
+            },
+          });
+        } catch (err) {
+          logger.error(`deleteIntegrationRoute: Caught error: ${err}`);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
+          return automaticImportResponse.error({
+            statusCode,
+            body: err,
+          });
+        }
+      }
+    );
+
+const downloadIntegrationRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .get({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}/download',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.READ}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(DownloadAutoImportIntegrationRequestParams),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const automaticImportv2 = await context.automaticImportv2;
+          const automaticImportService = automaticImportv2.automaticImportService;
+          const { integration_id: integrationId } = request.params;
+          const { buffer, packageName } = await automaticImportService.buildIntegrationPackage(
+            integrationId,
+            automaticImportv2.fieldsMetadataClient
+          );
+
+          return response.ok({
+            body: buffer,
+            headers: {
+              'content-type': 'application/zip',
+              'content-disposition': `attachment; filename="${packageName}.zip"`,
+            },
+          });
+        } catch (err) {
+          logger.error(`downloadIntegrationRoute: Caught error: ${err}`);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
+          return automaticImportResponse.error({
+            statusCode,
             body: err,
           });
         }

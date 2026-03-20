@@ -52,3 +52,20 @@ export const deleteUserAndRole = async (
   await securityService.user.delete(roleName);
   await securityService.role.delete(roleName);
 };
+
+export const deleteAndReCreateUserRole = async (
+  getService: FtrProviderContext['getService'],
+  roleName: SecurityRoleName
+): Promise<void> => {
+  const log = getService('log');
+  try {
+    await deleteUserAndRole(getService, roleName);
+  } catch (exc) {
+    log.error(`could not delete user and role ${roleName}`);
+  }
+  try {
+    await createUserAndRole(getService, roleName);
+  } catch (exc) {
+    log.error(`could not create user and role ${roleName}`);
+  }
+};

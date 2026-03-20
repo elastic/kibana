@@ -9,16 +9,12 @@ import { boomify, isBoom } from '@hapi/boom';
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import {
-  LENS_VIS_API_PATH,
-  LENS_API_VERSION,
-  LENS_API_ACCESS,
-  LENS_CONTENT_TYPE,
-} from '../../../../common/constants';
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
+import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
 import type { LensSavedObject } from '../../../content_management';
-import type { CMItemResultMeta, RegisterAPIRouteFn } from '../../types';
 import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
-import { getLensResponseItem } from '../utils';
+import { getLensResponseItem } from './utils';
+import type { RegisterAPIRouteFn } from '../../types';
 
 export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -26,7 +22,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
 ) => {
   const getRoute = router.get({
     path: `${LENS_VIS_API_PATH}/{id}`,
-    access: LENS_API_ACCESS,
+    access: 'internal', // to go public in 9.4
     enableQueryVersion: true,
     summary: 'Get Lens visualization',
     description: 'Get a Lens visualization from id.',
@@ -75,7 +71,6 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
-      // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
@@ -87,8 +82,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
           throw result.item.error;
         }
 
-        const resultMeta: CMItemResultMeta = result.meta;
-        const responseItem = getLensResponseItem(builder, result.item, resultMeta);
+        const responseItem = getLensResponseItem(builder, result.item);
 
         return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
           body: responseItem,
@@ -98,7 +92,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
           if (error.output.statusCode === 404) {
             return res.notFound({
               body: {
-                message: `A Lens visualization with id [${req.params.id}] was not found.`,
+                message: `A visualization with id [${req.params.id}] was not found.`,
               },
             });
           }

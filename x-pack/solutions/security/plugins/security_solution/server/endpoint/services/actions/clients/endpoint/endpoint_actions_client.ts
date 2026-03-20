@@ -162,7 +162,13 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     }
 
     if (actionRequest.command === 'runscript') {
-      const scriptDetails = await this.fetchScript(actionRequest.parameters.scriptId);
+      let scriptDetails: EndpointScript;
+
+      try {
+        scriptDetails = await this.fetchScript(actionRequest.parameters.scriptId);
+      } catch (error) {
+        return { isValid: false, error };
+      }
 
       if (scriptDetails.requiresInput && !(actionRequest.parameters.scriptInput ?? '').trim()) {
         return {
@@ -212,7 +218,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         const scriptDetails = await this.fetchScript(runscriptActionParams.scriptId);
         const scriptInfo = {
           file_id: scriptDetails.fileId,
-          file_hash: scriptDetails.fileHash,
+          file_sha256: scriptDetails.fileHash,
           file_name: scriptDetails.fileName,
           file_size: scriptDetails.fileSize,
           path_to_executable: scriptDetails.pathToExecutable,
@@ -560,17 +566,37 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
-    if (!this.options.endpointService.experimentalFeatures.responseActionsEndpointRunScript) {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsEndpointRunScript ||
+      (this.options.isAutomated &&
+        !this.options.endpointService.experimentalFeatures
+          .responseActionsEndpointAutomatedRunScript)
+    ) {
       throw new ResponseActionsClientError(
         'Elastic Defend runscript operation is not enabled',
         400
       );
     }
 
+    let runscriptActionRequestParams = actionRequest;
+
+    // Apply default for `timeout` if not set on request payload
+    if (
+      !(runscriptActionRequestParams.parameters as EndpointRunScriptActionRequestParams).timeout
+    ) {
+      runscriptActionRequestParams = {
+        ...runscriptActionRequestParams,
+        parameters: {
+          ...runscriptActionRequestParams.parameters,
+          timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT,
+        },
+      };
+    }
+
     return this.handleResponseAction<
       RunScriptActionRequestBody,
       ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
-    >('runscript', actionRequest, options);
+    >('runscript', runscriptActionRequestParams, options);
   }
 
   async getCustomScripts({

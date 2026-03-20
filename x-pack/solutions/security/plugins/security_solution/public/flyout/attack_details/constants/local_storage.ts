@@ -6,5 +6,7 @@
  */
 
 export const FLYOUT_STORAGE_KEYS = {
+  ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS:
+    'securitySolution.attackDetailsFlyout.overviewSectionExpanded.v9.4',
   RIGHT_PANEL_SELECTED_TABS: 'securitySolution.attackDetailsFlyout.rightPanel.selectedTabs.v9.3',
 };

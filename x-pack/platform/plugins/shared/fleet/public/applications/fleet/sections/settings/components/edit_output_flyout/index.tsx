@@ -319,6 +319,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               <EuiSelect
                 fullWidth
                 data-test-subj="settingsOutputsFlyout.typeInput"
+                aria-label={i18n.translate('xpack.fleet.settings.editOutputFlyout.typeInputLabel', {
+                  defaultMessage: 'Type',
+                })}
                 {...inputs.typeInput.props}
                 options={OUTPUT_TYPE_OPTIONS}
               />
@@ -499,6 +502,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                     defaultMessage="Allow agents to write to Streams"
                   />
                 }
+                disabled={inputs.writeToStreams.props.disabled}
                 checked={inputs.writeToStreams.value}
                 onChange={(e) => inputs.writeToStreams.setValue(e.target.checked)}
               />

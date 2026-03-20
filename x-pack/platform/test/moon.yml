@@ -4,17 +4,16 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-suites-xpack-platform'
-type: unknown
+layer: unknown
 owners: {}
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-xpack-platform'
+  title: '@kbn/test-suites-xpack-platform'
   description: Moon project for @kbn/test-suites-xpack-platform
   channel: ''
-  metadata:
-    sourceRoot: x-pack/platform/test
+  sourceRoot: x-pack/platform/test
 dependsOn:
   - '@kbn/test-suites-src'
   - '@kbn/telemetry-collection-manager-plugin'
@@ -140,8 +139,6 @@ dependsOn:
   - '@kbn/palettes'
   - '@kbn/field-formats-plugin'
   - '@kbn/datemath'
-  - '@kbn/global-search-plugin'
-  - '@kbn/global-search-test-plugin'
   - '@kbn/data-usage-plugin'
   - '@kbn/data-view-field-editor-plugin'
   - '@kbn/response-ops-rule-params'
@@ -169,6 +166,9 @@ dependsOn:
   - '@kbn/dashboard-plugin'
   - '@kbn/automatic-import-v2-plugin'
   - '@kbn/connector-specs'
+  - '@kbn/ftr-llm-proxy'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/ui-actions-plugin'
 tags:
   - test-helper
   - package

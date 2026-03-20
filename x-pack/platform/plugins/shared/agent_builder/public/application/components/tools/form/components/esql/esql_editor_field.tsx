@@ -50,11 +50,9 @@ export const EsqlEditorField = React.memo(() => {
             }}
             onTextLangQuerySubmit={promisify(noop)} // Required prop, but we don't need it
             editorIsInline
-            hideRunQueryText
             hasOutline
             hideRunQueryButton
             hideQueryHistory
-            hideTimeFilterInfo
             disableAutoFocus
             initialState={{
               editorHeight: 360,

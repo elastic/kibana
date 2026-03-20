@@ -23,7 +23,8 @@ interface Props {
 export function MissingSymbolsCallout({ frameType }: Props) {
   const languageType = getLanguageType({ frameType });
   const router = useProfilingRouter();
-  const { docLinks } = useProfilingDependencies().start.core;
+  const { docLinks, notifications } = useProfilingDependencies().start.core;
+  const isFeedbackEnabled = notifications.feedback.isEnabled();
 
   if (languageType === 'NATIVE') {
     return (
@@ -87,17 +88,19 @@ export function MissingSymbolsCallout({ frameType }: Props) {
             'Symbols are not available because of an error in the unwinder for this language or an unknown error with the interpreter.',
         })}
       </p>
-      <EuiButton
-        data-test-subj="profilingMissingSymbolsCalloutReportAProblemButton"
-        href={PROFILING_FEEDBACK_LINK}
-        target="_blank"
-        color="warning"
-      >
-        {i18n.translate(
-          'xpack.profiling.frameInformationWindow.missingSymbols.interpreted.reportProblem',
-          { defaultMessage: 'Report a problem' }
-        )}
-      </EuiButton>
+      {isFeedbackEnabled && (
+        <EuiButton
+          data-test-subj="profilingMissingSymbolsCalloutReportAProblemButton"
+          href={PROFILING_FEEDBACK_LINK}
+          target="_blank"
+          color="warning"
+        >
+          {i18n.translate(
+            'xpack.profiling.frameInformationWindow.missingSymbols.interpreted.reportProblem',
+            { defaultMessage: 'Report a problem' }
+          )}
+        </EuiButton>
+      )}
     </EuiCallOut>
   );
 }

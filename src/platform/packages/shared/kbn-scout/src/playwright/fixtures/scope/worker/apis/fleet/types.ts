@@ -48,6 +48,25 @@ export interface AgentPolicyCreateBody {
   unenroll_timeout?: number;
 }
 
+export interface AgentPolicyCreateOptions {
+  policyName: string;
+  policyNamespace: string;
+  sysMonitoring?: boolean;
+  params?: AgentPolicyCreateBody;
+}
+
+export interface PackagePolicyCreateBody {
+  policy_ids: string[];
+  package: {
+    name: string;
+    version?: string;
+  };
+  name: string;
+  description?: string;
+  namespace: string;
+  inputs: Record<string, any>;
+}
+
 export interface FleetOutputBody {
   allow_edit?: string[];
   ca_sha256?: string;
@@ -165,4 +184,12 @@ export interface AgentPolicyUpdateBody {
   space_ids?: string[];
   supports_agentless?: boolean;
   unenroll_timeout?: number;
+}
+
+export interface AgentPolicyUpdateOptions {
+  policyName: string;
+  policyNamespace: string;
+  agentPolicyId: string;
+  params?: AgentPolicyUpdateBody;
+  queryParams?: Record<string, string>;
 }

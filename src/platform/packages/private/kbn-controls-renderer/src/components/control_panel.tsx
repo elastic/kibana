@@ -8,10 +8,8 @@
  */
 
 import classNames from 'classnames';
-import deepEqual from 'fast-deep-equal';
-import { pick } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Subscription, distinctUntilChanged, map, of } from 'rxjs';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Subscription, of } from 'rxjs';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -24,93 +22,55 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { HasCustomPrepend } from '@kbn/controls-schemas';
+import type { HasCustomPrepend, PinnedControlLayoutState } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  apiPublishesTitle,
-  useBatchedPublishingSubjects,
-  type PublishingSubject,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
 
-import type { ControlPanelState, ControlsRendererParentApi } from '../types';
+import type { ControlsRendererParentApi } from '../types';
+import { apiPublishesLabel } from '../utils';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
 
 export const ControlPanel = ({
   parentApi,
-  uuid,
-  type,
+  control: { uid, grow, width, type },
   setControlPanelRef,
 }: {
   parentApi: ControlsRendererParentApi;
-  uuid: string;
-  type: string;
+  control: Required<PinnedControlLayoutState>;
   setControlPanelRef: (id: string, ref: HTMLElement | null) => void;
 }) => {
   const styles = useMemoCss(controlPanelStyles);
 
   const [api, setApi] = useState<(DefaultEmbeddableApi & Partial<HasCustomPrepend>) | null>(null);
-  const initialState = useMemo(() => {
-    return parentApi.layout$.getValue().controls[uuid];
-  }, [parentApi, uuid]);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: uuid,
+    id: uid,
   });
 
   const [viewMode, disabledActionIds] = useBatchedPublishingSubjects(
     parentApi.viewMode$,
     parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>)
   );
-  const [grow, setGrow] = useState<ControlPanelState['grow']>(
-    initialState.grow ?? DEFAULT_CONTROL_GROW
-  );
-  const [width, setWidth] = useState<ControlPanelState['width']>(
-    initialState.width ?? DEFAULT_CONTROL_WIDTH
-  );
-  const [panelTitle, setPanelTitle] = useState<string | undefined>();
-  const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
+
+  const [panelLabel, setPanelLabel] = useState<string | undefined>();
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const stateSubscription = parentApi.layout$
-      .pipe(
-        map(({ controls }) => pick(controls[uuid], ['grow', 'width'])),
-        distinctUntilChanged(deepEqual)
-      )
-      .subscribe((newState) => {
-        setGrow(newState.grow ?? DEFAULT_CONTROL_GROW);
-        setWidth(newState.width ?? DEFAULT_CONTROL_WIDTH);
-      });
-
-    return () => {
-      stateSubscription.unsubscribe();
-    };
-  }, [parentApi, uuid]);
 
   useEffect(() => {
     if (!api) return;
 
     /** Setup subscriptions for necessary state once API is available */
     const subscriptions = new Subscription();
-    if (apiPublishesTitle(api)) {
+    if (apiPublishesLabel(api)) {
       subscriptions.add(
-        api.title$.subscribe((result) => {
-          setPanelTitle(result);
+        api.label$.subscribe((result) => {
+          setPanelLabel(result);
         })
       );
-      if (api.defaultTitle$) {
-        subscriptions.add(
-          api.defaultTitle$.subscribe((result) => {
-            setDefaultPanelTitle(result);
-          })
-        );
-      }
     }
     return () => {
       subscriptions.unsubscribe();
@@ -120,9 +80,9 @@ export const ControlPanel = ({
   const setRefs = useCallback(
     (ref: HTMLElement | null) => {
       setNodeRef(ref);
-      setControlPanelRef(uuid, ref);
+      setControlPanelRef(uid, ref);
     },
-    [uuid, setNodeRef, setControlPanelRef]
+    [uid, setNodeRef, setControlPanelRef]
   );
 
   const onApiAvailable = useCallback(
@@ -145,16 +105,12 @@ export const ControlPanel = ({
       grow={Boolean(grow)}
       data-test-subj="control-frame"
       css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
-      className={classNames({
-        'controlFrameWrapper--medium': width === 'medium',
-        'controlFrameWrapper--small': width === 'small',
-        'controlFrameWrapper--large': width === 'large',
-      })}
+      className={`controlFrameWrapper--${width}`}
     >
       <FloatingActions
         data-test-subj="control-frame-floating-actions"
         api={api}
-        uuid={uuid}
+        uuid={uid}
         viewMode={viewMode}
         disabledActions={disabledActionIds}
         prependWrapperRef={prependWrapperRef}
@@ -162,10 +118,10 @@ export const ControlPanel = ({
         <EuiFormRow
           data-test-subj="control-frame-title"
           fullWidth
-          id={`control-title-${uuid}`}
+          id={`control-title-${uid}`}
           aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
             defaultMessage: 'Control for ${controlTitle}',
-            values: { controlTitle: panelTitle },
+            values: { controlTitle: panelLabel },
           })}
         >
           <EuiFormControlLayout
@@ -177,34 +133,44 @@ export const ControlPanel = ({
             css={styles.formControl}
             prepend={
               <>
-                <DragHandle
-                  isEditable={isEditable}
-                  controlTitle={panelTitle || defaultPanelTitle}
-                  {...attributes}
-                  {...listeners}
-                />
-
                 {api?.CustomPrependComponent ? (
-                  <api.CustomPrependComponent />
+                  <>
+                    <DragHandle
+                      isEditable={isEditable}
+                      controlTitle={panelLabel}
+                      className="controlFrame__dragHandle"
+                      {...attributes}
+                      {...listeners}
+                    />
+                    <api.CustomPrependComponent />
+                  </>
                 ) : (
-                  <EuiToolTip
-                    content={panelTitle || defaultPanelTitle}
-                    anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
+                  <DragHandle
+                    isEditable={isEditable}
+                    controlTitle={panelLabel}
+                    className="controlFrame__dragHandle"
+                    {...attributes}
+                    {...listeners}
                   >
-                    <EuiFormLabel className="controlPanel--label">
-                      <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
-                        {panelTitle || defaultPanelTitle}
-                      </span>
-                    </EuiFormLabel>
-                  </EuiToolTip>
+                    <EuiToolTip
+                      content={panelLabel}
+                      anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
+                    >
+                      <EuiFormLabel className="controlPanel--label">
+                        <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
+                          {panelLabel}
+                        </span>
+                      </EuiFormLabel>
+                    </EuiToolTip>
+                  </DragHandle>
                 )}
               </>
             }
             compressed={parentApi.isCompressed ? parentApi.isCompressed() : true}
           >
             <EmbeddableRenderer
-              key={uuid}
-              maybeId={uuid}
+              key={uid}
+              maybeId={uid}
               type={type}
               getParentApi={() => parentApi}
               onApiAvailable={onApiAvailable}

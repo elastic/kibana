@@ -111,6 +111,15 @@ const createElasticAssistantRequestContextMock = (
 ): jest.Mocked<ElasticAssistantApiRequestHandlerContext> => {
   return {
     actions: clients.elasticAssistant.actions as unknown as ActionsPluginStart,
+    rulesClient: {
+      create: jest.fn(),
+      runSoon: jest.fn(),
+      delete: jest.fn(),
+    } as unknown as ElasticAssistantApiRequestHandlerContext['rulesClient'],
+    frameworkAlerts: {
+      enabled: jest.fn(() => true),
+      getContextInitializationPromise: jest.fn(async () => ({ result: true })),
+    } as unknown as ElasticAssistantApiRequestHandlerContext['frameworkAlerts'],
     eventLogger: clients.eventLogger,
     eventLogIndex: '.kibana-event-log-*',
     userProfile: {

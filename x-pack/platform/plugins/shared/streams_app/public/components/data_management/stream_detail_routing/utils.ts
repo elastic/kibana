@@ -9,7 +9,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { isAlwaysCondition, type Condition } from '@kbn/streamlang';
 import type { RoutingDefinition, Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import type { IngestUpsertRequest } from '@kbn/streams-schema';
 import { emptyEqualsToAlways } from '../../../util/condition';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 
@@ -25,7 +25,7 @@ const toUIDefinition = <TRoutingDefinition extends RoutingDefinition>(
 const toAPIDefinition = (
   routingDefinitionWithAttributes: RoutingDefinitionWithUIAttributes
 ): RoutingDefinition => {
-  return omit(routingDefinitionWithAttributes, 'id');
+  return omit(routingDefinitionWithAttributes, 'id', 'isNew');
 };
 
 export const routingConverter = {

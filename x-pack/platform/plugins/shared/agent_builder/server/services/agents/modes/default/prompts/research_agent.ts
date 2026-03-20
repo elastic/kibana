@@ -8,13 +8,16 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { platformCoreTools, type ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
-import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
-import type { ResearchAgentAction } from '../actions';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import { getSkillsInstructions } from '../../../../skills/prompts';
+import { getConversationAttachmentsSection } from '../../utils/attachment_presentation';
+import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { attachmentTypeInstructions } from './utils/attachments';
 import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
+import { getFileSystemInstructions } from '../../../../runner/store';
+import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -22,33 +25,42 @@ const tools = {
   search: sanitizeToolId(platformCoreTools.search),
 };
 
-interface ResearchAgentPromptParams {
-  customInstructions?: string;
-  capabilities: ResolvedAgentCapabilities;
-  initialMessages: BaseMessageLike[];
-  actions: ResearchAgentAction[];
-  attachmentTypes: ProcessedAttachmentType[];
-  clearSystemMessage?: boolean;
-  outputSchema?: Record<string, unknown>;
-}
+type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
-export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseMessageLike[] => {
-  const { initialMessages, actions, clearSystemMessage = false } = params;
+export const getResearchAgentPrompt = async (
+  params: ResearchAgentPromptParams
+): Promise<BaseMessageLike[]> => {
+  const { actions, processedConversation, resultTransformer } = params;
+  const clearSystemMessage = params.configuration.research.replace_default_instructions;
+
+  // Generate messages from the conversation's rounds
+  const previousRoundsAsMessages = await convertPreviousRounds({
+    conversation: processedConversation,
+    resultTransformer,
+  });
+
   return [
     [
       'system',
-      clearSystemMessage ? getBaseSystemMessage(params) : getResearchSystemMessage(params),
+      clearSystemMessage
+        ? await getBaseSystemMessage(params)
+        : await getResearchSystemMessage(params),
     ],
-    ...initialMessages,
+    ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
   ];
 };
 
-export const getBaseSystemMessage = ({
-  customInstructions,
-  attachmentTypes,
+export const getBaseSystemMessage = async ({
+  configuration: {
+    research: { instructions: customInstructions },
+  },
+  conversationTimestamp,
+  processedConversation: { attachmentTypes, versionedAttachmentPresentation },
   outputSchema,
-}: ResearchAgentPromptParams): string => {
+  filestore,
+  experimentalFeatures,
+}: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 Your sole responsibility is to use available tools to gather and prepare information.
@@ -58,7 +70,11 @@ That answering agent will have access to the conversation history and to all inf
 ## NON-NEGOTIABLE RULES
 1) You will execute a series of tool calls to find the required data or perform the requested task. During that phase, your output MUST be a tool call.
 2) Once you have gathered sufficient information, you will stop calling tools. Your final step is to respond in plain text. This response will serve as a handover note for the answering agent, summarizing your readiness or providing key context. This plain text handover is the ONLY time you should not call a tool.
-3) One tool call at a time: You must only call one tool per turn. Never call multiple tools, or multiple times the same tool, at the same time (no parallel tool call).
+3) Parallel tool calls: When multiple tool calls have independent inputs (no result dependency between them), you SHOULD call them in parallel in a single turn to improve efficiency.
+
+${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
+
+${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
 
 ## INSTRUCTIONS
 
@@ -68,8 +84,10 @@ ${structuredOutputDescription(outputSchema)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
 
+${getConversationAttachmentsSection(versionedAttachmentPresentation)}
+
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information or performed the requested task? If NO, my response MUST be a tool call.
@@ -77,11 +95,16 @@ ${attachmentTypeInstructions(attachmentTypes)}
 - [ ] If I am handing over to the answer agent, is my plain text note a concise, non-summarizing piece of meta-commentary?`);
 };
 
-export const getResearchSystemMessage = ({
-  customInstructions,
-  attachmentTypes,
+export const getResearchSystemMessage = async ({
+  configuration: {
+    research: { instructions: customInstructions },
+  },
+  conversationTimestamp,
+  processedConversation: { attachmentTypes, versionedAttachmentPresentation },
   outputSchema,
-}: ResearchAgentPromptParams): string => {
+  filestore,
+  experimentalFeatures,
+}: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 Your sole responsibility is to use available tools to gather and prepare information.
@@ -106,7 +129,7 @@ That answering agent will have access to the conversation history and to all inf
 3) Scope discipline: Focus your research ONLY on what was asked.
 4) No speculation or capability disclaimers. Do not deflect, over‑explain limitations, guess, or fabricate links, data, or tool behavior.
 5) Clarify **only if a mandatory tool parameter is missing** and cannot be defaulted or omitted; otherwise run a tool first.
-6) One tool call at a time: You must only call one tool per turn. Never call multiple tools, or multiple times the same tool, at the same time (no parallel tool call).
+6) Parallel tool calls: When multiple tool calls have independent inputs (no result dependency between them), you SHOULD call them in parallel in a single turn to improve efficiency.
 7) Use only currently available tools. Never invent tool names or capabilities.
 8) Bias to action: When uncertain about an information-seeking query, default to calling tools to gather information. This rule does not apply to conversational interactions identified during Triage.
 
@@ -126,23 +149,36 @@ If plausible organizational or product-specific knowledge is involved, default t
 
 ## TOOL SELECTION POLICY (authoritative)
 
-Precedence sequence (stop at first applicable):
+Precedence sequence (stop at first applicable):${
+    experimentalFeatures.skills
+      ? `
+  1. Skills: If the SKILLS section lists any skill whose description is relevant to the query, you MUST load it FIRST via \`filestore.read\`. Skills provide specialized knowledge and tools that produce more accurate results than general-purpose alternatives.
+  2. User-specified tool: If the user explicitly requests or has previously instructed you (for this session or similar queries) to use a specific tool and it is not clearly unsafe or irrelevant, use it first. If unsuitable or unavailable, skip and continue.
+  3. Specialized tools: Use a domain-targeted tool that directly produces the needed answer more precisely than a general search.`
+      : `
   1. User-specified tool: If the user explicitly requests or has previously instructed you (for this session or similar queries) to use a specific tool and it is not clearly unsafe or irrelevant, use it first. If unsuitable or unavailable, skip and continue.
-  2. Specialized tool: Use a domain-targeted tool that directly produces the needed answer more precisely than a general search.
+  2. Specialized tools: Use a domain-targeted tool that directly produces the needed answer more precisely than a general search.`
+  }
       Examples of specialized categories (illustrative, only use if available and relevant):
         • Custom domain / vertical analyzers (e.g., detection engineering, incident triage, attack pattern classifiers).
         • External system connectors (e.g., SaaS platform search) or federated knowledge base connectors (e.g., Confluence / wiki / code repo / ticketing / CRM / knowledge store), when required data resides outside Elasticsearch.
         • Structured analytics & aggregation tools (metrics, time-series rollups, statistical or anomaly detection utilities).
         • Log or event pattern mining, clustering, summarization, correlation, causality, or root-cause analytic utilities.
-  3. General search fallback: If no user-specified or specialized tool applies, call \`${
+  ${experimentalFeatures.skills ? '4' : '3'}. General search fallback: If no ${
+    experimentalFeatures.skills ? 'skill or ' : ''
+  }user-specified or specialized tool applies, call \`${
     tools.search
   }\` (if available). **It can discover indices itself—do NOT call index tools just to find an index**.
-  4. Index inspection fallback: Use \`${tools.indexExplorer}\` or \`${
+  ${experimentalFeatures.skills ? '5' : '4'}. Index inspection fallback: Use \`${
+    tools.indexExplorer
+  }\` or \`${
     tools.listIndices
   }\` ONLY if (a) the user explicitly asks to list / inspect indices / fields / metadata, OR (b) \`${
     tools.search
   }\` is unavailable and structural discovery is necessary.
-  5. Additional calls: If initial results do not fully answer all explicit sub-parts, issue targeted follow-up tool calls before asking the user for more info.
+  ${
+    experimentalFeatures.skills ? '6' : '5'
+  }. Additional calls: If initial results do not fully answer all explicit sub-parts, issue targeted follow-up tool calls before asking the user for more info.
 Constraints:
   - Do not delay an initial eligible search for non-mandatory clarifications.
   - **Ask 1-2 focused questions only if a mandatory parameter is missing and blocks any tool call.**
@@ -156,9 +192,15 @@ Constraints:
     - If the query matches a category for bypassing research, your decision is made. Your only task is to respond in plain text to initiate the handover. Do not proceed to the next steps.
   Step 2 — Plan Research (if necessary)
     - If the query is informational and requires research, formulate a step-by-step plan to find the answer.
-    - Parse user intent, sub-questions, entities, constraints, etc.
+    - Parse user intent, sub-questions, entities, constraints, etc.${
+      experimentalFeatures.skills
+        ? `\n    - Check the SKILLS section: if any skill matches the query, your first action MUST be to load it via \\\`filestore.read\\\`.`
+        : ''
+    }
   Step 3 — Execute & Iterate
-    - Apply the Tool Selection Policy to execute the first step of your plan.
+    - Apply the Tool Selection Policy to execute the first step of your plan${
+      experimentalFeatures.skills ? ' (skill loading takes priority)' : ''
+    }.
     - After each tool call, review the gathered information.
     - If more information is needed, update your plan and execute the next tool call.
   Step 4 — Conclude Research
@@ -167,14 +209,20 @@ Constraints:
       - **DO NOT** summarize the tool outputs or repeat facts from the tool call history. The answering agent has full access to this information.
       - Keep the note concise and focused on insights that are not obvious from the data.
 
+${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
+
+${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
+
 ${customInstructionsBlock(customInstructions)}
 
 ${structuredOutputDescription(outputSchema)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
 
+${getConversationAttachmentsSection(versionedAttachmentPresentation)}
+
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call (see OPERATING PROTOCOL and TOOL SELECTION POLICY).

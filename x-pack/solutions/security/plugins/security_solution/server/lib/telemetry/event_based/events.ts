@@ -30,6 +30,7 @@ import type {
   RuleBulkUpgradeTelemetry,
   RuleUpgradeTelemetry,
 } from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
+import { TRIAL_COMPANION_EVENTS } from '../../trial_companion/telemetry/trial_companion_ebt_events';
 
 // Telemetry event that is sent for each rule that is upgraded during a prebuilt rule upgrade
 export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> = {
@@ -640,6 +641,83 @@ export const ENTITY_ENGINE_DELETION_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Namespace where the entities are stored (e.g. "default")',
+      },
+    },
+  },
+};
+
+export const ENTITY_HIGHLIGHTS_USAGE_EVENT: EventTypeOpts<{
+  entityType: string;
+  spaceId: string;
+}> = {
+  eventType: 'entity_highlights_usage',
+  schema: {
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity highlights have been request for  (e.g. "host")',
+      },
+    },
+    spaceId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Space where the highlight request originated (e.g. "default")',
+      },
+    },
+  },
+};
+
+export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
+  entitiesReturned: number;
+  entityTypes: string[];
+  errorMessage?: string;
+  spaceId: string;
+  success: boolean;
+  toolId: string;
+}> = {
+  eventType: 'entity_ai_tool_usage',
+  schema: {
+    toolId: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent tool being used (e.g. "security.get_entity")',
+      },
+    },
+    entityTypes: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Type of entity the tool was called for (e.g. "host")',
+        },
+      },
+      _meta: {
+        description: 'Entity types the tool was called for (e.g. ["host", "user"])',
+      },
+    },
+    spaceId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Space where the highlight request originated (e.g. "default")',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the tool usage was successful or not',
+      },
+    },
+    entitiesReturned: {
+      type: 'long',
+      _meta: {
+        description: 'Number of entities returned by the tool',
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description: 'Contains the error message in case the tool usage was not successful',
       },
     },
   },
@@ -1430,6 +1508,10 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
                 },
               },
             },
+            _meta: {
+              optional: true,
+              description: 'Reason for the failure if the query execution was unsuccessful.',
+            },
           },
         },
         _meta: {
@@ -1715,6 +1797,8 @@ export const events = [
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
+  ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT,
+  ENTITY_HIGHLIGHTS_USAGE_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
@@ -1728,4 +1812,5 @@ export const events = [
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
   ...SIEM_MIGRATIONS_EVENTS,
   GAP_DETECTED_EVENT,
+  ...TRIAL_COMPANION_EVENTS,
 ];

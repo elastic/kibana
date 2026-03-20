@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import type { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
@@ -43,25 +45,34 @@ export const getFromPreloaded = async ({
   history?: History<unknown>;
 }): Promise<PersistedDoc | undefined> => {
   const { notifications, spaces, attributeService } = lensServices;
-  let doc: LensDocument;
 
   try {
-    const docFromSavedObject = await (initialInput.savedObjectId
+    // If we already have the attributes for a by reference visualization, avoid loading from the library
+    const docFromSavedObject = await (initialInput.savedObjectId && !initialInput.attributes
       ? attributeService.loadFromLibrary(initialInput.savedObjectId)
       : undefined);
+
     if (!docFromSavedObject) {
+      const { attributes } = initialInput;
+
+      if (!attributes) {
+        throw new Error('Missing attributes');
+      }
+
       return {
-        // @TODO: it would be nice to address this type checks once for all
         doc: {
-          ...initialInput.attributes,
+          ...attributes,
           type: LENS_EMBEDDABLE_TYPE,
-        } as LensDocument,
+          ...(initialInput.savedObjectId ? { savedObjectId: initialInput.savedObjectId } : {}),
+        },
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
         },
         managed: false,
       };
     }
+
+    // By ref - use docFromSavedObject
     const { sharingSavedObjectProps, attributes, managed } = docFromSavedObject;
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch' && history) {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
@@ -77,14 +88,13 @@ export const getFromPreloaded = async ({
         }),
       });
     }
-    doc = {
-      ...initialInput,
-      ...attributes,
-      type: LENS_EMBEDDABLE_TYPE,
-    };
 
     return {
-      doc,
+      doc: {
+        ...attributes,
+        type: LENS_EMBEDDABLE_TYPE,
+        savedObjectId: initialInput.savedObjectId,
+      },
       sharingSavedObjectProps: {
         aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
         outcome: sharingSavedObjectProps?.outcome,
@@ -115,43 +125,6 @@ type PreloadedState = Omit<
   'resolvedDateRange' | 'searchSessionId' | 'isLinkedToOriginatingApp'
 >;
 
-/**
- * Initialize project routing in CPS Manager
- * Determines whether to preserve or reset the project routing based on the context
- */
-function initProjectRoutingState({
-  cps,
-  lens,
-  initialInput,
-  isLinkedToOriginatingApp = false,
-}: {
-  cps: LensAppServices['cps'];
-  lens: LensAppState;
-  initialInput?: LensSerializedState;
-  isLinkedToOriginatingApp?: boolean;
-}) {
-  if (!cps?.cpsManager) {
-    return;
-  }
-  const cpsManager = cps.cpsManager;
-
-  // Check if dataSources have been initialized already to detect save/save-as scenarios
-  const hasActiveLensSession = !Object.values(lens.datasourceStates).every(
-    (ds) => ds.state === null
-  );
-
-  // Reset when: NOT linked to originating app, NOT active session, NOT embeddable
-  const shouldReset = !isLinkedToOriginatingApp && !hasActiveLensSession && !initialInput;
-
-  if (shouldReset) {
-    const defaultRouting = cpsManager.getDefaultProjectRouting();
-    cpsManager.setProjectRouting(defaultRouting);
-    return defaultRouting;
-  } else {
-    return cpsManager.getProjectRouting();
-  }
-}
-
 async function loadFromLocatorState(
   store: MiddlewareAPI,
   initialState: NonNullable<LensStoreDeps['initialStateFromLocator']>,
@@ -159,7 +132,8 @@ async function loadFromLocatorState(
   { notifications, data }: LensStoreDeps['lensServices'],
   emptyState: PreloadedState,
   autoApplyDisabled: boolean,
-  projectRouting?: ProjectRouting
+  projectRouting?: ProjectRouting,
+  hideTextBasedEditor?: boolean
 ) {
   const { lens } = store.getState();
   const locatorReferences = 'references' in initialState ? initialState.references : undefined;
@@ -209,6 +183,7 @@ async function loadFromLocatorState(
       isLoading: false,
       annotationGroups,
       projectRouting,
+      hideTextBasedEditor,
     })
   );
 
@@ -224,7 +199,8 @@ async function loadFromEmptyState(
   { data }: LensStoreDeps['lensServices'],
   activeDatasourceId: string | undefined,
   autoApplyDisabled: boolean,
-  projectRouting?: ProjectRouting
+  projectRouting?: ProjectRouting,
+  hideTextBasedEditor?: boolean
 ) {
   const { lens } = store.getState();
   const { datasourceStates, indexPatterns, indexPatternRefs } = await initializeSources(
@@ -258,6 +234,7 @@ async function loadFromEmptyState(
         ),
         isLoading: false,
         projectRouting,
+        hideTextBasedEditor,
       },
       initialContext: loaderSharedArgs.initialContext,
     })
@@ -275,7 +252,8 @@ async function loadFromSavedObject(
   { data, chrome }: LensStoreDeps['lensServices'],
   autoApplyDisabled: boolean,
   inlineEditing?: boolean,
-  projectRouting?: ProjectRouting
+  projectRouting?: ProjectRouting,
+  hideTextBasedEditor?: boolean
 ) {
   const { doc, sharingSavedObjectProps, managed } = persisted;
   if (savedObjectId) {
@@ -363,6 +341,7 @@ async function loadFromSavedObject(
       annotationGroups,
       managed,
       projectRouting,
+      hideTextBasedEditor,
     })
   );
 
@@ -374,7 +353,7 @@ async function loadFromSavedObject(
 export async function loadInitial(
   store: MiddlewareAPI,
   storeDeps: LensStoreDeps,
-  { redirectCallback, initialInput, history, inlineEditing }: InitialAppState,
+  { redirectCallback, initialInput, history, inlineEditing, hideTextBasedEditor }: InitialAppState,
   autoApplyDisabled: boolean
 ) {
   const { lensServices, datasourceMap, initialContext, initialStateFromLocator, visualizationMap } =
@@ -384,12 +363,7 @@ export async function loadInitial(
   const { notifications, data, cps } = lensServices;
   const { lens } = store.getState();
 
-  const projectRouting = initProjectRoutingState({
-    cps,
-    lens,
-    initialInput,
-    isLinkedToOriginatingApp,
-  });
+  const projectRouting = cps?.cpsManager?.getProjectRouting();
 
   const loaderSharedArgs: LoaderSharedArgs = {
     visualizationMap,
@@ -403,7 +377,7 @@ export async function loadInitial(
 
   let activeDatasourceId: string | undefined;
   if (initialContext && 'query' in initialContext) {
-    activeDatasourceId = 'textBased';
+    activeDatasourceId = LENS_DATASOURCE_ID.TEXT_BASED;
   }
   if (initialStateFromLocator) {
     const newFilters = initialStateFromLocator.filters
@@ -433,7 +407,8 @@ export async function loadInitial(
           lensServices,
           emptyState,
           autoApplyDisabled,
-          projectRouting
+          projectRouting,
+          hideTextBasedEditor
         );
       } catch ({ message }) {
         notifications.toasts.addDanger({
@@ -465,7 +440,8 @@ export async function loadInitial(
         lensServices,
         activeDatasourceId,
         autoApplyDisabled,
-        projectRouting
+        projectRouting,
+        hideTextBasedEditor
       );
     } catch ({ message }) {
       notifications.toasts.addDanger({
@@ -487,7 +463,8 @@ export async function loadInitial(
           lensServices,
           autoApplyDisabled,
           inlineEditing,
-          projectRouting
+          projectRouting,
+          hideTextBasedEditor
         );
       } catch ({ message }) {
         notifications.toasts.addDanger({

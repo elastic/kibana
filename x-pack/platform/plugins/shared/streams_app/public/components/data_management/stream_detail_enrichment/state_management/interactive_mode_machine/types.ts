@@ -6,7 +6,7 @@
  */
 
 import type { IToasts, NotificationsStart } from '@kbn/core/public';
-import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type { GrokCollection } from '@kbn/grok-ui';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
@@ -29,7 +29,9 @@ export interface InteractiveModeMachineDeps {
 export type InteractiveModeToParentEvent =
   | { type: 'mode.dslUpdated'; dsl: StreamlangDSL }
   | { type: 'simulation.reset' }
-  | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] };
+  | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
+  | { type: 'simulation.filterByConditionAuto'; conditionId: string }
+  | { type: 'simulation.clearAutoConditionFilter' };
 
 interface InteractiveModeParentSnapshot {
   context: {
@@ -64,6 +66,8 @@ export interface InteractiveModeContext {
   suggestedPipeline?: StreamlangDSL;
   // Currently selected condition for filtering steps
   selectedConditionId?: string;
+  // Shared grok collection for pattern definitions
+  grokCollection: GrokCollection;
 }
 
 export interface InteractiveModeInput {
@@ -79,17 +83,18 @@ export interface InteractiveModeInput {
   simulationMode: DataSourceSimulationMode;
   // Stream name for pipeline suggestion
   streamName: string;
+  // Shared grok collection for pattern definitions
+  grokCollection: GrokCollection;
 }
 
 export type InteractiveModeEvent =
-  | { type: 'step.edit' }
-  | { type: 'step.cancel' }
+  | { type: 'step.edit'; id?: string }
+  | { type: 'step.cancel'; id?: string }
   | { type: 'step.save'; id: string }
   | {
       type: 'step.changeProcessor';
       id: string;
       step: StreamlangProcessorDefinition;
-      resources?: { grokExpressions?: DraftGrokExpression[] };
     }
   | {
       type: 'step.changeCondition';
@@ -97,8 +102,15 @@ export type InteractiveModeEvent =
       step: StreamlangConditionBlock;
     }
   | { type: 'step.change'; id: string }
+  | { type: 'step.parentChanged'; id: string }
   | { type: 'step.delete'; id: string }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
+  | {
+      type: 'step.reorderByDragDrop';
+      sourceStepId: string;
+      targetStepId: string;
+      operation: 'before' | 'after' | 'inside';
+    }
   | {
       type: 'step.addProcessor';
       processor?: StreamlangProcessorDefinition;

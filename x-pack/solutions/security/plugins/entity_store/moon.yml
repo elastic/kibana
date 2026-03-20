@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/entity-store'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/core-analysis'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/entity-store'
+  title: '@kbn/entity-store'
   description: Moon project for @kbn/entity-store
   channel: ''
   owner: '@elastic/core-analysis'
-  metadata:
-    sourceRoot: x-pack/solutions/security/plugins/entity_store
+  sourceRoot: x-pack/solutions/security/plugins/entity_store
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-plugins-server'
@@ -25,11 +24,26 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/zod-helpers'
   - '@kbn/task-manager-plugin'
-  - '@kbn/core-lifecycle-server'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-http-server'
   - '@kbn/config-schema'
   - '@kbn/logging-mocks'
+  - '@kbn/spaces-plugin'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/data-view-validation'
+  - '@kbn/data-views-plugin'
+  - '@kbn/es-types'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/scout-security'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/std'
+  - '@kbn/object-utils'
+  - '@kbn/es-query'
+  - '@kbn/security-plugin'
+  - '@kbn/streamlang'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/tracing-utils'
 tags:
   - plugin
   - prod
@@ -43,17 +57,28 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/**/*.ts
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

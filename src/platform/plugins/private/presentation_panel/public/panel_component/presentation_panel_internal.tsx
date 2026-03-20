@@ -13,7 +13,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
-import type { PublishesTitle } from '@kbn/presentation-publishing';
+import type { PublishesHideBorder, PublishesTitle } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
@@ -40,6 +40,7 @@ const PresentationPanelChrome = <
   showNotifications,
   getActions,
   actionPredicate,
+  titleHighlight,
 
   setDragHandle,
 
@@ -136,6 +137,7 @@ const PresentationPanelChrome = <
             showNotifications={showNotifications}
             panelTitle={panelTitle ?? defaultPanelTitle}
             panelDescription={panelDescription ?? defaultPanelDescription}
+            titleHighlight={titleHighlight}
           />
         )}
         {children}
@@ -156,10 +158,14 @@ export const PresentationPanelInternal = <
   ...rest
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
-  const [dataLoading, blockingError] = useBatchedOptionalPublishingSubjects(
-    api?.dataLoading$,
-    api?.blockingError$
-  );
+  const [dataLoading, blockingError, panelHideBorder, parentHideBorder] =
+    useBatchedOptionalPublishingSubjects(
+      api?.dataLoading$,
+      api?.blockingError$,
+      api?.hideBorder$,
+      (api?.parentApi as Partial<PublishesHideBorder>)?.hideBorder$
+    );
+  const hideBorder = Boolean(panelHideBorder) || Boolean(parentHideBorder);
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
@@ -201,7 +207,13 @@ export const PresentationPanelInternal = <
   return hidePanelChrome ? (
     InnerPanel
   ) : (
-    <PresentationPanelChrome {...rest} api={api} setDragHandle={setDragHandle}>
+    <PresentationPanelChrome
+      {...rest}
+      api={api}
+      showBorder={hideBorder ? false : rest.showBorder}
+      showShadow={hideBorder ? false : rest.showShadow}
+      setDragHandle={setDragHandle}
+    >
       {InnerPanel}
     </PresentationPanelChrome>
   );

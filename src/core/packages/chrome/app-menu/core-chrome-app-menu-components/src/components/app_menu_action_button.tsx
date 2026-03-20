@@ -10,9 +10,10 @@
 import React, { type MouseEvent } from 'react';
 import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
-import type { EuiButtonColor, PopoverAnchorPosition } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import {
   APP_MENU_NOTIFICATION_INDICATOR_LEFT,
   APP_MENU_NOTIFICATION_INDICATOR_TOP,
@@ -29,7 +30,6 @@ type AppMenuActionButtonProps = (AppMenuPrimaryActionItem | AppMenuSecondaryActi
   isPopoverOpen: boolean;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
-  popoverAnchorPosition?: PopoverAnchorPosition;
   onCloseOverflowButton?: () => void;
 };
 
@@ -55,7 +55,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     popoverTestId,
     onPopoverToggle,
     onPopoverClose,
-    popoverAnchorPosition,
     onCloseOverflowButton,
   } = props;
 
@@ -100,8 +99,11 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     splitButtonRun?.({ triggerElement: event.currentTarget });
   };
 
+  const routerLinkProps =
+    href && run ? getRouterLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
+
   const commonProps = {
-    onClick: href ? undefined : handleClick,
+    ...routerLinkProps,
     id: htmlId,
     'data-test-subj': testId || `app-menu-action-button-${id}`,
     iconType,
@@ -201,7 +203,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         popoverTestId={popoverTestId}
         onClose={onPopoverClose}
         onCloseOverflowButton={onCloseOverflowButton}
-        anchorPosition={popoverAnchorPosition}
       />
     );
   }

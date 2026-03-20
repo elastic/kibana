@@ -26,9 +26,15 @@ interface KibanaServerConfig {
   basePath: string;
 }
 
+interface KibanaCredentials {
+  username: string;
+  password: string;
+}
+
 interface KibanaConfig {
   elasticsearch: ElasticsearchConfig;
   server: KibanaServerConfig;
+  kibanaCredentials: KibanaCredentials;
 }
 
 /**
@@ -45,7 +51,7 @@ export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaCo
   if (fs.existsSync(configPathToUse)) {
     const loaded = (yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<
       string,
-      any
+      unknown
     >;
     const config = unflattenObject(loaded);
     esConfigValues = config.elasticsearch || {};
@@ -90,5 +96,13 @@ export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaCo
     ...serverEnvOverrides,
   };
 
-  return { elasticsearch: elasticsearchConfig, server: serverConfig };
+  // Kibana API credentials - for admin operations like enabling streams.
+  // Defaults to elastic superuser which has all Kibana privileges.
+  // Can be overridden via KIBANA_USERNAME/KIBANA_PASSWORD env vars.
+  const kibanaCredentials = {
+    username: process.env.KIBANA_USERNAME || 'elastic',
+    password: process.env.KIBANA_PASSWORD || 'changeme',
+  };
+
+  return { elasticsearch: elasticsearchConfig, server: serverConfig, kibanaCredentials };
 };

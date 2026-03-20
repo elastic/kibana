@@ -23,4 +23,8 @@ export const PainlessLang: CompleteLangModuleType = {
   validation$,
 };
 
+export { EditorStateService } from './lib';
+export type { EditorState } from './lib';
+export { PainlessCompletionAdapter } from './completion_adapter';
+export type { Language } from './lexer_rules/painless';
 export type * from './types';

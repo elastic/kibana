@@ -93,6 +93,7 @@ describe('registerTransactionDurationRuleType', () => {
         'service.name': 'opbeans-java',
         'transaction.name': 'GET /orders',
         'transaction.type': 'request',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -182,6 +183,7 @@ describe('registerTransactionDurationRuleType', () => {
         'service.name': 'opbeans-java',
         'transaction.name': 'GET /products',
         'transaction.type': 'request',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -271,6 +273,7 @@ describe('registerTransactionDurationRuleType', () => {
         'service.name': 'opbeans-java',
         'transaction.name': undefined,
         'transaction.type': 'request',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -360,6 +363,7 @@ describe('registerTransactionDurationRuleType', () => {
         'service.name': 'opbeans-java',
         'transaction.name': 'tx-java',
         'transaction.type': 'request',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -448,6 +452,7 @@ describe('registerTransactionDurationRuleType', () => {
         'service.name': 'opbeans-java',
         'transaction.name': 'tx-java',
         'transaction.type': 'request',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -543,6 +548,7 @@ describe('registerTransactionDurationRuleType', () => {
         'service.name': 'opbeans-java',
         'transaction.name': undefined,
         'transaction.type': 'request',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });

@@ -24,7 +24,16 @@ export class ExportPageObject extends FtrService {
   }
 
   async clickExportTopNavButton() {
-    return this.testSubjects.click('exportTopNavButton');
+    // First check if export button is directly visible
+    if (await this.testSubjects.exists('exportTopNavButton')) {
+      return await this.testSubjects.click('exportTopNavButton');
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+      return await this.testSubjects.click('exportTopNavButton');
+    }
   }
 
   async isExportPopoverOpen() {
@@ -65,14 +74,17 @@ export class ExportPageObject extends FtrService {
 
   async closeExportFlyout() {
     const closeButtonSubj = 'exportFlyoutCloseButton';
-    const isExportFlyoutOpen = await this.testSubjects.exists(closeButtonSubj);
+    await this.retry.waitFor('flyout to close', async () => {
+      const isExportFlyoutOpen = await this.testSubjects.exists(closeButtonSubj);
 
-    if (!isExportFlyoutOpen) {
-      return; // It was already closed
-    }
+      if (!isExportFlyoutOpen) {
+        return true; // It was already closed
+      }
 
-    await this.testSubjects.click(closeButtonSubj);
-    await this.testSubjects.waitForDeleted(closeButtonSubj);
+      await this.testSubjects.click(closeButtonSubj);
+      await this.testSubjects.waitForDeleted(closeButtonSubj);
+      return true;
+    });
   }
 
   async getExportAssetTextButton() {

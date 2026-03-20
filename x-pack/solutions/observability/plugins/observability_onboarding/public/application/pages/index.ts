@@ -12,3 +12,4 @@ export { LandingPage } from './landing';
 export { OtelLogsPage } from './otel_logs';
 export { FirehosePage } from './firehose';
 export { OtelApmPage } from './otel_apm';
+export { CloudForwarderPage } from './cloudforwarder';

@@ -9,7 +9,6 @@
 
 import React from 'react';
 
-import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -22,6 +21,7 @@ import type { ResolvedLink } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { EuiThemeProvider } from '@elastic/eui';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
 
 function createMockLinksParent({
   initialQuery,
@@ -46,7 +46,6 @@ function createMockLinksParent({
 describe('Dashboard link component', () => {
   const resolvedLink: ResolvedLink = {
     id: 'foo',
-    order: 0,
     type: 'dashboardLink',
     label: '',
     destination: '456',
@@ -98,11 +97,11 @@ describe('Dashboard link component', () => {
     renderComponent({ parentApi });
 
     // renders dashboard title
-    const link = screen.getByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toHaveTextContent('Dashboard 1');
 
     // does not render external link icon
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeNull();
 
     // calls `navigate` on click
@@ -120,27 +119,27 @@ describe('Dashboard link component', () => {
 
   test('modified click does not trigger event.preventDefault', async () => {
     renderComponent();
-    const link = screen.getByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     const clickEvent = createEvent.click(link, { ctrlKey: true });
     const preventDefault = jest.spyOn(clickEvent, 'preventDefault');
     fireEvent(link, clickEvent);
     expect(preventDefault).toHaveBeenCalledTimes(0);
   });
 
-  test('openInNewTab uses window.open, not navigateToApp, and renders external icon', async () => {
+  test('open_in_new_tab uses window.open, not navigateToApp, and renders external icon', async () => {
     const parentApi = createMockLinksParent({});
     renderComponent({
       link: {
         ...resolvedLink,
-        options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
+        options: { ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS, open_in_new_tab: true },
       },
       parentApi,
     });
 
-    const link = screen.getByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toBeInTheDocument();
     // external link icon is rendered
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeInTheDocument();
 
     // calls `window.open`
@@ -170,7 +169,7 @@ describe('Dashboard link component', () => {
     renderComponent({
       link: {
         ...resolvedLink,
-        options: DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
       parentApi,
     });
@@ -183,7 +182,7 @@ describe('Dashboard link component', () => {
     });
   });
 
-  test('does not pass timeRange to locator.getRedirectUrl if useCurrentDateRange is false', async () => {
+  test('does not pass timeRange to locator.getRedirectUrl if use_time_range is false', async () => {
     const initialFilters = [
       {
         query: { match_phrase: { foo: 'bar' } },
@@ -205,8 +204,8 @@ describe('Dashboard link component', () => {
       link: {
         ...resolvedLink,
         options: {
-          ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-          useCurrentDateRange: false,
+          ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
+          use_time_range: false,
         },
       },
       parentApi,
@@ -219,7 +218,7 @@ describe('Dashboard link component', () => {
     });
   });
 
-  test('does not pass filters or query to locator.getRedirectUrl if useCurrentFilters is false', async () => {
+  test('does not pass filters or query to locator.getRedirectUrl if use_filters is false', async () => {
     const initialFilters = [
       {
         query: { match_phrase: { foo: 'bar' } },
@@ -241,8 +240,8 @@ describe('Dashboard link component', () => {
       link: {
         ...resolvedLink,
         options: {
-          ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-          useCurrentFilters: false,
+          ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
+          use_filters: false,
         },
       },
       parentApi,
@@ -264,7 +263,7 @@ describe('Dashboard link component', () => {
       },
     });
 
-    const link = await screen.findByTestId('dashboardLink--foo--error');
+    const link = await screen.findByTestId('dashboardLink--Error fetching dashboard--error');
     expect(link).toHaveTextContent(DashboardLinkStrings.getDashboardErrorLabel());
   });
 
@@ -282,7 +281,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    const link = screen.getByTestId('dashboardLink--bar');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toHaveTextContent('current dashboard');
     await userEvent.click(link);
     expect(parentApi.locator?.navigate).toBeCalledTimes(0);
@@ -298,9 +297,9 @@ describe('Dashboard link component', () => {
       },
     });
 
-    const link = screen.getByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--another dashboard');
     await userEvent.hover(link);
-    const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
+    const tooltip = await screen.findByTestId('dashboardLink--another dashboard--tooltip');
     expect(tooltip).toHaveTextContent('another dashboard'); // title
     expect(tooltip).toHaveTextContent('something awesome'); // description
   });
@@ -322,7 +321,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    expect(await screen.findByTestId('dashboardLink--bar')).toHaveTextContent('old title');
+    expect(await screen.findByTestId('dashboardLink--Dashboard 1')).toHaveTextContent('old title');
 
     parentApi.title$.next('new title');
     rerender({
@@ -333,7 +332,7 @@ describe('Dashboard link component', () => {
         label: undefined,
       },
     });
-    expect(await screen.findByTestId('dashboardLink--bar')).toHaveTextContent('new title');
+    expect(await screen.findByTestId('dashboardLink--Dashboard 1')).toHaveTextContent('new title');
   });
 
   test('can override link label', async () => {
@@ -345,10 +344,10 @@ describe('Dashboard link component', () => {
       },
     });
 
-    const link = screen.getByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toHaveTextContent(label);
     await userEvent.hover(link);
-    const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
+    const tooltip = await screen.findByTestId('dashboardLink--Dashboard 1--tooltip');
     expect(tooltip).toHaveTextContent(label);
   });
 
@@ -367,7 +366,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    const link = screen.getByTestId('dashboardLink--bar');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toHaveTextContent(customLabel);
   });
 });

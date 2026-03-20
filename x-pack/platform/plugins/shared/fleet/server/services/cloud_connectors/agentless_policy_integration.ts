@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { PackageInfo } from '../../../common/types';
 import type { AgentPolicy, NewPackagePolicy } from '../../types';
 import { CloudConnectorCreateError } from '../../errors';
 import { cloudConnectorService } from '../cloud_connector';
@@ -49,19 +50,23 @@ export async function createAndIntegrateCloudConnector(params: {
   packagePolicy: NewPackagePolicy;
   agentPolicy: AgentPolicy;
   policyName: string;
+  packageInfo: PackageInfo;
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   logger: Logger;
   cloudConnectorName?: string;
+  accountType?: 'single-account' | 'organization-account';
 }): Promise<CloudConnectorIntegrationResult> {
   const {
     packagePolicy,
     agentPolicy,
     policyName,
+    packageInfo,
     soClient,
     esClient,
     logger,
     cloudConnectorName: providedCloudConnectorName,
+    accountType: providedAccountType,
   } = params;
 
   // Check if cloud connectors are enabled for this agentless policy
@@ -121,6 +126,7 @@ export async function createAndIntegrateCloudConnector(params: {
   const cloudConnectorVars = await extractAndCreateCloudConnectorSecrets(
     cloudProvider,
     updatedPackagePolicy,
+    packageInfo,
     esClient,
     logger
   );
@@ -136,10 +142,16 @@ export async function createAndIntegrateCloudConnector(params: {
   // otherwise extract from package policy or generate default
   const cloudConnectorName =
     providedCloudConnectorName ||
-    getCloudConnectorNameFromPackagePolicy(updatedPackagePolicy, cloudProvider, policyName);
+    getCloudConnectorNameFromPackagePolicy(
+      updatedPackagePolicy,
+      cloudProvider,
+      policyName,
+      packageInfo
+    );
 
-  // Extract account type from package policy vars
-  const accountType = extractAccountType(cloudProvider, updatedPackagePolicy);
+  // Use provided account type from API request, or fall back to extraction from package policy vars
+  const accountType =
+    providedAccountType ?? extractAccountType(cloudProvider, updatedPackagePolicy, packageInfo);
 
   try {
     const cloudConnector = await cloudConnectorService.create(soClient, {
@@ -156,7 +168,8 @@ export async function createAndIntegrateCloudConnector(params: {
     updatedPackagePolicy = updatePackagePolicyWithCloudConnectorSecrets(
       updatedPackagePolicy,
       cloudConnectorVars,
-      cloudProvider
+      cloudProvider,
+      packageInfo
     );
 
     // Set cloud connector ID on package policy

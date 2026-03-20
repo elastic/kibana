@@ -15,10 +15,6 @@ export class Homepage {
     await this.page.testSubj.waitForSelector('search-homepage');
   }
 
-  async getManageLink() {
-    return this.page.testSubj.locator('searchHomepageSearchHomepagePageManageSubscriptionLink');
-  }
-
   async getHeaderLeftGroup() {
     return this.page.testSubj.locator('searchHomepageHeaderLeftsideGroup');
   }
@@ -116,6 +112,10 @@ export class Homepage {
 
   async getEndpointValueField() {
     return this.page.testSubj.locator('endpointValueField');
+  }
+
+  async getKibanaVersionBadge() {
+    return this.page.testSubj.locator('kibana-version-badge');
   }
 
   // Body Links methods

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import uniqBy from 'lodash/uniqBy';
-import { isAssignment, isColumn, isFunctionExpression, isOptionNode } from '../../../ast/is';
+import { isAssignment, isColumn, isFunctionExpression, isOptionNode } from '@elastic/esql';
+import type { ESQLAstItem, ESQLCommand, ESQLCommandOption } from '@elastic/esql/types';
 import type { SupportedDataType } from '../../definitions/types';
 import { getExpressionType } from '../../definitions/utils';
-import type { ESQLAstItem, ESQLCommand, ESQLCommandOption } from '../../../types';
-import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
+import type { ESQLColumnData, ESQLUserDefinedColumn, UnmappedFieldsStrategy } from '../types';
+import type { IAdditionalFields } from '../registry';
 
 const getUserDefinedColumns = (
   command: ESQLCommand | ESQLCommandOption,
@@ -84,12 +85,15 @@ const getUserDefinedColumns = (
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string
+  query: string,
+  additionalFields: IAdditionalFields,
+  unmappedFieldsStrategy: UnmappedFieldsStrategy
 ) => {
   const columnMap = new Map<string, ESQLColumnData>();
   previousColumns.forEach((col) => columnMap.set(col.name, col)); // TODO make this more efficient
 
-  const typeOf = (thing: ESQLAstItem) => getExpressionType(thing, columnMap);
+  const typeOf = (thing: ESQLAstItem) =>
+    getExpressionType(thing, columnMap, unmappedFieldsStrategy);
 
   return uniqBy([...getUserDefinedColumns(command, typeOf, query)], 'name');
 };

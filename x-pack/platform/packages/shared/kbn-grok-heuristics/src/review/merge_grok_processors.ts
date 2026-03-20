@@ -56,9 +56,12 @@ export function mergeGrokProcessors(grokProcessors: GrokProcessorResult[]): Grok
 
   const descriptions = uniq(grokProcessors.map((processor) => processor.description));
 
+  // Deduplicate patterns - if multiple identical patterns exist, keep only one
+  const uniquePatterns = uniq(mergedPatterns);
+
   return {
     description: descriptions.join(', '),
-    patterns: mergedPatterns,
+    patterns: uniquePatterns,
     pattern_definitions: mergedPatternDefinitions,
   };
 }

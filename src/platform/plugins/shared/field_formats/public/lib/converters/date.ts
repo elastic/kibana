@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { memoize, noop } from 'lodash';
 import moment from 'moment';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { FieldFormat, FIELD_FORMAT_IDS } from '../../../common';
 import type { TextContextTypeConvert } from '../../../common/types';
 
@@ -46,7 +47,7 @@ export class DateFormat extends FieldFormat {
 
       this.memoizedConverter = memoize(function converter(value: string | number) {
         if (value === null || value === undefined) {
-          return '-';
+          return NULL_LABEL;
         }
 
         const date = moment(value);

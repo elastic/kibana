@@ -128,6 +128,7 @@ export async function getApmTraceError(params: {
         id: error?.id,
         log: errorSource?.error.log,
       },
+      index: hit._index,
     };
   });
 }

@@ -29,9 +29,11 @@ import {
   getConsoleRequest,
   EisCloudConnectPromoCallout,
   EisUpdateCallout,
+  useCloudConnectStatus,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
-import type { Index } from '../../../../../../../common';
+import { type Index } from '../../../../../../../common';
+import { formatBytes } from '../../../../../lib/format_bytes';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService, useLoadIndexMappings } from '../../../../../services';
 import { languageDefinitions, curlDefinition } from './languages';
@@ -69,7 +71,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   } = indexDetails;
   const {
     core,
-    plugins: { cloud, share },
+    plugins: { cloud, cloudConnect, share },
     services: { extensionsService },
   } = useAppContext();
   const state = useMappingsState();
@@ -84,6 +86,9 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const { data } = useUserPrivileges(indexDetails.name);
   const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
 
+  const sizeFormatted = formatBytes(size);
+  const primarySizeFormatted = formatBytes(primarySize);
+
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchUrl,
     apiKey: 'your_api_key',
@@ -91,9 +96,16 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   };
 
   const isLarge = useIsWithinBreakpoints(['xl']);
+  const {
+    isLoading: isCloudConnectStatusLoading,
+    isCloudConnected,
+    isCloudConnectedWithEisEnabled,
+  } = useCloudConnectStatus(cloudConnect?.hooks.useCloudConnectStatus);
 
   const shouldShowEisUpdateCallout =
-    (cloud?.isCloudEnabled && (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ?? false;
+    ((cloud?.isCloudEnabled || isCloudConnectedWithEisEnabled) &&
+      (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ??
+    false;
 
   const { parsedDefaultValue } = useMemo(
     () => parseMappings(mappingsData ?? undefined),
@@ -110,15 +122,17 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
   return (
     <>
-      <EisCloudConnectPromoCallout
-        promoId="indexDetailsOverview"
-        isSelfManaged={!cloud?.isCloudEnabled}
-        direction="row"
-        navigateToApp={() =>
-          core.application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-        }
-        addSpacer="bottom"
-      />
+      {!isCloudConnectStatusLoading && !isCloudConnected && (
+        <EisCloudConnectPromoCallout
+          promoId="indexDetailsOverview"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="row"
+          navigateToApp={() =>
+            core.application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
+          addSpacer="bottom"
+        />
+      )}
       {hasElserOnMlNodeSemanticText && (
         <EisUpdateCallout
           ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
@@ -141,7 +155,12 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
       )}
 
       <EuiFlexGrid columns={isLarge ? 3 : 1}>
-        <StorageDetails size={size} primarySize={primarySize} primary={primary} replica={replica} />
+        <StorageDetails
+          size={sizeFormatted}
+          primarySize={primarySizeFormatted}
+          primary={primary}
+          replica={replica}
+        />
 
         <StatusDetails
           documents={documents}
@@ -150,7 +169,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
           health={health}
         />
 
-        <SizeDocCountDetails size={size} documents={documents} />
+        <SizeDocCountDetails size={sizeFormatted} documents={documents} />
 
         <AliasesDetails aliases={aliases} />
 

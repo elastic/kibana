@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/expression-xy-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/expression-xy-plugin'
+  title: '@kbn/expression-xy-plugin'
   description: Moon project for @kbn/expression-xy-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/chart_expressions/expression_xy
+  sourceRoot: src/platform/plugins/shared/chart_expressions/expression_xy
 dependsOn:
   - '@kbn/charts-plugin'
   - '@kbn/core'
@@ -44,12 +43,12 @@ dependsOn:
   - '@kbn/core-rendering-browser'
   - '@kbn/palettes'
   - '@kbn/alerts-ui-shared'
-  - '@kbn/ui-actions-browser'
   - '@kbn/ebt-tools'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/chart-test-jest-helpers'
   - '@kbn/field-formats-common'
   - '@kbn/visualizations-common'
+  - '@kbn/ui-actions-plugin'
 tags:
   - plugin
   - prod
@@ -64,14 +63,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

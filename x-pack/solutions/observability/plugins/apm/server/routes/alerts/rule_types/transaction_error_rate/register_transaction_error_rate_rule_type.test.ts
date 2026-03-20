@@ -155,6 +155,15 @@ describe('Transaction error rate alert', () => {
       payload: {
         'kibana.alert.evaluation.threshold': 10,
         'kibana.alert.evaluation.value': 10,
+        'kibana.alert.grouping': {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          transaction: {
+            type: 'type-foo',
+          },
+        },
         'kibana.alert.reason':
           'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
         'processor.event': 'transaction',
@@ -162,6 +171,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': undefined,
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -278,6 +288,16 @@ describe('Transaction error rate alert', () => {
       payload: {
         'kibana.alert.evaluation.threshold': 10,
         'kibana.alert.evaluation.value': 10,
+        'kibana.alert.grouping': {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          transaction: {
+            name: 'tx-name-foo',
+            type: 'type-foo',
+          },
+        },
         'kibana.alert.reason':
           'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo, name: tx-name-foo. Alert when > 10%.',
         'processor.event': 'transaction',
@@ -285,6 +305,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': 'tx-name-foo',
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -400,6 +421,15 @@ describe('Transaction error rate alert', () => {
       payload: {
         'kibana.alert.evaluation.threshold': 10,
         'kibana.alert.evaluation.value': 10,
+        'kibana.alert.grouping': {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          transaction: {
+            type: 'type-foo',
+          },
+        },
         'kibana.alert.reason':
           'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
         'processor.event': 'transaction',
@@ -407,6 +437,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': undefined,
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -522,6 +553,15 @@ describe('Transaction error rate alert', () => {
       payload: {
         'kibana.alert.evaluation.threshold': 10,
         'kibana.alert.evaluation.value': 10,
+        'kibana.alert.grouping': {
+          service: {
+            environment: 'ENVIRONMENT_NOT_DEFINED',
+            name: 'foo',
+          },
+          transaction: {
+            type: 'type-foo',
+          },
+        },
         'kibana.alert.reason':
           'Failed transactions is 10% in the last 5 mins for service: foo, env: Not defined, type: type-foo. Alert when > 10%.',
         'processor.event': 'transaction',
@@ -529,6 +569,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': undefined,
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -632,6 +673,15 @@ describe('Transaction error rate alert', () => {
       payload: {
         'kibana.alert.evaluation.threshold': 10,
         'kibana.alert.evaluation.value': 10,
+        'kibana.alert.grouping': {
+          service: {
+            environment: 'env-bar',
+            name: 'bar',
+          },
+          transaction: {
+            type: 'type-bar',
+          },
+        },
         'kibana.alert.reason':
           'Failed transactions is 10% in the last 5 mins for service: bar, env: env-bar, type: type-bar. Alert when > 10%.',
         'processor.event': 'transaction',
@@ -639,6 +689,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'bar',
         'transaction.name': undefined,
         'transaction.type': 'type-bar',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -689,6 +740,16 @@ describe('Transaction error rate alert', () => {
           'kibana.alert.evaluation.threshold': 30,
           'kibana.alert.reason':
             'Failed transactions is 100% in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors, type: request. Alert when > 30%.',
+          'kibana.alert.grouping': {
+            service: {
+              environment: 'Synthtrace: many_errors',
+              name: 'synthtrace-high-cardinality-0',
+            },
+            transaction: {
+              name: 'tx-from-hit',
+              type: 'request',
+            },
+          },
           'agent.name': 'java',
           labels: [],
           'service.environment': 'Synthtrace: many_errors',
@@ -745,6 +806,102 @@ describe('Transaction error rate alert', () => {
     await executor({ params });
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
+
+    expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
+      context: {
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
+        environment: 'Synthtrace: many_errors',
+        grouping: {
+          service: {
+            environment: 'Synthtrace: many_errors',
+            name: 'synthtrace-high-cardinality-0',
+          },
+          transaction: {
+            name: 'tx-from-hit',
+            type: 'request',
+          },
+        },
+        interval: '5 mins',
+        reason:
+          'Failed transactions is 100% in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors, type: request. Alert when > 30%.',
+        serviceName: 'synthtrace-high-cardinality-0',
+        threshold: 10,
+        transactionName: undefined,
+        transactionType: 'request',
+        triggerValue: '100',
+        viewInAppUrl:
+          'http://localhost:5601/eyr/app/apm/services/synthtrace-high-cardinality-0?transactionType=request&environment=Synthtrace%3A%20many_errors',
+      },
+      id: 'test-id',
+    });
+  });
+
+  it('falls back to reconstructed grouping for recovered alerts without kibana.alert.grouping', async () => {
+    const { services, dependencies, executor } = createRuleTypeMocks();
+
+    registerTransactionErrorRateRuleType({
+      ...dependencies,
+    });
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 1,
+        },
+      },
+      aggregations: {
+        series: {
+          buckets: [],
+        },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
+    services.alertsClient.getRecoveredAlerts.mockReturnValue([
+      {
+        alert: {
+          getId: jest.fn().mockReturnValue('test-id'),
+          getUuid: jest.fn().mockReturnValue('test-uuid'),
+          scheduledExecutionOptions: undefined,
+          meta: [],
+          state: [],
+          context: {},
+          id: 'synthtrace-high-cardinality-0_Synthtrace: many_errors_request',
+          alertAsData: undefined,
+        },
+        hit: {
+          'kibana.alert.evaluation.value': 100,
+          'kibana.alert.reason':
+            'Failed transactions is 100% in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors, type: request. Alert when > 30%.',
+          'service.environment': 'Synthtrace: many_errors',
+          'service.name': 'synthtrace-high-cardinality-0',
+          'transaction.type': 'request',
+          'kibana.alert.rule.parameters': {
+            groupBy: [
+              'service.name',
+              'service.environment',
+              'transaction.type',
+              'transaction.name',
+            ],
+          },
+        },
+      },
+    ]);
+
+    const params = {
+      threshold: 10,
+      windowSize: 5,
+      windowUnit: 'm',
+    };
+
+    await executor({ params });
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {

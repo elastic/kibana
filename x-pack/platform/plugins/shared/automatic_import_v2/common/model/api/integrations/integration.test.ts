@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 
 import {
+  ApproveAutoImportIntegrationRequestBody,
+  ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
   CreateAutoImportIntegrationResponse,
   DeleteAutoImportIntegrationRequestParams,
@@ -46,6 +48,76 @@ describe('integration schemas', () => {
     ...overrides,
   });
 
+  describe('ApproveAutoImportIntegrationRequestParams', () => {
+    it('requires integration_id', () => {
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse({});
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('integration_id: Invalid input');
+    });
+
+    it('rejects empty integration_id', () => {
+      const payload = { integration_id: '   ' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
+    });
+
+    it('accepts valid params', () => {
+      const payload = { integration_id: 'integration-123' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+
+    it('strips unknown properties', () => {
+      const payload = { integration_id: 'integration-123', unknown: 'property' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual({ integration_id: 'integration-123' });
+    });
+  });
+
+  describe('ApproveAutoImportIntegrationRequestBody', () => {
+    const validPayload = {
+      version: '1.0.0',
+    };
+
+    it('accepts a valid payload', () => {
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(validPayload);
+      expectParseSuccess(result);
+    });
+
+    it('requires version', () => {
+      const payload = { ...validPayload };
+      delete (payload as any).version;
+
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('version: Invalid input');
+    });
+
+    it('rejects empty version', () => {
+      const payload = { ...validPayload, version: '   ' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('version: No empty strings allowed');
+    });
+
+    it('accepts non-semver version strings', () => {
+      const payload = { ...validPayload, version: 'build-2026-01-29' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+    });
+
+    it('rejects unknown properties', () => {
+      const payload = { ...validPayload, unknown: 'property' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+  });
+
   describe('CreateAutoImportIntegrationRequestBody', () => {
     const validPayload = {
       connectorId: 'test-connector-id',
@@ -72,7 +144,7 @@ describe('integration schemas', () => {
       const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('connectorId: Required');
+      expect(stringifyZodError(result.error)).toContain('connectorId: Invalid input');
     });
 
     it('requires integrationId', () => {
@@ -86,7 +158,7 @@ describe('integration schemas', () => {
       const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('integrationId: Required');
+      expect(stringifyZodError(result.error)).toContain('integrationId: Invalid input');
     });
 
     it('rejects empty integrationId', () => {
@@ -163,7 +235,7 @@ describe('integration schemas', () => {
       const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('title: Required');
+      expect(stringifyZodError(result.error)).toContain('title: Invalid input');
     });
 
     it('requires description', () => {
@@ -177,7 +249,7 @@ describe('integration schemas', () => {
       const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('description: Required');
+      expect(stringifyZodError(result.error)).toContain('description: Invalid input');
     });
 
     it('requires data stream title', () => {
@@ -198,7 +270,7 @@ describe('integration schemas', () => {
       const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('title: Required');
+      expect(stringifyZodError(result.error)).toContain('title: Invalid input');
     });
 
     it('requires data stream dataStreamId', () => {
@@ -219,7 +291,7 @@ describe('integration schemas', () => {
       const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('dataStreamId: Required');
+      expect(stringifyZodError(result.error)).toContain('dataStreamId: Invalid input');
     });
 
     it('rejects invalid input type', () => {
@@ -355,7 +427,7 @@ describe('integration schemas', () => {
       const result = GetAutoImportIntegrationRequestParams.safeParse({});
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('integration_id: Required');
+      expect(stringifyZodError(result.error)).toContain('integration_id: Invalid input');
     });
 
     it('rejects empty integration_id', () => {
@@ -400,7 +472,7 @@ describe('integration schemas', () => {
       const result = GetAutoImportIntegrationResponse.safeParse({});
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('integrationResponse: Required');
+      expect(stringifyZodError(result.error)).toContain('integrationResponse: Invalid input');
     });
 
     it('accepts a valid response with full integration', () => {
@@ -425,7 +497,7 @@ describe('integration schemas', () => {
       const result = GetAutoImportIntegrationResponse.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('integrationId: Required');
+      expect(stringifyZodError(result.error)).toContain('integrationId: Invalid input');
     });
 
     it('requires status in integrationResponse', () => {
@@ -441,7 +513,7 @@ describe('integration schemas', () => {
       const result = GetAutoImportIntegrationResponse.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('status: Required');
+      expect(stringifyZodError(result.error)).toContain('Invalid option');
     });
 
     it('rejects empty integrationId in integrationResponse', () => {
@@ -474,7 +546,7 @@ describe('integration schemas', () => {
       const result = GetAutoImportIntegrationResponse.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('title: Required');
+      expect(stringifyZodError(result.error)).toContain('title: Invalid input');
     });
 
     it('requires description in integrationResponse', () => {
@@ -490,7 +562,7 @@ describe('integration schemas', () => {
       const result = GetAutoImportIntegrationResponse.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('description: Required');
+      expect(stringifyZodError(result.error)).toContain('description: Invalid input');
     });
 
     it('requires dataStreams in integrationResponse', () => {
@@ -506,7 +578,7 @@ describe('integration schemas', () => {
       const result = GetAutoImportIntegrationResponse.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('dataStreams: Required');
+      expect(stringifyZodError(result.error)).toContain('dataStreams: Invalid input');
     });
 
     it('accepts integrationResponse with optional logo', () => {
@@ -595,6 +667,7 @@ describe('integration schemas', () => {
           title: 'Test Integration',
           totalDataStreamCount: 1,
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
         {
@@ -602,6 +675,7 @@ describe('integration schemas', () => {
           title: 'Test Integration',
           totalDataStreamCount: 1,
           successfulDataStreamCount: 1,
+          createdBy: 'user-2',
           status: 'completed' as const,
         },
       ];
@@ -616,6 +690,7 @@ describe('integration schemas', () => {
           title: 'Integration 1',
           totalDataStreamCount: 0,
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
       ];
@@ -623,7 +698,7 @@ describe('integration schemas', () => {
       const result = GetAllAutoImportIntegrationsResponse.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('integrationId: Required');
+      expect(stringifyZodError(result.error)).toContain('integrationId: Invalid input');
     });
 
     it('rejects empty integrationId', () => {
@@ -633,6 +708,7 @@ describe('integration schemas', () => {
           title: 'Integration 1',
           totalDataStreamCount: 0,
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
       ];
@@ -649,6 +725,7 @@ describe('integration schemas', () => {
           integrationId: 'integration-1',
           totalDataStreamCount: 0,
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
       ];
@@ -656,7 +733,7 @@ describe('integration schemas', () => {
       const result = GetAllAutoImportIntegrationsResponse.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('title: Required');
+      expect(stringifyZodError(result.error)).toContain('title: Invalid input');
     });
 
     it('requires totalDataStreamCount for each integration', () => {
@@ -665,6 +742,7 @@ describe('integration schemas', () => {
           integrationId: 'integration-1',
           title: 'Test Integration',
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
       ];
@@ -672,7 +750,7 @@ describe('integration schemas', () => {
       const result = GetAllAutoImportIntegrationsResponse.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('totalDataStreamCount: Required');
+      expect(stringifyZodError(result.error)).toContain('totalDataStreamCount: Invalid input');
     });
 
     it('requires successfulDataStreamCount for each integration', () => {
@@ -681,6 +759,7 @@ describe('integration schemas', () => {
           integrationId: 'integration-1',
           title: 'Test Integration',
           totalDataStreamCount: 5,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
       ];
@@ -688,7 +767,7 @@ describe('integration schemas', () => {
       const result = GetAllAutoImportIntegrationsResponse.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('successfulDataStreamCount: Required');
+      expect(stringifyZodError(result.error)).toContain('successfulDataStreamCount: Invalid input');
     });
 
     it('requires status for each integration', () => {
@@ -698,17 +777,25 @@ describe('integration schemas', () => {
           title: 'Test Integration',
           totalDataStreamCount: 5,
           successfulDataStreamCount: 3,
+          createdBy: 'user-1',
         },
       ];
 
       const result = GetAllAutoImportIntegrationsResponse.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('status: Required');
+      expect(stringifyZodError(result.error)).toContain('Invalid option');
     });
 
     it('accepts all valid task status values', () => {
-      const statuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'] as const;
+      const statuses = [
+        'pending',
+        'processing',
+        'completed',
+        'approved',
+        'failed',
+        'cancelled',
+      ] as const;
 
       statuses.forEach((status) => {
         const payload = [
@@ -717,6 +804,7 @@ describe('integration schemas', () => {
             title: 'Test Integration',
             totalDataStreamCount: 1,
             successfulDataStreamCount: 0,
+            createdBy: 'user-1',
             status,
           },
         ];
@@ -733,6 +821,7 @@ describe('integration schemas', () => {
           title: 'Test Integration',
           totalDataStreamCount: 1,
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
           unknown: 'property',
         },
@@ -750,7 +839,7 @@ describe('integration schemas', () => {
       const result = UpdateAutoImportIntegrationRequestParams.safeParse({});
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('integration_id: Required');
+      expect(stringifyZodError(result.error)).toContain('integration_id: Invalid input');
     });
 
     it('rejects empty integration_id', () => {
@@ -880,7 +969,7 @@ describe('integration schemas', () => {
       const result = DeleteAutoImportIntegrationRequestParams.safeParse({});
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('integration_id: Required');
+      expect(stringifyZodError(result.error)).toContain('integration_id: Invalid input');
     });
 
     it('rejects empty integration_id', () => {
@@ -1071,6 +1160,7 @@ describe('integration schemas', () => {
             title: 'Apache Logs',
             totalDataStreamCount: 1,
             successfulDataStreamCount: 0,
+            createdBy: 'admin',
             status: 'pending' as const,
           },
           {
@@ -1078,6 +1168,7 @@ describe('integration schemas', () => {
             title: 'MySQL Logs',
             totalDataStreamCount: 1,
             successfulDataStreamCount: 0,
+            createdBy: 'admin',
             status: 'pending' as const,
           },
         ];
@@ -1097,6 +1188,7 @@ describe('integration schemas', () => {
             title: 'Apache Logs',
             totalDataStreamCount: 1,
             successfulDataStreamCount: 0,
+            createdBy: 'admin',
             status: 'pending' as const,
           },
         ];

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { camelCase } from 'lodash';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import type { StateComparators, StateManager, WithAllKeys } from './types';
 import { runComparator } from './state_comparators';
+import type { StateComparators, StateManager, WithAllKeys } from './types';
 
 type SubjectOf<StateType extends object> = BehaviorSubject<WithAllKeys<StateType>[keyof StateType]>;
 
@@ -59,9 +60,10 @@ export const initializeStateManager = <StateType extends object>(
       }
     };
 
-    const capitalizedKey = (key as string).charAt(0).toUpperCase() + (key as string).slice(1);
+    const camelCaseKey = camelCase(key as string);
+    const capitalizedKey = camelCaseKey.charAt(0).toUpperCase() + camelCaseKey.slice(1);
     acc[`set${capitalizedKey}`] = setter;
-    acc[`${key as string}$`] = subject;
+    acc[`${camelCaseKey as string}$`] = subject;
 
     allSubjects.push(subject);
     keyToSubjectMap[key] = subject;

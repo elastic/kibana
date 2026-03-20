@@ -16,7 +16,7 @@ import type {
 } from '../../types/conditions';
 import { BINARY_OPERATORS } from '../../types/conditions';
 import { painlessFieldAccessor } from '../../types/utils';
-import { encodeValue } from '../../types/utils';
+import { encodeValue } from '../../types/utils/painless_encoding';
 import { evaluateDateMath } from './painless_date_math_helpers';
 
 // Type for mapping field names to variable names
@@ -190,6 +190,15 @@ function shorthandBinaryToPainless(
 
       return `((${safeFieldAccessor} instanceof Number && ${numberExpr}) || (${safeFieldAccessor} instanceof String && ${stringExpr}))`;
     }
+    case 'includes': {
+      // Handle both List (multivalue) and single value (after unwrapping of single-element lists)
+      // Fast path: try direct contains first (works if types already match)
+      // Fallback: convert elements to strings for type-safe comparison
+      const encodedValue = encodeValue(value as StringOrNumberOrBoolean);
+      const encodedStringValue = encodeValue(String(value));
+      // If List: check contains or string match. If single value (unwrapped): check equality
+      return `(${safeFieldAccessor} instanceof List ? (${safeFieldAccessor}.contains(${encodedValue}) || ${safeFieldAccessor}.stream().anyMatch(e -> String.valueOf(e).equals(${encodedStringValue}))) : (${safeFieldAccessor} == ${encodedValue} || String.valueOf(${safeFieldAccessor}).equals(${encodedStringValue})))`;
+    }
     case 'neq':
     default: // eq
       const operator = op === 'neq' ? '!=' : '==';
@@ -256,16 +265,15 @@ export function conditionToStatement(
   throw new Error('Unsupported condition');
 }
 
-export function conditionToPainless(condition: Condition): string {
-  // Always/never conditions (if you have them)
-  if ('never' in condition) {
-    return `return false`;
-  }
-  if ('always' in condition) {
-    return `return true`;
-  }
-
-  // Extract all field names and create variable mappings
+/**
+ * Helper to build a condition evaluation block with variable declarations.
+ * @param condition The condition to compile
+ * @returns Object with declarationsBlock and conditionExpression
+ */
+function buildConditionBlock(condition: Condition): {
+  declarationsBlock: string;
+  conditionExpression: string;
+} {
   const fields = extractFieldNames(condition);
   const varMap: FieldVarMap = new Map();
   const declarations: string[] = [];
@@ -276,21 +284,76 @@ export function conditionToPainless(condition: Condition): string {
     declarations.push(generateFieldDeclaration(field, varName));
   }
 
-  // declarationsBlock will look like this:
-  // def val_field1 = $('field1', null); if (val_field1 instanceof List && val_field1.size() == 1) { val_field1 = val_field1[0]; }
+  // Declarations block will look like this (def val_field1 = $('field1', null); if (val_field1 instanceof List && val_field1.size() == 1) { val_field1 = val_field1[0]; }
   const declarationsBlock = declarations.length > 0 ? declarations.join('\n  ') + '\n  ' : '';
+  const conditionExpression = conditionToStatement(condition, false, varMap);
+
+  return { declarationsBlock, conditionExpression };
+}
+
+export function conditionToPainless(condition: Condition): string {
+  // Always/never conditions (if you have them)
+  if ('never' in condition) {
+    return `return false`;
+  }
+  if ('always' in condition) {
+    return `return true`;
+  }
+
+  const { declarationsBlock, conditionExpression } = buildConditionBlock(condition);
 
   return `
   try {
   
   ${declarationsBlock}
   
-  if (${conditionToStatement(condition, false, varMap)}) {
+  if (${conditionExpression}) {
     return true;
   }
   return false;
 } catch (Exception e) {
   return false;
+}
+`;
+}
+
+/**
+ * Compiles a condition to a Painless script that sets a boolean variable instead of returning.
+ * This is useful for combining conditions where we need to check multiple conditions in sequence.
+ *
+ * @param condition The condition to compile
+ * @param resultVar The name of the boolean variable to set (should be declared beforehand)
+ * @returns A Painless script block that sets the resultVar to true/false based on the condition
+ *
+ * @example
+ * // For condition: { field: 'status', eq: 'active' }
+ * // Returns:
+ * // try {
+ * //   def val_status = $('status', null); ...
+ * //   if ((val_status !== null && val_status == "active")) {
+ * //     _conditionMet = true;
+ * //   }
+ * // } catch (Exception e) { }
+ */
+export function conditionToPainlessCheck(condition: Condition, resultVar: string): string {
+  // Always/never conditions
+  if ('never' in condition) {
+    return `// Condition: never\n${resultVar} = false;`;
+  }
+  if ('always' in condition) {
+    return `// Condition: always\n${resultVar} = true;`;
+  }
+
+  const { declarationsBlock, conditionExpression } = buildConditionBlock(condition);
+
+  return `
+try {
+  ${declarationsBlock}
+  if (${conditionExpression}) {
+    ${resultVar} = true;
+  }
+} catch (Exception e) {
+  // ${resultVar} stays false on error
 }
 `;
 }

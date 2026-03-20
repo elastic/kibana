@@ -54,7 +54,7 @@ describe('defend insights route helpers', () => {
     it('should return the correct tool params', () => {
       const params = {
         endpointIds: ['endpoint-id1'],
-        insightType: DefendInsightType.Enum.incompatible_antivirus,
+        insightType: DefendInsightType.enum.incompatible_antivirus,
         actionsClient: {} as any,
         anonymizationFields: [],
         apiConfig: { connectorId: 'connector-id1', actionTypeId: 'action-type-id1' },
@@ -90,7 +90,7 @@ describe('defend insights route helpers', () => {
         authenticatedUser: {} as any,
         dataClient: {
           getDefendInsight: jest.fn().mockResolvedValueOnce({
-            status: DefendInsightStatus.Enum.running,
+            status: DefendInsightStatus.enum.running,
             backingIndex: 'index',
           }),
           updateDefendInsight: jest.fn(),
@@ -125,7 +125,7 @@ describe('defend insights route helpers', () => {
         authenticatedUser: {} as any,
         dataClient: {
           getDefendInsight: jest.fn().mockResolvedValueOnce({
-            status: DefendInsightStatus.Enum.running,
+            status: DefendInsightStatus.enum.running,
             backingIndex: 'backing-index-name',
             generationIntervals: [],
           }),
@@ -136,7 +136,7 @@ describe('defend insights route helpers', () => {
         rawDefendInsights: '{"eventsContextCount": 5, "insights": ["insight1", "insight2"]}',
         startTime: moment(),
         telemetry: { reportEvent: jest.fn() } as any,
-        insightType: DefendInsightType.Enum.incompatible_antivirus,
+        insightType: DefendInsightType.enum.incompatible_antivirus,
       };
       await updateDefendInsights(params);
 
@@ -150,7 +150,7 @@ describe('defend insights route helpers', () => {
         defendInsightUpdateProps: {
           eventsContextCount: 5,
           insights: ['insight1', 'insight2'],
-          status: DefendInsightStatus.Enum.succeeded,
+          status: DefendInsightStatus.enum.succeeded,
           generationIntervals: expect.arrayContaining([
             expect.objectContaining({
               date: expect.any(String),

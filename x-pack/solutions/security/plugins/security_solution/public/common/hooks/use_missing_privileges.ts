@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RULES_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import { useMemo } from 'react';
+import { RULES_FEATURE_ID } from '../../../common/constants';
 import type { Privilege } from '../../detections/containers/detection_engine/alerts/types';
 import { useUserPrivileges } from '../components/user_privileges';
 
@@ -65,7 +65,7 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       };
     }
 
-    if (rulesPrivileges.edit === false) {
+    if (rulesPrivileges.rules.edit === false) {
       featurePrivileges.push([RULES_FEATURE_ID, ['all']]);
     }
 
@@ -90,5 +90,5 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       featurePrivileges,
       indexPrivileges,
     };
-  }, [listPrivileges.result, detectionEnginePrivileges.result, rulesPrivileges.edit]);
+  }, [listPrivileges.result, detectionEnginePrivileges.result, rulesPrivileges.rules.edit]);
 };

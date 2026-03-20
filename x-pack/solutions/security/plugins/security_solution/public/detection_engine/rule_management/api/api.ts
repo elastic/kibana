@@ -25,6 +25,7 @@ import type {
   PerformRuleUpgradeResponseBody,
   RevertPrebuiltRulesRequest,
   RevertPrebuiltRulesResponseBody,
+  ReviewRuleInstallationRequestBody,
   ReviewRuleInstallationResponseBody,
   ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
@@ -697,13 +698,16 @@ export const reviewRuleUpgrade = async ({
  */
 export const reviewRuleInstall = async ({
   signal,
+  request,
 }: {
   signal: AbortSignal | undefined;
+  request: ReviewRuleInstallationRequestBody;
 }): Promise<ReviewRuleInstallationResponseBody> =>
   KibanaServices.get().http.fetch(REVIEW_RULE_INSTALLATION_URL, {
     method: 'POST',
     version: '1',
     signal,
+    body: JSON.stringify(request),
   });
 
 export const performInstallAllRules = async (): Promise<PerformRuleInstallationResponseBody> =>

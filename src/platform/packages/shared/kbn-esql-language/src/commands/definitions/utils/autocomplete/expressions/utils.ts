@@ -7,44 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFunction } from '../../../../../types';
+import { isLiteral } from '@elastic/esql';
+import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
-import type { FunctionParameterContext } from './types';
-import type { ICommandContext } from '../../../../registry/types';
+import type { ExpressionContext, FunctionParameterContext } from './types';
+import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getFunctionDefinition } from '../..';
-import { SignatureAnalyzer } from './signature_analyzer';
-import type { Signature } from '../../../types';
+import { EDITOR_MARKER } from '../../../constants';
+import { resolveArgumentTypes } from '../../expressions';
+import type { SupportedDataType } from '../../../types';
+import {
+  getMatchingSignatures,
+  getMaxMinNumberOfParams,
+  getParamAtPosition,
+  getParamDefsAtPosition,
+} from '../../signatures';
+import { removeFinalUnknownIdentiferArg } from '../../shared';
+import type { PreferredExpressionType } from './types';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
+export type IncompleteOperatorReason = 'tooFewArgs' | 'wrongTypes';
 
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */
 export const specialOperators = [...inOperators, ...nullCheckOperators];
-
-/**
- * Detects if function signatures accept arbitrary/complex expressions in parameters.
- *
- * This pattern indicates functions where parameters can contain complex expressions
- * (not just simple values), characterized by:
- * - Variadic with multiple parameters (minParams >= 2)
- * - Unknown return type (depends on arguments)
- * - Mixed parameter types (boolean + any)
- *
- * Examples: CASE(condition1, value1, condition2, value2, ..., default)
- */
-export function acceptsArbitraryExpressions(signatures: Signature[]): boolean {
-  if (!signatures || signatures.length === 0) {
-    return false;
-  }
-
-  return signatures.some((sig) => {
-    const isVariadicWithMultipleParams = sig.minParams != null && sig.minParams >= 2;
-    const hasUnknownReturn = sig.returnType === 'unknown';
-    const hasMixedBooleanAndAny =
-      sig.params.some(({ type }) => type === 'boolean') && sig.params.some((p) => p.type === 'any');
-
-    return isVariadicWithMultipleParams && hasUnknownReturn && hasMixedBooleanAndAny;
-  });
-}
 
 /** Checks if operator is a NULL check (IS NULL, IS NOT NULL) */
 export function isNullCheckOperator(name: string) {
@@ -86,19 +71,165 @@ export function buildExpressionFunctionParameterContext(
     return null;
   }
 
-  const analyzer = SignatureAnalyzer.fromNode(fn, context, fnDefinition);
+  const { argTypes, literalMask } = resolveArgumentTypes(fn.args, {
+    columns: context?.columns,
+    unmappedFieldsStrategy: context?.unmappedFieldsStrategy,
+  });
 
-  if (!analyzer) {
+  const shouldGetNextArgument = fn.text.includes(EDITOR_MARKER);
+  let argIndex = Math.max(fn.args.length, 0);
+  if (!shouldGetNextArgument && argIndex) {
+    argIndex -= 1;
+  }
+
+  const isVariadicFn = fnDefinition.signatures.some((sig) => sig.minParams != null);
+  const hasMultipleSignatures = fnDefinition.signatures.length > 1;
+  const argsToCheckForFiltering =
+    isVariadicFn || shouldGetNextArgument || !hasMultipleSignatures ? argIndex : fn.args.length;
+
+  const validSignatures = getMatchingSignatures(
+    fnDefinition.signatures,
+    argTypes.slice(0, argsToCheckForFiltering),
+    literalMask.slice(0, argsToCheckForFiltering),
+    true,
+    true
+  );
+
+  const compatibleParamDefs = getParamDefsAtPosition(
+    getMatchingSignatures(
+      fnDefinition.signatures,
+      argTypes.slice(0, argIndex),
+      literalMask.slice(0, argIndex),
+      true,
+      true
+    ),
+    argIndex
+  );
+
+  const hasMoreMandatoryArgs = !validSignatures.some((signature) => {
+    const nextParam = getParamAtPosition(signature, argIndex + 1);
+
+    return nextParam === null || nextParam?.optional === true;
+  });
+
+  const firstArgumentType = argTypes[0];
+  const hasRepeating = fnDefinition.signatures.some((sig) => sig.isSignatureRepeating);
+  const firstValueType = hasRepeating ? argTypes[1] : undefined;
+
+  const signatures = validSignatures.length ? validSignatures : fnDefinition.signatures;
+
+  return {
+    signatures,
+    paramDefinitions: compatibleParamDefs,
+    hasMoreMandatoryArgs,
+    functionDefinition: fnDefinition,
+    firstArgumentType,
+    firstValueType,
+    currentParameterIndex: argIndex,
+    validSignatures,
+  };
+}
+
+/**
+ * Explains why an operator invocation is not yet complete for autocomplete purposes.
+ */
+export function getIncompleteOperatorReason(
+  operator: ESQLFunction,
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+): IncompleteOperatorReason | undefined {
+  const fnDefinition = getFunctionDefinition(operator.name);
+
+  if (!fnDefinition) {
+    return 'tooFewArgs';
+  }
+
+  const cleanedArgs = removeFinalUnknownIdentiferArg(operator.args, getExpressionType);
+  const { min, max } = getMaxMinNumberOfParams(fnDefinition.signatures);
+  const hasValidArity = cleanedArgs.length >= min && cleanedArgs.length <= max;
+
+  if (!hasValidArity) {
+    return 'tooFewArgs';
+  }
+
+  if (
+    operator.incomplete &&
+    (fnDefinition.name === 'is null' || fnDefinition.name === 'is not null')
+  ) {
+    return 'tooFewArgs';
+  }
+
+  if (
+    (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
+    Array.isArray(operator.args[1]) &&
+    !operator.args[1].length
+  ) {
+    return 'tooFewArgs';
+  }
+
+  const givenTypes = operator.args.map((arg) => getExpressionType(arg));
+  const literalMask = operator.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
+  const hasCorrectTypes =
+    getMatchingSignatures(fnDefinition.signatures, givenTypes, literalMask, true).length > 0;
+
+  if (!hasCorrectTypes) {
+    return 'wrongTypes';
+  }
+
+  return undefined;
+}
+
+/**
+ * Tries to get KQL suggestions if the cursor is inside a KQL function string parameter.
+ *
+ * Detects patterns like:
+ * - KQL("""query here...""")
+ *
+ * Returns null if not inside a KQL function string, allowing normal suggestion flow.
+ */
+export async function getKqlSuggestionsIfApplicable(
+  ctx: ExpressionContext
+): Promise<ISuggestionItem[] | null> {
+  const { innerText, callbacks } = ctx;
+
+  const getKqlSuggestions = callbacks?.getKqlSuggestions;
+
+  if (!getKqlSuggestions) {
     return null;
   }
 
-  return {
-    paramDefinitions: analyzer.getCompatibleParamDefs(),
-    hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
-    functionDefinition: fnDefinition,
-    firstArgumentType: analyzer.getFirstArgumentType(),
-    firstValueType: analyzer.getFirstValueType(),
-    currentParameterIndex: analyzer.getCurrentParameterIndex(),
-    validSignatures: analyzer.getValidSignatures(),
-  };
+  // Check if we're inside a KQL function call with triple quotes
+  const kqlMatch = innerText.match(/\bkql\s*\(\s*"""([\s\S]*)$/i);
+
+  if (!kqlMatch) {
+    return null;
+  }
+
+  const kqlQuery = kqlMatch[1];
+  const cursorPositionInKql = kqlQuery.length;
+
+  try {
+    // Get KQL suggestions from the autocomplete service
+    const suggestions = await getKqlSuggestions(kqlQuery, cursorPositionInKql);
+
+    if (!suggestions || suggestions.length === 0) {
+      return null;
+    }
+
+    return suggestions;
+  } catch (error) {
+    return null;
+  }
+}
+
+/** Normalizes preferred expression type option into an array form for downstream checks. */
+export function normalizePreferredExpressionTypes(
+  preferredExpressionType?: PreferredExpressionType | PreferredExpressionType[]
+): PreferredExpressionType[] {
+  if (!preferredExpressionType) {
+    return [];
+  }
+
+  return Array.isArray(preferredExpressionType)
+    ? preferredExpressionType
+    : [preferredExpressionType];
 }

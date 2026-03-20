@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-plugin'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/actionable-obs-team'
-toolchain:
+  defaultOwner: '@elastic/observability-ui'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-plugin'
+  title: '@kbn/observability-plugin'
   description: Moon project for @kbn/observability-plugin
   channel: ''
-  owner: '@elastic/actionable-obs-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/observability
+  owner: '@elastic/observability-ui'
+  sourceRoot: x-pack/solutions/observability/plugins/observability
 dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/triggers-actions-ui-plugin'
@@ -141,7 +140,6 @@ dependsOn:
   - '@kbn/core-http-browser-mocks'
   - '@kbn/discover-utils'
   - '@kbn/deeplinks-management'
-  - '@kbn/observability-nav-icons'
   - '@kbn/react-query'
   - '@kbn/content-management-utils'
   - '@kbn/maintenance-windows-plugin'
@@ -152,6 +150,10 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/kql'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/lens-common'
+  - '@kbn/apm-types'
+  - '@kbn/apm-types-shared'
 tags:
   - plugin
   - prod
@@ -168,14 +170,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

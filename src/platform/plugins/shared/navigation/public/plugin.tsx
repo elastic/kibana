@@ -42,15 +42,14 @@ export class NavigationPublicPlugin
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
     new TopNavMenuExtensionsRegistry();
   private readonly stop$ = new ReplaySubject<void>(1);
-  private coreStart?: CoreStart;
+  private readonly solutionNavDefinitions = new Map<SolutionId, AddSolutionNavigationArg>();
+  private chrome?: InternalChromeStart;
+  private activeSolutionId: SolutionId | null = null;
   private isSolutionNavEnabled = false;
-  private isCloudTrialUser = false;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
-    this.isCloudTrialUser = deps.cloud?.isInTrial() ?? false;
-
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
         this.topNavMenuExtensionsRegistry
@@ -62,11 +61,10 @@ export class NavigationPublicPlugin
     core: CoreStart,
     depsStart: NavigationPublicStartDependencies
   ): NavigationPublicStart {
-    this.coreStart = core;
-
     const { unifiedSearch, cloud, spaces } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
+    this.chrome = chrome;
     const activeSpace$: Observable<Space | undefined> = spaces?.getActiveSpace$() ?? of(undefined);
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
@@ -90,12 +88,6 @@ export class NavigationPublicPlugin
         isServerless,
         activeSpace,
       });
-
-      const feedbackUrlParams = this.buildFeedbackUrlParams(
-        isServerless,
-        cloud?.isCloudEnabled ?? false
-      );
-      chrome.project.setFeedbackUrlParams(feedbackUrlParams);
 
       if (!this.isSolutionNavEnabled) return;
 
@@ -152,12 +144,16 @@ export class NavigationPublicPlugin
     this.stop$.next();
   }
 
-  private addSolutionNavigation(solutionNavigation: AddSolutionNavigationArg) {
-    if (!this.coreStart) throw new Error('coreStart is not available');
-    const { project } = this.coreStart.chrome as InternalChromeStart;
-    project.updateSolutionNavigations({
-      [solutionNavigation.id]: solutionNavigation,
-    });
+  private addSolutionNavigation(def: AddSolutionNavigationArg) {
+    this.solutionNavDefinitions.set(def.id, def);
+    this.tryInitNavigation();
+  }
+
+  private tryInitNavigation() {
+    if (!this.activeSolutionId || !this.chrome) return;
+    const def = this.solutionNavDefinitions.get(this.activeSolutionId);
+    if (!def) return;
+    this.chrome.project.initNavigation(this.activeSolutionId, def.navigationTree$);
   }
 
   private initiateChromeStyleAndSideNav(
@@ -170,29 +166,17 @@ export class NavigationPublicPlugin
     // On serverless the chrome style is already set by the serverless plugin
     if (!isServerless) {
       chrome.setChromeStyle(isProjectNav ? 'project' : 'classic');
-
-      if (isProjectNav) {
-        chrome.sideNav.setIsFeedbackBtnVisible(!this.isCloudTrialUser);
-      }
     }
 
     if (isProjectNav && solutionView !== 'classic') {
-      chrome.project.changeActiveSolutionNavigation(solutionView!);
+      this.activeSolutionId = solutionView as SolutionId;
+      this.tryInitNavigation();
     }
   }
 
   private getIsUnauthenticated(http: HttpStart) {
     const { anonymousPaths } = http;
     return anonymousPaths.isAnonymous(window.location.pathname);
-  }
-
-  private buildFeedbackUrlParams(isServerless: boolean, isCloudEnabled: boolean) {
-    const version = this.initializerContext.env.packageInfo.version;
-    const type = isServerless ? 'serverless' : isCloudEnabled ? 'ech' : 'local';
-    return new URLSearchParams({
-      version,
-      type,
-    });
   }
 }
 

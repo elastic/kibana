@@ -7,8 +7,8 @@
 
 import { TestScheduler } from 'rxjs/testing';
 import { ChatCompletionEventType } from '@kbn/inference-common';
-import { processVertexStream } from './process_vertex_stream';
-import type { GenerateContentResponseChunk } from './types';
+import { processVertexStream, processVertexResponse } from './process_vertex_stream';
+import type { GenerateContentResponseChunk, GenerateContentResponse } from './types';
 
 describe('processVertexStream', () => {
   const getTestScheduler = () =>
@@ -148,6 +148,110 @@ describe('processVertexStream', () => {
           content: 'chunk C',
           tool_calls: [],
           type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+      });
+    });
+  });
+});
+
+describe('processVertexResponse', () => {
+  const getTestScheduler = () =>
+    new TestScheduler((actual, expected) => {
+      expect(actual).toEqual(expected);
+    });
+
+  it('completes when the source completes', () => {
+    getTestScheduler().run(({ expectObservable, hot }) => {
+      const source$ = hot<GenerateContentResponse>('----|');
+
+      const processed$ = source$.pipe(processVertexResponse());
+
+      expectObservable(processed$).toBe('----|');
+    });
+  });
+
+  it('emits a chunk event when the source emits content', () => {
+    getTestScheduler().run(({ expectObservable, hot }) => {
+      const chunk: GenerateContentResponse = {
+        candidates: [{ index: 0, content: { role: 'model', parts: [{ text: 'some chunk' }] } }],
+      };
+
+      const source$ = hot<GenerateContentResponseChunk>('--a', { a: chunk });
+
+      const processed$ = source$.pipe(processVertexResponse());
+
+      expectObservable(processed$).toBe('--a', {
+        a: {
+          content: 'some chunk',
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+      });
+    });
+  });
+
+  it('emits a chunk event when the source emits a function call', () => {
+    getTestScheduler().run(({ expectObservable, hot }) => {
+      const chunk: GenerateContentResponse = {
+        candidates: [
+          {
+            index: 0,
+            content: {
+              role: 'model',
+              parts: [{ functionCall: { name: 'func1', args: { arg1: true } } }],
+            },
+          },
+        ],
+      };
+
+      const source$ = hot<GenerateContentResponse>('--a', { a: chunk });
+
+      const processed$ = source$.pipe(processVertexResponse());
+
+      expectObservable(processed$).toBe('--a', {
+        a: {
+          content: '',
+          tool_calls: [
+            {
+              index: 0,
+              toolCallId: expect.any(String),
+              function: { name: 'func1', arguments: JSON.stringify({ arg1: true }) },
+            },
+          ],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+      });
+    });
+  });
+
+  it('emits a token count event when the source emits content with usageMetadata', () => {
+    getTestScheduler().run(({ expectObservable, hot }) => {
+      const chunk: GenerateContentResponse = {
+        candidates: [{ index: 0, content: { role: 'model', parts: [{ text: 'last chunk' }] } }],
+        usageMetadata: {
+          candidatesTokenCount: 1,
+          promptTokenCount: 2,
+          totalTokenCount: 3,
+        },
+      };
+
+      const source$ = hot<GenerateContentResponse>('--a', { a: chunk });
+
+      const processed$ = source$.pipe(processVertexResponse());
+
+      expectObservable(processed$).toBe('--(ab)', {
+        a: {
+          content: 'last chunk',
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+        b: {
+          tokens: {
+            completion: 1,
+            prompt: 2,
+            total: 3,
+          },
+          type: ChatCompletionEventType.ChatCompletionTokenCount,
         },
       });
     });

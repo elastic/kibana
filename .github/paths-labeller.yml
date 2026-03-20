@@ -1,10 +1,24 @@
 ---
+- 'Team:One Workflow':
+    - 'examples/workflows_extensions_example/**/*.*'
+    - 'src/platform/packages/shared/deeplinks/workflows/**/*.*'
+    - 'src/platform/packages/shared/kbn-workflows/**/*.*'
+    - 'src/platform/packages/shared/kbn-workflows-ui/**/*.*'
+    - 'src/platform/plugins/shared/workflows_execution_engine/**/*.*'
+    - 'src/platform/plugins/shared/workflows_extensions/**/*.*'
+    - 'src/platform/plugins/shared/workflows_management/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/**/*.*'
 - 'Feature:Embedding':
     - 'src/platform/plugins/shared/embeddable/**/*.*'
     - 'src/plugins/dashboard_embeddable_container/**/*.*'
 - 'Feature:Drilldowns':
+    - 'src/platform/plugins/shared/embeddable/**/*.*'
     - 'x-pack/plugins/drilldowns/**/*.*'
-    - 'x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/**/*.*'
 - 'Feature:ExpressionLanguage':
     - 'src/platform/plugins/shared/expressions/**/*.*'
     - 'src/plugins/bfetch/**/*.*'
@@ -18,11 +32,6 @@
 - 'Team:Fleet':
     - 'x-pack/platform/plugins/shared/fleet/**/*.*'
     - 'x-pack/platform/test/fleet_api_integration/**/*.*'
-- 'Team:obs-ux-management':
-    - 'x-pack/solutions/observability/plugins/observability/**/*.*'
-    - 'x-pack/solutions/observability/plugins/slo/**/*.*'
-    - 'x-pack/solutions/observability/plugins/synthetics/**/*.*'
-    - 'x-pack/solutions/observability/plugins/exploratory_view/**/*.*'
 - 'Team:obs-ai':
     - 'x-pack/platform/plugins/shared/observability_ai_assistant/**/*.*'
     - 'x-pack/plugins/observability_solution/observability_ai_assistant_*/**/*.*'

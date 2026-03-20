@@ -61,6 +61,12 @@ export const sloKeys = {
     includeOutdatedOnly: boolean;
     validTags: string;
   }) => [...sloKeys.allDefinitions(), params],
+  searchDefinitions: (params: {
+    search: string;
+    size: number;
+    searchAfter?: string;
+    remoteName?: string;
+  }) => [...sloKeys.all, 'searchDefinitions', params] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   allHealth: () => [...sloKeys.all, 'health'] as const,
   health: (list: Array<{ id: string; instanceId: string }>) =>
@@ -90,6 +96,26 @@ export const sloKeys = {
     remoteName?: string;
   }) => [...sloKeys.all, 'instances', params] as const,
   bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
+  allHealthScans: () => [...sloKeys.all, 'healthScans'] as const,
+  healthScans: (size?: number) => [...sloKeys.allHealthScans(), { size }] as const,
+  allHealthScanResults: () => [...sloKeys.all, 'healthScanResults'] as const,
+  healthScanResults: ({
+    scanId,
+    size,
+    searchAfter,
+    problematic,
+    allSpaces,
+  }: {
+    scanId: string;
+    size?: number;
+    searchAfter?: string;
+    problematic?: boolean;
+    allSpaces?: boolean;
+  }) =>
+    [
+      ...sloKeys.allHealthScanResults(),
+      { scanId, size, searchAfter, problematic, allSpaces },
+    ] as const,
 };
 
 export type SloKeys = typeof sloKeys;

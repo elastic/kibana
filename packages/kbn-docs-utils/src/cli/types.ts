@@ -17,6 +17,7 @@ import type {
   ReferencedDeprecationsByPlugin,
   UnreferencedDeprecationsByPlugin,
   AdoptionTrackedAPIsByPlugin,
+  UnnamedExportsByPlugin,
   ApiStats,
   PluginMetaInfo,
 } from '../types';
@@ -31,8 +32,12 @@ export interface CliFlags {
   references?: boolean;
   /** Stats flags: 'any', 'comments', and/or 'exports'. */
   stats?: string | string[];
-  /** Plugin filter: single plugin ID or array of plugin IDs. */
+  /** Validation checks: 'any', 'comments', 'exports', or 'all'. */
+  check?: string | string[];
+  /** Plugin filter: single plugin ID or array of plugin IDs (plugin.id from kibana.jsonc). */
   plugin?: string | string[];
+  /** Package filter: single package ID or array of package IDs (id from kibana.jsonc). */
+  package?: string | string[];
 }
 
 /**
@@ -43,8 +48,10 @@ export interface CliOptions {
   collectReferences: boolean;
   /** Stats flags to display. */
   stats?: string[];
-  /** Plugin filter IDs. */
+  /** Plugin filter IDs (plugin.id from kibana.jsonc). */
   pluginFilter?: string[];
+  /** Package filter IDs (id from kibana.jsonc, e.g., @kbn/package-name). */
+  packageFilter?: string[];
 }
 
 /**
@@ -65,8 +72,10 @@ export interface CliContext {
  * Result from setup_project task.
  */
 export interface SetupProjectResult {
-  /** Discovered plugins and packages. */
+  /** Plugins/packages to analyze (may be filtered via --plugin/--package). */
   plugins: PluginOrPackage[];
+  /** All discovered plugins/packages (for cross-reference resolution). */
+  allPlugins: PluginOrPackage[];
   /** File paths grouped by package. */
   pathsByPlugin: Map<PluginOrPackage, string[]>;
   /** TypeScript project instance. */
@@ -89,6 +98,8 @@ export interface BuildApiMapResult {
   unreferencedDeprecations: UnreferencedDeprecationsByPlugin;
   /** Adoption-tracked APIs. */
   adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
+  /** Unnamed exports found during API collection. */
+  unnamedExports: UnnamedExportsByPlugin;
 }
 
 /**

@@ -42,7 +42,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { useKbnPalettes } from '@kbn/palettes';
-import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { ESQL_TABLE_TYPE, MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -54,6 +54,7 @@ import type { PersistedState } from '@kbn/visualizations-common';
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
+  getLegendLayout,
   getAccessorByDimension,
   getColumnByAccessor,
   getOverridesFor,
@@ -847,9 +848,15 @@ export function XYChart({
               debugState={window._echDebugStateFlag ?? false}
               showLegend={showLegend}
               legendPosition={legend?.isInside ? legendInsideParams : legend.position}
+              legendLayout={getLegendLayout({
+                isInside: legend.isInside,
+                position: legend.position,
+                layout: legend.layout,
+              })}
               legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendValues={isHistogramViz ? legend.legendStats : []}
               legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
+              legendActionOnHover={interactive}
               theme={[
                 {
                   barSeriesStyle: {
@@ -859,7 +866,15 @@ export function XYChart({
                     color: undefined, // removes background for embeddables
                   },
                   legend: {
-                    labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+                    labelOptions: legend.shouldTruncate
+                      ? {
+                          maxLines: legend?.maxLines ?? 1,
+                          widthLimit: legend.listLayoutMaxWidth ?? 250,
+                        }
+                      : {
+                          maxLines: 0,
+                          widthLimit: 0,
+                        },
                   },
                   // if not title or labels are shown for axes, add some padding if required by reference line markers
                   chartMargins: {
@@ -1076,8 +1091,18 @@ function getLegendTitle(
   if (typeof title === 'string' && title.length > 0) {
     return title;
   }
-  return layer?.splitAccessors?.[0]
-    ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)?.name
+
+  const splitAccessorNames =
+    layer?.splitAccessors?.reduce<string[]>((acc, accessor) => {
+      const column = layer?.table.columns.find((c) => c.id === accessor);
+      if (column?.name) {
+        acc.push(column.name);
+      }
+      return acc;
+    }, []) ?? [];
+
+  return splitAccessorNames.length > 0
+    ? splitAccessorNames.join(MULTI_FIELD_KEY_SEPARATOR)
     : defaultLegendTitle;
 }
 

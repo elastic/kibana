@@ -8,14 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api';
 import {
   CreateExceptionListItemRequestBody,
   CreateExceptionListItemResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
 import type { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
-import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -31,7 +31,7 @@ export const createExceptionListItemRoute = (router: ListsPluginRouter): void =>
       path: EXCEPTION_LIST_ITEM_URL,
       security: {
         authz: {
-          requiredPrivileges: [LISTS_API_ALL],
+          requiredPrivileges: [EXCEPTIONS_API_ALL],
         },
       },
     })

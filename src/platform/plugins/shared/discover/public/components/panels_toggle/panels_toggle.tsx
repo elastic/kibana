@@ -13,7 +13,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { useAppStateSelector } from '../../application/main/state_management/redux';
-import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import type { SidebarToggleState } from '../../application/types';
 import {
   internalStateActions,
@@ -22,7 +21,6 @@ import {
 } from '../../application/main/state_management/redux';
 
 export interface PanelsToggleProps {
-  stateContainer: DiscoverStateContainer;
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
   renderedFor: 'histogram' | 'prompt' | 'tabs' | 'root';
   isChartAvailable: boolean | undefined; // it will be injected in `DiscoverMainContent` when rendering View mode tabs or in `DiscoverLayout` when rendering No results or Error prompt
@@ -30,14 +28,12 @@ export interface PanelsToggleProps {
 
 /**
  * An element of this component is created in DiscoverLayout
- * @param stateContainer
  * @param sidebarToggleState$
- * @param renderedIn
+ * @param renderedFor
  * @param isChartAvailable
  * @constructor
  */
 export const PanelsToggle: React.FC<PanelsToggleProps> = ({
-  stateContainer,
   sidebarToggleState$,
   renderedFor,
   isChartAvailable,

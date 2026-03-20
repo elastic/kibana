@@ -154,6 +154,7 @@ describe('Top Values Transforms', () => {
       expect(result.operation).toBe('terms');
       expect(result.fields).toEqual(['status']);
       expect(result.size).toBe(5);
+      expect(result.other_bucket).toBeUndefined();
     });
 
     it('should handle secondary fields', () => {
@@ -273,6 +274,37 @@ describe('Top Values Transforms', () => {
 
       const result = fromTermsLensStateToAPI(input, columns);
       expect(result.label).toBe('Custom Label');
+    });
+
+    it('should handle grouping other values', () => {
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'status',
+        customLabel: true,
+        label: 'Custom Label',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          secondaryFields: [],
+          size: 5,
+          accuracyMode: false,
+          include: [],
+          includeIsRegex: false,
+          exclude: [],
+          excludeIsRegex: false,
+          otherBucket: true,
+          missingBucket: false,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+          parentFormat: { id: 'terms' },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.label).toBe('Custom Label');
+      expect(result.other_bucket).toEqual({
+        include_documents_without_field: false,
+      });
     });
   });
 });

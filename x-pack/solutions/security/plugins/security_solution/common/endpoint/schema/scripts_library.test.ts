@@ -16,6 +16,7 @@ import {
 } from '../../api/endpoint/scripts_library';
 import type { HapiReadableStream } from '../../../server/types';
 import { ListScriptsRequestSchema } from '../../api/endpoint/scripts_library/list_scripts';
+import type { SortableScriptLibraryFields } from '../types';
 
 describe('Scripts library schemas', () => {
   const createFileStream = (): HapiReadableStream => {
@@ -36,186 +37,212 @@ describe('Scripts library schemas', () => {
 
     beforeEach(() => {
       // NOTE: should include only a minimum set of attributes needed for the API
+      // @ts-ignore pathToExecutable is conditionally required
       reqBody = {
         name: 'foo',
         platform: ['linux', 'macos', 'windows'],
         file: createFileStream(),
+        fileType: 'script',
       };
     });
 
-    it('should accept minimal required input', () => {
-      expect(CreateScriptRequestSchema.body.validate(reqBody)).toBeTruthy();
+    describe('Required fields', () => {
+      it('should accept minimal required input', () => {
+        expect(CreateScriptRequestSchema.body.validate(reqBody)).toBeTruthy();
+      });
+
+      // ------------------------------------
+      // Field: `name`
+      // ------------------------------------
+      it('should accept `name` property', () => {
+        expect(CreateScriptRequestSchema.body.validateKey('name', 'foo')).toBeTruthy();
+      });
+
+      it('should error if `name` is not provided', () => {
+        // @ts-expect-error
+        delete reqBody.name;
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
+
+      it('should error if `name` is not a string', () => {
+        // @ts-expect-error
+        reqBody.name = [];
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
+
+      it('should error if `name` is an empty string', () => {
+        reqBody.name = '     ';
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+          '[name]: Value can not be an empty string'
+        );
+      });
+
+      // ------------------------------------
+      // Field: `platform`
+      // ------------------------------------
+      it('should accept list of `platform` values', () => {
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
+      });
+
+      it('should error if `platform` is not provided', () => {
+        // @ts-expect-error
+        delete reqBody.platform;
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
+
+      it('should error if `platform` is not an array', () => {
+        // @ts-expect-error
+        reqBody.platform = 'foo';
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
+
+      it('should error if `platform` includes invalid values', () => {
+        // @ts-expect-error
+        reqBody.platform = ['foo'];
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
+
+      it('should error if `platform` includes duplicate values', () => {
+        reqBody.platform = ['linux', 'linux'];
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+          '[platform]: Duplicate values are not allowed'
+        );
+      });
+
+      // ------------------------------------
+      // Field: `file`
+      // ------------------------------------
+      it('should accept a `file`', () => {
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
+      });
+
+      it('should error if `file` is not provided', () => {
+        // @ts-expect-error
+        delete reqBody.file;
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
+
+      it('should error if `file` is not a stream', () => {
+        // @ts-expect-error
+        reqBody.file = {};
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
+
+      it('should error if `fileType` is not provided', () => {
+        // @ts-expect-error
+        delete reqBody.fileType;
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
+
+      it('should expect `pathToExecutable` if `fileType` is "archive"', () => {
+        reqBody.fileType = 'archive';
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+          '[pathToExecutable]: expected value of type [string] but got [undefined]'
+        );
+      });
+
+      it('should not allow `pathToExecutable` if `fileType` is "script"', () => {
+        reqBody.fileType = 'script';
+        reqBody.pathToExecutable = 'some/path';
+
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+          "[pathToExecutable]: a value wasn't expected to be present"
+        );
+      });
     });
 
-    // ------------------------------------
-    // Field: `name`
-    // ------------------------------------
-    it('should accept `name` property', () => {
-      expect(CreateScriptRequestSchema.body.validateKey('name', 'foo')).toBeTruthy();
-    });
+    describe('Optional fields', () => {
+      // ------------------------------------
+      // Field: `requiresInput`
+      // ------------------------------------
+      it('should accept `requiresInput` boolean', () => {
+        reqBody.requiresInput = true;
 
-    it('should error if `name` is not provided', () => {
-      // @ts-expect-error
-      delete reqBody.name;
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
+      });
 
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
-    });
+      it('should not error if `requiresInput` is missing', () => {
+        delete reqBody.requiresInput;
 
-    it('should error if `name` is not a string', () => {
-      // @ts-expect-error
-      reqBody.name = [];
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
+      });
 
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
-    });
+      it('should error is `requiresInput` is not a boolean', () => {
+        // @ts-expect-error
+        reqBody.requiresInput = [true];
 
-    it('should error if `name` is an empty string', () => {
-      reqBody.name = '     ';
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
 
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
-        '[name]: Value can not be an empty string'
-      );
-    });
+      it('should accept `tags` array with valid values', () => {
+        reqBody.tags = ['dataCollection', 'threatHunting'];
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
+      });
 
-    // ------------------------------------
-    // Field: `platform`
-    // ------------------------------------
-    it('should accept list of `platform` values', () => {
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
-    });
+      it('should error if `tags` is not an array', () => {
+        // @ts-expect-error
+        reqBody.tags = 'invalid';
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
 
-    it('should error if `platform` is not provided', () => {
-      // @ts-expect-error
-      delete reqBody.platform;
+      it('should error if `tags` contains invalid values', () => {
+        reqBody.tags = ['invalid'];
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
 
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
-    });
+      it('should error if `tags` contains duplicates', () => {
+        reqBody.tags = ['dataCollection', 'dataCollection'];
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+          '[tags]: Duplicate values are not allowed'
+        );
+      });
 
-    it('should error if `platform` is not an array', () => {
-      // @ts-expect-error
-      reqBody.platform = 'foo';
+      // ------------------------------------
+      // Field: `description`
+      // Field: `instructions`
+      // Field: `example`
+      // ------------------------------------
+      const optionalStringFields: Array<
+        keyof Pick<CreateScriptRequestBody, 'description' | 'instructions' | 'example'>
+      > = ['description', 'instructions', 'example'];
 
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
-    });
+      it.each(optionalStringFields)('should accept `%s` value', (field) => {
+        reqBody[field] = 'some value';
 
-    it('should error if `platform` includes invalid values', () => {
-      // @ts-expect-error
-      reqBody.platform = ['foo'];
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
+      });
 
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
-    });
+      it.each(optionalStringFields)('should not error if `%s` is missing', (field) => {
+        delete reqBody[field];
 
-    it('should error if `platform` includes duplicate values', () => {
-      reqBody.platform = ['linux', 'linux'];
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
+      });
 
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
-        '[platform]: Duplicate values are not allowed'
-      );
-    });
+      it.each(optionalStringFields)('should error if `%s` is not a string', (field) => {
+        // @ts-expect-error
+        reqBody[field] = ['some value'];
 
-    // ------------------------------------
-    // Field: `file`
-    // ------------------------------------
-    it('should accept a `file`', () => {
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
-    });
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      });
 
-    it('should error if `file` is not provided', () => {
-      // @ts-expect-error
-      delete reqBody.file;
+      it.each(optionalStringFields)('should error if `%s` is an empty string', (field) => {
+        reqBody[field] = '     ';
 
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
-    });
-
-    it('should error if `file` is not a stream', () => {
-      // @ts-expect-error
-      reqBody.file = {};
-
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
-    });
-
-    // ------------------------------------
-    // Field: `requiresInput`
-    // ------------------------------------
-    it('should accept `requiresInput` boolean', () => {
-      reqBody.requiresInput = true;
-
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
-    });
-
-    it('should not error if `requiresInput` is missing', () => {
-      delete reqBody.requiresInput;
-
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
-    });
-
-    it('should error is `requiresInput` is not a boolean', () => {
-      // @ts-expect-error
-      reqBody.requiresInput = [true];
-
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
-    });
-
-    it('should accept `tags` array with valid values', () => {
-      reqBody.tags = ['dataCollection', 'threatHunting'];
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
-    });
-
-    it('should error if `tags` is not an array', () => {
-      // @ts-expect-error
-      reqBody.tags = 'invalid';
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
-    });
-
-    it('should error if `tags` contains invalid values', () => {
-      reqBody.tags = ['invalid'];
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
-    });
-
-    it('should error if `tags` contains duplicates', () => {
-      reqBody.tags = ['dataCollection', 'dataCollection'];
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
-        '[tags]: Duplicate values are not allowed'
-      );
-    });
-
-    // ------------------------------------
-    // Field: `description`
-    // Field: `instructions`
-    // Field: `example`
-    // Field: `pathToExecutable`
-    // ------------------------------------
-    const optionalStringFields: Array<
-      keyof Pick<
-        CreateScriptRequestBody,
-        'description' | 'instructions' | 'example' | 'pathToExecutable'
-      >
-    > = ['description', 'instructions', 'example', 'pathToExecutable'];
-
-    it.each(optionalStringFields)('should accept `%s` value', (field) => {
-      reqBody[field] = 'some value';
-
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
-    });
-
-    it.each(optionalStringFields)('should not error if `%s` is missing', (field) => {
-      delete reqBody[field];
-
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
-    });
-
-    it.each(optionalStringFields)('should error if `%s` is not a string', (field) => {
-      // @ts-expect-error
-      reqBody[field] = ['some value'];
-
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
-    });
-
-    it.each(optionalStringFields)('should error if `%s` is an empty string', (field) => {
-      reqBody[field] = '     ';
-
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
-        `[${field}]: Value can not be an empty string`
-      );
+        expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+          `[${field}]: Value can not be an empty string`
+        );
+      });
     });
   });
 
@@ -244,12 +271,17 @@ describe('Scripts library schemas', () => {
       expect(() => ListScriptsRequestSchema.query.validate({ pageSize: 1001 })).toThrow();
     });
 
-    it.each(['name', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy'])(
-      'should accept a `sortField` param with value %s',
-      (sortField) => {
-        expect(ListScriptsRequestSchema.query.validate({ sortField })).toBeTruthy();
-      }
-    );
+    const sortFields: Array<SortableScriptLibraryFields> = [
+      'name',
+      'createdAt',
+      'createdBy',
+      'updatedAt',
+      'updatedBy',
+      'fileSize',
+    ];
+    it.each(sortFields)('should accept a `sortField` param with value %s', (sortField) => {
+      expect(ListScriptsRequestSchema.query.validate({ sortField })).toBeTruthy();
+    });
 
     it('should error `sortField` has an invalid field name', () => {
       expect(() => ListScriptsRequestSchema.query.validate({ sortField: 'foo' })).toThrow();
@@ -292,25 +324,37 @@ describe('Scripts library schemas', () => {
           description: 'some description',
           instructions: 'some instructions',
           example: 'some example',
-          pathToExecutable: 'some path',
+          fileType: 'script',
           file: createFileStream(),
           version: 'someVersionString',
         })
       ).toBeTruthy();
     });
 
+    it.each([
+      { field: 'description', value: '' },
+      { field: 'instructions', value: '' },
+      { field: 'example', value: '' },
+      { field: 'tags', value: [] },
+    ])('should accept `$field` field with `$value` value', ({ field, value }) => {
+      expect(
+        PatchUpdateScriptRequestSchema.body.validate({
+          [field]: value,
+        })
+      ).toBeTruthy();
+    });
+
     it.each`
-      title                 | bodyPayload
+      title              | bodyPayload
       ----------             -------------
-      ${'name'}             | ${{ name: 'foo' }}
-      ${'platform'}         | ${{ platform: ['windows'] }}
-      ${'tags'}             | ${{ tags: ['dataCollection'] }}
-      ${'file'}             | ${{ file: createFileStream() }}
-      ${'requiresInput'}    | ${{ requiresInput: true }}
-      ${'description'}      | ${{ description: 'some description' }}
-      ${'instructions'}     | ${{ instructions: 'some instruction' }}
-      ${'example'}          | ${{ example: 'some example' }}
-      ${'pathToExecutable'} | ${{ pathToExecutable: '/some/path' }}
+      ${'name'}          | ${{ name: 'foo' }}
+      ${'platform'}      | ${{ platform: ['windows'] }}
+      ${'tags'}          | ${{ tags: ['dataCollection'] }}
+      ${'file'}          | ${{ file: createFileStream() }}
+      ${'requiresInput'} | ${{ requiresInput: true }}
+      ${'description'}   | ${{ description: 'some description' }}
+      ${'instructions'}  | ${{ instructions: 'some instruction' }}
+      ${'example'}       | ${{ example: 'some example' }}
     `('should accept partial updates with only `$title`', ({ bodyPayload }) => {
       expect(PatchUpdateScriptRequestSchema.body.validate(bodyPayload)).toBeTruthy();
     });
@@ -324,6 +368,21 @@ describe('Scripts library schemas', () => {
     it('should error if only `version` is provided', () => {
       expect(() => PatchUpdateScriptRequestSchema.body.validate({ version: 'fdfd' })).toThrow(
         'At least one field must be defined for update'
+      );
+    });
+
+    it('should not allow `pathToExecutable` if `fileType` is "script"', () => {
+      expect(() =>
+        PatchUpdateScriptRequestSchema.body.validate({
+          fileType: 'script',
+          pathToExecutable: 'some/path',
+        })
+      ).toThrow("[pathToExecutable]: a value wasn't expected to be present");
+    });
+
+    it('should expect `pathToExecutable` if `fileType` is "archive"', () => {
+      expect(() => PatchUpdateScriptRequestSchema.body.validate({ fileType: 'archive' })).toThrow(
+        '[pathToExecutable]: expected value of type [string] but got [undefined]'
       );
     });
   });

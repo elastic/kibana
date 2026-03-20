@@ -18,11 +18,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import { isEmpty, isEqual } from 'lodash';
 import React, { forwardRef, useEffect, useState } from 'react';
 import type { DefaultValues, SubmitHandler } from 'react-hook-form';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import { useGrokCollection } from '@kbn/grok-ui';
 import type { ActionBlockProps } from '.';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
@@ -54,22 +55,28 @@ import { ProcessorErrors } from './processor_metrics';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
 import { ReplaceProcessorForm } from './replace';
+import { RedactProcessorForm } from './redact';
 import { SetProcessorForm } from './set';
+import { SplitProcessorForm } from './split';
+import { SortProcessorForm } from './sort';
 import { TransformStringProcessorForm } from './transform_string';
+import { ConcatProcessorForm } from './concat';
+import { JoinProcessorForm } from './join';
+import { NetworkDirectionProcessorForm } from './network_direction';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
 
   const getEnrichmentState = useGetStreamEnrichmentState();
 
-  const grokCollection = useStreamEnrichmentSelector((snapshot) => snapshot.context.grokCollection);
+  const { grokCollection } = useGrokCollection();
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   const [defaultValues] = useState(() =>
     getFormStateFromActionStep(
       selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
-      { grokCollection },
+      { grokCollection: grokCollection! },
       step as StreamlangProcessorDefinitionWithUIAttributes
     )
   );
@@ -86,13 +93,10 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
 
   useEffect(() => {
     const { unsubscribe } = methods.watch((value) => {
-      const { processorDefinition, processorResources } = convertFormStateToProcessor(
-        value as ProcessorFormState
-      );
+      const { processorDefinition } = convertFormStateToProcessor(value as ProcessorFormState);
       stepRef.send({
         type: 'step.changeProcessor',
         step: processorDefinition,
-        resources: processorResources,
       });
     });
     return () => unsubscribe();
@@ -147,6 +151,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 <EuiSpacer size="m" />
                 {type === 'convert' && <ConvertProcessorForm />}
                 {type === 'replace' && <ReplaceProcessorForm />}
+                {type === 'redact' && <RedactProcessorForm />}
                 {type === 'date' && <DateProcessorForm />}
                 {type === 'grok' && <GrokProcessorForm />}
                 {type === 'dissect' && <DissectProcessorForm />}
@@ -154,51 +159,14 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 {type === 'set' && <SetProcessorForm />}
                 {type === 'drop_document' && <DropProcessorForm />}
                 {type === 'math' && <MathProcessorForm />}
-                {type === 'uppercase' && (
-                  <TransformStringProcessorForm
-                    fieldSelectorHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseFieldHelpText',
-                      { defaultMessage: 'The field to uppercase.' }
-                    )}
-                    targetFieldHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseTargetHelpText',
-                      {
-                        defaultMessage:
-                          'The field that will hold the uppercased string. If empty, the input field is updated in place.',
-                      }
-                    )}
-                  />
-                )}
-                {type === 'lowercase' && (
-                  <TransformStringProcessorForm
-                    fieldSelectorHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseFieldHelpText',
-                      { defaultMessage: 'The field to lowercase.' }
-                    )}
-                    targetFieldHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseTargetHelpText',
-                      {
-                        defaultMessage:
-                          'The field that will hold the lowercase string. If empty, the input field is updated in place.',
-                      }
-                    )}
-                  />
-                )}
-                {type === 'trim' && (
-                  <TransformStringProcessorForm
-                    fieldSelectorHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimFieldHelpText',
-                      { defaultMessage: 'The field to trim.' }
-                    )}
-                    targetFieldHelpText={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimTargetHelpText',
-                      {
-                        defaultMessage:
-                          'The field that will hold the trimmed string. If empty, the input field is updated in place.',
-                      }
-                    )}
-                  />
-                )}
+                {type === 'uppercase' && <TransformStringProcessorForm />}
+                {type === 'lowercase' && <TransformStringProcessorForm />}
+                {type === 'trim' && <TransformStringProcessorForm />}
+                {type === 'split' && <SplitProcessorForm />}
+                {type === 'sort' && <SortProcessorForm />}
+                {type === 'concat' && <ConcatProcessorForm />}
+                {type === 'join' && <JoinProcessorForm />}
+                {type === 'network_direction' && <NetworkDirectionProcessorForm />}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}

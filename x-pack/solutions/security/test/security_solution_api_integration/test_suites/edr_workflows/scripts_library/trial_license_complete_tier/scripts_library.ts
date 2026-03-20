@@ -24,8 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const rolesUsersProvider = getService('rolesUsersProvider');
   const log = getService('log');
 
-  // @skipInServerless: because tests use custom roles
-  describe('@ess @serverless @skipInServerless @skipInServerlessMKI Endpoint Scripts Library', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint Scripts Library', function () {
     const afterEachCleanupCallbacks: Array<() => void | Promise<unknown>> = [];
     let adminSupertest: TestAgent;
 
@@ -84,37 +83,28 @@ export default function ({ getService }: FtrProviderContext) {
       let noAccessScriptsSuperTest: TestAgent;
 
       before(async () => {
-        await Promise.all([
-          rolesUsersProvider.loader.create(
-            rolesUsersProvider.buildRoleDefinition({
-              name: 'readScripts',
-              securityPrivileges: ['scripts_management_read'],
-            })
-          ),
-          rolesUsersProvider.loader.create(
-            rolesUsersProvider.buildRoleDefinition({
-              name: 'writeScripts',
-              securityPrivileges: ['scripts_management_all'],
-            })
-          ),
-          rolesUsersProvider.loader.create(
-            rolesUsersProvider.buildRoleDefinition({ name: 'noScriptsAccess' })
-          ),
-        ]);
+        readScriptsSuperTest = await utils.createSuperTestWithCustomRole({
+          name: 'readScripts',
+          privileges: rolesUsersProvider.buildRoleDefinition({
+            securityPrivileges: ['scripts_management_read'],
+          }),
+        });
 
-        readScriptsSuperTest = await utils.createSuperTest('readScripts');
-        writeScriptsSuperTest = await utils.createSuperTest('writeScripts');
-        noAccessScriptsSuperTest = await utils.createSuperTest('noScriptsAccess');
+        writeScriptsSuperTest = await utils.createSuperTestWithCustomRole({
+          name: 'writeScripts',
+          privileges: rolesUsersProvider.buildRoleDefinition({
+            securityPrivileges: ['scripts_management_all'],
+          }),
+        });
+
+        noAccessScriptsSuperTest = await utils.createSuperTestWithCustomRole({
+          name: 'noScriptsAccess',
+          privileges: rolesUsersProvider.buildRoleDefinition(),
+        });
       });
 
       after(async () => {
-        await Promise.all([
-          rolesUsersProvider.loader.delete('readScripts'),
-          rolesUsersProvider.loader.delete('writeScripts'),
-          rolesUsersProvider.loader.delete('noScriptsAccess'),
-        ]).catch((error) => {
-          log.warning(`after(): attempt to clear up roles/users failed:`, error);
-        });
+        await utils.cleanUpCustomRoles();
       });
 
       afterEach(async () => {

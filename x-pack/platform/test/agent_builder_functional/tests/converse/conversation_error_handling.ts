@@ -85,19 +85,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Wait for all interceptors to be called (backend processing complete)
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      // Wait for the successful response to appear
+      // Wait for the successful response to appear and contain the expected text
       await retry.try(async () => {
-        await testSubjects.find('agentBuilderRoundResponse');
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain(MOCKED_RESPONSE);
       });
 
-      // Assert the successful response is visible
-      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const responseText = await responseElement.getVisibleText();
-      expect(responseText).to.contain(MOCKED_RESPONSE);
-
       // Assert the error is no longer visible
-      const isErrorStillVisible = await agentBuilder.isErrorVisible();
-      expect(isErrorStillVisible).to.be(false);
+      await retry.try(async () => {
+        const isErrorStillVisible = await agentBuilder.isErrorVisible();
+        expect(isErrorStillVisible).to.be(false);
+      });
+    });
+
+    it('shows a "not found" prompt when conversation ID does not exist', async () => {
+      const INVALID_ID = 'this-id-does-not-exist-12345';
+      const initialUrl = await browser.getCurrentUrl();
+
+      await agentBuilder.navigateToApp(`conversations/${INVALID_ID}`);
+
+      await testSubjects.existOrFail('errorPrompt');
+
+      const errorTitle = await testSubjects.getVisibleText('errorPromptTitle');
+      expect(errorTitle).to.be('Conversation not found');
+
+      await testSubjects.existOrFail('startNewConversationButton');
+      await testSubjects.click('startNewConversationButton');
+
+      await retry.try(async () => {
+        const newUrl = await browser.getCurrentUrl();
+        expect(newUrl).to.not.equal(initialUrl);
+        expect(newUrl).to.contain('conversations/new');
+      });
+      await testSubjects.existOrFail('agentBuilderWelcomePage');
     });
 
     it('can start a new conversation when there is an error', async () => {
@@ -145,12 +166,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       await retry.try(async () => {
-        await testSubjects.find('agentBuilderRoundResponse');
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain(MOCKED_RESPONSE);
       });
-
-      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const responseText = await responseElement.getVisibleText();
-      expect(responseText).to.contain(MOCKED_RESPONSE);
     });
 
     it('an error does not persist across conversations', async () => {
@@ -195,12 +214,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Navigate back to the successful conversation
       await agentBuilder.navigateToConversationViaHistory(successfulConversationId);
 
-      const isErrorVisibleInSuccessful = await agentBuilder.isErrorVisible();
-      expect(isErrorVisibleInSuccessful).to.be(false);
+      await retry.try(async () => {
+        const isErrorVisibleInSuccessful = await agentBuilder.isErrorVisible();
+        expect(isErrorVisibleInSuccessful).to.be(false);
+      });
 
-      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const responseText = await responseElement.getVisibleText();
-      expect(responseText).to.contain(SUCCESSFUL_RESPONSE);
+      await retry.try(async () => {
+        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+        const responseText = await responseElement.getVisibleText();
+        expect(responseText).to.contain(SUCCESSFUL_RESPONSE);
+      });
     });
 
     it('clears the error when the user sends a new message', async () => {
@@ -249,8 +272,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Assert the error is cleared and no longer visible
-      const isErrorStillVisible = await agentBuilder.isErrorVisible();
-      expect(isErrorStillVisible).to.be(false);
+      await retry.try(async () => {
+        const isErrorStillVisible = await agentBuilder.isErrorVisible();
+        expect(isErrorStillVisible).to.be(false);
+      });
     });
 
     it('keeps the previous conversation rounds visible when there is an error', async () => {

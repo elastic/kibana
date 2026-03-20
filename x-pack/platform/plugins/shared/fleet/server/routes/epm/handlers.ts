@@ -14,7 +14,6 @@ import { omit, pick } from 'lodash';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
 
@@ -29,6 +28,7 @@ import type {
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
   UpdatePackageResponse,
+  ReviewUpgradeResponse,
   GetVerificationKeyIdResponse,
   GetBulkAssetsResponse,
   GetInstalledPackagesResponse,
@@ -60,6 +60,7 @@ import type {
   RollbackPackageRequestSchema,
   GetKnowledgeBaseRequestSchema,
   DeletePackageResponseSchema,
+  ReviewUpgradeRequestSchema,
 } from '../../types';
 import { KibanaSavedObjectType } from '../../types';
 import {
@@ -96,7 +97,7 @@ import {
   rollbackAvailableCheck,
   rollbackInstallation,
 } from '../../services/epm/packages/rollback';
-import { updatePackage } from '../../services/epm/packages/update';
+import { updatePackage, reviewUpgrade } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
   ReauthorizeTransformRequestSchema,
@@ -315,6 +316,21 @@ export const updatePackageHandler: FleetRequestHandler<
   return response.ok({ body });
 };
 
+export const reviewUpgradeHandler: FleetRequestHandler<
+  TypeOf<typeof ReviewUpgradeRequestSchema.params>,
+  unknown,
+  TypeOf<typeof ReviewUpgradeRequestSchema.body>
+> = async (context, request, response) => {
+  const savedObjectsClient = (await context.fleet).internalSoClient;
+  const { pkgName } = request.params;
+  const { action, target_version: targetVersion } = request.body;
+
+  await reviewUpgrade({ savedObjectsClient, pkgName, action, targetVersion });
+  const body: ReviewUpgradeResponse = { success: true };
+
+  return response.ok({ body });
+};
+
 export const getStatsHandler: FleetRequestHandler<
   TypeOf<typeof GetStatsRequestSchema.params>
 > = async (context, request, response) => {
@@ -335,11 +351,8 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   const { pkgName, pkgVersion } = request.params;
-
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const spaceId = fleetContext.spaceId;
   const installSource = 'registry';
@@ -352,9 +365,10 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
-    authorizationHeader,
+    request,
     ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
     skipDataStreamRollover: request.query?.skipDataStreamRollover,
+    skipDependencyCheck: request.query?.skipDependencyCheck,
   });
 
   if (!res.error) {
@@ -380,9 +394,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const kibanaVersion = appContextService.getKibanaVersion();
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const spaceId = fleetContext.spaceId;
   const { integrationName, force, datasets } = request.body;
   const installSource = 'custom';
@@ -395,7 +407,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
       esClient,
       spaceId,
       force,
-      authorizationHeader,
+      request,
       kibanaVersion,
     });
 
@@ -481,8 +493,6 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
@@ -491,7 +501,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     spaceId,
     prerelease: request.query.prerelease,
     force: request.body.force,
-    authorizationHeader,
+    request,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -512,8 +522,6 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const installSource = 'upload';
   const res = await installPackage({
     installSource,
@@ -522,7 +530,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     archiveBuffer,
     spaceId,
     contentType,
-    authorizationHeader,
+    request,
     ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
     skipDataStreamRollover: request.query?.skipDataStreamRollover,
   });
@@ -616,9 +624,8 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
   }
 
   const logger = appContextService.getLogger();
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, username);
   const secondaryAuth = await generateTransformSecondaryAuthHeaders({
-    authorizationHeader,
+    request,
     logger,
     username,
     pkgName,
@@ -716,6 +723,8 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       previous_version: attributes.previous_version,
       rolled_back: attributes.rolled_back,
       is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
+      pending_upgrade_review: attributes.pending_upgrade_review,
+      keep_policies_up_to_date: attributes.keep_policies_up_to_date,
     };
 
     return {

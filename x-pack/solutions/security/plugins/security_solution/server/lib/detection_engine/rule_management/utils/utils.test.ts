@@ -516,7 +516,7 @@ describe('utils', () => {
       const result = await swapActionIds(mockAction, soClient);
       expect(result instanceof Error).toBeTruthy();
       expect((result as unknown as Error).message).toEqual(
-        'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details'
+        'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/docs/extend/kibana/saved-objects/share for more details'
       );
     });
 
@@ -671,7 +671,7 @@ describe('utils', () => {
             status_code: 409,
             message:
               // error message for when two or more action connectors are found for a single id
-              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details',
+              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/docs/extend/kibana/saved-objects/share for more details',
           },
         })
       );
@@ -715,7 +715,7 @@ describe('utils', () => {
           error: {
             status_code: 409,
             message:
-              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details',
+              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/docs/extend/kibana/saved-objects/share for more details',
           },
         })
       );

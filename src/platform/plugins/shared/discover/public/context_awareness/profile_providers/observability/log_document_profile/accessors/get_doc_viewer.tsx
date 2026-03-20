@@ -18,7 +18,7 @@ import {
   UnifiedDocViewerLogsOverview,
   type UnifiedDocViewerLogsOverviewApi,
 } from '@kbn/unified-doc-viewer-plugin/public';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps, DocViewActions } from '@kbn/unified-doc-viewer/types';
 import React, { useEffect, useRef, useState } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import { filter, skip } from 'rxjs';
@@ -67,6 +67,7 @@ export const createGetDocViewer =
                 logsAIInsightFeature={logsAIInsightFeature}
                 streamsFeature={streamsFeature}
                 indexes={indexes}
+                docViewActions={params.actions}
                 {...props}
               />
             );
@@ -84,6 +85,7 @@ interface LogOverviewTabProps extends DocViewRenderProps {
   logsAIInsightFeature: ObservabilityLogsAIInsightFeature | undefined;
   streamsFeature: ObservabilityStreamsFeature | undefined;
   indexes: ObservabilityIndexes;
+  docViewActions?: DocViewActions;
 }
 
 const LogOverviewTab = ({
@@ -92,6 +94,7 @@ const LogOverviewTab = ({
   logsAIInsightFeature,
   streamsFeature,
   indexes,
+  docViewActions,
   ...props
 }: LogOverviewTabProps) => {
   const [logsOverviewApi, setLogsOverviewApi] = useState<UnifiedDocViewerLogsOverviewApi | null>(
@@ -102,6 +105,7 @@ const LogOverviewTab = ({
   return (
     <UnifiedDocViewerLogsOverview
       {...props}
+      docViewActions={docViewActions}
       ref={setLogsOverviewApi}
       renderAIAssistant={logsAIAssistantFeature?.render}
       renderAIInsight={logsAIInsightFeature?.render}

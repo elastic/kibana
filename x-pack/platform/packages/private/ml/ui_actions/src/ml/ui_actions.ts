@@ -17,6 +17,3 @@ export interface CreateCategorizationADJobContext {
 }
 
 export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION = 'createMLADCategorizationJobAction';
-
-export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER =
-  'CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER';

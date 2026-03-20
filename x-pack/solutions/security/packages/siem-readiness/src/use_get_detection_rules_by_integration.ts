@@ -1,0 +1,124 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useMemo } from 'react';
+import type { RelatedIntegrationRuleResponse, RelatedIntegration } from './types';
+import { useSiemReadinessApi } from './use_siem_readiness_api';
+
+export interface RuleIntegrationCoverage {
+  coveredRules: RelatedIntegrationRuleResponse[];
+  uncoveredRules: RelatedIntegrationRuleResponse[];
+  missingIntegrations: string[];
+  installedIntegrations: string[];
+  relatedIntegrations: RelatedIntegration[];
+}
+
+export const getRuleIntegrationCoverage = (
+  rules: RelatedIntegrationRuleResponse[],
+  installedIntegrationPackages: string[]
+): RuleIntegrationCoverage => {
+  const installedSet = new Set(installedIntegrationPackages);
+  const referencedIntegrations = new Set<string>();
+  const relatedIntegrationsMap = new Map<string, RelatedIntegration>();
+
+  const coveredRules: RelatedIntegrationRuleResponse[] = [];
+  const uncoveredRules: RelatedIntegrationRuleResponse[] = [];
+
+  rules.forEach((rule) => {
+    const requiredIntegrations =
+      rule.related_integrations?.map((i) => i.package).filter(Boolean) ?? [];
+
+    rule.related_integrations?.forEach((integration) => {
+      if (integration.package) {
+        referencedIntegrations.add(integration.package);
+        relatedIntegrationsMap.set(integration.package, {
+          package: integration.package,
+          version: integration.version,
+        });
+      }
+    });
+
+    if (requiredIntegrations.length === 0) {
+      coveredRules.push(rule);
+      return;
+    }
+
+    // Current behavior: a rule is considered covered if ANY required integration is installed
+    const hasInstalledIntegration = requiredIntegrations.some((pkg) => installedSet.has(pkg));
+
+    if (hasInstalledIntegration) {
+      coveredRules.push(rule);
+    } else {
+      uncoveredRules.push(rule);
+    }
+  });
+
+  return {
+    coveredRules,
+    uncoveredRules,
+    missingIntegrations: Array.from(referencedIntegrations).filter((pkg) => !installedSet.has(pkg)),
+    installedIntegrations: Array.from(installedSet),
+    relatedIntegrations: Array.from(relatedIntegrationsMap.values()),
+  };
+};
+
+export const useDetectionRulesByIntegration = (integrationPackages?: string | string[]) => {
+  const { getDetectionRules, getIntegrations } = useSiemReadinessApi();
+  const enabledRulesQuery = getDetectionRules;
+  const integrationItems = getIntegrations?.data?.items;
+
+  const enabledPackages = useMemo(() => {
+    if (integrationPackages !== undefined) {
+      return Array.isArray(integrationPackages) ? integrationPackages : [integrationPackages];
+    }
+
+    const allIntegrationPackages = integrationItems ?? [];
+    const enabledPackageNames: string[] = [];
+
+    for (const pkg of allIntegrationPackages) {
+      const isInstalled = pkg.status === 'installed';
+      const hasPolicies = (pkg.packagePoliciesInfo?.count ?? 0) > 0;
+
+      if (isInstalled && hasPolicies) {
+        enabledPackageNames.push(pkg.name);
+      }
+    }
+
+    return enabledPackageNames;
+  }, [integrationPackages, integrationItems]);
+
+  const ruleIntegrationCoverage = useMemo(() => {
+    if (!enabledRulesQuery.data?.data) {
+      return null;
+    }
+    return getRuleIntegrationCoverage(enabledRulesQuery.data.data, enabledPackages);
+  }, [enabledRulesQuery.data?.data, enabledPackages]);
+
+  const enabledPackagesSet = useMemo(() => new Set(enabledPackages), [enabledPackages]);
+
+  const disabledPackagesSet = useMemo(() => {
+    const disabled = new Set<string>();
+
+    for (const pkg of integrationItems ?? []) {
+      const isInstalled = pkg.status === 'installed';
+      const hasPolicies = (pkg.packagePoliciesInfo?.count ?? 0) > 0;
+
+      if (isInstalled && !hasPolicies) {
+        disabled.add(pkg.name);
+      }
+    }
+
+    return disabled;
+  }, [integrationItems]);
+
+  return {
+    ruleIntegrationCoverage,
+    enabledPackages,
+    enabledPackagesSet,
+    disabledPackagesSet,
+  };
+};

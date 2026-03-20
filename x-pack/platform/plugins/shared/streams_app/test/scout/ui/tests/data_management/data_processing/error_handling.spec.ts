@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe(
   'Stream data processing - error handling and recovery',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
@@ -48,7 +49,9 @@ test.describe(
       });
 
       await pageObjects.streams.saveStepsListChanges();
-      await pageObjects.streams.confirmChangesInReviewModal();
+      // The review modal may or may not appear depending on whether detected fields
+      // have mapping-affecting changes. Use conditional confirmation.
+      await pageObjects.streams.confirmChangesInReviewModalIfPresent();
 
       // Should show error and stay in creating state
       await pageObjects.toasts.waitFor();
@@ -62,7 +65,7 @@ test.describe(
         await route.continue();
       });
       await pageObjects.streams.saveStepsListChanges();
-      await pageObjects.streams.confirmChangesInReviewModal();
+      await pageObjects.streams.confirmChangesInReviewModalIfPresent();
 
       // Should succeed
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
@@ -81,7 +84,9 @@ test.describe(
       await pageObjects.streams.waitForModifiedFieldsDetection();
 
       await pageObjects.streams.saveStepsListChanges();
-      await pageObjects.streams.confirmChangesInReviewModal();
+      // The review modal may or may not appear depending on whether detected fields
+      // have mapping-affecting changes. Use conditional confirmation.
+      await pageObjects.streams.confirmChangesInReviewModalIfPresent();
       await pageObjects.toasts.closeAll();
 
       // Edit the processor

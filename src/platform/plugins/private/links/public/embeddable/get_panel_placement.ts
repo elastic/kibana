@@ -31,6 +31,6 @@ export async function getPanelPlacement(serializedState?: LinksEmbeddableState) 
   }
   const isHorizontal = layout === LINKS_HORIZONTAL_LAYOUT;
   const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
-  const height = isHorizontal ? 4 : numLinks * 3 + 4;
+  const height = isHorizontal ? 2 : numLinks * 3 + 4;
   return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
 }

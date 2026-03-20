@@ -12,7 +12,7 @@ import {
   addListener as originalAddListener,
   removeListener as originalRemoveListener,
 } from '@reduxjs/toolkit';
-import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../../../common/constants';
+import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../common/constants';
 import type { RootState } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
@@ -44,8 +44,8 @@ export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const attacksAlertsAlignmentEnabled = services.featureFlags.getBooleanValue(
-    ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  const enableAlertsAndAttacksAlignment = services.uiSettings.get(
+    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
     false
   );
 
@@ -98,12 +98,13 @@ export const useInitDataViewManager = () => {
         dataViews: services.dataViews,
         http: services.http,
         uiSettings: services.uiSettings,
+        notifications: services.notifications,
         application: services.application,
         spaces: services.spaces,
         storage: services.storage,
         logger: createInitListenerLogger,
       },
-      attacksAlertsAlignmentEnabled
+      enableAlertsAndAttacksAlignment
     );
 
     logger.debug('Registering data view manager listeners');
@@ -122,6 +123,7 @@ export const useInitDataViewManager = () => {
       createDataViewSelectedListener({
         scope,
         dataViews: services.dataViews,
+        notifications: services.notifications,
         storage: services.storage,
         logger: createDataViewSelectedListenerLogger,
       })
@@ -144,13 +146,14 @@ export const useInitDataViewManager = () => {
       });
     };
   }, [
-    attacksAlertsAlignmentEnabled,
+    enableAlertsAndAttacksAlignment,
     dispatch,
     logger,
     newDataViewPickerEnabled,
     services.application,
     services.dataViews,
     services.http,
+    services.notifications,
     createInitListenerLogger,
     services.spaces,
     services.storage,

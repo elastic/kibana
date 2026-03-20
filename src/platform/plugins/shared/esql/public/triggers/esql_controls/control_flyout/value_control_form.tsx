@@ -8,16 +8,24 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiComboBox,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import {
   ESQLVariableType,
   EsqlControlType,
   TIMEFIELD_ROUTE,
-  type ESQLControlState,
   type ESQLControlVariable,
 } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import {
   appendStatsByToQuery,
   getESQLResults,
@@ -28,8 +36,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ServiceDeps } from '../../../kibana_services';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -41,11 +50,10 @@ interface ValueControlFormProps {
   variableName: string;
   controlFlyoutType: EsqlControlType;
   queryString: string;
-  setControlState: (state: ESQLControlState) => void;
-  initialState?: ESQLControlState;
+  setControlState: (state: OptionsListESQLControlState) => void;
+  initialState?: OptionsListESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
-  currentApp?: string;
   esqlVariables: ESQLControlVariable[];
 }
 
@@ -67,13 +75,19 @@ export function ValueControlForm({
   setControlState,
   valuesRetrieval,
   timeRange,
-  currentApp,
   esqlVariables,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
   const theme = useEuiTheme();
   const kibana = useKibana<ServiceDeps>();
   const { core } = kibana.services;
+  const abortControllerRef = useRef<AbortController>(new AbortController());
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current.abort();
+    };
+  }, []);
 
   const [availableValuesOptions, setAvailableValuesOptions] = useState<EuiComboBoxOptionOption[]>(
     variableType === ESQLVariableType.TIME_LITERAL
@@ -88,8 +102,8 @@ export function ValueControlForm({
   );
 
   const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
-    initialState?.availableOptions
-      ? initialState.availableOptions.map((option) => {
+    initialState?.available_options
+      ? initialState.available_options.map((option) => {
           return {
             label: option,
             key: option,
@@ -101,7 +115,7 @@ export function ValueControlForm({
 
   const [valuesQuery, setValuesQuery] = useState<string>(
     variableType === ESQLVariableType.VALUES
-      ? initialState?.esqlQuery ?? INITIAL_EMPTY_STATE_QUERY
+      ? initialState?.esql_query ?? INITIAL_EMPTY_STATE_QUERY
       : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
@@ -113,7 +127,7 @@ export function ValueControlForm({
 
   const shouldDefaultToMultiSelect = variableType === ESQLVariableType.MULTI_VALUES;
   const [singleSelect, setSingleSelect] = useState<boolean>(
-    initialState?.singleSelect ?? !shouldDefaultToMultiSelect
+    initialState?.single_select ?? !shouldDefaultToMultiSelect
   );
 
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
@@ -157,17 +171,23 @@ export function ValueControlForm({
 
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
+      abortControllerRef.current.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       try {
+        const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
         getESQLResults({
           esqlQuery: query,
           search,
-          signal: undefined,
+          signal: controller.signal,
           filter: undefined,
           dropNullColumns: true,
           timeRange,
+          timezone,
           variables: esqlVariables,
         }).then((results) => {
-          if (!isMounted()) {
+          if (!isMounted() || controller.signal.aborted) {
             return;
           }
           const columns = results.response.columns.map((col) => col.name);
@@ -192,10 +212,13 @@ export function ValueControlForm({
         });
         setValuesQuery(query);
       } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          return;
+        }
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search, timeRange, esqlVariables]
+    [isMounted, search, timeRange, esqlVariables, core.uiSettings]
   );
 
   const setSuggestedQuery = useCallback(async () => {
@@ -217,8 +240,8 @@ export function ValueControlForm({
 
   useEffect(() => {
     if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
-      if (initialState?.esqlQuery) {
-        onValuesQuerySubmit(initialState.esqlQuery);
+      if (initialState?.esql_query) {
+        onValuesQuerySubmit(initialState.esql_query);
       } else if (valuesRetrieval) {
         setSuggestedQuery();
       }
@@ -226,7 +249,7 @@ export function ValueControlForm({
   }, [
     selectedValues?.length,
     controlFlyoutType,
-    initialState?.esqlQuery,
+    initialState?.esql_query,
     variableName,
     valuesRetrieval,
     onValuesQuerySubmit,
@@ -238,14 +261,14 @@ export function ValueControlForm({
     // removes the question mark from the variable name
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const state = {
-      availableOptions,
-      selectedOptions: [availableOptions[0]],
-      singleSelect,
+      available_options: availableOptions,
+      selected_options: [availableOptions[0]],
+      single_select: singleSelect,
       title: label || variableNameWithoutQuestionmark,
-      variableName: variableNameWithoutQuestionmark,
-      variableType: singleSelect ? variableType : ESQLVariableType.MULTI_VALUES,
-      esqlQuery: valuesQuery || queryString,
-      controlType: controlFlyoutType,
+      variable_name: variableNameWithoutQuestionmark,
+      variable_type: singleSelect ? variableType : ESQLVariableType.MULTI_VALUES,
+      esql_query: valuesQuery || queryString,
+      control_type: controlFlyoutType,
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);
@@ -275,16 +298,29 @@ export function ValueControlForm({
     <>
       {controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && (
         <>
+          <EuiFormLabel
+            css={css`
+              display: block;
+              width: 100%;
+              margin-block-start: ${theme.euiTheme.size.s};
+              padding-block-start: ${theme.euiTheme.size.s};
+              padding-block-end: ${theme.euiTheme.size.s};
+              border-bottom: ${theme.euiTheme.border.thin};
+            `}
+          >
+            {i18n.translate('esql.flyout.valuesQueryEditor.label', {
+              defaultMessage: 'Values query',
+            })}
+          </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <ESQLLangEditor
             query={{ esql: valuesQuery }}
             onTextLangQueryChange={(q) => {
               setValuesQuery(q.esql);
             }}
-            hideTimeFilterInfo={true}
             disableAutoFocus={true}
             errors={esqlQueryErrors}
             editorIsInline
-            hideRunQueryText
             onTextLangQuerySubmit={async (q, a) => {
               if (q) {
                 await onValuesQuerySubmit(q.esql);
@@ -292,10 +328,6 @@ export function ValueControlForm({
             }}
             isDisabled={false}
             isLoading={false}
-            hasOutline
-            formLabel={i18n.translate('esql.flyout.valuesQueryEditor.label', {
-              defaultMessage: 'Values query',
-            })}
             esqlVariables={esqlVariables}
           />
           {showValuesPreview && (

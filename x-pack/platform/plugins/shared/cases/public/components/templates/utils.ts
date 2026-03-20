@@ -7,8 +7,9 @@
 
 import { isEmpty } from 'lodash';
 import type { ActionConnector, TemplateConfiguration } from '../../../common/types/domain';
+import { getNoneConnector } from '../../../common/utils/connectors';
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
-import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
+import { normalizeActionConnector } from '../configure_cases/utils';
 import {
   customFieldsFormDeserializer,
   customFieldsFormSerializer,

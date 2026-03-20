@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useEffect, useState } from 'react';
+import React, { type ReactNode, useEffect, useRef, useState } from 'react';
 import {
   EuiLoadingSpinner,
   EuiFlyoutHeader,
@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { PROMPT_LAYOUT_VARIANTS } from '../application/components/common/prompt/layout';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../application/hooks/use_ui_privileges';
 import { UpgradeLicensePrompt } from '../application/components/access/prompts/upgrade_license_prompt';
@@ -35,6 +36,17 @@ interface AccessDeniedWrapperProps {
 
 const AccessDeniedWrapper: React.FC<AccessDeniedWrapperProps> = ({ children, onClose }) => {
   const { euiTheme } = useEuiTheme();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!closeButtonRef.current) return;
+
+    const timeoutId = setTimeout(() => {
+      closeButtonRef.current?.focus();
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
@@ -63,6 +75,7 @@ const AccessDeniedWrapper: React.FC<AccessDeniedWrapperProps> = ({ children, onC
       <EuiFlyoutHeader css={headerStyles}>
         {onClose && (
           <EuiButtonIcon
+            buttonRef={closeButtonRef}
             iconType="cross"
             aria-label={closeButtonLabel}
             onClick={onClose}
@@ -133,7 +146,7 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
   if (!accessState.hasRequiredLicense) {
     return (
       <AccessDeniedWrapper onClose={onClose}>
-        <UpgradeLicensePrompt variant="embeddable" />
+        <UpgradeLicensePrompt variant={PROMPT_LAYOUT_VARIANTS.EMBEDDABLE} />
       </AccessDeniedWrapper>
     );
   }
@@ -141,7 +154,7 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
   if (!hasShowPrivilege) {
     return (
       <AccessDeniedWrapper onClose={onClose}>
-        <NoPrivilegePrompt variant="embeddable" />
+        <NoPrivilegePrompt variant={PROMPT_LAYOUT_VARIANTS.EMBEDDABLE} />
       </AccessDeniedWrapper>
     );
   }
@@ -149,7 +162,7 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
   if (!accessState.hasLlmConnector) {
     return (
       <AccessDeniedWrapper onClose={onClose}>
-        <AddLlmConnectionPrompt variant="embeddable" />
+        <AddLlmConnectionPrompt variant={PROMPT_LAYOUT_VARIANTS.EMBEDDABLE} />
       </AccessDeniedWrapper>
     );
   }

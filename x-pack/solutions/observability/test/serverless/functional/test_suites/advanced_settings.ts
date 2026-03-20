@@ -10,7 +10,9 @@ import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-se
 import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import {
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
 } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -44,7 +46,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // This setting is read only for the time being
         if (
           settingId === OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS ||
-          settingId === OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY
+          settingId === OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY ||
+          settingId === OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS ||
+          settingId === OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS
         ) {
           continue;
         }

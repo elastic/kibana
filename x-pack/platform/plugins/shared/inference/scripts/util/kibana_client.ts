@@ -205,7 +205,14 @@ export class KibanaClient {
               pathname: `/internal/inference/chat_complete/stream`,
             }),
             body,
-            { responseType: 'stream', timeout: 0 }
+            {
+              responseType: 'stream',
+              timeout: 0,
+              headers: {
+                'kbn-xsrf': 'true',
+                'x-elastic-internal-origin': 'foo',
+              },
+            }
           )
         ) as ChatCompleteAPIResponse<TOptions>;
       }
@@ -216,7 +223,13 @@ export class KibanaClient {
             pathname: `/internal/inference/chat_complete`,
           }),
           body,
-          { timeout: 0 }
+          {
+            timeout: 0,
+            headers: {
+              'kbn-xsrf': 'true',
+              'x-elastic-internal-origin': 'foo',
+            },
+          }
         )
         .then((response) => {
           return response.data;
@@ -244,12 +257,10 @@ export class KibanaClient {
   }
 
   async getConnectors() {
-    const connectors: AxiosResponse<{ connectors: InferenceConnector[] }> = await axios.get(
-      this.getUrl({
-        pathname: '/internal/inference/connectors',
-      })
-    );
+    const response = await this.callKibana<{ connectors: InferenceConnector[] }>('GET', {
+      pathname: '/internal/inference/connectors',
+    });
 
-    return connectors.data.connectors;
+    return response.data.connectors;
   }
 }

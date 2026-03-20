@@ -22,10 +22,9 @@ jest.mock('./query_utils', () => ({
     calculatePercentilesFromBuckets: jest.fn(),
     getTTFTMetrics: jest.fn(),
     getTTLTMetrics: jest.fn(),
-    getLatencyByModel: jest.fn(),
-    getLatencyByAgentType: jest.fn(),
     getTokensByModel: jest.fn(),
     getQueryToResultTimeByModel: jest.fn(),
+    getQueryToResultTimeByAgentType: jest.fn(),
     getToolCallsByModel: jest.fn(),
   })),
   isIndexNotFoundError: jest.fn(),
@@ -108,7 +107,7 @@ describe('telemetry_collector', () => {
       expect(registeredCollector.schema.custom_agents.total.type).toBe('long');
     });
 
-    it('defines conversations schema', () => {
+    it('defines conversations schema with token breakdown', () => {
       expect(registeredCollector.schema.conversations).toBeDefined();
       expect(registeredCollector.schema.conversations.total.type).toBe('long');
       expect(registeredCollector.schema.conversations.total_rounds.type).toBe('long');
@@ -117,9 +116,19 @@ describe('telemetry_collector', () => {
       );
       expect(registeredCollector.schema.conversations.rounds_distribution.type).toBe('array');
       expect(registeredCollector.schema.conversations.tokens_used.type).toBe('long');
+      expect(registeredCollector.schema.conversations.tokens_input.type).toBe('long');
+      expect(registeredCollector.schema.conversations.tokens_output.type).toBe('long');
       expect(registeredCollector.schema.conversations.average_tokens_per_conversation.type).toBe(
         'float'
       );
+    });
+
+    it('defines daily schema matching conversations schema', () => {
+      expect(registeredCollector.schema.daily).toBeDefined();
+      expect(registeredCollector.schema.daily.total.type).toBe('long');
+      expect(registeredCollector.schema.daily.total_rounds.type).toBe('long');
+      expect(registeredCollector.schema.daily.tokens_input.type).toBe('long');
+      expect(registeredCollector.schema.daily.tokens_output.type).toBe('long');
     });
 
     it('defines query_to_result_time schema', () => {
@@ -179,6 +188,8 @@ describe('telemetry_collector', () => {
           avg_rounds_per_conversation: 5,
           rounds_distribution: [{ bucket: '1-5', count: 100 }],
           tokens_used: 50000,
+          tokens_input: 30000,
+          tokens_output: 20000,
           average_tokens_per_conversation: 500,
         }),
         getTTFTMetrics: jest.fn().mockResolvedValue({
@@ -199,26 +210,6 @@ describe('telemetry_collector', () => {
           mean: 1500,
           total_samples: 1000,
         }),
-        getLatencyByModel: jest.fn().mockResolvedValue([
-          {
-            model: 'gpt-4',
-            ttft_p50: 100,
-            ttft_p95: 500,
-            ttlt_p50: 1000,
-            ttlt_p95: 5000,
-            sample_count: 500,
-          },
-        ]),
-        getLatencyByAgentType: jest.fn().mockResolvedValue([
-          {
-            agent_id: 'default',
-            ttft_p50: 120,
-            ttft_p95: 550,
-            ttlt_p50: 1100,
-            ttlt_p95: 5500,
-            sample_count: 300,
-          },
-        ]),
         getTokensByModel: jest.fn().mockResolvedValue([
           {
             model: 'gpt-4',
@@ -238,6 +229,19 @@ describe('telemetry_collector', () => {
             mean: 1100,
             total_samples: 100,
             sample_count: 100,
+          },
+        ]),
+        getQueryToResultTimeByAgentType: jest.fn().mockResolvedValue([
+          {
+            agent_id: 'default',
+            p50: 1000,
+            p75: 2000,
+            p90: 4000,
+            p95: 6000,
+            p99: 8000,
+            mean: 1500,
+            total_samples: 300,
+            sample_count: 300,
           },
         ]),
         getToolCallsByModel: jest.fn().mockResolvedValue([
@@ -332,11 +336,24 @@ describe('telemetry_collector', () => {
         avg_rounds_per_conversation: 5,
         rounds_distribution: [{ bucket: '1-5', count: 100 }],
         tokens_used: 50000,
+        tokens_input: 30000,
+        tokens_output: 20000,
+        average_tokens_per_conversation: 500,
+      });
+
+      expect(result.daily).toEqual({
+        total: 100,
+        total_rounds: 500,
+        avg_rounds_per_conversation: 5,
+        rounds_distribution: [{ bucket: '1-5', count: 100 }],
+        tokens_used: 50000,
+        tokens_input: 30000,
+        tokens_output: 20000,
         average_tokens_per_conversation: 500,
       });
 
       expect(result.query_to_result_time).toEqual({
-        p50: 500,
+        p50: 1000,
         p75: 2000,
         p90: 4000,
         p95: 6000,
@@ -364,6 +381,20 @@ describe('telemetry_collector', () => {
           mean: 1100,
           total_samples: 100,
           sample_count: 100,
+        },
+      ]);
+
+      expect(result.query_to_result_time_by_agent_type).toEqual([
+        {
+          agent_id: 'default',
+          p50: 1000,
+          p75: 2000,
+          p90: 4000,
+          p95: 6000,
+          p99: 8000,
+          mean: 1500,
+          total_samples: 300,
+          sample_count: 300,
         },
       ]);
 
@@ -413,17 +444,21 @@ describe('telemetry_collector', () => {
 
       expect(logger.error).toHaveBeenCalledWith('Failed to collect telemetry: Fetch error');
 
+      const emptyConversationMetrics = {
+        total: 0,
+        total_rounds: 0,
+        avg_rounds_per_conversation: 0,
+        rounds_distribution: [],
+        tokens_used: 0,
+        tokens_input: 0,
+        tokens_output: 0,
+        average_tokens_per_conversation: 0,
+      };
       expect(result).toEqual({
         custom_tools: { total: 0, by_type: [] },
         custom_agents: { total: 0 },
-        conversations: {
-          total: 0,
-          total_rounds: 0,
-          avg_rounds_per_conversation: 0,
-          rounds_distribution: [],
-          tokens_used: 0,
-          average_tokens_per_conversation: 0,
-        },
+        conversations: emptyConversationMetrics,
+        daily: emptyConversationMetrics,
         query_to_result_time: {
           p50: 0,
           p75: 0,
@@ -441,19 +476,9 @@ describe('telemetry_collector', () => {
           mean: 0,
           total_samples: 0,
         },
-        time_to_last_token: {
-          p50: 0,
-          p75: 0,
-          p90: 0,
-          p95: 0,
-          p99: 0,
-          mean: 0,
-          total_samples: 0,
-        },
-        latency_by_model: [],
-        latency_by_agent_type: [],
         tokens_by_model: [],
         query_to_result_time_by_model: [],
+        query_to_result_time_by_agent_type: [],
         tool_calls_by_model: [],
         tool_calls: {
           total: 0,
@@ -584,31 +609,6 @@ describe('telemetry_collector', () => {
       const result: AgentBuilderTelemetry = await registeredCollector.fetch(mockContext);
 
       expect(result.errors.avg_errors_per_conversation).toBe(0);
-    });
-
-    it('handles missing tool_call counters with default 0', async () => {
-      mockQueryUtils.getCountersByPrefix.mockImplementation((domain: string, prefix: string) => {
-        if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_tool_call_`) {
-          return Promise.resolve(
-            new Map([
-              [`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_default_agent`, 10],
-              // Missing other sources
-            ])
-          );
-        }
-        return Promise.resolve(new Map());
-      });
-
-      const result: AgentBuilderTelemetry = await registeredCollector.fetch(mockContext);
-
-      expect(result.tool_calls.by_source).toEqual({
-        default_agent: 10,
-        custom_agent: 0,
-        mcp: 0,
-        api: 0,
-        a2a: 0,
-      });
-      expect(result.tool_calls.total).toBe(10);
     });
   });
 });

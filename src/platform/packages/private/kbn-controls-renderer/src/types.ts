@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlsGroupState } from '@kbn/controls-schemas';
-import type { PinnedControlLayoutState } from '@kbn/controls-schemas/src/types';
+import type { BehaviorSubject } from 'rxjs';
+
+import type { ControlsGroupState, PinnedControlLayoutState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import type {
+  HasSerializedChildState,
+  PresentationContainer,
   PublishesDisabledActionIds,
   PublishesUnifiedSearch,
   PublishesViewMode,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { BehaviorSubject } from 'rxjs';
 
 type ControlState = ControlsGroupState[number];
 export type ControlPanelState = Pick<ControlState, 'width' | 'grow'> & { order: number };
@@ -32,23 +34,22 @@ export interface ControlsLayout {
   };
 }
 
-export interface PublishesControlsLayout {
-  layout$: BehaviorSubject<ControlsLayout>;
-}
-
 export type ControlsRendererParentApi = Pick<
   PresentationContainer,
-  'children$' | 'addNewPanel' | 'replacePanel'
+  'children$' | 'addNewPanel' | 'replacePanel' | 'removePanel'
 > &
   Partial<PublishesUnifiedSearch> &
   PublishesViewMode &
   HasSerializedChildState<object> &
   Partial<PublishesDisabledActionIds> & {
     registerChildApi: (api: DefaultEmbeddableApi) => void;
-    layout$: BehaviorSubject<ControlsLayout>;
     isCompressed?: () => boolean;
   };
 
-export interface HasPrependWrapperRef {
-  prependWrapperRef: React.RefObject<HTMLDivElement>;
+export interface PublishesFocusedPanelId {
+  focusedPanelId$: BehaviorSubject<string | undefined>;
+}
+
+export interface PublishesLabel {
+  label$: PublishingSubject<string | undefined>;
 }

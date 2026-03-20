@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from './primitive.gen';
 
@@ -122,7 +122,15 @@ export const OriginalSource = z.object({
  * The status of the task
  */
 export type TaskStatus = z.infer<typeof TaskStatus>;
-export const TaskStatus = z.enum(['pending', 'processing', 'completed', 'failed', 'cancelled']);
+export const TaskStatus = z.enum([
+  'pending',
+  'processing',
+  'completed',
+  'approved',
+  'failed',
+  'cancelled',
+  'deleting',
+]);
 export type TaskStatusEnum = typeof TaskStatus.enum;
 export const TaskStatusEnum = TaskStatus.enum;
 
@@ -175,6 +183,18 @@ export const IntegrationResponse = z.object({
    */
   description: NonEmptyString,
   /**
+   * The version of the integration
+   */
+  version: z.string().optional(),
+  /**
+   * The username of the user who created the integration
+   */
+  createdBy: z.string().optional(),
+  /**
+   * The profile UID of the user who created the integration
+   */
+  createdByProfileUid: z.string().optional(),
+  /**
    * The data streams of the integration
    */
   dataStreams: z.array(DataStreamResponse),
@@ -198,6 +218,10 @@ export const AllIntegrationsResponseIntegration = z.object({
    */
   title: NonEmptyString,
   /**
+   * The logo of the integration (base64 encoded SVG)
+   */
+  logo: z.string().optional(),
+  /**
    * The number of data streams of the integration
    */
   totalDataStreamCount: z.number().int(),
@@ -206,7 +230,36 @@ export const AllIntegrationsResponseIntegration = z.object({
    */
   successfulDataStreamCount: z.number().int(),
   /**
+   * The version of the integration
+   */
+  version: z.string().optional(),
+  /**
+   * The username of the user who created the integration
+   */
+  createdBy: NonEmptyString,
+  /**
+   * The profile UID of the user who created the integration
+   */
+  createdByProfileUid: z.string().optional(),
+  /**
    * The status of the integration
    */
   status: TaskStatus,
 });
+
+/**
+ * The LangSmith options object.
+ */
+export type LangSmithOptions = z.infer<typeof LangSmithOptions>;
+export const LangSmithOptions = z
+  .object({
+    /**
+     * The project name.
+     */
+    projectName: z.string(),
+    /**
+     * The apiKey to use for tracing.
+     */
+    apiKey: z.string(),
+  })
+  .strict();

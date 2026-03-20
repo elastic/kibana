@@ -1,33 +1,14 @@
 steps:
-  - command: .buildkite/scripts/lifecycle/pre_build.sh
-    label: Pre-Build
-    timeout_in_minutes: 10
-    id: pre_build
-    agents:
-      machineType: n2-standard-2
-
-  - wait
-
-  - command: .buildkite/scripts/steps/store_cache.sh
-    label: Store Cache for build
-    timeout_in_minutes: 10
-    id: store_cache
-    soft_fail: true
-    depends_on:
-      - terrazzo-initial-pipeline-upload
-    agents:
-      machineType: n2-standard-2
-      diskSizeGb: 95
-
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      machineType: n2-standard-8
-      preemptible: true
+      machineType: c4d-standard-16
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 200
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
-    timeout_in_minutes: 90
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
@@ -36,11 +17,14 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
-      machineType: n2-highcpu-8
+      machineType: n2d-standard-8
       preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: quick_checks
     timeout_in_minutes: 60
+    env:
+      CHECK_GATE: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -49,9 +33,12 @@ steps:
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     key: checks
+    env:
+      CHECK_GATE: 'true'
     agents:
-      machineType: n2-standard-2
+      machineType: n2d-standard-2
       preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -62,11 +49,14 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      machineType: n2-standard-16
+      machineType: n2d-standard-16
       preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: linting
     timeout_in_minutes: 60
+    env:
+      CHECK_GATE: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -75,11 +65,30 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      machineType: n2-standard-32
+      machineType: n2d-standard-32
       preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: linting_with_types
     timeout_in_minutes: 60
+    env:
+      CHECK_GATE: 'true'
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/lint_with_oxlint.sh
+    label: 'Linting (with oxlint)'
+    agents:
+      machineType: n2d-standard-16
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c
+      diskSizeGb: 105
+    key: linting_with_oxlint
+    timeout_in_minutes: 60
+    env:
+      CHECK_GATE: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -88,10 +97,15 @@ steps:
   - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
     label: 'Check OAS Snapshot'
     agents:
-      machineType: n2-standard-4
+      machineType: n2d-standard-2
       preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
     key: check_oas_snapshot
+    depends_on:
+      - build
     timeout_in_minutes: 60
+    env:
+      CHECK_GATE: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -100,24 +114,58 @@ steps:
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
-      machineType: c4-standard-4
-      diskType: 'hyperdisk-balanced'
+      machineType: n2d-highmem-4
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
+    env:
+      CHECK_GATE: 'true'
     retry:
       automatic:
         - exit_status: '-1'
           limit: 3
 
-  - wait
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order'
+    key: pick_test_group_run_order
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 115
+    timeout_in_minutes: 10
+    env:
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+      FTR_CONFIGS_DEPS: 'build'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
+    label: 'Scout Test Run Builder'
+    agents:
+      machineType: n2d-standard-8
+    key: build_scout_tests
+    timeout_in_minutes: 20
+    depends_on:
+      - build
+    env:
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests'
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
       machineType: n2-standard-2
+    key: ci_stats_ready
     timeout_in_minutes: 10
     depends_on:
       - build
@@ -132,9 +180,10 @@ steps:
     agents:
       machineType: n2-highmem-4
       preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: build_api_docs
-    timeout_in_minutes: 90
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'

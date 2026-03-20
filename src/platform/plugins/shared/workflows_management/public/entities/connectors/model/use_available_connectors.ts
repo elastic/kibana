@@ -9,7 +9,10 @@
 
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { fetchConnector } from '@kbn/alerts-ui-shared/src/common/apis';
+import { useQuery } from '@kbn/react-query';
 import type { ConnectorInstance, ConnectorTypeInfo } from '@kbn/workflows';
+import { useKibana } from '../../../hooks/use_kibana';
 import { selectConnectors } from '../../workflows/store/workflow_detail/selectors';
 
 export const useAvailableConnectors = () => useSelector(selectConnectors);
@@ -31,4 +34,17 @@ export function useConnectorInstances(actionTypeId: string): ConnectorInstance[]
 export function useConnectorTypes(): ConnectorTypeInfo[] {
   const data = useAvailableConnectors();
   return useMemo(() => Object.values(data?.connectorTypes ?? {}), [data?.connectorTypes]);
+}
+
+/**
+ * Helper hook to fetch a connector by its ID
+ */
+export function useFetchConnector(connectorId?: string) {
+  const { http } = useKibana().services;
+  return useQuery({
+    queryKey: ['fetchConnector', connectorId],
+    queryFn: () => (connectorId ? fetchConnector(connectorId, { http }) : undefined),
+    enabled: !!connectorId,
+    cacheTime: 0,
+  });
 }

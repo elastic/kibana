@@ -27,6 +27,7 @@ import {
 } from '../../agent_list_page/components';
 import { UninstallCommandFlyout } from '../../../../components';
 import { AgentRollbackModal } from '../../components/agent_rollback_modal';
+import { AgentPolicyYamlFlyout } from '../../../../components';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 
@@ -52,6 +53,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
     const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState(false);
+    const [isAgentPolicyYamlFlyoutOpen, setIsAgentPolicyYamlFlyoutOpen] = useState(false);
     const [isAgentMigrateFlyoutOpen, setIsAgentMigrateFlyoutOpen] = useState(false);
     const [isChangePrivilegeLevelFlyoutOpen, setIsChangePrivilegeLevelFlyoutOpen] = useState(false);
     const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
@@ -81,6 +83,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         onReassignClick: () => setIsReassignFlyoutOpen(true),
         onUpgradeClick: () => setIsUpgradeModalOpen(true),
         onViewAgentJsonClick: () => setIsAgentDetailsJsonFlyoutOpen(true),
+        onViewAgentPolicyClick: () => setIsAgentPolicyYamlFlyoutOpen(true),
         onMigrateAgentClick: () => setIsAgentMigrateFlyoutOpen(true),
         onRequestDiagnosticsClick: () => setIsRequestDiagnosticsModalOpen(true),
         onChangeAgentPrivilegeLevelClick: () => setIsChangePrivilegeLevelFlyoutOpen(true),
@@ -147,6 +150,15 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             <AgentDetailsJsonFlyout
               agent={agent}
               onClose={() => setIsAgentDetailsJsonFlyoutOpen(false)}
+            />
+          </EuiPortal>
+        )}
+        {isAgentPolicyYamlFlyoutOpen && agent.policy_id && (
+          <EuiPortal>
+            <AgentPolicyYamlFlyout
+              policyId={agent.policy_id}
+              revision={agent.policy_revision}
+              onClose={() => setIsAgentPolicyYamlFlyoutOpen(false)}
             />
           </EuiPortal>
         )}

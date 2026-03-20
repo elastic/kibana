@@ -78,7 +78,7 @@ export function getInferencePropertiesFromPipelineConfig(
   };
 
   pipelineConfig.processors?.forEach((processor) => {
-    const { inference } = processor;
+    const { inference } = processor || {};
     if (inference) {
       propertiesToReturn.inferenceObj = inference;
       // Get the input field

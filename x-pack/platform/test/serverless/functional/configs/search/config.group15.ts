@@ -1,0 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FtrConfigProviderContext } from '@kbn/test';
+
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const baseTestConfig = await readConfigFile(require.resolve('../../config.search.base.ts'));
+
+  return {
+    ...baseTestConfig.getAll(),
+    testFiles: [
+      require.resolve('../../test_suites/discover/embeddable'), // 5 min
+      require.resolve('../../test_suites/context'), // 6 min
+      require.resolve('../../test_suites/discover/esql'), // 7min
+    ],
+    junit: {
+      reportName: 'Serverless Search Functional Tests - Common Group 15',
+    },
+  };
+}

@@ -29,6 +29,7 @@ import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppres
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import { getDataStreamNamespaceFilter } from '../utils/get_data_stream_namespace_filter';
 
 interface MachineLearningRuleExecutorParams {
   sharedParams: SecuritySharedParams<MachineLearningRuleParams>;
@@ -81,21 +82,25 @@ export const mlExecutor = async ({
       jobSummaries.some((job) => !isJobStarted(job.jobState, job.datafeedState))
     ) {
       const warningMessage = [
-        'Machine learning job(s) are not started:',
+        'ML jobs are not started',
         ...jobSummaries.map((job) =>
           [
-            `job id: "${job.id}"`,
-            `job name: "${job?.customSettings?.security_app_display_name ?? job.id}"`,
-            `job status: "${job.jobState}"`,
-            `datafeed status: "${job.datafeedState}"`,
-          ].join(', ')
+            `Job ID: "${job.id}"`,
+            `Job name: "${job?.customSettings?.security_app_display_name ?? job.id}"`,
+            `Job status: "${job.jobState}"`,
+            `Datafeed status: "${job.datafeedState}"`,
+          ].join('. ')
         ),
-      ].join(' ');
+      ].join('\n');
 
       result.warningMessages.push(warningMessage);
-      ruleExecutionLogger.warn(warningMessage);
+      ruleExecutionLogger.debug(warningMessage);
       result.warning = true;
     }
+
+    const dataStreamNamespaceFilters = await getDataStreamNamespaceFilter({
+      uiSettingsClient: services.uiSettingsClient,
+    });
 
     let anomalyResults: AnomalyResults;
     try {
@@ -111,9 +116,11 @@ export const mlExecutor = async ({
         to: tuple.to.toISOString(),
         maxSignals: tuple.maxSignals,
         exceptionFilter,
+        additionalFilters: dataStreamNamespaceFilters,
         isLoggedRequestsEnabled,
       });
       anomalyResults = searchResults.anomalyResults;
+      result.totalEventsFound = anomalyResults.hits.hits.length;
       loggedRequests.push(...(searchResults.loggedRequests ?? []));
     } catch (error) {
       result.errors.push(error.message);
@@ -139,7 +146,7 @@ export const mlExecutor = async ({
 
     const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {
-      ruleExecutionLogger.debug(`Found ${anomalyCount} signals from ML anomalies`);
+      ruleExecutionLogger.debug(`Alerts from ML anomalies: ${anomalyCount}`);
     }
 
     if (

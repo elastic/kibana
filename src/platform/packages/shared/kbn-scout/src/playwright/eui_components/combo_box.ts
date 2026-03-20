@@ -147,11 +147,18 @@ export class EuiComboBoxWrapper {
   }
 
   // Select a single option in the comboBox
-  async selectSingleOption(value: string) {
+  async selectSingleOption(
+    value: string,
+    options: { optionTestSubj?: string; optionRoleName?: string } = {}
+  ) {
     await this.clear();
     await this.comboBoxMainInput.click();
     await this.typeValueInSearch(value);
-    await this.page.getByRole('option', { name: value }).click();
+    // Prefer a specific test subj when option text is ambiguous.
+    const optionLocator = options.optionTestSubj
+      ? this.page.testSubj.locator(options.optionTestSubj)
+      : this.page.getByRole('option', { name: options.optionRoleName ?? value, exact: false });
+    await optionLocator.click();
     expect(await this.getSelectedValue()).toBe(value);
   }
 

@@ -18,6 +18,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLiveAnnouncer,
   EuiPageSection,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -41,6 +42,7 @@ import {
   reactRouterNavigate,
   attemptToURIDecode,
 } from '../../../../../shared_imports';
+import { formatBytes } from '../../../../..';
 import { getDataStreamDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
@@ -135,6 +137,7 @@ const getColumnConfigs = ({
         label: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
           defaultMessage: 'Storage size',
         }),
+        render: (index) => formatBytes(index.size),
         order: 70,
       }
     );
@@ -147,7 +150,7 @@ const getColumnConfigs = ({
           defaultMessage: 'Health',
         }),
         order: 20,
-        render: (index) => <DataHealth health={index.health} />,
+        render: (index) => (index.health ? <DataHealth health={index.health} /> : undefined),
       },
       {
         fieldName: 'status',
@@ -203,6 +206,7 @@ export class IndexTable extends Component {
     this.docCountApi = docCountApi(props.http);
     this.state = {
       selectedIndicesMap: {},
+      selectionAnnouncement: '',
     };
   }
 
@@ -232,6 +236,35 @@ export class IndexTable extends Component {
     for (const toggleParam of toggleParams) {
       if (toggles.includes(toggleParam)) {
         toggleChanged(toggleParam, rest[toggleParam] === 'true');
+      }
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const hadSelectedItems = Object.keys(prevState.selectedIndicesMap).length > 0;
+    const hasSelectedItems = Object.keys(this.state.selectedIndicesMap).length > 0;
+
+    if (!hadSelectedItems && hasSelectedItems) {
+      const selectionAnnouncement = i18n.translate(
+        'xpack.idxMgmt.indexTable.bulkActionsAnnouncementVisible',
+        {
+          defaultMessage: 'Bulk actions menu is now available.',
+        }
+      );
+
+      if (this.state.selectionAnnouncement !== selectionAnnouncement) {
+        this.setState({ selectionAnnouncement });
+      }
+    } else if (hadSelectedItems && !hasSelectedItems) {
+      const selectionAnnouncement = i18n.translate(
+        'xpack.idxMgmt.indexTable.bulkActionsAnnouncementHidden',
+        {
+          defaultMessage: 'Bulk actions menu is now hidden.',
+        }
+      );
+
+      if (this.state.selectionAnnouncement !== selectionAnnouncement) {
+        this.setState({ selectionAnnouncement });
       }
     }
   }
@@ -297,6 +330,35 @@ export class IndexTable extends Component {
           })}
         />
         <EuiSpacer />
+      </>
+    );
+  }
+
+  renderEnrichmentErrors() {
+    const { indicesEnrichmentErrors } = this.props;
+    if (!indicesEnrichmentErrors || indicesEnrichmentErrors.length === 0) {
+      return null;
+    }
+
+    return (
+      <>
+        <EuiCallOut
+          iconType="warning"
+          color="warning"
+          data-test-subj="indicesEnrichmentErrorCallout"
+          title={i18n.translate('xpack.idxMgmt.indexTable.enrichmentErrorTitle', {
+            defaultMessage: 'Some index details could not be loaded',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.indexTable.enrichmentErrorDescription"
+            defaultMessage="The following data sources failed to load: {sources}."
+            values={{
+              sources: indicesEnrichmentErrors.join(', '),
+            }}
+          />
+        </EuiCallOut>
+        <EuiSpacer size="m" />
       </>
     );
   }
@@ -570,7 +632,7 @@ export class IndexTable extends Component {
       }
     }
 
-    const { selectedIndicesMap } = this.state;
+    const { selectedIndicesMap, selectionAnnouncement } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
 
     return (
@@ -707,7 +769,11 @@ export class IndexTable extends Component {
 
               {this.renderFilterError()}
 
+              {this.renderEnrichmentErrors()}
+
               <EuiSpacer size="m" />
+
+              <EuiLiveAnnouncer>{selectionAnnouncement}</EuiLiveAnnouncer>
 
               <div style={{ maxWidth: '100%', overflow: 'auto' }}>
                 <EuiTable data-test-subj="indexTable">

@@ -25,7 +25,7 @@ node scripts/otel_demo.js --teardown
 ## What This Does
 
 1. **Ensures minikube is running** - Starts it if needed
-2. **Enables Streams in Kibana** - Calls `POST /api/streams/_enable` to set up the logs index
+2. **Enables Streams in Kibana** - Calls `POST /api/streams/_enable` to set up the logs.otel index
 3. **Deploys OTel Demo to Kubernetes** - Creates namespace, deployments, services
 4. **Configures OTel Collector** with:
    - `filelog` receiver to collect container logs from `/var/log/pods`
@@ -75,7 +75,7 @@ node scripts/otel_demo.js [options]
 
 Options:
   --config, -c         Path to Kibana config file (default: config/kibana.dev.yml)
-  --logs-index         Index name for logs (default: "logs")
+  --logs-index         Index name for logs (default: "logs.otel")
   --teardown           Stop and remove the OTel Demo from Kubernetes
   --scenario, -s       Apply a failure scenario (can be repeated)
   --patch, -p          Patch scenarios onto running cluster (no redeploy)
@@ -154,14 +154,28 @@ node scripts/otel_demo.js
 
 ## Accessing the Demo
 
-After deployment:
+After deployment, the frontend can be accessed via NodePort.
+
+### On macOS with Docker driver:
 
 ```bash
-# Access the web store frontend
-minikube service frontend-external -n otel-demo
+# Use minikube service command (keep terminal open)
+minikube service frontend-external -n online-boutique
 
-# Or use the NodePort directly (http://<minikube-ip>:30080)
+# Or for otel-demo:
+minikube service frontend-external -n otel-demo
+```
+
+**Note:** On macOS with the Docker driver, the `minikube service` command creates a tunnel and must be kept running in a separate terminal to maintain access to the service.
+
+### On Linux or with other drivers:
+
+```bash
+# Get the minikube IP
 minikube ip
+
+# Access directly via NodePort
+# http://<minikube-ip>:30080
 ```
 
 ## Viewing Logs

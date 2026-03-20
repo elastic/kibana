@@ -17,18 +17,21 @@ import type { AttackDetailsPanelTabType } from './tabs';
 import { useKibana } from '../../common/lib/kibana';
 
 import { useTabs } from './hooks/use_tabs';
+import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useAttackDetailsContext } from './context';
 import { PanelHeader } from './header';
 
 export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
+export { ATTACK_PREVIEW_BANNER } from './context';
 
 /**
- * Panel to be displayed in Attack Details flyout
+ * Panel to be displayed in Attack Details flyout right section.
  */
-export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
+export const AttackDetailsRightPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
   const { storage } = useKibana().services;
   const { openRightPanel } = useExpandableFlyoutApi();
   const { attackId, indexName } = useAttackDetailsContext();
+  const expandDetails = useNavigateToAttackDetailsLeftPanel();
 
   const { tabsDisplayed, selectedTabId } = useTabs({ path });
 
@@ -37,8 +40,12 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
       openRightPanel({
         id: AttackDetailsRightPanelKey,
         path: { tab: tabId },
-        params: { attackId, indexName },
+        params: {
+          attackId,
+          indexName,
+        },
       });
+
       // saving which tab is currently selected in the right panel in local storage
       storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
     },
@@ -47,7 +54,7 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
+      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
       <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}
@@ -59,4 +66,5 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
   );
 });
 
-AttackDetailsPanel.displayName = 'AttackDetailsPanel';
+AttackDetailsRightPanel.displayName = 'AttackDetailsRightPanel';
+export { AttackDetailsPreviewPanel } from './preview';

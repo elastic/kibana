@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
 import pMap from 'p-map';
 import { get, partition, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
-import { getFlattenedObject } from '@kbn/std';
+import { getFlattenedObject, stableStringify } from '@kbn/std';
 import type {
   CustomFieldsConfiguration,
   TemplatesConfiguration,
@@ -25,15 +24,12 @@ import {
   MAX_TITLE_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_SUFFIX_LENGTH,
+  MAX_OPEN_CASES,
 } from '../../../common/constants';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
-import {
-  INITIAL_ORACLE_RECORD_COUNTER,
-  MAX_CONCURRENT_ES_REQUEST,
-  MAX_OPEN_CASES,
-} from './constants';
+import { INITIAL_ORACLE_RECORD_COUNTER, MAX_CONCURRENT_ES_REQUEST } from './constants';
 import type {
   BulkCreateOracleRecordRequest,
   CasesConnectorRunParams,
@@ -170,6 +166,45 @@ export class CasesConnectorExecutor {
      * comments (if available) and alerts to the corresponding cases.
      */
     await this.attachCommentAndAlertsToCases(groupedAlertsWithClosedCasesHandled, params);
+
+    /**
+     * Now that all cases have been updated, we can push updates to external connectors
+     */
+    if (params.autoPushCase) {
+      await this.pushCaseUpdates(groupedAlertsWithClosedCasesHandled, params);
+    }
+  }
+
+  private async pushCaseUpdates(
+    groupedAlertsWithCases: Map<string, GroupedAlertsWithCases>,
+    params: CasesConnectorRunParams
+  ) {
+    return pMap(
+      Array.from(groupedAlertsWithCases.values()),
+      /**
+       * attachments.bulkCreate throws an error on errors
+       */
+      async (groupedAlertsWithCase) => {
+        const { theCase } = groupedAlertsWithCase;
+        if (theCase.connector && params.autoPushCase) {
+          return this.casesClient.cases
+            .push({
+              caseId: theCase.id,
+              connectorId: theCase.connector.id,
+              pushType: 'automatic',
+            })
+            .catch((error) => {
+              this.logger.debug(
+                `[CasesConnector][CasesConnectorExecutor][pushCaseUpdates] Failed to auto-push case (id: ${theCase.id}): ${error}`
+              );
+            });
+        }
+        return Promise.resolve();
+      },
+      {
+        concurrency: MAX_CONCURRENT_ES_REQUEST,
+      }
+    );
   }
 
   private groupAlerts({
@@ -210,7 +245,7 @@ export class CasesConnectorExecutor {
 
     for (const alert of alertsWithAllGroupingFields) {
       const alertWithOnlyTheGroupingFields = pick(alert, uniqueGroupingByFields);
-      const groupingKey = stringify(alertWithOnlyTheGroupingFields);
+      const groupingKey = stableStringify(alertWithOnlyTheGroupingFields);
 
       if (this.logger.isLevelEnabled('debug')) {
         this.logger.debug(
@@ -229,7 +264,7 @@ export class CasesConnectorExecutor {
     if (noGroupedAlerts.length > 0) {
       const noGroupedGrouping = this.generateNoGroupAlertGrouping(params.groupingBy);
 
-      groupingMap.set(stringify(noGroupedGrouping), {
+      groupingMap.set(stableStringify(noGroupedGrouping), {
         alerts: noGroupedAlerts,
         grouping: noGroupedGrouping,
       });
@@ -252,11 +287,12 @@ export class CasesConnectorExecutor {
     params: CasesConnectorRunParams,
     groupedAlerts: CasesGroupedAlerts[]
   ): CasesGroupedAlerts[] {
-    if (groupedAlerts.length > params.maximumCasesToOpen || groupedAlerts.length > MAX_OPEN_CASES) {
+    const groupSize = groupedAlerts.length;
+    if (groupSize > params.maximumCasesToOpen || groupSize > MAX_OPEN_CASES) {
       const maxCasesCircuitBreaker = Math.min(params.maximumCasesToOpen, MAX_OPEN_CASES);
 
       this.logger.warn(
-        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases ${maxCasesCircuitBreaker}. Falling back to one case.`,
+        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (${groupSize}) than the maximum number of allowed cases (${maxCasesCircuitBreaker}). Falling back to one case.`,
         this.getLogMetadata(params)
       );
 

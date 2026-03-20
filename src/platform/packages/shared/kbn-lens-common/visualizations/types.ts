@@ -380,6 +380,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   setDimension: (
     props: VisualizationDimensionChangeProps<T> & { groupId: string; previousColumn?: string }
   ) => T;
+
+  reorderDimension?: (
+    props: VisualizationDimensionChangeProps<T> & { groupId: string; targetColumnId: string }
+  ) => T;
   /**
    * The frame is telling the visualization to remove a dimension. The visualization needs to
    * look at its internal state to determine which dimension is being affected.
@@ -476,7 +480,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getUserMessages?: (state: T, deps: { frame: FramePublicAPI }) => UserMessage[];
+  getUserMessages?: (
+    state: T,
+    deps: { frame: FramePublicAPI; setState?: StateSetter<T> }
+  ) => UserMessage[];
 
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state

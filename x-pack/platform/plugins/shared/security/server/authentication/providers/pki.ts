@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type { DetailedPeerCertificate } from 'tls';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import { BaseAuthenticationProvider } from './base';
 import type { AuthenticationInfo } from '../../elasticsearch';
@@ -16,7 +17,6 @@ import { getDetailedErrorMessage } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
 import { Tokens } from '../tokens';
 
 /**

@@ -6,7 +6,7 @@
  */
 
 import { uniq, mapValues } from 'lodash';
-import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
 import {
@@ -30,6 +30,12 @@ const isPrimitive = (value: unknown): boolean => value != null && typeof value !
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 
+export const getLayerPaletteName = (layer: XYDataLayerConfig): string =>
+  layer.colorMapping?.paletteId ?? layer.palette?.name ?? 'default';
+
+const getPaletteDefinition = (paletteService: PaletteRegistry, paletteName: string) =>
+  paletteService.get(paletteName) ?? paletteService.get('default');
+
 export type ColorAssignments = Record<
   string,
   {
@@ -46,7 +52,7 @@ export function getColorAssignments(
   const layersPerPalette: Record<string, XYDataLayerConfig[]> = {};
 
   layers.filter(isDataLayer).forEach((layer) => {
-    const palette = layer.palette?.name || 'default';
+    const palette = getLayerPaletteName(layer);
     if (!layersPerPalette[palette]) {
       layersPerPalette[palette] = [];
     }
@@ -55,24 +61,29 @@ export function getColorAssignments(
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer, layerIndex) => {
-      if (layer.collapseFn || !layer.splitAccessor) {
+      if (layer.collapseFn || !layer.splitAccessors || layer.splitAccessors.length === 0) {
         return { numberOfSeries: layer.accessors.length, splits: [] };
       }
-      const splitAccessor = layer.splitAccessor;
-      const column = data.tables[layer.layerId]?.columns.find(({ id }) => id === splitAccessor);
-      const columnFormatter = column && formatFactory(column.meta.params);
+      const splitAccessors = layer.splitAccessors;
+      const columns = data.tables[layer.layerId]?.columns.filter(({ id }) =>
+        splitAccessors.includes(id)
+      );
+
       const splits =
-        !column || !data.tables[layer.layerId]
+        !columns || columns.length === 0 || !data.tables[layer.layerId]
           ? []
           : uniq(
-              data.tables[layer.layerId].rows.map((row) => {
-                let value = row[splitAccessor];
-                if (value && !isPrimitive(value)) {
-                  value = columnFormatter?.convert(value) ?? value;
-                } else {
-                  value = String(value);
-                }
-                return value;
+              data.tables[layer.layerId].rows.flatMap((row) => {
+                return columns.map((column) => {
+                  let value = row[column.id];
+                  if (value && !isPrimitive(value)) {
+                    const columnFormatter = formatFactory(column.meta.params);
+                    value = columnFormatter?.convert(value) ?? value;
+                  } else {
+                    value = String(value);
+                  }
+                  return value;
+                });
               })
             );
       return { numberOfSeries: (splits.length || 1) * layer.accessors.length, splits };
@@ -93,7 +104,7 @@ export function getColorAssignments(
             : seriesPerLayer
                 .slice(0, layerIndex)
                 .reduce((sum, perLayer) => sum + perLayer.numberOfSeries, 0)) +
-          (sortedLayer.splitAccessor && splitRank !== -1
+          (sortedLayer.splitAccessors && splitRank !== -1
             ? splitRank * sortedLayer.accessors.length
             : 0) +
           sortedLayer.accessors.indexOf(yAccessor)
@@ -130,23 +141,25 @@ export function getAssignedColorConfig(
         : defaultAnnotationColor,
     };
   }
-  const layerContainsSplits = isDataLayer(layer) && !layer.collapseFn && layer.splitAccessor;
-  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
-  const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
+  const layerContainsSplits =
+    isDataLayer(layer) && !layer.collapseFn && (layer.splitAccessors ?? []).length > 0;
+  const currentPaletteName = getLayerPaletteName(layer);
+  const currentPaletteParams = layer.palette?.params;
+  const totalSeriesCount = colorAssignments[currentPaletteName]?.totalSeriesCount;
 
   if (layerContainsSplits) {
     return getDisabledConfig(accessor);
   }
 
   const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
-  const rank = colorAssignments[currentPalette.name].getRank(
+  const rank = colorAssignments[currentPaletteName].getRank(
     layer,
     columnToLabel[accessor] || accessor,
     accessor
   );
   const assignedColor =
     totalSeriesCount != null
-      ? paletteService.get(currentPalette.name).getCategoricalColor(
+      ? getPaletteDefinition(paletteService, currentPaletteName).getCategoricalColor(
           [
             {
               name: columnToLabel[accessor] || accessor,
@@ -155,7 +168,7 @@ export function getAssignedColorConfig(
             },
           ],
           { maxDepth: 1, totalSeries: totalSeriesCount },
-          currentPalette.params
+          currentPaletteParams
         )
       : undefined;
   return {
@@ -177,7 +190,7 @@ export function getAccessorColorConfigs(
   if (isAnnotationsLayer(layer)) {
     return getAnnotationsAccessorColorConfig(layer);
   }
-  const layerContainsSplits = !layer.collapseFn && layer.splitAccessor;
+  const layerContainsSplits = !layer.collapseFn && (layer.splitAccessors ?? []).length > 0;
   return layer.accessors.map((accessor) => {
     if (layerContainsSplits) {
       return getDisabledConfig(accessor);

@@ -14,10 +14,15 @@ import type {
   RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 import { AgentService } from '../agents/agent_service';
-import { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
+import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
+import { generateFieldMappings } from '../build_integration/fields';
+import { validateFieldMappings } from '../build_integration/validate_fields';
+import type { LangSmithOptions } from '../../routes/types';
 import type { AutomaticImportV2PluginStartDependencies } from '../../types';
 import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
 
@@ -28,11 +33,23 @@ export interface DataStreamTaskParams extends DataStreamParams {
    * Inference connector ID to use when the background task runs.
    */
   connectorId: string;
+  /**
+   * Optional LangSmith tracing options to propagate to the agent invocation.
+   */
+  langSmithOptions?: LangSmithOptions;
 }
 
 export interface DataStreamParams {
   integrationId: string;
   dataStreamId: string;
+}
+
+export function isUnrecoverableByStatus(error: unknown): boolean {
+  const s =
+    (error as { statusCode?: number })?.statusCode ??
+    (error as { meta?: { status?: number } })?.meta?.status ??
+    (error as { output?: { statusCode?: number } })?.output?.statusCode;
+  return s !== undefined && s !== 200 && s !== 201;
 }
 
 export class TaskManagerService {
@@ -44,10 +61,11 @@ export class TaskManagerService {
   constructor(
     logger: LoggerFactory,
     taskManagerSetup: TaskManagerSetupContract,
-    core: CoreSetup<AutomaticImportV2PluginStartDependencies>
+    core: CoreSetup<AutomaticImportV2PluginStartDependencies>,
+    samplesIndexService: AutomaticImportSamplesIndexService
   ) {
     this.logger = logger.get('taskManagerService');
-    this.agentService = new AgentService(new AutomaticImportSamplesIndexService(logger), logger);
+    this.agentService = new AgentService(samplesIndexService, logger);
     // Register task definitions during setup phase
     taskManagerSetup.registerTaskDefinitions({
       [DATA_STREAM_CREATION_TASK_TYPE]: {
@@ -174,7 +192,8 @@ export class TaskManagerService {
     );
 
     const { id: taskId, params } = taskInstance;
-    const { integrationId, dataStreamId, connectorId } = params as DataStreamTaskParams;
+    const { integrationId, dataStreamId, connectorId, langSmithOptions } =
+      params as DataStreamTaskParams;
 
     this.logger.debug(
       `Running task ${taskId} with ${JSON.stringify({ integrationId, dataStreamId, connectorId })}`
@@ -188,8 +207,9 @@ export class TaskManagerService {
       // Get core services and plugins
       const [coreStart, pluginsStart] = await core.getStartServices();
 
-      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-      const esClient = scopedClusterClient.asCurrentUser;
+      // Use internal user for agent tools (fetch samples, validate pipeline) and field mapping
+      // validation. These operations run in a background task and do not require user-scoped access.
+      const esClient = coreStart.elasticsearch.client.asInternalUser;
 
       const model = await pluginsStart.inference.getChatModel({
         request,
@@ -208,24 +228,47 @@ export class TaskManagerService {
         integrationId,
         dataStreamId,
         esClient,
-        model
+        model,
+        langSmithOptions
       );
 
       this.logger.debug(`Task ${taskId} completed successfully`);
 
-      // Extract and convert the pipeline to JSON string
-      const pipelineString = JSON.stringify(result.current_pipeline || {});
+      if (!result.current_pipeline) {
+        throw new Error('Agent did not produce a valid ingest pipeline');
+      }
 
-      // Extract docs from pipeline_generation_results and convert to string array
-      const pipelineGenerationResults = (result.pipeline_generation_results?.docs || []).map(
-        (doc) => JSON.stringify(doc)
+      const pipelineObject = result.current_pipeline as Pipeline;
+      const pipelineGenerationResultsObjects = result.pipeline_generation_results ?? [];
+
+      this.logger.debug(`Pipeline object: ${JSON.stringify(pipelineObject)}`);
+      this.logger.debug(
+        `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
 
-      // Update the data stream saved object with pipeline and task status
+      const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
+      const fieldMapping = await generateFieldMappings(
+        (pipelineGenerationResultsObjects ?? []) as Array<Record<string, unknown>>,
+        fieldsMetadataClient
+      );
+      this.logger.debug(`Generated field mappings: ${JSON.stringify(fieldMapping)}`);
+
+      const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
+      if (!validationResult.valid) {
+        this.logger.warn(
+          `Field mapping validation warnings for ${dataStreamId}: ${validationResult.errors.join(
+            ', '
+          )}`
+        );
+      }
+
+      // Update the data stream saved object with pipeline, field mappings, and task status
       await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
         integrationId,
         dataStreamId,
-        ingestPipeline: pipelineString,
+        ingestPipeline: pipelineObject,
+        pipelineDocs: pipelineGenerationResultsObjects,
+        fieldMapping,
         status: TASK_STATUSES.completed,
       });
 
@@ -236,13 +279,30 @@ export class TaskManagerService {
         state: {
           task_status: TASK_STATUSES.completed,
           result: {
-            ingest_pipeline: pipelineString,
-            pipeline_generation_results: pipelineGenerationResults,
+            ingest_pipeline: pipelineObject,
+            pipeline_generation_results: pipelineGenerationResultsObjects,
           },
         },
       };
     } catch (error) {
-      this.logger.error(`Task ${taskId} failed: ${JSON.stringify(error)}`);
+      this.logger.error(`Task ${taskId} failed: ${error}`);
+
+      try {
+        await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
+          integrationId,
+          dataStreamId,
+          status: TASK_STATUSES.failed,
+        });
+        this.logger.debug(
+          `Data stream ${dataStreamId} marked as failed for integration ${integrationId}`
+        );
+      } catch (updateError) {
+        this.logger.error(`Failed to mark data stream ${dataStreamId} as failed: ${updateError}`);
+      }
+
+      if (isUnrecoverableByStatus(error))
+        throwUnrecoverableError(error instanceof Error ? error : new Error(String(error)));
+
       return { state: { task_status: TASK_STATUSES.failed }, error };
     }
   }

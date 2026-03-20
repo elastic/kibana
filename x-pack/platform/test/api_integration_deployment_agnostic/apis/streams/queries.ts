@@ -32,7 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let apiClient: StreamsSupertestRepositoryClient;
 
-  const STREAM_NAME = 'logs.queries-test';
+  const STREAM_NAME = 'logs.otel.queries-test';
   const stream: Streams.WiredStream.UpsertRequest['stream'] = {
     description: '',
     ingest: {
@@ -88,11 +88,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('lists queries when defined on the stream', async () => {
       const queries = [
-        { id: v4(), title: 'OutOfMemoryError', kql: { query: "message:'OutOfMemoryError'" } },
+        {
+          id: v4(),
+          title: 'OutOfMemoryError',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'OutOfMemoryError'")`,
+          },
+        },
         {
           id: v4(),
           title: 'cluster_block_exception',
-          kql: { query: "message:'cluster_block_exception'" },
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'cluster_block_exception'")`,
+          },
         },
       ];
 
@@ -122,7 +132,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const query = {
           id: v4(),
           title: 'initial title',
-          kql: { query: "message:'initial query'" },
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'initial query'")`,
+          },
         };
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
@@ -130,7 +143,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: STREAM_NAME, queryId: query.id },
               body: {
                 title: query.title,
-                kql: query.kql,
+                esql: query.esql,
               },
             },
           })
@@ -146,11 +159,50 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(rules.body.data[0].name).to.eql(query.title);
       });
 
-      it('updates the query and create a new rule when updating an existing query kql', async () => {
+      it('returns 400 and does not save when ES|QL query is missing METADATA _id,_source', async () => {
+        const queryId = v4();
+        await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId },
+              body: {
+                title: 'missing metadata',
+                esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'x'")` },
+              },
+            },
+          })
+          .expect(400);
+
+        const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+        expect(getQueriesResponse.queries).to.eql([]);
+      });
+
+      it('returns 400 and does not save when ES|QL query references invalid sources', async () => {
+        const queryId = v4();
+        await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId },
+              body: {
+                title: 'invalid sources',
+                esql: { query: 'FROM logs.ecs METADATA _id, _source' },
+              },
+            },
+          })
+          .expect(400);
+
+        const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+        expect(getQueriesResponse.queries).to.eql([]);
+      });
+
+      it('updates the query and create a new rule when updating an existing query esql', async () => {
         const query = {
           id: 'first',
           title: 'initial title',
-          kql: { query: 'initial query' },
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
+          },
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
@@ -159,13 +211,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
+        const updatedEsql = `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("updated query")`;
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
             params: {
               path: { name: STREAM_NAME, queryId: query.id },
               body: {
                 title: query.title,
-                kql: { query: 'updated query' },
+                esql: { query: updatedEsql },
               },
             },
           })
@@ -178,7 +231,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: query.id,
             title: query.title,
-            kql: { query: 'updated query' },
+            description: '',
+            esql: { query: updatedEsql },
           },
         ]);
 
@@ -192,7 +246,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const query = {
           id: 'first',
           title: 'initial title',
-          kql: { query: 'initial query' },
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
+          },
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
@@ -207,7 +264,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: STREAM_NAME, queryId: query.id },
               body: {
                 title: 'updated title',
-                kql: { query: query.kql.query },
+                esql: query.esql,
               },
             },
           })
@@ -220,7 +277,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: query.id,
             title: 'updated title',
-            kql: { query: query.kql.query },
+            description: '',
+            esql: { query: query.esql.query },
           },
         ]);
 
@@ -240,7 +298,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: queryId,
             title: 'Significant Query',
-            kql: { query: "message:'query'" },
+            description: '',
+            esql: {
+              query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'query'")`,
+            },
           },
         ],
       });
@@ -273,17 +334,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const firstQuery = {
         id: 'first',
         title: 'first query',
-        kql: { query: 'query 1' },
+        description: '',
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 1")`,
+        },
       };
       const secondQuery = {
         id: 'second',
         title: 'second query',
-        kql: { query: 'query 2' },
+        description: '',
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 2")`,
+        },
       };
       const thirdQuery = {
         id: 'third',
         title: 'third query',
-        kql: { query: 'query 3' },
+        description: '',
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3")`,
+        },
       };
       await putStream(apiClient, STREAM_NAME, {
         stream,
@@ -295,12 +365,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const newQuery = {
         id: 'fourth',
         title: 'fourth query',
-        kql: { query: 'query 4' },
+        description: '',
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 4")`,
+        },
       };
       const updateThirdQuery = {
         id: 'third',
         title: 'third query',
-        kql: { query: 'query 3 updated' },
+        description: '',
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3 updated")`,
+        },
       };
 
       const bulkResponse = await apiClient
@@ -349,6 +425,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(initialThirdRuleId).not.to.eql(
         updatedRules.body.data.find((rule: any) => rule.name === updateThirdQuery.title).id
       );
+    });
+
+    it('returns 400 and does not apply changes when bulk includes an invalid ES|QL query', async () => {
+      const firstQuery = {
+        id: 'first',
+        title: 'first query',
+        description: '',
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 1")`,
+        },
+      };
+      await putStream(apiClient, STREAM_NAME, {
+        stream,
+        ...emptyAssets,
+        queries: [firstQuery],
+      });
+
+      const invalidQuery = {
+        id: 'invalid',
+        title: 'invalid query',
+        description: '',
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query invalid")`,
+        },
+      };
+
+      await apiClient
+        .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
+          params: {
+            path: { name: STREAM_NAME },
+            body: {
+              operations: [{ index: invalidQuery }, { delete: { id: firstQuery.id } }],
+            },
+          },
+        })
+        .expect(400);
+
+      const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+      expect(getQueriesResponse.queries).to.eql([firstQuery]);
     });
   });
 }

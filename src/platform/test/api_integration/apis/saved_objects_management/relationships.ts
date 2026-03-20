@@ -71,6 +71,12 @@ export default function ({ getService }: FtrProviderContext) {
       const typesQuery = types.map((t) => `savedObjectTypes=${t}`).join('&');
       return `${baseApiUrl}/${type}/${id}?${typesQuery}`;
     };
+    const sortRelations = <TRelation extends { relationship: string; type: string; id: string }>(
+      relations: TRelation[]
+    ) =>
+      [...relations].sort((a, b) =>
+        `${a.relationship}:${a.type}:${a.id}`.localeCompare(`${b.relationship}:${b.type}:${b.id}`)
+      );
 
     describe('searches', () => {
       it('should validate search response schema', async () => {
@@ -462,7 +468,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
-        expect(resp.body.relations).to.eql([
+        const expectedRelations = [
           {
             id: '960372e0-3224-11e8-a572-ffca06da1357',
             type: 'search',
@@ -509,7 +515,9 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
           },
-        ]);
+        ];
+
+        expect(sortRelations(resp.body.relations)).to.eql(sortRelations(expectedRelations));
       });
 
       it('should filter based on savedObjectTypes', async () => {

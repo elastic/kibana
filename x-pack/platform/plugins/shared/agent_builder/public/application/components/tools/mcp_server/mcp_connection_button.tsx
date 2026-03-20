@@ -35,7 +35,7 @@ export const McpConnectionButton = () => {
       button={
         <EuiButtonEmpty
           key="mcp-server-connection-button"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={toggleContextOpen}
           data-test-subj="agentBuilderManageMcpButton"

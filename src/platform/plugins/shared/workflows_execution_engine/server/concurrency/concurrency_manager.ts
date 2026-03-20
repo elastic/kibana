@@ -19,7 +19,7 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
  * Scope:
  * - Evaluating concurrency group keys from static strings or template expressions
  * - Enforcing concurrency limits per group
- * - Implementing collision strategies (queue, drop, cancel-in-progress)
+ * - Implementing collision strategies (drop, cancel-in-progress)
  */
 export class ConcurrencyManager {
   private readonly templatingEngine: WorkflowTemplatingEngine;
@@ -53,30 +53,18 @@ export class ConcurrencyManager {
     }
 
     const keyExpression = concurrencySettings.key.trim();
-    if (keyExpression === '') {
-      return null;
-    }
-    if (!keyExpression.includes('{{') || !keyExpression.includes('}}')) {
-      return keyExpression;
-    }
 
     try {
-      const evaluated = this.templatingEngine.evaluateExpression(
+      const rendered = this.templatingEngine.render(
         keyExpression,
         context as Record<string, unknown>
       );
 
-      if (evaluated === null || evaluated === undefined) {
-        return keyExpression;
-      }
-
-      const result = String(evaluated).trim();
-
-      if (result === '') {
+      if (rendered === '') {
         return null;
       }
 
-      return result;
+      return rendered;
     } catch (error) {
       return keyExpression;
     }
@@ -112,7 +100,7 @@ export class ConcurrencyManager {
       return true;
     }
 
-    const strategy = concurrencySettings.strategy; // ?? 'queue'; TBD
+    const strategy = concurrencySettings.strategy;
     const maxConcurrency = concurrencySettings.max ?? 1;
 
     // Query for non-terminal execution IDs in the same concurrency group
@@ -173,7 +161,6 @@ export class ConcurrencyManager {
       return true; // Execution can proceed after cancelling old ones
     }
 
-    // For 'queue' strategy (TBD) or unknown strategies, allow execution to proceed
     return true;
   }
 }

@@ -10,9 +10,18 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  /**
+   * When false, event-driven workflow execution is disabled: event-triggered runs
+   * (triggeredBy not in manual/scheduled/alert) are skipped at execution time.
+   */
+  eventDriven: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    logEvents: schema.boolean({ defaultValue: true }),
+  }),
   logging: schema.object({
     console: schema.boolean({ defaultValue: false }),
   }),
@@ -23,6 +32,15 @@ const configSchema = schema.object({
         defaultValue: ['*'],
       }
     ),
+  }),
+  maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
+  collectQueueMetrics: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description:
+        'When enabled, stores queue delay metrics (scheduledAt, runAt, queueDelayMs, scheduleDelayMs) in workflow executions. ' +
+        'Useful for observability but adds to document size. Disabled by default for performance.',
+    },
   }),
 });
 

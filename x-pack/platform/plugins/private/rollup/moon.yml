@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/rollup-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/rollup-plugin'
+  title: '@kbn/rollup-plugin'
   description: Moon project for @kbn/rollup-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/rollup
+  sourceRoot: x-pack/platform/plugins/private/rollup
 dependsOn:
   - '@kbn/core'
   - '@kbn/management-plugin'
@@ -41,6 +40,7 @@ dependsOn:
   - '@kbn/rollup'
   - '@kbn/licensing-types'
   - '@kbn/data-view-validation'
+  - '@kbn/index-management-shared-types'
 tags:
   - plugin
   - prod
@@ -56,14 +56,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

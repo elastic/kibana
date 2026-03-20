@@ -10,6 +10,7 @@ import { filter, map, omit } from 'lodash';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
+import { escapeQuotes } from '@kbn/es-query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { FindPacksRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -50,12 +51,32 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           request
         );
 
+        const filters: string[] = [];
+        if (request.query.enabled !== undefined) {
+          filters.push(
+            `${packSavedObjectType}.attributes.enabled: ${request.query.enabled === 'true'}`
+          );
+        }
+
+        if (request.query.createdBy) {
+          const users = request.query.createdBy.split(',');
+          const userFilters = users.map(
+            (u) => `${packSavedObjectType}.attributes.created_by: "${escapeQuotes(u.trim())}"`
+          );
+          filters.push(`(${userFilters.join(' OR ')})`);
+        }
+
         const soClientResponse = await spaceScopedClient.find<PackSavedObject>({
           type: packSavedObjectType,
           page: request.query.page ?? 1,
           perPage: request.query.pageSize ?? 20,
           sortField: request.query.sort ?? 'updated_at',
           sortOrder: request.query.sortOrder ?? 'desc',
+          ...(request.query.search && {
+            search: request.query.search,
+            searchFields: ['name'],
+          }),
+          ...(filters.length && { filter: filters.join(' AND ') }),
         });
 
         const packSavedObjects: PackResponseData[] = map(soClientResponse.saved_objects, (pack) => {
@@ -74,8 +95,10 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             enabled: attributes.enabled,
             created_at: attributes.created_at,
             created_by: attributes.created_by,
+            created_by_profile_uid: attributes.created_by_profile_uid,
             updated_at: attributes.updated_at,
             updated_by: attributes.updated_by,
+            updated_by_profile_uid: attributes.updated_by_profile_uid,
             saved_object_id: pack.id,
             policy_ids: policyIds,
           };

@@ -18,9 +18,9 @@ const AUTHOR_FILTERS: Record<AuthorFilter, RuleMigrationFilters> = {
 const STATUS_FILTERS: Record<RulesStatusFilter, RuleMigrationFilters> = {
   [StatusFilterBase.FAILED]: { failed: true },
   [StatusFilterBase.INSTALLED]: { installed: true },
-  [StatusFilterBase.TRANSLATED]: { installed: false, fullyTranslated: true },
-  [StatusFilterBase.PARTIALLY_TRANSLATED]: { partiallyTranslated: true },
-  [StatusFilterBase.UNTRANSLATABLE]: { untranslatable: true },
+  [StatusFilterBase.TRANSLATED]: { installed: false, fullyTranslated: true, failed: false },
+  [StatusFilterBase.PARTIALLY_TRANSLATED]: { partiallyTranslated: true, failed: false },
+  [StatusFilterBase.UNTRANSLATABLE]: { untranslatable: true, failed: false },
   [RulesSpecificStatusFilter.INDEX_PATTERN_MISSING]: { missingIndex: true },
 };
 

@@ -1174,7 +1174,7 @@
         "signature": [
           "(client: ",
           "ElasticsearchClient",
-          ", connectorId?: string | undefined, from?: number, size?: number, syncJobType?: \"all\" | \"content\" | \"access_control\", syncStatus?: ",
+          ", connectorId?: string | undefined, from?: number, size?: number, syncJobType?: \"content\" | \"all\" | \"access_control\", syncStatus?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -1282,7 +1282,7 @@
             "label": "syncJobType",
             "description": [],
             "signature": [
-              "\"all\" | \"content\" | \"access_control\""
+              "\"content\" | \"all\" | \"access_control\""
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/fetch_sync_jobs.ts",
             "lineNumber": 21,
@@ -6273,7 +6273,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "\"<\" | \">\" | \"regex\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
+              "\"regex\" | \">\" | \"<\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/types/connectors.ts",
             "lineNumber": 143,
@@ -7760,21 +7760,21 @@
             "section": "def-common.ConnectorFeatures",
             "text": "ConnectorFeatures"
           },
-          "; error: string | null; status: ",
-          {
-            "pluginId": "@kbn/search-connectors",
-            "scope": "common",
-            "docId": "kibKbnSearchConnectorsPluginApi",
-            "section": "def-common.ConnectorStatus",
-            "text": "ConnectorStatus"
-          },
-          "; description: string | null; configuration: ",
+          "; error: string | null; description: string | null; configuration: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
             "docId": "kibKbnSearchConnectorsPluginApi",
             "section": "def-common.ConnectorConfiguration",
             "text": "ConnectorConfiguration"
+          },
+          "; status: ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorStatus",
+            "text": "ConnectorStatus"
           },
           "; language: string | null; pipeline?: ",
           {
@@ -8211,7 +8211,7 @@
         "label": "FilteringRuleRule",
         "description": [],
         "signature": [
-          "\"<\" | \">\" | \"regex\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
+          "\"regex\" | \">\" | \"<\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
         ],
         "path": "src/platform/packages/shared/kbn-search-connectors/types/connectors.ts",
         "lineNumber": 118,

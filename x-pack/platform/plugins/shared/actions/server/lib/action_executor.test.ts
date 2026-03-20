@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { KibanaRequest } from '@kbn/core/server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -91,6 +91,7 @@ const actionExecutorInitializationParams = {
   encryptedSavedObjectsClient,
   eventLogger,
   getActionsAuthorizationWithRequest,
+  getCurrentUserProfileIdFromAPIKey: jest.fn().mockResolvedValue(undefined),
   inMemoryConnectors: [
     createMockInMemoryConnector({
       id: 'preconfigured',
@@ -354,7 +355,9 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
+        signal: undefined,
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -398,9 +401,47 @@ describe('Action Executor', () => {
         globalAuthHeaders: {
           'x-custom-header': 'custom-header-value',
         },
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
+        signal: undefined,
       });
     });
+
+    if (!executeUnsecure) {
+      test(`successfully ${label} with abort signal`, async () => {
+        mockGetRequestBodyByte.mockReturnValue(300);
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+          connectorSavedObject
+        );
+        connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+        const abortController = new AbortController();
+        const executeParamsWithSignal = {
+          ...executeParams,
+          signal: abortController.signal,
+        };
+
+        await actionExecutor.execute(executeParamsWithSignal);
+
+        expect(connectorType.executor).toHaveBeenCalledWith(
+          expect.objectContaining({
+            actionId: CONNECTOR_ID,
+            services: expect.anything(),
+            config: {
+              bar: true,
+            },
+            secrets: {
+              baz: true,
+            },
+            params: { foo: true },
+            logger: loggerMock,
+            connectorUsageCollector: expect.any(ConnectorUsageCollector),
+            source: SOURCE,
+            signal: abortController.signal,
+          })
+        );
+      });
+    }
 
     for (const executionSource of [
       {
@@ -465,6 +506,7 @@ describe('Action Executor', () => {
           logger: loggerMock,
           source: executionSource.source,
           connectorUsageCollector: expect.any(ConnectorUsageCollector),
+          profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         });
 
         expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -553,6 +595,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
@@ -638,6 +681,7 @@ describe('Action Executor', () => {
           logger: loggerMock,
           request: {},
           connectorUsageCollector: expect.any(ConnectorUsageCollector),
+          profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
           ...(executeUnsecure ? {} : { source: SOURCE }),
         });
       }
@@ -759,6 +803,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
@@ -922,7 +967,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating connector type config: Required`,
+        message: `error validating connector type config: ✖ Invalid input: expected object, received undefined`,
         errorSource: TaskErrorSource.FRAMEWORK,
       });
     });
@@ -980,7 +1025,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating connector type config: Required`,
+        message: `error validating connector type config: ✖ Invalid input: expected object, received undefined`,
 
         errorSource: TaskErrorSource.FRAMEWORK,
       });
@@ -1015,7 +1060,8 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action params: Field \"param1\": Required`,
+        message: `error validating action params: ✖ Invalid input: expected string, received undefined
+  → at param1`,
         errorSource: TaskErrorSource.USER,
       });
     });
@@ -1087,6 +1133,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
     });
@@ -1121,6 +1168,7 @@ describe('Action Executor', () => {
         request: {},
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         source: SOURCE,
+        profileUid: mockUser?.profile_uid,
       });
     });
 
@@ -1196,6 +1244,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
@@ -1294,6 +1343,7 @@ describe('Action Executor', () => {
         request: {},
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         source: SOURCE,
+        profileUid: mockUser?.profile_uid,
       });
 
       expect(loggerMock.debug).toBeCalledWith(
@@ -1525,6 +1575,7 @@ describe('Action Executor', () => {
           logger: loggerMock,
           connectorUsageCollector: expect.any(ConnectorUsageCollector),
           source: SOURCE,
+          profileUid: mockUser?.profile_uid,
         });
       }
     });
@@ -2228,6 +2279,49 @@ describe('execute() - optional params validator', () => {
 
     await expect(actionExecutor.execute(executeParams)).rejects.toThrow(
       'Connector type "test-without-executor" does not have an execute function and cannot be executed.'
+    );
+  });
+});
+
+describe('execute() - spaceId override', () => {
+  test('uses the provided spaceId instead of deriving from request', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute({
+      ...executeParams,
+      spaceId: 'override-space',
+    });
+
+    // spacesMock.getSpaceId should not be called when spaceId is provided
+    expect(spacesMock.getSpaceId).not.toHaveBeenCalled();
+
+    // The action should be fetched from the override space namespace
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      'action',
+      CONNECTOR_ID,
+      { namespace: 'override-space' }
+    );
+  });
+
+  test('falls back to deriving spaceId from request when spaceId is not provided', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute(executeParams);
+
+    // spacesMock.getSpaceId should be called when no spaceId override is provided
+    expect(spacesMock.getSpaceId).toHaveBeenCalled();
+
+    // The action should be fetched from the namespace derived from request
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      'action',
+      CONNECTOR_ID,
+      { namespace: 'some-namespace' }
     );
   });
 });

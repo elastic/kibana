@@ -813,11 +813,7 @@ describe('CaseCommentModel', () => {
       });
 
       it('throws if limit is reached when creating external reference', async () => {
-        await expect(
-          model.bulkCreate({
-            attachments: [commentExternalReference],
-          })
-        ).rejects.toThrow(
+        await expect(model.bulkCreate({ attachments: [commentExternalReference] })).rejects.toThrow(
           `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
         );
       });

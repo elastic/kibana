@@ -11,6 +11,7 @@ export interface Connector {
   id: string;
   name: string;
   type: string;
+  iconType: string;
   category: DataSourceCategory;
 }
 
@@ -25,6 +26,7 @@ export interface ActiveSource {
   id: string;
   name: string;
   type: string;
+  iconType: string;
   stackConnectors: string[];
   workflows: string[];
   agentTools: string[];

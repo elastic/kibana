@@ -22,6 +22,7 @@ import type {
   ReportingJobResponse,
   ReportingRequestHandlerContext,
   ReportingSetup,
+  ReportingUser,
 } from '../../../types';
 import { GenerateRequestHandler } from './generate_request_handler';
 
@@ -94,7 +95,7 @@ describe('Handle request to generate', () => {
 
     requestHandler = new GenerateRequestHandler({
       reporting: reportingCore,
-      user: { username: 'testymcgee' },
+      user: { username: 'testymcgee' } as ReportingUser,
       context: mockContext,
       path: '/api/reporting/test/generate/pdf',
       req: mockRequest,
@@ -252,7 +253,7 @@ describe('Handle request to generate', () => {
     test('disallows invalid browser timezone', async () => {
       const handler = new GenerateRequestHandler({
         reporting: reportingCore,
-        user: { username: 'testymcgee' },
+        user: { username: 'testymcgee' } as ReportingUser,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
         req: {
@@ -272,10 +273,10 @@ describe('Handle request to generate', () => {
           "invalid params: [
             {
               \\"code\\": \\"custom\\",
-              \\"message\\": \\"Invalid timezone\\",
               \\"path\\": [
                 \\"browserTimezone\\"
-              ]
+              ],
+              \\"message\\": \\"Invalid timezone\\"
             }
           ]"
         `);

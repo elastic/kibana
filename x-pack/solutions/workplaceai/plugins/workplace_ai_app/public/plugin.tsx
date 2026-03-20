@@ -12,9 +12,11 @@ import type {
   WorkplaceAIAppPluginStart,
   WorkplaceAIAppPluginSetupDependencies,
   WorkplaceAIAppPluginStartDependencies,
+  WorkplaceAIClientConfig,
 } from './types';
 import { registerApp } from './application';
 import { type WorkplaceAIServices } from './services';
+import { createRerankStepDefinition } from './steps';
 
 export class WorkplaceAIAppPlugin
   implements
@@ -27,9 +29,11 @@ export class WorkplaceAIAppPlugin
 {
   private services?: WorkplaceAIServices;
   private readonly logger: Logger;
+  private readonly config: WorkplaceAIClientConfig;
 
-  constructor(context: PluginInitializerContext) {
-    this.services = {};
+  constructor(context: PluginInitializerContext<WorkplaceAIClientConfig>) {
+    this.config = context.config.get();
+    this.services = { config: this.config };
     this.logger = context.logger.get('workplaceai.app.public');
   }
 
@@ -37,6 +41,8 @@ export class WorkplaceAIAppPlugin
     core: CoreSetup<WorkplaceAIAppPluginStartDependencies, WorkplaceAIAppPluginStart>,
     pluginsSetup: WorkplaceAIAppPluginSetupDependencies
   ): WorkplaceAIAppPluginSetup {
+    pluginsSetup.workflowsExtensions.registerStepDefinition(createRerankStepDefinition(core));
+
     registerApp({
       core,
       getServices: () => {

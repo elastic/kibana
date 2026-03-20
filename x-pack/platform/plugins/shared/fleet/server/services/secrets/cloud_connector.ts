@@ -7,7 +7,23 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { CloudProvider, CloudConnectorVars } from '../../../common/types';
+import type {
+  CloudProvider,
+  CloudConnectorVars,
+  CloudConnectorVar,
+  PackageInfo,
+  CloudConnectorSecretReference,
+  CloudConnectorSecretVar,
+  AwsCloudConnectorVars,
+  AzureCloudConnectorVars,
+  GcpCloudConnectorVars,
+} from '../../../common/types';
+import {
+  extractRawCredentialVars,
+  getCredentialSchema,
+  getAllVarKeys,
+  findFirstVarEntry,
+} from '../../../common/services/cloud_connectors';
 import type { NewPackagePolicy } from '../../types';
 import { CloudConnectorInvalidVarsError } from '../../errors';
 
@@ -20,6 +36,7 @@ import { createSecrets } from './common';
  *
  * @param cloudProvider - The cloud provider (aws, azure, gcp)
  * @param packagePolicy - The package policy containing cloud connector vars
+ * @param packageInfo - The package info for storage mode detection
  * @param esClient - Elasticsearch client for creating secrets
  * @param logger - Logger instance
  * @returns CloudConnectorVars with secret references populated
@@ -27,17 +44,22 @@ import { createSecrets } from './common';
 export async function extractAndCreateCloudConnectorSecrets(
   cloudProvider: CloudProvider,
   packagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo,
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<CloudConnectorVars | undefined> {
   logger.debug('Extracting package policy vars for cloud connector and creating secrets');
 
   if (packagePolicy.supports_cloud_connector && cloudProvider === 'aws') {
-    return await extractAwsCloudConnectorSecrets(packagePolicy, esClient, logger);
+    return await extractAwsCloudConnectorSecrets(packagePolicy, packageInfo, esClient, logger);
   }
 
   if (packagePolicy.supports_cloud_connector && cloudProvider === 'azure') {
-    return await extractAzureCloudConnectorSecrets(packagePolicy, esClient, logger);
+    return await extractAzureCloudConnectorSecrets(packagePolicy, packageInfo, esClient, logger);
+  }
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'gcp') {
+    return await extractGcpCloudConnectorSecrets(packagePolicy, packageInfo, esClient, logger);
   }
 }
 
@@ -46,22 +68,32 @@ export async function extractAndCreateCloudConnectorSecrets(
  */
 async function extractAwsCloudConnectorSecrets(
   packagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo,
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<CloudConnectorVars | undefined> {
-  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+  // Use accessor to get vars from the correct location (package-level or input-level)
+  const vars = extractRawCredentialVars(packagePolicy, packageInfo);
 
   if (!vars) {
     logger.error('Package policy must contain vars for AWS cloud connector');
     throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
   }
 
-  // Look for role_arn and external_id in the vars
-  const roleArn: string = vars.role_arn?.value || vars['aws.role_arn']?.value;
-  const externalIdVar = vars.external_id || vars['aws.credentials.external_id'];
+  // Use schema to get all possible var keys for role_arn and external_id
+  const schema = getCredentialSchema('aws');
+  const roleArnKeys = getAllVarKeys(schema.fields.roleArn);
+  const externalIdKeys = getAllVarKeys(schema.fields.externalId);
+
+  // Look for role_arn using schema-defined keys
+  const roleArnVar = findFirstVarEntry(vars, roleArnKeys);
+  const roleArn = roleArnVar?.value as string | undefined;
+
+  // Look for external_id using schema-defined keys
+  const externalIdVar = findFirstVarEntry(vars, externalIdKeys);
 
   if (roleArn && externalIdVar) {
-    let externalIdWithSecretRef: { type: 'password'; value: any };
+    let externalIdWithSecretRef: { type: 'password'; value: CloudConnectorSecretReference };
 
     // If external_id is not already a secret reference, create a secret for it
     if (externalIdVar.value && !externalIdVar.value.isSecretRef) {
@@ -113,24 +145,38 @@ async function extractAwsCloudConnectorSecrets(
  */
 async function extractAzureCloudConnectorSecrets(
   packagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo,
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<CloudConnectorVars | undefined> {
-  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+  // Use accessor to get vars from the correct location (package-level or input-level)
+  const vars = extractRawCredentialVars(packagePolicy, packageInfo);
 
   if (!vars) {
     logger.error('Package policy must contain vars for Azure cloud connector');
     throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
   }
 
-  const tenantIdVar = vars.tenant_id || vars['azure.credentials.tenant_id'];
-  const clientIdVar = vars.client_id || vars['azure.credentials.client_id'];
-  const azureCredentials =
-    vars.azure_credentials_cloud_connector_id || vars['azure.credentials.cloud_connector_id'];
+  // Use schema to get all possible var keys for Azure credentials
+  const schema = getCredentialSchema('azure');
+  const tenantIdKeys = getAllVarKeys(schema.fields.tenantId);
+  const clientIdKeys = getAllVarKeys(schema.fields.clientId);
+  const connectorIdKeys = getAllVarKeys(schema.fields.azure_credentials_cloud_connector_id);
+
+  // Look for Azure vars using schema-defined keys
+  const tenantIdVar = findFirstVarEntry(vars, tenantIdKeys);
+  const clientIdVar = findFirstVarEntry(vars, clientIdKeys);
+  const azureCredentials = findFirstVarEntry(vars, connectorIdKeys);
 
   if (tenantIdVar && clientIdVar && azureCredentials) {
-    let tenantIdWithSecretRef = tenantIdVar;
-    let clientIdWithSecretRef = clientIdVar;
+    let tenantIdWithSecretRef: CloudConnectorSecretVar = {
+      type: 'password',
+      value: tenantIdVar.value as CloudConnectorSecretReference,
+    };
+    let clientIdWithSecretRef: CloudConnectorSecretVar = {
+      type: 'password',
+      value: clientIdVar.value as CloudConnectorSecretReference,
+    };
 
     // Create secrets for tenant_id and client_id if they're not already secret references
     const secretsToCreate: string[] = [];
@@ -155,7 +201,7 @@ async function extractAzureCloudConnectorSecrets(
           throw new CloudConnectorInvalidVarsError('Unexpected array of secrets for tenant_id');
         }
         tenantIdWithSecretRef = {
-          ...tenantIdVar,
+          type: 'password',
           value: {
             id: tenantSecret.id,
             isSecretRef: true,
@@ -169,7 +215,7 @@ async function extractAzureCloudConnectorSecrets(
           throw new CloudConnectorInvalidVarsError('Unexpected array of secrets for client_id');
         }
         clientIdWithSecretRef = {
-          ...clientIdVar,
+          type: 'password',
           value: {
             id: clientSecret.id,
             isSecretRef: true,
@@ -178,10 +224,13 @@ async function extractAzureCloudConnectorSecrets(
       }
     }
 
-    const azureCloudConnectorVars = {
-      tenant_id: tenantIdWithSecretRef as any,
-      client_id: clientIdWithSecretRef as any,
-      azure_credentials_cloud_connector_id: azureCredentials as any,
+    const azureCloudConnectorVars: AzureCloudConnectorVars = {
+      tenant_id: tenantIdWithSecretRef,
+      client_id: clientIdWithSecretRef,
+      azure_credentials_cloud_connector_id: {
+        type: 'text',
+        value: azureCredentials.value as string,
+      },
     };
 
     logger.debug(
@@ -201,8 +250,96 @@ async function extractAzureCloudConnectorSecrets(
 }
 
 /**
+ * Extracts GCP cloud connector variables and creates secrets.
+ * service_account and audience are non-secret text fields (type: text in integration manifests).
+ * Only gcp_credentials_cloud_connector_id is a secret.
+ */
+async function extractGcpCloudConnectorSecrets(
+  packagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo,
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<CloudConnectorVars | undefined> {
+  const vars = extractRawCredentialVars(packagePolicy, packageInfo);
+
+  if (!vars) {
+    logger.error('Package policy must contain vars for GCP cloud connector');
+    throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+  }
+
+  const schema = getCredentialSchema('gcp');
+  const serviceAccountKeys = getAllVarKeys(schema.fields.serviceAccount);
+  const audienceKeys = getAllVarKeys(schema.fields.audience);
+  const connectorIdKeys = getAllVarKeys(schema.fields.gcp_credentials_cloud_connector_id);
+
+  const serviceAccountVar = findFirstVarEntry(vars, serviceAccountKeys);
+  const audienceVar = findFirstVarEntry(vars, audienceKeys);
+  const connectorIdVar = findFirstVarEntry(vars, connectorIdKeys);
+
+  if (serviceAccountVar && audienceVar && connectorIdVar) {
+    const serviceAccountAsVar: CloudConnectorVar = {
+      type: 'text',
+      value: serviceAccountVar.value as string,
+    };
+    const audienceAsVar: CloudConnectorVar = {
+      type: 'text',
+      value: audienceVar.value as string,
+    };
+
+    let connectorIdWithSecretRef: CloudConnectorSecretVar = {
+      type: 'password',
+      value: connectorIdVar.value as CloudConnectorSecretReference,
+    };
+
+    if (connectorIdVar.value && !connectorIdVar.value.isSecretRef) {
+      logger.debug(
+        'Creating 1 secret for GCP cloud connector (gcp_credentials_cloud_connector_id)'
+      );
+      const secrets = await createSecrets({
+        esClient,
+        values: [connectorIdVar.value],
+      });
+
+      const secret = secrets[0];
+      if (Array.isArray(secret)) {
+        throw new CloudConnectorInvalidVarsError(
+          'Unexpected array of secrets for GCP gcp_credentials_cloud_connector_id'
+        );
+      }
+      connectorIdWithSecretRef = {
+        type: 'password',
+        value: {
+          id: secret.id,
+          isSecretRef: true,
+        },
+      };
+    }
+
+    const gcpCloudConnectorVars: GcpCloudConnectorVars = {
+      service_account: serviceAccountAsVar,
+      audience: audienceAsVar,
+      gcp_credentials_cloud_connector_id: connectorIdWithSecretRef,
+    };
+
+    logger.debug(
+      `Extracted GCP cloud connector vars: service_account=${!!serviceAccountAsVar}, audience=${!!audienceAsVar}, gcp_credentials_cloud_connector_id=[REDACTED]`
+    );
+
+    return gcpCloudConnectorVars;
+  }
+
+  logger.error(
+    `Missing required GCP vars: service_account=${!!serviceAccountVar}, audience=${!!audienceVar}, gcp_credentials_cloud_connector_id=[REDACTED]`
+  );
+  throw new CloudConnectorInvalidVarsError(
+    'Missing required GCP cloud connector variables: ' +
+      `service_account=${!!serviceAccountVar}, audience=${!!audienceVar}, gcp_credentials_cloud_connector_id=[REDACTED]`
+  );
+}
+
+/**
  * Extracts secret IDs from cloud connector variables for cleanup during deletion
- * This function handles extracting secret references from both AWS and Azure cloud connectors.
+ * This function handles extracting secret references from AWS, Azure, and GCP cloud connectors.
  *
  * @param cloudProvider - The cloud provider (aws, azure, gcp)
  * @param cloudConnectorVars - The cloud connector variables containing secret references
@@ -215,34 +352,29 @@ export function extractSecretIdsFromCloudConnectorVars(
   const secretIds: string[] = [];
 
   if (cloudProvider === 'aws') {
-    const awsVars = cloudConnectorVars as any;
+    const awsVars = cloudConnectorVars as AwsCloudConnectorVars;
     // AWS has external_id as a secret
-    if (
-      awsVars.external_id?.value &&
-      typeof awsVars.external_id.value === 'object' &&
-      awsVars.external_id.value.isSecretRef &&
-      awsVars.external_id.value.id
-    ) {
+    if (awsVars.external_id?.value?.isSecretRef && awsVars.external_id.value.id) {
       secretIds.push(awsVars.external_id.value.id);
     }
   } else if (cloudProvider === 'azure') {
-    const azureVars = cloudConnectorVars as any;
+    const azureVars = cloudConnectorVars as AzureCloudConnectorVars;
     // Azure has tenant_id and client_id as secrets
-    if (
-      azureVars.tenant_id?.value &&
-      typeof azureVars.tenant_id.value === 'object' &&
-      azureVars.tenant_id.value.isSecretRef &&
-      azureVars.tenant_id.value.id
-    ) {
+    if (azureVars.tenant_id?.value?.isSecretRef && azureVars.tenant_id.value.id) {
       secretIds.push(azureVars.tenant_id.value.id);
     }
-    if (
-      azureVars.client_id?.value &&
-      typeof azureVars.client_id.value === 'object' &&
-      azureVars.client_id.value.isSecretRef &&
-      azureVars.client_id.value.id
-    ) {
+    if (azureVars.client_id?.value?.isSecretRef && azureVars.client_id.value.id) {
       secretIds.push(azureVars.client_id.value.id);
+    }
+  } else if (cloudProvider === 'gcp') {
+    const gcpVars = cloudConnectorVars as GcpCloudConnectorVars;
+    // Only gcp_credentials_cloud_connector_id is a secret;
+    // service_account and audience are non-secret text fields
+    if (
+      gcpVars.gcp_credentials_cloud_connector_id?.value?.isSecretRef &&
+      gcpVars.gcp_credentials_cloud_connector_id.value.id
+    ) {
+      secretIds.push(gcpVars.gcp_credentials_cloud_connector_id.value.id);
     }
   }
 

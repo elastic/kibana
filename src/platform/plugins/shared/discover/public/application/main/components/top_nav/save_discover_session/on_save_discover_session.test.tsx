@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  savedSearchMock,
-  savedSearchMockWithTimeField,
-} from '../../../../../__mocks__/saved_search';
 import type {
   DiscoverSessionSaveModalOnSaveCallback,
   DiscoverSessionSaveModalProps,
 } from './save_modal';
 import type { OnSaveDiscoverSessionParams } from './on_save_discover_session';
 import { onSaveDiscoverSession } from './on_save_discover_session';
-import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ReactElement } from 'react';
 import type { DiscoverServices } from '../../../../../build_services';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
@@ -27,10 +23,15 @@ import {
   fromTabStateToSavedObjectTab,
   internalStateActions,
 } from '../../../state_management/redux';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import { getTabStateMock } from '../../../state_management/redux/__mocks__/internal_state.mocks';
+import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import {
+  getPersistedTabMock,
+  getTabStateMock,
+} from '../../../state_management/redux/__mocks__/internal_state.mocks';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 
 const mockShowSaveModal = jest.mocked(showSaveModal);
 
@@ -52,8 +53,26 @@ const getOnSaveProps = (props?: Partial<OnSaveProps>): OnSaveProps => ({
   ...props,
 });
 
+const defaultServices = createDiscoverServicesMock();
+
+const defaultPersistedDiscoverSession = createDiscoverSessionMock({
+  id: 'the-saved-search-id',
+  title: 'A saved search',
+  description: 'description',
+  managed: false,
+  tags: [],
+  tabs: [
+    getPersistedTabMock({
+      tabId: 'the-saved-search-id',
+      dataView: dataViewMock,
+      services: defaultServices,
+    }),
+  ],
+});
+
 const setup = async ({
-  savedSearch = savedSearchMock,
+  persistedDiscoverSession = defaultPersistedDiscoverSession,
+  initialTabDataView,
   additionalPersistedTabs,
   dataViewsList,
   services = createDiscoverServicesMock(),
@@ -67,7 +86,8 @@ const setup = async ({
   onSaveCb,
   onClose,
 }: {
-  savedSearch?: SavedSearch | false;
+  persistedDiscoverSession?: DiscoverSession | false;
+  initialTabDataView?: DataView;
   additionalPersistedTabs?: DiscoverSessionTab[];
   dataViewsList?: DataView[];
   services?: DiscoverServices;
@@ -75,33 +95,75 @@ const setup = async ({
   onSaveCb?: OnSaveDiscoverSessionParams['onSaveCb'];
   onClose?: OnSaveDiscoverSessionParams['onClose'];
 } = {}) => {
+  const finalPersistedSession =
+    persistedDiscoverSession === false
+      ? undefined
+      : additionalPersistedTabs
+      ? {
+          ...persistedDiscoverSession,
+          tabs: [...persistedDiscoverSession.tabs, ...additionalPersistedTabs],
+        }
+      : persistedDiscoverSession;
+
+  const allDataViews = [
+    ...(initialTabDataView ? [initialTabDataView] : []),
+    ...(dataViewsList ?? []),
+    dataViewMock,
+    dataViewMockWithTimeField,
+    dataViewWithTimefieldMock,
+  ];
+  const uniqueDataViews = allDataViews.filter(
+    (dv, index, self) => self.findIndex((d) => d.id === dv.id) === index
+  );
+
+  const toolkit = getDiscoverInternalStateMock({
+    services,
+    persistedDataViews: uniqueDataViews,
+  });
+
+  // Apply mock after creating toolkit since toolkit also mocks saveDiscoverSession
   jest
     .spyOn(services.savedSearch, 'saveDiscoverSession')
     .mockImplementation(mockSaveDiscoverSession);
-  const stateContainer = getDiscoverStateMock({
-    savedSearch,
-    additionalPersistedTabs,
-    services,
-  });
+
+  await toolkit.initializeTabs({ persistedDiscoverSession: finalPersistedSession });
+
+  // Initialize the current tab's runtime state to set up currentDataView$
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+  // Ensure the current tab's data view is set for tests that depend on isTimeBased
+  if (initialTabDataView) {
+    toolkit.internalState.dispatch(
+      internalStateActions.setDataView({
+        tabId: toolkit.getCurrentTab().id,
+        dataView: initialTabDataView,
+      })
+    );
+  }
+
   if (dataViewsList) {
-    stateContainer.internalState.dispatch(
+    toolkit.internalState.dispatch(
       internalStateActions.loadDataViewList.fulfilled(
         dataViewsList as DataViewListItem[],
         'requestId'
       )
     );
   }
+
   let saveModal: ReactElement<DiscoverSessionSaveModalProps> | undefined;
   mockShowSaveModal.mockImplementation((modal) => {
     saveModal = modal as ReactElement<DiscoverSessionSaveModalProps>;
   });
+
   await onSaveDiscoverSession({
     services,
-    state: stateContainer,
+    dispatch: toolkit.internalState.dispatch,
+    getState: toolkit.internalState.getState,
+    runtimeStateManager: toolkit.runtimeStateManager,
     onSaveCb,
     onClose,
   });
-  return { stateContainer, saveModal };
+  return { toolkit, saveModal };
 };
 
 describe('onSaveDiscoverSession', () => {
@@ -109,256 +171,297 @@ describe('onSaveDiscoverSession', () => {
     mockShowSaveModal.mockReset();
   });
 
-  it('should call showSaveModal and set expected props', async () => {
-    const services = createDiscoverServicesMock();
-    const { saveModal } = await setup({
-      savedSearch: {
-        ...savedSearchMock,
-        managed: true,
-      },
-      services,
-    });
-    expect(saveModal).toBeDefined();
-    expect(saveModal?.props).toEqual({
-      isTimeBased: false,
-      services,
-      title: 'A saved search',
-      showCopyOnSave: true,
-      description: 'description',
-      timeRestore: false,
-      tags: [],
-      onSave: expect.any(Function),
-      onClose: expect.any(Function),
-      managed: true,
-    });
-  });
-
-  describe('isTimeBased checks', () => {
-    const services = createDiscoverServicesMock();
-    const dataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
-      tab: getTabStateMock({
-        id: 'dataViewNoTimeFieldTab',
-        initialInternalState: {
-          serializedSearchSource: { index: dataViewMock.id },
-        },
-      }),
-      timeRestore: false,
-      services,
-    });
-    const dataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
-      tab: getTabStateMock({
-        id: 'dataViewWithTimeFieldTab',
-        initialInternalState: {
-          serializedSearchSource: { index: dataViewMockWithTimeField.id },
-        },
-      }),
-      timeRestore: false,
-      services,
-    });
-    const adHocDataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
-      tab: getTabStateMock({
-        id: 'adHocDataViewNoTimeFieldTab',
-        initialInternalState: {
-          serializedSearchSource: { index: { title: 'adhoc' } },
-        },
-      }),
-      timeRestore: false,
-      services,
-    });
-    const adHocDataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
-      tab: getTabStateMock({
-        id: 'adHocDataViewWithTimeFieldTab',
-        initialInternalState: {
-          serializedSearchSource: { index: { title: 'adhoc', timeFieldName: 'timestamp' } },
-        },
-      }),
-      timeRestore: true,
-      services,
-    });
-
-    it("should set isTimeBased to false if no tab's data view is time based", async () => {
-      const { saveModal } = await setup({
-        additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewNoTimeFieldTab],
-        dataViewsList: [dataViewMock],
+  describe('By Value', () => {
+    it('should skip the modal and immediately save and return the serialisable state', async () => {
+      const services = createDiscoverServicesMock();
+      jest.spyOn(services.embeddableEditor, 'isByValueEditor').mockReturnValue(true);
+      const byValueTab = getPersistedTabMock({
+        tabId: 'mock-session',
+        dataView: dataViewMock,
         services,
       });
-      expect(saveModal?.props.isTimeBased).toBe(false);
+      jest.spyOn(services.embeddableEditor, 'getByValueInput').mockReturnValue(byValueTab);
+      jest.spyOn(services.embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
+
+      const onSaveCb = jest.fn();
+
+      const { saveModal } = await setup({
+        persistedDiscoverSession: {
+          ...defaultPersistedDiscoverSession,
+          managed: true,
+        },
+        onSaveCb,
+        services,
+      });
+
+      expect(saveModal).not.toBeDefined();
+      expect(onSaveCb).toHaveBeenCalledTimes(1);
+      expect(onSaveCb).toHaveBeenCalledWith(expect.any(Object));
+    });
+  });
+
+  describe('By Reference', () => {
+    it('should call showSaveModal and set expected props', async () => {
+      const services = createDiscoverServicesMock();
+      const { saveModal } = await setup({
+        persistedDiscoverSession: {
+          ...defaultPersistedDiscoverSession,
+          managed: true,
+        },
+        services,
+      });
+      expect(saveModal).toBeDefined();
+      expect(saveModal?.props).toEqual({
+        isTimeBased: false,
+        services,
+        title: 'A saved search',
+        showCopyOnSave: true,
+        description: 'description',
+        timeRestore: false,
+        tags: [],
+        onSave: expect.any(Function),
+        onClose: expect.any(Function),
+        managed: true,
+      });
     });
 
-    it.each([
-      [
-        'initialized tab',
-        {
-          savedSearch: savedSearchMockWithTimeField,
+    describe('isTimeBased checks', () => {
+      const services = createDiscoverServicesMock();
+      const dataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
+        tab: getTabStateMock({
+          id: 'dataViewNoTimeFieldTab',
+          initialInternalState: {
+            serializedSearchSource: { index: dataViewMock.id },
+          },
+        }),
+        services,
+        currentDataView: dataViewMock,
+      });
+      const dataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
+        tab: getTabStateMock({
+          id: 'dataViewWithTimeFieldTab',
+          initialInternalState: {
+            serializedSearchSource: { index: dataViewMockWithTimeField.id },
+          },
+        }),
+        services,
+        currentDataView: dataViewMockWithTimeField,
+      });
+      const adHocDataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
+        tab: getTabStateMock({
+          id: 'adHocDataViewNoTimeFieldTab',
+          initialInternalState: {
+            serializedSearchSource: { index: { title: 'adhoc' } },
+          },
+        }),
+        services,
+        currentDataView: undefined,
+      });
+      const adHocDataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
+        tab: getTabStateMock({
+          id: 'adHocDataViewWithTimeFieldTab',
+          initialInternalState: {
+            serializedSearchSource: { index: { title: 'adhoc', timeFieldName: 'timestamp' } },
+          },
+          attributes: {
+            timeRestore: true,
+          },
+        }),
+        services,
+        currentDataView: undefined,
+      });
+
+      it("should set isTimeBased to false if no tab's data view is time based", async () => {
+        const { saveModal } = await setup({
           additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewNoTimeFieldTab],
           dataViewsList: [dataViewMock],
+          services,
+        });
+        expect(saveModal?.props.isTimeBased).toBe(false);
+      });
+
+      it.each([
+        [
+          'initialized tab',
+          {
+            initialTabDataView: dataViewWithTimefieldMock,
+            additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewNoTimeFieldTab],
+            dataViewsList: [dataViewMock],
+          },
+        ],
+        [
+          'uninitialized tab with persisted data view',
+          {
+            additionalPersistedTabs: [dataViewWithTimeFieldTab, adHocDataViewNoTimeFieldTab],
+            dataViewsList: [dataViewMockWithTimeField],
+          },
+        ],
+        [
+          'uninitialized tab with ad hoc data view',
+          {
+            additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewWithTimeFieldTab],
+            dataViewsList: [dataViewMock],
+          },
+        ],
+      ])(
+        "should set isTimeBased to true if any tab's data view is time based - %s",
+        async (_, setupArgs) => {
+          const { saveModal } = await setup({ ...setupArgs, services });
+          expect(saveModal?.props.isTimeBased).toBe(true);
+        }
+      );
+    });
+
+    it("should set timeRestore to true if any tab's timeRestore is true", async () => {
+      const services = createDiscoverServicesMock();
+      const noTimeRestoreTab = fromTabStateToSavedObjectTab({
+        tab: getTabStateMock({ id: 'noTimeRestoreTab', attributes: { timeRestore: false } }),
+        services,
+        currentDataView: dataViewMock,
+      });
+      const timeRestoreTab = fromTabStateToSavedObjectTab({
+        tab: getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } }),
+        services,
+        currentDataView: dataViewMock,
+      });
+      let { saveModal } = await setup({
+        additionalPersistedTabs: [noTimeRestoreTab],
+        services,
+      });
+      expect(saveModal?.props.timeRestore).toBe(false);
+      ({ saveModal } = await setup({
+        additionalPersistedTabs: [timeRestoreTab],
+        services,
+      }));
+      expect(saveModal?.props.timeRestore).toBe(true);
+    });
+
+    it('should set showCopyOnSave to true if a persisted Discover session exists', async () => {
+      const services = createDiscoverServicesMock();
+      let { saveModal } = await setup({ services, persistedDiscoverSession: false });
+      expect(saveModal?.props.showCopyOnSave).toBe(false);
+      ({ saveModal } = await setup({ services }));
+      expect(saveModal?.props.showCopyOnSave).toBe(true);
+    });
+
+    it('should pass tags to the save modal', async () => {
+      const { saveModal } = await setup({
+        persistedDiscoverSession: {
+          ...defaultPersistedDiscoverSession,
+          tags: ['tag1', 'tag2'],
         },
-      ],
-      [
-        'uninitialized tab with persisted data view',
-        {
-          additionalPersistedTabs: [dataViewWithTimeFieldTab, adHocDataViewNoTimeFieldTab],
-          dataViewsList: [dataViewMockWithTimeField],
+      });
+      expect(saveModal?.props.tags).toEqual(['tag1', 'tag2']);
+    });
+
+    it('should update tags if savedObjectsTagging is defined', async () => {
+      const { toolkit, saveModal } = await setup({
+        persistedDiscoverSession: {
+          ...defaultPersistedDiscoverSession,
+          tags: ['tag1', 'tag2'],
         },
-      ],
-      [
-        'uninitialized tab with ad hoc data view',
-        {
-          additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewWithTimeFieldTab],
-          dataViewsList: [dataViewMock],
+      });
+      await saveModal?.props.onSave(getOnSaveProps({ newTags: ['tag3', 'tag4'] }));
+      expect(toolkit.internalState.getState().persistedDiscoverSession?.tags).toEqual([
+        'tag3',
+        'tag4',
+      ]);
+    });
+
+    it('should not update tags if savedObjectsTagging is undefined', async () => {
+      const { toolkit, saveModal } = await setup({
+        persistedDiscoverSession: {
+          ...defaultPersistedDiscoverSession,
+          tags: ['tag1', 'tag2'],
         },
-      ],
-    ])(
-      "should set isTimeBased to true if any tab's data view is time based - %s",
-      async (_, setupArgs) => {
-        const { saveModal } = await setup({ ...setupArgs, services });
-        expect(saveModal?.props.isTimeBased).toBe(true);
-      }
-    );
-  });
-
-  it("should set timeRestore to true if any tab's timeRestore is true", async () => {
-    const services = createDiscoverServicesMock();
-    const noTimeRestoreTab = fromTabStateToSavedObjectTab({
-      tab: getTabStateMock({ id: 'noTimeRestoreTab' }),
-      timeRestore: false,
-      services,
+        services: { ...createDiscoverServicesMock(), savedObjectsTagging: undefined },
+      });
+      await saveModal?.props.onSave(getOnSaveProps({ newTags: ['tag3', 'tag4'] }));
+      expect(toolkit.internalState.getState().persistedDiscoverSession?.tags).toEqual([
+        'tag1',
+        'tag2',
+      ]);
     });
-    const timeRestoreTab = fromTabStateToSavedObjectTab({
-      tab: getTabStateMock({ id: 'timeRestoreTab' }),
-      timeRestore: true,
-      services,
+
+    it('should return the Discover session ID on save', async () => {
+      const { saveModal } = await setup();
+      const result = await saveModal?.props.onSave(getOnSaveProps());
+      expect(result).toEqual({ id: defaultPersistedDiscoverSession.id });
     });
-    let { saveModal } = await setup({
-      additionalPersistedTabs: [noTimeRestoreTab],
-      services,
+
+    it('should call onSaveCb on save if provided', async () => {
+      const onSaveCb = jest.fn();
+      let { saveModal } = await setup({ onSaveCb });
+      await saveModal?.props.onSave(getOnSaveProps());
+      expect(onSaveCb).toHaveBeenCalledTimes(1);
+      ({ saveModal } = await setup({ persistedDiscoverSession: false, onSaveCb }));
+      await saveModal?.props.onSave(getOnSaveProps());
+      expect(onSaveCb).toHaveBeenCalledTimes(2);
     });
-    expect(saveModal?.props.timeRestore).toBe(false);
-    ({ saveModal } = await setup({
-      additionalPersistedTabs: [timeRestoreTab],
-      services,
-    }));
-    expect(saveModal?.props.timeRestore).toBe(true);
-  });
 
-  it('should set showCopyOnSave to true if a persisted Discover session exists', async () => {
-    const services = createDiscoverServicesMock();
-    let { saveModal } = await setup({ services, savedSearch: false });
-    expect(saveModal?.props.showCopyOnSave).toBe(false);
-    ({ saveModal } = await setup({ services }));
-    expect(saveModal?.props.showCopyOnSave).toBe(true);
-  });
-
-  it('should pass tags to the save modal', async () => {
-    const { saveModal } = await setup({
-      savedSearch: {
-        ...savedSearchMock,
-        tags: ['tag1', 'tag2'],
-      },
+    it('should navigate to new Discover session on save if onSaveCb is not provided', async () => {
+      const services = createDiscoverServicesMock();
+      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const { saveModal } = await setup({ services });
+      await saveModal?.props.onSave(getOnSaveProps());
+      expect(navigateSpy).not.toHaveBeenCalled();
+      const { saveModal: newSaveModal, toolkit: newToolkit } = await setup({
+        persistedDiscoverSession: false,
+        services,
+      });
+      await newSaveModal?.props.onSave(getOnSaveProps());
+      expect(navigateSpy).toHaveBeenCalledWith({
+        savedSearchId: 'new-session',
+        tab: {
+          id: newToolkit.getCurrentTab().id,
+        },
+      });
+      expect(newToolkit.internalState.getState().persistedDiscoverSession?.id).toBe('new-session');
     });
-    expect(saveModal?.props.tags).toEqual(['tag1', 'tag2']);
-  });
 
-  it('should update tags if savedObjectsTagging is defined', async () => {
-    const savedSearch: SavedSearch = {
-      ...savedSearchMock,
-      tags: ['tag1', 'tag2'],
-    };
-    const { stateContainer, saveModal } = await setup({ savedSearch });
-    await saveModal?.props.onSave(getOnSaveProps({ newTags: ['tag3', 'tag4'] }));
-    expect(stateContainer.savedSearchState.getCurrent$().getValue().tags).toEqual(['tag3', 'tag4']);
-  });
-
-  it('should not update tags if savedObjectsTagging is undefined', async () => {
-    const savedSearch: SavedSearch = {
-      ...savedSearchMock,
-      tags: ['tag1', 'tag2'],
-    };
-    const { stateContainer, saveModal } = await setup({
-      savedSearch,
-      services: { ...createDiscoverServicesMock(), savedObjectsTagging: undefined },
+    it('should show a success toast on save', async () => {
+      const services = createDiscoverServicesMock();
+      const successSpy = jest.spyOn(services.toastNotifications, 'addSuccess');
+      const { saveModal } = await setup({ services });
+      await saveModal?.props.onSave(getOnSaveProps());
+      expect(successSpy).toHaveBeenCalledWith({
+        title: "Discover session 'title' was saved",
+        'data-test-subj': 'saveSearchSuccess',
+      });
     });
-    await saveModal?.props.onSave(getOnSaveProps({ newTags: ['tag3', 'tag4'] }));
-    expect(stateContainer.savedSearchState.getCurrent$().getValue().tags).toEqual(['tag1', 'tag2']);
-  });
 
-  it('should return the Discover session ID on save', async () => {
-    const { saveModal } = await setup({ savedSearch: savedSearchMock });
-    const result = await saveModal?.props.onSave(getOnSaveProps());
-    expect(result).toEqual({ id: savedSearchMock.id });
-  });
-
-  it('should call onSaveCb on save if provided', async () => {
-    const onSaveCb = jest.fn();
-    let { saveModal } = await setup({ savedSearch: savedSearchMock, onSaveCb });
-    await saveModal?.props.onSave(getOnSaveProps());
-    expect(onSaveCb).toHaveBeenCalledTimes(1);
-    ({ saveModal } = await setup({ savedSearch: false, onSaveCb }));
-    await saveModal?.props.onSave(getOnSaveProps());
-    expect(onSaveCb).toHaveBeenCalledTimes(2);
-  });
-
-  it('should navigate to new Discover session on save if onSaveCb is not provided', async () => {
-    const services = createDiscoverServicesMock();
-    const navigateSpy = jest.spyOn(services.locator, 'navigate');
-    let { saveModal } = await setup({ services });
-    await saveModal?.props.onSave(getOnSaveProps());
-    expect(navigateSpy).not.toHaveBeenCalled();
-    ({ saveModal } = await setup({
-      savedSearch: false,
-      services,
-    }));
-    await saveModal?.props.onSave(getOnSaveProps());
-    expect(navigateSpy).toHaveBeenCalledWith({
-      savedSearchId: 'new-session',
-      tab: {
-        id: 'stable-test-initial-tab-id',
-      },
+    it('should show a danger toast on error', async () => {
+      const services = createDiscoverServicesMock();
+      const dangerSpy = jest.spyOn(services.toastNotifications, 'addDanger');
+      const { saveModal } = await setup({
+        services,
+        mockSaveDiscoverSession: () => Promise.reject(new Error('Save error')),
+      });
+      await saveModal?.props.onSave(getOnSaveProps());
+      expect(dangerSpy).toHaveBeenCalledWith({
+        title: "Discover session 'title' was not saved",
+        text: 'Save error',
+      });
     });
-  });
 
-  it('should show a success toast on save', async () => {
-    const services = createDiscoverServicesMock();
-    const successSpy = jest.spyOn(services.toastNotifications, 'addSuccess');
-    const { saveModal } = await setup({ services });
-    await saveModal?.props.onSave(getOnSaveProps());
-    expect(successSpy).toHaveBeenCalledWith({
-      title: "Discover session 'title' was saved",
-      'data-test-subj': 'saveSearchSuccess',
+    it('should show no toast when save is unsuccessful without an error', async () => {
+      const services = createDiscoverServicesMock();
+      const successSpy = jest.spyOn(services.toastNotifications, 'addSuccess');
+      const dangerSpy = jest.spyOn(services.toastNotifications, 'addDanger');
+      const { saveModal } = await setup({
+        services,
+        mockSaveDiscoverSession: () => Promise.resolve(undefined),
+      });
+      await saveModal?.props.onSave(getOnSaveProps());
+      expect(successSpy).not.toHaveBeenCalled();
+      expect(dangerSpy).not.toHaveBeenCalled();
     });
-  });
 
-  it('should show a danger toast on error', async () => {
-    const services = createDiscoverServicesMock();
-    const dangerSpy = jest.spyOn(services.toastNotifications, 'addDanger');
-    const { saveModal } = await setup({
-      services,
-      mockSaveDiscoverSession: () => Promise.reject(new Error('Save error')),
+    it('should call onClose when closed if provided', async () => {
+      const onClose = jest.fn();
+      const { saveModal } = await setup({ onClose });
+      saveModal?.props.onClose();
+      expect(onClose).toHaveBeenCalled();
     });
-    await saveModal?.props.onSave(getOnSaveProps());
-    expect(dangerSpy).toHaveBeenCalledWith({
-      title: "Discover session 'title' was not saved",
-      text: 'Save error',
-    });
-  });
-
-  it('should show no toast when save is unsuccessful without an error', async () => {
-    const services = createDiscoverServicesMock();
-    const successSpy = jest.spyOn(services.toastNotifications, 'addSuccess');
-    const dangerSpy = jest.spyOn(services.toastNotifications, 'addDanger');
-    const { saveModal } = await setup({
-      services,
-      mockSaveDiscoverSession: () => Promise.resolve(undefined),
-    });
-    await saveModal?.props.onSave(getOnSaveProps());
-    expect(successSpy).not.toHaveBeenCalled();
-    expect(dangerSpy).not.toHaveBeenCalled();
-  });
-
-  it('should call onClose when closed if provided', async () => {
-    const onClose = jest.fn();
-    const { saveModal } = await setup({ onClose });
-    saveModal?.props.onClose();
-    expect(onClose).toHaveBeenCalled();
   });
 });

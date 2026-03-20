@@ -475,7 +475,7 @@ describe('EndpointActionsClient', () => {
         case 'runscript':
           expectedParams = {
             ...expectedParams,
-            file_hash: 'e5441eb2bb',
+            file_sha256: 'e5441eb2bb',
             file_id: 'file-1-2-3',
             file_name: 'my_script.sh',
             file_size: 12098,
@@ -700,12 +700,58 @@ describe('EndpointActionsClient', () => {
         expect.objectContaining({
           document: expect.objectContaining({
             meta: {
-              file_hash: 'e5441eb2bb',
+              file_sha256: 'e5441eb2bb',
               file_id: 'file-1-2-3',
               file_name: 'my_script.sh',
               file_size: 12098,
               path_to_executable: undefined,
             },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should send user defined `timeout` value to endpoint', async () => {
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args', timeout: 123456 },
+          })
+        )
+      ).resolves.toEqual(expect.any(Object));
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              data: expect.objectContaining({
+                parameters: expect.objectContaining({ timeout: 123456 }),
+              }),
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should include a default `timeout` if one is not provided', async () => {
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args', timeout: 0 },
+          })
+        )
+      ).resolves.toEqual(expect.any(Object));
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              data: expect.objectContaining({
+                parameters: expect.objectContaining({ timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT }),
+              }),
+            }),
           }),
         }),
         expect.anything()

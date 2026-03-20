@@ -10,7 +10,7 @@
         "label": "NotificationsService",
         "description": [],
         "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
-        "lineNumber": 34,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -26,7 +26,7 @@
               "any"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
-            "lineNumber": 41,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -47,7 +47,7 @@
               "NotificationsSetup"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
-            "lineNumber": 45,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -63,7 +63,7 @@
                   "SetupDeps"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
-                "lineNumber": 45,
+                "lineNumber": 52,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -80,13 +80,13 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ overlays, targetDomElement, ...startDeps }: ",
+              "({ overlays, targetDomElement, settings, ...startDeps }: ",
               "StartDeps",
               ") => ",
               "NotificationsStart"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
-            "lineNumber": 63,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -96,13 +96,13 @@
                 "id": "def-public.NotificationsService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ overlays, targetDomElement, ...startDeps }",
+                "label": "{\n    overlays,\n    targetDomElement,\n    settings,\n    ...startDeps\n  }",
                 "description": [],
                 "signature": [
                   "StartDeps"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
-                "lineNumber": 63,
+                "lineNumber": 70,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -122,7 +122,7 @@
               "() => void"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
-            "lineNumber": 85,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -254,7 +254,7 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
@@ -298,7 +298,7 @@
                 "tags": [],
                 "label": "toastOrId",
                 "description": [
-                  "- a {@link Toast } returned by {@link ToastsApi.add } or its id"
+                  "- a {@link Toast} returned by {@link ToastsApi.add} or its id"
                 ],
                 "signature": [
                   "string | ",
@@ -344,7 +344,7 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
@@ -363,7 +363,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
@@ -411,7 +411,7 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
@@ -430,7 +430,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
@@ -478,7 +478,7 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
@@ -497,7 +497,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
@@ -545,7 +545,7 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
@@ -564,7 +564,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
@@ -629,7 +629,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link ErrorToastOptions }"
+                  "- {@link ErrorToastOptions}"
                 ],
                 "signature": [
                   "ErrorToastOptions"
@@ -662,7 +662,7 @@
         "label": "NotificationsServiceContract",
         "description": [],
         "signature": [
-          "{ start: ({ overlays, targetDomElement, ...startDeps }: ",
+          "{ start: ({ overlays, targetDomElement, settings, ...startDeps }: ",
           "StartDeps",
           ") => ",
           "NotificationsStart",
@@ -673,7 +673,7 @@
           "; stop: () => void; }"
         ],
         "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
-        "lineNumber": 98,
+        "lineNumber": 112,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

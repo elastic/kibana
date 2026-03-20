@@ -17,19 +17,23 @@ export interface TraceItemComposite {
   compressionStrategy: CompressionStrategy;
 }
 
+export type TraceItemDocType = 'span' | 'transaction';
+
 export interface TraceItem {
   id: string;
   timestampUs: number;
   name: string;
   traceId: string;
   duration: number;
-  errors: Array<{ errorDocId: string }>;
+  result?: string;
+  errors: Array<{ errorDocId: string; errorDocIndex?: string }>;
   status?: {
     fieldName: (typeof STATUS_FIELD_NAME)[number];
     value: EventOutcome | StatusCode;
   };
   parentId?: string;
   serviceName: string;
+  serviceEnvironment?: string;
   type?: string;
   sync?: boolean;
   agentName?: AgentName;
@@ -40,4 +44,5 @@ export interface TraceItem {
   icon?: string;
   coldstart?: boolean;
   composite?: TraceItemComposite;
+  docType: TraceItemDocType;
 }

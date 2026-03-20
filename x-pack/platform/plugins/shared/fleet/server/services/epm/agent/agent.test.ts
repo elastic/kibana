@@ -40,6 +40,9 @@ function getMockedMetaVariable() {
     input: {
       id: 'input-id',
     },
+    agent: {
+      version: '9.3.0',
+    },
   };
 }
 
@@ -595,6 +598,67 @@ describe('encode', () => {
       hosts: [
         'sqlserver://db_elastic_agent:Special%20Characters%3A%20%21%20%2A%20%28%20%29%27@localhost',
       ],
+    });
+  });
+});
+
+describe('semverSatisfies', () => {
+  it('should render the block when the agent version satisfies the condition', () => {
+    const streamTemplate = `
+    {{#semverSatisfies _meta.agent.version "^9.3.0"}}
+    supported: true
+    {{/semverSatisfies}}
+    {{#semverSatisfies _meta.agent.version "<9.3.0"}}
+    supported: false
+    {{/semverSatisfies}}`;
+
+    const vars = {};
+
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      supported: true,
+    });
+  });
+
+  it('should not render the block when the agent version does not satisfy the condition', () => {
+    const streamTemplate = `
+    field: "value"
+    {{#semverSatisfies _meta.agent.version ">=10.0.0"}}
+    supported: true
+    {{/semverSatisfies}}`;
+
+    const vars = {};
+
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      field: 'value',
+    });
+  });
+
+  it('should not render any blocks when the agent version variable is not set', () => {
+    const streamTemplate = `
+    field: "value"
+    {{#semverSatisfies _meta.agent.version "^9.3.0"}}
+    supported: true
+    {{/semverSatisfies}}
+    {{#semverSatisfies _meta.agent.version "<9.3.0"}}
+    supported: false
+    {{/semverSatisfies}}`;
+
+    const vars = {};
+
+    const output = compileTemplate(
+      vars,
+      {
+        ...getMockedMetaVariable(),
+        agent: {
+          version: undefined,
+        },
+      },
+      streamTemplate
+    );
+    expect(output).toEqual({
+      field: 'value',
     });
   });
 });

@@ -24,12 +24,12 @@ import type {
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
   FormBasedLayer,
+  ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
 import type { LensApiState, MetricState } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
-import type { LensApiFilterType } from '../schema/filter';
 
 const dataView = 'test-dataview';
 
@@ -77,7 +77,7 @@ describe('getDatasetIndex', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "index": "test_index",
-        "timeFieldName": "@timestamp",
+        "timeFieldName": undefined,
       }
     `);
   });
@@ -135,6 +135,98 @@ describe('addLayerColumn', () => {
       }
     `);
   });
+
+  test('adds column with reference column', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: [],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'counter_rate',
+      label: 'Counter rate',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'max',
+      sourceField: 'bytes',
+      label: 'Max of bytes',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn]);
+
+    expect(layer.columns.metric).toBeDefined();
+    expect(layer.columns.metric_reference).toBeDefined();
+    expect(layer.columns.metric).toHaveProperty('references', ['metric_reference']);
+    expect(layer.columnOrder).toEqual(['metric', 'metric_reference']);
+  });
+
+  test('adds reference column to the beginning when first=true', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: ['existing'],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'cumulative_sum',
+      label: 'Cumulative sum',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'sum',
+      sourceField: 'sales',
+      label: 'Sum of sales',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], true);
+
+    expect(layer.columns.metric).toBeDefined();
+    expect(layer.columns.metric_reference).toBeDefined();
+    expect(layer.columns.metric).toHaveProperty('references', ['metric_reference']);
+    expect(layer.columnOrder).toEqual(['metric_reference', 'metric', 'existing']);
+  });
+
+  test('adds column with postfix and reference', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: [],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'moving_average',
+      label: 'Moving average',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'sum',
+      sourceField: 'count',
+      label: 'Sum of count',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], false, '_trendline');
+
+    expect(layer.columns.metric_trendline).toBeDefined();
+    expect(layer.columns.metric_trendline_reference).toBeDefined();
+    expect(layer.columns.metric_trendline).toHaveProperty('references', [
+      'metric_trendline_reference',
+    ]);
+    expect(layer.columnOrder).toEqual(['metric_trendline', 'metric_trendline_reference']);
+  });
 });
 
 describe('buildDatasourceStates', () => {
@@ -147,13 +239,16 @@ describe('buildDatasourceStates', () => {
           type: 'esql',
           query: 'from test | limit 10',
         },
-        metric: {
-          operation: 'value',
-          label: 'test',
-          column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
-        },
+        metrics: [
+          {
+            type: 'primary',
+            operation: 'value',
+            label: 'test',
+            column: 'test',
+            fit: false,
+            alignments: { labels: 'left', value: 'left' },
+          },
+        ],
         sampling: 1,
         ignore_global_filters: false,
       },
@@ -176,7 +271,7 @@ describe('buildDatasourceStates', () => {
                 "query": Object {
                   "esql": "from test | limit 10",
                 },
-                "timeField": "@timestamp",
+                "timeField": undefined,
               },
             },
           },
@@ -184,7 +279,7 @@ describe('buildDatasourceStates', () => {
         "usedDataviews": Object {
           "layer_0": Object {
             "index": "test",
-            "timeFieldName": "@timestamp",
+            "timeFieldName": undefined,
             "type": "adHocDataView",
           },
         },
@@ -415,28 +510,47 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
-      metric: {
-        operation: 'value',
-        label: 'test',
-        column: 'test',
-        fit: false,
-        alignments: { labels: 'left', value: 'left' },
-      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
       sampling: 1,
       ignore_global_filters: false,
       filters: [
-        { language: 'kuery', query: 'category: "shoes"' },
-        { language: 'lucene', query: 'price > 100' },
-      ] as LensApiFilterType[],
+        {
+          type: 'condition',
+          data_view_id: 'dv-1',
+          condition: { field: 'category', operator: 'is', value: 'shoes' },
+        },
+        {
+          type: 'dsl',
+          data_view_id: 'dv-1',
+          dsl: { query: { match_all: {} } },
+        },
+      ],
     };
 
-    const result = filtersAndQueryToLensState(apiState);
+    const result = filtersAndQueryToLensState(apiState, []);
 
     expect(result.query).toEqual({ esql: 'from test | limit 10' });
     expect(result.filters).toHaveLength(2);
-    for (const [index, filter] of Object.entries(result.filters ?? [])) {
-      expect(filter).toEqual({ meta: {}, ...apiState.filters?.[index as unknown as number] });
-    }
+    expect(result.references).toHaveLength(1);
+    expect(result.filters).toMatchObject([
+      {
+        meta: { index: 'filter-ref-dv-1' },
+        query: { match_phrase: { category: 'shoes' } },
+      },
+      {
+        meta: { index: 'filter-ref-dv-1' },
+        query: { match_all: {} },
+      },
+    ]);
   });
 
   test('handles missing filters and query gracefully', () => {
@@ -447,35 +561,95 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
-      metric: {
-        operation: 'value',
-        label: 'test',
-        column: 'test',
-        fit: false,
-        alignments: { labels: 'left', value: 'left' },
-      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
       sampling: 1,
       ignore_global_filters: false,
     };
 
-    const result = filtersAndQueryToLensState(apiState);
+    const result = filtersAndQueryToLensState(apiState, []);
 
     expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    expect(result.filters).toEqual([]);
+    expect(result.references).toEqual([]);
+  });
+
+  test('extracts filter data view references when applicable', () => {
+    const apiState: LensApiState = {
+      type: 'metric',
+      title: 'test metric',
+      dataset: {
+        type: 'esql',
+        query: 'from test | limit 10',
+      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+      filters: [
+        {
+          type: 'condition',
+          data_view_id: 'dv-1',
+          condition: { field: 'category', operator: 'is', value: 'shoes' },
+        },
+      ],
+    };
+
+    const existingReferences = [{ type: 'index-pattern', id: 'dv-1', name: 'layer_ref' }];
+    const result = filtersAndQueryToLensState(apiState, existingReferences);
+
+    expect(result.filters).toHaveLength(1);
+    expect(result.references).toHaveLength(1);
+    expect(result.filters[0].meta.index).toEqual('filter-ref-dv-1');
+    expect(result.references[0]).toMatchObject({
+      type: 'index-pattern',
+      id: 'dv-1',
+      name: 'filter-ref-dv-1',
+    });
   });
 });
 
 describe('filtersAndQueryToApiFormat', () => {
   test('converts Lens state filters and query to API format', () => {
     const lensState: LensAttributes = {
+      references: [{ type: 'index-pattern', id: 'dv-1', name: 'ref_1' }],
       state: {
         filters: [
           {
-            query: { language: 'kuery', query: 'category: "electronics"' },
-            meta: { disabled: false },
+            meta: {
+              type: 'phrase',
+              key: 'category',
+              index: 'ref_1',
+              disabled: false,
+              params: { query: 'electronics' },
+            },
+            query: { match_phrase: { category: 'electronics' } },
           },
           {
-            query: { language: 'lucene', query: 'price:[100 TO *]' },
-            meta: { negate: true },
+            meta: {
+              type: 'phrase',
+              key: 'price',
+              index: 'ref_1',
+              negate: true,
+              params: { query: 'price:[100 TO *]' },
+            },
+            query: { match_phrase: { price: 'price:[100 TO *]' } },
           },
         ] as Filter[],
         query: { language: 'kuery', query: 'brand: "apple"' } as Query,
@@ -488,12 +662,25 @@ describe('filtersAndQueryToApiFormat', () => {
       Object {
         "filters": Array [
           Object {
-            "language": "kuery",
-            "query": "category: \\"electronics\\"",
+            "condition": Object {
+              "field": "category",
+              "operator": "is",
+              "value": "electronics",
+            },
+            "data_view_id": "dv-1",
+            "disabled": false,
+            "type": "condition",
           },
           Object {
-            "language": "lucene",
-            "query": "price:[100 TO *]",
+            "condition": Object {
+              "field": "price",
+              "negate": true,
+              "operator": "is",
+              "value": "price:[100 TO *]",
+            },
+            "data_view_id": "dv-1",
+            "negate": true,
+            "type": "condition",
           },
         ],
         "query": Object {

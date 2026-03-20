@@ -440,13 +440,12 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             isolation: 'isolate', // ensures that tooltips within this flyout render as should
           })}
           ownFocus
-          maskProps={{
-            headerZindexLocation: 'above',
-          }}
+          container={null}
           ref={flyoutRef}
           {...(selectedMenuItem?.groupId === 'exportDerivatives'
             ? selectedMenuItem.config.flyoutSizing || {}
             : {})}
+          session="start"
         >
           {/* TODO: remove this global style once https://github.com/elastic/eui/issues/8801 is resolved  */}
           <Global

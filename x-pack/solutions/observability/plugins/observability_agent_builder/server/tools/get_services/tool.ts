@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import { z } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
@@ -26,16 +25,15 @@ const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
 const getServicesSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  environment: z
-    .string()
-    .min(1)
-    .optional()
-    .describe('Optionally filter the services by the environments that they are running in.'),
   healthStatus: z
     .array(z.enum(['unknown', 'healthy', 'warning', 'critical']))
     .optional()
+    .describe('Filter by health status. Example: ["warning", "critical"].'),
+  kqlFilter: z
+    .string()
+    .optional()
     .describe(
-      'Optional list of health statuses to filter services by (e.g., ["healthy", "warning"]). Valid values: "unknown", "healthy", "warning", "critical".'
+      'KQL filter to narrow down services. Examples: "host.name: web-server-01", "service.name: frontend".'
     ),
 });
 
@@ -45,10 +43,7 @@ export function createGetServicesTool({
   dataRegistry,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
@@ -75,7 +70,7 @@ When to use:
       },
     },
     handler: async (toolParams, context) => {
-      const { start, end, environment, healthStatus } = toolParams;
+      const { start, end, healthStatus, kqlFilter } = toolParams;
       const { request, esClient } = context;
 
       try {
@@ -88,8 +83,8 @@ When to use:
           logger,
           start,
           end,
-          environment,
           healthStatus,
+          kqlFilter,
         });
 
         return {

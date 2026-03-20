@@ -24,7 +24,6 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   useEuiTheme,
-  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InferenceCostsTransparencyTour } from '@kbn/search-api-panels';
@@ -44,6 +43,10 @@ type SelectInferenceIdContentProps = SelectInferenceIdProps & {
   setValue: (value: string) => void;
   value: string;
 };
+
+interface EndpointOptionData {
+  description: string;
+}
 
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   'data-test-subj': dataTestSubj,
@@ -116,32 +119,15 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
    * Only includes endpoints compatible with semantic_text (text_embedding and sparse_embedding).
    * Includes optimistic updates for newly created endpoints that may not be in the list yet.
    */
-  const options: EuiSelectableOption[] = useMemo(() => {
-    const selectableOptions: EuiSelectableOption[] =
+  const options: EuiSelectableOption<EndpointOptionData>[] = useMemo(() => {
+    const selectableOptions: EuiSelectableOption<EndpointOptionData>[] =
       compatibleEndpoints?.endpointDefinitions?.map((endpoint) => {
         return {
+          key: endpoint.inference_id,
           label: endpoint.inference_id,
           'data-test-subj': `custom-inference_${endpoint.inference_id}`,
           checked: value === endpoint.inference_id ? 'on' : undefined,
-          disabled: !endpoint.accessible,
-          append: !endpoint.accessible && endpoint.requiredLicense && (
-            <EuiBadge color="hollow" iconType="lock">
-              {endpoint.requiredLicense[0].toUpperCase() + endpoint.requiredLicense.slice(1)}
-            </EuiBadge>
-          ),
-          'aria-label':
-            !endpoint.accessible && endpoint.requiredLicense
-              ? i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.disabledOption.ariaLabel',
-                  {
-                    defaultMessage: '{inferenceId} endpoint disabled - {license} license required',
-                    values: {
-                      inferenceId: endpoint.inference_id,
-                      license: endpoint.requiredLicense,
-                    },
-                  }
-                )
-              : undefined,
+          description: endpoint.description,
         };
       }) || [];
 
@@ -150,15 +136,28 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     const isValueInOptions = selectableOptions.some((option) => option.label === value);
     if (value && !isValueInOptions) {
       selectableOptions.push({
+        key: value,
         label: value,
         checked: 'on',
         'data-test-subj': `custom-inference_${value}`,
+        description: '',
       });
     }
     return selectableOptions;
   }, [compatibleEndpoints, value]);
 
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
+
+  const renderEndpointOption = useCallback((option: EuiSelectableOption<EndpointOptionData>) => {
+    return (
+      <>
+        <EuiText size="s">{option.label}</EuiText>
+        <EuiText size="xs" color="subdued" className="eui-displayBlock">
+          <small>{option.description}</small>
+        </EuiText>
+      </>
+    );
+  }, []);
 
   /**
    * Auto-select default inference endpoint when:
@@ -208,7 +207,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                   isReady={isSelectInferenceIdOpen}
                 >
                   <EuiButton
-                    iconType="arrowDown"
+                    iconType="chevronSingleDown"
                     iconSide="right"
                     color="text"
                     fullWidth
@@ -234,7 +233,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
             <EuiContextMenuPanel>
               <EuiContextMenuItem
                 key="createInferenceEndpointButton"
-                icon="plusInCircle"
+                icon="plusCircle"
                 size="s"
                 data-test-subj="createInferenceEndpointButton"
                 onClick={(e) => {
@@ -282,7 +281,8 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                     }
                   )}
                 >
-                  <EuiSelectable
+                  <EuiSelectable<EndpointOptionData>
+                    id="inferenceEndpointsSelectable"
                     aria-label={i18n.translate(
                       'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.ariaLabel',
                       {
@@ -307,6 +307,11 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                     onChange={(newOptions) => {
                       setValue(newOptions.find((option) => option.checked)?.label || '');
                     }}
+                    renderOption={renderEndpointOption}
+                    listProps={{
+                      isVirtualized: false,
+                    }}
+                    height={euiTheme.base * 15}
                   >
                     {(list, search) => (
                       <>
@@ -345,6 +350,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 isEdit={false}
                 onSubmitSuccess={onSubmitSuccess}
                 enforceAdaptiveAllocations={enforceAdaptiveAllocations}
+                allowedTaskTypes={['text_embedding', 'sparse_embedding']}
               />
             </Suspense>
           )}

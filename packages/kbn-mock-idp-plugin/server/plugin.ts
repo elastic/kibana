@@ -23,6 +23,7 @@ import {
 } from '@kbn/es';
 import type { ServerlessProductTier } from '@kbn/es/src/utils';
 import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
+import { getSAMLRequestId } from '@kbn/mock-idp-utils/src/utils';
 
 import type { ConfigType } from './config';
 
@@ -35,6 +36,7 @@ const createSAMLResponseSchema = schema.object({
   full_name: schema.maybe(schema.nullable(schema.string())),
   email: schema.maybe(schema.nullable(schema.string())),
   roles: schema.arrayOf(schema.string()),
+  url: schema.string(),
 });
 
 // BOOKMARK - List of Kibana project types
@@ -154,6 +156,11 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             : {};
 
           try {
+            const requestId = await getSAMLRequestId(request.body.url);
+            if (requestId) {
+              logger.info(`Sending SAML response for request ID: ${requestId}`);
+            }
+
             return response.ok({
               body: {
                 SAMLResponse: await createSAMLResponse({
@@ -162,6 +169,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
                   full_name: request.body.full_name ?? undefined,
                   email: request.body.email ?? undefined,
                   roles: request.body.roles,
+                  ...(requestId ? { authnRequestId: requestId } : {}),
                   ...serverlessOptions,
                 }),
               },
@@ -260,14 +268,12 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         },
         async (context, request, response) => {
           try {
-            const { apiKey } = request.body;
-            const [
-              {
-                security: { authc },
-              },
-            ] = await core.getStartServices();
+            const [{ elasticsearch }] = await core.getStartServices();
+
             // Get scoped client with UIAM headers
-            const scopedClient = authc.apiKeys.uiam?.getScopedClusterClientWithApiKey(apiKey);
+            const scopedClient = elasticsearch.client.asScoped({
+              headers: { authorization: `ApiKey ${request.body.apiKey}` },
+            });
 
             if (!scopedClient) {
               return response.badRequest({
@@ -344,6 +350,47 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             });
           } catch (err) {
             logger.error(`Failed to invalidate API key via UIAM: ${err}`, err);
+            return response.customError({
+              statusCode: 500,
+              body: { message: err.message },
+            });
+          }
+        }
+      );
+
+      router.post(
+        {
+          path: '/mock_idp/uiam/convert_api_keys',
+          validate: {
+            body: schema.object({
+              keys: schema.arrayOf(schema.string(), { minSize: 1 }),
+            }),
+          },
+          options: { authRequired: 'optional' },
+          security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+        },
+        async (context, request, response) => {
+          try {
+            const { keys } = request.body;
+            const [
+              {
+                security: { authc },
+              },
+            ] = await core.getStartServices();
+
+            const result = await authc.apiKeys.uiam?.convert(keys);
+
+            if (!result) {
+              return response.badRequest({
+                body: { message: 'Failed to convert API keys' },
+              });
+            }
+
+            return response.ok({
+              body: result,
+            });
+          } catch (err) {
+            logger.error(`Failed to convert API keys via UIAM: ${err}`, err);
             return response.customError({
               statusCode: 500,
               body: { message: err.message },

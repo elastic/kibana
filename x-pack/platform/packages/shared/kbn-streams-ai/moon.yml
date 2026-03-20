@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/streams-ai'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/streams-ai'
+  title: '@kbn/streams-ai'
   description: Moon project for @kbn/streams-ai
   channel: ''
   owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/kbn-streams-ai
+  sourceRoot: x-pack/platform/packages/shared/kbn-streams-ai
 dependsOn:
   - '@kbn/ai-tools'
   - '@kbn/std'
@@ -26,11 +25,11 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/zod'
   - '@kbn/inference-prompt-utils'
-  - '@kbn/es-query'
   - '@kbn/zod-helpers'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/apm-utils'
   - '@kbn/i18n'
+  - '@kbn/traced-es-client'
 tags:
   - shared-server
   - package
@@ -44,14 +43,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

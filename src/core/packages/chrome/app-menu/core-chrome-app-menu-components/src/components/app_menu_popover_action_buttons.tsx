@@ -67,7 +67,6 @@ export const AppMenuPopoverActionButtons = ({
             }}
             onPopoverClose={handleOnPopoverClose}
             onCloseOverflowButton={onCloseOverflowButton}
-            popoverAnchorPosition="downLeft"
           />
         </EuiFlexItem>
       )}
@@ -85,7 +84,6 @@ export const AppMenuPopoverActionButtons = ({
             }}
             onPopoverClose={handleOnPopoverClose}
             onCloseOverflowButton={onCloseOverflowButton}
-            popoverAnchorPosition="downLeft"
           />
         </EuiFlexItem>
       )}

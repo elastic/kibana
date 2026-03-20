@@ -17,9 +17,12 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { buildWorkflowContext } from './build_workflow_context';
+import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
@@ -29,6 +32,7 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
   dependencies?: ContextDependencies;
+  telemetryClient?: WorkflowExecutionTelemetryClient;
 }
 
 /**
@@ -60,6 +64,8 @@ export class WorkflowExecutionRuntimeManager {
   private nextNodeId: string | undefined;
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
+  private telemetryClient?: WorkflowExecutionTelemetryClient;
+  private telemetryReported: boolean = false;
   private get topologicalOrder(): string[] {
     return this.workflowGraph.topologicalOrder;
   }
@@ -72,6 +78,7 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState = workflowExecutionRuntimeManagerInit.workflowExecutionState;
     this.coreStart = workflowExecutionRuntimeManagerInit.coreStart;
     this.dependencies = workflowExecutionRuntimeManagerInit.dependencies;
+    this.telemetryClient = workflowExecutionRuntimeManagerInit.telemetryClient;
   }
 
   public get workflowExecution() {
@@ -118,12 +125,19 @@ export class WorkflowExecutionRuntimeManager {
 
   public navigateToNextNode(): void {
     const currentNodeId = this.workflowExecution.currentNodeId;
-    const currentNodeIndex = this.topologicalOrder.findIndex((nodeId) => nodeId === currentNodeId);
-    if (currentNodeIndex < this.topologicalOrder.length - 1) {
-      this.nextNodeId = this.topologicalOrder[currentNodeIndex + 1];
-      return;
+    this.nextNodeId = this.nodeAfter(currentNodeId);
+  }
+
+  public navigateToAfterNode(nodeId: string): void {
+    this.nextNodeId = this.nodeAfter(nodeId);
+  }
+
+  private nodeAfter(nodeId: string | undefined): string | undefined {
+    const index = this.topologicalOrder.findIndex((id) => id === nodeId);
+    if (index >= 0 && index < this.topologicalOrder.length - 1) {
+      return this.topologicalOrder[index + 1];
     }
-    this.nextNodeId = undefined;
+    return undefined;
   }
 
   public getCurrentNodeScope(): StackFrame[] {
@@ -202,10 +216,90 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
+  public setWorkflowOutputs(outputs: Record<string, unknown>): void {
+    this.workflowExecutionState.updateWorkflowExecution({
+      context: {
+        ...(this.workflowExecution.context || {}),
+        output: outputs,
+      },
+    });
+  }
+
+  public setWorkflowStatus(status: ExecutionStatus): void {
+    this.workflowExecutionState.updateWorkflowExecution({ status });
+  }
+
+  /**
+   * Sets workflow status to CANCELLED with a reason (and cancelledAt, cancelledBy).
+   * Use when workflow.output has status: 'cancelled' or when cancelling with a specific message.
+   */
+  public setWorkflowCancelled(reason: string): void {
+    const cancelledAt = new Date().toISOString();
+    this.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.CANCELLED,
+      cancellationReason: reason,
+      cancelledAt,
+      cancelledBy: 'workflow',
+    });
+  }
+
+  /**
+   * Pops scopes from the scope stack, finishing each one, until {@link shouldStop}
+   * returns true for the current scope (or the stack is exhausted when no predicate
+   * is provided).
+   *
+   * @param inclusive — when true the scope that matches {@link shouldStop} is also
+   *   popped and finished. Defaults to false (stop *before* the matching scope).
+   *
+   * Used by:
+   * - loop.break — stop at and *include* the enclosing loop enter node (inclusive)
+   * - loop.continue — stop *before* the enclosing loop enter node (exclusive)
+   * - workflow.output / workflow.fail — unwind the entire stack (no predicate)
+   */
+  public unwindScopes(
+    stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    shouldStop?: (scope: ScopeData) => boolean,
+    { inclusive = false }: { inclusive?: boolean } = {}
+  ): void {
+    let scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
+
+    while (!scopeStack.isEmpty()) {
+      const currentScope = scopeStack.getCurrentScope();
+      if (!currentScope) {
+        break;
+      }
+
+      const matched = shouldStop?.(currentScope) ?? false;
+      if (matched && !inclusive) {
+        break;
+      }
+
+      scopeStack = scopeStack.exitScope();
+
+      const scopeStepRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        nodeId: currentScope.nodeId,
+        stackFrames: scopeStack.stackFrames,
+      });
+      if (scopeStepRuntime.stepExecutionExists()) {
+        scopeStepRuntime.finishStep();
+      }
+
+      if (matched && inclusive) {
+        break;
+      }
+    }
+
+    this.workflowExecutionState.updateWorkflowExecution({
+      scopeStack: scopeStack.stackFrames,
+    });
+  }
+
   public setWorkflowError(error: Error | undefined): void {
     const executionError = error ? ExecutionError.fromError(error) : undefined;
+    const serializedError = executionError ? executionError.toSerializableObject() : undefined;
+
     this.workflowExecutionState.updateWorkflowExecution({
-      error: executionError ? executionError.toSerializableObject() : undefined,
+      error: serializedError,
     });
   }
 
@@ -384,12 +478,14 @@ export class WorkflowExecutionRuntimeManager {
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
       currentNodeId: this.nextNodeId,
     };
-    if (!this.nextNodeId) {
-      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
-    }
 
-    if (workflowExecution.error) {
+    if (isTerminalStatus(workflowExecution.status)) {
+      workflowExecutionUpdate.status = workflowExecution.status;
+    } else if (workflowExecution.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
+      workflowExecutionUpdate.error = workflowExecution.error;
+    } else if (!this.nextNodeId) {
+      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
 
     if (
@@ -429,6 +525,9 @@ export class WorkflowExecutionRuntimeManager {
           );
         }
       }
+
+      // Report telemetry for terminal status (only once)
+      this.reportTelemetryIfTerminal(workflowExecution, workflowExecutionUpdate);
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
@@ -453,5 +552,33 @@ export class WorkflowExecutionRuntimeManager {
         tags: ['workflow', 'execution', 'complete'],
       }
     );
+  }
+
+  /**
+   * Reports telemetry for workflow execution when it reaches a terminal status.
+   * Only reports once per execution to avoid duplicate events.
+   */
+  private reportTelemetryIfTerminal(
+    workflowExecution: EsWorkflowExecution,
+    workflowExecutionUpdate: Partial<EsWorkflowExecution>
+  ): void {
+    const finalStatus = workflowExecutionUpdate.status || workflowExecution.status;
+    if (!this.telemetryClient || this.telemetryReported || !isTerminalStatus(finalStatus)) {
+      return;
+    }
+
+    this.telemetryReported = true;
+    const stepExecutions = this.workflowExecutionState.getAllStepExecutions();
+    const finalWorkflowExecution = {
+      ...workflowExecution,
+      ...workflowExecutionUpdate,
+      status: finalStatus,
+    } as EsWorkflowExecution;
+
+    this.telemetryClient.reportWorkflowExecutionTerminated({
+      workflowExecution: finalWorkflowExecution,
+      stepExecutions,
+      finalStatus,
+    });
   }
 }

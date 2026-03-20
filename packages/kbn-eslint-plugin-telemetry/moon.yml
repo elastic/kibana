@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/eslint-plugin-telemetry'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-knowledge-team'
-toolchain:
+  defaultOwner: '@elastic/kibana-core'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/eslint-plugin-telemetry'
+  title: '@kbn/eslint-plugin-telemetry'
   description: Moon project for @kbn/eslint-plugin-telemetry
   channel: ''
-  owner: '@elastic/obs-knowledge-team'
-  metadata:
-    sourceRoot: packages/kbn-eslint-plugin-telemetry
+  owner: '@elastic/kibana-core'
+  sourceRoot: packages/kbn-eslint-plugin-telemetry
 dependsOn:
   - '@kbn/repo-packages'
   - '@kbn/repo-info'
@@ -33,14 +32,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

@@ -1,49 +1,41 @@
 # TO_INTEGER
 
-Converts an input value to an integer. If the input is a date type, it is interpreted as milliseconds since the Unix epoch and converted to an integer. Boolean values are converted to integers: `true` becomes `1` and `false` becomes `0`.
+Converts an input value to an integer. If the input is a date type, its value is interpreted as milliseconds since the Unix epoch and converted to an integer. Boolean `true` is converted to `1`, and `false` to `0`. When two arguments are provided—a string value and a whole number base—the string is parsed as an integer in the specified base. If parsing fails, a warning is generated and the result is `null`. A leading '0x' prefix is allowed for base 16.
 
 ## Syntax
 
-`TO_INTEGER(field)`
+`TO_INTEGER(field, base)`
 
 ### Parameters
 
-#### `field`
+#### field
 
-The input value to be converted. This can be a single- or multi-valued column or an expression.
+The input value to convert. This can be a single- or multi-valued column or an expression.
+
+#### base
+
+(Optional) The radix or base used to convert the input value. When a base is specified, the input type must be `keyword` or `text`.
 
 ## Examples
 
-Converting long values to integers
+Converts each value in the multi-valued field `long` to an integer, returning `null` for values that cannot be converted and generating a warning.
 
 ```esql
 ROW long = [5013792, 2147483647, 501379200000]
 | EVAL int = TO_INTEGER(long)
 ```
 
-| long           | int          |
-|----------------|--------------|
-| 5013792        | 5013792      |
-| 2147483647     | 2147483647   |
-| 501379200000   | null         |
+Parses the string `str1` as a base 16 integer and `str2` as a base 13 integer, then keeps the original and converted values.
 
-In this example, the first two values are successfully converted to integers. However, the last value exceeds the range of an integer, resulting in a `null` value. When such a failure occurs, a warning is added to the response.
-
-### Warning Example
-
-If a value cannot be converted, the response includes a warning header with details about the failure:
-
-```
-"Line 1:61: evaluation of [TO_INTEGER(long)] failed, treating result as null. Only first 20 failures recorded."
+```esql
+ROW str1 = "0x32", str2 = "31"
+| EVAL int1 = TO_INTEGER(str1, 16), int2 = TO_INTEGER(str2, 13)
+| KEEP str1, int1, str2, int2
 ```
 
-Additionally, another header provides the failure reason and the problematic value:
+Attempts to parse the string `str1` as an integer in base 27 (which succeeds) and in base 10 (which fails, returning `null` and generating a warning).
 
+```esql
+ROW str1 = "Kona"
+| EVAL int1 = TO_INTEGER(str1, 27), fail1 = TO_INTEGER(str1, 10)
 ```
-"org.elasticsearch.xpack.esql.core.InvalidArgumentException: [501379200000] out of [integer] range"
-```
-
-## Limitations
-
-- Values that exceed the range of an integer will result in a `null` value.
-- A warning is generated when conversion fails, and only the first 20 failures are recorded in the response headers.

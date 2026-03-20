@@ -242,7 +242,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
       ) : undefined,
     toolsRight: [
       <EuiButton
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="createLegacyTemplateButton"
         key="createTemplateButton"
         {...reactRouterNavigate(history, {
@@ -292,6 +292,9 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
           'data-test-subj': 'cell',
         })}
         data-test-subj="legacyTemplateTable"
+        tableCaption={i18n.translate('xpack.idxMgmt.templateList.legacyTable.tableCaption', {
+          defaultMessage: 'Legacy index templates',
+        })}
         noItemsMessage={
           <FormattedMessage
             id="xpack.idxMgmt.templateList.legacyTable.noLegacyIndexTemplatesMessage"

@@ -6,75 +6,144 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiToolTip, EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { EuiShowFor, EuiToolTip } from '@elastic/eui';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useAssistantContext } from '../..';
 
-const TOOLTIP_CONTENT = i18n.translate(
+const SHORTCUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistantContext.assistantNavLinkShortcutTooltip',
   {
     values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
     defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
   }
 );
+
+const OPEN_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.openAIAssistantLabel', {
+  defaultMessage: 'Open the AI Assistant',
+});
+
 const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assistantNavLink', {
   defaultMessage: 'AI Assistant',
 });
 
+const FULL_TOOLTIP_CONTENT = (
+  <div style={{ textAlign: 'center' }}>
+    <span>{OPEN_LABEL}</span>
+    <br />
+    <span>{SHORTCUT_LABEL}</span>
+  </div>
+);
+
 export const AssistantNavLink: FC = () => {
   const {
-    chrome,
     showAssistantOverlay,
     assistantAvailability,
     openChatTrigger$,
     completeOpenChat,
+    isOverlayOpen,
   } = useAssistantContext();
-  const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
-  // useObserverable would change the order of re-renders that are tested against closely.
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const tooltipRef = useRef<EuiToolTip>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(true);
+
   useEffect(() => {
-    const s = chrome.getChromeStyle$().subscribe(setChromeStyle);
-    return () => s.unsubscribe();
-  }, [chrome]);
+    const keyboardListener = (event: KeyboardEvent) => {
+      const hasModifier = isMac ? event.metaKey : event.ctrlKey;
+      if (hasModifier && (event.code === 'Semicolon' || event.key === ';')) {
+        event.preventDefault();
+        showAssistantOverlay({ showOverlay: !isOverlayOpen });
+      }
+      if (event.key === 'Escape' && isOverlayOpen) {
+        setTooltipVisible(true);
+        buttonRef.current?.focus();
+      }
+    };
 
-  const showOverlay = useCallback(
-    () => showAssistantOverlay({ showOverlay: true }),
-    [showAssistantOverlay]
-  );
+    window.addEventListener('keydown', keyboardListener);
+    return () => window.removeEventListener('keydown', keyboardListener);
+  }, [showAssistantOverlay, isOverlayOpen]);
 
   useEffect(() => {
     if (!openChatTrigger$) return;
     const sub = openChatTrigger$.subscribe((selection) => {
       if (selection === AIAssistantType.Security) {
-        showOverlay();
+        showAssistantOverlay({ showOverlay: true });
         completeOpenChat?.();
       }
     });
     return () => sub.unsubscribe();
-  }, [completeOpenChat, openChatTrigger$, showOverlay]);
+  }, [completeOpenChat, openChatTrigger$, showAssistantOverlay]);
 
-  if (!assistantAvailability.hasAssistantPrivilege || !chromeStyle) {
+  if (!assistantAvailability.hasAssistantPrivilege) {
     return null;
   }
 
-  const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
+  const handleClick = () => {
+    tooltipRef.current?.hideToolTip();
+    setTooltipVisible(false);
+    showAssistantOverlay({ showOverlay: !isOverlayOpen });
+  };
+
+  const showTooltip = !isOverlayOpen && tooltipVisible;
+  const variant = isOverlayOpen ? 'accent' : 'base';
+
+  const textButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      variant={variant}
+      size="s"
+      iconType="aiAssistantLogo"
+      onClick={handleClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+      data-test-subj="assistantNavLink"
+    >
+      {LINK_LABEL}
+    </AiButton>
+  );
+
+  const iconButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      iconOnly
+      variant={variant}
+      size="s"
+      iconType="aiAssistantLogo"
+      onClick={handleClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+      aria-label={OPEN_LABEL}
+      data-test-subj="assistantNavLinkButtonIcon"
+    />
+  );
 
   return (
-    <EuiToolTip content={TOOLTIP_CONTENT}>
-      <EuiButtonBasicOrEmpty
-        onClick={showOverlay}
-        color="primary"
-        size="s"
-        iconType={AssistantIcon}
-        data-test-subj="assistantNavLink"
-      >
-        {LINK_LABEL}
-      </EuiButtonBasicOrEmpty>
-    </EuiToolTip>
+    <>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        {showTooltip ? (
+          <EuiToolTip content={SHORTCUT_LABEL} ref={tooltipRef}>
+            {textButton}
+          </EuiToolTip>
+        ) : (
+          textButton
+        )}
+      </EuiShowFor>
+
+      <EuiShowFor sizes={['xs', 's']}>
+        {showTooltip ? (
+          <EuiToolTip content={FULL_TOOLTIP_CONTENT} ref={tooltipRef}>
+            {iconButton}
+          </EuiToolTip>
+        ) : (
+          iconButton
+        )}
+      </EuiShowFor>
+    </>
   );
 };

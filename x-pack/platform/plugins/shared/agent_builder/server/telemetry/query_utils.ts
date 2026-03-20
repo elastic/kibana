@@ -202,12 +202,19 @@ export class QueryUtils {
   /**
    * Get conversation metrics from Elasticsearch
    */
-  async getConversationMetrics() {
+  async getConversationMetrics(dateFilter?: { gte: string }) {
     try {
       const conversationIndexName = chatSystemIndex('conversations');
+
+      const query: Record<string, any> = dateFilter
+        ? { bool: { filter: [{ range: { created_at: { gte: dateFilter.gte } } }] } }
+        : { match_all: {} };
+
       const response = await this.esClient.search({
         index: conversationIndexName,
         size: 0,
+        track_total_hits: true,
+        query,
         aggs: {
           rounds_distribution: {
             terms: {
@@ -228,23 +235,53 @@ export class QueryUtils {
               size: 100,
             },
           },
-          total_tokens: {
+          total_rounds: {
             sum: {
               script: {
                 source: `
                   def source = params._source;
                   def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
-                  def totalTokens = 0;
+                  return roundsArray != null ? roundsArray.size() : 0;
+                `,
+                lang: 'painless',
+              },
+            },
+          },
+          total_input_tokens: {
+            sum: {
+              script: {
+                source: `
+                  def source = params._source;
+                  def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                  def total = 0;
                   if (roundsArray != null) {
                     for (def round : roundsArray) {
                       if (round.model_usage != null) {
-                        def inputTokens = round.model_usage.input_tokens != null ? round.model_usage.input_tokens : 0;
-                        def outputTokens = round.model_usage.output_tokens != null ? round.model_usage.output_tokens : 0;
-                        totalTokens += inputTokens + outputTokens;
+                        total += round.model_usage.input_tokens != null ? round.model_usage.input_tokens : 0;
                       }
                     }
                   }
-                  return totalTokens;
+                  return total;
+                `,
+                lang: 'painless',
+              },
+            },
+          },
+          total_output_tokens: {
+            sum: {
+              script: {
+                source: `
+                  def source = params._source;
+                  def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                  def total = 0;
+                  if (roundsArray != null) {
+                    for (def round : roundsArray) {
+                      if (round.model_usage != null) {
+                        total += round.model_usage.output_tokens != null ? round.model_usage.output_tokens : 0;
+                      }
+                    }
+                  }
+                  return total;
                 `,
                 lang: 'painless',
               },
@@ -259,31 +296,19 @@ export class QueryUtils {
         count: bucket.doc_count as number,
       }));
 
-      // Calculate total rounds and average
-      let totalRounds = 0;
-      buckets.forEach((bucket: any) => {
-        const bucketKey = bucket.key as string;
-        const count = bucket.doc_count as number;
-        if (bucketKey === '1-5') {
-          totalRounds += count * 3; // Approximate: use middle value
-        } else if (bucketKey === '6-10') {
-          totalRounds += count * 8;
-        } else if (bucketKey === '11-20') {
-          totalRounds += count * 15;
-        } else if (bucketKey === '21-50') {
-          totalRounds += count * 35;
-        } else {
-          totalRounds += count * 75; // Approximate for 51+
-        }
-      });
+      const totalRoundsAgg = response.aggregations?.total_rounds as any;
+      const totalRounds = Math.round(totalRoundsAgg?.value || 0);
 
       const total = response.hits.total as any;
       const totalConversations = typeof total === 'number' ? total : total?.value || 0;
       const avgRoundsPerConversation =
         totalConversations > 0 ? totalRounds / totalConversations : 0;
 
-      const totalTokensAgg = response.aggregations?.total_tokens as any;
-      const tokensUsed = totalTokensAgg?.value || 0;
+      const totalInputTokensAgg = response.aggregations?.total_input_tokens as any;
+      const totalOutputTokensAgg = response.aggregations?.total_output_tokens as any;
+      const tokensInput = Math.round(totalInputTokensAgg?.value || 0);
+      const tokensOutput = Math.round(totalOutputTokensAgg?.value || 0);
+      const tokensUsed = tokensInput + tokensOutput;
       const averageTokensPerConversation =
         totalConversations > 0 ? tokensUsed / totalConversations : 0;
 
@@ -292,7 +317,9 @@ export class QueryUtils {
         total_rounds: totalRounds,
         avg_rounds_per_conversation: Math.round(avgRoundsPerConversation * 100) / 100,
         rounds_distribution: roundsDistribution,
-        tokens_used: Math.round(tokensUsed),
+        tokens_used: tokensUsed,
+        tokens_input: tokensInput,
+        tokens_output: tokensOutput,
         average_tokens_per_conversation: Math.round(averageTokensPerConversation * 100) / 100,
       };
     } catch (error) {
@@ -305,6 +332,8 @@ export class QueryUtils {
         avg_rounds_per_conversation: 0,
         rounds_distribution: [],
         tokens_used: 0,
+        tokens_input: 0,
+        tokens_output: 0,
         average_tokens_per_conversation: 0,
       };
     }
@@ -580,23 +609,26 @@ export class QueryUtils {
   }
 
   /**
-   * Get latency breakdown by agent
-   * Returns TTFT and TTLT p50/p95 for each agent_id
+   * Get query-to-result time (TTLT) grouped by agent
+   * Returns TTLT percentiles/mean for each agent_id
    */
-  async getLatencyByAgentType(): Promise<
+  async getQueryToResultTimeByAgentType(): Promise<
     Array<{
       agent_id: string;
-      ttft_p50: number;
-      ttft_p95: number;
-      ttlt_p50: number;
-      ttlt_p95: number;
+      p50: number;
+      p75: number;
+      p90: number;
+      p95: number;
+      p99: number;
+      mean: number;
+      total_samples: number;
       sample_count: number;
     }>
   > {
     try {
       const conversationIndexName = chatSystemIndex('conversations');
 
-      // Get latency metrics grouped by agent_id
+      // Get TTLT metrics grouped by agent_id
       const response = await this.esClient.search({
         index: conversationIndexName,
         size: 0,
@@ -612,23 +644,14 @@ export class QueryUtils {
                   path: 'conversation_rounds',
                 },
                 aggs: {
-                  ttft_percentiles: {
-                    percentiles: {
-                      field: 'conversation_rounds.time_to_first_token',
-                      percents: [50, 95],
-                    },
-                  },
-                  ttlt_percentiles: {
+                  ttl_percentiles: {
                     percentiles: {
                       field: 'conversation_rounds.time_to_last_token',
-                      percents: [50, 95],
+                      percents: [50, 75, 90, 95, 99],
                     },
                   },
-                  count: {
-                    value_count: {
-                      field: 'conversation_rounds.time_to_first_token',
-                    },
-                  },
+                  ttl_avg: { avg: { field: 'conversation_rounds.time_to_last_token' } },
+                  ttl_count: { value_count: { field: 'conversation_rounds.time_to_last_token' } },
                 },
               },
             },
@@ -640,18 +663,23 @@ export class QueryUtils {
 
       return buckets.map((bucket: any) => {
         const roundsAggs = bucket.all_rounds;
+        const percentiles = roundsAggs?.ttl_percentiles?.values || {};
+        const totalSamples = roundsAggs?.ttl_count?.value || 0;
         return {
           agent_id: bucket.key,
-          ttft_p50: Math.round(roundsAggs?.ttft_percentiles?.values?.['50.0'] || 0),
-          ttft_p95: Math.round(roundsAggs?.ttft_percentiles?.values?.['95.0'] || 0),
-          ttlt_p50: Math.round(roundsAggs?.ttlt_percentiles?.values?.['50.0'] || 0),
-          ttlt_p95: Math.round(roundsAggs?.ttlt_percentiles?.values?.['95.0'] || 0),
-          sample_count: roundsAggs?.count?.value || 0,
+          p50: Math.round(percentiles['50.0'] || 0),
+          p75: Math.round(percentiles['75.0'] || 0),
+          p90: Math.round(percentiles['90.0'] || 0),
+          p95: Math.round(percentiles['95.0'] || 0),
+          p99: Math.round(percentiles['99.0'] || 0),
+          mean: Math.round(roundsAggs?.ttl_avg?.value || 0),
+          total_samples: totalSamples,
+          sample_count: totalSamples,
         };
       });
     } catch (error) {
       if (!isIndexNotFoundError(error)) {
-        this.logger.warn(`Failed to fetch latency by agent: ${error.message}`);
+        this.logger.warn(`Failed to fetch query-to-result time by agent: ${error.message}`);
       }
       return [];
     }

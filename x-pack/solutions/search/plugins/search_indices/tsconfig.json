@@ -48,6 +48,8 @@
     "@kbn/react-query",
     "@kbn/search-api-panels",
     "@kbn/deeplinks-management",
+    "@kbn/index-management-plugin",
+    "@kbn/cloud-connect-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -14,20 +14,23 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function update(
   requestCtx: RequestHandlerContext,
+  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
-  updateBody: DashboardUpdateRequestBody
+  updateBody: DashboardUpdateRequestBody,
+  isDashboardAppRequest: boolean = false
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const { access_control: accessControl, ...restOfData } = updateBody.data;
+  const { access_control: accessControl, ...restOfData } = updateBody;
 
   const {
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn(restOfData);
+  } = transformDashboardIn(restOfData, isDashboardAppRequest);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
@@ -43,5 +46,10 @@ export async function update(
     }
   );
 
-  return getDashboardCRUResponseBody(savedObject, 'update');
+  return getDashboardCRUResponseBody(
+    savedObject,
+    'update',
+    dashboardStateSchema,
+    isDashboardAppRequest
+  );
 }

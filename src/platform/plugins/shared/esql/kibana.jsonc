@@ -20,7 +20,9 @@
       "contentManagement",
       "share",
       "fileUpload",
-      "fieldFormats"
+      "fieldFormats",
+      "kql",
+      "inference"
     ],
     "requiredBundles": [
       "kibanaReact",

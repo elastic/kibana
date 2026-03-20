@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 import { createIndexPatternService } from '../../../data_views_service/service';
 import { useLensDispatch, updateIndexPatterns } from '../../../state_management';
@@ -19,7 +20,6 @@ export function LayerConfiguration({
   attributes,
   coreStart,
   startDependencies,
-  datasourceId,
   framePublicAPI,
   hasPadding,
   setIsInlineFlyoutVisible,
@@ -32,9 +32,11 @@ export function LayerConfiguration({
   parentApi,
   panelId,
   closeFlyout,
-  canEditTextBasedQuery,
   editorContainer,
+  onTextBasedQueryStateChange,
 }: LayerConfigurationProps) {
+  // Derive whether we're in text-based mode from the query type
+  const isTextBasedMode = isOfAggregateQueryType(attributes.state.query);
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
   const indexPatternService = useMemo(
@@ -61,7 +63,7 @@ export function LayerConfiguration({
     core: coreStart,
     dataViews: startDependencies.dataViews,
     uiActions: startDependencies.uiActions,
-    hideLayerHeader: datasourceId === 'textBased',
+    hideLayerHeader: isTextBasedMode,
     // TODO: remove this prop once we display the chart switch in Discover
     onlyAllowSwitchToSubtypes,
     indexPatternService,
@@ -73,8 +75,8 @@ export function LayerConfiguration({
     parentApi,
     panelId,
     closeFlyout,
-    canEditTextBasedQuery,
     editorContainer,
+    onTextBasedQueryStateChange,
   };
   return (
     <div

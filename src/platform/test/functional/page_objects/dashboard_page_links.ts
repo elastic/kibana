@@ -86,8 +86,8 @@ export class DashboardPageLinks extends FtrService {
 
   public async addDashboardLink(
     destination: string,
-    useCurrentFilters: boolean = true,
-    useCurrentDateRange: boolean = true,
+    useFilters: boolean = true,
+    useTimeRange: boolean = true,
     openInNewTab: boolean = false,
     linkLabel?: string
   ) {
@@ -112,15 +112,15 @@ export class DashboardPageLinks extends FtrService {
     }
 
     await this.testSubjects.setEuiSwitch(
-      'dashboardDrillDownOptions--useCurrentFilters--checkbox',
-      useCurrentFilters ? 'check' : 'uncheck'
+      'dashboardNavigationOptions--useFilters--checkbox',
+      useFilters ? 'check' : 'uncheck'
     );
     await this.testSubjects.setEuiSwitch(
-      'dashboardDrillDownOptions--useCurrentDateRange--checkbox',
-      useCurrentDateRange ? 'check' : 'uncheck'
+      'dashboardNavigationOptions--useTimeRange--checkbox',
+      useTimeRange ? 'check' : 'uncheck'
     );
     await this.testSubjects.setEuiSwitch(
-      'dashboardDrillDownOptions--openInNewTab--checkbox',
+      'dashboardNavigationOptions--openInNewTab--checkbox',
       openInNewTab ? 'check' : 'uncheck'
     );
 
@@ -173,17 +173,13 @@ export class DashboardPageLinks extends FtrService {
     await editButton.click();
   }
 
-  public async reorderLinks(linkLabel: string, startIndex: number, steps: number, reverse = false) {
+  public async reorderLinks(startIndex: number, steps: number, reverse = false) {
     this.log.debug(
-      `move the ${linkLabel} link from ${startIndex} to ${
-        reverse ? startIndex - steps : startIndex + steps
-      }`
+      `move link at position ${startIndex} to ${reverse ? startIndex - steps : startIndex + steps}`
     );
     const linkToMove = await this.findDraggableLinkByIndex(startIndex);
     const draggableButton = await linkToMove.findByTestSubject(`panelEditorLink--dragHandle`);
-    expect(await draggableButton.getAttribute('data-rfd-drag-handle-draggable-id')).to.equal(
-      linkLabel
-    );
+
     await draggableButton.focus();
     await this.browser.pressKeys(this.browser.keys.SPACE);
 

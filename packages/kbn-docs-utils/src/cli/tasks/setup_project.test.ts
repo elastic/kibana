@@ -11,6 +11,7 @@ import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { setupProject } from './setup_project';
 import type { CliContext, CliOptions } from '../types';
+import type { FindPluginsOptions } from '../../find_plugins';
 
 // Mock dependencies - order matters: mock get_all_doc_file_ids first to prevent globby from loading
 jest.mock('../../mdx/get_all_doc_file_ids', () => ({
@@ -112,6 +113,7 @@ describe('setupProject', () => {
     const result = await setupProject(context, options);
 
     expect(result.plugins).toBeDefined();
+    expect(result.allPlugins).toBeDefined();
     expect(result.pathsByPlugin).toBeDefined();
     expect(result.project).toBeDefined();
   });
@@ -134,6 +136,22 @@ describe('setupProject', () => {
     const Fs = jest.requireMock('fs');
     Fs.existsSync.mockReturnValue(true);
 
+    const mockPlugin = {
+      id: 'test-plugin',
+      directory: '/mock/repo/root/src/plugins/test',
+      isPlugin: true,
+      manifest: { id: 'test-plugin', owner: { name: 'test-team' }, serviceFolders: [] },
+      manifestPath: '/mock/repo/root/src/plugins/test/kibana.json',
+    };
+
+    // Return all plugins for allPlugins, filtered for filteredPlugins
+    (findPlugins as jest.Mock).mockImplementation((options?: FindPluginsOptions) => {
+      if (options?.pluginFilter) {
+        return [mockPlugin];
+      }
+      return [mockPlugin, { ...mockPlugin, id: 'other-plugin' }];
+    });
+
     const options: CliOptions = {
       collectReferences: false,
       pluginFilter: ['test-plugin'],
@@ -149,10 +167,96 @@ describe('setupProject', () => {
 
     const options: CliOptions = {
       collectReferences: false,
-      stats: ['any'],
       pluginFilter: ['nonexistent-plugin'],
     };
 
-    await expect(setupProject(context, options)).rejects.toThrow('expected --plugin was not found');
+    await expect(setupProject(context, options)).rejects.toThrow(
+      "expected --plugin 'nonexistent-plugin' was not found"
+    );
+  });
+
+  it('validates package filter and throws error if packages not found', async () => {
+    (findPlugins as jest.Mock).mockReturnValue([]);
+
+    const options: CliOptions = {
+      collectReferences: false,
+      packageFilter: ['@kbn/nonexistent-package'],
+    };
+
+    await expect(setupProject(context, options)).rejects.toThrow(
+      "expected --package '@kbn/nonexistent-package' was not found"
+    );
+  });
+
+  it('scopes TypeScript project to single plugin directory when pluginFilter has one plugin', async () => {
+    const { Project } = jest.requireMock('ts-morph');
+    const mockProject = Project();
+
+    jest.clearAllMocks();
+
+    const mockPlugin = {
+      id: 'single-plugin',
+      directory: '/mock/repo/root/src/plugins/single',
+      isPlugin: true,
+      manifest: { id: 'single-plugin', owner: { name: 'test-team' }, serviceFolders: [] },
+      manifestPath: '/mock/repo/root/src/plugins/single/kibana.json',
+    };
+
+    // Return all plugins for allPlugins, filtered for plugins
+    (findPlugins as jest.Mock).mockImplementation((options?: FindPluginsOptions) => {
+      if (options?.pluginFilter) {
+        return [mockPlugin];
+      }
+      return [mockPlugin, { ...mockPlugin, id: 'other-plugin' }];
+    });
+
+    const options: CliOptions = {
+      collectReferences: false,
+      pluginFilter: ['single-plugin'],
+    };
+
+    await setupProject(context, options);
+
+    // Should use the single plugin's tsconfig
+    expect(Project).toHaveBeenCalledWith({
+      tsConfigFilePath: '/mock/repo/root/src/plugins/single/tsconfig.json',
+      skipAddingFilesFromTsConfig: true,
+    });
+
+    // Should only add files from the single plugin directory
+    expect(mockProject.addSourceFilesAtPaths).toHaveBeenCalledWith([
+      '/mock/repo/root/src/plugins/single/**/*.ts',
+      '!**/*.d.ts',
+    ]);
+
+    // Should NOT call resolveSourceFileDependencies for single-plugin builds
+    expect(mockProject.resolveSourceFileDependencies).not.toHaveBeenCalled();
+  });
+
+  it('loads full codebase and resolves dependencies when no pluginFilter', async () => {
+    const { Project } = jest.requireMock('ts-morph');
+    const mockProject = Project();
+
+    jest.clearAllMocks();
+
+    (findPlugins as jest.Mock).mockReturnValue([]);
+
+    const options: CliOptions = {
+      collectReferences: false,
+    };
+
+    await setupProject(context, options);
+
+    // Should use the repo root tsconfig
+    expect(Project).toHaveBeenCalledWith({
+      tsConfigFilePath: '/mock/repo/root/tsconfig.json',
+      skipAddingFilesFromTsConfig: true,
+    });
+
+    // Should add files from all directories
+    expect(mockProject.addSourceFilesAtPaths).toHaveBeenCalledTimes(8);
+
+    // Should call resolveSourceFileDependencies for full builds
+    expect(mockProject.resolveSourceFileDependencies).toHaveBeenCalled();
   });
 });

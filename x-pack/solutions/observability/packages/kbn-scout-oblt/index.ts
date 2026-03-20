@@ -8,11 +8,15 @@
 // Observability-specific test framework
 export { test, apiTest, spaceTest } from './src/playwright';
 
+// Worker fixtures for observability tests (e.g. sloData for API tests)
+export { sloDataFixture } from './src/playwright/fixtures/worker';
+export type { SloDataFixture } from './src/playwright/fixtures/worker';
+
 // re-exported test framework from @kbn/scout
-export { expect, lighthouseTest, tags } from '@kbn/scout';
+export { lighthouseTest, tags } from '@kbn/scout';
 
 // Custom global setup hook with profiling support
-export { globalSetupHook } from './src/playwright/global_hooks/profiling_setup';
+export { globalSetupHook } from './src/playwright/global_hook';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {

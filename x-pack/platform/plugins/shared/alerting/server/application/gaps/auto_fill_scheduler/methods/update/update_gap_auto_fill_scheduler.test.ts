@@ -30,6 +30,7 @@ import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { backfillClientMock } from '../../../../../backfill_client/backfill_client.mock';
 import type { UpdateGapAutoFillSchedulerParams } from './types';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -73,6 +74,8 @@ const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   eventLogger,
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 const defaultRuleType = { type: 'test-rule-type', consumer: 'test-consumer' };
@@ -250,20 +253,14 @@ describe('updateGapAutoFillScheduler()', () => {
       })
     );
 
-    // Authorization is checked for both existing and new rule types
-    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ruleTypeId: 'another-rule-type',
-        consumer: 'another-consumer',
-      })
-    );
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ruleTypeId: 'test-rule-type',
-        consumer: 'test-consumer',
-      })
-    );
+    // Authorization is checked for the updated rule types
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledWith({
+      ruleTypeIdConsumersPairs: [
+        { ruleTypeId: updatedRuleTypes[0].type, consumers: [updatedRuleTypes[0].consumer] },
+      ],
+      operation: expect.any(String),
+      entity: expect.any(String),
+    });
   });
 
   test('validates params and throws on invalid payload', async () => {
@@ -283,7 +280,7 @@ describe('updateGapAutoFillScheduler()', () => {
 
   test('logs and rethrows when authorization fails', async () => {
     setupSchedulerSo();
-    (authorization.ensureAuthorized as jest.Mock).mockImplementationOnce(() => {
+    (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
       throw new Error('no access');
     });
 

@@ -19,8 +19,8 @@ applies_to:
 
 Installing product documentation requires network access to its artifact repository. 
 
-* {applies_to}`stack: ga 9.1+` In air-gapped environments, or environments where remote network traffic is blocked or filtered, you can use a local artifact repository by specifying the path with the `file://` URI scheme.
-* {applies_to}`stack: ga =9.0` In air-gapped environments, or environments where remote network traffic is blocked or filtered, the artifact repository must be manually deployed somewhere accessible by the Kibana deployment.
+* {applies_to}`stack: ga 9.0+` In air-gapped environments, or environments where remote network traffic is blocked or filtered, you can use a local artifact repository by specifying the path with the `file://` URI scheme.
+* {applies_to}`stack: ga 9.0+` In air-gapped environments, or environments where remote network traffic is blocked or filtered, the artifact repository must be manually deployed somewhere accessible by the Kibana deployment.
 
 Deploying a custom product documentation repository can be done in 2 ways: using a S3 bucket, or using a CDN.
 

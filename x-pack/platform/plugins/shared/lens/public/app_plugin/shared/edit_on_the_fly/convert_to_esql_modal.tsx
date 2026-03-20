@@ -11,7 +11,6 @@ import type {
   EuiBasicTableColumn,
   EuiConfirmModalProps,
   EuiTableSelectionType,
-  IconType,
 } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -29,19 +28,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LensLayerType } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
+
 import { layerTypes } from '../../..';
-
-type LayerType = Exclude<LensLayerType, 'metricTrendline'>;
-
-export interface ConvertibleLayer {
-  id: string;
-  icon: IconType;
-  name: string;
-  type: LayerType;
-  query: string;
-  isConvertibleToEsql: boolean;
-}
+import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
 
 const typeLabels: Record<LayerType, (count: number) => string> = {
   data: (count: number) =>
@@ -66,9 +56,8 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   onCancel: EuiConfirmModalProps['onCancel'];
   /**
    * Callback invoked when user confirms the conversion.
-   * @param params - Object containing array of layer IDs selected for conversion
    */
-  onConfirm: (params: { layersToConvert: string[] }) => void;
+  onConfirm: () => void;
 }> = ({ layers, onCancel, onConfirm }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -91,7 +80,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         itemIdToExpandedRowMapValues[layer.id] = (
           <EuiFlexItem>
             <EuiCodeBlock isCopyable language="esql" paddingSize="s">
-              {layer.query}
+              {esql(layer.query).print('wrapping')}
             </EuiCodeBlock>
           </EuiFlexItem>
         );
@@ -108,7 +97,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         field: 'icon',
         name: '',
         width: euiTheme.size.l,
-        render: (icon: string) => <EuiIcon type={icon} />,
+        render: (icon: string) => <EuiIcon type={icon} aria-hidden={true} />,
       },
       {
         field: 'name',
@@ -201,28 +190,21 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   return (
     <EuiConfirmModal
       aria-label={i18n.translate('xpack.lens.config.switchToQueryModeAriaLabel', {
-        defaultMessage: 'Switch to Query mode',
+        defaultMessage: 'Switch to query mode',
       })}
       title={i18n.translate('xpack.lens.config.switchToQueryModeTitle', {
-        defaultMessage: 'Switch to Query mode',
+        defaultMessage: 'Switch to query mode',
       })}
       onCancel={onCancel}
       cancelButtonText={i18n.translate('xpack.lens.config.cancelButtonTextButtonLabel', {
         defaultMessage: 'Cancel',
       })}
-      onConfirm={() => {
-        let layersToConvert: string[] = [];
-        if (layers.length === 1 && layers[0].isConvertibleToEsql) {
-          layersToConvert = [layers[0].id];
-        } else if (layers.length > 1 && selectedItems.length > 0) {
-          layersToConvert = selectedItems.map((layer) => layer.id);
-        }
-        onConfirm({ layersToConvert });
-      }}
+      onConfirm={onConfirm}
       confirmButtonText={i18n.translate('xpack.lens.config.switchToQueryModeButtonLabel', {
         defaultMessage: 'Switch to query mode',
       })}
       confirmButtonDisabled={!isConfirmButtonEnabled}
+      data-test-subj="lnsConvertToEsqlModal"
     >
       <p>
         {i18n.translate('xpack.lens.config.queryModeDescription', {
@@ -241,7 +223,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         iconType="warning"
         size="s"
         title={i18n.translate('xpack.lens.config.queryModeWarningDescription', {
-          defaultMessage: 'Once query mode is activated you cannot switch back to visual mode.',
+          defaultMessage: `Once you save the chart after switching to query mode, you can't switch back.`,
         })}
       />
 
@@ -274,7 +256,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCodeBlock isCopyable language="esql" paddingSize="s">
-              {layers[0].query}
+              {esql(layers[0].query).print('wrapping')}
             </EuiCodeBlock>
           </EuiFlexItem>
         </EuiFlexGroup>

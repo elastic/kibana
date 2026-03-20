@@ -15,6 +15,7 @@ import {
 import { getFailedTransactionRateTimeSeries } from '../../lib/helpers/transaction_error_rate';
 import { ApmDocumentType } from '../../../common/document_type';
 import {
+  SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
@@ -30,7 +31,8 @@ import { withApmSpan } from '../../utils/with_apm_span';
 interface Options {
   apmEventClient: APMEventClient;
   environment: string;
-  dependencyName: string;
+  dependencies: string[];
+  sourceServiceName?: string;
   start: number;
   end: number;
   offset?: string;
@@ -38,7 +40,8 @@ interface Options {
 
 function getServiceMapDependencyNodeInfoForTimeRange({
   environment,
-  dependencyName,
+  dependencies,
+  sourceServiceName,
   apmEventClient,
   start,
   end,
@@ -77,9 +80,8 @@ function getServiceMapDependencyNodeInfoForTimeRange({
         bool: {
           filter: [
             ...getDocumentTypeFilterForServiceDestinationStatistics(true),
-            {
-              term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName },
-            },
+            { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencies } },
+            ...(sourceServiceName ? [{ term: { [SERVICE_NAME]: sourceServiceName } }] : []),
             ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
           ],
@@ -166,7 +168,8 @@ export interface ServiceMapServiceDependencyInfoResponse {
 
 export async function getServiceMapDependencyNodeInfo({
   apmEventClient,
-  dependencyName,
+  dependencies,
+  sourceServiceName,
   start,
   end,
   environment,
@@ -175,7 +178,8 @@ export async function getServiceMapDependencyNodeInfo({
   const commonProps = {
     environment,
     apmEventClient,
-    dependencyName,
+    dependencies,
+    sourceServiceName,
     start,
     end,
   };

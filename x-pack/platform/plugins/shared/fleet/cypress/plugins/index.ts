@@ -14,6 +14,11 @@ import { createEsClientForTesting } from '@kbn/test';
 
 import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 
+// Resolve axe-core path in Node context (before webpack preprocessing).
+// This is needed because the webpack preprocessor transforms require.resolve() incorrectly.
+// See: https://github.com/component-driven/cypress-axe/issues/84
+const axeCorePath = require.resolve('axe-core/axe.min.js');
+
 const plugin: Cypress.PluginConfig = (on, config) => {
   const client = createEsClientForTesting({
     esUrl: config.env.ELASTICSEARCH_URL,
@@ -46,6 +51,11 @@ const plugin: Cypress.PluginConfig = (on, config) => {
     return res.json();
   }
   on('task', {
+    // Return axe-core source code for accessibility testing.
+    // This bypasses the webpack preprocessor issue with require.resolve().
+    getAxeCoreSource() {
+      return fs.readFileSync(axeCorePath, 'utf8');
+    },
     async insertDoc({ index, doc, id }: { index: string; doc: any; id: string }) {
       return client.create({ id, document: doc, index, refresh: 'wait_for' });
     },

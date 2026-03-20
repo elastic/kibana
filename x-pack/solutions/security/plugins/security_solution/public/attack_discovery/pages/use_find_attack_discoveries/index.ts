@@ -41,6 +41,10 @@ interface Props {
   status?: string[];
   sortField?: string;
   sortOrder?: string;
+  /**
+   * Whether to filter by scheduled or ad-hoc attack-discoveries. If omitted, both scheduled and ad-hoc Attack discoveries are returned. Use `true` to return only scheduled discoveries, `false` to return only ad-hoc.
+   */
+  scheduled?: boolean;
 }
 
 interface UseFindAttackDiscoveries {
@@ -79,6 +83,7 @@ export const useFindAttackDiscoveries = ({
   status,
   sortField = '@timestamp',
   sortOrder = 'desc',
+  scheduled,
 }: Props): UseFindAttackDiscoveries => {
   const { addError } = useAppToasts();
 
@@ -105,6 +110,7 @@ export const useFindAttackDiscoveries = ({
         sort_order: sortOrder,
         start,
         status,
+        scheduled,
       };
 
       return http.fetch<AttackDiscoveryFindResponse>(ATTACK_DISCOVERY_FIND, {
@@ -133,6 +139,7 @@ export const useFindAttackDiscoveries = ({
       sortOrder,
       start,
       status,
+      scheduled,
     ]
   );
 
@@ -175,6 +182,7 @@ export const useFindAttackDiscoveries = ({
       start,
       status,
       isAssistantEnabled,
+      scheduled,
     ],
     queryFn,
     {

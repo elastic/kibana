@@ -7,11 +7,7 @@
 
 import type TestAgent from 'supertest/lib/agent';
 import expect from '@kbn/expect';
-import {
-  ENDPOINT_ARTIFACT_LISTS,
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
-} from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import {
   ALL_ENDPOINT_ARTIFACT_LIST_IDS,
   GLOBAL_ARTIFACT_TAG,
@@ -25,16 +21,15 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
+import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
+import type { CustomRole } from '../../../../config/services/types';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
-import { createSupertestErrorLogger } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
-  const rolesUsersProvider = getService('rolesUsersProvider');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
-  const log = getService('log');
   const config = getService('config');
 
   const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
@@ -43,20 +38,17 @@ export default function ({ getService }: FtrProviderContext) {
     .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
     ?.includes('endpointExceptionsMovedUnderManagement');
 
-  // Failing: See https://github.com/elastic/kibana/issues/246207
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
-  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Endpoint Exceptions', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Endpoint Exceptions', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     let t1AnalystSupertest: TestAgent;
     let endpointPolicyManagerSupertest: TestAgent;
-    let endpointOpsAnalystSupertest: TestAgent;
 
     before(async () => {
       t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
       endpointPolicyManagerSupertest = await utils.createSuperTest(ROLE.endpoint_policy_manager);
-      endpointOpsAnalystSupertest = await utils.createSuperTest(ROLE.endpoint_operations_analyst);
 
       // Create an endpoint policy in fleet we can work with
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
@@ -179,118 +171,11 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe(`and using Import API`, function () {
-      const buildImportBuffer = (
-        listId: (typeof ALL_ENDPOINT_ARTIFACT_LIST_IDS)[number]
-      ): Buffer => {
-        const generator = new ExceptionsListItemGenerator();
-        const listInfo = Object.values(ENDPOINT_ARTIFACT_LISTS).find((listDefinition) => {
-          return listDefinition.id === listId;
-        });
-
-        if (!listInfo) {
-          throw new Error(`Unknown listId: ${listId}. Unable to generate exception list item.`);
-        }
-
-        const createItem = () => {
-          switch (listId) {
-            case ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id:
-              return generator.generateEndpointException();
-
-            case ENDPOINT_ARTIFACT_LISTS.blocklists.id:
-              return generator.generateBlocklist();
-
-            case ENDPOINT_ARTIFACT_LISTS.eventFilters.id:
-              return generator.generateEventFilter();
-
-            case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id:
-              return generator.generateHostIsolationException();
-
-            case ENDPOINT_ARTIFACT_LISTS.trustedApps.id:
-              return generator.generateTrustedApp();
-
-            case ENDPOINT_ARTIFACT_LISTS.trustedDevices.id:
-              return generator.generateTrustedDevice();
-
-            default:
-              throw new Error(`Unknown listId: ${listId}. Unable to generate exception list item.`);
-          }
-        };
-
-        return Buffer.from(
-          `
-  {"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${
-    listInfo!.description
-  }","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${
-            listInfo!.name
-          }","namespace_type":"agnostic","os_types":[],"tags":[],"tie_breaker_id":"034d07f4-fa33-43bb-adfa-6f6bda7921ce","type":"endpoint","updated_at":"2025-08-21T14:20:07.012Z","updated_by":"kibana","version":1}
-  ${JSON.stringify(createItem())}
-  ${JSON.stringify(createItem())}
-  ${JSON.stringify(createItem())}
-  {"exported_exception_list_count":1,"exported_exception_list_item_count":3,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}
-  `,
-          'utf8'
-        );
-      };
-
-      // All non-Endpoint exceptions artifacts are not allowed to import
-      ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
-        (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-      ).forEach((listId) => {
-        it(`should error when importing ${listId} artifacts`, async () => {
-          await endpointArtifactTestResources.deleteList(listId);
-
-          const { body } = await endpointOpsAnalystSupertest
-            .post(`${EXCEPTION_LIST_URL}/_import`)
-            .set('kbn-xsrf', 'true')
-            .on('error', createSupertestErrorLogger(log).ignoreCodes([400]))
-            .attach('file', buildImportBuffer(listId), 'import_data.ndjson')
-            .expect(400);
-
-          expect(body.message).to.eql(
-            'EndpointArtifactError: Import is not supported for Endpoint artifact exceptions'
-          );
-        });
-      });
-
-      it('should import endpoint exceptions and add global artifact tag if missing', async () => {
-        await endpointArtifactTestResources.deleteList(
-          ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-        );
-
-        await endpointOpsAnalystSupertest
-          .post(`${EXCEPTION_LIST_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .on('error', createSupertestErrorLogger(log))
-          .attach(
-            'file',
-            buildImportBuffer(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id),
-            'import_exceptions.ndjson'
-          )
-          .expect(200);
-
-        const { body } = await endpointOpsAnalystSupertest
-          .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
-          .set('kbn-xsrf', 'true')
-          .on('error', createSupertestErrorLogger(log))
-          .query({
-            list_id: 'endpoint_list',
-            namespace_type: 'agnostic',
-            per_page: 50,
-          })
-          .send()
-          .expect(200);
-
-        // After import - all items should be returned on a GET `find` request.
-        expect(body.data.length).to.eql(3);
-
-        for (const endpointException of body.data) {
-          expect(endpointException.tags).to.include.string(GLOBAL_ARTIFACT_TAG);
-
-          const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${endpointException.item_id}&namespace_type=${endpointException.namespace_type}`;
-          await endpointOpsAnalystSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
-        }
-      });
+    after(async () => {
+      const promises = ALL_ENDPOINT_ARTIFACT_LIST_IDS.map((listId) =>
+        endpointArtifactTestResources.deleteList(listId)
+      );
+      await Promise.all(promises);
     });
 
     describe('and has authorization to manage endpoint security', () => {
@@ -387,29 +272,31 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('@skipInServerless and user has endpoint exception access but no global artifact access', () => {
+    describe('and user has endpoint exception access but no global artifact access', () => {
       let noGlobalArtifactSupertest: TestAgent;
 
       before(async () => {
-        const loadedRole = await rolesUsersProvider.loader.create({
+        const role: CustomRole = {
           name: 'no_global_artifact_role',
-          kibana: [
-            {
-              base: [],
-              feature: {
-                [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_all'],
+          privileges: {
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_all'],
+                },
+                spaces: ['*'],
               },
-              spaces: ['*'],
-            },
-          ],
-          elasticsearch: { cluster: [], indices: [], run_as: [] },
-        });
+            ],
+            elasticsearch: { cluster: [], indices: [] },
+          },
+        };
 
-        noGlobalArtifactSupertest = await utils.createSuperTest(loadedRole.username);
+        noGlobalArtifactSupertest = await utils.createSuperTestWithCustomRole(role);
       });
 
       after(async () => {
-        await rolesUsersProvider.loader.delete('no_global_artifact_role');
+        await utils.cleanUpCustomRoles();
       });
 
       for (const endpointExceptionApiCall of endpointExceptionCalls) {
@@ -468,11 +355,17 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('@skipInServerless and user has authorization to read endpoint exceptions', function () {
+    describe('and user has authorization to read endpoint exceptions', function () {
       let hunterSupertest: TestAgent;
 
       before(async () => {
-        hunterSupertest = await utils.createSuperTest(ROLE.hunter);
+        hunterSupertest = await utils.createSuperTestWithCustomRole({
+          name: 'custom_hunter_role',
+          privileges: getHunter(),
+        });
+      });
+      after(async () => {
+        await utils.cleanUpCustomRoles();
       });
 
       for (const endpointExceptionApiCall of [...endpointExceptionCalls, ...needsWritePrivilege]) {

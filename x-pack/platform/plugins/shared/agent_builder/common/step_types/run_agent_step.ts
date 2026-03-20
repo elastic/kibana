@@ -7,6 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { StepCategory } from '@kbn/workflows';
+import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Step type ID for the agentBuilder run agent step.
@@ -21,11 +24,44 @@ export const InputSchema = z.object({
    * output schema for the run agent step, if provided agent will return structured output
    */
   // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
-  schema: z.any().optional().describe('The schema for the output of the agent.'),
+  schema: JsonModelShapeSchema.optional().describe('The schema for the output of the agent.'),
   /**
    * The user input message to send to the agent.
    */
   message: z.string().describe('The user input message to send to the agent.'),
+  /**
+   * Optional attachments to provide to the agent.
+   */
+  attachments: z
+    .array(
+      z.object({
+        /**
+         * Optional unique identifier for the attachment.
+         */
+        id: z.string().optional(),
+        /**
+         * Type of the attachment (e.g., "security.alert").
+         */
+        type: z.string(),
+        /**
+         * Data payload of the attachment, specific to the attachment type.
+         */
+        data: z.record(z.string(), z.any()),
+        /**
+         * When true, the attachment will not be displayed in the UI.
+         */
+        hidden: z.boolean().optional(),
+      })
+    )
+    .optional()
+    .describe('Optional attachments to provide to the agent.'),
+  /**
+   * Optional existing conversation id to continue a previous conversation.
+   */
+  conversation_id: z
+    .string()
+    .optional()
+    .describe('Optional existing conversation ID to continue a previous conversation.'),
 });
 
 /**
@@ -40,7 +76,13 @@ export const OutputSchema = z.object({
   structured_output: z
     .any()
     .optional()
-    .describe('The structured output from the agent. Only here when schem was provided'),
+    .describe('The structured output from the agent. Only here when schema was provided'),
+  conversation_id: z
+    .string()
+    .optional()
+    .describe(
+      'Conversation ID associated with this step execution. Present when create_conversation is enabled or conversation_id is provided.'
+    ),
 });
 
 /**
@@ -61,6 +103,14 @@ export const ConfigSchema = z.object({
     .string()
     .optional()
     .describe('The ID of the connector to use. Defaults to the default GenAI connector.'),
+  /**
+   * When true, create/persist a conversation and associate it with the executing user.
+   * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
+   */
+  'create-conversation': z
+    .boolean()
+    .optional()
+    .describe('When true, creates a conversation for the step.'),
 });
 
 export type RunAgentStepInputSchema = typeof InputSchema;
@@ -78,6 +128,110 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
   RunAgentStepConfigSchema
 > = {
   id: RunAgentStepTypeId,
+  category: StepCategory.Ai,
+  label: i18n.translate('xpack.agentBuilder.runAgentStep.label', {
+    defaultMessage: 'Run Agent',
+  }),
+  description: i18n.translate('xpack.agentBuilder.runAgentStep.description', {
+    defaultMessage:
+      'Execute an AgentBuilder AI agent to process input and generate responses. Optionally provide a JSON schema to receive structured output.',
+  }),
+  documentation: {
+    details: i18n.translate('xpack.agentBuilder.runAgentStep.documentation.details', {
+      defaultMessage:
+        'The agentBuilder.runAgent step allows you to invoke an AI agent within your workflow. The agent will process the input message and return a response, optionally using tools and maintaining conversation context. To receive structured output, provide a JSON schema that defines the expected response format.',
+    }),
+    examples: [
+      `## Basic agent invocation
+\`\`\`yaml
+- name: run_agent
+  type: ${RunAgentStepTypeId}
+  with:
+    message: "Analyze the following data and provide insights"
+\`\`\``,
+
+      `## Use a specific agent
+\`\`\`yaml
+- name: custom_agent
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  with:
+    message: "{{ workflow.input.message }}"
+\`\`\``,
+
+      `## Create a conversation and reuse it in a follow-up step
+\`\`\`yaml
+- name: initial_analysis
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  create-conversation: true
+  with:
+    message: "Analyze the event and suggest next steps. {{ event | json }}"
+
+- name: followup
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  with:
+    conversation_id: "{{ steps.initial_analysis.output.conversation_id }}"
+    message: "Continue from the previous analysis and complete any missing steps."
+\`\`\``,
+
+      `## Get structured output using a JSON schema
+\`\`\`yaml
+- name: extract_person_data
+  type: ${RunAgentStepTypeId}
+  with:
+    message: "Extract information about famous scientists from the text"
+    schema:
+      title: Person Array
+      type: array
+      items:
+        title: Person
+        type: object
+        properties:
+          name:
+            type: string
+            description: The person's first name
+          surname:
+            type: string
+            description: The person's last name
+          field:
+            type: string
+            description: Their field of study
+        required:
+          - name
+          - surname
+\`\`\`
+
+When a schema is provided, the agent's response will be available in \`output.structured_output\` as a typed object, while \`output.message\` will contain a string representation of the structured output.`,
+
+      `## Structured output with simple object schema
+\`\`\`yaml
+- name: analyze_sentiment
+  type: ${RunAgentStepTypeId}
+  with:
+    message: "Analyze the sentiment of this customer feedback: {{ feedback }}"
+    schema:
+      type: object
+      properties:
+        sentiment:
+          type: string
+          enum: [positive, negative, neutral]
+          description: Overall sentiment classification
+        confidence:
+          type: number
+          description: Confidence score between 0 and 1
+        key_phrases:
+          type: array
+          items:
+            type: string
+          description: Important phrases that influenced the sentiment
+      required:
+        - sentiment
+        - confidence
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: ConfigSchema,

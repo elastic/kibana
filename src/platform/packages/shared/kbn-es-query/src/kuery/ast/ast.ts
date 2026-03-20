@@ -43,7 +43,7 @@ export const fromLiteralExpression = (
 };
 
 export const fromKueryExpression = (
-  expression: string | estypes.QueryDslQueryContainer,
+  expression: string | NonNullable<estypes.QueryDslQueryContainer>,
   parseOptions: Partial<KueryParseOptions> = {}
 ): KueryNode => {
   try {

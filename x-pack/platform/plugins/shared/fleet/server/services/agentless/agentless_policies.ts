@@ -23,7 +23,6 @@ import { AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT } from '../../../common/const
 
 import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import type { PackagePolicyClient } from '../package_policy_service';
 
 import { agentPolicyService } from '../agent_policy';
@@ -100,9 +99,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     const user = request
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
       : undefined;
-    const authorizationHeader = request
-      ? HTTPAuthorizationHeader.parseFromRequest(request, user?.username)
-      : null;
 
     const spaceId = this.soClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
 
@@ -130,21 +126,15 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       // Build agentless config with cloud connectors if provided
       let agentlessConfig = baseAgentlessConfig;
       if (data.cloud_connector?.enabled) {
-        const inputsArray = data.inputs ? Object.entries(data.inputs) : [];
-        const input = inputsArray.find(([, pinput]) => pinput.enabled !== false);
-        const targetCsp = input?.[0].match(/aws|azure|gcp/)?.[0] as
-          | 'aws'
-          | 'azure'
-          | 'gcp'
-          | undefined;
-
         this.logger.debug(
-          `Configuring cloud connectors for cloud provider: ${targetCsp} from cloud_connector object`
+          `Configuring cloud connectors for cloud provider: ${
+            data.cloud_connector.target_csp || 'undefined'
+          } from cloud_connector object`
         );
         agentlessConfig = {
           ...baseAgentlessConfig,
           cloud_connectors: {
-            target_csp: targetCsp,
+            target_csp: data.cloud_connector.target_csp,
             enabled: true,
           },
         };
@@ -167,7 +157,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           data_output_id: outputId,
           is_protected: false,
         },
-        { id: agentPolicyId, skipDeploy: true, authorizationHeader, user }
+        { id: agentPolicyId, skipDeploy: true, request, user }
       );
 
       createdAgentPolicyId = agentPolicy.id;
@@ -200,6 +190,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         packagePolicy: newPackagePolicy,
         agentPolicy,
         policyName: data.name,
+        packageInfo: pkgInfo,
         soClient: this.soClient,
         esClient: this.esClient,
         logger: this.logger,
@@ -221,7 +212,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           force,
           bumpRevision: false,
           spaceId,
-          authorizationHeader,
           user,
         },
         context,

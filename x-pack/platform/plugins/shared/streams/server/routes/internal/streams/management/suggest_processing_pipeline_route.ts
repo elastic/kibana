@@ -5,36 +5,35 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { suggestProcessingPipeline } from '@kbn/streams-ai';
+import { z } from '@kbn/zod/v4';
+import { suggestProcessingPipeline, type SuggestProcessingPipelineResult } from '@kbn/streams-ai';
 import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
-import { createSSEInternalError } from '@kbn/sse-utils';
+import { createSSEInternalError, createSSERequestError, isSSEError } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
-import { type FlattenRecord, flattenRecord } from '@kbn/streams-schema';
+import {
+  Streams,
+  type FlattenRecord,
+  flattenRecord,
+  getStreamTypeFromDefinition,
+} from '@kbn/streams-schema';
 import { type StreamlangDSL, type GrokProcessor, type DissectProcessor } from '@kbn/streamlang';
-import type { InferenceClient } from '@kbn/inference-common';
+import { type InferenceClient, isInferenceError } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
-import {
-  getGrokProcessor,
-  getReviewFields as getGrokReviewFields,
-  mergeGrokProcessors,
-  type GrokProcessorResult,
-} from '@kbn/grok-heuristics';
-import {
-  getDissectProcessorWithReview,
-  getReviewFields as getDissectReviewFields,
-  extractDissectPattern,
-  groupMessagesByPattern as groupMessagesByDissectPattern,
-} from '@kbn/dissect-heuristics';
+import { assembleGrokProcessor, type GrokPatternNode } from '@kbn/grok-heuristics';
+import { assembleDissectProcessor } from '@kbn/dissect-heuristics';
+import type { Logger } from '@kbn/logging';
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
+import type { StreamsClient } from '../../../../lib/streams/client';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { simulateProcessing } from '../processing/simulation_handler';
 import { handleProcessingGrokSuggestions } from '../processing/grok_suggestions_handler';
 import { handleProcessingDissectSuggestions } from '../processing/dissect_suggestions_handler';
+import { isNoLLMSuggestionsError } from '../processing/no_llm_suggestions_error';
 
 export interface SuggestIngestPipelineParams {
   path: { name: string };
@@ -46,7 +45,7 @@ export interface SuggestIngestPipelineParams {
         fieldName: string;
         patternGroups: Array<{
           messages: string[];
-          nodes: Array<{ pattern: string } | { id: string; component: string; values: string[] }>;
+          nodes: GrokPatternNode[];
         }>;
       } | null;
       dissect: {
@@ -96,7 +95,7 @@ export const suggestIngestPipelineSchema = z.object({
 type SuggestProcessingPipelineResponse = Observable<
   ServerSentEventBase<
     'suggested_processing_pipeline',
-    { pipeline: Awaited<ReturnType<typeof suggestProcessingPipeline>> }
+    { pipeline: SuggestProcessingPipelineResult['pipeline'] }
   >
 >;
 
@@ -117,12 +116,14 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    telemetry,
   }): Promise<SuggestProcessingPipelineResponse> => {
-    logger.debug('[suggest_pipeline] Request received');
     logger.debug(
-      `[suggest_pipeline] extracted_patterns: grok=${Boolean(
-        params.body.extracted_patterns?.grok
-      )} dissect=${Boolean(params.body.extracted_patterns?.dissect)}`
+      `[${params.path.name}][suggest_pipeline] Request received (connectorId=${
+        params.body.connector_id
+      } grok=${Boolean(params.body.extracted_patterns?.grok)} dissect=${Boolean(
+        params.body.extracted_patterns?.dissect
+      )})`
     );
 
     // Wrap entire logic in Observable so errors can be sent as SSE events
@@ -139,6 +140,12 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           await getScopedClients({ request });
 
         const stream = await streamsClient.getStream(params.path.name);
+        if (!Streams.ingest.all.Definition.is(stream)) {
+          throw new StatusError(
+            'Processing suggestions are only available for ingest streams',
+            400
+          );
+        }
 
         const abortController = new AbortController();
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
@@ -155,7 +162,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
 
           if (grok) {
             logger.debug(
-              `[suggest_pipeline] (parallel) scheduling grok patternGroups=${grok.patternGroups.length} fieldName=${grok.fieldName}`
+              `[${stream.name}][suggest_pipeline] (parallel) scheduling grok (patternGroups=${grok.patternGroups.length} fieldName=${grok.fieldName} connectorId=${params.body.connector_id})`
             );
             candidatePromises.push(
               processGrokPatterns({
@@ -175,7 +182,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           }
           if (dissect) {
             logger.debug(
-              `[suggest_pipeline] (parallel) scheduling dissect messages=${dissect.messages.length} fieldName=${dissect.fieldName}`
+              `[${stream.name}][suggest_pipeline] (parallel) scheduling dissect (messages=${dissect.messages.length} fieldName=${dissect.fieldName} connectorId=${params.body.connector_id})`
             );
             candidatePromises.push(
               processDissectPattern({
@@ -194,33 +201,55 @@ export const suggestProcessingPipelineRoute = createServerRoute({
             );
           }
 
-          const results = await Promise.all(candidatePromises);
-          const candidates = results.filter(
-            (
-              r
-            ): r is {
-              type: 'grok' | 'dissect';
-              processor: GrokProcessor | DissectProcessor;
-              parsedRate: number;
-            } => r !== null
-          );
-          candidates.forEach((c) =>
-            logger.debug(`[suggest_pipeline] Candidate type=${c.type} parsedRate=${c.parsedRate}`)
+          const settled = await Promise.allSettled(candidatePromises);
+          const candidates: Array<{
+            type: 'grok' | 'dissect';
+            processor: GrokProcessor | DissectProcessor;
+            parsedRate: number;
+          }> = [];
+
+          for (const result of settled) {
+            if (result.status === 'fulfilled' && result.value !== null) {
+              candidates.push(result.value);
+            } else if (result.status === 'rejected') {
+              const { reason } = result;
+              if (isNoLLMSuggestionsError(reason)) {
+                logger.debug(
+                  `[${stream.name}][suggest_pipeline] No LLM suggestions available (connectorId=${params.body.connector_id})`
+                );
+              } else {
+                const meta = formatInferenceErrorMeta(reason);
+                logger.error(
+                  `[${stream.name}][suggest_pipeline] Candidate failed` +
+                    ` (connectorId=${params.body.connector_id}${meta}): ${getErrorMessage(reason)}`
+                );
+              }
+            }
+          }
+          candidates.forEach((c, index) =>
+            logger.debug(
+              `[${stream.name}][suggest_pipeline] Candidate ${index + 1}/${
+                candidates.length
+              } (type=${c.type} parsedRate=${c.parsedRate})`
+            )
           );
           if (candidates.length > 0) {
             candidates.sort((a, b) => b.parsedRate - a.parsedRate);
             logger.debug(
-              `[suggest_pipeline] Selected processor type=${candidates[0].type} parsedRate=${candidates[0].parsedRate}`
+              `[${stream.name}][suggest_pipeline] Selected ${candidates[0].type} processor (parsedRate=${candidates[0].parsedRate})`
             );
             parsingProcessor = candidates[0].processor;
           }
         }
 
-        return await suggestProcessingPipeline({
+        const maxSteps = 6; // Limit reasoning steps for latency and token cost
+        const startTime = Date.now();
+
+        const result = await suggestProcessingPipeline({
           definition: stream,
           inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
           parsingProcessor,
-          maxSteps: 4, // Limit reasoning steps for latency and token cost
+          maxSteps,
           signal: abortController.signal,
           documents: params.body.documents,
           esClient: scopedClusterClient.asCurrentUser,
@@ -231,25 +260,78 @@ export const suggestProcessingPipelineRoute = createServerRoute({
                 path: { name: stream.name },
                 body: { processing: pipeline, documents: params.body.documents },
               },
-              scopedClusterClient,
+              esClient: scopedClusterClient.asCurrentUser,
               streamsClient,
               fieldsMetadataClient,
             }),
         });
+
+        const durationMs = Date.now() - startTime;
+        logger.debug(
+          `[${stream.name}][suggest_pipeline] Processing pipeline generated (connectorId=${
+            params.body.connector_id
+          } durationMs=${durationMs} steps=${result.metadata.stepsUsed} hasPipeline=${
+            result.pipeline !== null
+          })`
+        );
+
+        // Report telemetry for pipeline suggestion
+        telemetry.trackProcessingPipelineSuggested({
+          duration_ms: durationMs,
+          steps_used: result.metadata.stepsUsed,
+          success: result.pipeline !== null,
+          stream_name: stream.name,
+          stream_type: getStreamTypeFromDefinition(stream),
+        });
+
+        return result;
       })()
     ).pipe(
-      map((pipeline) => ({
+      map((result) => ({
         type: 'suggested_processing_pipeline' as const,
-        pipeline,
+        pipeline: result.pipeline,
       })),
       catchError((error) => {
-        logger.error('Failed to generate pipeline suggestion:', error);
-        // Convert error to SSE error event so it's sent to client with full message
-        throw createSSEInternalError(error.message || 'Failed to generate pipeline suggestion');
+        if (isNoLLMSuggestionsError(error)) {
+          logger.debug(
+            `[${params.path.name}][suggest_pipeline] No LLM suggestions available for pipeline generation (connectorId=${params.body.connector_id})`
+          );
+          // Return null pipeline instead of error - frontend will handle this gracefully
+          return [
+            {
+              type: 'suggested_processing_pipeline' as const,
+              pipeline: null,
+            },
+          ];
+        }
+        const errorMessage = getErrorMessage(error) || 'Failed to generate pipeline suggestion';
+        logger.error(
+          `[${params.path.name}][suggest_pipeline] Failed to generate pipeline suggestion` +
+            ` (connectorId=${params.body.connector_id}${formatInferenceErrorMeta(
+              error
+            )}): ${errorMessage}`
+        );
+        if (isSSEError(error) && error.status) {
+          throw createSSERequestError(errorMessage, error.status);
+        }
+        throw createSSEInternalError(errorMessage);
       })
     );
   },
 });
+
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+const formatInferenceErrorMeta = (error: unknown): string => {
+  if (isInferenceError(error)) {
+    const parts: string[] = [];
+    if (error.code) parts.push(`code=${error.code}`);
+    if (error.meta?.status) parts.push(`status=${error.meta.status}`);
+    return parts.length > 0 ? ` ${parts.join(' ')}` : '';
+  }
+  return '';
+};
 
 /**
  * Process grok patterns extracted client-side:
@@ -272,7 +354,7 @@ async function processGrokPatterns({
 }: {
   patternGroups: Array<{
     messages: string[];
-    nodes: Array<{ pattern: string } | { id: string; component: string; values: string[] }>;
+    nodes: GrokPatternNode[];
   }>;
   fieldName: string;
   streamName: string;
@@ -280,73 +362,63 @@ async function processGrokPatterns({
   documents: FlattenRecord[];
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
-  streamsClient: any;
+  streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
-  logger: any;
+  logger: Logger;
 }): Promise<{ type: 'grok'; processor: GrokProcessor; parsedRate: number } | null> {
   const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
 
-  // Request grok pattern reviews for each group in parallel
-  const grokResults = await Promise.allSettled(
-    patternGroups.map(async (group) => {
-      logger.debug(`[suggest_pipeline][grok] Reviewing group messages=${group.messages.length}`);
-      // Call LLM to review patterns directly
-      const patterns = group.nodes
-        .filter((node): node is { pattern: string } => 'pattern' in node)
-        .map((node) => node.pattern);
-      logger.debug(`[suggest_pipeline][grok] Derived patterns=${patterns.length}`);
-
-      const grokProcessor = await handleProcessingGrokSuggestions({
-        params: {
-          path: { name: streamName },
-          body: {
-            connector_id: connectorId,
-            sample_messages: group.messages,
-            review_fields: getGrokReviewFields(group.nodes as any, 10),
-          },
-        },
-        inferenceClient,
-        scopedClusterClient,
-        streamsClient,
-        fieldsMetadataClient,
-        signal,
-        logger,
-      });
-      logger.debug('[suggest_pipeline][grok] LLM review response received');
-
-      const grokProcessorResult = getGrokProcessor(
-        patterns.map((pattern) => ({ pattern })),
-        grokProcessor
-      );
+  const combinedGrokProcessor = await assembleGrokProcessor({
+    from: fieldName,
+    patternGroups,
+    reviewFn: async (reviewFields, messages) => {
       logger.debug(
-        `[suggest_pipeline][grok] getGrokProcessor produced patterns=${grokProcessorResult.patterns.length}`
+        `[${streamName}][suggest_pipeline][grok] Reviewing group (messages=${messages.length} connectorId=${connectorId})`
       );
+      try {
+        const result = await handleProcessingGrokSuggestions({
+          params: {
+            path: { name: streamName },
+            body: {
+              connector_id: connectorId,
+              sample_messages: messages,
+              review_fields: reviewFields,
+            },
+          },
+          inferenceClient,
+          scopedClusterClient,
+          streamsClient,
+          fieldsMetadataClient,
+          signal,
+          logger,
+        });
+        logger.debug(
+          `[${streamName}][suggest_pipeline][grok] LLM review response received (connectorId=${connectorId})`
+        );
+        return result;
+      } catch (error) {
+        const meta = formatInferenceErrorMeta(error);
+        logger.error(
+          `[${streamName}][suggest_pipeline][grok] LLM review failed` +
+            ` (connectorId=${connectorId}${meta}): ${getErrorMessage(error)}`
+        );
+        throw error;
+      }
+    },
+  });
 
-      return grokProcessorResult;
-    })
-  );
-
-  // Collect successful results
-  const grokProcessors = grokResults.reduce<GrokProcessorResult[]>((acc, result) => {
-    if (result.status === 'fulfilled') {
-      acc.push(result.value);
-    } else {
-      // Re-throw the first error to fail the entire suggestion
-      logger.error('[suggest_pipeline][grok] LLM review failed:', result.reason);
-      throw result.reason;
-    }
-    return acc;
-  }, []);
-
-  if (grokProcessors.length === 0) {
+  if (!combinedGrokProcessor) {
+    logger.debug(
+      `[${streamName}][suggest_pipeline][grok] No grok processor produced (connectorId=${connectorId})`
+    );
     return null;
   }
 
-  // Merge all grok processors into one
-  const combinedGrokProcessor = mergeGrokProcessors(grokProcessors);
+  logger.debug(
+    `[${streamName}][suggest_pipeline][grok] Assembled grok processor (patterns=${combinedGrokProcessor.patterns.length} connectorId=${connectorId})`
+  );
 
-  // Run simulation to verify grok patterns work
   const simulationResult = await simulateProcessing({
     params: {
       path: { name: streamName },
@@ -355,16 +427,14 @@ async function processGrokPatterns({
         processing: {
           steps: [
             {
-              action: 'grok',
+              ...combinedGrokProcessor,
               customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
-              from: fieldName,
-              patterns: combinedGrokProcessor.patterns,
             },
           ],
         },
       },
     },
-    scopedClusterClient,
+    esClient: scopedClusterClient.asCurrentUser,
     streamsClient,
     fieldsMetadataClient,
   });
@@ -372,13 +442,13 @@ async function processGrokPatterns({
   const parsedRate =
     simulationResult.processors_metrics[SUGGESTED_GROK_PROCESSOR_ID]?.parsed_rate ?? 0;
 
+  logger.debug(
+    `[${streamName}][suggest_pipeline][grok] Simulation complete (parsedRate=${parsedRate} connectorId=${connectorId})`
+  );
+
   return {
     type: 'grok',
-    processor: {
-      action: 'grok',
-      from: fieldName,
-      patterns: combinedGrokProcessor.patterns as [string, ...string[]],
-    },
+    processor: combinedGrokProcessor,
     parsedRate,
   };
 }
@@ -410,10 +480,10 @@ async function processDissectPattern({
   documents: FlattenRecord[];
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
-  streamsClient: any;
+  streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
-  logger: any;
+  logger: Logger;
 }): Promise<{ type: 'dissect'; processor: DissectProcessor; parsedRate: number } | null> {
   const SUGGESTED_DISSECT_PROCESSOR_ID = 'dissect-processor';
 
@@ -421,51 +491,55 @@ async function processDissectPattern({
     return null;
   }
 
-  // Extract dissect pattern on server-side
-  logger.debug('[suggest_pipeline][dissect] Grouping messages by pattern');
-  const grouped = groupMessagesByDissectPattern(messages);
-  if (grouped.length === 0) {
-    logger.debug('[suggest_pipeline][dissect] No patterns found in messages');
-    return null;
-  }
-
-  const largestGroup = grouped[0];
-  logger.debug(
-    `[suggest_pipeline][dissect] Extracting pattern from largest group messages=${largestGroup.messages.length}`
-  );
-  const dissectPattern = extractDissectPattern(largestGroup.messages);
-
-  if (!dissectPattern.ast.nodes.length) {
-    logger.debug('[suggest_pipeline][dissect] No AST nodes in extracted pattern');
-    return null;
-  }
-
-  // Use extracted fields for review & processor generation
-  const reviewFields = getDissectReviewFields(dissectPattern, 10);
-  const dissectReview = await handleProcessingDissectSuggestions({
-    params: {
-      path: { name: streamName },
-      body: {
-        connector_id: connectorId,
-        sample_messages: largestGroup.messages.slice(0, 10),
-        review_fields: reviewFields,
-      },
+  const dissectResult = await assembleDissectProcessor({
+    from: fieldName,
+    messages,
+    reviewFn: async (reviewFields, sampleMessages) => {
+      logger.debug(
+        `[${streamName}][suggest_pipeline][dissect] Reviewing fields (messages=${sampleMessages.length} connectorId=${connectorId})`
+      );
+      try {
+        const result = await handleProcessingDissectSuggestions({
+          params: {
+            path: { name: streamName },
+            body: {
+              connector_id: connectorId,
+              sample_messages: sampleMessages,
+              review_fields: reviewFields,
+            },
+          },
+          inferenceClient,
+          scopedClusterClient,
+          streamsClient,
+          fieldsMetadataClient,
+          signal,
+          logger,
+        });
+        logger.debug(
+          `[${streamName}][suggest_pipeline][dissect] LLM review response received (connectorId=${connectorId})`
+        );
+        return result;
+      } catch (error) {
+        const meta = formatInferenceErrorMeta(error);
+        logger.error(
+          `[${streamName}][suggest_pipeline][dissect] LLM review failed` +
+            ` (connectorId=${connectorId}${meta}): ${getErrorMessage(error)}`
+        );
+        throw error;
+      }
     },
-    inferenceClient,
-    scopedClusterClient,
-    streamsClient,
-    fieldsMetadataClient,
-    signal,
-    logger,
   });
 
-  const dissectProcessor = getDissectProcessorWithReview(dissectPattern, dissectReview, fieldName);
-  const pattern = dissectProcessor.pattern;
-
-  if (!pattern || pattern.trim().length === 0) {
-    logger.debug('[suggest_pipeline][dissect] Empty pattern generated; skipping simulation');
+  if (!dissectResult) {
+    logger.debug(
+      `[${streamName}][suggest_pipeline][dissect] No dissect processor produced (connectorId=${connectorId})`
+    );
     return null;
   }
+
+  logger.debug(
+    `[${streamName}][suggest_pipeline][dissect] Assembled dissect processor (connectorId=${connectorId})`
+  );
 
   const simulationResult = await simulateProcessing({
     params: {
@@ -475,16 +549,14 @@ async function processDissectPattern({
         processing: {
           steps: [
             {
-              action: 'dissect',
+              ...dissectResult,
               customIdentifier: SUGGESTED_DISSECT_PROCESSOR_ID,
-              from: fieldName,
-              pattern,
             },
           ],
         },
       },
     },
-    scopedClusterClient,
+    esClient: scopedClusterClient.asCurrentUser,
     streamsClient,
     fieldsMetadataClient,
   });
@@ -492,14 +564,13 @@ async function processDissectPattern({
   const parsedRate =
     simulationResult.processors_metrics[SUGGESTED_DISSECT_PROCESSOR_ID]?.parsed_rate ?? 0;
 
+  logger.debug(
+    `[${streamName}][suggest_pipeline][dissect] Simulation complete (parsedRate=${parsedRate} connectorId=${connectorId})`
+  );
+
   return {
     type: 'dissect',
-    processor: {
-      action: 'dissect',
-      from: fieldName,
-      pattern,
-      append_separator: ' ',
-    },
+    processor: dissectResult,
     parsedRate,
   };
 }

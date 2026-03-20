@@ -31,7 +31,7 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes, useKbnPalettes, KbnPalette } from '@kbn/palettes';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
@@ -41,6 +41,7 @@ import type {
   UserMessage,
   AnnotationGroups,
   FormBasedPersistedState,
+  VisualizationInfo,
 } from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
 import {
@@ -70,12 +71,16 @@ import type {
 } from './types';
 import { visualizationSubtypes, visualizationTypes, defaultSeriesType } from './types';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
-import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
+import {
+  getAccessorColorConfigs,
+  getColorAssignments,
+  getLayerPaletteName,
+} from './color_assignment';
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,
-  annotationLayerHasUnsavedChanges,
   isHorizontalSeries,
+  isLineSeries,
   getColumnToLabelMap,
 } from './state_helpers';
 import {
@@ -101,6 +106,7 @@ import {
   getDescription,
   getFirstDataLayer,
   getLayersByType,
+  getRecommendedXAxisTitleVisibility,
   getReferenceLayers,
   getVisualizationType,
   isAnnotationsLayer,
@@ -284,14 +290,15 @@ export const getXyVisualization = ({
     const compatibleSeriesType: SeriesType = (currentStackingType?.subtypes[chosenTypeIndex] ||
       seriesType) as SeriesType;
 
+    const switchLayer = (layer: XYLayerConfig): XYLayerConfig =>
+      applySeriesDefaultsIfNeeded(layer, compatibleSeriesType);
+
     return {
       ...state,
       preferredSeriesType: compatibleSeriesType,
       layers: layerId
-        ? state.layers.map((layer) =>
-            layer.layerId === layerId ? { ...layer, seriesType: compatibleSeriesType } : layer
-          )
-        : state.layers.map((layer) => ({ ...layer, seriesType: compatibleSeriesType })),
+        ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
+        : state.layers.map(switchLayer),
     };
   },
 
@@ -414,6 +421,8 @@ export const getXyVisualization = ({
       return { groups: [] };
     }
 
+    const isTextBasedLayer = frame.datasourceLayers[layerId]?.isTextBasedLanguage();
+
     if (isAnnotationsLayer(layer)) {
       return getAnnotationsConfiguration({ state, frame, layer });
     }
@@ -457,7 +466,7 @@ export const getXyVisualization = ({
             isDataLayer(l) &&
             l.seriesType === dataLayer.seriesType &&
             Boolean(l.xAccessor) === Boolean(dataLayer.xAccessor) &&
-            Boolean(l.splitAccessor) === Boolean(dataLayer.splitAccessor)
+            l.splitAccessors?.length === dataLayer.splitAccessors?.length
           ) {
             const { left: localLeft, right: localRight } = groupAxesByType([l], frame.activeData);
             // return true only if matching axis are found
@@ -513,17 +522,22 @@ export const getXyVisualization = ({
           groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
             defaultMessage: 'Breakdown',
           }),
-          accessors: dataLayer.splitAccessor
-            ? [
-                {
-                  columnId: dataLayer.splitAccessor,
-                  triggerIconType: dataLayer.collapseFn ? 'aggregate' : 'colorBy',
-                  palette: dataLayer.collapseFn ? undefined : colors,
-                },
-              ]
+          accessors: dataLayer.splitAccessors
+            ? dataLayer.splitAccessors.map((splitAccessor, i) => ({
+                columnId: splitAccessor,
+                triggerIconType: dataLayer.collapseFn
+                  ? 'aggregate'
+                  : i === 0
+                  ? 'colorBy'
+                  : undefined,
+                palette: dataLayer.collapseFn ? undefined : i === 0 ? colors : undefined,
+              }))
             : [],
           filterOperations: isBucketed,
-          supportsMoreColumns: !dataLayer.splitAccessor,
+          // multiple breakdown are supported only in text based layers
+          supportsMoreColumns: isTextBasedLayer
+            ? true
+            : (dataLayer.splitAccessors ?? []).length === 0,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           requiredMinDimensionCount:
             dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
@@ -592,8 +606,48 @@ export const getXyVisualization = ({
     return onDropForVisualization(props, this);
   },
 
+  reorderDimension(props) {
+    const { prevState, layerId, columnId, groupId, targetColumnId } = props;
+
+    const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
+      (l) => l.layerId === layerId
+    );
+    if (!foundLayer) {
+      return prevState;
+    }
+
+    if (!isDataLayer(foundLayer)) {
+      return prevState;
+    }
+
+    const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
+    if (groupId === 'x') {
+      newLayer.xAccessor = columnId;
+    }
+    if (groupId === 'y') {
+      newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
+    }
+    if (groupId === 'breakdown') {
+      if (newLayer.splitAccessors) {
+        const columnIdIndex = newLayer.splitAccessors.indexOf(columnId);
+        const targetColumnIdIndex = newLayer.splitAccessors.indexOf(targetColumnId);
+
+        if (columnIdIndex !== -1 && targetColumnIdIndex !== -1) {
+          const newSplitAccessors = [...newLayer.splitAccessors];
+          newSplitAccessors[columnIdIndex] = targetColumnId;
+          newSplitAccessors[targetColumnIdIndex] = columnId;
+          newLayer.splitAccessors = newSplitAccessors;
+        }
+      }
+    }
+    return {
+      ...prevState,
+      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
+    };
+  },
+
   setDimension(props) {
-    const { prevState, layerId, columnId, groupId } = props;
+    const { prevState, layerId, columnId, groupId, frame } = props;
 
     const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
       (l) => l.layerId === layerId
@@ -610,18 +664,43 @@ export const getXyVisualization = ({
     }
 
     const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
+    let stateWithRecommendedXAxisTitleVisibility = prevState;
+
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
+
+      const datasourceLayer = frame.datasourceLayers[layerId];
+      const operation = datasourceLayer?.getOperationForColumnId(columnId);
+      const recommendedAxisSettings = getRecommendedXAxisTitleVisibility(
+        prevState.axisTitlesVisibilitySettings,
+        operation,
+        prevState.xTitle
+      );
+      if (recommendedAxisSettings) {
+        stateWithRecommendedXAxisTitleVisibility = {
+          ...prevState,
+          axisTitlesVisibilitySettings: recommendedAxisSettings,
+        };
+      }
     }
     if (groupId === 'y') {
       newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
     }
     if (groupId === 'breakdown') {
-      newLayer.splitAccessor = columnId;
+      if (newLayer.splitAccessors) {
+        newLayer.splitAccessors = [
+          ...newLayer.splitAccessors.filter((a) => a !== columnId),
+          columnId,
+        ];
+      } else {
+        newLayer.splitAccessors = [columnId];
+      }
     }
     return {
-      ...prevState,
-      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
+      ...stateWithRecommendedXAxisTitleVisibility,
+      layers: stateWithRecommendedXAxisTitleVisibility.layers.map((l) =>
+        l.layerId === layerId ? newLayer : l
+      ),
     };
   },
 
@@ -646,10 +725,13 @@ export const getXyVisualization = ({
     if (isDataLayer(newLayer)) {
       if (newLayer.xAccessor === columnId) {
         delete newLayer.xAccessor;
-      } else if (newLayer.splitAccessor === columnId) {
-        delete newLayer.splitAccessor;
-        // as the palette is associated with the break down by dimension, remove it together with the dimension
-        delete newLayer.palette;
+      } else if (newLayer.splitAccessors?.includes(columnId)) {
+        newLayer.splitAccessors = newLayer.splitAccessors.filter((a) => a !== columnId);
+        if (newLayer.splitAccessors.length === 0) {
+          delete newLayer.splitAccessors;
+          // as the palette is associated with the break down by dimension, remove it together with the dimension
+          delete newLayer.palette;
+        }
       }
     }
     if (newLayer.accessors.includes(columnId)) {
@@ -735,12 +817,7 @@ export const getXyVisualization = ({
       return <ReferenceLayerHeader />;
     }
     if (isAnnotationsLayer(layer)) {
-      return (
-        <AnnotationsLayerHeader
-          title={getAnnotationLayerTitle(layer)}
-          hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
-        />
-      );
+      return <AnnotationsLayerHeader title={getAnnotationLayerTitle(layer)} />;
     }
     return undefined;
   },
@@ -882,8 +959,8 @@ export const getXyVisualization = ({
       const breakDownLayerValidation = validateLayersForDimension(
         'break_down',
         state.layers,
-        ({ splitAccessor, seriesType }) =>
-          seriesType.includes('percentage') && splitAccessor == null // check if no split accessor
+        ({ splitAccessors, seriesType }) =>
+          seriesType.includes('percentage') && splitAccessors == null // check if no split accessor
       );
       if (!breakDownLayerValidation.valid) {
         errors.push(breakDownLayerValidation.error);
@@ -1185,12 +1262,58 @@ const getMappedAccessors = ({
   return mappedAccessors;
 };
 
+/**
+ * Applies series-type-specific defaults to a layer after a type switch.
+ */
+function applySeriesDefaultsIfNeeded(
+  layer: XYLayerConfig,
+  toSeriesType: SeriesType
+): XYLayerConfig {
+  const updated = { ...layer, seriesType: toSeriesType };
+  if (isDataLayer(layer) && isDataLayer(updated) && updated.colorMapping) {
+    return {
+      ...updated,
+      colorMapping: resolveDefaultPaletteForSeriesType(
+        updated.colorMapping,
+        layer.seriesType,
+        toSeriesType
+      ),
+    };
+  }
+  return updated;
+}
+
+/**
+ * Resolves the default palette when switching between series types.
+ * Uses direction-specific matching so that user-chosen palettes are preserved:
+ *  - Switching TO line: only replaces 'default' with 'elastic_line_optimized'
+ *  - Switching FROM line: only replaces 'elastic_line_optimized' with 'default'
+ */
+function resolveDefaultPaletteForSeriesType(
+  colorMapping: NonNullable<XYDataLayerConfig['colorMapping']>,
+  fromSeriesType: SeriesType,
+  toSeriesType: SeriesType
+): NonNullable<XYDataLayerConfig['colorMapping']> {
+  if (isLineSeries(fromSeriesType) === isLineSeries(toSeriesType)) {
+    return colorMapping;
+  }
+
+  if (isLineSeries(toSeriesType) && colorMapping.paletteId === KbnPalette.Default) {
+    return { ...colorMapping, paletteId: KbnPalette.ElasticLineOptimized };
+  }
+  if (isLineSeries(fromSeriesType) && colorMapping.paletteId === KbnPalette.ElasticLineOptimized) {
+    return { ...colorMapping, paletteId: KbnPalette.Default };
+  }
+
+  return colorMapping;
+}
+
 function getVisualizationInfo(
   state: XYState,
   frame: Partial<FramePublicAPI> | undefined,
   paletteService: PaletteRegistry,
   fieldFormats: FieldFormatsStart
-) {
+): VisualizationInfo {
   const isHorizontal = isHorizontalChart(state.layers);
   const visualizationLayersInfo = state.layers.map((layer) => {
     const palette = [];
@@ -1236,20 +1359,21 @@ function getVisualizationInfo(
           palette.push(...mappedAccessors.flatMap(({ color }) => color));
         }
       }
-      if (layer.splitAccessor) {
-        dimensions.push({
-          name: i18n.translate('xpack.lens.xyChart.splitSeries', {
-            defaultMessage: 'Breakdown',
-          }),
-          dimensionType: 'breakdown',
-          id: layer.splitAccessor,
+      if (layer.splitAccessors) {
+        layer.splitAccessors.forEach((splitAccessor) => {
+          dimensions.push({
+            name: i18n.translate('xpack.lens.xyChart.splitSeries', {
+              defaultMessage: 'Breakdown',
+            }),
+            dimensionType: 'breakdown',
+            id: splitAccessor,
+          });
         });
+
         if (!layer.collapseFn) {
-          palette.push(
-            ...paletteService
-              .get(layer.palette?.name || 'default')
-              .getCategoricalColors(10, layer.palette?.params)
-          );
+          const paletteDefinition =
+            paletteService.get(getLayerPaletteName(layer)) ?? paletteService.get('default');
+          palette.push(...paletteDefinition.getCategoricalColors(10, layer.palette?.params));
         }
       }
     }

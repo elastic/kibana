@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-doc-viewer'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/unified-doc-viewer'
+  title: '@kbn/unified-doc-viewer'
   description: Moon project for @kbn/unified-doc-viewer
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-unified-doc-viewer
+  sourceRoot: src/platform/packages/shared/kbn-unified-doc-viewer
 dependsOn:
   - '@kbn/discover-utils'
   - '@kbn/data-views-plugin'
@@ -28,6 +27,7 @@ dependsOn:
   - '@kbn/field-utils'
   - '@kbn/core-analytics-browser-mocks'
   - '@kbn/shared-ux-error-boundary'
+  - '@kbn/restorable-state'
 tags:
   - shared-browser
   - package
@@ -42,14 +42,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

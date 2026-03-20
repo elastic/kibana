@@ -68,8 +68,6 @@ describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
 
     // Create exception list not used by any rules
     createExceptionList(getExceptionList1(), getExceptionList1().list_id);
-    // Create exception list associated with a rule
-    createExceptionList(getExceptionList2(), getExceptionList2().list_id);
 
     createExceptionListItem(getExceptionList2().list_id, {
       list_id: getExceptionList2().list_id,
@@ -113,6 +111,7 @@ describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
 
   it('Duplicate exception list with expired items', function () {
     duplicateSharedExceptionListFromListsManagementPageByListId(getExceptionList2().list_id, true);
+    waitForExceptionsTableToBeLoaded();
 
     // After duplication - check for new list
     assertExceptionListsExists([`${EXCEPTION_LIST_TO_DUPLICATE_NAME} [Duplicate]`]);
@@ -127,6 +126,7 @@ describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
 
   it('Duplicate exception list without expired items', function () {
     duplicateSharedExceptionListFromListsManagementPageByListId(getExceptionList2().list_id, false);
+    waitForExceptionsTableToBeLoaded();
 
     // After duplication - check for new list
     assertExceptionListsExists([`${EXCEPTION_LIST_TO_DUPLICATE_NAME} [Duplicate]`]);

@@ -163,6 +163,7 @@ export class CoreSystem {
     this.chrome = new ChromeService({
       browserSupportsCsp,
       kibanaVersion: injectedMetadata.version,
+      basePath: injectedMetadata.basePath,
       coreContext: this.coreContext,
     });
     this.docLinks = new DocLinksService(this.coreContext);
@@ -377,7 +378,6 @@ export class CoreSystem {
         theme,
         userProfile,
         uiSettings,
-        analytics,
         featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
@@ -397,6 +397,7 @@ export class CoreSystem {
         overlays,
         targetDomElement: notificationsTargetDomElement,
         rendering,
+        settings,
       });
 
       resolveNotifications!(notifications);
@@ -456,7 +457,15 @@ export class CoreSystem {
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
       this.rendering.renderCore(
-        { chrome, application, overlays, featureFlags },
+        {
+          chrome,
+          application,
+          overlays,
+          featureFlags,
+          http,
+          docLinks,
+          customBranding,
+        },
         coreUiTargetDomElement
       );
 

@@ -6,6 +6,7 @@
  */
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
+
 import type { EsqlToolDefinition, EsqlToolParam } from '@kbn/agent-builder-common';
 import { ToolType } from '@kbn/agent-builder-common';
 import { omit } from 'lodash';
@@ -27,12 +28,13 @@ export const transformEsqlToolToFormData = (tool: EsqlToolDefinition): EsqlToolF
     esql: tool.configuration.query,
     labels: tool.tags,
     params: Object.entries(tool.configuration.params).map(
-      ([name, { type, description, optional }]) => ({
+      ([name, { type, description, optional, defaultValue }]) => ({
         name,
         type,
         description,
         source: EsqlParamSource.Custom,
         optional: optional ?? false,
+        defaultValue,
       })
     ),
     type: ToolType.esql,
@@ -55,11 +57,18 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
       params: data.params
         .filter((param) => esqlParams.has(param.name))
         .reduce((paramsMap, param) => {
-          paramsMap[param.name] = {
+          const paramConfig: EsqlToolParam = {
             type: param.type,
             description: param.description,
             optional: param.optional,
           };
+
+          // Add defaultValue if provided and parameter is optional
+          if (param.optional && param.defaultValue != null && param.defaultValue !== '') {
+            paramConfig.defaultValue = param.defaultValue;
+          }
+
+          paramsMap[param.name] = paramConfig;
           return paramsMap;
         }, {} as Record<string, EsqlToolParam>),
     },

@@ -10,20 +10,24 @@ import { i18n } from '@kbn/i18n';
 import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../types';
+import { Commands } from '../../definitions/keywords';
 
 const limitCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
 };
 
 export const limitCommand = {
-  name: 'limit',
+  name: Commands.LIMIT,
   methods: limitCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.limitDoc', {
       defaultMessage:
         'Returns the first search results, in search order, based on the "limit" specified.',
     }),
-    declaration: 'LIMIT max_number_of_rows',
-    examples: ['… | LIMIT 100', '… | LIMIT 1'],
+    preview: true,
+    // TODO: Remove this temporary autocomplete gate once LIMIT BY is available outside tests.
+    limitByHidden: process.env.NODE_ENV === 'test' ? false : true,
+    declaration: 'LIMIT max_number_of_rows [BY grouping_expression1[, ..., grouping_expressionN]]',
+    examples: ['… | LIMIT 100', '… | LIMIT 1', '… | LIMIT 10 BY category'],
   },
 };

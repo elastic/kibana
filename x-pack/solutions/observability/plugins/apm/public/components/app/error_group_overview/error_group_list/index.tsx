@@ -93,7 +93,7 @@ export function ErrorGroupList({
 
   const { core } = useApmPluginContext();
 
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(apmEnableTableSearchBar, true);
+  const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(apmEnableTableSearchBar, true);
 
   const { offset, rangeFrom, rangeTo } = query;
 
@@ -187,7 +187,7 @@ export function ErrorGroupList({
               serviceName={serviceName}
               query={{
                 ...query,
-                kuery: `error.exception.type:"${type}"`,
+                kuery: `error.exception.type:"${type}" OR error.type:"${type}"`,
               }}
             >
               {type}
@@ -332,13 +332,17 @@ export function ErrorGroupList({
       rowHeader="groupId"
       tableCaption={tableCaption}
       noItemsMessage={
-        isMainStatsLoading
-          ? i18n.translate('xpack.apm.errorsTable.loading', {
-              defaultMessage: 'Loading...',
-            })
-          : i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+        isMainStatsLoading ? (
+          i18n.translate('xpack.apm.errorsTable.loading', {
+            defaultMessage: 'Loading...',
+          })
+        ) : (
+          <span data-test-subj="apmErrorGroupListEmptyState">
+            {i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
               defaultMessage: 'No errors found',
-            })
+            })}
+          </span>
+        )
       }
       items={mainStatistics.errorGroups}
       columns={columns}

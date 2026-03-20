@@ -15,7 +15,8 @@ export interface ESQLEditorRestorableState {
   resizableContainerHeight: number;
   isHistoryOpen: boolean;
   historySelectedTabId: HistoryTabId;
+  isVisorOpen: boolean;
 }
 
-export const { withRestorableState, useRestorableState } =
+export const { withRestorableState, useRestorableState, useRestorableRef } =
   createRestorableStateProvider<ESQLEditorRestorableState>();

@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiCallOut,
   EuiHealth,
+  EuiFormPrepend,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -123,12 +124,14 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
               }
             )}
             prepend={
-              <EuiText size="relative" color={''}>
-                <FormattedMessage
-                  id="xpack.fleet.debug.healthCheckPanel.fleetServerHostsLabel"
-                  defaultMessage="Fleet Server Hosts"
-                />
-              </EuiText>
+              <EuiFormPrepend
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.debug.healthCheckPanel.fleetServerHostsLabel"
+                    defaultMessage="Fleet Server Hosts"
+                  />
+                }
+              />
             }
             onChange={(fleetServerHostId) => {
               setHealthData(undefined);

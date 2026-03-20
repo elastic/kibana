@@ -132,6 +132,8 @@ export interface CreateExceptionListOptions {
   immutable: Immutable;
   /** document version */
   version: Version;
+  /** item os types to apply */
+  osTypes: OsTypeArray;
 }
 
 /**
@@ -196,6 +198,18 @@ export interface DeleteExceptionListItemOptions {
 export interface DeleteExceptionListItemByIdOptions {
   /** the "id" of an exception list item */
   id: Id;
+  /** saved object namespace (single | agnostic) */
+  namespaceType: NamespaceType;
+}
+
+/**
+ * ExceptionListClient.bulkDeleteExceptionListItems
+ * {@link ExceptionListClient.bulkDeleteExceptionListItems}
+ */
+export interface BulkDeleteExceptionListItemsOptions {
+  /** the "ids" of the exception list items */
+  ids: Id[];
+
   /** saved object namespace (single | agnostic) */
   namespaceType: NamespaceType;
 }

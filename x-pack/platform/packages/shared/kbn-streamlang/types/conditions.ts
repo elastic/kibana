@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { createIsNarrowSchema, DeepStrict, NonEmptyString } from '@kbn/zod-helpers/v4';
 
 export const stringOrNumberOrBoolean = z
   .union([z.string(), z.number(), z.boolean()])
@@ -31,9 +30,12 @@ export const BINARY_OPERATORS: BinaryOperatorKeys[] = [
   'startsWith',
   'endsWith',
   'range',
+  'includes',
 ];
 
 export const UNARY_OPERATORS: UnaryOperatorKeys[] = ['exists'];
+
+export const ARRAY_OPERATORS: BinaryOperatorKeys[] = ['includes'];
 
 export interface RangeCondition {
   gt?: StringOrNumberOrBoolean;
@@ -53,6 +55,7 @@ export interface ShorthandBinaryFilterCondition {
   startsWith?: StringOrNumberOrBoolean;
   endsWith?: StringOrNumberOrBoolean;
   range?: RangeCondition;
+  includes?: StringOrNumberOrBoolean;
 }
 
 export const operatorToHumanReadableNameMap = {
@@ -71,6 +74,7 @@ export const operatorToHumanReadableNameMap = {
   endsWith: i18n.translate('xpack.streams.filter.endsWith', { defaultMessage: 'ends with' }),
   exists: i18n.translate('xpack.streams.filter.exists', { defaultMessage: 'exists' }),
   range: i18n.translate('xpack.streams.filter.range', { defaultMessage: 'in range' }),
+  includes: i18n.translate('xpack.streams.filter.includes', { defaultMessage: 'includes' }),
 };
 
 export const rangeConditionSchema = z
@@ -95,6 +99,9 @@ export const shorthandBinaryFilterConditionSchema = z
     startsWith: stringOrNumberOrBoolean.optional().describe('Starts-with comparison value.'),
     endsWith: stringOrNumberOrBoolean.optional().describe('Ends-with comparison value.'),
     range: rangeConditionSchema.optional().describe('Range comparison values.'),
+    includes: stringOrNumberOrBoolean
+      .optional()
+      .describe('Checks if multivalue field includes the value.'),
   })
   .refine(
     (obj) =>
@@ -219,6 +226,13 @@ export const isAlwaysCondition = createIsNarrowSchema(conditionSchema, alwaysCon
 export const isNotCondition = createIsNarrowSchema(conditionSchema, notConditionSchema);
 
 export const isCondition = createIsNarrowSchema(z.unknown(), conditionSchema);
+
+/**
+ * Strict version of conditionSchema that rejects excess/unknown keys.
+ * Pre-constructed for performance as DeepStrict creates proxy wrappers.
+ */
+export const conditionSchemaStrict = DeepStrict(conditionSchema);
+export const isConditionStrict = createIsNarrowSchema(z.unknown(), conditionSchemaStrict);
 
 export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ always: {} });
 

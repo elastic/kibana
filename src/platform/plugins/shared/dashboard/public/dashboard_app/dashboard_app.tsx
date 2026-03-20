@@ -59,6 +59,7 @@ export interface DashboardAppProps {
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
   expandedPanelId?: string;
+  setDashboardAppApi: (api: DashboardApi | undefined) => void;
 }
 
 export function DashboardApp({
@@ -67,6 +68,7 @@ export function DashboardApp({
   redirectTo,
   history,
   expandedPanelId,
+  setDashboardAppApi,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
@@ -181,6 +183,9 @@ export function DashboardApp({
       // integrations
       useSessionStorageIntegration: true,
       useUnifiedSearchIntegration: true,
+      // Hide the control group from the dashboard renderer; the dashboard app handles displaying
+      // pinned controls in the top nav instead
+      useControlsIntegration: false,
       unifiedSearchSettings: {
         kbnUrlStateStorage,
       },
@@ -260,6 +265,7 @@ export function DashboardApp({
         key={regenerateId}
         locator={locator}
         onApiAvailable={(dashboard, dashboardInternal) => {
+          setDashboardAppApi(dashboard);
           if (dashboard && dashboard.uuid !== dashboardApi?.uuid) {
             setDashboardApi(dashboard);
             setDashboardInternalApi(dashboardInternal);
@@ -267,6 +273,9 @@ export function DashboardApp({
               dashboard?.expandPanel(expandedPanelId);
             }
           }
+        }}
+        onApiCleanup={() => {
+          setDashboardAppApi(undefined);
         }}
         dashboardRedirect={redirectTo}
         savedObjectId={savedDashboardId}

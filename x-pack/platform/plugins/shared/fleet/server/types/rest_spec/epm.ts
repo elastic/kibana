@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { ExperimentalDataStreamFeaturesSchema } from '../models/package_policy';
+import {
+  DeprecationInfoSchema,
+  ExperimentalDataStreamFeaturesSchema,
+} from '../models/package_policy';
+import { OtelCollectorConfigSchema } from '../models';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
@@ -154,6 +158,7 @@ export const PackageInfoSchema = schema
     description: schema.maybe(schema.string()),
     title: schema.string(),
     icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 10 })),
+    deprecated: schema.maybe(DeprecationInfoSchema),
     conditions: schema.maybe(
       schema.object({
         kibana: schema.maybe(schema.object({ version: schema.maybe(schema.string()) })),
@@ -163,6 +168,7 @@ export const PackageInfoSchema = schema
             capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
           })
         ),
+        deprecated: schema.maybe(DeprecationInfoSchema),
       })
     ),
     release: schema.maybe(
@@ -208,6 +214,34 @@ export const PackageInfoSchema = schema
     format_version: schema.maybe(schema.string()),
     vars: schema.maybe(
       schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
+    ),
+    var_groups: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          selector_title: schema.string(),
+          description: schema.maybe(schema.string()),
+          options: schema.arrayOf(
+            schema
+              .object({
+                name: schema.string(),
+                title: schema.string(),
+                description: schema.maybe(schema.string()),
+                vars: schema.arrayOf(schema.string(), { maxSize: 100 }),
+                hide_in_deployment_modes: schema.maybe(
+                  schema.arrayOf(
+                    schema.oneOf([schema.literal('default'), schema.literal('agentless')]),
+                    { maxSize: 2 }
+                  )
+                ),
+              })
+              .extendsDeep({ unknowns: 'allow' }),
+            { maxSize: 20 }
+          ),
+        }),
+        { maxSize: 20 }
+      )
     ),
     latestVersion: schema.maybe(schema.string()),
     discovery: schema.maybe(
@@ -305,6 +339,7 @@ export const GetInputsResponseSchema = schema.oneOf([
       }),
       { maxSize: 10000 }
     ),
+    ...OtelCollectorConfigSchema,
   }),
 ]);
 
@@ -557,7 +592,7 @@ export const GetKnowledgeBaseRequestSchema = {
 export const GetBulkAssetsRequestSchema = {
   body: schema.object({
     assetIds: schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() }), {
-      maxSize: 1000,
+      maxSize: 10000,
     }),
   }),
 };
@@ -571,6 +606,26 @@ export const UpdatePackageRequestSchema = {
     keepPoliciesUpToDate: schema.boolean(),
   }),
 };
+
+export const ReviewUpgradeRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string({
+      meta: { description: 'Package name to review upgrade for' },
+    }),
+  }),
+  body: schema.object({
+    action: schema.oneOf([
+      schema.literal('accept'),
+      schema.literal('decline'),
+      schema.literal('pending'),
+    ]),
+    target_version: schema.string(),
+  }),
+};
+
+export const ReviewUpgradeResponseSchema = schema.object({
+  success: schema.boolean(),
+});
 
 export const GetStatsRequestSchema = {
   params: schema.object({
@@ -587,6 +642,12 @@ export const InstallPackageFromRegistryRequestSchema = {
     prerelease: schema.maybe(schema.boolean()),
     ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
     skipDataStreamRollover: schema.boolean({ defaultValue: false }),
+    skipDependencyCheck: schema.boolean({
+      defaultValue: false,
+      meta: {
+        description: 'Skip dependency validation when installing a package with dependencies',
+      },
+    }),
   }),
   body: schema.nullable(
     schema.object({

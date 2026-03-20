@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type PrivmonUserCsvUploadErrorItem = z.infer<typeof PrivmonUserCsvUploadErrorItem>;
 export const PrivmonUserCsvUploadErrorItem = z.object({
@@ -25,9 +25,10 @@ export const PrivmonUserCsvUploadErrorItem = z.object({
 
 export type PrivmonUserCsvUploadStats = z.infer<typeof PrivmonUserCsvUploadStats>;
 export const PrivmonUserCsvUploadStats = z.object({
-  successful: z.number().int(),
-  failed: z.number().int(),
-  total: z.number().int(),
+  successfulOperations: z.number().int(),
+  uploaded: z.number().int(),
+  failedOperations: z.number().int(),
+  totalOperations: z.number().int(),
 });
 
 export type PrivmonBulkUploadUsersCSVResponse = z.infer<typeof PrivmonBulkUploadUsersCSVResponse>;

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import path from 'path';
+
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   type TestElasticsearchUtils,
@@ -347,7 +348,7 @@ describe('fleet usage telemetry', () => {
       refresh: 'wait_for',
     });
 
-    const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
+    const soClient = kbnServer.coreStart.savedObjects.getUnsafeInternalClient();
     await soClient.create(packagePolicyType, {
       name: 'fleet_server-1',
       namespace: 'default',
@@ -391,6 +392,7 @@ describe('fleet usage telemetry', () => {
       latest_revision: true,
     });
 
+    const output2Id = uuidv4();
     await soClient.create(
       'ingest-outputs',
       {
@@ -403,8 +405,9 @@ describe('fleet usage telemetry', () => {
         ca_trusted_fingerprint: '',
         proxy_id: null,
       },
-      { id: 'output2' }
+      { id: output2Id }
     );
+    const output3Id = uuidv4();
     await soClient.create(
       'ingest-outputs',
       {
@@ -417,8 +420,9 @@ describe('fleet usage telemetry', () => {
         ca_trusted_fingerprint: '',
         proxy_id: null,
       },
-      { id: 'output3' }
+      { id: output3Id }
     );
+    const output4Id = uuidv4();
     await soClient.create(
       'ingest-outputs',
       {
@@ -432,7 +436,7 @@ describe('fleet usage telemetry', () => {
         proxy_id: null,
         preset: 'balanced',
       },
-      { id: 'output4' }
+      { id: output4Id }
     );
 
     await soClient.create(
@@ -448,8 +452,8 @@ describe('fleet usage telemetry', () => {
         revision: 2,
         updated_by: 'system',
         schema_version: '1.0.0',
-        data_output_id: 'output2',
-        monitoring_output_id: 'output3',
+        data_output_id: output2Id,
+        monitoring_output_id: output3Id,
         global_data_tags: [
           { name: 'test', value: 'test1' },
           { name: 'test2', value: 'test2' },
@@ -470,8 +474,8 @@ describe('fleet usage telemetry', () => {
         revision: 2,
         updated_by: 'system',
         schema_version: '1.0.0',
-        data_output_id: 'output4',
-        monitoring_output_id: 'output4',
+        data_output_id: output4Id,
+        monitoring_output_id: output4Id,
         global_data_tags: [
           { name: 'test', value: 'test1' },
           { name: 'test2', value: 'test2' },

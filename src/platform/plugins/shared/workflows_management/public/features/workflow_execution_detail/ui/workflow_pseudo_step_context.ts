@@ -11,7 +11,7 @@ import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
-export type TriggerType = 'alert' | 'scheduled' | 'manual';
+export type TriggerType = 'alert' | 'scheduled' | 'manual' | 'document';
 
 export interface TriggerContextFromExecution {
   triggerType: TriggerType;
@@ -24,17 +24,19 @@ export function buildTriggerContextFromExecution(
   if (!executionContext) {
     return null;
   }
-
   let triggerType: TriggerType = 'manual'; // Default to manual trigger type
 
-  const hasEvent = executionContext.event !== undefined;
   const isScheduled =
     (executionContext.event as { type?: string } | undefined)?.type === 'scheduled';
 
   if (isScheduled) {
     triggerType = 'scheduled';
-  } else if (hasEvent) {
-    triggerType = 'alert';
+  } else if (executionContext.event != null) {
+    if ((executionContext.event as Record<string, unknown>).alerts != null) {
+      triggerType = 'alert';
+    } else {
+      triggerType = 'document';
+    }
   }
 
   const inputData = (executionContext as { event?: JsonValue; inputs?: JsonValue }).event
@@ -64,7 +66,7 @@ export function buildTriggerStepExecutionFromContext(
     stepType: `trigger_${triggerContext.triggerType}`,
     status: ExecutionStatus.COMPLETED,
     input: triggerContext.input,
-    output: undefined,
+    output: (workflowExecution.context?.output as JsonValue) ?? undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
     workflowId: workflowExecution.workflowId || '',
@@ -78,10 +80,21 @@ export function buildTriggerStepExecutionFromContext(
 export function buildOverviewStepExecutionFromContext(
   workflowExecution: WorkflowExecutionDto
 ): WorkflowStepExecutionDto {
-  let contextData: JsonValue | undefined;
+  let contextData: Record<string, unknown> = {};
   if (workflowExecution.context) {
     const { inputs, event, ...context } = workflowExecution.context;
-    contextData = context as JsonValue;
+    contextData = context as Record<string, unknown>;
+  }
+
+  // Add trace information to the context data for display in the Overview table
+  if (workflowExecution.traceId) {
+    contextData = {
+      ...contextData,
+      trace: {
+        traceId: workflowExecution.traceId,
+        entryTransactionId: workflowExecution.entryTransactionId,
+      },
+    };
   }
 
   return {
@@ -91,7 +104,7 @@ export function buildOverviewStepExecutionFromContext(
     status: workflowExecution.status,
     stepExecutionIndex: 0,
     startedAt: workflowExecution.startedAt,
-    input: contextData,
+    input: contextData as JsonValue,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
     workflowId: workflowExecution.workflowId ?? '',

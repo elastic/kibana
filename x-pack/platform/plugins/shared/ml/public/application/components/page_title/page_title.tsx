@@ -8,13 +8,19 @@
 import type { FC, ReactNode } from 'react';
 import React from 'react';
 import { EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface PageTitleProps {
   title: ReactNode;
 }
 
-export const PageTitle: FC<PageTitleProps> = ({ title }) => (
-  <EuiTitle size="l">
-    <h1>{title}</h1>
-  </EuiTitle>
-);
+export const PageTitle: FC<PageTitleProps> = ({ title }) => {
+  const titleStyles = css`
+    word-break: normal;
+  `;
+  return (
+    <EuiTitle size="l" css={titleStyles}>
+      <h1>{title}</h1>
+    </EuiTitle>
+  );
+};

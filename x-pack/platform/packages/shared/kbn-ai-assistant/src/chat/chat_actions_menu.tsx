@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
+  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiToolTip,
@@ -27,7 +28,6 @@ import {
 import type { ApplicationStart } from '@kbn/core/public';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { isSupportedConnectorType } from '@kbn/inference-common';
-import { RobotIcon } from '@kbn/ai-assistant-icon';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
@@ -153,7 +153,7 @@ export function ChatActionsMenu({
                     openAgentBuilderConfirmationModal();
                   }}
                 >
-                  <RobotIcon size="m" />
+                  <EuiIcon type="productAgent" size="m" />
                   {i18n.translate('xpack.aiAssistant.chatHeader.actions.agentBuilderOptInButton', {
                     defaultMessage: 'Try AI Agent',
                   })}

@@ -57,7 +57,7 @@ export const useListExceptionItems = ({
   });
   const [lastUpdated, setLastUpdated] = useState<null | string | number>(null);
   const [viewerStatus, setViewerStatus] = useState<ViewerStatus | ''>('');
-  const { read: canReadRules } = useUserPrivileges().rulesPrivileges;
+  const { read: canReadExceptions } = useUserPrivileges().rulesPrivileges.exceptions;
 
   const handleErrorStatus = useCallback(
     (error: Error, errorTitle?: string, errorDescription?: string) => {
@@ -72,12 +72,14 @@ export const useListExceptionItems = ({
 
   const getReferences = useCallback(async () => {
     try {
-      const result: RuleReferences = canReadRules ? await getExceptionItemsReferences([list]) : {};
+      const result: RuleReferences = canReadExceptions
+        ? await getExceptionItemsReferences([list])
+        : {};
       setExceptionListReferences(result);
     } catch (error) {
       handleErrorStatus(error);
     }
-  }, [canReadRules, handleErrorStatus, list]);
+  }, [canReadExceptions, handleErrorStatus, list]);
 
   const updateViewer = useCallback(
     (

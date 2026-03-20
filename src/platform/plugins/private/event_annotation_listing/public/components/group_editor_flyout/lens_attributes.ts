@@ -143,7 +143,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
             name: `indexpattern-datasource-layer-${DATA_LAYER_ID}`,
           },
         ],
-    version: 1 as const,
+    version: 2 as const,
   } as TypedLensByValueInput['attributes']);
 
 export const getCurrentTimeField = (attributes: TypedLensByValueInput['attributes']) => {

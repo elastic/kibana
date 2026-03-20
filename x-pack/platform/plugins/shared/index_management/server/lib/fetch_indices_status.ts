@@ -17,7 +17,7 @@ export async function fetchUserStartPrivileges(
     index: [
       {
         names: [indexName],
-        privileges: ['manage'],
+        privileges: ['manage', 'delete'],
       },
     ],
   });

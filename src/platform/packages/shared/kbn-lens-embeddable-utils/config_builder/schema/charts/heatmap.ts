@@ -19,29 +19,17 @@ import {
   layerSettingsSchema,
   dslOnlyPanelInfoSchema,
   axisTitleSchemaProps,
+  legendTruncateAfterLinesSchema,
 } from '../shared';
-import { mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps } from './shared';
+import { legendSizeSchema, mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps } from './shared';
 import { positionSchema } from '../alignments';
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 
 const legendSchemaProps = {
-  truncate_after_lines: schema.maybe(
-    schema.number({ meta: { description: 'Number of lines before truncating legend text' } })
-  ),
+  truncate_after_lines: legendTruncateAfterLinesSchema,
   visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the legend' } })),
-  size: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal('auto'),
-        schema.literal('small'),
-        schema.literal('medium'),
-        schema.literal('large'),
-        schema.literal('xlarge'),
-      ],
-      { defaultValue: 'auto', meta: { description: 'Size of the legend' } }
-    )
-  ),
+  size: legendSizeSchema,
   position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
 };
 
@@ -59,30 +47,66 @@ const labelsSchemaProps = {
 
 const simpleLabelsSchema = schema.object(omit(labelsSchemaProps, 'orientation'));
 
+const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+  meta: { description: 'Axis sort order; omit or use undefined for no sorting' },
+});
+
 const heatmapSharedStateSchema = {
-  type: schema.literal('heatmap'),
+  type: schema.literal('heat_map'),
   legend: schema.maybe(
-    schema.object(legendSchemaProps, { meta: { description: 'Legend configuration' } })
+    schema.object(legendSchemaProps, {
+      meta: {
+        id: 'heatmapLegend',
+        title: 'Legend',
+        description: 'Legend configuration',
+      },
+    })
   ),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
-  axes: schema.maybe(
+  axis: schema.maybe(
     schema.object(
       {
         x: schema.maybe(
-          schema.object({
-            title: schema.maybe(schema.object(axisTitleSchemaProps)),
-            labels: schema.maybe(schema.object(labelsSchemaProps)),
-          })
+          schema.object(
+            {
+              title: schema.maybe(schema.object(axisTitleSchemaProps)),
+              labels: schema.maybe(schema.object(labelsSchemaProps)),
+              sort: schema.maybe(heatmapSortPredicateSchema),
+            },
+            {
+              meta: {
+                id: 'heatmapXAxis',
+                title: 'X Axis',
+                description: 'X axis configuration',
+              },
+            }
+          )
         ),
         y: schema.maybe(
-          schema.object({
-            title: schema.maybe(schema.object(axisTitleSchemaProps)),
-            labels: schema.maybe(simpleLabelsSchema),
-          })
+          schema.object(
+            {
+              title: schema.maybe(schema.object(axisTitleSchemaProps)),
+              labels: schema.maybe(simpleLabelsSchema),
+              sort: schema.maybe(heatmapSortPredicateSchema),
+            },
+            {
+              meta: {
+                id: 'heatmapYAxis',
+                title: 'Y Axis',
+                description: 'Y axis configuration',
+              },
+            }
+          )
         ),
       },
-      { meta: { description: 'Axis configuration for X and Y axes' } }
+      {
+        meta: {
+          id: 'heatmapAxes',
+          title: 'Axes',
+          description: 'Axis configuration for X and Y axes',
+        },
+      }
     )
   ),
   cells: schema.maybe(
@@ -99,43 +123,51 @@ const heatmapSharedStateSchema = {
           })
         ),
       },
-      { meta: { description: 'Cells configuration' } }
+      { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' } }
     )
   ),
 };
 
 const heatmapAxesStateSchemaProps = {
-  xAxis: bucketOperationDefinitionSchema,
-  yAxis: schema.maybe(bucketOperationDefinitionSchema),
+  x: bucketOperationDefinitionSchema,
+  y: schema.maybe(bucketOperationDefinitionSchema),
 };
 
 const heatmapAxesStateESQLSchemaProps = {
-  xAxis: esqlColumnSchema,
-  yAxis: schema.maybe(esqlColumnSchema),
+  x: esqlColumnSchema,
+  y: schema.maybe(esqlColumnSchema),
 };
 
 const heatmapStateMetricOptionsSchemaProps = {
   color: schema.maybe(colorByValueSchema),
 };
 
-export const heatmapStateSchemaNoESQL = schema.object({
-  ...heatmapSharedStateSchema,
-  ...heatmapAxesStateSchemaProps,
-  ...dslOnlyPanelInfoSchema,
-  ...datasetSchema,
-  metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-    schema.object(heatmapStateMetricOptionsSchemaProps)
-  ),
-});
+export const heatmapStateSchemaNoESQL = schema.object(
+  {
+    ...heatmapSharedStateSchema,
+    ...heatmapAxesStateSchemaProps,
+    ...dslOnlyPanelInfoSchema,
+    ...datasetSchema,
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+      heatmapStateMetricOptionsSchemaProps
+    ),
+  },
+  { meta: { id: 'heatmapNoESQL', title: 'Heatmap Chart (DSL)' } }
+);
 
-export const heatmapStateSchemaESQL = schema.object({
-  ...heatmapSharedStateSchema,
-  ...heatmapAxesStateESQLSchemaProps,
-  ...datasetEsqlTableSchema,
-  metric: schema.allOf([schema.object(heatmapStateMetricOptionsSchemaProps), esqlColumnSchema]),
-});
+export const heatmapStateSchemaESQL = schema.object(
+  {
+    ...heatmapSharedStateSchema,
+    ...heatmapAxesStateESQLSchemaProps,
+    ...datasetEsqlTableSchema,
+    metric: esqlColumnSchema.extends(heatmapStateMetricOptionsSchemaProps),
+  },
+  { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
+);
 
-export const heatmapStateSchema = schema.oneOf([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL]);
+export const heatmapStateSchema = schema.oneOf([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
+  meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
+});
 
 export type HeatmapState = TypeOf<typeof heatmapStateSchema>;
 export type HeatmapStateNoESQL = TypeOf<typeof heatmapStateSchemaNoESQL>;

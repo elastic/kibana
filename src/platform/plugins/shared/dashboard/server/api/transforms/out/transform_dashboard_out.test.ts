@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PinnedControlState } from '@kbn/controls-schemas';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../dashboard_saved_object';
-import type { DashboardState } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
 
 jest.mock('../../../kibana_services', () => ({
@@ -23,8 +21,8 @@ jest.mock('../../../kibana_services', () => ({
 }));
 
 describe('transformDashboardOut', () => {
-  const controlGroupInputControlsSo = {
-    explicitInput: { anyKey: 'some value' },
+  const pinnedPanelSo = {
+    config: { anyKey: 'some value' },
     type: 'type1',
     order: 0,
   };
@@ -52,72 +50,28 @@ describe('transformDashboardOut', () => {
       timeRestore: false,
       title: 'my title',
     };
-    expect(transformDashboardOut(input)).toEqual<DashboardState>({
-      title: 'my title',
-    });
-  });
-
-  test('should not supply defaults for optional nested properties', () => {
-    const input: DashboardSavedObjectAttributes = {
-      controlGroupInput: {
-        panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),
-      },
-      panelsJSON: JSON.stringify(panelsSo),
-      optionsJSON: JSON.stringify({
-        hidePanelTitles: false,
-      }),
-      kibanaSavedObjectMeta: {},
-      title: 'my title',
-      description: 'my description',
-    };
-    expect(transformDashboardOut(input)).toEqual<DashboardState>({
-      pinned_panels: [
-        {
-          config: { anyKey: 'some value' },
-          uid: 'foo',
-          type: 'type1',
-        } as unknown as PinnedControlState,
-      ],
-      description: 'my description',
-      options: {
-        hide_panel_titles: false,
-      },
-      panels: [
-        {
-          config: {
-            enhancements: {},
-            savedObjectId: '1',
-            title: 'title1',
-          },
-          grid: { x: 0, y: 0, w: 10, h: 10 },
-          uid: '1',
-          type: 'type1',
-          version: '2',
-        },
-      ],
+    expect(transformDashboardOut(input)).toEqual({
       title: 'my title',
     });
   });
 
   test('should transform full attributes correctly', () => {
     const input: DashboardSavedObjectAttributes = {
-      controlGroupInput: {
-        panelsJSON: JSON.stringify({
+      pinned_panels: {
+        panels: {
           foo: {
-            ...controlGroupInputControlsSo,
+            ...pinnedPanelSo,
             grow: false,
             width: 'small',
           },
-        }),
-        ignoreParentSettingsJSON: JSON.stringify({ ignoreFilters: true }),
-        controlStyle: 'twoLine',
-        showApplySelections: true,
+        },
       },
       description: 'description',
       kibanaSavedObjectMeta: {
         searchSourceJSON: JSON.stringify({ query: { query: 'test', language: 'KQL' } }),
       },
       optionsJSON: JSON.stringify({
+        autoApplyFilters: false,
         hidePanelTitles: true,
         useMargins: false,
         syncColors: false,
@@ -148,7 +102,7 @@ describe('transformDashboardOut', () => {
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(transformDashboardOut(input, references)).toEqual<DashboardState>({
+    expect(transformDashboardOut(input, references)).toEqual({
       pinned_panels: [
         {
           uid: 'foo',
@@ -158,7 +112,7 @@ describe('transformDashboardOut', () => {
             anyKey: 'some value',
           },
           type: 'type1',
-        } as unknown as PinnedControlState,
+        },
       ],
       description: 'description',
       query: { query: 'test', language: 'KQL' },
@@ -174,7 +128,6 @@ describe('transformDashboardOut', () => {
         {
           config: {
             enhancements: {},
-            savedObjectId: '1',
             title: 'title1',
           },
           grid: {
@@ -185,7 +138,6 @@ describe('transformDashboardOut', () => {
           },
           uid: '1',
           type: 'type1',
-          version: '2',
         },
       ],
       refresh_interval: {
@@ -197,6 +149,83 @@ describe('transformDashboardOut', () => {
         from: 'now-15m',
         to: 'now',
       },
+      title: 'title',
+    });
+  });
+
+  test('should transform <9.4 legacy attributes correctly', () => {
+    const input: DashboardSavedObjectAttributes = {
+      controlGroupInput: {
+        panelsJSON: JSON.stringify({
+          foo: {
+            ...pinnedPanelSo,
+            grow: false,
+            width: 'small',
+          },
+        }),
+        ignoreParentSettingsJSON: JSON.stringify({ ignoreFilters: true }),
+        controlStyle: 'twoLine',
+        showApplySelections: true,
+      },
+      description: 'description',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: JSON.stringify({ query: { query: 'test', language: 'KQL' } }),
+      },
+      optionsJSON: JSON.stringify({
+        hidePanelTitles: true,
+        useMargins: false,
+        syncColors: false,
+        syncTooltips: false,
+        syncCursor: false,
+      }),
+      panelsJSON: JSON.stringify(panelsSo),
+      title: 'title',
+    };
+    const references = [
+      {
+        type: 'index-pattern',
+        id: 'index-pattern1',
+        name: 'index-pattern-ref-index-pattern1',
+      },
+    ];
+    expect(transformDashboardOut(input, references)).toEqual({
+      pinned_panels: [
+        {
+          uid: 'foo',
+          grow: false,
+          width: 'small',
+          config: {
+            anyKey: 'some value',
+          },
+          type: 'type1',
+        },
+      ],
+      description: 'description',
+      query: { query: 'test', language: 'KQL' },
+      options: {
+        hide_panel_titles: true,
+        use_margins: false,
+        sync_colors: false,
+        sync_tooltips: false,
+        sync_cursor: false,
+        auto_apply_filters: false,
+      },
+      panels: [
+        {
+          config: {
+            enhancements: {},
+            title: 'title1',
+          },
+          grid: {
+            x: 0,
+            y: 0,
+            w: 10,
+            h: 10,
+          },
+          uid: '1',
+          type: 'type1',
+        },
+      ],
       title: 'title',
     });
   });

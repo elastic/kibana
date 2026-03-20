@@ -35,6 +35,7 @@ import {
   createDashboardListingFilterUrl,
 } from '../utils/urls';
 import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/performance/dashboard_duration_start_mark';
+import type { DashboardApi } from '../dashboard_api/types';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -48,6 +49,7 @@ export interface DashboardMountProps {
   element: AppMountParameters['element'];
   coreStart: CoreStart;
   mountContext: DashboardMountContextProps;
+  setDashboardAppApi: (api: DashboardApi | undefined) => void;
 }
 
 export async function mountApp({
@@ -55,6 +57,7 @@ export async function mountApp({
   element,
   appUnMounted,
   mountContext,
+  setDashboardAppApi,
 }: DashboardMountProps) {
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
 
@@ -115,14 +118,16 @@ export async function mountApp({
         savedDashboardId={routeProps.match.params.id}
         redirectTo={redirect}
         expandedPanelId={routeProps.match.params.expandedPanelId}
+        setDashboardAppApi={setDashboardAppApi}
       />
     );
   };
 
-  const renderListingPage = (routeProps: RouteComponentProps) => {
+  const renderListingPage = (routeProps: RouteComponentProps<{ activeTab?: string }>) => {
     // clear the dashboard duration start mark set during mounting because we
     // went to the listing page instead of a dashboard view
     performance.clearMarks(DASHBOARD_DURATION_START_MARK);
+    embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
 
     coreServices.chrome.docTitle.change(getDashboardPageTitle());
     const routeParams = parse(routeProps.history.location.search);
@@ -168,7 +173,11 @@ export async function mountApp({
               ]}
               render={renderDashboard}
             />
-            <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+            <Route
+              exact
+              path={[LANDING_PAGE_PATH, `${LANDING_PAGE_PATH}/:activeTab`]}
+              render={renderListingPage}
+            />
             <Route exact path="/">
               <Redirect to={LANDING_PAGE_PATH} />
             </Route>

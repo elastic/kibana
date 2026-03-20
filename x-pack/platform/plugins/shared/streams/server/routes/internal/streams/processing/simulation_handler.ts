@@ -21,7 +21,7 @@ import type {
   FieldCapsResponse,
   IngestSimulateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
 import type {
@@ -35,19 +35,26 @@ import type {
   DetectedField,
   ProcessingSimulationResponse,
 } from '@kbn/streams-schema';
-import { getInheritedFieldsFromAncestors, isOtelStream, Streams } from '@kbn/streams-schema';
-import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
-import type { StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline } from '@kbn/streamlang';
-import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
+import {
+  getInheritedFieldsFromAncestors,
+  getRoot,
+  LOGS_ECS_STREAM_NAME,
+  Streams,
+} from '@kbn/streams-schema';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
-import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
+import {
+  FIELD_DEFINITION_TYPES,
+  type StreamsMappingProperties,
+} from '@kbn/streams-schema/src/fields';
+import { validateStreamlang, type StreamlangDSL } from '@kbn/streamlang';
+import { mapValues, uniq, uniqBy, omit, isEmpty } from 'lodash';
 import {
   normalizeGeoPointsInObject,
   detectGeoPointPatternsFromDocuments,
 } from '../../../../lib/streams/helpers/normalize_geo_points';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
+import { buildSimulationProcessorsWithConditionNoops } from './simulation_condition_noops';
 
 export interface ProcessingSimulationParams {
   path: {
@@ -62,7 +69,7 @@ export interface ProcessingSimulationParams {
 
 export interface SimulateProcessingDeps {
   params: ProcessingSimulationParams;
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
 }
@@ -101,7 +108,7 @@ export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKe
 
 export const simulateProcessing = async ({
   params,
-  scopedClusterClient,
+  esClient,
   streamsClient,
   fieldsMetadataClient,
 }: SimulateProcessingDeps): Promise<ProcessingSimulationResponse> => {
@@ -109,10 +116,43 @@ export const simulateProcessing = async ({
   const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
     await Promise.all([
       streamsClient.getStream(params.path.name),
-      getStreamIndex(scopedClusterClient, streamsClient, params.path.name),
+      getStreamIndex(esClient, streamsClient, params.path.name),
     ]);
 
   const streamFields = await getStreamFields(streamsClient, stream);
+
+  // Get reserved fields for validation
+  const reservedFields = Object.entries(streamFields)
+    .filter(([, { type }]) => type === 'system')
+    .map(([name]) => name);
+
+  // Validate the Streamlang DSL before attempting simulation
+  const rootStream = getRoot(params.path.name);
+  const isWiredStream = Streams.WiredStream.Definition.is(stream);
+  const validationResult = validateStreamlang(params.body.processing, {
+    reservedFields,
+    streamType: isWiredStream ? 'wired' : 'classic',
+    skipNamespaceValidation: isWiredStream && rootStream === LOGS_ECS_STREAM_NAME,
+  });
+
+  if (!validationResult.isValid) {
+    return {
+      documents: [],
+      processors_metrics: {},
+      documents_metrics: {
+        failed_rate: 1,
+        partially_parsed_rate: 0,
+        skipped_rate: 0,
+        parsed_rate: 0,
+        dropped_rate: 0,
+      },
+      detected_fields: [],
+      definition_error: {
+        type: 'validation_error',
+        message: validationResult.errors.map((e) => e.message).join(', '),
+      },
+    };
+  }
 
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
   const simulationData = prepareSimulationData(params, stream, streamFields);
@@ -129,8 +169,8 @@ export const simulateProcessing = async ({
    * - The ingest simulation is used to fail fast on mapping failures. This runs only if `detected_fields` is provided.
    */
   const [pipelineSimulationResult, ingestSimulationResult] = await Promise.all([
-    executePipelineSimulation(scopedClusterClient, pipelineSimulationBody),
-    executeIngestSimulation(scopedClusterClient, ingestSimulationBody),
+    executePipelineSimulation(esClient, pipelineSimulationBody),
+    executeIngestSimulation(esClient, ingestSimulationBody),
   ]);
 
   /* 3. Fail fast on pipeline simulations errors and return the generic error response gracefully */
@@ -140,8 +180,6 @@ export const simulateProcessing = async ({
     return prepareSimulationFailureResponse(ingestSimulationResult.error);
   }
 
-  const otelStream = isOtelStream(stream);
-
   /* 4. Extract all the documents reports and processor metrics from the simulations */
   const { docReports, processorsMetrics } = computePipelineSimulationResult(
     pipelineSimulationResult.simulation,
@@ -149,13 +187,12 @@ export const simulateProcessing = async ({
     simulationData.docs,
     params.body.processing,
     Streams.WiredStream.Definition.is(stream),
-    otelStream,
     streamFields
   );
 
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
   const detectedFields = await computeDetectedFields(
-    processorsMetrics,
+    docReports,
     params,
     streamFields,
     streamIndexFieldCaps,
@@ -185,14 +222,12 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
    * 1. Force each processor to not ignore failures to collect all errors
    * 2. Append the error message to the `_errors` field on failure
    */
-  const transpiledIngestPipelineProcessors = transpileIngestPipeline(processing, {
-    ignoreMalformed: true,
-    traceCustomIdentifiers: true,
-  }).processors;
+  const transpiledIngestPipelineProcessors =
+    buildSimulationProcessorsWithConditionNoops(processing);
 
   return transpiledIngestPipelineProcessors.map((processor) => {
     const type = Object.keys(processor)[0];
-    const processorConfig = (processor as any)[type]; // Safe to use any here due to type structure
+    const processorConfig = (processor as Record<string, Record<string, unknown>>)[type];
 
     return {
       [type]: {
@@ -204,7 +239,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
               field: '_errors',
               value: {
                 message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: processorConfig.tag,
+                processor_id: processorConfig?.tag,
                 type: 'generic_processor_failure',
               },
             },
@@ -254,7 +289,6 @@ const preparePipelineSimulationBody = (
 
   return {
     docs,
-    // @ts-expect-error field_access_pattern not supported by typing yet
     pipeline: { processors, field_access_pattern: 'flexible' },
     verbose: true,
   };
@@ -278,7 +312,6 @@ const prepareIngestSimulationBody = (
   if (defaultPipelineName) {
     pipelineSubstitutions[defaultPipelineName] = {
       processors,
-      // @ts-expect-error field_access_pattern not supported by typing yet
       field_access_pattern: 'flexible',
     };
   }
@@ -318,13 +351,11 @@ const prepareIngestSimulationBody = (
  * In case any other error occurs, we delegate the error handling to currently in draft processor.
  */
 export const executePipelineSimulation = async (
-  scopedClusterClient: IScopedClusterClient,
+  esClient: ElasticsearchClient,
   simulationBody: IngestSimulateRequest
 ): Promise<PipelineSimulationResult> => {
   try {
-    const originalSimulation = await scopedClusterClient.asCurrentUser.ingest.simulate(
-      simulationBody
-    );
+    const originalSimulation = await esClient.ingest.simulate(simulationBody);
     const simulation = sanitiseSimulationResult(originalSimulation);
     return {
       status: 'success',
@@ -347,7 +378,7 @@ export const executePipelineSimulation = async (
     return {
       status: 'failure',
       error: {
-        message: error.message,
+        message: error instanceof Error ? error.message : String(error),
         type: 'generic_simulation_failure',
       },
     };
@@ -430,11 +461,11 @@ function propagateProcessorResultsPipelineTags(
 }
 
 const executeIngestSimulation = async (
-  scopedClusterClient: IScopedClusterClient,
+  esClient: ElasticsearchClient,
   simulationBody: SimulateIngestRequest
 ): Promise<IngestSimulationResult> => {
   try {
-    const simulation = await scopedClusterClient.asCurrentUser.simulate.ingest(simulationBody);
+    const simulation = await esClient.simulate.ingest(simulationBody);
 
     return {
       status: 'success',
@@ -457,7 +488,7 @@ const executeIngestSimulation = async (
     return {
       status: 'failure',
       error: {
-        message: error.message,
+        message: error instanceof Error ? error.message : String(error),
         type: 'generic_simulation_failure',
       },
     };
@@ -479,18 +510,15 @@ const computePipelineSimulationResult = (
   sampleDocs: Array<{ _source: FlattenRecord }>,
   processing: StreamlangDSL,
   isWiredStream: boolean,
-  otelStream: boolean,
   streamFields: FieldDefinition
 ): {
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
 } => {
-  const transpiledProcessors = transpileIngestPipeline(processing, {
-    ignoreMalformed: true,
-    traceCustomIdentifiers: true,
-  }).processors;
+  const transpiledProcessors = buildSimulationProcessorsWithConditionNoops(processing);
 
   const processorsMap = initProcessorMetricsMap(transpiledProcessors);
+  const conditionProcessorTags = collectConditionBlockIds(processing);
 
   const forbiddenFields = Object.entries(streamFields)
     .filter(([, { type }]) => type === 'system')
@@ -498,21 +526,23 @@ const computePipelineSimulationResult = (
 
   const docReports = pipelineSimulationResult.docs.map((pipelineDocResult, id) => {
     const ingestDocResult = ingestSimulationResult.docs[id];
-    const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult, otelStream);
+    const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult);
     const processedBy = collectProcessedByProcessorIds(pipelineDocResult.processor_results);
 
     const { errors, status, value } = getLastDoc(
       pipelineDocResult,
       sampleDocs[id]._source,
-      ingestDocErrors
+      ingestDocErrors,
+      conditionProcessorTags
     );
 
-    const diff = computeSimulationDocDiff(
-      sampleDocs[id]._source,
-      pipelineDocResult,
+    const diff = computeSimulationDocDiff({
+      base: sampleDocs[id]._source,
+      docResult: pipelineDocResult,
       isWiredStream,
-      forbiddenFields
-    );
+      forbiddenFields,
+      conditionProcessorTags,
+    });
 
     pipelineDocResult.processor_results.forEach((processor) => {
       const procId = processor.tag;
@@ -526,7 +556,9 @@ const computePipelineSimulationResult = (
       }
     });
 
-    diff.detected_fields.forEach(({ processor_id, name }) => {
+    // Use intermediate_field_changes for processor metrics - this tracks what each processor touched,
+    // even if the field was later deleted by another processor (useful for debugging/metrics)
+    diff.intermediate_field_changes.forEach(({ processor_id, name }) => {
       processorsMap[processor_id].detected_fields.push(name);
     });
 
@@ -559,16 +591,17 @@ const computePipelineSimulationResult = (
 };
 
 const initProcessorMetricsMap = (
-  processors: IngestProcessorContainer[]
+  processors: NonNullable<IngestProcessorContainer>[]
 ): Record<string, ProcessorMetrics> => {
   // Gather unique IDs because the manual ingest pipeline proccessor (for example) will share the same
   // ID across it's nested processors.
   const ids = new Set<string>();
 
   for (const processor of processors) {
-    const type = Object.keys(processor)[0] as keyof IngestProcessorContainer;
-    const config = processor[type] as Record<string, unknown>;
-    const tag = config.tag;
+    const type = Object.keys(processor)[0] as keyof NonNullable<IngestProcessorContainer>;
+    const config = processor[type];
+
+    const tag = config?.tag;
 
     if (typeof tag === 'string') {
       ids.add(tag);
@@ -620,13 +653,23 @@ const extractProcessorMetrics = ({
 
 const getDocumentStatus = (
   doc: SuccessfulPipelineSimulateDocumentResult,
-  ingestDocErrors: SimulationError[]
+  ingestDocErrors: SimulationError[],
+  conditionProcessorTags: Set<string>
 ): DocSimulationStatus => {
   // If there is an ingestion mapping error, the document parsing should be considered failed
   if (ingestDocErrors.some((error) => error.type === 'field_mapping_failure')) {
     return 'failed';
   }
-  const processorResults = doc.processor_results;
+  const processorResults = filterOutConditionNoopProcessorResults(
+    doc.processor_results,
+    conditionProcessorTags
+  );
+
+  // If a simulation run contains no non-condition processors, treat it as parsed (noop pipeline),
+  // rather than incorrectly classifying it as "skipped" (Array.every() is true on empty arrays).
+  if (processorResults.length === 0) {
+    return 'parsed';
+  }
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
@@ -652,12 +695,16 @@ const getDocumentStatus = (
 const getLastDoc = (
   docResult: SuccessfulPipelineSimulateDocumentResult,
   sample: FlattenRecord,
-  ingestDocErrors: SimulationError[]
+  ingestDocErrors: SimulationError[],
+  conditionProcessorTags: Set<string>
 ) => {
-  const status = getDocumentStatus(docResult, ingestDocErrors);
+  const status = getDocumentStatus(docResult, ingestDocErrors, conditionProcessorTags);
+  const processorResults = filterOutConditionNoopProcessorResults(
+    docResult.processor_results,
+    conditionProcessorTags
+  );
   const lastDocSource =
-    docResult.processor_results.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ??
-    sample;
+    processorResults.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ?? sample;
 
   if (status === 'parsed') {
     return {
@@ -671,18 +718,35 @@ const getLastDoc = (
   }
 };
 
+interface ComputeSimulationDocDiffParams {
+  base: FlattenRecord;
+  docResult: SuccessfulPipelineSimulateDocumentResult;
+  isWiredStream: boolean;
+  forbiddenFields: string[];
+  conditionProcessorTags: Set<string>;
+}
+
 /**
  * To improve tracking down the errors and the fields detection to the individual processor,
  * this function computes the detected fields and the errors for each processor.
+ *
+ * Returns:
+ * - `intermediate_field_changes`: All fields touched by each processor (for per-processor metrics/debugging)
+ * - `detected_fields`: Only fields that exist in the final output compared to input (for overall detection)
+ * - `errors`: Processing errors detected during comparison
  */
-const computeSimulationDocDiff = (
-  base: FlattenRecord,
-  docResult: SuccessfulPipelineSimulateDocumentResult,
-  isWiredStream: boolean,
-  forbiddenFields: string[]
-) => {
+export const computeSimulationDocDiff = ({
+  base,
+  docResult,
+  isWiredStream,
+  forbiddenFields,
+  conditionProcessorTags,
+}: ComputeSimulationDocDiffParams) => {
   // Keep only the successful processors defined from the user, skipping the on_failure processors from the simulation
-  const successfulProcessors = docResult.processor_results.filter(isSuccessfulProcessor);
+  const successfulProcessors = filterOutConditionNoopProcessorResults(
+    docResult.processor_results,
+    conditionProcessorTags
+  ).filter(isSuccessfulProcessor);
 
   const comparisonDocs = [
     { processor_id: 'base', value: base },
@@ -694,12 +758,20 @@ const computeSimulationDocDiff = (
     }),
   ];
 
-  const diffResult: Pick<SimulationDocReport, 'detected_fields' | 'errors'> = {
+  // Store base and final docs for overall diff computation
+  const baseDoc = comparisonDocs[0];
+  const finalDoc = comparisonDocs[comparisonDocs.length - 1];
+
+  const diffResult: Pick<SimulationDocReport, 'detected_fields' | 'errors'> & {
+    intermediate_field_changes: Array<{ processor_id: string; name: string }>;
+  } = {
     detected_fields: [],
+    intermediate_field_changes: [],
     errors: [],
   };
 
-  // Compare each document outcome with the previous one, flattening for standard comparison and detecting added/udpated fields.
+  // Compare each document outcome with the previous one, flattening for standard comparison and detecting added/updated fields.
+  // This tracks what each processor touches for debugging/metrics purposes.
   // When updated fields are detected compared to the original document, the processor is not additive to the documents, and an error is added to the diff result.
   while (comparisonDocs.length > 1) {
     const currentDoc = comparisonDocs.shift()!; // Safe to use ! here since we check the length
@@ -719,7 +791,8 @@ const computeSimulationDocDiff = (
       name,
     }));
 
-    diffResult.detected_fields.push(...processorDetectedFields);
+    // Track intermediate field changes (includes fields that may be deleted by later processors)
+    diffResult.intermediate_field_changes.push(...processorDetectedFields);
 
     if (forbiddenFields.some((field) => updatedFields.includes(field))) {
       diffResult.errors.push({
@@ -730,6 +803,23 @@ const computeSimulationDocDiff = (
     }
   }
 
+  // Compute overall diff between initial input and final output.
+  // This excludes temporary fields that were created then deleted within processing.
+  const { added: finalAdded, updated: finalUpdated } = calculateObjectDiff(
+    flattenObjectNestedLast(baseDoc.value),
+    flattenObjectNestedLast(finalDoc.value)
+  );
+
+  const overallAddedFields = Object.keys(flattenObjectNestedLast(finalAdded));
+  const overallUpdatedFields = Object.keys(flattenObjectNestedLast(finalUpdated));
+  const overallDetectedFieldNames = new Set([...overallAddedFields, ...overallUpdatedFields]);
+
+  // Filter intermediate field changes to only include fields that exist in the final output,
+  // keeping processor attribution for fields that do exist
+  diffResult.detected_fields = diffResult.intermediate_field_changes.filter(({ name }) =>
+    overallDetectedFieldNames.has(name)
+  );
+
   return diffResult;
 };
 
@@ -739,6 +829,7 @@ const collectProcessedByProcessorIds = (
   const processedBy = new Set<string>();
 
   processorResults.forEach((processor) => {
+    // Include condition-noop tags as well: the UI uses them to filter docs by condition match.
     if (!processor.tag || isSkippedProcessor(processor)) {
       return;
     }
@@ -749,10 +840,43 @@ const collectProcessedByProcessorIds = (
   return Array.from(processedBy);
 };
 
-const collectIngestDocumentErrors = (
-  docResult: SimulateIngestSimulateIngestDocumentResult,
-  otelStream: boolean
+const NOOP_CLEANUP_SUFFIX = ':noop-cleanup';
+
+const filterOutConditionNoopProcessorResults = (
+  processorResults: SuccessfulPipelineSimulateDocumentResult['processor_results'],
+  conditionProcessorTags: Set<string>
 ) => {
+  return processorResults.filter((proc) => {
+    if (!proc.tag) return true;
+    // Filter out condition noop processors (set processor tagged with condition ID)
+    if (conditionProcessorTags.has(proc.tag)) return false;
+    // Filter out noop cleanup processors (remove processor tagged with conditionId:noop-cleanup)
+    if (proc.tag.endsWith(NOOP_CLEANUP_SUFFIX)) {
+      const conditionId = proc.tag.slice(0, -NOOP_CLEANUP_SUFFIX.length);
+      if (conditionProcessorTags.has(conditionId)) return false;
+    }
+    return true;
+  });
+};
+
+const collectConditionBlockIds = (processing: StreamlangDSL): Set<string> => {
+  const ids = new Set<string>();
+  const traverse = (steps: StreamlangDSL['steps']) => {
+    for (const step of steps) {
+      if ('condition' in step && !('action' in step)) {
+        if (step.customIdentifier) {
+          ids.add(step.customIdentifier);
+        }
+        traverse(step.condition.steps);
+      }
+    }
+  };
+
+  traverse(processing.steps);
+  return ids;
+};
+
+const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocumentResult) => {
   const errors: SimulationError[] = [];
 
   if (isMappingFailure(docResult)) {
@@ -763,17 +887,10 @@ const collectIngestDocumentErrors = (
   }
 
   if (docResult.doc?.ignored_fields) {
-    // Drop ignored field errors for OTEL streams if they end in geo.location - This is a temporary workaround for https://github.com/elastic/elasticsearch/issues/140506
-    const fieldsWithoutLocation = docResult.doc.ignored_fields.filter(({ field }) => {
-      return !field.endsWith('geo.location');
-    });
-    if (otelStream && fieldsWithoutLocation.length === 0) {
-      return errors;
-    }
     errors.push({
       type: 'ignored_fields_failure',
       message: 'Some fields were ignored while simulating this document ingestion.',
-      ignored_fields: fieldsWithoutLocation,
+      ignored_fields: docResult.doc.ignored_fields,
     });
   }
 
@@ -840,7 +957,7 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
 };
 
 const getStreamIndex = async (
-  scopedClusterClient: IScopedClusterClient,
+  esClient: ElasticsearchClient,
   streamsClient: StreamsClient,
   streamName: string
 ): Promise<{
@@ -854,10 +971,10 @@ const getStreamIndex = async (
   }
 
   const [lastIndex, lastIndexFieldCaps] = await Promise.all([
-    scopedClusterClient.asCurrentUser.indices.get({
+    esClient.indices.get({
       index: lastIndexRef.index_name,
     }),
-    scopedClusterClient.asCurrentUser.fieldCaps({
+    esClient.fieldCaps({
       index: lastIndexRef.index_name,
       fields: '*',
     }),
@@ -888,15 +1005,17 @@ const getStreamFields = async (
 
 /**
  * In case new fields have been detected, we want to tell the user which ones are inherited and already mapped.
+ * Uses per-doc detected_fields which have already been filtered to exclude temporary fields (created then deleted).
  */
 const computeDetectedFields = async (
-  processorsMetrics: Record<string, ProcessorMetrics>,
+  docReports: SimulationDocReport[],
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
   streamFieldCaps: FieldCapsResponse['fields'],
   fieldsMetadataClient: IFieldsMetadataClient
 ): Promise<DetectedField[]> => {
-  const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
+  // Aggregate field names from per-doc detected_fields (already filtered to exclude temporary fields)
+  const fields = docReports.flatMap((doc) => doc.detected_fields.map((f) => f.name));
 
   const uniqueFields = uniq(fields);
 
@@ -960,15 +1079,26 @@ const getRateCalculatorForDocs = (docs: SimulationDocReport[]) => (status: DocSi
   return matchCount / docs.length;
 };
 
-const computeMappingProperties = (detectedFields: NamedFieldDefinitionConfig[]) => {
+type MappingDetectedField = NamedFieldDefinitionConfig & {
+  type: (typeof FIELD_DEFINITION_TYPES)[number];
+};
+
+const isMappingDetectedField = (field: NamedFieldDefinitionConfig): field is MappingDetectedField =>
+  FIELD_DEFINITION_TYPES.includes(field.type as (typeof FIELD_DEFINITION_TYPES)[number]);
+
+const computeMappingProperties = (
+  detectedFields: NamedFieldDefinitionConfig[]
+): StreamsMappingProperties => {
   return Object.fromEntries(
-    detectedFields.flatMap(({ name, ...config }) => {
-      if (config.type === 'system') {
+    detectedFields.flatMap((field) => {
+      if (!isMappingDetectedField(field)) {
         return [];
       }
+
+      const { name, description: _description, ...config } = field;
       return [[name, { ...config, ignore_malformed: false }]];
     })
-  );
+  ) as StreamsMappingProperties;
 };
 
 /**

@@ -22,6 +22,7 @@ import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { convertToApiThreshold } from '../../helpers/threshold_unit';
 import type { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
@@ -39,6 +40,7 @@ export interface CustomEquationEditorProps {
   aggregationTypes: AggregationTypes;
   errors: IErrorObject;
   dataView: DataViewBase;
+  kql: KqlPluginStart;
 }
 
 const NEW_METRIC = {
@@ -57,6 +59,7 @@ export function CustomEquationEditor({
   aggregationTypes,
   errors,
   dataView,
+  kql,
 }: CustomEquationEditorProps) {
   const [customMetrics, setCustomMetrics] = useState<CustomMetrics>(
     expression?.metrics ?? [NEW_METRIC]
@@ -145,6 +148,7 @@ export function CustomEquationEditor({
       onChange={handleChange}
       errors={errors}
       dataView={dataView}
+      kql={kql}
     />
   ));
 

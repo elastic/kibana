@@ -36,6 +36,7 @@ function getTsProject(repoPath: string, overridePath?: string): Project {
   });
 
   if (!overridePath) {
+    // Full build: load all source files and resolve dependencies upfront
     project.addSourceFilesAtPaths([`${repoPath}/x-pack/plugins/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/x-pack/packages/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/x-pack/platform/**/*.ts`, '!**/*.d.ts']);
@@ -44,10 +45,17 @@ function getTsProject(repoPath: string, overridePath?: string): Project {
     project.addSourceFilesAtPaths([`${repoPath}/src/platform/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/src/core/packages/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/packages/**/*.ts`, '!**/*.d.ts']);
+    project.resolveSourceFileDependencies();
   } else {
+    // Single-plugin build: only load files from the target plugin directory.
+    // We intentionally skip resolveSourceFileDependencies() here because:
+    // 1. ts-morph resolves dependencies lazily when accessed (e.g., via getType()).
+    // 2. This significantly reduces memory usage and startup time for single-plugin builds.
+    // 3. Cross-package type references still resolve correctly via the tsconfig paths.
+    // Trade-off: First access to external types may be slightly slower, but overall
+    // build time is reduced since we don't load the entire codebase into memory.
     project.addSourceFilesAtPaths([`${overridePath}/**/*.ts`, '!**/*.d.ts']);
   }
-  project.resolveSourceFileDependencies();
   return project;
 }
 
@@ -73,25 +81,42 @@ export async function setupProject(
 ): Promise<SetupProjectResult> {
   const { transaction, outputFolder } = context;
 
+  const { pluginFilter, packageFilter } = options;
+  const hasPluginFilter = pluginFilter && pluginFilter.length > 0;
+  const hasPackageFilter = packageFilter && packageFilter.length > 0;
+  const hasAnyFilter = hasPluginFilter || hasPackageFilter;
+
   const spanInitialDocIds = transaction.startSpan('build_api_docs.initialDocIds', 'setup');
   const initialDocIds =
-    !options.pluginFilter && Fs.existsSync(outputFolder)
-      ? await getAllDocFileIds(outputFolder)
-      : undefined;
+    !hasAnyFilter && Fs.existsSync(outputFolder) ? await getAllDocFileIds(outputFolder) : undefined;
   spanInitialDocIds?.end();
 
   const spanPlugins = transaction.startSpan('build_api_docs.findPlugins', 'setup');
-  const plugins = findPlugins(
-    options.stats && options.pluginFilter ? options.pluginFilter : undefined
-  );
+  // Always find all plugins for cross-reference resolution.
+  const allPlugins = findPlugins();
+  // Find filtered plugins if a filter is provided.
+  const filteredPlugins = hasAnyFilter ? findPlugins({ pluginFilter, packageFilter }) : allPlugins;
 
-  if (
-    options.stats &&
-    Array.isArray(options.pluginFilter) &&
-    options.pluginFilter.length !== plugins.length
-  ) {
-    throw createFlagError('expected --plugin was not found');
+  // Validate that all requested plugins were found.
+  if (hasPluginFilter && pluginFilter) {
+    const foundPluginIds = filteredPlugins.filter((p) => p.isPlugin).map((p) => p.id);
+    const missingPlugins = pluginFilter.filter((id) => !foundPluginIds.includes(id));
+    if (missingPlugins.length > 0) {
+      throw createFlagError(`expected --plugin '${missingPlugins.join(', ')}' was not found`);
+    }
   }
+
+  // Validate that all requested packages were found.
+  if (hasPackageFilter && packageFilter) {
+    const foundPackageIds = filteredPlugins.filter((p) => !p.isPlugin).map((p) => p.id);
+    const missingPackages = packageFilter.filter((id) => !foundPackageIds.includes(id));
+    if (missingPackages.length > 0) {
+      throw createFlagError(`expected --package '${missingPackages.join(', ')}' was not found`);
+    }
+  }
+
+  // Use filtered plugins for iteration, all plugins for reference resolution
+  const plugins = hasAnyFilter ? filteredPlugins : allPlugins;
   spanPlugins?.end();
 
   const spanPathsByPackage = transaction.startSpan('build_api_docs.getPathsByPackage', 'setup');
@@ -99,15 +124,15 @@ export async function setupProject(
   spanPathsByPackage?.end();
 
   const spanProject = transaction.startSpan('build_api_docs.getTsProject', 'setup');
-  const project = getTsProject(
-    REPO_ROOT,
-    options.stats && options.pluginFilter && plugins.length === 1 ? plugins[0].directory : undefined
-  );
+  // Optimize: when building a single plugin/package, scope the TS project to just that directory
+  const singlePluginDirectory =
+    hasAnyFilter && filteredPlugins.length === 1 ? filteredPlugins[0].directory : undefined;
+  const project = getTsProject(REPO_ROOT, singlePluginDirectory);
   spanProject?.end();
 
   const spanFolders = transaction.startSpan('build_api_docs.check-folders', 'setup');
-  // if the output folder already exists, and we don't have a plugin filter, delete all the files in the output folder
-  if (Fs.existsSync(outputFolder) && !options.pluginFilter) {
+  // if the output folder already exists, and we don't have a filter, delete all the files in the output folder
+  if (Fs.existsSync(outputFolder) && !hasAnyFilter) {
     await Fsp.rm(outputFolder, { recursive: true });
   }
 
@@ -119,6 +144,7 @@ export async function setupProject(
 
   return {
     plugins,
+    allPlugins,
     pathsByPlugin,
     project,
     initialDocIds,

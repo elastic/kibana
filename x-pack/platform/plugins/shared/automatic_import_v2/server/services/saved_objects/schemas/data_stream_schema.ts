@@ -22,6 +22,7 @@ export const dataStreamSchemaV1 = schema.object({
     ),
     {
       minSize: 1,
+      maxSize: 100,
     }
   ),
   job_info: schema.object({
@@ -46,14 +47,40 @@ export const dataStreamSchemaV1 = schema.object({
           },
         })
       ),
+      original_source: schema.maybe(
+        schema.object({
+          source_type: schema.oneOf([schema.literal('file'), schema.literal('index')]),
+          source_value: schema.string({ minLength: 1, maxLength: 512 }),
+        })
+      ),
     },
     { unknowns: 'allow' }
   ),
   result: schema.maybe(
     schema.object({
-      ingest_pipeline: schema.maybe(schema.string()),
-      field_mapping: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+      ingest_pipeline: schema.maybe(
+        schema.object({
+          processors: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 10000 }),
+          on_failure: schema.maybe(
+            schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 10000 })
+          ),
+          name: schema.maybe(schema.string()),
+        })
+      ),
+      field_mapping: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            name: schema.string(),
+            type: schema.string(),
+            is_ecs: schema.boolean(),
+          }),
+          { maxSize: 10000 }
+        )
+      ),
       connector: schema.maybe(schema.string()),
+      pipeline_docs: schema.maybe(
+        schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
+      ),
     })
   ),
 });

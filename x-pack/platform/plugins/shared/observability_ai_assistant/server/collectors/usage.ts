@@ -12,6 +12,7 @@ import { resourceNames } from '../service';
 
 interface ObservabilityAIAssistantUsage {
   knowledge_base: {
+    users_with_any_entries: number;
     users_with_global_entries: number;
     users_with_global_entries_user_created: number;
     users_with_global_entries_assistant_created: number;
@@ -40,6 +41,12 @@ export function registerUsageCollector(
     isReady: () => true,
     schema: {
       knowledge_base: {
+        users_with_any_entries: {
+          type: 'long',
+          _meta: {
+            description: 'Number of unique users with any knowledge base entries',
+          },
+        },
         users_with_global_entries: {
           type: 'long',
           _meta: {
@@ -119,6 +126,9 @@ export function registerUsageCollector(
           },
         },
         aggs: {
+          any_entries: {
+            cardinality: { field: 'user.id' },
+          },
           global_entries: {
             filter: { term: { public: true } },
             aggs: {
@@ -241,48 +251,60 @@ export function registerUsageCollector(
 
       return {
         knowledge_base: {
-          users_with_global_entries: (
-            (kbResponse.aggregations?.global_entries as any)
-              ?.unique_users as AggregationsCardinalityAggregate
-          )?.value,
-          users_with_global_entries_user_created: (
-            (kbResponse.aggregations?.global_entries_user_created as any)
-              ?.unique_users as AggregationsCardinalityAggregate
-          )?.value,
-          users_with_global_entries_assistant_created: (
-            (kbResponse.aggregations?.global_entries_assistant_created as any)
-              ?.unique_users as AggregationsCardinalityAggregate
-          )?.value,
-          users_with_private_entries: (
-            (kbResponse.aggregations?.private_entries as any)
-              ?.unique_users as AggregationsCardinalityAggregate
-          )?.value,
-          users_with_private_entries_user_created: (
-            (kbResponse.aggregations?.private_entries_user_created as any)
-              ?.unique_users as AggregationsCardinalityAggregate
-          )?.value,
-          users_with_private_entries_assistant_created: (
-            (kbResponse.aggregations?.private_entries_assistant_created as any)
-              ?.unique_users as AggregationsCardinalityAggregate
-          )?.value,
-          users_with_user_instructions: (
-            (kbResponse.aggregations?.user_instructions as any)
-              ?.unique_users as AggregationsCardinalityAggregate
-          )?.value,
+          users_with_any_entries:
+            (kbResponse.aggregations?.any_entries as AggregationsCardinalityAggregate)?.value ?? 0,
+          users_with_global_entries:
+            (
+              (kbResponse.aggregations?.global_entries as any)
+                ?.unique_users as AggregationsCardinalityAggregate
+            )?.value ?? 0,
+          users_with_global_entries_user_created:
+            (
+              (kbResponse.aggregations?.global_entries_user_created as any)
+                ?.unique_users as AggregationsCardinalityAggregate
+            )?.value ?? 0,
+          users_with_global_entries_assistant_created:
+            (
+              (kbResponse.aggregations?.global_entries_assistant_created as any)
+                ?.unique_users as AggregationsCardinalityAggregate
+            )?.value ?? 0,
+          users_with_private_entries:
+            (
+              (kbResponse.aggregations?.private_entries as any)
+                ?.unique_users as AggregationsCardinalityAggregate
+            )?.value ?? 0,
+          users_with_private_entries_user_created:
+            (
+              (kbResponse.aggregations?.private_entries_user_created as any)
+                ?.unique_users as AggregationsCardinalityAggregate
+            )?.value ?? 0,
+          users_with_private_entries_assistant_created:
+            (
+              (kbResponse.aggregations?.private_entries_assistant_created as any)
+                ?.unique_users as AggregationsCardinalityAggregate
+            )?.value ?? 0,
+          users_with_user_instructions:
+            (
+              (kbResponse.aggregations?.user_instructions as any)
+                ?.unique_users as AggregationsCardinalityAggregate
+            )?.value ?? 0,
         },
         conversations: {
-          users_with_archived_conversations: (
-            (conversationsResponse.aggregations?.archived as any)
-              ?.unique_users as AggregationsCardinalityAggregate
-          )?.value,
-          users_with_private_conversations: (
-            (conversationsResponse.aggregations?.private as any)
-              ?.unique_users as AggregationsCardinalityAggregate
-          )?.value,
-          users_with_shared_conversations: (
-            (conversationsResponse.aggregations?.shared as any)
-              ?.unique_users as AggregationsCardinalityAggregate
-          )?.value,
+          users_with_archived_conversations:
+            (
+              (conversationsResponse.aggregations?.archived as any)
+                ?.unique_users as AggregationsCardinalityAggregate
+            )?.value ?? 0,
+          users_with_private_conversations:
+            (
+              (conversationsResponse.aggregations?.private as any)
+                ?.unique_users as AggregationsCardinalityAggregate
+            )?.value ?? 0,
+          users_with_shared_conversations:
+            (
+              (conversationsResponse.aggregations?.shared as any)
+                ?.unique_users as AggregationsCardinalityAggregate
+            )?.value ?? 0,
         },
       };
     },

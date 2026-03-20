@@ -168,643 +168,647 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
     class="euiBasicTable c2"
     data-test-subj="paginated-basic-table"
   >
-    <table
-      class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
-      id="__table_generated-id"
-      tabindex="-1"
+    <div
+      class="emotion-euiContainerCSS"
     >
-      <caption
-        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-      />
-      <thead>
-        <tr>
-          <th
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_Process name_0"
-            role="columnheader"
-            scope="col"
-            style="width: 20%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-            >
-              <span
-                class="eui-textTruncate"
-                title="Process name"
-              >
-                Process name
-              </span>
-            </div>
-          </th>
-          <th
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_Hosts_1"
-            role="columnheader"
-            scope="col"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-            >
-              <span
-                class="eui-textTruncate"
-                title="Hosts"
-              >
-                Hosts
-              </span>
-            </div>
-          </th>
-          <th
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_Instances_2"
-            role="columnheader"
-            scope="col"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-            >
-              <span
-                class="eui-textTruncate"
-                title="Instances"
-              >
-                Instances
-              </span>
-            </div>
-          </th>
-          <th
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_Host names_3"
-            role="columnheader"
-            scope="col"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-            >
-              <span
-                class="eui-textTruncate"
-                title="Host names"
-              >
-                Host names
-              </span>
-            </div>
-          </th>
-          <th
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_Last command_4"
-            role="columnheader"
-            scope="col"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-            >
-              <span
-                class="eui-textTruncate"
-                title="Last command"
-              >
-                Last command
-              </span>
-            </div>
-          </th>
-          <th
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_Last user_5"
-            role="columnheader"
-            scope="col"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-            >
-              <span
-                class="eui-textTruncate"
-                title="Last user"
-              >
-                Last user
-              </span>
-            </div>
-          </th>
-        </tr>
-      </thead>
-      <tbody
-        class="css-0"
+      <table
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+        id="__table_generated-id"
+        tabindex="-1"
       >
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        <caption
+          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+        />
+        <thead>
+          <tr>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Process name_0"
+              role="columnheader"
+              scope="col"
+              style="width: 20%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Process name"
+                >
+                  Process name
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Hosts_1"
+              role="columnheader"
+              scope="col"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Hosts"
+                >
+                  Hosts
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Instances_2"
+              role="columnheader"
+              scope="col"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Instances"
+                >
+                  Instances
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Host names_3"
+              role="columnheader"
+              scope="col"
+              style="width: 25%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Host names"
+                >
+                  Host names
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Last command_4"
+              role="columnheader"
+              scope="col"
+              style="width: 25%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Last command"
+                >
+                  Last command
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Last user_5"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Last user"
+                >
+                  Last user
+                </span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody
+          class="css-0"
         >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 20%;"
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              elrond.elstc.co
-               
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              0
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              93
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              <span
-                class="c3"
-              >
-                —
-              </span>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              <span
-                class="c3"
-              >
-                —
-              </span>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 20%;"
             >
               <div
-                data-test-subj="cellActions-renderContent-user.name"
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                <div>
-                  <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                  >
-                    <div>
-                      root
+                elrond.elstc.co
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                0
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                93
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 25%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="c3"
+                >
+                  —
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 25%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="c3"
+                >
+                  —
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-user.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        root
+                      </div>
                     </div>
                   </div>
                 </div>
+                 
               </div>
-               
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 20%;"
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              elrond.elstc.co
-               
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              1
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              93
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 20%;"
             >
               <div
-                data-test-subj="cellActions-renderContent-host.name"
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                <div>
-                  <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                  >
-                    <div>
-                      <a
-                        class="euiLink emotion-euiLink-primary"
-                        data-test-subj="host-details-button"
-                        href="/name/hello-world"
-                        rel="noreferrer"
-                      >
-                        hello-world
-                      </a>
+                elrond.elstc.co
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                1
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                93
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 25%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-host.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        <a
+                          class="euiLink emotion-euiLink-primary"
+                          data-test-subj="host-details-button"
+                          href="/name/hello-world"
+                          rel="noreferrer"
+                        >
+                          hello-world
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
+                 
               </div>
-               
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              <span
-                class="c3"
-              >
-                —
-              </span>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 25%;"
             >
               <div
-                data-test-subj="cellActions-renderContent-user.name"
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                <div>
-                  <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                  >
-                    <div>
-                      root
+                <span
+                  class="c3"
+                >
+                  —
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-user.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        root
+                      </div>
                     </div>
                   </div>
                 </div>
+                 
               </div>
-               
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 20%;"
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              siem-kibana
-               
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              2
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              97
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 20%;"
             >
               <div
-                data-test-subj="cellActions-renderContent-host.name"
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                <div>
-                  <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                  >
-                    <div>
-                      <a
-                        class="euiLink emotion-euiLink-primary"
-                        data-test-subj="host-details-button"
-                        href="/name/hello-world"
-                        rel="noreferrer"
-                      >
-                        hello-world
-                      </a>
+                siem-kibana
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                2
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                97
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 25%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-host.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        <a
+                          class="euiLink emotion-euiLink-primary"
+                          data-test-subj="host-details-button"
+                          href="/name/hello-world"
+                          rel="noreferrer"
+                        >
+                          hello-world
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div
-                data-test-subj="cellActions-renderContent-host.name"
-              >
-                <div>
-                  <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                  >
-                    <div>
-                      <a
-                        class="euiLink emotion-euiLink-primary"
-                        data-test-subj="host-details-button"
-                        href="/name/hello-world-2"
-                        rel="noreferrer"
-                      >
-                        hello-world-2
-                      </a>
+                <div
+                  data-test-subj="cellActions-renderContent-host.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        <a
+                          class="euiLink emotion-euiLink-primary"
+                          data-test-subj="host-details-button"
+                          href="/name/hello-world-2"
+                          rel="noreferrer"
+                        >
+                          hello-world-2
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
+                 
               </div>
-               
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              <span
-                class="c3"
-              >
-                —
-              </span>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 25%;"
             >
               <div
-                data-test-subj="cellActions-renderContent-user.name"
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                <div>
-                  <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                  >
-                    <div>
-                      Evan
+                <span
+                  class="c3"
+                >
+                  —
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-user.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        Evan
+                      </div>
                     </div>
                   </div>
                 </div>
+                 
               </div>
-               
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 20%;"
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              siem-kibana
-               
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              1
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              97
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              <span
-                class="c3"
-              >
-                —
-              </span>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              <span
-                class="c3"
-              >
-                —
-              </span>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 20%;"
             >
               <div
-                data-test-subj="cellActions-renderContent-user.name"
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                <div>
-                  <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                  >
-                    <div>
-                      Evan
+                siem-kibana
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                1
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                97
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 25%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="c3"
+                >
+                  —
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 25%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="c3"
+                >
+                  —
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-user.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        Evan
+                      </div>
                     </div>
                   </div>
                 </div>
+                 
               </div>
-               
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 20%;"
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              siem-kibana
-               
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              5
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 8%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              97
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 20%;"
             >
               <div
-                data-test-subj="cellActions-renderContent-host.name"
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                <div>
-                  <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                  >
-                    <div>
-                      <a
-                        class="euiLink emotion-euiLink-primary"
-                        data-test-subj="host-details-button"
-                        href="/name/hello-world"
-                        rel="noreferrer"
-                      >
-                        hello-world
-                      </a>
+                siem-kibana
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                5
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 8%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                97
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 25%;"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-host.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        <a
+                          class="euiLink emotion-euiLink-primary"
+                          data-test-subj="host-details-button"
+                          href="/name/hello-world"
+                          rel="noreferrer"
+                        >
+                          hello-world
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div
-                data-test-subj="cellActions-renderContent-host.name"
-              >
-                <div>
-                  <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                  >
-                    <div>
-                      <a
-                        class="euiLink emotion-euiLink-primary"
-                        data-test-subj="host-details-button"
-                        href="/name/hello-world-2"
-                        rel="noreferrer"
-                      >
-                        hello-world-2
-                      </a>
+                <div
+                  data-test-subj="cellActions-renderContent-host.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        <a
+                          class="euiLink emotion-euiLink-primary"
+                          data-test-subj="host-details-button"
+                          href="/name/hello-world-2"
+                          rel="noreferrer"
+                        >
+                          hello-world-2
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
+                 
               </div>
-               
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-            style="width: 25%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              <span
-                class="c3"
-              >
-                —
-              </span>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              style="width: 25%;"
             >
               <div
-                data-test-subj="cellActions-renderContent-user.name"
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
-                <div>
-                  <div
-                    class="euiPopover emotion-euiPopover-inline-block"
-                  >
-                    <div>
-                      Evan
+                <span
+                  class="c3"
+                >
+                  —
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-user.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        Evan
+                      </div>
                     </div>
                   </div>
                 </div>
+                 
               </div>
-               
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
   <div
     class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
@@ -825,7 +829,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
             class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
           >
             <span
-              class="eui-textTruncate euiButtonEmpty__text"
+              class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
             >
               Rows per page: 10
             </span>
@@ -864,7 +868,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
             aria-hidden="true"
             class="euiButtonIcon__icon"
             color="inherit"
-            data-euiicon-type="arrowLeft"
+            data-euiicon-type="chevronSingleLeft"
           />
         </button>
         <ul
@@ -885,7 +889,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   1
                 </span>
@@ -905,7 +909,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   2
                 </span>
@@ -925,7 +929,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   3
                 </span>
@@ -945,7 +949,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   4
                 </span>
@@ -965,7 +969,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   5
                 </span>
@@ -984,7 +988,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
             aria-hidden="true"
             class="euiButtonIcon__icon"
             color="inherit"
-            data-euiicon-type="arrowRight"
+            data-euiicon-type="chevronSingleRight"
           />
         </button>
       </nav>

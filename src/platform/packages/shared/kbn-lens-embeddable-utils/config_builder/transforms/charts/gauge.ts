@@ -19,7 +19,7 @@ import type { SavedObjectReference } from '@kbn/core/types';
 import type { GaugeState, LensApiState } from '../../schema';
 import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
 import type { LensAttributes } from '../../types';
-import { DEFAULT_LAYER_ID } from '../../types';
+import { DEFAULT_LAYER_ID } from '../../constants';
 import type { DeepMutable, DeepPartial } from '../utils';
 import {
   addLayerColumn,
@@ -65,6 +65,8 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
         ? layer.shape.direction === 'horizontal'
           ? 'horizontalBullet'
           : 'verticalBullet'
+        : layer.shape.type === 'semi_circle'
+        ? 'semiCircle'
         : layer.shape.type
       : 'horizontalBullet',
     ...(layer.metric.color
@@ -106,7 +108,9 @@ function reverseBuildVisualizationState(
         ? { type: 'bullet', direction: 'horizontal' }
         : visualization.shape === 'verticalBullet'
         ? { type: 'bullet', direction: 'vertical' }
-        : { type: visualization.shape },
+        : {
+            type: visualization.shape === 'semiCircle' ? 'semi_circle' : visualization.shape,
+          },
     metric: isEsqlTableTypeDataset(dataset)
       ? {
           ...getValueApiColumn(metricAccessor, layer as TextBasedLayer),
@@ -212,10 +216,14 @@ function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['
 function getValueColumns(layer: GaugeStateESQL) {
   return [
     getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
-    ...(layer.metric.max ? [getValueColumn(getAccessorName('max'), layer.metric.max.column)] : []),
-    ...(layer.metric.min ? [getValueColumn(getAccessorName('min'), layer.metric.min.column)] : []),
+    ...(layer.metric.max
+      ? [getValueColumn(getAccessorName('max'), layer.metric.max.column, 'number')]
+      : []),
+    ...(layer.metric.min
+      ? [getValueColumn(getAccessorName('min'), layer.metric.min.column, 'number')]
+      : []),
     ...(layer.metric.goal
-      ? [getValueColumn(getAccessorName('goal'), layer.metric.goal.column)]
+      ? [getValueColumn(getAccessorName('goal'), layer.metric.goal.column, 'number')]
       : []),
   ];
 }
@@ -252,7 +260,7 @@ export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFi
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

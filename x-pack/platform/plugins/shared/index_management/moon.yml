@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/index-management-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/index-management-plugin'
+  title: '@kbn/index-management-plugin'
   description: Moon project for @kbn/index-management-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/index_management
+  sourceRoot: x-pack/platform/plugins/shared/index_management
 dependsOn:
   - '@kbn/core'
   - '@kbn/management-plugin'
@@ -76,6 +75,9 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/test-eui-helpers'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/cloud'
+  - '@kbn/search-index-documents'
+  - '@kbn/cloud-connect-plugin'
 tags:
   - plugin
   - prod
@@ -93,14 +95,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

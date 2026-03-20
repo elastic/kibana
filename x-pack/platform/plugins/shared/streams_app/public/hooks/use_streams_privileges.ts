@@ -10,6 +10,8 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -35,6 +37,8 @@ export function useStreamsPrivileges() {
 
   const license = useObservable(licensing.license$);
 
+  const queryStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false);
+
   const significantEventsEnabled = uiSettings.get<boolean>(
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
     false // Default to false if the setting is not defined or not available
@@ -51,6 +55,11 @@ export function useStreamsPrivileges() {
   const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
 
   const attachmentsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS, false);
+
+  const wiredStreamViewsEnabled = uiSettings.get(
+    OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+    false
+  );
 
   return {
     ui: streams as {
@@ -69,11 +78,17 @@ export function useStreamsPrivileges() {
         enabled: significantEventsDiscoveryEnabled,
         available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
       },
+      queryStreams: {
+        enabled: queryStreamsEnabled,
+      },
       contentPacks: {
         enabled: contentPacksEnabled,
       },
       attachments: {
         enabled: attachmentsEnabled,
+      },
+      wiredStreamViews: {
+        enabled: wiredStreamViewsEnabled,
       },
     },
     isLoading: !license,

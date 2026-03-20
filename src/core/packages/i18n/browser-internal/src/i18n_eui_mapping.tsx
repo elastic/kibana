@@ -260,7 +260,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSelector.dragHandleAriaLabel': i18n.translate(
       'core.euiColumnSelector.dragHandleAriaLabel',
       {
-        defaultMessage: 'Drag handle',
+        defaultMessage: 'drag handle',
       }
     ),
     'euiColumnSelector.hideAll': i18n.translate('core.euiColumnSelector.hideAll', {
@@ -776,10 +776,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage:
         'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.',
     }),
-    'euiFlyout.screenReaderNonModalDialog': i18n.translate(
-      'core.euiFlyout.screenReaderNonModalDialog',
+    'euiFlyout.screenReaderNoOverlayMaskDialog': i18n.translate(
+      'core.euiFlyout.screenReaderNoOverlayMaskDialog',
       {
-        defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
+        defaultMessage: 'You are in a modal dialog. To close the dialog, press Escape.',
       }
     ),
     'euiFlyout.screenReaderFocusTrapShards': i18n.translate(
@@ -1367,6 +1367,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Next {displayInterval}',
         values: { displayInterval },
       }),
+    'euiTimeWindowButtons.invalidZoomInLabel': i18n.translate(
+      'core.euiTimeWindowButtons.invalidZoomInLabel',
+      { defaultMessage: 'Cannot zoom in invalid time window' }
+    ),
+    'euiTimeWindowButtons.cannotZoomInLabel': i18n.translate(
+      'core.euiTimeWindowButtons.cannotZoomInLabel',
+      { defaultMessage: 'Cannot zoom in any further' }
+    ),
+    'euiTimeWindowButtons.zoomInLabel': i18n.translate('core.euiTimeWindowButtons.zoomInLabel', {
+      defaultMessage: 'Zoom in',
+    }),
     'euiQuickSelect.fullDescription': ({ timeTense, timeValue, timeUnit }: EuiValues) =>
       i18n.translate('core.euiQuickSelect.fullDescription', {
         defaultMessage: 'Currently set to {timeTense} {timeValue} {timeUnit}.',

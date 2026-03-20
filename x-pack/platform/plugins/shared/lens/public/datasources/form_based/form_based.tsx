@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import React from 'react';
 import type { Reference } from '@kbn/content-management-utils';
 import type { CoreStart } from '@kbn/core/public';
@@ -237,9 +239,9 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const { uiSettings, featureFlags } = core;
+  const { uiSettings } = core;
 
-  const DATASOURCE_ID = 'formBased';
+  const DATASOURCE_ID = LENS_DATASOURCE_ID.FORM_BASED;
   const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
@@ -494,7 +496,6 @@ export function getFormBasedDatasource({
         layerId,
         indexPatterns,
         uiSettings,
-        featureFlags,
         dateRange,
         nowInstant,
         searchSessionId,

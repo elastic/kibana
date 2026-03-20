@@ -9,7 +9,7 @@
 
 import { omit } from 'lodash';
 import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
-import { actions } from './actions';
+import * as actions from './actions';
 
 export {
   type DiscoverInternalState,
@@ -17,12 +17,17 @@ export {
   type TabStateGlobalState,
   type DiscoverAppState,
   type InternalStateDataRequestParams,
+  type CascadedDocumentsState,
   TabInitializationStatus,
 } from './types';
 
 export { DEFAULT_TAB_STATE } from './constants';
 
-export { type InternalStateStore, createInternalStateStore } from './internal_state';
+export {
+  type InternalStateStore,
+  type InternalStateDispatch,
+  createInternalStateStore,
+} from './internal_state';
 
 export const internalStateActions = {
   ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
@@ -33,6 +38,7 @@ export const internalStateActions = {
 export {
   InternalStateProvider,
   useInternalStateDispatch,
+  useInternalStateGetState,
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabSelector,
@@ -46,8 +52,11 @@ export {
   selectAllTabs,
   selectRecentlyClosedTabs,
   selectTab,
+  selectTabAppState,
+  selectTabCombinedFilters,
   selectIsTabsBarHidden,
   selectHasUnsavedChanges,
+  selectTabSavedSearch,
 } from './selectors';
 
 export {
@@ -62,7 +71,10 @@ export {
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
+  useCurrentTabDataStateContainer,
   RuntimeStateProvider,
+  RuntimeStateManagerProvider,
+  useRuntimeStateManager,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
@@ -77,6 +89,7 @@ export {
 } from './utils';
 
 export {
+  fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,

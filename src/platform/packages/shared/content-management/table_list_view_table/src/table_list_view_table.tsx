@@ -101,6 +101,7 @@ export interface TableListViewTableProps<
     refs?: {
       references?: SavedObjectsFindOptionsReference[];
       referencesToExclude?: SavedObjectsFindOptionsReference[];
+      tabId?: string;
     }
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
@@ -968,12 +969,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const renderCreateButton = useCallback(() => {
     if (createItem) {
       return (
-        <EuiButton
-          onClick={createItem}
-          data-test-subj="newItemButton"
-          iconType="plusInCircleFilled"
-          fill
-        >
+        <EuiButton onClick={createItem} data-test-subj="newItemButton" iconType="plusCircle" fill>
           <FormattedMessage
             id="contentManagement.tableList.listing.createNewItemButtonLabel"
             defaultMessage="Create {entityName}"

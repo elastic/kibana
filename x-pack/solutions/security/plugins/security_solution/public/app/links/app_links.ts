@@ -9,7 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 
-import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../../../common/constants';
+import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../common/constants';
 import { aiValueLinks } from '../../reports/links';
 import { configurationsLinks, getConfigurationsLinks } from '../../configurations/links';
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
@@ -21,7 +21,7 @@ import { alertDetectionsLinks, alertSummaryLink, alertsLink } from '../../detect
 import { links as rulesLinks } from '../../rules/links';
 import { links as siemMigrationsLinks } from '../../siem_migrations/links';
 import { links as timelinesLinks } from '../../timelines/links';
-import { links as casesLinks } from '../../cases/links';
+import { getCasesLinks } from '../../cases/links';
 import { links as managementLinks, getManagementFilteredLinks } from '../../management/links';
 import { exploreLinks } from '../../explore/links';
 import { onboardingLinks } from '../../onboarding/links';
@@ -36,7 +36,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   alertSummaryLink,
   attackDiscoveryLinks,
   findingsLinks,
-  casesLinks,
+  getCasesLinks(false),
   configurationsLinks,
   timelinesLinks,
   indicatorsLinks,
@@ -64,15 +64,18 @@ export const getFilteredLinks = async (
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
 
+  const templatesEnabled = plugins.cases.config.templatesEnabled;
+  const filteredCasesLinks = getCasesLinks(templatesEnabled);
+
   return Object.freeze([
     dashboardsLinks,
-    core.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+    core.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
       ? alertDetectionsLinks
       : alertsLink,
     alertSummaryLink,
     attackDiscoveryLinks,
     findingsLinks,
-    casesLinks,
+    filteredCasesLinks,
     filteredConfigurationsLinks,
     timelinesLinks,
     indicatorsLinks,

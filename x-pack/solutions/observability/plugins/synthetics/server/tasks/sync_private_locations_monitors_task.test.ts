@@ -9,6 +9,7 @@ import type { CustomTaskInstance } from './sync_private_locations_monitors_task'
 import {
   SyncPrivateLocationMonitorsTask,
   runSynPrivateLocationMonitorsTaskSoon,
+  DEFAULT_TASK_SCHEDULE,
 } from './sync_private_locations_monitors_task';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -93,9 +94,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       task.registerTaskDefinition(mockTaskManager as any);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         'Synthetics:Sync-Private-Location-Monitors': expect.objectContaining({
-          title: 'Synthetics Sync Global Params Task',
+          title: 'Synthetics Sync Private Location Monitors Task',
           description:
-            'This task is executed so that we can sync private location monitors for example when global params are updated',
+            'This task syncs private location monitor package policies, handling maintenance window changes and cleaning up duplicate policies',
           timeout: '10m',
           maxAttempts: 1,
           createTaskRunner: expect.any(Function),
@@ -105,22 +106,38 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   });
 
   describe('start', () => {
-    it('should schedule the task correctly', async () => {
+    it('uses the existing task schedule when task already exists', async () => {
+      mockTaskManagerStart.get.mockResolvedValue({
+        schedule: { interval: '10m' },
+      } as any);
+
       await task.start();
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[SyncPrivateLocationMonitorsTask] Scheduling private location task'
+
+      expect(mockTaskManagerStart.get).toHaveBeenCalledWith(
+        'Synthetics:Sync-Private-Location-Monitors-single-instance'
       );
-      expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith({
-        id: 'Synthetics:Sync-Private-Location-Monitors-single-instance',
-        state: {},
-        schedule: {
-          interval: '60m',
-        },
-        taskType: 'Synthetics:Sync-Private-Location-Monitors',
-        params: {},
-      });
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[SyncPrivateLocationMonitorsTask] Sync private location monitors task scheduled successfully'
+      expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({ schedule: { interval: '10m' } })
+      );
+    });
+
+    it('falls back to DEFAULT_TASK_SCHEDULE when task does not exist yet', async () => {
+      mockTaskManagerStart.get.mockRejectedValue({ statusCode: 404 });
+
+      await task.start();
+
+      expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({ schedule: { interval: DEFAULT_TASK_SCHEDULE } })
+      );
+    });
+
+    it('uses DEFAULT_TASK_SCHEDULE when existing task has no schedule', async () => {
+      mockTaskManagerStart.get.mockResolvedValue({ schedule: undefined } as any);
+
+      await task.start();
+
+      expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({ schedule: { interval: DEFAULT_TASK_SCHEDULE } })
       );
     });
   });
@@ -248,6 +265,43 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.state.lastStartedAt).toBe(startedAt.toISOString());
+    });
+
+    it('should sync only for provided privateLocationId and clear it from state', async () => {
+      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+      // Ensure the server's savedObjects.createInternalRepository returns an object for the call
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+        .fn()
+        .mockReturnValue(mockSoClient as any);
+
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const syncSpy = jest
+        .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
+        .mockResolvedValue(undefined);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(syncSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          allPrivateLocations: expect.any(Array),
+          encryptedSavedObjects: mockEncryptedSoClient,
+          privateLocationId: 'pl-1',
+          soClient: expect.any(Object),
+        })
+      );
+
+      expect(result.state).toEqual({
+        ...taskInstance.state,
+        privateLocationId: undefined,
+      });
     });
   });
 
@@ -461,7 +515,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     it('should not delete any policies if all are expected', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
         (async function* () {
-          yield ['monitor1-loc1-space1'];
+          yield ['monitor1-loc1'];
         })()
       );
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
@@ -472,7 +526,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     it('should delete unexpected policies and set performCleanupSync true', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
         (async function* () {
-          yield ['monitor1-loc1-space1', 'unexpected-policy'];
+          yield ['monitor1-loc1', 'unexpected-policy'];
         })()
       );
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
@@ -536,6 +590,32 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(mockLogger.debug).toHaveBeenCalledWith(
         '[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached'
       );
+    });
+  });
+
+  describe('schedule resolution in runTask', () => {
+    const mockPrivateLocations = [
+      { id: 'pl-1', label: 'Private Location 1', isServiceManaged: false, agentPolicyId: 'p-1' },
+    ];
+
+    beforeEach(() => {
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({ hasMWsChanged: false } as any);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockResolvedValue(mockPrivateLocations as any);
+    });
+
+    it('uses the task schedule interval when present', async () => {
+      const taskInstance = { ...getMockTaskInstance(), schedule: { interval: '15m' } };
+      const result = await task.runTask({ taskInstance });
+      expect(result.schedule).toEqual({ interval: '15m' });
+    });
+
+    it('falls back to DEFAULT_TASK_SCHEDULE when task has no schedule', async () => {
+      const taskInstance = getMockTaskInstance();
+      const result = await task.runTask({ taskInstance });
+      expect(result.schedule).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
     });
   });
 

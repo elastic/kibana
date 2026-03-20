@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { LlmProxy, LLmError } from '../llm_proxy';
+import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
 import {
   mockTitleGeneration,
   mockTitleGenerationWithError,
   mockHandoverToAnswer,
   mockFinalAnswer,
   mockAgentToolCall,
+  mockAgentParallelToolCalls,
   mockSearchToolCallWithNaturalLanguageGen,
 } from './calls';
 
@@ -115,6 +116,32 @@ export const setupAgentCallSearchToolWithNoIndexSelectedThenAnswer = async ({
     toolArg: {
       query: 'just a query',
     },
+  });
+
+  mockHandoverToAnswer(proxy, 'ready to answer');
+
+  mockFinalAnswer(proxy, response);
+};
+
+/**
+ * Parallel tool call scenario - LLM calls two tools in a single response
+ */
+export const setupAgentParallelToolCallsThenAnswer = async ({
+  response,
+  proxy,
+  title = 'New discussion',
+  toolCalls,
+}: {
+  response: string;
+  title?: string;
+  proxy: LlmProxy;
+  toolCalls: Array<{ name: string; args: Record<string, any> }>;
+}) => {
+  mockTitleGeneration(proxy, title);
+
+  mockAgentParallelToolCalls({
+    llmProxy: proxy,
+    toolCalls,
   });
 
   mockHandoverToAnswer(proxy, 'ready to answer');

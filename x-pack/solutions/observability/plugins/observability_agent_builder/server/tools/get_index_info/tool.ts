@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -35,25 +35,25 @@ const getIndexInfoSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Index pattern (e.g., "logs-*", "metrics-*"). Required for "list-fields" and "get-field-values".'
+      'Index pattern. Examples: "logs-*", "metrics-*". Required for "list-fields" and "get-field-values".'
     ),
   fields: z
     .array(z.string())
     .max(10)
     .optional()
     .describe(
-      'Array of field names or wildcard patterns to get values for (e.g., ["host.name"], ["attributes.app.*"]). Required for "get-field-values".'
+      'Array of field names or wildcard patterns to get values for. Examples: ["host.name"], ["attributes.app.*"]. Required for "get-field-values".'
     ),
   ...timeRangeSchemaOptional({ start: 'now-24h', end: 'now' }),
   kqlFilter: z
     .string()
     .optional()
-    .describe('KQL filter to scope field discovery (e.g., ["service.name: checkout"]).'),
+    .describe('KQL filter to scope field discovery. Examples: \'service.name: "checkout"\'.'),
   intent: z
     .string()
     .optional()
     .describe(
-      'Investigation focus to filter relevant fields (e.g., "memory issues", "high latency").'
+      'Investigation focus to filter relevant fields. Examples: "memory issues", "high latency".'
     ),
 });
 

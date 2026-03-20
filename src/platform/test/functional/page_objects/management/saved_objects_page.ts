@@ -256,6 +256,11 @@ export class SavedObjectsPageObject extends FtrService {
     await table[title].checkbox.click();
   }
 
+  async clickObjectLinkByTitle(title: string) {
+    const table = keyBy(await this.getElementsInTable(), 'title');
+    await table[title].titleElement.click();
+  }
+
   async getObjectTypeByTitle(title: string) {
     const table = keyBy(await this.getElementsInTable(), 'title');
     // should we check if table size > 0 and log error if not?

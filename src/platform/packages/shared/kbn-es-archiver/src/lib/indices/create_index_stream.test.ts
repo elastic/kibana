@@ -24,6 +24,7 @@ import {
   createStubIndexRecord,
   createStubDataStreamRecord,
   createStubDocRecord,
+  createStubDataStreamDocRecord,
   createStubClient,
   createStubLogger,
 } from './__mocks__/stubs';
@@ -379,6 +380,48 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createStubDocRecord('new-index', 1),
         createStubDocRecord('new-index', 2),
       ]);
+    });
+
+    it('filters data stream documents whose backing index differs from the data stream name', async () => {
+      const client = createStubClient();
+      const stats = createStubStats();
+
+      // Simulate createDataStream throwing resource_already_exists_exception
+      client.indices.createDataStream = sinon.spy(async () => {
+        const err = new Error('resource_already_exists_exception');
+        (err as any).meta = {
+          body: { error: { type: 'resource_already_exists_exception' } },
+        };
+        throw err;
+      }) as any;
+
+      const output = await createPromiseFromStreams([
+        createListStream([
+          createStubDataStreamRecord('my-data-stream', 'my-template'),
+          createStubDataStreamDocRecord(
+            'my-data-stream',
+            '.ds-my-data-stream-2024.01.01-000001',
+            1
+          ),
+          createStubDataStreamDocRecord(
+            'my-data-stream',
+            '.ds-my-data-stream-2024.01.01-000001',
+            2
+          ),
+        ]),
+        createCreateIndexStream({
+          client,
+          stats,
+          log,
+          skipExisting: true,
+        }),
+        createConcatStream([]),
+      ]);
+
+      expect(stats.getTestSummary()).toEqual({
+        skippedIndex: 1,
+      });
+      expect(output).toHaveLength(0);
     });
   });
 });

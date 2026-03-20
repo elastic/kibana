@@ -16,6 +16,7 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
@@ -25,9 +26,9 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type {
   KibanaAssetReference,
   PackageDataStreamTypes,
+  PackageDependencies,
   PackageInstallContext,
 } from '../../../../common/types';
-import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
@@ -182,7 +183,7 @@ export async function ensureInstalledPackage(options: {
   pkgVersion?: string;
   spaceId?: string;
   force?: boolean;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
 }): Promise<EnsurePackageResult> {
   const {
     savedObjectsClient,
@@ -191,7 +192,7 @@ export async function ensureInstalledPackage(options: {
     pkgVersion,
     force = false,
     spaceId = DEFAULT_SPACE_ID,
-    authorizationHeader,
+    request,
   } = options;
 
   // If pkgVersion isn't specified, find the latest package version
@@ -222,7 +223,7 @@ export async function ensureInstalledPackage(options: {
       esClient,
       neverIgnoreVerificationError: !force,
       force: true, // Always force outdated packages to be installed if a later version isn't installed
-      authorizationHeader,
+      request,
     });
 
     if (
@@ -276,7 +277,7 @@ export async function handleInstallPackageFailure({
   installedPkg,
   esClient,
   spaceId,
-  authorizationHeader,
+  request,
   keepFailedInstallation,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -286,7 +287,7 @@ export async function handleInstallPackageFailure({
   installedPkg: SavedObject<Installation> | undefined;
   esClient: ElasticsearchClient;
   spaceId: string;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   keepFailedInstallation?: boolean;
 }) {
   if (error instanceof ConcurrentInstallOperationError) {
@@ -343,7 +344,7 @@ export async function handleInstallPackageFailure({
         pkgkey,
         esClient,
         spaceId,
-        authorizationHeader,
+        request,
         retryFromLastState: true,
       });
       return;
@@ -365,7 +366,7 @@ export async function handleInstallPackageFailure({
         esClient,
         spaceId,
         force: true,
-        authorizationHeader,
+        request,
       });
     }
   } catch (e) {
@@ -404,13 +405,14 @@ interface InstallRegistryPackageParams {
   neverIgnoreVerificationError?: boolean;
   ignoreConstraints?: boolean;
   prerelease?: boolean;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
   keepFailedInstallation?: boolean;
   useStreaming?: boolean;
   automaticInstall?: boolean;
+  skipDependencyCheck?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -424,7 +426,7 @@ interface InstallCustomPackageParams {
   esClient: ElasticsearchClient;
   spaceId: string;
   force?: boolean;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   kibanaVersion: string;
 }
 interface InstallUploadedArchiveParams {
@@ -434,7 +436,7 @@ interface InstallUploadedArchiveParams {
   contentType: string;
   spaceId: string;
   version?: string;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   isBundledPackage?: boolean;
@@ -485,7 +487,7 @@ async function installPackageFromRegistry({
   pkgkey,
   esClient,
   spaceId,
-  authorizationHeader,
+  request,
   force = false,
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
@@ -496,6 +498,7 @@ async function installPackageFromRegistry({
   keepFailedInstallation = false,
   useStreaming = false,
   automaticInstall = false,
+  skipDependencyCheck = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -512,12 +515,6 @@ async function installPackageFromRegistry({
   try {
     // get the currently installed package
 
-    installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-    installType = getInstallType({ pkgVersion, installedPkg });
-
-    telemetryEvent.installType = installType;
-    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
-
     const queryLatest = () =>
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
@@ -530,6 +527,12 @@ async function installPackageFromRegistry({
       latestPkg = await queryLatest();
       pkgVersion = latestPkg.version;
     }
+
+    installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+    installType = getInstallType({ pkgVersion, installedPkg });
+
+    telemetryEvent.installType = installType;
+    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
     // get latest package version and requested version in parallel for performance
     const [latestPackage, { paths, packageInfo, archiveIterator, verificationResult }] =
@@ -595,13 +598,14 @@ async function installPackageFromRegistry({
       packageInstallContext,
       paths,
       verificationResult,
-      authorizationHeader,
+      request,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
       useStreaming,
       keepFailedInstallation,
       automaticInstall,
+      skipDependencyCheck,
     });
   } catch (e) {
     sendEventWithLatestState(
@@ -638,13 +642,14 @@ export async function installPackageWithStateMachine(options: {
   paths: string[];
   verificationResult?: PackageVerificationResult;
   telemetryEvent?: PackageUpdateEvent;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
   useStreaming?: boolean;
   keepFailedInstallation?: boolean;
   automaticInstall?: boolean;
+  skipDependencyCheck?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -659,7 +664,7 @@ export async function installPackageWithStateMachine(options: {
     esClient,
     spaceId,
     verificationResult,
-    authorizationHeader,
+    request,
     ignoreMappingUpdateErrors,
     skipDataStreamRollover,
     packageInstallContext,
@@ -667,6 +672,7 @@ export async function installPackageWithStateMachine(options: {
     useStreaming,
     keepFailedInstallation,
     automaticInstall,
+    skipDependencyCheck,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -785,12 +791,13 @@ export async function installPackageWithStateMachine(options: {
       spaceId,
       verificationResult,
       installSource,
-      authorizationHeader,
+      request,
       force,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
       useStreaming,
+      skipDependencyCheck,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -823,7 +830,7 @@ export async function installPackageWithStateMachine(options: {
           installedPkg,
           spaceId,
           esClient,
-          authorizationHeader,
+          request,
           keepFailedInstallation,
         });
         sendEventWithLatestState(
@@ -857,7 +864,7 @@ async function installPackageByUpload({
   contentType,
   spaceId,
   version,
-  authorizationHeader,
+  request,
   ignoreMappingUpdateErrors,
   skipDataStreamRollover,
   isBundledPackage,
@@ -940,7 +947,7 @@ async function installPackageByUpload({
       spaceId,
       force: true, // upload has implicit force
       paths,
-      authorizationHeader,
+      request,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       useStreaming,
@@ -959,6 +966,7 @@ export type InstallPackageParams = {
   spaceId: string;
   neverIgnoreVerificationError?: boolean;
   retryFromLastState?: boolean;
+  skipDependencyCheck?: boolean;
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
@@ -977,7 +985,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   const logger = appContextService.getLogger();
   const { savedObjectsClient, esClient } = args;
 
-  const authorizationHeader = args.authorizationHeader;
+  const request = args.request;
 
   if (args.installSource === 'registry') {
     const {
@@ -993,6 +1001,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
+      skipDependencyCheck,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -1011,7 +1020,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         contentType: 'application/zip',
         spaceId,
         version: matchingBundledPackage.version,
-        authorizationHeader,
+        request,
         ignoreMappingUpdateErrors,
         skipDataStreamRollover,
         isBundledPackage: true,
@@ -1031,13 +1040,14 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       neverIgnoreVerificationError,
       ignoreConstraints,
       prerelease,
-      authorizationHeader,
+      request,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
+      skipDependencyCheck,
     });
 
     return response;
@@ -1056,7 +1066,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       archiveBuffer,
       contentType,
       spaceId,
-      authorizationHeader,
+      request,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
     });
@@ -1071,7 +1081,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       esClient,
       spaceId,
       force,
-      authorizationHeader,
+      request,
       kibanaVersion,
     });
     return response;
@@ -1088,7 +1098,7 @@ export async function installCustomPackage(
     spaceId,
     pkgName,
     force,
-    authorizationHeader,
+    request,
     datasets,
     kibanaVersion,
   } = args;
@@ -1104,7 +1114,12 @@ export async function installCustomPackage(
     title: convertStringToTitle(pkgName),
     description: generateDescription(datasets.map((dataset) => dataset.name)),
     version: INITIAL_VERSION,
-    owner: { github: authorizationHeader?.username ?? 'unknown' },
+    owner: {
+      github:
+        (request
+          ? appContextService.getSecurityCore().authc.getCurrentUser(request)?.username
+          : null) ?? 'unknown',
+    },
     type: 'integration' as const,
     data_streams: generateDatastreamEntries(datasets, pkgName),
   };
@@ -1138,7 +1153,7 @@ export async function installCustomPackage(
     spaceId,
     force,
     paths,
-    authorizationHeader,
+    request,
   });
 }
 
@@ -1197,6 +1212,7 @@ export async function restartInstallation(options: {
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
   previousVersion?: string | null;
+  dependencies?: PackageDependencies | null;
 }) {
   const {
     savedObjectsClient,
@@ -1205,6 +1221,7 @@ export async function restartInstallation(options: {
     installSource,
     verificationResult,
     previousVersion,
+    dependencies,
   } = options;
 
   let savedObjectUpdate: Partial<Installation> = {
@@ -1213,6 +1230,7 @@ export async function restartInstallation(options: {
     install_started_at: new Date().toISOString(),
     install_source: installSource,
     previous_version: previousVersion,
+    ...(dependencies ? { dependencies } : {}),
   };
 
   if (verificationResult) {
@@ -1239,8 +1257,10 @@ export async function createInstallation(options: {
   installSource: InstallSource;
   spaceId: string;
   verificationResult?: PackageVerificationResult;
+  dependencies?: PackageDependencies | null;
 }) {
-  const { savedObjectsClient, packageInfo, installSource, verificationResult } = options;
+  const { savedObjectsClient, packageInfo, installSource, verificationResult, dependencies } =
+    options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const toSaveESIndexPatterns = generateESIndexPatterns(
     getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
@@ -1270,6 +1290,7 @@ export async function createInstallation(options: {
     install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
     keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     verification_status: 'unknown',
+    ...(dependencies ? { dependencies } : {}),
   };
 
   if (verificationResult) {

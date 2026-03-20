@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/scout-reporting'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-qa'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/scout-reporting'
+  title: '@kbn/scout-reporting'
   description: Moon project for @kbn/scout-reporting
   channel: ''
   owner: '@elastic/appex-qa'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-scout-reporting
+  sourceRoot: src/platform/packages/private/kbn-scout-reporting
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
@@ -24,6 +23,7 @@ dependsOn:
   - '@kbn/scout-info'
   - '@kbn/repo-info'
   - '@kbn/code-owners'
+  - '@kbn/get-repo-files'
   - '@kbn/repo-packages'
   - '@kbn/zod'
 tags:
@@ -39,14 +39,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

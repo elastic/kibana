@@ -45,6 +45,7 @@ export interface ServiceCardProps {
   onEnable?: () => void;
   onDisable?: () => void;
   onOpen?: () => void;
+  onRotateApiKey?: () => void;
   isLoading?: boolean;
   isCardDisabled?: boolean;
   subscriptionRequired?: boolean;
@@ -104,6 +105,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   onEnable,
   onDisable,
   onOpen,
+  onRotateApiKey,
   isLoading = false,
   isCardDisabled = false,
   subscriptionRequired = false,
@@ -319,7 +321,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
     if (enabled) {
       const moreActionsButton = (
         <EuiButtonIcon
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           aria-label={i18n.translate('xpack.cloudConnect.connectedServices.service.moreActions', {
             defaultMessage: 'More actions',
           })}
@@ -331,6 +333,24 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       );
 
       const menuItems = [
+        ...(onRotateApiKey
+          ? [
+              <EuiContextMenuItem
+                key="rotate"
+                onClick={() => {
+                  closePopover();
+                  onRotateApiKey();
+                }}
+              >
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.cloudConnect.connectedServices.service.rotateApiKey"
+                    defaultMessage="Rotate API key"
+                  />
+                </EuiText>
+              </EuiContextMenuItem>,
+            ]
+          : []),
         <EuiContextMenuItem
           key="disable"
           onClick={() => {
@@ -358,7 +378,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                 href={serviceUrl}
                 target="_blank"
                 iconSide="right"
-                iconType="popout"
+                iconType="external"
                 onClick={() => {
                   // Track telemetry for opening service
                   if (serviceKey) {
@@ -406,7 +426,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           onClick={onEnable}
           disabled={!onEnable || isLoading}
           isLoading={isLoading}
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           data-test-subj="serviceCardConnectButton"
         >

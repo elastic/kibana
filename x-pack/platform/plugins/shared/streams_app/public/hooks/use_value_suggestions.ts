@@ -18,35 +18,65 @@ import {
 
 const MAX_RECORDS_STORED = 1000;
 
+export interface ValueSuggestionsOptions {
+  /** When true, array values are flattened to show individual elements as suggestions */
+  flattenArrays?: boolean;
+}
+
 /**
- * Create field suggestions from accumulated simulation records
+ * Create field suggestions from accumulated simulation records.
  * @param previewRecords array of flattened records
  * @param field field name to extract unique values for
+ * @param options configuration options for suggestion generation
  * @returns array of unique values for the specified field
  */
 const createValueSuggestions = (
   previewRecords: FlattenRecord[] = [],
-  field?: string
+  field?: string,
+  options?: ValueSuggestionsOptions
 ): Suggestion[] => {
   if (!field) {
     return [];
   }
 
-  const suggestions = new Set<StringOrNumberOrBoolean>();
+  const { flattenArrays = false } = options ?? {};
+  // Use string keys for deduplication to handle arrays correctly
+  // (arrays with same values but different references would not deduplicate in a Set)
+  const suggestions = new Map<string, StringOrNumberOrBoolean | StringOrNumberOrBoolean[]>();
 
   previewRecords.forEach((record) => {
     const value = record[field];
-    if (value !== undefined) {
-      suggestions.add(value as StringOrNumberOrBoolean);
+    if (value !== undefined && value !== null) {
+      if (flattenArrays && Array.isArray(value)) {
+        // Flatten array values to show individual elements as suggestions
+        value.forEach((item) => {
+          if (item !== undefined && item !== null) {
+            const key = String(item);
+            if (!suggestions.has(key)) {
+              suggestions.set(key, item as StringOrNumberOrBoolean);
+            }
+          }
+        });
+      } else {
+        // For arrays, use JSON.stringify as key to ensure proper deduplication
+        const key = Array.isArray(value) ? JSON.stringify(value) : String(value);
+        if (!suggestions.has(key)) {
+          suggestions.set(key, value as StringOrNumberOrBoolean | StringOrNumberOrBoolean[]);
+        }
+      }
     }
   });
 
-  return Array.from(suggestions)
-    .sort()
-    .map((value) => ({ name: String(value) }));
+  return Array.from(suggestions.values())
+    .sort((a, b) => String(a).localeCompare(String(b)))
+    .map((value) => ({ name: Array.isArray(value) ? JSON.stringify(value) : String(value) }));
 };
 
-const useValueSuggestions = (previewRecords: FlattenRecord[], field?: string): Suggestion[] => {
+const useValueSuggestions = (
+  previewRecords: FlattenRecord[],
+  field?: string,
+  options?: ValueSuggestionsOptions
+): Suggestion[] => {
   const [records, setRecords] = useState<FlattenRecord[]>([]);
 
   useEffect(() => {
@@ -58,30 +88,40 @@ const useValueSuggestions = (previewRecords: FlattenRecord[], field?: string): S
   }, [previewRecords]);
 
   return useMemo(() => {
-    return createValueSuggestions(records, field);
-  }, [records, field]);
+    return createValueSuggestions(records, field, options);
+  }, [records, field, options]);
 };
 
 /**
  * Hook for providing value suggestions from enrichment simulation data - to be used with Enrichment only
  * @param field field name to extract unique values for
+ * @param options configuration options for suggestion generation
  * @returns array of unique suggestions for the specified field
  */
-export const useEnrichmentValueSuggestions = (field?: string): Suggestion[] => {
+export const useEnrichmentValueSuggestions = (
+  field?: string,
+  options?: ValueSuggestionsOptions
+): Suggestion[] => {
   return useValueSuggestions(
     useSimulatorSelector((state) => selectPreviewRecords(state.context)),
-    field
+    field,
+    options
   );
 };
 
 /**
  * Hook for providing value suggestions from routing samples data - to be used with Routing only
  * @param field field name to extract unique values for
+ * @param options configuration options for suggestion generation
  * @returns array of unique suggestions for the specified field
  */
-export const useRoutingValueSuggestions = (field?: string): Suggestion[] => {
+export const useRoutingValueSuggestions = (
+  field?: string,
+  options?: ValueSuggestionsOptions
+): Suggestion[] => {
   return useValueSuggestions(
     useStreamSamplesSelector((snapshot) => selectPreviewDocuments(snapshot.context)),
-    field
+    field,
+    options
   );
 };

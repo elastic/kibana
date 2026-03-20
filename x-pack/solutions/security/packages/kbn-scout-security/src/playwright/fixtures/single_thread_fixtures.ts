@@ -12,7 +12,12 @@ import type {
   SecurityTestFixtures,
   SecurityWorkerFixtures,
 } from './types';
-import { getDetectionRuleApiService, getEntityAnalyticsApiService } from './worker';
+import {
+  getDetectionRuleApiService,
+  getDetectionAlertsApiService,
+  getEntityAnalyticsApiService,
+  getTimelineApiService,
+} from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
 const securityFixtures = mergeTests(baseTest, securityBrowserAuthFixture);
@@ -22,10 +27,15 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
     {
       pageObjects,
       page,
-    }: { pageObjects: SecurityTestFixtures['pageObjects']; page: SecurityTestFixtures['page'] },
+      config,
+    }: {
+      pageObjects: SecurityTestFixtures['pageObjects'];
+      page: SecurityTestFixtures['page'];
+      config: SecurityWorkerFixtures['config'];
+    },
     use: (pageObjects: SecurityTestFixtures['pageObjects']) => Promise<void>
   ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
+    const extendedPageObjects = extendPageObjects(pageObjects, page, config);
     await use(extendedPageObjects);
   },
   apiServices: [
@@ -33,20 +43,30 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
       {
         apiServices,
         kbnClient,
+        esClient,
         log,
       }: {
         apiServices: ApiServicesFixture;
         kbnClient: SecurityWorkerFixtures['kbnClient'];
+        esClient: SecurityWorkerFixtures['esClient'];
         log: SecurityWorkerFixtures['log'];
       },
       use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as SecurityApiServicesFixture;
+      extendedApiServices.detectionAlerts = getDetectionAlertsApiService({
+        esClient,
+        log,
+      });
       extendedApiServices.detectionRule = getDetectionRuleApiService({
         kbnClient,
         log,
       });
       extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
+        kbnClient,
+        log,
+      });
+      extendedApiServices.timeline = getTimelineApiService({
         kbnClient,
         log,
       });

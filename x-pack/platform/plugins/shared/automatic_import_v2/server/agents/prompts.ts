@@ -117,10 +117,29 @@ Analyze log samples and provide structured analysis containing:
 
 ## Workflow
 
-### Step 1: Review Samples
-- Review all samples to identify patterns and variations
+### Step 1: Initial hypothesis from the first 10 logs
+- Use the **first 10 log lines (in order)** as your initial analysis set (if fewer than 10 are provided, use all of them).
+- Infer the likely **format type**, a preliminary **field list** (including nesting), and likely **delimiters/patterns**.
+- Write down what you believe is invariant vs. what might vary (e.g., optional segments, variable whitespace, missing keys).
 
-### Step 2: Identify Log Format
+### Step 2: Validate the hypothesis on additional logs (and revise if needed)
+- Now **double-check** your hypothesis against a small set of additional logs (at least **5** more if available).
+- For each validation log, ask: “Does my current analysis still explain this log without hand-waving?”
+- If any validation log conflicts with your current analysis, you MUST update the analysis:
+  - **Append new variants** to *Edge Cases* and/or *Special Patterns*.
+  - **Add newly observed fields** and mark previously assumed required fields as **optional** if missing.
+  - **Adjust delimiters/patterns** if the structure differs (e.g., different separators, quoting rules).
+  - **Update Format Type confidence** (lower if there are unresolved variants).
+  - **Change the recommended processor** if the new evidence makes your prior recommendation inefficient or unreliable.
+
+### Step 3: Re-validate after revisions (repeat until stable)
+- After revising, validate again using a few more logs (another **3–5** if available).
+- Repeat the cycle (validate → revise → re-validate) until one of the following is true:
+  - **Stable**: the last validation batch introduces **no new fields, no new variants, and no contradictions**, OR
+  - **Exhausted**: you have checked all available logs.
+- Do not ignore outliers; model them explicitly as variants/edge cases, or lower confidence and explain why.
+
+### Step 4: Identify Log Format
 Determine the primary log format type:
 - **JSON/NDJSON**: Each line is a valid JSON object
 - **Syslog**: RFC3164 (\`Mon DD HH:MM:SS host process[pid]: message\`) or RFC5424 format
@@ -130,19 +149,41 @@ Determine the primary log format type:
 - **LEEF**: Log Event Extended Format (\`LEEF:Version|Vendor|...\`)
 - **Unstructured**: Free-form text without clear structure
 
-### Step 3: Extract Field Information
+### Step 5: Extract Field Information
 For each field found in the samples:
 - **Field name**: Exact name as it appears (including nesting: \`parent.child\`)
 - **Data type**: string, integer, float, boolean, array, object
 - **Consistency**: Is it present in all samples (required) or some (optional)?
 - **Nesting level**: Flat or nested (specify depth)
 
-### Step 4: Identify Parsing Characteristics
+### Step 6: Identify Parsing Characteristics
 Document important characteristics:
 - **Delimiters**: What separates fields or values? (space, comma, pipe, equals, etc.)
 - **Special patterns**: Timestamps, IP addresses, UUIDs, quoted strings
 - **Edge cases**: Null values, empty fields, escaped characters, multi-line content
 - **Encoding**: UTF-8, special characters, escape sequences
+
+### Step 7: Recommend the Best Processor (Downstream agents rely on this)
+Your recommendation must optimize for **runtime efficiency** and **low iteration cost** for the pipeline generator.
+
+**Recommendation rules (choose the simplest reliable strategy)**
+1. **Prefer \`json\`** when samples are valid JSON/NDJSON (even if fields are nested/arrays). This is typically the fastest/most reliable option.
+2. **Prefer \`dissect\`** when the line structure is delimiter-driven and stable (fixed separators like spaces, \`|\`, \`]\`, \`:\`, \`=\`, commas).
+   - If there is a structured prefix and then a key-value tail, recommend **\`dissect\` as primary** and call out **\`kv\` as a follow-up** on the remainder.
+3. **Prefer \`kv\`** when the majority of the useful content is key-value pairs and delimiters are consistent.
+4. **Prefer \`csv\`** for comma/tab-separated logs with stable column order.
+5. **Recommend \`grok\` only as a last resort** when:
+   - Delimiters are not stable, OR the structure is inconsistent across samples, AND
+   - \`dissect\`/\`kv\`/\`csv\` cannot reasonably cover the variants.
+   When you recommend \`grok\`, explicitly list what makes it unavoidable (e.g., irregular whitespace + optional groups + mixed tokens).
+
+**Special format guidance**
+- **Syslog**: often best modeled as a structured header + free-form message. Prefer **\`dissect\`** for the header when stable; only use **\`grok\`** for the header if the header itself varies.
+- **CEF/LEEF**: typically a fixed header separated by \`|\` plus an extension of key-value pairs. Prefer **\`dissect\`** (header) + **\`kv\`** (extension). The primary recommendation should be **\`dissect\`** (faster than \`grok\`).
+
+**What NOT to recommend**
+- Do not recommend \`grok\` simply because it can match; only recommend it if cheaper processors cannot.
+- Do not recommend multiple competing primary processors; pick one primary and mention follow-ups (if any) in the reason/notes.
 
 ## Output Format
 
@@ -181,6 +222,7 @@ Provide analysis in this exact structure:
 ## Recommended Processor
 **[json/dissect/kv/csv/grok]**
 Reason: [Brief explanation why this processor is best for this format]
+[If applicable, mention follow-up processors here (e.g., "Strategy: dissect header, then kv on the remainder") and why this is efficient]
 
 ## Additional Notes
 [Any other relevant information for pipeline generation]
@@ -274,6 +316,45 @@ Based on the provided log analysis, create an ingest pipeline using the most app
 - Handle edge cases: null values, missing fields, data type variations
 - Use a single top-level \`on_failure\` handler at the end of the pipeline that captures any processor failure and sets \`error.message\`; do not attach \`on_failure\` to each processor individually
 - Keep pipelines efficient - avoid unnecessary processors
+
+### Efficiency Rules (Especially for \`dissect\` and \`grok\`)
+Your pipeline must be correct AND efficient. Prefer designs that minimize CPU and avoid repeated regex work.
+
+**General efficiency constraints**
+- Use the **fewest processors** possible to achieve the best success rate.
+- Avoid parsing the same text multiple times (e.g., **do not** run multiple \`grok\` processors over the same field).
+- Use processor-level \`if\` conditions to **skip expensive parsing** when it obviously does not apply (e.g., skip \`grok\` when the field is missing/empty).
+- When there are multiple log variants, prefer **one parsing step with multiple patterns** rather than multiple parsing steps.
+
+**When to choose \`dissect\`**
+- Use \`dissect\` when the structure is **delimiter-driven** and mostly stable (fixed separators like spaces, \`|\`, \`]\`, \`:\`, \`=\`, commas).
+- Use **one** \`dissect\` with a precise pattern rather than a fallback chain of many \`dissect\` processors.
+- Capture only what you need; explicitly skip irrelevant segments using \`%{?skip}\` fields.
+- Prefer \`dissect\` + a targeted follow-up processor (e.g., \`kv\` on the remainder) instead of switching to \`grok\`.
+
+**When \`grok\` is unavoidable (make it fast)**
+- Use **a single \`grok\` processor** with a \`patterns\` array (ordered most-common to least-common). Do not create multiple \`grok\` processors for variants.
+- Anchor patterns with \`^\` and \`$\` whenever possible to prevent excessive backtracking.
+- Avoid overly permissive tokens:
+  - Do not use \`GREEDYDATA\` except at the **very end** of the pattern.
+  - Avoid multiple \`DATA\`/optional groups in the middle; use concrete patterns like \`NUMBER\`, \`WORD\`, \`IP\`, \`TIMESTAMP_ISO8601\`, etc.
+- Prefer a small number of clear patterns over one mega-pattern with many nested optionals.
+- If only a suffix/prefix differs between variants, keep the common part identical and vary the minimal segment.
+
+**Iteration guidance (keep iterations efficient)**
+- Start from the provided analysis: produce a deterministic first pipeline.
+- When validation fails, update the pipeline only to address the **specific failed samples**:
+  - If failures are format variants, add/adjust a pattern within the same \`patterns\` array (not a new \`grok\` processor).
+  - If failures indicate stable delimiters, switch from \`grok\` to \`dissect\` (don’t keep expanding regex).
+- Do not “guess” patterns beyond what the failures show; each iteration must have a clear reason tied to validation output.
+
+### Edge-Case Checklist (Use the analysis; cover what’s mentioned)
+When generating the pipeline, explicitly account for edge cases called out in the analysis, such as:
+- Optional/missing segments (missing log level, missing bracket groups, missing key-value tail)
+- Empty/null message fields
+- Variable whitespace / repeated delimiters
+- Quoted values and escaped quotes
+- Multiple message variants (e.g., different prefixes) using pattern arrays (not processor chains)
 
 ### Step 2: Validate and Iterate
 - **ALWAYS** call \`validate_ingest_pipeline\` with your generated pipeline

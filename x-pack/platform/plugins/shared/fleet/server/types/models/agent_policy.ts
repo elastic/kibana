@@ -281,8 +281,31 @@ const BaseSecretsSchema = schema
     unknowns: 'allow',
   });
 
-export const NewAgentPolicySchema = schema.object({
-  ...AgentPolicyBaseSchema,
+export const AgentPolicySchemaV3 = schema
+  .object({
+    ...AgentPolicyBaseSchema,
+  })
+  .extends({
+    has_agent_version_conditions: schema.maybe(schema.boolean()),
+  });
+
+export const AgentPolicySchemaV4 = AgentPolicySchemaV3.extends({
+  min_agent_version: schema.maybe(schema.nullable(schema.string())),
+  package_agent_version_conditions: schema.maybe(
+    schema.nullable(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          version_condition: schema.string(),
+        }),
+        { maxSize: 1000 }
+      )
+    )
+  ),
+});
+
+export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
   supports_agentless: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -299,8 +322,7 @@ export const NewAgentPolicySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });
 
-export const AgentPolicySchema = schema.object({
-  ...AgentPolicyBaseSchema,
+export const AgentPolicySchema = AgentPolicySchemaV3.extends({
   id: schema.string(),
   is_managed: schema.maybe(schema.boolean()),
   status: schema.oneOf([
@@ -322,6 +344,15 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   agents: schema.maybe(schema.number()),
   unprivileged_agents: schema.maybe(schema.number()),
   fips_agents: schema.maybe(schema.number()),
+  agents_per_version: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        version: schema.string(),
+        count: schema.number(),
+      }),
+      { maxSize: 1000 }
+    )
+  ),
   is_protected: schema.boolean({
     meta: {
       description:
@@ -331,6 +362,19 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   version: schema.maybe(schema.string()),
   is_preconfigured: schema.maybe(schema.boolean()),
   schema_version: schema.maybe(schema.string()),
+  min_agent_version: schema.maybe(schema.nullable(schema.string())),
+  package_agent_version_conditions: schema.maybe(
+    schema.nullable(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          version_condition: schema.string(),
+        }),
+        { maxSize: 1000 }
+      )
+    )
+  ),
   package_policies: schema.maybe(
     schema.oneOf([
       schema.arrayOf(schema.string(), { maxSize: 10000 }),
@@ -524,6 +568,18 @@ export const FullAgentPolicyResponseSchema = schema.object({
       download: schema.object({
         sourceURI: schema.string(),
         ssl: schema.maybe(BaseSSLSchema),
+        auth: schema.maybe(
+          schema.object({
+            username: schema.maybe(schema.string()),
+            password: schema.maybe(schema.string()),
+            api_key: schema.maybe(schema.string()),
+            headers: schema.maybe(
+              schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }), {
+                maxSize: 100,
+              })
+            ),
+          })
+        ),
         secrets: schema.maybe(BaseSecretsSchema),
         timeout: schema.maybe(schema.string()),
         target_directory: schema.maybe(schema.string()),

@@ -11,13 +11,13 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 
 import { UiamAPIKeys } from './uiam_api_keys';
 import type { SecurityLicense } from '../../../../common';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import type { UiamServicePublic } from '../../../uiam';
-import { HTTPAuthorizationHeader } from '../../http_authentication';
 
 describe('UiamAPIKeys', () => {
   let uiamApiKeys: UiamAPIKeys;
@@ -41,19 +41,16 @@ describe('UiamAPIKeys', () => {
 
     mockUiam = {
       getAuthenticationHeaders: jest.fn(),
-      getUserProfileGrant: jest.fn(),
-      getEsClientAuthenticationHeader: jest.fn().mockReturnValue({
-        'x-client-authentication': 'shared-secret',
-      }),
+      getClientAuthentication: jest.fn(),
       refreshSessionTokens: jest.fn(),
       invalidateSessionTokens: jest.fn(),
       grantApiKey: jest.fn(),
       revokeApiKey: jest.fn(),
+      convertApiKeys: jest.fn(),
     };
 
     uiamApiKeys = new UiamAPIKeys({
       logger,
-      clusterClient: mockClusterClient,
       license: mockLicense,
       uiam: mockUiam,
     });
@@ -300,56 +297,79 @@ describe('UiamAPIKeys', () => {
     });
   });
 
-  describe('getScopedClusterClientWithApiKey()', () => {
-    it('creates scoped client with UIAM headers when API key starts with UIAM prefix', () => {
-      const result = uiamApiKeys.getScopedClusterClientWithApiKey('essu_test_key_123');
+  describe('convert()', () => {
+    it('returns null when license is not enabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
 
-      expect(result).toBe(mockScopedClusterClient);
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith({
-        headers: {
-          authorization: 'ApiKey essu_test_key_123',
-          'x-client-authentication': 'shared-secret',
-        },
-      });
-      expect(mockUiam.getEsClientAuthenticationHeader).toHaveBeenCalled();
+      const result = await uiamApiKeys.convert(['es-api-key']);
+
+      expect(result).toBeNull();
+      expect(mockUiam.convertApiKeys).not.toHaveBeenCalled();
     });
 
-    it('creates scoped client without UIAM headers when API key does not start with UIAM prefix', () => {
-      const result = uiamApiKeys.getScopedClusterClientWithApiKey('regular_api_key_123');
+    it('successfully converts API keys via UIAM', async () => {
+      const mockResponse = {
+        results: [
+          {
+            status: 'success' as const,
+            id: 'converted-key-id',
+            key: 'essu_converted_key',
+            description: 'converted key',
+            organization_id: 'org-123',
+            internal: true,
+            role_assignments: {},
+            creation_date: '2026-01-01T00:00:00Z',
+            expiration_date: null,
+          },
+        ],
+      };
+      mockUiam.convertApiKeys.mockResolvedValue(mockResponse);
 
-      expect(result).toBe(mockScopedClusterClient);
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith({
-        headers: {
-          authorization: 'ApiKey regular_api_key_123',
-        },
-      });
-      expect(mockUiam.getEsClientAuthenticationHeader).not.toHaveBeenCalled();
-    });
-  });
+      const result = await uiamApiKeys.convert(['es-api-key-base64']);
 
-  describe('isUiamCredential()', () => {
-    it('returns true when credentials start with UIAM prefix', () => {
-      const authorization = new HTTPAuthorizationHeader('ApiKey', 'essu_credential_123');
-
-      const result = UiamAPIKeys.isUiamCredential(authorization);
-
-      expect(result).toBe(true);
-    });
-
-    it('returns false when credentials do not start with UIAM prefix', () => {
-      const authorization = new HTTPAuthorizationHeader('ApiKey', 'regular_credential_123');
-
-      const result = UiamAPIKeys.isUiamCredential(authorization);
-
-      expect(result).toBe(false);
+      expect(result).toEqual(mockResponse);
+      expect(mockUiam.convertApiKeys).toHaveBeenCalledWith(['es-api-key-base64']);
+      expect(logger.debug).toHaveBeenCalledWith('Trying to convert 1 API key(s)');
     });
 
-    it('returns false when credentials are empty', () => {
-      const authorization = new HTTPAuthorizationHeader('ApiKey', '');
+    it('injects the same elasticsearch URL endpoint for all keys', async () => {
+      const mockResponse = {
+        results: [
+          {
+            status: 'success' as const,
+            id: 'k1',
+            key: 'essu_k1',
+            description: 'key 1',
+            organization_id: 'org-1',
+            internal: true,
+            role_assignments: {},
+            creation_date: '2026-01-01T00:00:00Z',
+            expiration_date: null,
+          },
+          {
+            status: 'failed' as const,
+            code: 'ES_API_KEY_AUTHENTICATION_FAILED',
+            message: 'Auth failed',
+            resource: null,
+            type: 'UNKNOWN',
+          },
+        ],
+      };
+      mockUiam.convertApiKeys.mockResolvedValue(mockResponse);
 
-      const result = UiamAPIKeys.isUiamCredential(authorization);
+      const result = await uiamApiKeys.convert(['valid-key', 'invalid-key']);
 
-      expect(result).toBe(false);
+      expect(result).toEqual(mockResponse);
+      expect(mockUiam.convertApiKeys).toHaveBeenCalledWith(['valid-key', 'invalid-key']);
+    });
+
+    it('logs and throws error when UIAM conversion fails', async () => {
+      const error = new Error('UIAM service error');
+      mockUiam.convertApiKeys.mockRejectedValue(error);
+
+      await expect(uiamApiKeys.convert(['es-api-key'])).rejects.toThrow('UIAM service error');
+
+      expect(logger.error).toHaveBeenCalledWith('Failed to convert API keys: UIAM service error');
     });
   });
 

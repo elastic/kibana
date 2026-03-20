@@ -21,7 +21,11 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import {
+  appendWhereClauseToESQLQuery,
+  hasTransformationalCommand,
+  appendFilteringWhereClauseForCascadeLayout,
+} from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
@@ -35,7 +39,6 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -62,12 +65,14 @@ import {
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
+import { isCascadedDocumentsVisible } from './cascaded_documents';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -79,11 +84,7 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
   </QueryClientProvider>
 ));
 
-export interface DiscoverLayoutProps {
-  stateContainer: DiscoverStateContainer;
-}
-
-export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
+export function DiscoverLayout() {
   const {
     trackUiMetric,
     capabilities,
@@ -102,7 +103,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const styles = useMemoCss(componentStyles);
   const globalQueryState = data.query.getState();
-  const { main$ } = stateContainer.dataState.data$;
+  const dataStateContainer = useCurrentTabDataStateContainer();
+  const { main$ } = dataStateContainer.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
@@ -123,6 +125,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
+  const esqlVariables = useCurrentTabSelector((state) => state.esqlVariables);
+  const isCascadeLayoutSelected = useCurrentTabSelector((tab) =>
+    isCascadedDocumentsVisible(
+      tab.cascadedDocumentsState.availableCascadeGroups,
+      tab.appState.query
+    )
+  );
 
   const fetchCounter = useRef<number>(0);
 
@@ -233,13 +242,24 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       // weird existence logic from Discover components
       // in the field it comes the operator _exists_ and in the value the field
       // I need to take care of it here but I think it should be handled on the fieldlist instead
-      const updatedQuery = appendWhereClauseToESQLQuery(
-        query.esql,
-        fieldName === '_exists_' ? String(values) : fieldName,
-        fieldName === '_exists_' || values == null ? undefined : values,
-        getOperator(fieldName, values, operation),
-        fieldType
-      );
+      const updatedQuery = isCascadeLayoutSelected
+        ? appendFilteringWhereClauseForCascadeLayout(
+            query.esql,
+            esqlVariables,
+            dataView,
+            fieldName === '_exists_' ? String(values) : fieldName,
+            fieldName === '_exists_' || values == null ? undefined : values,
+            getOperator(fieldName, values, operation),
+            fieldType
+          )
+        : appendWhereClauseToESQLQuery(
+            query.esql,
+            fieldName === '_exists_' ? String(values) : fieldName,
+            fieldName === '_exists_' || values == null ? undefined : values,
+            getOperator(fieldName, values, operation),
+            fieldType
+          );
+
       if (!updatedQuery) {
         return;
       }
@@ -255,7 +275,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         fieldsMetadata,
       });
     },
-    [query, data.query.queryString, trackUiMetric, scopedEBTManager, fieldsMetadata]
+    [
+      query,
+      isCascadeLayoutSelected,
+      esqlVariables,
+      dataView,
+      data.query.queryString,
+      trackUiMetric,
+      scopedEBTManager,
+      fieldsMetadata,
+    ]
   );
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
@@ -275,6 +304,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [dispatch, updateAppState]
   );
 
+  const updateAdHocDataViewId = useCurrentTabAction(internalStateActions.updateAdHocDataViewId);
   const onFieldEdited: (options: {
     editedDataView: DataView;
     removedFieldName?: string;
@@ -287,7 +317,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         onRemoveColumn(removedFieldName);
       }
       if (!editedDataView.isPersisted()) {
-        await stateContainer.actions.updateAdHocDataViewId(editedDataView);
+        await dispatch(
+          updateAdHocDataViewId({
+            editedDataView,
+          })
+        );
       }
       if (editedDataView?.id) {
         // `tab.uiState.fieldListExistingFieldsInfo` needs to be reset when user edits fields,
@@ -299,9 +333,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           })
         );
       }
-      stateContainer.dataState.refetch$.next('reset');
+      dataStateContainer.refetch$.next('reset');
     },
-    [dataView, stateContainer, currentColumns, onRemoveColumn, dispatch]
+    [dataView, dataStateContainer, currentColumns, onRemoveColumn, dispatch, updateAdHocDataViewId]
   );
 
   const onDisableFilters = useCallback(() => {
@@ -312,7 +346,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [filterManager]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
-  const documentState = useDataState(stateContainer.dataState.data$.documents$);
+  const documentState = useDataState(dataStateContainer.data$.documents$);
 
   const esqlModeWarning = useMemo(() => {
     if (isEsqlMode) {
@@ -344,25 +378,23 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
     return (
       <PanelsToggle
-        stateContainer={stateContainer}
         sidebarToggleState$={sidebarToggleState$}
         renderedFor="root"
         isChartAvailable={undefined}
       />
     );
-  }, [stateContainer, sidebarToggleState$]);
+  }, [sidebarToggleState$]);
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
-      return <DiscoverUninitialized onRefresh={() => stateContainer.dataState.fetch()} />;
+      return <DiscoverUninitialized onRefresh={() => dataStateContainer.fetch()} />;
     }
 
     return (
       <>
         <DiscoverHistogramLayout
           dataView={dataView}
-          stateContainer={stateContainer}
           columns={currentColumns}
           viewMode={viewMode}
           onAddFilter={onFilter}
@@ -376,13 +408,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [
     resultState,
     dataView,
-    stateContainer,
     currentColumns,
     viewMode,
     onFilter,
     onFieldEdited,
     onDropFieldToTable,
     panelsToggle,
+    dataStateContainer,
   ]);
 
   const isLoading =
@@ -390,8 +422,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     documentState.fetchStatus === FetchStatus.PARTIAL;
 
   const onCancelClick = useCallback(() => {
-    stateContainer.dataState.cancel();
-  }, [stateContainer.dataState]);
+    dataStateContainer.cancel();
+  }, [dataStateContainer]);
 
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
   const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
@@ -406,9 +438,26 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [dispatch, setLayoutUiState]
   );
 
+  const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
+  const onChangeDataView = useCallback(
+    (dataViewOrDataViewId: string | DataView) => {
+      dispatch(changeDataView({ dataViewOrDataViewId }));
+    },
+    [dispatch, changeDataView]
+  );
+
+  const onDataViewCreatedAction = useCurrentTabAction(internalStateActions.onDataViewCreated);
+  const onDataViewCreated = useCallback(
+    (nextDataView: DataView) => {
+      dispatch(onDataViewCreatedAction({ nextDataView }));
+    },
+    [dispatch, onDataViewCreatedAction]
+  );
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
+      data-test-subj="dscPage"
       data-fetch-counter={fetchCounter.current}
       direction="column"
       css={[
@@ -422,7 +471,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     >
       <TopNavMemoized
         savedQuery={savedQuery}
-        stateContainer={stateContainer}
         esqlModeErrors={esqlModeErrors}
         esqlModeWarning={esqlModeWarning}
         onFieldEdited={onFieldEdited}
@@ -446,12 +494,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             sidebarPanel={
               <SidebarMemoized
                 columns={currentColumns}
-                documents$={stateContainer.dataState.data$.documents$}
+                documents$={dataStateContainer.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}
-                onChangeDataView={stateContainer.actions.onChangeDataView}
-                onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                onChangeDataView={onChangeDataView}
+                onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}
                 onRemoveField={onRemoveColumnWithTracking}
                 selectedDataView={dataView}
@@ -484,7 +532,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                       />
                     ) : (
                       <DiscoverNoResults
-                        stateContainer={stateContainer}
                         isTimeBased={isTimeBased}
                         query={globalQueryState.query}
                         filters={globalQueryState.filters}
@@ -545,6 +592,8 @@ const componentStyles = {
   sidebarContainer: css({
     width: '100%',
     height: '100%',
+    display: 'flex',
+    flex: '1 1 auto',
   }),
   mainPanel: ({ euiTheme }: UseEuiTheme) =>
     css({

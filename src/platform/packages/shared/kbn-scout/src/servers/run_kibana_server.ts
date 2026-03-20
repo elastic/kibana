@@ -28,6 +28,15 @@ export async function runKibanaServer(options: {
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const devMode = !installDir;
   const useTaskRunner = options.config.get('kbnTestServer.useDedicatedTaskRunner');
+  const env = {
+    ...process.env,
+    ...options.config.get('kbnTestServer.env'),
+  };
+  if (env.NO_COLOR !== undefined) {
+    delete env.FORCE_COLOR;
+  } else if (env.FORCE_COLOR === undefined) {
+    env.FORCE_COLOR = '1';
+  }
 
   const procRunnerOpts = {
     cwd: installDir || REPO_ROOT,
@@ -36,11 +45,7 @@ export async function runKibanaServer(options: {
         ? Path.resolve(installDir, 'bin/kibana.bat')
         : Path.resolve(installDir, 'bin/kibana')
       : process.execPath,
-    env: {
-      FORCE_COLOR: 1,
-      ...process.env,
-      ...options.config.get('kbnTestServer.env'),
-    },
+    env,
     wait: runOptions.wait,
     onEarlyExit: options.onEarlyExit,
   };

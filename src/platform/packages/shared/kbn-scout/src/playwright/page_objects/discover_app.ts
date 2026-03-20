@@ -11,21 +11,52 @@ import type { Download } from 'playwright-core';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { KibanaCodeEditorWrapper } from '../ui_components';
 
 export class DiscoverApp {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly codeEditor: KibanaCodeEditorWrapper;
+
+  constructor(private readonly page: ScoutPage) {
+    this.codeEditor = new KibanaCodeEditorWrapper(page);
+  }
 
   async goto() {
     await this.page.gotoApp('discover');
+    await this.waitForDiscoverPage();
+  }
+
+  private async waitForDiscoverPage() {
+    await expect(this.page.testSubj.locator('dscPage')).toBeVisible();
+  }
+
+  private async getVisibleDataViewSwitch() {
+    const discoverSwitch = this.page.testSubj.locator('discover-dataView-switch-link');
+    const fallbackSwitch = this.page.testSubj.locator('dataView-switch-link');
+
+    // There should be exactly one visible data view switch.
+    // If both are visible (bug), fail explicitly instead of picking one
+    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible();
+
+    const discoverVisible = await discoverSwitch.isVisible();
+    const fallbackVisible = await fallbackSwitch.isVisible();
+
+    if (discoverVisible === fallbackVisible) {
+      throw new Error(
+        `Expected exactly one data view switch link to be visible, but discover=${discoverVisible} fallback=${fallbackVisible}`
+      );
+    }
+
+    return discoverVisible ? discoverSwitch : fallbackSwitch;
   }
 
   async selectDataView(name: string) {
-    const currentValue = await this.page.testSubj.innerText('*dataView-switch-link');
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
       return;
     }
-    await this.page.testSubj.click('*dataView-switch-link');
-    await this.page.testSubj.waitForSelector('indexPattern-switcher');
+    await dataViewSwitch.click();
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = this.page.testSubj
       .locator('indexPattern-switcher')
@@ -35,12 +66,14 @@ export class DiscoverApp {
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
-    await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeHidden();
     await this.waitUntilFieldListHasCountOfFields();
   }
 
   getSelectedDataView(): Locator {
-    return this.page.testSubj.locator('discover-dataView-switch-link');
+    return this.page.testSubj
+      .locator('discover-dataView-switch-link')
+      .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
   async clickNewSearch() {
@@ -55,7 +88,6 @@ export class DiscoverApp {
     await this.page.testSubj.fill('savedObjectTitle', name);
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   async waitUntilFieldListHasCountOfFields() {
@@ -114,12 +146,66 @@ export class DiscoverApp {
     });
   }
 
+  // Waits for the document table to be fully rendered and stable
   async waitForDocTableRendered() {
     const table = this.page.testSubj.locator('discoverDocTable');
     await expect(table).toBeVisible();
-    await expect(table).toHaveAttribute('data-render-complete', 'true', {
-      timeout: 30_000,
-    });
+
+    const minDurationMs = 2_000;
+    const pollIntervalMs = 100;
+    const totalTimeoutMs = 30_000;
+
+    let stableSince: number | null = null;
+
+    await expect
+      .poll(
+        async () => {
+          const attr = await table.getAttribute('data-render-complete');
+          const now = Date.now();
+
+          if (attr === 'true') {
+            if (!stableSince) {
+              stableSince = now;
+            }
+            const elapsed = now - stableSince;
+            return elapsed >= minDurationMs;
+          } else {
+            // Reset if it flips to anything other than 'true'
+            stableSince = null;
+            return false;
+          }
+        },
+        {
+          message: `data-render-complete did not stay 'true' for ${minDurationMs}ms`,
+          timeout: totalTimeoutMs,
+          intervals: [pollIntervalMs],
+        }
+      )
+      .toBe(true);
+  }
+
+  async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
+    const expandButton = this.page.locator(
+      `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
+    );
+
+    // Ensure button stable after grid render (catches row shifts)
+    await expect(expandButton).toBeVisible();
+
+    // Scroll to, hover, and click the expand button
+    await expandButton.scrollIntoViewIfNeeded();
+    await expandButton.hover();
+    await expandButton.click({ delay: 50 });
+  }
+
+  async waitForDocViewerFlyoutOpen() {
+    const docViewer = this.page.testSubj.locator('kbnDocViewer');
+    await expect(docViewer).toBeVisible({ timeout: 30_000 });
+  }
+
+  async openAndWaitForDocViewerFlyout({ rowIndex }: { rowIndex: number }) {
+    await this.openDocumentDetails({ rowIndex });
+    await this.waitForDocViewerFlyoutOpen();
   }
 
   async getDocTableIndex(index: number): Promise<string> {
@@ -149,15 +235,23 @@ export class DiscoverApp {
   }
 
   async revertUnsavedChanges() {
-    await this.page.testSubj.hover('unsavedChangesBadge');
-    await this.page.testSubj.click('unsavedChangesBadge');
-    await this.page.testSubj.waitForSelector('unsavedChangesBadgeMenuPanel', { state: 'visible' });
-    await this.page.testSubj.click('revertUnsavedChangesButton');
+    // Click the secondary button on the split save button
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+
+    // Wait for popover and revert
+    const revertButton = this.page.testSubj.locator('revertUnsavedChangesButton');
+    await expect(revertButton).toBeVisible();
+    await revertButton.click();
+
     await this.waitUntilSearchingHasFinished();
   }
 
+  getColumnHeader(name: string): Locator {
+    return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
+  }
+
   async clickFieldSort(field: string, sortOption: string) {
-    const header = this.page.testSubj.locator(`dataGridHeaderCell-${field}`);
+    const header = this.getColumnHeader(field);
     await header.click();
     await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
       state: 'visible',
@@ -170,17 +264,6 @@ export class DiscoverApp {
       .locator('[data-test-subj^="dataGridHeaderCell-"]')
       .allInnerTexts();
     return headers.join(',');
-  }
-
-  async getSharedItemTitleAndDescription(): Promise<{ title: string; description: string }> {
-    const cssSelector = '[data-shared-item][data-title][data-description]';
-    const element = this.page.locator(cssSelector);
-    await element.waitFor({ state: 'visible' });
-
-    const title = (await element.getAttribute('data-title')) || '';
-    const description = (await element.getAttribute('data-description')) || '';
-
-    return { title, description };
   }
 
   async showChart() {
@@ -200,7 +283,7 @@ export class DiscoverApp {
     return await Promise.all(columnLocators.map((locator) => locator.innerText()));
   }
 
-  async writeSearchQuery(query: string) {
+  async writeAndSubmitKqlQuery(query: string) {
     await this.page.testSubj.fill('queryInput', query);
     await expect(this.page.testSubj.locator('queryInput')).toHaveValue(query);
     await this.page.testSubj.click('querySubmitButton');
@@ -258,9 +341,121 @@ export class DiscoverApp {
     }
   }
 
+  async writeAndSubmitEsqlQuery(query: string) {
+    await this.selectTextBaseLang();
+    await this.codeEditor.setCodeEditorValue(query);
+    await this.page.testSubj.click('querySubmitButton');
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async navigateToTabByName(name: string) {
+    const tabsBar = this.page.testSubj.locator('unifiedTabs_tabsBar');
+    const tab = tabsBar.getByRole('tab', { name });
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-selected', 'true');
+  }
+
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
     await this.page.testSubj.click('querySubmitButton');
     await this.waitUntilSearchingHasFinished();
     await rowLocator.waitFor({ state: 'visible', timeout });
+  }
+
+  public get esqlMenuPopover(): Locator {
+    return this.page.testSubj.locator('esql-menu-popover');
+  }
+
+  async openRecommendedQueriesPanel() {
+    const menuPopover = this.esqlMenuPopover;
+    if (!(await menuPopover.isVisible())) {
+      await this.page.testSubj.click('esql-help-popover-button');
+    }
+
+    await menuPopover.waitFor({ state: 'visible' });
+
+    const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
+    await expect(recommendedQueriesButton).toBeVisible();
+    await recommendedQueriesButton.click();
+    await this.page.testSubj.locator('contextMenuPanelTitleButton').waitFor({ state: 'visible' });
+  }
+
+  async runRecommendedEsqlQuery(queryLabel: string) {
+    await this.openRecommendedQueriesPanel();
+
+    const queryOption = this.esqlMenuPopover.getByRole('button', {
+      exact: true,
+      name: queryLabel,
+    });
+
+    await expect(queryOption).toBeVisible();
+    await queryOption.click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
+    return this.codeEditor.getCodeEditorValue(nthIndex);
+  }
+
+  async addBreakdownFieldFromSidebar(field: string) {
+    const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
+    if (await sidebarToggleButton.isVisible()) {
+      await sidebarToggleButton.click();
+    }
+
+    await this.waitUntilFieldListHasCountOfFields();
+
+    const fieldLocator = this.page.testSubj.locator(`field-${field}`);
+    await fieldLocator.hover();
+    await fieldLocator.click();
+    await this.waitUntilFieldPopoverIsLoaded();
+
+    await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  private async waitUntilFieldPopoverIsLoaded() {
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await expect(this.page.locator('[data-test-subj*="-statsLoading"]')).toBeHidden();
+  }
+
+  /**
+   * Scrolls through the virtualized doc table grid to assert that the given
+   * text exists somewhere in the rendered rows. Necessary because virtual
+   * scrolling only keeps a subset of rows in the DOM at any time.
+   */
+  async expectDocTableToContainText(text: string) {
+    // 200px per step × 50 steps = 10 000px of total scroll coverage,
+    // enough for grids with hundreds of rows at default row height (~34px).
+    const SCROLL_STEP_PX = 200;
+    const MAX_SCROLL_STEPS = 50;
+    // Per-position timeout: long enough for Playwright to retry through
+    // transient re-renders, short enough to not stall at positions where
+    // the text genuinely isn't in the DOM.
+    const PER_POSITION_TIMEOUT_MS = 500;
+
+    await this.waitUntilSearchingHasFinished();
+    const docTable = this.page.testSubj.locator('discoverDocTable');
+    await expect(docTable).toBeVisible();
+
+    const grid = docTable.locator('.euiDataGrid__virtualized');
+    await grid.evaluate((el) => el.scrollTo(0, 0));
+
+    for (let i = 0; i < MAX_SCROLL_STEPS; i++) {
+      try {
+        await expect(docTable).toContainText(text, { timeout: PER_POSITION_TIMEOUT_MS });
+        return;
+      } catch {
+        // Text not found at this scroll position, continue scrolling
+      }
+
+      const atBottom = await grid.evaluate((el, step) => {
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight) return true;
+        el.scrollBy(0, step);
+        return false;
+      }, SCROLL_STEP_PX);
+      if (atBottom) break;
+    }
+
+    await expect(docTable).toContainText(text);
   }
 }

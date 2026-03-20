@@ -103,6 +103,9 @@ export const annotationXY: LensAttributes = {
             {
               color: '#ff0000',
               icon: 'triangle',
+              lineWidth: 2,
+              lineStyle: 'dashed',
+              isHidden: false,
               id: 'cf13a990-6a33-427a-a85a-2f271116776a',
               key: {
                 type: 'point_in_time',

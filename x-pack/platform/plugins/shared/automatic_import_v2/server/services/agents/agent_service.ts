@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { HumanMessage } from '@langchain/core/messages';
 import { createAutomaticImportAgent } from '../../agents';
 import {
   createIngestPipelineGeneratorAgent,
@@ -21,6 +22,7 @@ import {
 } from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
+import type { LangSmithOptions } from '../../routes/types';
 
 export class AgentService {
   private logger: Logger;
@@ -49,7 +51,8 @@ export class AgentService {
     integrationId: string,
     dataStreamId: string,
     esClient: ElasticsearchClient,
-    model: InferenceChatModel
+    model: InferenceChatModel,
+    langSmithOptions?: LangSmithOptions
   ) {
     this.logger.debug(
       `invokeAutomaticImportAgent: Invoking automatic import agent for integration ${integrationId} and data stream ${dataStreamId}`
@@ -58,8 +61,7 @@ export class AgentService {
     // Fetch samples from the index (decoupled from agent building)
     const samples = await this.samplesIndexService.getSamplesForDataStream(
       integrationId,
-      dataStreamId,
-      esClient
+      dataStreamId
     );
 
     // Create tools at the service level
@@ -100,28 +102,25 @@ export class AgentService {
       subagents: [logsAnalyzerSubAgent, pipelineGeneratorSubAgent, textToEcsSubAgent],
     });
 
-    const traceOptions = {
-      tracers: [
-        ...getLangSmithTracer({
-          // TODO: Get apiKey from config
-          apiKey: 'apiKey',
-          projectName: 'projectName',
-          logger: this.logger,
-        }),
-      ],
-    };
+    const langSmithTracers =
+      langSmithOptions?.apiKey && langSmithOptions?.projectName
+        ? getLangSmithTracer({
+            apiKey: langSmithOptions.apiKey,
+            projectName: langSmithOptions.projectName,
+            logger: this.logger,
+          })
+        : [];
 
     const result = await automaticImportAgent.invoke(
       {
         messages: [
-          {
-            role: 'user',
+          new HumanMessage({
             content: `You are tasked with generating an Elasticsearch ingest pipeline for the integration \`${integrationId}\` and data stream \`${dataStreamId}\`.`,
-          },
+          }),
         ],
       },
       {
-        callbacks: [...(traceOptions.tracers ?? [])],
+        callbacks: [...langSmithTracers],
         runName: 'automatic_import_agent',
         tags: ['automatic_import_agent'],
       }

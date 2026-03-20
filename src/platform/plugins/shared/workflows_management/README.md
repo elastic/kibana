@@ -8,6 +8,7 @@ The workflows management plugin provides the user interface and management capab
 
 ## Table of Contents
 
+- [Requirements](#requirements)
 - [Enable the Feature Flag](#enable-the-feature-flag)
 - [Overview](#overview)
 - [Features](#features)
@@ -16,6 +17,12 @@ The workflows management plugin provides the user interface and management capab
 - [API Endpoints](#api-endpoints)
 - [UI Application](#ui-application)
 - [Development](#development)
+
+---
+
+## Requirements
+
+To use workflows, you need an **active Enterprise license**. Workflows are not available on Basic or Standard licenses.
 
 ---
 
@@ -341,6 +348,7 @@ POST /api/workflows/testStep
 ```json
 {
   "stepId": "step-1",
+  "workflowId": "workflow-0d8d376e-07f9-47a2-b8a2-852081d75ddc",
   "contextOverride": {
     "spaceId": "default",
     "inputs": {...}

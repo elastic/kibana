@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 import { euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
 import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { ChromeStyle } from '../layout.types';
 import type { EmotionFn } from '../types';
 
 const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
@@ -37,7 +37,10 @@ const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
       css`
         background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
         border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
-        border: ${getHighContrastBorder(useEuiTheme)};
+
+        // use outline so it doesn't affect size/layout and cause a scrollbar
+        outline: ${getHighContrastBorder(useEuiTheme)};
+
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
       `}
       ${!isProjectStyle &&
@@ -56,12 +59,6 @@ const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
         ${euiOverflowScroll(useEuiTheme, { direction: 'y' })};
         // reset the height back to respect the margin bottom
         height: calc(100% - ${layoutVar('application.marginBottom')});
-
-        // Hide scrollbar
-        scrollbar-width: none; /* Firefox */
-        &::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, Edge */
-        }
       }
     `;
   };

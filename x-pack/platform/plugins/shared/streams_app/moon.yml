@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/streams-app-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/streams-app-plugin'
+  title: '@kbn/streams-app-plugin'
   description: Moon project for @kbn/streams-app-plugin
   channel: ''
   owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/streams_app
+  sourceRoot: x-pack/platform/plugins/shared/streams_app
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -55,7 +54,6 @@ dependsOn:
   - '@kbn/content-packs-schema'
   - '@kbn/dashboard-plugin'
   - '@kbn/deeplinks-analytics'
-  - '@kbn/visualization-utils'
   - '@kbn/calculate-auto'
   - '@kbn/deeplinks-observability'
   - '@kbn/ui-theme'
@@ -85,7 +83,6 @@ dependsOn:
   - '@kbn/core-notifications-browser'
   - '@kbn/io-ts-utils'
   - '@kbn/otel-semantic-conventions'
-  - '@kbn/storage-adapter'
   - '@kbn/cloud-plugin'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/deeplinks-security'
@@ -98,7 +95,6 @@ dependsOn:
   - '@kbn/traced-es-client'
   - '@kbn/streamlang-yaml-editor'
   - '@kbn/tooling-log'
-  - '@kbn/inference-common'
   - '@kbn/core-chrome-navigation'
   - '@kbn/classic-stream-flyout'
   - '@kbn/ebt-tools'
@@ -107,6 +103,11 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/react-query'
   - '@kbn/timerange'
+  - '@kbn/inference-common'
+  - '@kbn/esql'
+  - '@kbn/inference-endpoint-ui-common'
+  - '@kbn/stack-connectors-plugin'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
@@ -125,14 +126,24 @@ fileGroups:
     - '!.storybook/**/*.js'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

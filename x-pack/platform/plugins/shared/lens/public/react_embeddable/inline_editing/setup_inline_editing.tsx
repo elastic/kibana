@@ -13,8 +13,9 @@ import type {
   LensInternalApi,
   LensRuntimeState,
   TypedLensSerializedState,
+  LensDatasourceId,
 } from '@kbn/lens-common';
-import type { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { isTextBasedLanguage } from '../helper';
@@ -58,13 +59,9 @@ export function prepareInlineEditPanel(
     closeFlyout,
     onApply,
     onCancel,
-    hideTimeFilterInfo,
     applyButtonLabel,
   }: Partial<
-    Pick<
-      EditConfigPanelProps,
-      'closeFlyout' | 'onApply' | 'onCancel' | 'hideTimeFilterInfo' | 'applyButtonLabel'
-    >
+    Pick<EditConfigPanelProps, 'closeFlyout' | 'onApply' | 'onCancel' | 'applyButtonLabel'>
   > = {}) {
     const currentState = getState();
     const isNewPanel = initialState.isNewPanel;
@@ -75,7 +72,7 @@ export function prepareInlineEditPanel(
       saveUserChartTypeToSessionStorage(attributes.visualizationType);
     }
     const activeDatasourceId = (getActiveDatasourceIdFromDoc(attributes) ||
-      'formBased') as EditLensConfigurationProps['datasourceId'];
+      LENS_DATASOURCE_ID.FORM_BASED) as LensDatasourceId;
 
     const { updatePanelState, updateSuggestion } = getStateManagementForInlineEditing(
       activeDatasourceId,
@@ -119,7 +116,6 @@ export function prepareInlineEditPanel(
         updateByRefInput={updateByRefInput}
         updatePanelState={updatePanelState}
         updateSuggestion={updateSuggestion}
-        datasourceId={activeDatasourceId}
         lensAdapters={inspectorApi.getInspectorAdapters()}
         dataLoading$={dataLoading$}
         panelId={uuid}
@@ -136,7 +132,6 @@ export function prepareInlineEditPanel(
             : undefined
         }
         displayFlyoutHeader
-        canEditTextBasedQuery={isTextBasedLanguage(currentState)}
         isNewPanel={panelManagementApi.isNewPanel()}
         onCancel={() => {
           panelManagementApi.onStopEditing(
@@ -148,13 +143,20 @@ export function prepareInlineEditPanel(
           );
           onCancel?.();
         }}
-        onApply={(newAttributes) => {
-          panelManagementApi.onStopEditing(false, { ...getState(), attributes: newAttributes });
+        onApply={async (newAttributes) => {
+          let appliedAttributes = newAttributes;
           if (newAttributes.visualizationType != null) {
-            onApply?.(newAttributes);
+            const result = await onApply?.(newAttributes);
+            if (result) {
+              appliedAttributes = result;
+            }
           }
+          panelManagementApi.onStopEditing(false, {
+            ...getState(),
+            attributes: appliedAttributes,
+          });
+          return appliedAttributes;
         }}
-        hideTimeFilterInfo={hideTimeFilterInfo}
         isReadOnly={panelManagementApi.canShowConfig() && !panelManagementApi.isEditingEnabled()}
         parentApi={parentApi}
         applyButtonLabel={applyButtonLabel}

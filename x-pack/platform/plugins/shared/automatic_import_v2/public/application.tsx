@@ -8,10 +8,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { IntegrationManagement } from './components/integration_management/integration_management';
 import type { Services } from './services/types';
 import type { AutomaticImportPluginStartDependencies } from './types';
+import { UIStateProvider } from './components/integration_management/contexts';
+
+const queryClient = new QueryClient();
 
 export const renderApp = ({
   coreStart,
@@ -22,7 +27,7 @@ export const renderApp = ({
   plugins: AutomaticImportPluginStartDependencies;
   params: AppMountParameters;
 }) => {
-  const { element } = params;
+  const { element, history } = params;
   const services: Services = {
     ...coreStart,
     ...plugins,
@@ -30,9 +35,18 @@ export const renderApp = ({
 
   ReactDOM.render(
     coreStart.rendering.addContext(
-      <KibanaContextProvider services={services}>
-        <IntegrationManagement />
-      </KibanaContextProvider>
+      <QueryClientProvider client={queryClient}>
+        <KibanaContextProvider services={services}>
+          <UIStateProvider>
+            <Router history={history}>
+              <Routes>
+                <Route path="/edit/:integrationId" component={IntegrationManagement} />
+                <Route path="/" component={IntegrationManagement} />
+              </Routes>
+            </Router>
+          </UIStateProvider>
+        </KibanaContextProvider>
+      </QueryClientProvider>
     ),
     element
   );

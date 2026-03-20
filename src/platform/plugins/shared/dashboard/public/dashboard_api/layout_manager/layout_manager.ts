@@ -28,10 +28,11 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
+import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
-import { childrenUnsavedChanges$, type PanelPackage } from '@kbn/presentation-containers';
-import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { SerializedTitles, PanelPackage } from '@kbn/presentation-publishing';
 import {
+  childrenUnsavedChanges$,
   apiHasLibraryTransforms,
   apiHasSerializableState,
   apiPublishesTitle,
@@ -76,7 +77,7 @@ export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
-  initialPinnedPanels: DashboardState['pinned_panels'] | undefined,
+  initialPinnedPanels: DashboardState['pinned_panels'],
   trackPanel: ReturnType<typeof initializeTrackPanel>
 ) {
   // --------------------------------------------------------------------------------------
@@ -144,13 +145,19 @@ export function initializeLayoutManager(
   let lastSavedLayout = initialLayout;
 
   let lastSavedChildState = initialChildState;
-  const resetLayout = () => {
-    layout$.next({ ...lastSavedLayout });
-    currentChildState = { ...lastSavedChildState };
+  const resetLayout = (state: DashboardState) => {
+    const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
+      state.panels,
+      state.pinned_panels
+    );
+
+    layout$.next({ ...layoutToApply });
+    currentChildState = { ...childStateToApply };
+
     let childrenModified = false;
     const currentChildren = { ...children$.value };
     for (const uuid of Object.keys(currentChildren)) {
-      if (lastSavedLayout.panels[uuid] || lastSavedLayout.pinnedPanels[uuid]) {
+      if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
         const child = currentChildren[uuid];
         if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
       } else {
@@ -552,6 +559,19 @@ export function initializeLayoutManager(
     },
     api: {
       layout$,
+      getLayout: (id: string) => {
+        const layout = layout$.getValue();
+        return layout.panels[id] ?? layout.pinnedPanels[id];
+      },
+      setLayout: (id: string, newLayout: DashboardLayoutPanel | PinnedPanelLayoutState) => {
+        const layout = { ...layout$.getValue() };
+        if (layout.panels[id] && 'grid' in newLayout) {
+          layout.panels[id] = newLayout;
+        } else if (layout.pinnedPanels[id] && 'width' in newLayout) {
+          layout.pinnedPanels[id] = newLayout;
+        }
+        layout$.next(layout);
+      },
       registerChildApi: (api: DefaultEmbeddableApi) => {
         children$.next({
           ...children$.value,

@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { map } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { apiCanPinPanels } from '@kbn/presentation-containers';
 import {
+  apiCanPinPanels,
   apiHasParentApi,
   getInheritedViewMode,
   getViewModeSubject,
@@ -63,10 +63,7 @@ export class EditControlDisplaySettingsAction
 
   public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
     return apiIsPinnableControlApi(embeddable)
-      ? combineLatest([
-          getViewModeSubject(embeddable) ?? new BehaviorSubject(undefined),
-          embeddable.parentApi.layout$,
-        ]).pipe(map(() => undefined))
+      ? getViewModeSubject(embeddable)?.pipe(map(() => undefined))
       : undefined;
   }
 

@@ -17,8 +17,10 @@ import { InspectKnowledgeBasePopover } from './inspect_knowlegde_base_popover';
 
 export function WelcomeMessageKnowledgeBase({
   knowledgeBase,
+  eisCalloutZIndex,
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
+  eisCalloutZIndex?: number;
 }) {
   const prevIsInstalling = usePrevious(knowledgeBase.isInstalling || knowledgeBase.isPolling);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
@@ -62,5 +64,10 @@ export function WelcomeMessageKnowledgeBase({
     ) : null;
   }
 
-  return <KnowledgeBaseInstallationStatusPanel knowledgeBase={knowledgeBase} />;
+  return (
+    <KnowledgeBaseInstallationStatusPanel
+      knowledgeBase={knowledgeBase}
+      eisCalloutZIndex={eisCalloutZIndex}
+    />
+  );
 }

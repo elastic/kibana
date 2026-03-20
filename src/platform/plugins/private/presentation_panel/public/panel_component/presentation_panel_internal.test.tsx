@@ -9,7 +9,7 @@
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import type { PublishesDataViews, PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -25,6 +25,7 @@ import type {
   PresentationPanelInternalProps,
 } from './types';
 import { EuiThemeProvider } from '@elastic/eui';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 describe('Presentation panel', () => {
   const editPanelSpy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
@@ -102,7 +103,7 @@ describe('Presentation panel', () => {
         title$: new BehaviorSubject<string | undefined>('superTest'),
       };
       await renderPresentationPanel({ api });
-      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('CONTEXT_MENU_TRIGGER', {
+      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(ON_OPEN_PANEL_MENU, {
         embeddable: api,
       });
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('PANEL_BADGE_TRIGGER', {
@@ -359,6 +360,28 @@ describe('Presentation panel', () => {
       };
       await renderPresentationPanel({ api });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
+    });
+
+    it('passes titleHighlight prop through to PresentationPanelHeader', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        title$: new BehaviorSubject<string | undefined>('CPU Usage'),
+      };
+      const { container } = render(
+        <EuiThemeProvider>
+          <PresentationPanel
+            Component={getMockPresentationPanelCompatibleComponent(api)}
+            titleHighlight="cpu"
+          />
+        </EuiThemeProvider>
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitle')).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        const mark = container.querySelector('mark');
+        expect(mark).toBeInTheDocument();
+      });
     });
   });
 });

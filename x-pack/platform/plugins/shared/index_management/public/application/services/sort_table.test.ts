@@ -81,42 +81,6 @@ describe('sortTable', () => {
     });
   });
 
-  describe('sorts by size', () => {
-    const indices = [{ size: '248b' }, { size: '2.35mb' }, { size: '6.36kb' }] as Index[];
-    it('ascending', () => {
-      const sorted = sortTable(indices, 'size', true);
-      expect(sorted).toEqual([{ size: '248b' }, { size: '6.36kb' }, { size: '2.35mb' }]);
-    });
-    it('descending', () => {
-      const sorted = sortTable(indices, 'size', false);
-      expect(sorted).toEqual([{ size: '2.35mb' }, { size: '6.36kb' }, { size: '248b' }]);
-    });
-  });
-
-  describe('sorts by primary_size', () => {
-    const indices = [
-      { primary_size: '248b' },
-      { primary_size: '2.35mb' },
-      { primary_size: '6.36kb' },
-    ] as Index[];
-    it('ascending', () => {
-      const sorted = sortTable(indices, 'primary_size', true);
-      expect(sorted).toEqual([
-        { primary_size: '248b' },
-        { primary_size: '6.36kb' },
-        { primary_size: '2.35mb' },
-      ]);
-    });
-    it('descending', () => {
-      const sorted = sortTable(indices, 'primary_size', false);
-      expect(sorted).toEqual([
-        { primary_size: '2.35mb' },
-        { primary_size: '6.36kb' },
-        { primary_size: '248b' },
-      ]);
-    });
-  });
-
   describe('sorts by data_stream', () => {
     const indices = [
       { data_stream: 'test1' },

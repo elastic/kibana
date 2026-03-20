@@ -312,7 +312,7 @@ export function KnowledgeBaseTab() {
                       fill
                       data-test-subj="knowledgeBaseNewEntryButton"
                       iconSide="right"
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       onClick={() => setIsNewEntryPopoverOpen((prevValue) => !prevValue)}
                     >
                       {i18n.translate(
@@ -379,6 +379,10 @@ export function KnowledgeBaseTab() {
                 onClick: () => setSelectedCategory(row),
               })}
               onChange={handleChangeSort}
+              tableCaption={i18n.translate(
+                'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.tableCaption',
+                { defaultMessage: 'Knowledge base entries table' }
+              )}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -457,7 +461,11 @@ export function KnowledgeBaseTab() {
               <InspectKnowledgeBasePopover knowledgeBase={knowledgeBase} />
             </>
           ) : (
-            <KnowledgeBaseInstallationStatusPanel knowledgeBase={knowledgeBase} />
+            <KnowledgeBaseInstallationStatusPanel
+              knowledgeBase={knowledgeBase}
+              eisCalloutZIndex={0}
+              isInKnowledgeBaseTab
+            />
           )}
         </EuiFlexItem>
       </EuiPanel>

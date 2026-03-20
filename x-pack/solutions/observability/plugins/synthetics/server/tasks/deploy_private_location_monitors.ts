@@ -32,6 +32,7 @@ import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
 } from '../synthetics_service/formatters/public_formatters/format_configs';
+import { monitorUsesGlobalParams } from '../synthetics_service/formatters/param_utils';
 
 interface SyncConfig {
   config: HeartbeatConfig;
@@ -175,11 +176,15 @@ export class DeployPrivateLocationMonitors {
     encryptedSavedObjects,
     soClient,
     spaceIdToSync,
+    modifiedParamKeys,
+    privateLocationId,
   }: {
+    privateLocationId?: string;
     spaceIdToSync?: string;
     soClient: SavedObjectsClientContract;
     allPrivateLocations: PrivateLocationAttributes[];
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+    modifiedParamKeys?: string[];
   }) {
     if (allPrivateLocations.length === 0) {
       this.debugLog('No private locations found, skipping sync of private location monitors');
@@ -190,8 +195,19 @@ export class DeployPrivateLocationMonitors {
       await this.getAllMonitorConfigs({
         encryptedSavedObjects,
         soClient,
+        privateLocationId,
         spaceId: spaceIdToSync,
+        modifiedParamKeys,
       });
+
+    if (monitorSpaceIds.size === 0) {
+      this.debugLog(
+        modifiedParamKeys
+          ? 'No monitors found that use the modified parameters, skipping sync of private location monitors'
+          : 'No monitors found, skipping sync of private location monitors'
+      );
+      return;
+    }
 
     return this.serverSetup.fleet.runWithCache(async () => {
       this.debugLog(
@@ -200,7 +216,9 @@ export class DeployPrivateLocationMonitors {
         )}`
       );
       await this.deployEditMonitors({
-        allPrivateLocations,
+        allPrivateLocations: allPrivateLocations.filter(
+          (loc) => loc.id === privateLocationId || !privateLocationId
+        ),
         configsBySpaces,
         monitorSpaceIds,
         paramsBySpace,
@@ -260,10 +278,14 @@ export class DeployPrivateLocationMonitors {
     soClient,
     encryptedSavedObjects,
     spaceId = ALL_SPACES_ID,
+    modifiedParamKeys,
+    privateLocationId,
   }: {
     soClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     spaceId?: string;
+    modifiedParamKeys?: string[];
+    privateLocationId?: string;
   }) {
     const { syntheticsService } = this.syntheticsMonitorClient;
     const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId });
@@ -275,6 +297,9 @@ export class DeployPrivateLocationMonitors {
 
     const monitorsPromise = monitorConfigRepository.findDecryptedMonitors({
       spaceId,
+      ...(privateLocationId && {
+        filter: `${syntheticsMonitorAttributes}.locations.id:"${privateLocationId}"`,
+      }),
     });
 
     const [paramsBySpace, monitors, maintenanceWindows] = await Promise.all([
@@ -284,7 +309,7 @@ export class DeployPrivateLocationMonitors {
     ]);
 
     return {
-      ...this.mixParamsWithMonitors(monitors, paramsBySpace),
+      ...this.mixParamsWithMonitors(monitors, paramsBySpace, { modifiedParamKeys }),
       paramsBySpace,
       maintenanceWindows,
     };
@@ -301,18 +326,28 @@ export class DeployPrivateLocationMonitors {
 
   mixParamsWithMonitors(
     monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
-    paramsBySpace: Record<string, Record<string, string>>
+    paramsBySpace: Record<string, Record<string, string>>,
+    options: { modifiedParamKeys?: string[] } = {}
   ) {
+    const { modifiedParamKeys } = options;
     const configsBySpaces: Record<string, HeartbeatConfig[]> = {};
     const monitorSpaceIds = new Set<string>();
+    let skippedMonitorsCount = 0;
 
     for (const monitor of monitors) {
       const spaceId = monitor.namespaces?.[0];
       if (!spaceId) {
         continue;
       }
-      monitorSpaceIds.add(spaceId);
+
       const normalizedMonitor = normalizeSecrets(monitor).attributes as MonitorFields;
+
+      if (modifiedParamKeys && !monitorUsesGlobalParams(normalizedMonitor, modifiedParamKeys)) {
+        skippedMonitorsCount++;
+        continue;
+      }
+
+      monitorSpaceIds.add(spaceId);
       const { str: paramsString } = mixParamsWithGlobalParams(
         paramsBySpace[spaceId],
         normalizedMonitor
@@ -331,6 +366,14 @@ export class DeployPrivateLocationMonitors {
           },
           paramsString
         )
+      );
+    }
+
+    if (modifiedParamKeys && skippedMonitorsCount > 0) {
+      this.debugLog(
+        `Filtered out ${skippedMonitorsCount} monitors that do not use the modified parameters: ${modifiedParamKeys.join(
+          ', '
+        )}`
       );
     }
 

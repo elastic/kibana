@@ -10,19 +10,18 @@
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type {
-  AppMenuActionSubmenuSecondary,
-  AppMenuSubmenuActionSecondary,
-} from '@kbn/discover-utils';
-import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
-import type { DiscoverStateContainer } from '../../../state_management/discover_state';
+import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
+import { createSearchSource } from '../../../state_management/utils/create_search_source';
+import type { DiscoverInternalState } from '../../../state_management/redux';
+import { selectTab } from '../../../state_management/redux/selectors';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -41,9 +40,10 @@ const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
+  tabId: string;
+  getState: () => DiscoverInternalState;
   onFinishAction: () => void;
-  stateContainer: DiscoverStateContainer;
-}> = ({ stateContainer, discoverParams, services, onFinishAction }) => {
+}> = ({ discoverParams, services, tabId, getState, onFinishAction = () => {} }) => {
   const {
     dataView,
     isEsqlMode,
@@ -53,8 +53,11 @@ const CreateAlertFlyout: React.FC<{
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
+
+  // Get fresh tab state when the component renders
+  const currentTab = selectTab(getState(), tabId);
   const timeField = getTimeField(dataView);
-  const { query, savedQuery: savedQueryId } = stateContainer.getCurrentTab().appState;
+  const { query, savedQuery: savedQueryId } = currentTab.appState;
 
   /**
    * Provides the default parameters used to initialize the new rule
@@ -68,14 +71,18 @@ const CreateAlertFlyout: React.FC<{
         timeField,
       };
     }
+    const searchSource = createSearchSource({
+      dataView,
+      appState: currentTab.appState,
+      globalState: currentTab.globalState,
+      services,
+    });
     return {
       searchType: 'searchSource',
-      searchConfiguration: stateContainer.savedSearchState
-        .getState()
-        .searchSource.getSerializedFields(),
+      searchConfiguration: searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [isEsqlMode, stateContainer.savedSearchState, savedQueryId, query, timeField]);
+  }, [isEsqlMode, currentTab, dataView, services, savedQueryId, query, timeField]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({
@@ -117,82 +124,76 @@ const CreateAlertFlyout: React.FC<{
 export const getAlertsAppMenuItem = ({
   discoverParams,
   services,
-  stateContainer,
+  tabId,
+  getState,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  stateContainer: DiscoverStateContainer;
-}): AppMenuActionSubmenuSecondary => {
+  tabId: string;
+  getState: () => DiscoverInternalState;
+}): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
 
+  const items: DiscoverAppMenuPopoverItem[] = [];
+
+  if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
+    items.push({
+      id: AppMenuActionId.manageRulesAndConnectors,
+      order: Number.MAX_SAFE_INTEGER,
+      label: i18n.translate('discover.alerts.manageRulesAndConnectors', {
+        defaultMessage: 'Manage rules and connectors',
+      }),
+      iconType: 'tableOfContents',
+      testId: 'discoverManageAlertsButton',
+      href: services.application.getUrlForApp(
+        services.application.isAppRegistered('rules')
+          ? 'rules'
+          : 'management/insightsAndAlerting/triggersActions/rules'
+      ),
+    });
+
+    if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
+      items.push({
+        id: AppMenuActionId.createRule,
+        order: 1,
+        label: i18n.translate('discover.alerts.createSearchThreshold', {
+          defaultMessage: 'Create search threshold rule',
+        }),
+        iconType: 'bell',
+        testId: 'discoverCreateAlertButton',
+        disableButton: !hasTimeFieldName,
+        tooltipContent: hasTimeFieldName
+          ? undefined
+          : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
+              defaultMessage: 'Data view does not have a time field.',
+            }),
+        run: ({ context: { onFinishAction } }) => {
+          return (
+            <CreateAlertFlyout
+              onFinishAction={onFinishAction}
+              discoverParams={discoverParams}
+              services={services}
+              tabId={tabId}
+              getState={getState}
+            />
+          );
+        },
+      });
+    }
+  }
+
   return {
     id: AppMenuActionId.alerts,
-    type: AppMenuActionType.secondary,
     label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
       defaultMessage: 'Alerts',
     }),
-    description: i18n.translate('discover.localMenu.alertsDescription', {
-      defaultMessage: 'Alerts',
-    }),
     testId: 'discoverAlertsButton',
-    actions: services.capabilities.management?.insightsAndAlerting?.triggersActions
-      ? [
-          ...((discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)
-            ? [
-                {
-                  id: AppMenuActionId.createRule,
-                  type: AppMenuActionType.secondary,
-                  controlProps: {
-                    label: i18n.translate('discover.alerts.createSearchThreshold', {
-                      defaultMessage: 'Create search threshold rule',
-                    }),
-                    iconType: 'bell',
-                    testId: 'discoverCreateAlertButton',
-                    disableButton: !hasTimeFieldName,
-                    tooltip: hasTimeFieldName
-                      ? undefined
-                      : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
-                          defaultMessage: 'Data view does not have a time field.',
-                        }),
-                    onClick: async (params) => {
-                      return (
-                        <CreateAlertFlyout
-                          {...params}
-                          discoverParams={discoverParams}
-                          services={services}
-                          stateContainer={stateContainer}
-                        />
-                      );
-                    },
-                  },
-                },
-              ]
-            : []) as AppMenuSubmenuActionSecondary[]),
-          {
-            id: 'alertsDivider',
-            type: AppMenuActionType.submenuHorizontalRule,
-            order: 109,
-          },
-          {
-            id: AppMenuActionId.manageRulesAndConnectors,
-            type: AppMenuActionType.secondary,
-            order: 110,
-            controlProps: {
-              label: i18n.translate('discover.alerts.manageRulesAndConnectors', {
-                defaultMessage: 'Manage rules and connectors',
-              }),
-              iconType: 'tableOfContents',
-              testId: 'discoverManageAlertsButton',
-              href: services.application.getUrlForApp(
-                'management/insightsAndAlerting/triggersActions/rules'
-              ),
-              onClick: undefined,
-            },
-          },
-        ]
-      : [],
+    order: 4,
+    iconType: 'alert',
+    popoverWidth: 250,
+    items,
   };
 };
 

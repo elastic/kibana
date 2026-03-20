@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import type { ErrorActorEvent } from 'xstate5';
-import { fromPromise } from 'xstate5';
+import type { ErrorActorEvent } from 'xstate';
+import { fromPromise } from 'xstate';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';

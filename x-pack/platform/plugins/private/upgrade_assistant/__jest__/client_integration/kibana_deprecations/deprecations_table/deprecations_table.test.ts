@@ -14,7 +14,8 @@ import { kibanaDeprecationsServiceHelpers } from '../service.mock';
 import { setupEnvironment } from '../../helpers/setup_environment';
 import { setupKibanaPage } from '../kibana_deprecations.helpers';
 
-describe('Kibana deprecations - Deprecations table', () => {
+// Failing: See https://github.com/elastic/kibana/issues/253915
+describe.skip('Kibana deprecations - Deprecations table', () => {
   let deprecationService: jest.Mocked<DeprecationsServiceStart>;
 
   const {

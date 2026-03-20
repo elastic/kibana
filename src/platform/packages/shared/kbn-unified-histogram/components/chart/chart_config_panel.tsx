@@ -49,7 +49,6 @@ export function ChartConfigPanel({
   onSuggestionContextEdit: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
-  const previousSuggestion = useRef<Suggestion | undefined>(undefined);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
 
@@ -91,7 +90,6 @@ export function ChartConfigPanel({
     [onSuggestionContextEdit, visContext]
   );
 
-  const currentSuggestion = currentSuggestionContext.suggestion;
   const currentSuggestionType = currentSuggestionContext.type;
 
   useEffect(() => {
@@ -114,20 +112,20 @@ export function ChartConfigPanel({
             setIsFlyoutVisible(false);
           }}
           wrapInFlyout
-          datasourceId="textBased"
+          hideTextBasedEditor={true}
           hidesSuggestions={currentSuggestionType !== UnifiedHistogramSuggestionType.lensSuggestion}
         />
       );
       setEditLensConfigPanel(panel);
-      previousSuggestion.current = currentSuggestion;
       previousAdapters.current = tablesAdapters;
       if (dataHasChanged) {
         previousQuery.current = query;
       }
     }
-    const suggestionHasChanged = currentSuggestion?.title !== previousSuggestion?.current?.title;
-    // rerender the component if the data has changed
-    if (isPlainRecord && (dataHasChanged || suggestionHasChanged || !isFlyoutVisible)) {
+    // rerender the component if the data has changed or flyout becomes visible
+    // Note: when suggestion/chart type changes while flyout is visible, it flows through
+    // visContext.attributes props instead of recreating the component (which would reset state)
+    if (isPlainRecord && (dataHasChanged || !isFlyoutVisible)) {
       fetchLensConfigComponent();
     }
   }, [
@@ -136,7 +134,6 @@ export function ChartConfigPanel({
     updatePanelState,
     updateSuggestion,
     isPlainRecord,
-    currentSuggestion,
     query,
     isFlyoutVisible,
     setIsFlyoutVisible,

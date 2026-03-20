@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -20,7 +22,6 @@ import memoizeOne from 'memoize-one';
 import { flatten, isEqual } from 'lodash';
 import type {
   DatasourceDimensionEditorProps,
-  DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
   DataType,
@@ -36,7 +37,6 @@ import type {
   Datasource,
   DatasourceSuggestion,
 } from '@kbn/lens-common';
-import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { toExpression } from './to_expression';
@@ -307,7 +307,7 @@ export function getTextBasedDatasource({
     return [];
   };
   const TextBasedDatasource: Datasource<TextBasedPrivateState, TextBasedPersistedState> = {
-    id: 'textBased',
+    id: LENS_DATASOURCE_ID.TEXT_BASED,
 
     checkIntegrity: () => {
       return [];
@@ -473,18 +473,7 @@ export function getTextBasedDatasource({
       );
     },
 
-    DataPanelComponent(props: DatasourceDataPanelProps<TextBasedPrivateState>) {
-      const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
-      return (
-        <TextBasedDataPanel
-          data={data}
-          dataViews={dataViews}
-          expressions={expressions}
-          layerFields={layerFields}
-          {...props}
-        />
-      );
-    },
+    DataPanelComponent: () => null,
 
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
@@ -527,7 +516,7 @@ export function getTextBasedDatasource({
           return;
         }
         Object.values(layer.columns).forEach((column) => {
-          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.fieldName);
+          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.label ?? column.fieldName);
         });
       });
 
@@ -537,15 +526,17 @@ export function getTextBasedDatasource({
     onDrop,
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
       return {
-        datasourceId: 'textBased',
+        datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
 
         getTableSpec: () => {
-          return (
-            state.layers[layerId]?.columns.map((column) => ({
-              columnId: column.columnId,
-              fields: [column.fieldName],
-            })) || []
-          );
+          const layerColumns = state.layers[layerId]?.columns ?? [];
+          // Column ordering: non-metric columns (rows) before metric columns
+          const nonMetric = layerColumns.filter((col) => !(col.inMetricDimension ?? false));
+          const metric = layerColumns.filter((col) => col.inMetricDimension ?? false);
+          return [...nonMetric, ...metric].map((column) => ({
+            columnId: column.columnId,
+            fields: [column.fieldName],
+          }));
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];

@@ -5,30 +5,34 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
 import { wrapJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
 import type { Logger } from '@kbn/logging';
-import type { ProcessedAttachmentType } from '../utils/prepare_conversation';
-import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
 import { errorAction } from './actions';
-import { getStructuredAnswerPrompt } from './prompts';
+import type { PromptFactory } from './prompts';
 import { getRandomAnsweringMessage } from './i18n';
 import { tags } from './constants';
 import type { StateType } from './state';
 import { processStructuredAnswerResponse } from './action_utils';
 
-export const structuredOutputSchema = z.object({
+const structuredOutputZodSchema = z.object({
   response: z.string().describe("The response to the user's query"),
   data: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe('Optional structured data to include in the response'),
 });
+
+const { $schema: _$schema, ...structuredOutputSchema } = z.toJSONSchema(structuredOutputZodSchema, {
+  io: 'input',
+  unrepresentable: 'any',
+}) as Record<string, unknown>;
+
+export { structuredOutputSchema };
 
 const wrappedSchemaProp = 'response';
 
@@ -38,19 +42,15 @@ const wrappedSchemaProp = 'response';
  */
 export const createAnswerAgentStructured = ({
   chatModel,
-  configuration,
-  capabilities,
+  promptFactory,
   events,
   outputSchema,
-  attachmentTypes,
 }: {
   chatModel: InferenceChatModel;
-  configuration: ResolvedConfiguration;
-  capabilities: ResolvedAgentCapabilities;
   events: AgentEventEmitter;
+  promptFactory: PromptFactory;
   outputSchema?: Record<string, unknown>;
   logger: Logger;
-  attachmentTypes: ProcessedAttachmentType[];
 }) => {
   return async (state: StateType) => {
     if (state.answerActions.length === 0 && state.errorCount === 0) {
@@ -72,13 +72,9 @@ export const createAnswerAgentStructured = ({
           tags: [tags.agent, tags.answerAgent],
         });
 
-      const prompt = getStructuredAnswerPrompt({
-        customInstructions: configuration.answer.instructions,
-        capabilities,
-        initialMessages: state.initialMessages,
+      const prompt = await promptFactory.getStructuredAnswerPrompt({
         actions: state.mainActions,
         answerActions: state.answerActions,
-        attachmentTypes,
       });
 
       let response = await structuredModel.invoke(prompt);

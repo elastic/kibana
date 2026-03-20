@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 
-import { APP_ID } from '../constants';
+import { APP_ID, EXCEPTIONS_API_READ, EXCEPTIONS_API_ALL } from '../constants';
 import type { SecurityFeatureParams } from './types';
 
 const TRANSLATIONS = Object.freeze({
@@ -85,6 +85,8 @@ export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeTrustedApplications`,
@@ -100,7 +102,12 @@ export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           ui: ['writeTrustedApplications', 'readTrustedApplications'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedApplications`],
+          api: [
+            'lists-read',
+            EXCEPTIONS_API_READ,
+            'lists-summary',
+            `${APP_ID}-readTrustedApplications`,
+          ],
           id: 'trusted_applications_read',
           includeIn: 'none',
           name: TRANSLATIONS.read,
@@ -135,6 +142,8 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeTrustedDevices`,
@@ -150,7 +159,7 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
           ui: ['writeTrustedDevices', 'readTrustedDevices'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedDevices`],
+          api: ['lists-read', EXCEPTIONS_API_READ, 'lists-summary', `${APP_ID}-readTrustedDevices`],
           id: 'trusted_devices_read',
           includeIn: 'none',
           name: TRANSLATIONS.read,
@@ -184,6 +193,8 @@ export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-deleteHostIsolationExceptions`,
@@ -199,7 +210,12 @@ export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           ui: ['readHostIsolationExceptions', 'deleteHostIsolationExceptions'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
+          api: [
+            'lists-read',
+            EXCEPTIONS_API_READ,
+            'lists-summary',
+            `${APP_ID}-readHostIsolationExceptions`,
+          ],
           id: 'host_isolation_exceptions_read',
           includeIn: 'none',
           name: TRANSLATIONS.read,
@@ -231,6 +247,8 @@ export const blocklistSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeBlocklist`,
@@ -246,7 +264,7 @@ export const blocklistSubFeature = (): SubFeatureConfig => ({
           ui: ['writeBlocklist', 'readBlocklist'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readBlocklist`],
+          api: ['lists-read', EXCEPTIONS_API_READ, 'lists-summary', `${APP_ID}-readBlocklist`],
           id: 'blocklist_read',
           includeIn: 'none',
           name: TRANSLATIONS.read,
@@ -279,6 +297,8 @@ export const eventFiltersSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeEventFilters`,
@@ -294,7 +314,7 @@ export const eventFiltersSubFeature = (): SubFeatureConfig => ({
           ui: ['writeEventFilters', 'readEventFilters'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readEventFilters`],
+          api: ['lists-read', EXCEPTIONS_API_READ, 'lists-summary', `${APP_ID}-readEventFilters`],
           id: 'event_filters_read',
           includeIn: 'none',
           name: TRANSLATIONS.read,
@@ -646,6 +666,8 @@ export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
           ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-showEndpointExceptions`,
@@ -661,7 +683,12 @@ export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
             read: [],
           },
           ui: ['showEndpointExceptions'],
-          api: ['lists-read', 'lists-summary', `${APP_ID}-showEndpointExceptions`],
+          api: [
+            'lists-read',
+            EXCEPTIONS_API_READ,
+            'lists-summary',
+            `${APP_ID}-showEndpointExceptions`,
+          ],
         },
       ],
     },

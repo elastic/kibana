@@ -104,10 +104,13 @@ function shouldInsertMatchingCloser(
     return false;
   }
 
-  // Don't insert if it's a quote and the either of the preceding/following characters is alphanumeric
+  // Don't insert if it's a quote and the either of the preceding/following characters is alphanumeric,
+  // or if the preceding character equals the same type of quote
   return !(
     ['"', `'`].includes(key) &&
-    (isAlphanumeric(precedingCharacter) || isAlphanumeric(followingCharacter))
+    (isAlphanumeric(precedingCharacter) ||
+      isAlphanumeric(followingCharacter) ||
+      precedingCharacter === key)
   );
 }
 

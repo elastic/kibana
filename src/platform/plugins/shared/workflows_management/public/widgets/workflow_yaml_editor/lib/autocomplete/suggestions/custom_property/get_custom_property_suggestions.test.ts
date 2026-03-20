@@ -46,16 +46,18 @@ describe('getCustomPropertySuggestions', () => {
   });
 
   const createMockGetPropertyHandler = (
-    getOptions: jest.Mock | null = jest.fn().mockResolvedValue([
+    search: jest.Mock | null = jest.fn().mockResolvedValue([
       { label: 'option-1', value: 'value-1' },
       { label: 'option-2', value: 'value-2' },
     ])
   ) => {
-    const handler = {
-      completion: {
-        getOptions,
-      },
-    };
+    const handler = search
+      ? {
+          selection: {
+            search,
+          },
+        }
+      : null;
     return jest.fn().mockReturnValue(handler);
   };
 
@@ -105,8 +107,8 @@ describe('getCustomPropertySuggestions', () => {
       expect(getPropertyHandler).toHaveBeenCalledWith('custom-type', 'input', 'my-input-key');
     });
 
-    it('should pass current value to the complete function', async () => {
-      const completeMock = jest.fn().mockResolvedValue([]);
+    it('should pass current value to the search function', async () => {
+      const searchMock = jest.fn().mockResolvedValue([]);
       const context = createMockContext({
         focusedYamlPair: {
           keyNode: { value: 'key', range: [1, 1, 1] } as Scalar,
@@ -114,11 +116,15 @@ describe('getCustomPropertySuggestions', () => {
           path: ['key'],
         },
       });
-      const getPropertyHandler = createMockGetPropertyHandler(completeMock);
+      const getPropertyHandler = createMockGetPropertyHandler(searchMock);
 
       await getCustomPropertySuggestions(context, getPropertyHandler);
 
-      expect(completeMock).toHaveBeenCalledWith('partial-input');
+      expect(searchMock).toHaveBeenCalledWith('partial-input', {
+        stepType: 'custom-type',
+        scope: 'config',
+        propertyKey: 'key',
+      });
     });
   });
 
@@ -245,20 +251,20 @@ describe('getCustomPropertySuggestions', () => {
       expect(suggestions).toEqual([]);
     });
 
-    it('should return empty array when propertyHandler.complete is null', async () => {
+    it('should return empty array when propertyHandler.selection is null', async () => {
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler(null as unknown as jest.Mock);
+      const getPropertyHandler = jest.fn().mockReturnValue(null);
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
       expect(suggestions).toEqual([]);
     });
 
-    it('should return empty array when propertyHandler.complete is undefined', async () => {
+    it('should return empty array when propertyHandler.selection.search is undefined', async () => {
       const context = createMockContext();
-      const getPropertyHandler = jest.fn().mockResolvedValue({
-        completion: {
-          getOptions: undefined as unknown as jest.Mock,
+      const getPropertyHandler = jest.fn().mockReturnValue({
+        selection: {
+          search: undefined,
         },
       });
 
@@ -356,15 +362,19 @@ describe('getCustomPropertySuggestions', () => {
       expect(suggestions[0].insertText).toBe('actual-insert-value');
     });
 
-    it('should include detail when provided by completion', async () => {
+    it('should include description when provided by selection', async () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(
-        jest.fn().mockResolvedValue([{ label: 'option', value: 'val', detail: 'This is a detail' }])
+        jest
+          .fn()
+          .mockResolvedValue([
+            { label: 'option', value: 'val', description: 'This is a description' },
+          ])
       );
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
-      expect(suggestions[0].detail).toBe('This is a detail');
+      expect(suggestions[0].detail).toBe('This is a description');
     });
 
     it('should include documentation when provided by completion', async () => {
@@ -447,15 +457,15 @@ describe('getCustomPropertySuggestions', () => {
   });
 
   describe('async behavior', () => {
-    it('should properly await async complete function', async () => {
-      const completeMock = jest.fn().mockImplementation(
+    it('should properly await async search function', async () => {
+      const searchMock = jest.fn().mockImplementation(
         () =>
           new Promise((resolve) => {
             setTimeout(() => resolve([{ label: 'async-option', value: 'async-value' }]), 10);
           })
       );
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler(completeMock);
+      const getPropertyHandler = createMockGetPropertyHandler(searchMock);
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -463,13 +473,13 @@ describe('getCustomPropertySuggestions', () => {
       expect(suggestions[0].label).toBe('async-option');
     });
 
-    it('should handle rejected promises from complete function', async () => {
-      const completeMock = jest.fn().mockRejectedValue(new Error('Completion failed'));
+    it('should handle rejected promises from search function', async () => {
+      const searchMock = jest.fn().mockRejectedValue(new Error('Search failed'));
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler(completeMock);
+      const getPropertyHandler = createMockGetPropertyHandler(searchMock);
 
       await expect(getCustomPropertySuggestions(context, getPropertyHandler)).rejects.toThrow(
-        'Completion failed'
+        'Search failed'
       );
     });
   });

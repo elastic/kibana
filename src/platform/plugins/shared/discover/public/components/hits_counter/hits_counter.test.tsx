@@ -8,12 +8,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen, within, render } from '@testing-library/react';
 import { HitsCounter, HitsCounterMode } from './hits_counter';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
-import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../__mocks__/discover_state.mock';
 import type {
   DataDocuments$,
   DataTotalHits$,
@@ -21,6 +19,8 @@ import type {
 import { FetchStatus } from '../../application/types';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { DiscoverToolkitTestProvider } from '../../__mocks__/test_provider';
+import type { InternalStateMockToolkit } from '../../__mocks__/discover_state.mock';
 
 function getDocuments$(count: number = 5) {
   return new BehaviorSubject({
@@ -29,127 +29,198 @@ function getDocuments$(count: number = 5) {
   }) as DataDocuments$;
 }
 
+async function setup() {
+  const toolkit = getDiscoverInternalStateMock();
+  await toolkit.initializeTabs();
+  const { dataStateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
+  return { toolkit, dataStateContainer };
+}
+
+function renderWithToolkit(toolkit: InternalStateMockToolkit, children: React.ReactNode) {
+  return render(
+    <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+  );
+}
+
 describe('hits counter', function () {
-  it('expect to render the number of hits', function () {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+  it('expect to render the number of hits', async function () {
+    const { toolkit, dataStateContainer } = await setup();
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 1,
     }) as DataTotalHits$;
-    stateContainer.dataState.data$.documents$ = getDocuments$();
-    const component1 = mountWithIntl(
-      <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
-    );
-    expect(findTestSubject(component1, 'discoverQueryHits').text()).toBe('1');
-    expect(findTestSubject(component1, 'discoverQueryTotalHits').text()).toBe('1');
-    expect(component1.find('[data-test-subj="discoverQueryHits"]').length).toBe(1);
+    dataStateContainer.data$.documents$ = getDocuments$();
+    const component1 = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.appended} />);
 
-    const component2 = mountWithIntl(
-      <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1');
+    expect(screen.getAllByTestId('discoverQueryHits').length).toBe(1);
+
+    component1.unmount();
+
+    const component2 = renderWithToolkit(
+      toolkit,
+      <HitsCounter mode={HitsCounterMode.standalone} />
     );
-    expect(findTestSubject(component2, 'discoverQueryHits').text()).toBe('1');
-    expect(findTestSubject(component2, 'discoverQueryTotalHits').text()).toBe('1 result');
-    expect(component2.find('[data-test-subj="discoverQueryHits"]').length).toBe(1);
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1 result');
+    expect(screen.getAllByTestId('discoverQueryHits').length).toBe(1);
+
+    component2.unmount();
   });
 
-  it('expect to render 1,899 hits if 1899 hits given', function () {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+  it('expect to render 1,899 hits if 1899 hits given', async function () {
+    const { toolkit, dataStateContainer } = await setup();
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 1899,
     }) as DataTotalHits$;
-    stateContainer.dataState.data$.documents$ = getDocuments$();
-    const component1 = mountWithIntl(
-      <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
-    );
-    expect(findTestSubject(component1, 'discoverQueryHits').text()).toBe('1,899');
-    expect(findTestSubject(component1, 'discoverQueryTotalHits').text()).toBe('1,899');
+    dataStateContainer.data$.documents$ = getDocuments$();
+    const component1 = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.appended} />);
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899');
 
-    const component2 = mountWithIntl(
-      <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
+    component1.unmount();
+
+    const component2 = renderWithToolkit(
+      toolkit,
+      <HitsCounter mode={HitsCounterMode.standalone} />
     );
-    expect(findTestSubject(component2, 'discoverQueryHits').text()).toBe('1,899');
-    expect(findTestSubject(component2, 'discoverQueryTotalHits').text()).toBe('1,899 results');
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899 results');
+
+    component2.unmount();
   });
 
-  it('should render a EuiLoadingSpinner when status is partial', () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+  it('renders with custom hit counter labels', async function () {
+    const { toolkit, dataStateContainer } = await setup();
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 1899,
+    }) as DataTotalHits$;
+    dataStateContainer.data$.documents$ = getDocuments$();
+
+    const component1 = renderWithToolkit(
+      toolkit,
+      <HitsCounter
+        mode={HitsCounterMode.appended}
+        hitCounterLabel="kibanana"
+        hitCounterPluralLabel="kibananas"
+      />
+    );
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899');
+
+    component1.unmount();
+
+    const component2 = renderWithToolkit(
+      toolkit,
+      <HitsCounter
+        mode={HitsCounterMode.standalone}
+        hitCounterLabel="kibanana"
+        hitCounterPluralLabel="kibananas"
+      />
+    );
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899 kibananas');
+
+    component2.unmount();
+
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 1,
+    }) as DataTotalHits$;
+
+    const component3 = renderWithToolkit(
+      toolkit,
+      <HitsCounter
+        mode={HitsCounterMode.standalone}
+        hitCounterLabel="kibanana"
+        hitCounterPluralLabel="kibananas"
+      />
+    );
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1 kibanana');
+
+    component3.unmount();
+  });
+
+  it('should render a EuiLoadingSpinner when status is partial', async () => {
+    const { toolkit, dataStateContainer } = await setup();
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.PARTIAL,
       result: 2,
     }) as DataTotalHits$;
-    stateContainer.dataState.data$.documents$ = getDocuments$();
-    const component = mountWithIntl(
-      <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
-    );
-    expect(component.find(EuiLoadingSpinner).length).toBe(1);
+    dataStateContainer.data$.documents$ = getDocuments$();
+    const component = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.standalone} />);
+
+    const progressElement = within(component.container).getAllByRole('progressbar');
+
+    expect(progressElement.length).toBe(1);
+    expect(progressElement[0]).toHaveClass('euiLoadingSpinner');
   });
 
-  it('should render discoverQueryHitsPartial when status is partial', () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+  it('should render discoverQueryHitsPartial when status is partial', async () => {
+    const { toolkit, dataStateContainer } = await setup();
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.PARTIAL,
       result: 2,
     }) as DataTotalHits$;
-    stateContainer.dataState.data$.documents$ = getDocuments$();
-    const component = mountWithIntl(
-      <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
-    );
-    expect(component.find('[data-test-subj="discoverQueryHitsPartial"]').length).toBe(1);
-    expect(findTestSubject(component, 'discoverQueryTotalHits').text()).toBe('≥2 results');
+    dataStateContainer.data$.documents$ = getDocuments$();
+    renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.standalone} />);
+    expect(screen.queryByTestId('discoverQueryHitsPartial')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverQueryTotalHits')).toHaveTextContent('≥2 results');
   });
 
-  it('should not render if loading', () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+  it('should not render if loading', async () => {
+    const { toolkit, dataStateContainer } = await setup();
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.LOADING,
       result: undefined,
     }) as DataTotalHits$;
-    stateContainer.dataState.data$.documents$ = getDocuments$();
-    const component = mountWithIntl(
-      <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
-    );
-    expect(component.isEmptyRender()).toBe(true);
+    dataStateContainer.data$.documents$ = getDocuments$();
+    const component = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.standalone} />);
+
+    expect(component.container).toBeEmptyDOMElement();
   });
 
-  it('should render discoverQueryHitsPartial when status is error', () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+  it('should render discoverQueryHitsPartial when status is error', async () => {
+    const { toolkit, dataStateContainer } = await setup();
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.ERROR,
       result: undefined,
     }) as DataTotalHits$;
-    stateContainer.dataState.data$.documents$ = getDocuments$(3);
-    const component = mountWithIntl(
-      <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
-    );
-    expect(component.find('[data-test-subj="discoverQueryHitsPartial"]').length).toBe(1);
-    expect(findTestSubject(component, 'discoverQueryTotalHits').text()).toBe('≥3 resultsInfo');
-    expect(component.text()).toBe('≥3 resultsInfo');
+    dataStateContainer.data$.documents$ = getDocuments$(3);
+    const component = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.standalone} />);
+    expect(screen.getByTestId('discoverQueryHitsPartial')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('≥3 resultsInfo');
 
-    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+    component.unmount();
+
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.ERROR,
       result: 200,
     }) as DataTotalHits$;
-    stateContainer.dataState.data$.documents$ = getDocuments$(2);
+    dataStateContainer.data$.documents$ = getDocuments$(2);
 
-    const component2 = mountWithIntl(
-      <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
-    );
-    expect(component2.find('[data-test-subj="discoverQueryHitsPartial"]').length).toBe(1);
-    expect(findTestSubject(component2, 'discoverQueryTotalHits').text()).toBe('≥200Info');
-    expect(component2.text()).toBe(' (≥200Info)');
+    const component2 = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.appended} />);
+    expect(screen.getByTestId('discoverQueryHitsPartial')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('≥200Info');
 
-    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+    component2.unmount();
+
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.ERROR,
       result: 0,
     }) as DataTotalHits$;
-    stateContainer.dataState.data$.documents$ = getDocuments$(1);
+    dataStateContainer.data$.documents$ = getDocuments$(1);
 
-    const component3 = mountWithIntl(
-      <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
-    );
-    expect(component3.find('[data-test-subj="discoverQueryHitsPartial"]').length).toBe(1);
-    expect(findTestSubject(component3, 'discoverQueryTotalHits').text()).toBe('≥1Info');
-    expect(component3.text()).toBe(' (≥1Info)');
+    const component3 = renderWithToolkit(toolkit, <HitsCounter mode={HitsCounterMode.appended} />);
+    expect(screen.getByTestId('discoverQueryHitsPartial')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('≥1Info');
+
+    component3.unmount();
   });
 });

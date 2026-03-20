@@ -136,11 +136,6 @@ export const OptionsListStrings = {
           'Available {optionCount, plural, one {option} other {options}} for {fieldName}',
         values: { fieldName, optionCount },
       }),
-    getAllowExpensiveQueriesWarning: () =>
-      i18n.translate('controls.optionsList.popover.allowExpensiveQueriesWarning', {
-        defaultMessage:
-          'The cluster setting to allow expensive queries is off, so some features are disabled.',
-      }),
     getLoadingMoreMessage: () =>
       i18n.translate('controls.optionsList.popover.loadingMore', {
         defaultMessage: 'Loading more options...',
@@ -162,7 +157,7 @@ export const OptionsListStrings = {
       switch (fieldType) {
         case 'ip': {
           return i18n.translate('controls.optionsList.popover.invalidSearch.ip', {
-            defaultMessage: 'Your search is not a valid IP address.',
+            defaultMessage: 'Your search is not a valid IP address or CIDR notation.',
           });
         }
         case 'number': {

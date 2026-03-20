@@ -62,14 +62,14 @@ describe('Initializing the store', () => {
   it('should initialize initial datasource', async () => {
     const { store, deps } = makeLensStore({ preloadedState });
     await loadInitialAppState(store, defaultProps);
-    expect(deps.datasourceMap.testDatasource.initialize).toHaveBeenCalled();
+    expect(deps.datasourceMap.formBased.initialize).toHaveBeenCalled();
   });
 
   it('should have initialized the initial datasource and visualization', async () => {
     const { store, deps } = makeLensStore({ preloadedState });
     await loadInitialAppState(store, { ...defaultProps, initialInput: undefined });
-    expect(deps.datasourceMap.testDatasource.initialize).toHaveBeenCalled();
-    expect(deps.datasourceMap.testDatasource2.initialize).not.toHaveBeenCalled();
+    expect(deps.datasourceMap.formBased.initialize).toHaveBeenCalled();
+    expect(deps.datasourceMap.textBased.initialize).not.toHaveBeenCalled();
     expect(deps.visualizationMap.testVis.initialize).toHaveBeenCalled();
     expect(deps.visualizationMap.testVis2.initialize).not.toHaveBeenCalled();
   });
@@ -85,8 +85,8 @@ describe('Initializing the store', () => {
         title: '',
         state: {
           datasourceStates: {
-            testDatasource: datasource1State,
-            testDatasource2: datasource2State,
+            formBased: datasource1State,
+            textBased: datasource2State,
           },
           visualization: {},
           query: { query: '', language: 'lucene' },
@@ -114,9 +114,9 @@ describe('Initializing the store', () => {
         },
       },
       datasourceMap: {
-        testDatasource: createMockDatasource('testDatasource'),
-        testDatasource2: createMockDatasource('testDatasource2'),
-        testDatasource3: createMockDatasource('testDatasource3'),
+        formBased: createMockDatasource('formBased'),
+        textBased: createMockDatasource('textBased'),
+        formBased3: createMockDatasource('formBased3'),
       },
     });
 
@@ -128,21 +128,21 @@ describe('Initializing the store', () => {
     await loadInitialAppState(store, defaultProps);
     const { datasourceMap } = storeDeps;
 
-    expect(datasourceMap.testDatasource.initialize).toHaveBeenCalledWith(
+    expect(datasourceMap.formBased.initialize).toHaveBeenCalledWith(
       datasource1State,
       [],
       undefined,
       [],
       {}
     );
-    expect(datasourceMap.testDatasource2.initialize).toHaveBeenCalledWith(
+    expect(datasourceMap.textBased.initialize).toHaveBeenCalledWith(
       datasource2State,
       [],
       undefined,
       [],
       {}
     );
-    expect(datasourceMap.testDatasource3.initialize).not.toHaveBeenCalled();
+    expect(datasourceMap.formBased3.initialize).not.toHaveBeenCalled();
     expect(store.getState()).toMatchSnapshot();
   });
 
@@ -176,7 +176,7 @@ describe('Initializing the store', () => {
             state: {},
             selectedLayerId: null,
           },
-          datasourceStates: { testDatasource: { isLoading: false, state: {} } },
+          datasourceStates: { formBased: { isLoading: false, state: {} } },
         },
       });
 
@@ -187,9 +187,9 @@ describe('Initializing the store', () => {
             state: {},
             selectedLayerId: null,
           },
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           datasourceStates: {
-            testDatasource: { isLoading: false, state: {} },
+            formBased: { isLoading: false, state: {} },
           },
         }),
       });
@@ -207,10 +207,10 @@ describe('Initializing the store', () => {
             activeId: 'testVis',
             selectedLayerId: null,
           },
-          activeDatasourceId: 'testDatasource2', // resets to first on the list
+          activeDatasourceId: 'textBased', // resets to first on the list
           datasourceStates: {
-            testDatasource: { isLoading: false, state: undefined }, // state resets to undefined
-            testDatasource2: {
+            formBased: { isLoading: false, state: undefined }, // state resets to undefined
+            textBased: {
               state: {}, // initializes first in the map
             },
           },
@@ -249,7 +249,7 @@ describe('Initializing the store', () => {
           }),
           query: defaultDoc.state.query,
           isLoading: false,
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           filters: mockFilters,
         }),
       });

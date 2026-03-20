@@ -8,10 +8,12 @@
 import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
 import type { WorkplaceAIAppPluginStartDependencies } from '../types';
 import type { InternalServices } from '../services';
+import type { WorkplaceAIAppConfig } from '../config';
 
 export interface RouteDependencies {
   core: CoreSetup<WorkplaceAIAppPluginStartDependencies>;
   router: IRouter;
   logger: Logger;
+  config: WorkplaceAIAppConfig;
   getServices: () => InternalServices;
 }

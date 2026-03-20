@@ -41,7 +41,8 @@ export const ConditionPanel = ({
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel
-      color="subdued"
+      color="plain"
+      hasShadow={false}
       paddingSize="s"
       className={css`
         border-radius: ${euiTheme.size.s};
@@ -61,13 +62,21 @@ export const EditableConditionPanel = ({
   condition,
   isEditingCondition,
   setCondition,
+  onValidityChange,
 }: {
   condition: Condition;
   isEditingCondition: boolean;
   setCondition: (condition: Condition) => void;
+  onValidityChange?: (isValid: boolean) => void;
 }) => {
+  const handleValidityChange = onValidityChange ?? (() => {});
   return isEditingCondition ? (
-    <ConditionEditor condition={condition} status="enabled" onConditionChange={setCondition} />
+    <ConditionEditor
+      condition={condition}
+      status="enabled"
+      onConditionChange={setCondition}
+      onValidityChange={handleValidityChange}
+    />
   ) : (
     <ConditionPanel condition={condition} />
   );

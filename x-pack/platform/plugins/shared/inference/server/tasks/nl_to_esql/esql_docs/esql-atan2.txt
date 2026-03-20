@@ -1,15 +1,26 @@
-## ATAN2
+# ATAN2
 
-The `ATAN2` function calculates the angle between the positive x-axis and the ray from the origin to the point (x, y) in the Cartesian plane, expressed in radians.
+The ATAN2 command calculates the angle, in radians, between the positive x-axis and the ray from the origin to the point (x, y) in the Cartesian plane.
 
-### Examples
+## Syntax
+
+`ATAN2(y_coordinate, x_coordinate)`
+
+### Parameters
+
+#### y_coordinate
+
+The y coordinate. If this value is `null`, the function returns `null`.
+
+#### x_coordinate
+
+The x coordinate. If this value is `null`, the function returns `null`.
+
+## Examples
+
+Calculates the angle in radians between the positive x-axis and the point (0.6, 12.9) using the ATAN2 function.
 
 ```esql
 ROW y=12.9, x=.6
-| EVAL atan2 = ATAN2(y, x)
-```
-
-```esql
-ROW y=5.0, x=3.0
-| EVAL atan2 = ATAN2(y, x)
+| EVAL atan2=ATAN2(y, x)
 ```

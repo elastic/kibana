@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasPanelCapabilities } from '@kbn/presentation-containers';
+import type { HasPanelCapabilities, PublishesHideBorder } from '@kbn/presentation-publishing';
 import type {
   CanLockHoverActions,
   HasParentApi,
@@ -68,6 +68,11 @@ export interface PresentationPanelInternalProps<
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 
   hidePanelChrome?: boolean;
+
+  /**
+   * Optional search term to highlight in the panel title
+   */
+  titleHighlight?: string;
 }
 
 /**
@@ -85,7 +90,8 @@ export interface DefaultPresentationPanelApi
         HasParentApi &
         CanLockHoverActions &
         CanOverrideHoverActions &
-        HasPanelCapabilities
+        HasPanelCapabilities &
+        PublishesHideBorder
     > {}
 
 export type PresentationPanelProps<

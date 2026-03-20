@@ -6,6 +6,7 @@
  */
 
 import { OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS } from '@kbn/management-settings-ids';
+import { tags } from '@kbn/scout';
 import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
 
@@ -16,7 +17,7 @@ const TEST_RULE_NAME = 'attachments-test-rule';
 const TEST_SLO_NAME = 'Attachments Test SLO';
 
 // TODO: Re-enable on serverless once https://github.com/elastic/kibana/issues/248090 is resolved
-test.describe('Attachments', { tag: ['@ess'] }, () => {
+test.describe('Attachments', { tag: tags.stateful.classic }, () => {
   let ruleId: string;
   let sloId: string;
 

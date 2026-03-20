@@ -27,8 +27,7 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { useLoadConnectors } from '../hooks/use_load_connectors';
-import { useKibana } from '../hooks/use_kibana';
+import { useLoadConnectors, useKibana } from '..';
 import { ConnectorSetup } from './connector_setup';
 import * as i18n from './translations';
 
@@ -162,9 +161,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
   const renderOption: EuiSelectableProps['renderOption'] = useCallback(
     (option: EuiSelectableOption) => (
       <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
-        <EuiFlexItem grow={false} data-test-subj={`connector-${option.label}`}>
-          {option.label}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
       </EuiFlexGroup>
     ),
     []
@@ -243,11 +240,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
 
   if (!connectorExists && customConnectors.length + preConfiguredConnectors.length === 0) {
     return (
-      <EuiFlexGroup
-        direction="column"
-        alignItems="flexEnd"
-        data-test-subj="connectorSelectorNoConnectors"
-      >
+      <EuiFlexGroup direction="column" alignItems="flexEnd">
         <EuiFlexItem>
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
@@ -264,7 +257,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
   }
 
   return (
-    <EuiFlexGroup direction="column" alignItems="flexEnd" data-test-subj="connectorSelectorWrapper">
+    <EuiFlexGroup direction="column" alignItems="flexEnd">
       <EuiFlexItem>
         <EuiInputPopover
           input={input}

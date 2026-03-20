@@ -6,7 +6,7 @@
  */
 
 import { lastValueFrom, map } from 'rxjs';
-import { fromPromise } from 'xstate5';
+import { fromPromise } from 'xstate';
 import type { IToasts, NotificationsStart } from '@kbn/core/public';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';
@@ -15,11 +15,16 @@ import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {
   extractGrokPatternDangerouslySlow,
   groupMessagesByPattern as groupMessagesByGrokPattern,
+  type GrokPatternNode,
 } from '@kbn/grok-heuristics';
 
 import { i18n } from '@kbn/i18n';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
+import {
+  NoSuggestionsError,
+  isNoSuggestionsError,
+} from '../../steps/blocks/action/utils/no_suggestions_error';
 import { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField } from '../../utils';
 import { extractMessagesFromField } from '../../steps/blocks/action/utils/pattern_suggestion_helpers';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine/types';
@@ -37,8 +42,6 @@ export interface SuggestPipelineInput extends SuggestPipelineInputMinimal {
   telemetryClient: StreamsTelemetryClient;
   notifications: NotificationsStart;
 }
-
-type GrokPatternNode = { pattern: string } | { id: string; component: string; values: string[] };
 
 interface ExtractedGrokPattern {
   type: 'grok';
@@ -95,7 +98,22 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
           },
         },
       })
-      .pipe(map((event) => streamlangDSLSchema.parse(event.pipeline)))
+      .pipe(
+        map((event) => {
+          // Handle case where LLM couldn't generate suggestions
+          if (event.pipeline === null) {
+            throw new NoSuggestionsError(
+              i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.noSuggestionsError',
+                {
+                  defaultMessage: 'Could not generate suggestions',
+                }
+              )
+            );
+          }
+          return streamlangDSLSchema.parse(event.pipeline);
+        })
+      )
   );
 
   return pipeline;
@@ -121,7 +139,7 @@ async function extractGrokPatternsClientSide(
       const grokPatternNodes = extractGrokPatternDangerouslySlow(group.messages);
       return {
         messages: group.messages.slice(0, 10), // Limit to 10 samples per group
-        nodes: grokPatternNodes as GrokPatternNode[], // forward full nodes with proper typing
+        nodes: grokPatternNodes,
       };
     });
 
@@ -161,6 +179,12 @@ export const createNotifySuggestionFailureNotifier =
   ({ toasts }: { toasts: IToasts }) =>
   (params: { event: unknown }) => {
     const event = params.event as { error: Error };
+
+    // Don't show toast for NoSuggestionsError - UI will handle it inline
+    if (isNoSuggestionsError(event.error)) {
+      return;
+    }
+
     const formattedError = getFormattedError(event.error);
     toasts.addError(formattedError, {
       title: i18n.translate(

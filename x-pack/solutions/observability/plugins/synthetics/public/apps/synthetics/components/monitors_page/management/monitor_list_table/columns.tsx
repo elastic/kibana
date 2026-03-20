@@ -124,6 +124,7 @@ export function useMonitorListColumns({
       align: 'left' as const,
       field: ConfigKey.SCHEDULE,
       sortable: true,
+      'data-test-subj': 'syntheticsMonitorListFrequency',
       name: i18n.translate('xpack.synthetics.management.monitorList.frequency', {
         defaultMessage: 'Frequency',
       }),
@@ -132,6 +133,7 @@ export function useMonitorListColumns({
     {
       align: 'left' as const,
       field: ConfigKey.LOCATIONS,
+      'data-test-subj': 'syntheticsMonitorListLocations',
       name: i18n.translate('xpack.synthetics.management.monitorList.locations', {
         defaultMessage: 'Locations',
       }),

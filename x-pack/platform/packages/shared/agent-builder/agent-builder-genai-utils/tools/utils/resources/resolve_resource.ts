@@ -12,6 +12,7 @@ import { EsResourceType } from '@kbn/agent-builder-common';
 import type { MappingField } from '../mappings';
 import { flattenMapping, getIndexMappings, getDataStreamMappings } from '../mappings';
 import { processFieldCapsResponse } from '../field_caps';
+import { isCcsTarget, getFieldsFromFieldCaps } from '../ccs';
 
 export interface ResolveResourceResponse {
   /** name of the resource */
@@ -64,6 +65,19 @@ export const resolveResource = async ({
   // target is an index
   if (resolveRes.indices.length > 0) {
     const indexName = resolveRes.indices[0].name;
+
+    // CCS fallback: the _mapping API does not support remote indices,
+    // so we use the CCS-compatible _field_caps API instead.
+    // Trade-off: _meta.description is not available via _field_caps.
+    if (isCcsTarget(resourceName)) {
+      const fields = await getFieldsFromFieldCaps({ resource: indexName, esClient });
+      return {
+        name: resourceName,
+        type: EsResourceType.index,
+        fields,
+      };
+    }
+
     const mappingRes = await getIndexMappings({ indices: [indexName], esClient, cleanup: true });
     const mappings = mappingRes[indexName].mappings;
     const fields = flattenMapping(mappings);
@@ -77,6 +91,19 @@ export const resolveResource = async ({
   // target is a datastream
   if (resolveRes.data_streams.length > 0) {
     const datastream = resolveRes.data_streams[0].name;
+
+    // CCS fallback: the _data_stream/_mappings API does not support remote data streams,
+    // so we use the CCS-compatible _field_caps API instead.
+    // Trade-off: _meta.description is not available via _field_caps.
+    if (isCcsTarget(resourceName)) {
+      const fields = await getFieldsFromFieldCaps({ resource: datastream, esClient });
+      return {
+        name: resourceName,
+        type: EsResourceType.dataStream,
+        fields,
+      };
+    }
+
     const mappingRes = await getDataStreamMappings({
       datastreams: [datastream],
       esClient,

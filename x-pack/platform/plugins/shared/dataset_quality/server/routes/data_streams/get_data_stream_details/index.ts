@@ -128,11 +128,17 @@ const entityFields = [
   'aws.sqs.queue.name',
 ];
 
-// Gather host terms like 'host', 'pod', 'container'
-const hostsAgg: TermAggregation = entityFields.reduce(
-  (acc, idField) => ({ ...acc, [idField]: { terms: { field: idField, size: MAX_HOSTS } } }),
-  {} as TermAggregation
-);
+function isFieldAggregatable(
+  fieldCapsResponse: Awaited<ReturnType<ElasticsearchClient['fieldCaps']>>,
+  fieldName: string
+): boolean {
+  const fieldCaps = fieldCapsResponse.fields[fieldName];
+  if (!fieldCaps) {
+    return false;
+  }
+
+  return Object.values(fieldCaps).every((caps) => caps.aggregatable === true);
+}
 
 async function getDataStreamSummaryStats(
   esClient: ElasticsearchClient,
@@ -146,6 +152,22 @@ async function getDataStreamSummaryStats(
   hosts: Record<string, string[]>;
 }> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
+
+  const fieldCapsResponse = await esClient.fieldCaps({
+    index: dataStream,
+    fields: ['*'],
+    include_unmapped: false,
+  });
+
+  const aggregatableFields = entityFields.filter((field) =>
+    isFieldAggregatable(fieldCapsResponse, field)
+  );
+
+  // Gather host terms like 'host', 'pod', 'container'
+  const hostsAgg = aggregatableFields.reduce(
+    (acc, idField) => ({ ...acc, [idField]: { terms: { field: idField, size: MAX_HOSTS } } }),
+    {} as TermAggregation
+  );
 
   const response = await datasetQualityESClient.search({
     index: dataStream,
@@ -169,8 +191,14 @@ async function getDataStreamSummaryStats(
   return {
     docsCount,
     degradedDocsCount,
-    services: getTermsFromAgg(serviceNamesAgg, response.aggregations),
-    hosts: getTermsFromAgg(hostsAgg, response.aggregations),
+    services: getTermsFromAgg(
+      serviceNamesAgg,
+      response.aggregations as Record<string, TermsAggregationResult> | undefined
+    ),
+    hosts: getTermsFromAgg(
+      hostsAgg,
+      response.aggregations as Record<string, TermsAggregationResult> | undefined
+    ),
   };
 }
 
@@ -194,15 +222,26 @@ async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string
   return docCount ? sizeInBytes / docCount : 0;
 }
 
-function getTermsFromAgg(termAgg: TermAggregation, aggregations: any) {
+interface TermsAggregationBucket {
+  key: string;
+}
+
+interface TermsAggregationResult {
+  buckets?: TermsAggregationBucket[];
+}
+
+function getTermsFromAgg(
+  termAgg: TermAggregation,
+  aggregations: Record<string, TermsAggregationResult> | undefined
+) {
   if (!aggregations) {
     return {};
   }
 
   return Object.entries(termAgg).reduce((acc, [key, _value]) => {
-    const values = aggregations[key]?.buckets.map((bucket: any) => bucket.key) as string[];
+    const values = aggregations[key]?.buckets?.map((bucket) => bucket.key) ?? [];
     return { ...acc, [key]: values };
-  }, {});
+  }, {} as Record<string, string[]>);
 }
 
 function throwIfInvalidDataStreamParams(dataStream?: string) {

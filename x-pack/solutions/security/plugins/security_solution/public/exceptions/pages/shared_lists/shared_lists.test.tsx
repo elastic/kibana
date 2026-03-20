@@ -51,6 +51,15 @@ jest.mock('../../../detections/containers/detection_engine/lists/use_lists_confi
 }));
 
 jest.mock('../../hooks/use_endpoint_exceptions_capability');
+jest.mock('../../components/create_shared_exception_list', () => ({
+  CreateSharedListFlyout: ({ handleCloseFlyout }: { handleCloseFlyout: () => void }) => (
+    <div data-test-subj="createSharedExceptionListFlyout">
+      <button type="button" data-test-subj="closeFlyoutButton" onClick={handleCloseFlyout}>
+        {'Close'}
+      </button>
+    </div>
+  ),
+}));
 
 describe('SharedLists', () => {
   const mockHistory = generateHistoryMock();
@@ -201,7 +210,7 @@ describe('SharedLists', () => {
     });
   });
 
-  it('disables the "endpoint_list" overflow card button when user is restricted to only READ Endpoint Exceptions', async () => {
+  it('renders the "endpoint_list" overflow card button as enabled when user is restricted to only READ Endpoint Exceptions', async () => {
     (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(false);
 
     const wrapper = render(
@@ -210,7 +219,12 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
-    expect(allMenuActions[0]).toBeDisabled();
+    fireEvent.click(allMenuActions[1]);
+
+    await waitFor(() => {
+      const allExportActions = wrapper.getAllByTestId('sharedListOverflowCardActionItemExport');
+      expect(allExportActions[0]).toBeEnabled();
+    });
   });
 
   it('renders delete option as disabled if list is "endpoint_list"', async () => {
@@ -228,10 +242,13 @@ describe('SharedLists', () => {
     });
   });
 
-  it('renders overflow card button as disabled if user is read only', async () => {
+  it('renders overflow card button as enabled if user is read only', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: false },
+      rulesPrivileges: {
+        rules: { read: true, edit: false },
+        exceptions: { read: true, edit: false },
+      },
     });
 
     const wrapper = render(
@@ -240,6 +257,63 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
-    expect(allMenuActions[1]).toBeDisabled();
+    expect(allMenuActions[1]).toBeEnabled();
+  });
+
+  it('renders export option as enabled when user is restricted to only READ rules', async () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        rules: { read: true, edit: false },
+        exceptions: { read: true, edit: false },
+      },
+    });
+
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+    const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    fireEvent.click(allMenuActions[0]);
+
+    await waitFor(() => {
+      const allExportActions = wrapper.getAllByTestId('sharedListOverflowCardActionItemExport');
+      expect(allExportActions[0]).toBeEnabled();
+    });
+  });
+
+  it('returns focus to the create button when the create shared list flyout is closed', async () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        rules: { read: true, edit: true },
+        exceptions: { read: true, edit: true },
+      },
+    });
+
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    const createButtonText = wrapper.getByText('Create shared exception list');
+    const createButton = createButtonText.closest('button')!;
+    fireEvent.click(createButton);
+
+    const createListOption = wrapper.getByTestId('manageExceptionListCreateExceptionListButton');
+    fireEvent.click(createListOption);
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId('createSharedExceptionListFlyout')).toBeInTheDocument();
+    });
+
+    const closeFlyoutButton = wrapper.getByTestId('closeFlyoutButton');
+    fireEvent.click(closeFlyoutButton);
+
+    await waitFor(() => {
+      expect(createButton).toHaveFocus();
+    });
   });
 });

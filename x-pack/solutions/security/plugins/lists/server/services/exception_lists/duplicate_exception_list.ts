@@ -54,6 +54,7 @@ export const duplicateExceptionListAndItems = async ({
     meta: list.meta,
     name: `${list.name} [Duplicate]`,
     namespaceType: list.namespace_type,
+    osTypes: list.os_types,
     savedObjectsClient,
     tags: list.tags,
     type: list.type,

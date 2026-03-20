@@ -290,6 +290,37 @@ export const labels = {
       }
     ),
 
+    deleteToolUsedByAgentsTitle: (toolId: string) =>
+      i18n.translate('xpack.agentBuilder.tools.deleteToolUsedByAgentsTitle', {
+        defaultMessage: 'Tool "{toolId}" is used by agents',
+        values: { toolId },
+      }),
+    deleteToolUsedByAgentsDescription: i18n.translate(
+      'xpack.agentBuilder.tools.deleteToolUsedByAgentsDescription',
+      {
+        defaultMessage: 'Remove this tool from all agents that use it and delete the tool?',
+      }
+    ),
+    deleteToolUsedByAgentsAgentListLabel: i18n.translate(
+      'xpack.agentBuilder.tools.deleteToolUsedByAgentsAgentListLabel',
+      {
+        defaultMessage: 'Agents using this tool',
+      }
+    ),
+    deleteToolUsedByAgentsAgentList: (agentNames: string[]) => agentNames.join(', '),
+    deleteToolUsedByAgentsConfirmButton: i18n.translate(
+      'xpack.agentBuilder.tools.deleteToolUsedByAgentsConfirmButton',
+      {
+        defaultMessage: 'Yes, remove and delete',
+      }
+    ),
+    deleteToolUsedByAgentsCancelButton: i18n.translate(
+      'xpack.agentBuilder.tools.deleteToolUsedByAgentsCancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+
     // Bulk delete modal
     bulkDeleteEsqlToolsTitle: (count: number) =>
       i18n.translate('xpack.agentBuilder.tools.bulkDeleteEsqlToolsTitle', {
@@ -452,6 +483,335 @@ export const labels = {
         }
       ),
     },
+  },
+  skills: {
+    title: i18n.translate('xpack.agentBuilder.skills.title', { defaultMessage: 'Skills' }),
+    newSkillButton: i18n.translate('xpack.agentBuilder.skills.newSkillButton', {
+      defaultMessage: 'New skill',
+    }),
+    newSkillTitle: i18n.translate('xpack.agentBuilder.skills.newSkillTitle', {
+      defaultMessage: 'Create a new skill',
+    }),
+    editSkillTitle: i18n.translate('xpack.agentBuilder.skills.editSkillTitle', {
+      defaultMessage: 'Edit skill',
+    }),
+    readOnly: i18n.translate('xpack.agentBuilder.skills.readOnly', {
+      defaultMessage: 'Read-only',
+    }),
+    builtinLabel: i18n.translate('xpack.agentBuilder.skills.builtinLabel', {
+      defaultMessage: 'Built-in',
+    }),
+    customLabel: i18n.translate('xpack.agentBuilder.skills.customLabel', {
+      defaultMessage: 'Custom',
+    }),
+    skillsTableCaption: (skillsCount: number) =>
+      i18n.translate('xpack.agentBuilder.skills.skillsTableCaption', {
+        defaultMessage: 'Available skills for AI agents: {skillsCount} skills',
+        values: { skillsCount },
+      }),
+    skillIdLabel: i18n.translate('xpack.agentBuilder.skills.idLabel', { defaultMessage: 'ID' }),
+    nameLabel: i18n.translate('xpack.agentBuilder.skills.nameLabel', { defaultMessage: 'Name' }),
+    descriptionLabel: i18n.translate('xpack.agentBuilder.skills.descriptionLabel', {
+      defaultMessage: 'Description',
+    }),
+    contentLabel: i18n.translate('xpack.agentBuilder.skills.contentLabel', {
+      defaultMessage: 'Instructions',
+    }),
+    toolsLabel: i18n.translate('xpack.agentBuilder.skills.toolsLabel', { defaultMessage: 'Tools' }),
+    referencedContentLabel: i18n.translate('xpack.agentBuilder.skills.referencedContentLabel', {
+      defaultMessage: 'Additional files',
+    }),
+    typeLabel: i18n.translate('xpack.agentBuilder.skills.typeLabel', { defaultMessage: 'Type' }),
+    saveButtonLabel: i18n.translate('xpack.agentBuilder.skills.saveButtonLabel', {
+      defaultMessage: 'Save',
+    }),
+    cancelButtonLabel: i18n.translate('xpack.agentBuilder.skills.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+    saveButtonTooltip: i18n.translate('xpack.agentBuilder.skills.saveButtonTooltip', {
+      defaultMessage: 'Resolve all form errors to save.',
+    }),
+    editSkillButtonLabel: i18n.translate('xpack.agentBuilder.skills.editSkillButtonLabel', {
+      defaultMessage: 'Edit',
+    }),
+    viewSkillButtonLabel: i18n.translate('xpack.agentBuilder.skills.viewSkillButtonLabel', {
+      defaultMessage: 'View',
+    }),
+    deleteSkillButtonLabel: i18n.translate('xpack.agentBuilder.skills.deleteSkillButtonLabel', {
+      defaultMessage: 'Delete',
+    }),
+    skillContextMenuButtonLabel: i18n.translate(
+      'xpack.agentBuilder.skills.skillContextMenuButtonLabel',
+      {
+        defaultMessage: 'Skill context menu',
+      }
+    ),
+    searchSkillsPlaceholder: i18n.translate('xpack.agentBuilder.skills.searchSkillsPlaceholder', {
+      defaultMessage: 'Search',
+    }),
+    noSkillsMatchMessage: i18n.translate('xpack.agentBuilder.skills.noSkillsMatchMessage', {
+      defaultMessage: 'No skills match your search.',
+    }),
+    noSkillsMessage: i18n.translate('xpack.agentBuilder.skills.noSkillsMessage', {
+      defaultMessage: "It looks like you don't have any custom skills defined yet.",
+    }),
+    listSkillsErrorMessage: i18n.translate('xpack.agentBuilder.skills.listSkillsErrorMessage', {
+      defaultMessage: 'Failed to fetch skills',
+    }),
+    includeBuiltinSkillsSwitchLabel: i18n.translate(
+      'xpack.agentBuilder.skills.includeBuiltinSkillsSwitchLabel',
+      {
+        defaultMessage: 'Include built-in skills',
+      }
+    ),
+    deleteSkillSuccessToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.deleteSkillSuccessToast', {
+        defaultMessage: 'Skill "{skillId}" deleted',
+        values: { skillId },
+      }),
+    createSkillSuccessToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.createSkillSuccessToast', {
+        defaultMessage: 'Skill "{skillId}" created',
+        values: { skillId },
+      }),
+    editSkillSuccessToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.editSkillSuccessToast', {
+        defaultMessage: 'Skill "{skillId}" updated',
+        values: { skillId },
+      }),
+    deleteSkillErrorToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.deleteSkillErrorToast', {
+        defaultMessage: 'Unable to delete skill "{skillId}"',
+        values: { skillId },
+      }),
+    createSkillErrorToast: i18n.translate('xpack.agentBuilder.skills.createSkillErrorToast', {
+      defaultMessage: 'Unable to create skill',
+    }),
+    editSkillErrorToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.editSkillErrorToast', {
+        defaultMessage: 'Unable to update skill "{skillId}"',
+        values: { skillId },
+      }),
+    loadSkillErrorToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.loadSkillErrorToast', {
+        defaultMessage: 'Unable to load "{skillId}"',
+        values: { skillId },
+      }),
+    loadSkillsErrorToast: i18n.translate('xpack.agentBuilder.skills.loadSkillsErrorToast', {
+      defaultMessage: 'Unable to load skills',
+    }),
+    deleteSkillTitle: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.deleteSkillTitle', {
+        defaultMessage: 'Delete {skillId}?',
+        values: { skillId },
+      }),
+    deleteSkillCancelButton: i18n.translate('xpack.agentBuilder.skills.deleteSkillCancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    deleteSkillConfirmButton: i18n.translate('xpack.agentBuilder.skills.deleteSkillConfirmButton', {
+      defaultMessage: 'Delete skill',
+    }),
+    deleteSkillConfirmationText: i18n.translate(
+      'xpack.agentBuilder.skills.deleteSkillConfirmationText',
+      {
+        defaultMessage: 'This action will permanently remove the skill. This cannot be undone.',
+      }
+    ),
+    toolIdsLabel: i18n.translate('xpack.agentBuilder.skills.toolIdsLabel', {
+      defaultMessage: 'Associated tools',
+    }),
+    toolIdsHelpText: i18n.translate('xpack.agentBuilder.skills.toolIdsHelpText', {
+      defaultMessage: 'Select tools that this skill can use.',
+    }),
+  },
+  plugins: {
+    title: i18n.translate('xpack.agentBuilder.plugins.title', { defaultMessage: 'Plugins' }),
+    pluginsTableCaption: (pluginsCount: number) =>
+      i18n.translate('xpack.agentBuilder.plugins.pluginsTableCaption', {
+        defaultMessage: 'Installed plugins: {pluginsCount} plugins',
+        values: { pluginsCount },
+      }),
+    nameLabel: i18n.translate('xpack.agentBuilder.plugins.nameLabel', {
+      defaultMessage: 'Name',
+    }),
+    descriptionLabel: i18n.translate('xpack.agentBuilder.plugins.descriptionLabel', {
+      defaultMessage: 'Description',
+    }),
+    versionLabel: i18n.translate('xpack.agentBuilder.plugins.versionLabel', {
+      defaultMessage: 'Version',
+    }),
+    skillsLabel: i18n.translate('xpack.agentBuilder.plugins.skillsLabel', {
+      defaultMessage: 'Skills',
+    }),
+    sourceLabel: i18n.translate('xpack.agentBuilder.plugins.sourceLabel', {
+      defaultMessage: 'Source',
+    }),
+    searchPluginsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.plugins.searchPluginsPlaceholder',
+      {
+        defaultMessage: 'Search',
+      }
+    ),
+    noPluginsMatchMessage: i18n.translate('xpack.agentBuilder.plugins.noPluginsMatchMessage', {
+      defaultMessage: 'No plugins match your search.',
+    }),
+    noPluginsMessage: i18n.translate('xpack.agentBuilder.plugins.noPluginsMessage', {
+      defaultMessage: 'No plugins installed yet.',
+    }),
+    listPluginsErrorMessage: i18n.translate('xpack.agentBuilder.plugins.listPluginsErrorMessage', {
+      defaultMessage: 'Failed to fetch plugins',
+    }),
+    loadPluginsErrorToast: i18n.translate('xpack.agentBuilder.plugins.loadPluginsErrorToast', {
+      defaultMessage: 'Unable to load plugins',
+    }),
+    deletePluginSuccessToast: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.deletePluginSuccessToast', {
+        defaultMessage: 'Plugin "{pluginName}" deleted',
+        values: { pluginName },
+      }),
+    deletePluginErrorToast: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.deletePluginErrorToast', {
+        defaultMessage: 'Unable to delete plugin "{pluginName}"',
+        values: { pluginName },
+      }),
+    deletePluginTitle: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.deletePluginTitle', {
+        defaultMessage: 'Delete {pluginName}?',
+        values: { pluginName },
+      }),
+    deletePluginCancelButton: i18n.translate(
+      'xpack.agentBuilder.plugins.deletePluginCancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+    deletePluginConfirmButton: i18n.translate(
+      'xpack.agentBuilder.plugins.deletePluginConfirmButton',
+      {
+        defaultMessage: 'Delete plugin',
+      }
+    ),
+    deletePluginConfirmationText: i18n.translate(
+      'xpack.agentBuilder.plugins.deletePluginConfirmationText',
+      {
+        defaultMessage:
+          'This will permanently remove the plugin and all its managed skills. This cannot be undone.',
+      }
+    ),
+    pluginContextMenuButtonLabel: i18n.translate(
+      'xpack.agentBuilder.plugins.pluginContextMenuButtonLabel',
+      {
+        defaultMessage: 'Plugin context menu',
+      }
+    ),
+    deletePluginButtonLabel: i18n.translate('xpack.agentBuilder.plugins.deletePluginButtonLabel', {
+      defaultMessage: 'Delete',
+    }),
+    installPluginButton: i18n.translate('xpack.agentBuilder.plugins.installPluginButton', {
+      defaultMessage: 'Install plugin',
+    }),
+    installFromUrlMenuItem: i18n.translate('xpack.agentBuilder.plugins.installFromUrlMenuItem', {
+      defaultMessage: 'Install from URL',
+    }),
+    uploadMenuItem: i18n.translate('xpack.agentBuilder.plugins.uploadMenuItem', {
+      defaultMessage: 'Upload ZIP',
+    }),
+    installFromUrlModalTitle: i18n.translate(
+      'xpack.agentBuilder.plugins.installFromUrlModalTitle',
+      {
+        defaultMessage: 'Install plugin from URL',
+      }
+    ),
+    uploadPluginModalTitle: i18n.translate('xpack.agentBuilder.plugins.uploadPluginModalTitle', {
+      defaultMessage: 'Upload plugin',
+    }),
+    urlFieldLabel: i18n.translate('xpack.agentBuilder.plugins.urlFieldLabel', {
+      defaultMessage: 'Plugin URL',
+    }),
+    urlFieldPlaceholder: i18n.translate('xpack.agentBuilder.plugins.urlFieldPlaceholder', {
+      defaultMessage: 'https://github.com/...',
+    }),
+    fileFieldLabel: i18n.translate('xpack.agentBuilder.plugins.fileFieldLabel', {
+      defaultMessage: 'Plugin ZIP file',
+    }),
+    installButton: i18n.translate('xpack.agentBuilder.plugins.installButton', {
+      defaultMessage: 'Install',
+    }),
+    cancelButton: i18n.translate('xpack.agentBuilder.plugins.cancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    installPluginSuccessToast: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.installPluginSuccessToast', {
+        defaultMessage: 'Plugin "{pluginName}" installed',
+        values: { pluginName },
+      }),
+    installPluginErrorToast: i18n.translate('xpack.agentBuilder.plugins.installPluginErrorToast', {
+      defaultMessage: 'Failed to install plugin',
+    }),
+    uploadPluginSuccessToast: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.uploadPluginSuccessToast', {
+        defaultMessage: 'Plugin "{pluginName}" installed',
+        values: { pluginName },
+      }),
+    uploadPluginErrorToast: i18n.translate('xpack.agentBuilder.plugins.uploadPluginErrorToast', {
+      defaultMessage: 'Failed to upload plugin',
+    }),
+    viewPluginButtonLabel: i18n.translate('xpack.agentBuilder.plugins.viewPluginButtonLabel', {
+      defaultMessage: 'View',
+    }),
+    pluginDetailsTitle: i18n.translate('xpack.agentBuilder.plugins.pluginDetailsTitle', {
+      defaultMessage: 'Plugin details',
+    }),
+    backToPluginsButton: i18n.translate('xpack.agentBuilder.plugins.backToPluginsButton', {
+      defaultMessage: 'Back to plugins',
+    }),
+    idLabel: i18n.translate('xpack.agentBuilder.plugins.idLabel', {
+      defaultMessage: 'ID',
+    }),
+    authorLabel: i18n.translate('xpack.agentBuilder.plugins.authorLabel', {
+      defaultMessage: 'Author',
+    }),
+    noSkillsLabel: i18n.translate('xpack.agentBuilder.plugins.noSkillsLabel', {
+      defaultMessage: 'None',
+    }),
+    identitySectionTitle: i18n.translate('xpack.agentBuilder.plugins.identitySectionTitle', {
+      defaultMessage: 'Identity',
+    }),
+    identitySectionDescription: i18n.translate(
+      'xpack.agentBuilder.plugins.identitySectionDescription',
+      {
+        defaultMessage: 'Core identifiers and version information for the plugin.',
+      }
+    ),
+    aboutSectionTitle: i18n.translate('xpack.agentBuilder.plugins.aboutSectionTitle', {
+      defaultMessage: 'About',
+    }),
+    aboutSectionDescription: i18n.translate('xpack.agentBuilder.plugins.aboutSectionDescription', {
+      defaultMessage: 'Description and authorship information.',
+    }),
+    sourceSectionTitle: i18n.translate('xpack.agentBuilder.plugins.sourceSectionTitle', {
+      defaultMessage: 'Source',
+    }),
+    sourceSectionDescription: i18n.translate(
+      'xpack.agentBuilder.plugins.sourceSectionDescription',
+      {
+        defaultMessage: 'Where the plugin was installed from.',
+      }
+    ),
+    skillsSectionTitle: i18n.translate('xpack.agentBuilder.plugins.skillsSectionTitle', {
+      defaultMessage: 'Skills',
+    }),
+    skillsSectionDescription: i18n.translate(
+      'xpack.agentBuilder.plugins.skillsSectionDescription',
+      {
+        defaultMessage: 'Skills provided by this plugin.',
+      }
+    ),
+    loadPluginErrorToast: (pluginId: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.loadPluginErrorToast', {
+        defaultMessage: 'Unable to load "{pluginId}"',
+        values: { pluginId },
+      }),
   },
   agents: {
     title: i18n.translate('xpack.agentBuilder.agents.list.title', { defaultMessage: 'Agents' }),

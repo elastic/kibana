@@ -16,10 +16,15 @@
  * License v3.0 only", or the "Server Side Public License v 1".
  */
 
-import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { registerStepDefinitions } from './step_types';
+import {
+  WORKFLOWS_EXTENSIONS_EXAMPLE_APP_ID,
+  WORKFLOWS_EXTENSIONS_EXAMPLE_APP_TITLE,
+} from '../common/constants';
 import { ExampleExternalService } from '../common/external_service/external_service';
+import { registerStepDefinitions } from './step_types';
+import { registerTriggerDefinitions } from './triggers';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePublicPluginSetup {
@@ -33,6 +38,9 @@ export interface WorkflowsExtensionsExamplePublicPluginStart {
 
 export interface WorkflowsExtensionsExamplePublicPluginSetupDeps {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+  developerExamples: {
+    register: (config: { appId: string; title: string; description: string }) => void;
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -50,18 +58,37 @@ export class WorkflowsExtensionsExamplePlugin
     >
 {
   public setup(
-    _core: CoreSetup,
+    core: CoreSetup,
     plugins: WorkflowsExtensionsExamplePublicPluginSetupDeps
   ): WorkflowsExtensionsExamplePublicPluginSetup {
     // Register steps on setup phase
     registerStepDefinitions(plugins.workflowsExtensions, {
       externalService: new ExampleExternalService({
-        'my-proxy': 'https://example.com',
-        'my-other-proxy': 'https://example.com/other',
-        'my-third-proxy': 'https://example.com/third',
-        'my-fourth-proxy': 'https://example.com/fourth',
-        'my-fifth-proxy': 'https://example.com/fifth',
+        'my-proxy': { name: 'Production Proxy', url: 'https://example.com' },
+        'my-other-proxy': { name: 'Staging Proxy', url: 'https://example.com/other' },
+        'my-third-proxy': { name: 'Development Proxy', url: 'https://example.com/third' },
+        'my-fourth-proxy': { name: 'Testing Proxy', url: 'https://example.com/fourth' },
+        'my-fifth-proxy': { name: 'Backup Proxy', url: 'https://example.com/fifth' },
       }),
+    });
+    registerTriggerDefinitions(plugins.workflowsExtensions);
+
+    core.application.register({
+      id: WORKFLOWS_EXTENSIONS_EXAMPLE_APP_ID,
+      title: WORKFLOWS_EXTENSIONS_EXAMPLE_APP_TITLE,
+      visibleIn: [],
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        const [coreStart] = await core.getStartServices();
+        return renderApp(coreStart, params);
+      },
+    });
+
+    plugins.developerExamples.register({
+      appId: WORKFLOWS_EXTENSIONS_EXAMPLE_APP_ID,
+      title: WORKFLOWS_EXTENSIONS_EXAMPLE_APP_TITLE,
+      description:
+        'Register custom workflow steps and triggers, and emit events for the example trigger.',
     });
 
     return {};

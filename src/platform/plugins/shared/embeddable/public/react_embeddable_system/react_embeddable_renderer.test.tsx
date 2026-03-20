@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { setStubKibanaServices as setupPresentationPanelServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -62,6 +62,7 @@ describe('embeddable renderer', () => {
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initializeDrilldownsManager: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: expect.any(String),
@@ -85,6 +86,7 @@ describe('embeddable renderer', () => {
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initializeDrilldownsManager: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: '12345',
@@ -104,6 +106,7 @@ describe('embeddable renderer', () => {
     render(<EmbeddableRenderer type={'test'} getParentApi={() => parentApi} />);
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initializeDrilldownsManager: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi,
         uuid: expect.any(String),
@@ -211,10 +214,77 @@ describe('embeddable renderer', () => {
     );
 
     await waitFor(() => expect(embeddable.getByTestId('errorMessageMarkdown')).toBeInTheDocument());
-    expect(onApiAvailable).not.toBeCalled();
     expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
       'error in buildEmbeddable'
     );
+  });
+
+  it('registers error API via onApiAvailable when buildEmbeddable throws', async () => {
+    const errorFactory: EmbeddableFactory<{ name: string; bork: string }> = {
+      ...testEmbeddableFactory,
+      type: 'errorRegistersApi',
+      buildEmbeddable: () => {
+        throw new Error('saved object not found');
+      },
+    };
+    registerReactEmbeddableFactory('errorRegistersApi', () => Promise.resolve(errorFactory));
+    setupPresentationPanelServices();
+
+    const onApiAvailable = jest.fn();
+    render(
+      <EuiThemeProvider>
+        <EmbeddableRenderer
+          type={'errorRegistersApi'}
+          maybeId={'67890'}
+          onApiAvailable={onApiAvailable}
+          getParentApi={() => ({
+            getSerializedStateForChild: () => ({}),
+          })}
+        />
+      </EuiThemeProvider>
+    );
+
+    await waitFor(() => expect(onApiAvailable).toHaveBeenCalledTimes(1));
+
+    const errorApi = onApiAvailable.mock.calls[0][0];
+    expect(errorApi.uuid).toBe('67890');
+    expect(errorApi.parentApi).toBeUndefined();
+    expect(errorApi.blockingError$.getValue()).toEqual(new Error('saved object not found'));
+  });
+
+  it('assigns parentApi on error API when parent is a presentation container', async () => {
+    const errorFactory: EmbeddableFactory<{ name: string; bork: string }> = {
+      ...testEmbeddableFactory,
+      type: 'errorWithContainerParent',
+      buildEmbeddable: () => {
+        throw new Error('container parent error');
+      },
+    };
+    registerReactEmbeddableFactory('errorWithContainerParent', () => Promise.resolve(errorFactory));
+    setupPresentationPanelServices();
+
+    const parentApi = {
+      ...getMockPresentationContainer(),
+      getSerializedStateForChild: () => ({}),
+    };
+    const onApiAvailable = jest.fn();
+    render(
+      <EuiThemeProvider>
+        <EmbeddableRenderer
+          type={'errorWithContainerParent'}
+          maybeId={'99999'}
+          onApiAvailable={onApiAvailable}
+          getParentApi={() => parentApi}
+        />
+      </EuiThemeProvider>
+    );
+
+    await waitFor(() => expect(onApiAvailable).toHaveBeenCalledTimes(1));
+
+    const errorApi = onApiAvailable.mock.calls[0][0];
+    expect(errorApi.uuid).toBe('99999');
+    expect(errorApi.parentApi).toBe(parentApi);
+    expect(errorApi.blockingError$.getValue()).toEqual(new Error('container parent error'));
   });
 });
 

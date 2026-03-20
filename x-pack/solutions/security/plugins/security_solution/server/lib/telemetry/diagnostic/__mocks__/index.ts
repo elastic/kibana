@@ -69,6 +69,12 @@ export const createMockEsClient = () => {
     ilm: {
       explainLifecycle: jest.fn(),
     },
+    indices: {
+      exists: jest.fn(),
+    },
+    security: {
+      hasPrivileges: jest.fn(),
+    },
     helpers: mockHelpers,
     cluster: { health: jest.fn() },
     nodes: { stats: jest.fn() },
@@ -137,10 +143,11 @@ enabled: ${config.enabled}`;
 
 // Helper functions for common test patterns
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createMockSearchResponse = (hits: any[] = [], aggregations?: any) => ({
+export const createMockSearchResponse = (hits: any[] = [], aggregations?: any, pitId?: string) => ({
   hits: {
     hits: hits.map((hit) => ({ _source: hit, sort: ['sort1'] })),
   },
+  ...(pitId && { pit_id: pitId }),
   ...(aggregations && { aggregations }),
 });
 
@@ -160,6 +167,8 @@ export const setupPointInTime = (
 ) => {
   mockEsClient.openPointInTime.mockResolvedValue({ id: pitId });
   mockEsClient.closePointInTime.mockResolvedValue({});
+  mockEsClient.indices.exists.mockResolvedValue(true);
+  mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true });
 };
 
 export const createTestObserver = () => {

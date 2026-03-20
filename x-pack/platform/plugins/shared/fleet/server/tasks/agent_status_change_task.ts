@@ -5,12 +5,7 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import {
-  type CoreSetup,
-  type ElasticsearchClient,
-  type Logger,
-  SavedObjectsClient,
-} from '@kbn/core/server';
+import { type CoreSetup, type ElasticsearchClient, type Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -158,8 +153,7 @@ export class AgentStatusChangeTask {
 
     const [coreStart, _startDeps] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
-
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
     try {
       await this.persistAgentStatusChanges(esClient, soClient, abortController);
 

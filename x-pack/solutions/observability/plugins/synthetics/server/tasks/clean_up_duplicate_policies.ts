@@ -52,15 +52,13 @@ export async function cleanUpDuplicatedPackagePolicies(
     for await (const result of finder.find()) {
       result.saved_objects.forEach((monitor) => {
         monitor.attributes.locations?.forEach((location) => {
-          const spaceId = monitor.namespaces?.[0];
-          if (!location.isServiceManaged && spaceId) {
+          if (!location.isServiceManaged) {
             const policyId = privateLocationAPI.getPolicyId(
               {
                 origin: monitor.attributes.origin,
                 id: monitor.attributes.id,
               },
-              location.id,
-              spaceId
+              location.id
             );
             expectedPackagePolicies.add(policyId);
           }
@@ -91,6 +89,11 @@ export async function cleanUpDuplicatedPackagePolicies(
 
     // if we have any to delete or any expected that were not found we need to perform a sync
     performCleanupSync = packagePoliciesToDelete.length > 0 || expectedPackagePolicies.size > 0;
+
+    debugLog(`Found ${packagePoliciesToDelete.length} duplicate package policies to delete.`);
+    debugLog(
+      `Found ${expectedPackagePolicies.size} expected package policies that were not found.`
+    );
 
     if (packagePoliciesToDelete.length > 0) {
       await deleteDuplicatePackagePolicies(
