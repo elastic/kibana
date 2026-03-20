@@ -9,10 +9,14 @@ export const ruleKeys = {
   all: ['rule'] as const,
   lists: () => [...ruleKeys.all, 'list'] as const,
   list: (filters: { page: number; perPage: number }) => [...ruleKeys.lists(), filters] as const,
-  detail: (id: string) => [...ruleKeys.all, 'detail', id] as const,
+  details: () => [...ruleKeys.all, 'details'] as const,
+  detail: (id: string) => [...ruleKeys.details(), id] as const,
   create: () => [...ruleKeys.all, 'create'] as const,
   update: () => [...ruleKeys.all, 'update'] as const,
   delete: () => [...ruleKeys.all, 'delete'] as const,
+  bulkDelete: () => [...ruleKeys.all, 'bulkDelete'] as const,
+  bulkEnable: () => [...ruleKeys.all, 'bulkEnable'] as const,
+  bulkDisable: () => [...ruleKeys.all, 'bulkDisable'] as const,
 };
 
 export const workflowKeys = {

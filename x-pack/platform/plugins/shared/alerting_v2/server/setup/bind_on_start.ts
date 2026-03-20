@@ -6,11 +6,15 @@
  */
 
 import { Logger, OnStart, PluginStart } from '@kbn/core-di';
+import { PluginInitializer } from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { initializeResources } from '../resources/register_resources';
 import { initializeESQLViews } from '../esql_views/register_views';
+import { scheduleApiKeyInvalidationTask } from '../lib/tasks/invalidate_pending_api_keys/schedule_task';
+import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 
@@ -22,6 +26,9 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
     const taskManager = container.get(
       PluginStart<AlertingServerStartDependencies['taskManager']>('taskManager')
     );
+    const config = container
+      .get<PluginInitializerContext<PluginConfig>['config']>(PluginInitializer('config'))
+      .get<PluginConfig>();
 
     initializeResources({
       logger,
@@ -39,6 +46,19 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
         error: {
           code: 'DISPATCHER_TASK_SCHEDULE_FAILURE',
           type: 'DispatcherTask',
+        },
+      });
+    });
+
+    scheduleApiKeyInvalidationTask({
+      logger,
+      taskManager,
+      interval: config.invalidateApiKeysTask.interval,
+    }).catch((error) => {
+      logger.error(error as Error, {
+        error: {
+          code: 'API_KEY_INVALIDATION_TASK_SCHEDULE_FAILURE',
+          type: 'ApiKeyInvalidationTask',
         },
       });
     });

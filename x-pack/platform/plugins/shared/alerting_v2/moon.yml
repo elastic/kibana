@@ -62,6 +62,7 @@ dependsOn:
   - '@kbn/es-mappings'
   - '@kbn/std'
   - '@kbn/eval-kql'
+  - '@kbn/alerting-plugin'
   - '@kbn/react-query'
   - '@kbn/core-security-server'
   - '@kbn/encrypted-saved-objects-plugin'
@@ -72,6 +73,8 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/es-query'
   - '@kbn/react-hooks'
+  - '@kbn/lens-plugin'
+  - '@kbn/core-security-server-mocks'
 tags:
   - plugin
   - prod

@@ -14,7 +14,8 @@ import { QueryResultsGrid } from './query_results_grid';
  * Recovery results preview panel.
  *
  * Displays a live preview of the recovery ES|QL query results. Shown when
- * the recovery policy type is `'query'`. Delegates grid rendering to
+ * the recovery policy type is `'query'`. Includes a chart histogram above
+ * the data grid when results are available. Delegates rendering to
  * `QueryResultsGrid`.
  */
 export const RecoveryResultsPreview = () => {
@@ -28,6 +29,9 @@ export const RecoveryResultsPreview = () => {
     groupingFields,
     uniqueGroupCount,
     hasValidQuery,
+    query,
+    timeField,
+    lookback,
   } = useRecoveryPreview();
 
   return (
@@ -56,6 +60,9 @@ export const RecoveryResultsPreview = () => {
       groupingFields={groupingFields}
       uniqueGroupCount={uniqueGroupCount}
       hasValidQuery={hasValidQuery}
+      query={query}
+      timeField={timeField}
+      lookback={lookback}
     />
   );
 };

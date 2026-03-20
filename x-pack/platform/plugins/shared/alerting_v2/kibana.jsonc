@@ -16,11 +16,13 @@
       "data",
       "dataViews",
       "esql",
+      "lens",
       "security",
       "encryptedSavedObjects",
       "workflowsManagement"
     ],
     "optionalPlugins": ["management"],
+    "requiredBundles": ["alerting"],
     "extraPublicDirs": []
   }
 }
