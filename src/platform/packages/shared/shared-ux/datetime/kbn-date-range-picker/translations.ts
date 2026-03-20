@@ -287,13 +287,14 @@ export const settingsPanelTexts = {
 export const autoRefreshButtonTexts = {
   pauseAriaLabel: (timeRemainingLabel: string) =>
     i18n.translate('sharedUXPackages.dateRangePicker.autoRefreshButton.pauseAriaLabel', {
-      defaultMessage: 'Auto-refresh active, next refresh in {timeRemainingLabel}. Click to pause.',
+      defaultMessage:
+        'Auto-refresh active, next refresh in {timeRemainingLabel}. Activate to pause.',
       values: { timeRemainingLabel },
     }),
   resumeAriaLabel: (intervalCountdownLabel: string) =>
     i18n.translate('sharedUXPackages.dateRangePicker.autoRefreshButton.resumeAriaLabel', {
       defaultMessage:
-        'Auto-refresh paused, refresh interval is {intervalCountdownLabel}. Click to resume.',
+        'Auto-refresh paused, refresh interval is {intervalCountdownLabel}. Activate to resume.',
       values: { intervalCountdownLabel },
     }),
 };
