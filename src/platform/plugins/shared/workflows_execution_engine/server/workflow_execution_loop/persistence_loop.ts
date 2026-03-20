@@ -47,12 +47,14 @@ export async function persistenceLoop(
   // Create the abort promise once outside the loop to avoid accumulating
   // event listeners on each iteration.
   const persistenceAbortPromise: Promise<void> = persistenceAbortSignal
-    ? new Promise<void>((resolve) => {
+    ? new Promise<void>((_, reject) => {
         if (persistenceAbortSignal.aborted) {
-          resolve();
+          reject(new TimeoutAbortedError());
           return;
         }
-        persistenceAbortSignal.addEventListener('abort', () => resolve(), { once: true });
+        persistenceAbortSignal.addEventListener('abort', () => reject(new TimeoutAbortedError()), {
+          once: true,
+        });
       })
     : new Promise<void>(() => {});
 
