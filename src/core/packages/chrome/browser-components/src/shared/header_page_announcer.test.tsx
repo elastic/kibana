@@ -143,10 +143,9 @@ describe('HeaderPageAnnouncer', () => {
   it('does not focus skip link when Tab is pressed and focus is within a flyout', () => {
     const { getByTestId, getByText } = render(
       <>
-        <HeaderPageAnnouncer
-          breadcrumbs$={createBreadcrumbs$([{ text: 'Test' }])}
-          customBranding$={createBranding$({})}
-        />
+        <TestChromeProviders>
+          <HeaderPageAnnouncer breadcrumbs={[{ text: 'Test' }]} />
+        </TestChromeProviders>
         <div className="euiFlyout" role="dialog" aria-label="Flyout">
           <button>Button in flyout</button>
         </div>
