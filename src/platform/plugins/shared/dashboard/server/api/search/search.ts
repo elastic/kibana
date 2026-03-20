@@ -39,7 +39,7 @@ export async function search(
       'timeTo',
       'timeRestore',
     ],
-    search: searchParams.search,
+    search: searchParams.query,
     perPage: searchParams.per_page,
     page: searchParams.page,
     defaultSearchOperator: 'AND',
