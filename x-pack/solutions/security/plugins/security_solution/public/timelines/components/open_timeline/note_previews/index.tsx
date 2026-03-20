@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { userSelectedNotesForDeletion } from '../../../../notes';
@@ -39,7 +39,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 export const NotePreviewsContainer = styled.section`
-  padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
+  padding-top: ${({ theme }) => `${theme.euiTheme.size.s}`};
 `;
 
 NotePreviewsContainer.displayName = 'NotePreviewsContainer';

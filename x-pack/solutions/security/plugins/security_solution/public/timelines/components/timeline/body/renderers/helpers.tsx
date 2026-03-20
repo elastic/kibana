@@ -7,7 +7,8 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
-import styled from 'styled-components';
+import React from 'react';
+import styled from '@emotion/styled';
 
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 
@@ -29,9 +30,7 @@ export const getValues = (field: string, data: TimelineNonEcsData[]): string[] |
 
 export const DETAILS_CLASS_NAME = 'details';
 
-export const Details = styled.div.attrs(() => ({
-  className: DETAILS_CLASS_NAME,
-}))`
+const DetailsRoot = styled.div`
   margin: 5px 0 5px 10px;
   & .euiBadge {
     margin: 2px 0 2px 0;
@@ -40,6 +39,10 @@ export const Details = styled.div.attrs(() => ({
     justify-content: center;
   }
 `;
+export const Details: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className = '',
+  ...props
+}) => <DetailsRoot className={`${DETAILS_CLASS_NAME} ${className}`.trim()} {...props} />;
 Details.displayName = 'Details';
 
 export const TokensFlexItem = styled(EuiFlexItem)`

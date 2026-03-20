@@ -13,7 +13,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useDispatch } from 'react-redux';
 
 import { appActions } from '../../../../common/store/app';
@@ -33,7 +33,7 @@ const AddNotesContainer = styled.div`
 AddNotesContainer.displayName = 'AddNotesContainer';
 
 const ButtonsContainer = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.euiSizeS};
+  margin-top: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 ButtonsContainer.displayName = 'ButtonsContainer';

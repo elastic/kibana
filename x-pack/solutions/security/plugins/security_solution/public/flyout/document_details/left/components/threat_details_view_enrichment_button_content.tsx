@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { THREAT_INTELLIGENCE_ENRICHMENTS_BUTTON_CONTENT_TEST_ID } from './test_ids';

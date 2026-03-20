@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { has } from 'lodash/fp';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineId } from '../../../../../../../../common/types';
@@ -45,7 +45,9 @@ export const WITH_FIELD_NAMES = [
 
 export const DEFAULT_GAP = 3; // px
 
-export const AlertFieldFlexGroup = styled(EuiFlexGroup)<{ $scopeId: string }>`
+export const AlertFieldFlexGroup = styled(EuiFlexGroup, {
+  shouldForwardProp: (prop) => prop !== '$scopeId',
+})<{ $scopeId: string }>`
   flex-grow: 0;
   gap: ${({ $scopeId }) => ($scopeId === TimelineId.active ? 0 : DEFAULT_GAP)}px;
 `;

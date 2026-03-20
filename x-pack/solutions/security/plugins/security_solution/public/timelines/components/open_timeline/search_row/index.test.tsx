@@ -8,25 +8,18 @@
 import type { EuiFilterButtonProps } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 import { SearchRow } from '.';
 
 import * as i18n from '../translations';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiSizeL: '10px',
-  },
-});
 
 describe('SearchRow', () => {
   test('it renders a search input with the expected placeholder when the query is empty', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <SearchRow
           onlyFavorites={false}
           onQueryChange={jest.fn()}
@@ -34,7 +27,7 @@ describe('SearchRow', () => {
           query=""
           timelineType={TimelineTypeEnum.default}
         />
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
 
     expect(wrapper.find('input').first().props()).toHaveProperty(
@@ -46,7 +39,7 @@ describe('SearchRow', () => {
   describe('Only Favorites Button', () => {
     test('it renders the expected button text', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <SearchRow
             onlyFavorites={false}
             onQueryChange={jest.fn()}
@@ -54,7 +47,7 @@ describe('SearchRow', () => {
             query=""
             timelineType={TimelineTypeEnum.default}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="only-favorites-toggle"]').first().text()).toEqual(
@@ -66,7 +59,7 @@ describe('SearchRow', () => {
       const onToggleOnlyFavorites = jest.fn();
 
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <SearchRow
             onlyFavorites={false}
             onQueryChange={jest.fn()}
@@ -74,7 +67,7 @@ describe('SearchRow', () => {
             query=""
             timelineType={TimelineTypeEnum.default}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       wrapper.find('button[data-test-subj="only-favorites-toggle"]').first().simulate('click');
@@ -84,7 +77,7 @@ describe('SearchRow', () => {
 
     test('it sets the button to the toggled state when onlyFavorites is true', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <SearchRow
             onlyFavorites={true}
             onQueryChange={jest.fn()}
@@ -92,7 +85,7 @@ describe('SearchRow', () => {
             query=""
             timelineType={TimelineTypeEnum.default}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       const props = wrapper
@@ -105,7 +98,7 @@ describe('SearchRow', () => {
 
     test('it sets the button to the NON-toggled state when onlyFavorites is false', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <SearchRow
             onlyFavorites={false}
             onQueryChange={jest.fn()}
@@ -113,7 +106,7 @@ describe('SearchRow', () => {
             query=""
             timelineType={TimelineTypeEnum.default}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       const props = wrapper
@@ -130,7 +123,7 @@ describe('SearchRow', () => {
 
     test('it invokes onQueryChange when the user enters a query', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <SearchRow
             onlyFavorites={false}
             onQueryChange={onQueryChange}
@@ -138,7 +131,7 @@ describe('SearchRow', () => {
             query=""
             timelineType={TimelineTypeEnum.default}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       wrapper

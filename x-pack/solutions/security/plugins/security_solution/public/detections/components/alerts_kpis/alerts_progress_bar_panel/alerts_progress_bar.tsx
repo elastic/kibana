@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ProgressBarRow } from './alerts_progress_bar_row';
@@ -38,15 +38,15 @@ const ProgressWrapper = styled.div`
 
 const StyledEuiHorizontalRule = styled(EuiHorizontalRule)`
   margin-top: 0;
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+  margin-bottom: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: -${({ theme }) => theme.eui.euiSizeM};
+  margin-top: -${({ theme }) => theme.euiTheme.size.m};
 `;
 
 const StyledEuiProgress = styled(EuiProgress)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+  margin-bottom: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 const DataStatsWrapper = styled.div`
@@ -54,7 +54,7 @@ const DataStatsWrapper = styled.div`
 `;
 
 const EmptyAction = styled.div`
-  padding-left: ${({ theme }) => theme.eui.euiSizeL};
+  padding-left: ${({ theme }) => theme.euiTheme.size.l};
 `;
 
 export interface AlertsProcessBarProps {

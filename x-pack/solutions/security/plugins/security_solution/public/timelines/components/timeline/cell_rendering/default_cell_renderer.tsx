@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { useGetMappedNonEcsValue } from '../../../../common/utils/get_mapped_non_ecs_value';
 import { columnRenderers } from '../body/renderers';
@@ -14,7 +14,9 @@ import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 import type { CellValueElementProps } from '.';
 import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
 
-const StyledContent = styled.div<{ $isDetails: boolean }>`
+const StyledContent = styled('div', {
+  shouldForwardProp: (prop) => prop !== '$isDetails',
+})<{ $isDetails: boolean }>`
   padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};
   width: 100%;
   margin: 0 auto;

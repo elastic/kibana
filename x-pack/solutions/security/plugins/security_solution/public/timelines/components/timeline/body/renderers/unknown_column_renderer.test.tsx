@@ -8,21 +8,14 @@
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 import { getValues } from './helpers';
-import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
 import { TimelineId } from '../../../../../../common/types/timeline';
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiColorMediumShade: '#ece',
-  },
-});
 
 describe('unknown_column_renderer', () => {
   let mockDatum: TimelineNonEcsData[];
@@ -56,9 +49,9 @@ describe('unknown_column_renderer', () => {
       scopeId: TimelineId.test,
     });
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <span>{emptyColumn}</span>
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
@@ -72,9 +65,9 @@ describe('unknown_column_renderer', () => {
       scopeId: TimelineId.test,
     });
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <EuiThemeProvider>
         <span>{emptyColumn}</span>
-      </ThemeProvider>
+      </EuiThemeProvider>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });

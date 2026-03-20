@@ -9,7 +9,7 @@ import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
 import { isString } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import {
@@ -27,11 +27,13 @@ import { EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
 import * as i18n from './translations';
 
 type ProviderBadgeStyledType = typeof EuiBadge & {
-  // https://styled-components.com/docs/api#transient-props
+  // Use transient props to avoid forwarding to the DOM.
   $timelineType: TimelineType;
 };
 
-const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
+const ProviderBadgeStyled = styled(EuiBadge, {
+  shouldForwardProp: (prop) => prop !== '$timelineType',
+})<ProviderBadgeStyledType>`
   .euiToolTipAnchor {
     &::after {
       font-style: normal;
@@ -63,13 +65,13 @@ ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
 
 const ProviderFieldBadge = styled.div`
   display: block;
-  padding: ${({ theme }) => `${theme.eui.euiSizeXS} ${theme.eui.euiSizeS}`};
+  padding: ${({ theme }) => `${theme.euiTheme.size.xs} ${theme.euiTheme.size.s}`};
   font-size: 0.6em;
 `;
 
 const StyledTemplateFieldBadge = styled(ProviderFieldBadge)`
-  background: ${({ theme }) => theme.eui.euiPanelBackgroundColorModifiers.accent};
-  color: ${({ theme }) => theme.eui.euiColorAccentText};
+  background: ${({ theme }) => theme.euiTheme.colors.backgroundBaseAccent};
+  color: ${({ theme }) => theme.euiTheme.colors.accentText};
   text-transform: uppercase;
 `;
 
@@ -79,7 +81,7 @@ interface TemplateFieldBadgeProps {
 }
 
 const ConvertFieldBadge = styled(ProviderFieldBadge)`
-  background: ${({ theme }) => theme.eui.euiColorDarkShade};
+  background: ${({ theme }) => theme.euiTheme.colors.darkShade};
   cursor: pointer;
 
   &:hover {

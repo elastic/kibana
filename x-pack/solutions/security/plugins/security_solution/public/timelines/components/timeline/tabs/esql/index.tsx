@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
-import { createGlobalStyle } from 'styled-components';
+import { css, Global } from '@emotion/react';
 import type { ScopedHistory } from '@kbn/core/public';
 import { from, type Subscription } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
@@ -35,11 +35,15 @@ import { savedSearchComparator } from './utils';
 import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
-const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
-  [data-test-subj='searchSessionIndicator'] {
-    display: none;
-  }
-`;
+const HideSearchSessionIndicatorBreadcrumbIcon = () => (
+  <Global
+    styles={css`
+      [data-test-subj='searchSessionIndicator'] {
+        display: none;
+      }
+    `}
+  />
+);
 
 interface DiscoverTabContentProps {
   timelineId: string;

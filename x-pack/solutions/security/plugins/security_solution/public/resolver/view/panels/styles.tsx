@@ -8,7 +8,7 @@
 import { memo } from 'react';
 import { EuiCode, EuiBreadcrumbs, EuiDescriptionList } from '@elastic/eui';
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 /**
  * Used by the nodeDetail view, eventDetail view and control panel to show attributes of the related events.
@@ -33,7 +33,9 @@ export const StyledTitle = styled('h4')`
 /**
  * Styled version of EuiBreadcrumbs that is used by the breadcrumbs in each panel.
  */
-export const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`
+export const ThemedBreadcrumbs = styled(EuiBreadcrumbs, {
+  shouldForwardProp: (prop) => prop !== 'background' && prop !== 'text',
+})<{ background: string; text: string }>`
   &.euiBreadcrumbs {
     background-color: ${(props) => props.background};
     color: ${(props) => props.text};
@@ -58,7 +60,9 @@ export const StyledButtonTextContainer = styled.div`
 /**
  * Used in the node list panel to call out the event that is represented by the databaseDocumentID.
  */
-export const StyledAnalyzedEvent = styled.div`
+export const StyledAnalyzedEvent = styled('div', {
+  shouldForwardProp: (prop) => prop !== 'color',
+})`
   color: ${(props) => props.color};
   font-size: 10.5px;
   font-weight: 700;

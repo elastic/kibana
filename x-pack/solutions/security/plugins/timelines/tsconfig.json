@@ -27,7 +27,6 @@
     "@kbn/data-views-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/safer-lodash-set",

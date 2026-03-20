@@ -21,7 +21,7 @@ import {
 import { get } from 'lodash';
 import type { FC, ReactElement } from 'react';
 import React, { Fragment, useCallback, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
@@ -37,7 +37,7 @@ import {
 } from '../translations';
 
 const SpacedContainer = styled.div`
-  margin: ${({ theme }) => theme.eui.euiSizeS} 0;
+  margin: ${({ theme }) => theme.euiTheme.size.s} 0;
 `;
 
 export const renderThreatMatchRows: RowRenderer['renderRow'] = ({ data, scopeId }) => {

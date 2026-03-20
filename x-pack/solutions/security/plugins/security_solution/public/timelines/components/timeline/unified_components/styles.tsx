@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import styled, { createGlobalStyle } from 'styled-components';
+import React from 'react';
+import styled from '@emotion/styled';
+import { css, Global } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 
-export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = '' }) => ({
-  className: `${className}`,
-}))`
+export const StyledTableFlexGroup = styled(EuiFlexGroup)`
   margin: 0;
   width: 100%;
   overflow: hidden;
@@ -21,10 +21,8 @@ export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = ''
   }
 `;
 
-export const StyledUnifiedTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
-  className: `${className}`,
-}))`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
+export const StyledUnifiedTableFlexItem = styled(EuiFlexItem)`
+  ${({ theme }) => `margin: 0 ${theme.euiTheme.size.m};`}
   overflow: hidden;
 `;
 
@@ -32,22 +30,25 @@ export const StyledEuiProgress = styled(EuiProgress)`
   z-index: 2;
 `;
 
-export const StyledPageContentWrapper = styled.div.attrs(({ className = '' }) => ({
-  className: `${className}`,
-}))`
+export const StyledPageContentWrapper = styled.div`
   height: 100%;
   overflow: hidden;
   position: relative;
 `;
 
-export const StyledMainEuiPanel = styled(EuiPanel).attrs(({ className = '' }) => ({
-  className: `udtPageContent__wrapper ${className}`,
-}))`
+const StyledMainEuiPanelRoot = styled(EuiPanel)`
   overflow: hidden; // Ensures horizontal scroll of table
   display: flex;
   flex-direction: column;
   height: 100%;
 `;
+
+export const StyledMainEuiPanel: React.FC<React.ComponentProps<typeof EuiPanel>> = ({
+  className = '',
+  ...props
+}) => (
+  <StyledMainEuiPanelRoot className={`udtPageContent__wrapper ${className}`.trim()} {...props} />
+);
 
 export const leadingActionsColumnStyles = `
   .udtTimeline .euiDataGridRowCell--controlColumn:nth-child(3) .euiDataGridRowCell__content {
@@ -55,15 +56,12 @@ export const leadingActionsColumnStyles = `
   }
 `;
 
-export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = '' }) => ({
-  className: `unifiedDataTable ${className}`,
-  role: 'rowgroup',
-}))`
+const StyledTimelineUnifiedDataTableRoot = styled.div`
   height: 100%;
 
   .udtTimeline .euiDataGrid__virtualized {
     ${({ theme }) =>
-      `scrollbar-color: ${theme.eui.euiColorMediumShade} ${theme.eui.euiColorLightShade}`};
+      `scrollbar-color: ${theme.euiTheme.colors.mediumShade} ${theme.euiTheme.colors.lightShade}`};
   }
 
   .udtTimeline [data-gridcell-column-id|='select'] {
@@ -121,11 +119,11 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     .udtTimeline
     .euiDataGridRow:hover
     .euiDataGridRowCell--lastColumn.euiDataGridRowCell--controlColumn {
-    ${({ theme }) => `background-color: ${theme.eui.colorLightShade};`};
+    ${({ theme }) => `background-color: ${theme.euiTheme.colors.lightShade};`};
   }
 
   .udtTimeline .euiDataGridRowCell--lastColumn.euiDataGridRowCell--controlColumn {
-    ${({ theme }) => `background-color: ${theme.eui.emptyShade};`};
+    ${({ theme }) => `background-color: ${theme.euiTheme.colors.emptyShade};`};
   }
 
   .udtTimeline .siemEventsTable__trSupplement--summary {
@@ -147,7 +145,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGridRow.eqlSequence {
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
-      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary}`};
+      ${({ theme }) => `border-left: 4px solid ${theme.euiTheme.colors.primary}`};
     }
 
     background: repeating-linear-gradient(
@@ -163,7 +161,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGridRow.eqlNonSequence {
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
-      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorAccent};`}
+      ${({ theme }) => `border-left: 4px solid ${theme.euiTheme.colors.accent};`}
     }
 
     background: repeating-linear-gradient(
@@ -179,7 +177,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGridRow.nonRawEvent {
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
-      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
+      ${({ theme }) => `border-left: 4px solid ${theme.euiTheme.colors.warning};`}
     }
   }
 
@@ -187,7 +185,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGridRow.rawEvent {
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
-      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorLightShade};`}
+      ${({ theme }) => `border-left: 4px solid ${theme.euiTheme.colors.lightShade};`}
     }
   }
 
@@ -201,7 +199,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     right: 5px;
 
     button {
-      ${({ theme }) => `color: ${theme.eui.euiColorDarkShade};`}
+      ${({ theme }) => `color: ${theme.euiTheme.colors.darkShade};`}
     }
   }
 
@@ -221,9 +219,24 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   ${leadingActionsColumnStyles}
 `;
 
+export const StyledTimelineUnifiedDataTable: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className = '',
+  ...props
+}) => (
+  <StyledTimelineUnifiedDataTableRoot
+    className={`unifiedDataTable ${className}`.trim()}
+    role="rowgroup"
+    {...props}
+  />
+);
+
 // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
-export const UnifiedTimelineGlobalStyles = createGlobalStyle`
-  body:has(.timeline-portal-overlay-mask) .unifiedDataTable__cellPopover {
-    z-index: 1004 !important;
-  }
-`;
+export const UnifiedTimelineGlobalStyles = () => (
+  <Global
+    styles={css`
+      body:has(.timeline-portal-overlay-mask) .unifiedDataTable__cellPopover {
+        z-index: 1004 !important;
+      }
+    `}
+  />
+);

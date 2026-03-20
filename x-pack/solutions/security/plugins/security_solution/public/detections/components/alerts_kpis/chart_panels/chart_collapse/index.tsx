@@ -11,7 +11,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { v4 as uuid } from 'uuid';
 import { capitalize } from 'lodash';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { GroupBySelection } from '../../alerts_progress_bar_panel/types';
 import { getGroupByLabel } from '../../alerts_progress_bar_panel/helpers';
 import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
@@ -48,8 +48,8 @@ const combinedAggregations = (groupBySelection: GroupBySelection) => {
 };
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.euiSizeXS};
-  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l}) {
+  margin-top: ${({ theme }) => theme.euiTheme.size.xs};
+  @media only screen and (min-width: ${({ theme }) => theme.euiTheme.breakpoint.l}px) {
   }
 `;
 
@@ -58,8 +58,8 @@ const SeverityWrapper = styled(EuiFlexItem)`
 `;
 
 const StyledEuiText = styled(EuiText)`
-  border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  padding-left: ${({ theme }) => theme.eui.euiSizeL};
+  border-left: 1px solid ${({ theme }) => theme.euiTheme.colors.lightShade};
+  padding-left: ${({ theme }) => theme.euiTheme.size.l};
   // allows text to truncate
   max-width: 250px;
 `;

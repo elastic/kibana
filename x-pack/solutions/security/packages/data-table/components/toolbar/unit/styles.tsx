@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 export const UnitCount = styled.span`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};

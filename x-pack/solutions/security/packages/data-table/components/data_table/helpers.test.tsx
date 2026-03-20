@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EuiThemeComputed } from '@elastic/eui';
 import type { ColumnHeaderOptions } from '../../common/types';
 import {
   addBuildingBlockStyle,
@@ -177,7 +177,9 @@ describe('helpers', () => {
   });
 
   describe('addBuildingBlockStyle', () => {
-    const THEME = { eui: { euiColorHighlight: 'euiColorHighlight' }, darkMode: false } as EuiTheme;
+    const THEME = {
+      colors: { highlight: 'euiColorHighlight' },
+    } as EuiThemeComputed;
 
     test('it calls `setCellProps` with background color when event is a building block', () => {
       const mockedSetCellProps = jest.fn();

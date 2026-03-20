@@ -10,7 +10,6 @@ import type {
   EuiDataGridPaginationProps,
 } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { CaseViewEventsTableProps } from '@kbn/cases-plugin/common/ui';
-import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
 import {
   addBuildingBlockStyle,
@@ -23,11 +22,10 @@ import {
 } from '@kbn/securitysolution-data-table';
 import { type DataView } from '@kbn/data-views-plugin/public';
 import type { DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
-import React, { type FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { ThemeContext } from 'styled-components';
-import { EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { SECURITY_CELL_ACTIONS_CASE_EVENTS } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { RowAction } from '../../../common/components/control_columns/row_action';
 import { buildBrowserFields } from '../../../data_view_manager/utils/build_browser_fields';
@@ -80,7 +78,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
     );
   }, [columns, defaultColumns, dispatch, dataView, sort]);
 
-  const theme: EuiTheme = useContext(ThemeContext);
+  const { euiTheme } = useEuiTheme();
 
   const pagination: EuiDataGridPaginationProps & { pageSize: number } = useMemo(
     () => ({
@@ -134,7 +132,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
           const rowData = data[pageRowIndex];
 
           if (rowData) {
-            addBuildingBlockStyle(rowData.ecs, theme, setCellProps);
+            addBuildingBlockStyle(rowData.ecs, euiTheme, setCellProps);
           } else {
             // disable the cell when it has no data
             setCellProps({ style: { display: 'none' } });
@@ -170,7 +168,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
           );
         },
       })),
-    [controlColumns, data, itemsPerPage, loadingEventIds, theme]
+    [controlColumns, data, itemsPerPage, loadingEventIds, euiTheme]
   );
 
   const getFieldSpec = useCallback(

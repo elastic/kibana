@@ -6,7 +6,7 @@
  */
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { RELOAD_PAGE_TITLE } from './translations';
 

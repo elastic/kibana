@@ -19,7 +19,7 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
 import { StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';

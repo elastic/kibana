@@ -7,7 +7,7 @@
 
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { EuiPanel, EuiComboBox } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { LegacyRef } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { PANEL_HEIGHT, MOBILE_PANEL_HEIGHT } from './config';
@@ -37,7 +37,7 @@ export const KpiPanel = styled(EuiPanel)<{
   position: relative;
   overflow-x: hidden;
   overflow-y: ${({ $overflowY }) => $overflowY ?? 'hidden'};
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+  @media only screen and (min-width: ${(props) => props.theme.euiTheme.breakpoint.m}px) {
     ${({ height, $toggleStatus }) =>
       $toggleStatus &&
       `

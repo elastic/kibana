@@ -16,8 +16,7 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
@@ -50,13 +49,13 @@ const autoOverflowXCSS = { 'overflow-x': 'auto' };
 const VerticalDivider = styled.span`
   width: 0;
   height: 20px;
-  border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  border-left: 1px solid ${({ theme }) => theme.euiTheme.colors.lightShade};
 `;
-const TimelinePanel = euiStyled(EuiPanel)`
-  backgroundColor: ${(props) => props.theme.eui.euiColorEmptyShade};
-  color: ${(props) => props.theme.eui.euiTextColor};
-  padding-inline: ${(props) => props.theme.eui.euiSizeM};
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+const TimelinePanel = styled(EuiPanel)`
+  background-color: ${(props) => props.theme.euiTheme.colors.emptyShade};
+  color: ${(props) => props.theme.euiTheme.colors.text};
+  padding-inline: ${(props) => props.theme.euiTheme.size.m};
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.medium};
 `;
 
 interface FlyoutHeaderPanelProps {

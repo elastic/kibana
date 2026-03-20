@@ -8,7 +8,7 @@
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 const NOTES = i18n.translate('xpack.securitySolution.timeline.notes.notesButtonLabel', {
@@ -21,7 +21,7 @@ export const NotificationDot = styled.span`
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: ${({ theme }) => theme.eui.euiColorDanger};
+  background-color: ${({ theme }) => theme.euiTheme.colors.danger};
   top: 17%;
   left: 52%;
 `;

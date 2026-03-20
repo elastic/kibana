@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import type { ComponentType, ReactElement, Ref } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { State } from '../../../../common/store';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
@@ -164,7 +164,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
 ActiveTimelineTab.displayName = 'ActiveTimelineTab';
 
 const CountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+  margin-left: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 const StyledEuiTab = styled(EuiTab)`
@@ -185,7 +185,7 @@ const StyledEuiTab = styled(EuiTab)`
 `;
 
 const StyledEuiTabs = styled(EuiTabs)`
-  padding-inline: ${(props) => props.theme.eui.euiSizeM};
+  padding-inline: ${(props) => props.theme.euiTheme.size.m};
 `;
 
 const TabsContentComponent: React.FC<BasicTimelineTab> = ({

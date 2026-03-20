@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
@@ -14,7 +13,7 @@ import { DragDropContext } from '@hello-pangea/dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
 import { createStore as createReduxStore } from 'redux';
-import { ThemeProvider } from 'styled-components';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
@@ -48,13 +47,13 @@ export const TestProvidersComponent: React.FC<Props> = ({
   return (
     <I18nProvider>
       <ReduxStoreProvider store={store}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+        <EuiThemeProvider>
           <QueryClientProvider client={queryClient}>
             <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve(cellActions)}>
               <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
             </CellActionsProvider>
           </QueryClientProvider>
-        </ThemeProvider>
+        </EuiThemeProvider>
       </ReduxStoreProvider>
     </I18nProvider>
   );

@@ -9,7 +9,7 @@ import { pick } from 'lodash/fp';
 import { EuiPanel, EuiProgress, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { useSpaceId } from '../../../common/hooks/use_space_id';

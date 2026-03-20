@@ -11,7 +11,7 @@ import { rgba } from 'polished';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { DraggableChildrenFn, DraggingStyle, NotDraggingStyle } from '@hello-pangea/dnd';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -73,18 +73,20 @@ const DroppableContainer = styled.div`
 
   .${IS_DRAGGING_CLASS_NAME} &:hover {
     display: flex;
-    background-color: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
+    background-color: ${({ theme }) => rgba(theme.euiTheme.colors.success, 0.2)} !important;
   }
 `;
 
 const Parens = styled.span`
-  color: ${({ theme }) => theme.eui.euiColorMediumShade};
+  color: ${({ theme }) => theme.euiTheme.colors.mediumShade};
   font-size: 32px;
   padding: 2px;
   user-select: none;
 `;
 
-const AndOrBadgeContainer = styled.div<{ hideBadge: boolean }>`
+const AndOrBadgeContainer = styled('div', {
+  shouldForwardProp: (prop) => prop !== 'hideBadge',
+})<{ hideBadge: boolean }>`
   span {
     visibility: ${({ hideBadge }) => (hideBadge ? 'hidden' : 'inherit')};
   }

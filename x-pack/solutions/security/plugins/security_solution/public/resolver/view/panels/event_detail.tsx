@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBreadcrumb, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import { EuiSpacer, EuiText, EuiInMemoryTable } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useSelector } from 'react-redux';
 import { BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';

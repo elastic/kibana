@@ -7,14 +7,14 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { DraggableBadge } from '../../../../../common/components/draggables';
 
 import { isNillEmptyOrNotFinite, TokensFlexItem } from './helpers';
 
 const HashFlexGroup = styled(EuiFlexGroup)`
-  margin: ${({ theme }) => theme.eui.euiSizeXS};
+  margin: ${({ theme }) => theme.euiTheme.size.xs};
 `;
 
 interface Props {

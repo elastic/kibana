@@ -8,13 +8,13 @@
 import { EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { useGetAlertsByRuleColumns } from './columns';
 import type { AlertsByRuleData } from './types';
 
 const Wrapper = styled.div`
-  margin-top: -${({ theme }) => theme.eui.euiSizeM};
+  margin-top: -${({ theme }) => theme.euiTheme.size.m};
 `;
 const TableWrapper = styled.div`
   height: 210px;

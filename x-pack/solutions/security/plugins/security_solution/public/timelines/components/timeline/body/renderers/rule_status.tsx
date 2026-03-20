@@ -10,7 +10,7 @@ import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { STATUS_BUTTON_TEST_ID } from '../../../../../flyout/document_details/right/components/test_ids';
 
 const mapping = {

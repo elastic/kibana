@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import {
   EuiFlexGroup,
   EuiFlexItem,

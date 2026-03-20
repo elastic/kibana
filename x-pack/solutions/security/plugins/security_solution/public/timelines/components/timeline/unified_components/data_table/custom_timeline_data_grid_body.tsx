@@ -7,11 +7,10 @@
 
 import type { EuiDataGridCustomBodyProps, EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { type EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { CSSProperties, FC, PropsWithChildren } from 'react';
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { VariableSizeList } from 'react-window';
 import { EuiAutoSizer, useEuiTheme } from '@elastic/eui';
@@ -31,15 +30,17 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   refetch?: () => void;
 };
 
-const VirtualizedCustomDataGridContainer = styled.div<{
+const VirtualizedCustomDataGridContainer = styled('div', {
+  shouldForwardProp: (prop) => prop !== '$maxWidth',
+})<{
   $maxWidth?: number;
 }>`
   width: 100%;
   height: 100%;
-  border-bottom: ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
+  border-bottom: ${(props) => props.theme.euiTheme.border.thin};
   .udt--customRow {
     border-radius: 0;
-    padding: ${(props) => (props.theme as EuiTheme).eui.euiDataGridCellPaddingM};
+    padding: ${(props) => props.theme.euiTheme.size.m};
     max-width: ${(props) => props.$maxWidth}px;
   }
 
@@ -61,7 +62,7 @@ const VirtualizedCustomDataGridContainer = styled.div<{
       .euiDataGridRowCell--lastColumn,
       .euiDataGridRowCell--controlColumn,
       .udt--customRow {
-        ${({ theme }) => `background-color: ${theme.eui.euiColorHighlight};`}
+        ${({ theme }) => `background-color: ${theme.euiTheme.colors.highlight};`}
       }
     }
   }
@@ -266,26 +267,34 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
  *
  */
 
-const CustomGridRow = styled.div.attrs<{
-  className?: string;
-}>((props) => ({
-  className: `euiDataGridRow ${props.className ?? ''}`,
-  role: 'row',
-}))``;
+const CustomGridRowRoot = styled.div``;
+
+const CustomGridRow: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className = '',
+  ...props
+}) => <CustomGridRowRoot className={`euiDataGridRow ${className}`.trim()} role="row" {...props} />;
 
 /* below styles as per : https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer */
-const CustomGridRowCellWrapper = styled.div.attrs<{
-  className?: string;
-}>((props) => ({
-  className: `rowCellWrapper ${props.className ?? ''}`,
-  role: 'row',
-}))`
-  height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
+const CustomGridRowCellWrapperRoot = styled('div', {
+  shouldForwardProp: (prop) => prop !== '$cssRowHeight',
+})<{ $cssRowHeight: string }>`
+  height: ${(props) => props.$cssRowHeight};
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
     min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
   }
 `;
+
+const CustomGridRowCellWrapper: React.FC<
+  React.HTMLAttributes<HTMLDivElement> & { $cssRowHeight: string }
+> = ({ className = '', $cssRowHeight, ...props }) => (
+  <CustomGridRowCellWrapperRoot
+    className={`rowCellWrapper ${className}`.trim()}
+    role="row"
+    $cssRowHeight={$cssRowHeight}
+    {...props}
+  />
+);
 
 type CustomTimelineDataGridSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;

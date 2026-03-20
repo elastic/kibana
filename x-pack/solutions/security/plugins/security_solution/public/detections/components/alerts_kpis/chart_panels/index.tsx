@@ -8,7 +8,7 @@
 import type { Filter, Query } from '@kbn/es-query';
 import { EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useAlertsLocalStorage } from './alerts_local_storage';
 import type { AlertsSettings } from './alerts_local_storage/types';
 import { ChartContextMenu } from './chart_context_menu';
@@ -38,7 +38,7 @@ const FullHeightFlexItem = styled(EuiFlexItem)`
 `;
 
 const ChartSelectContainer = styled.div`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+  margin-left: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 export interface Props {

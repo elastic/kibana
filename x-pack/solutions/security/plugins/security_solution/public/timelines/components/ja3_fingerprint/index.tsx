@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { DraggableBadge } from '../../../common/components/draggables';
 import { Ja3FingerprintLink } from '../../../common/components/links';

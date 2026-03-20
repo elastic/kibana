@@ -16,15 +16,14 @@ import type {
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
-import { EuiDataGrid, EuiProgress } from '@elastic/eui';
+import { EuiDataGrid, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import type { ComponentType } from 'react';
-import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
-import styled, { ThemeContext } from 'styled-components';
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type {
   BrowserFields,
@@ -181,7 +180,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
 
     const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
 
-    const theme: EuiTheme = useContext(ThemeContext);
+    const { euiTheme } = useEuiTheme();
 
     const showBulkActions = useMemo(() => {
       if (selectedCount === 0 || !showCheckboxes) {
@@ -402,7 +401,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
 
         useEffect(() => {
           if (ecs && rowData) {
-            addBuildingBlockStyle(ecs, theme, setCellProps);
+            addBuildingBlockStyle(ecs, euiTheme, setCellProps);
           } else {
             // disable the cell when it has no data
             setCellProps({ style: { display: 'none' } });
@@ -443,7 +442,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
       pagination.pageSize,
       renderCellValue,
       rowRenderers,
-      theme,
+      euiTheme,
     ]);
 
     return (

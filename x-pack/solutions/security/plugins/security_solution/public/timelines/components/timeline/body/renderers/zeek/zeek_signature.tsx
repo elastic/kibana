@@ -8,7 +8,7 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
 import { GoogleLink, ReputationLink } from '../../../../../../common/components/links';

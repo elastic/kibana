@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 import type { EuiBasicTableColumn, EuiTableDataType } from '@elastic/eui';
 import { omit } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { isUntitled } from '../helpers';
 import { NotePreviews } from '../note_previews';

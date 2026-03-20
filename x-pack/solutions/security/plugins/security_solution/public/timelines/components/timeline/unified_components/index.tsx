@@ -16,7 +16,7 @@ import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DropType } from '@kbn/dom-drag-drop';
 import { DropOverlayWrapper, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import type {
   UnifiedFieldListSidebarContainerApi,

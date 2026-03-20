@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useContext } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
@@ -36,7 +36,9 @@ interface StyledActionsContainer {
   readonly topPct: number;
 }
 
-const StyledActionsContainer = styled.div<StyledActionsContainer>`
+const StyledActionsContainer = styled('div', {
+  shouldForwardProp: (prop) => prop !== 'color' && prop !== 'fontSize' && prop !== 'topPct',
+})<StyledActionsContainer>`
   background-color: transparent;
   color: ${(props) => props.color};
   display: flex;
@@ -57,7 +59,10 @@ interface StyledDescriptionText {
   readonly isDisplaying: boolean;
 }
 
-const StyledDescriptionText = styled.div<StyledDescriptionText>`
+const StyledDescriptionText = styled('div', {
+  shouldForwardProp: (prop) =>
+    prop !== 'backgroundColor' && prop !== 'color' && prop !== 'isDisplaying',
+})<StyledDescriptionText>`
   background-color: ${(props) => props.backgroundColor};
   color: ${(props) => props.color};
   display: ${(props) => (props.isDisplaying ? 'block' : 'none')};
@@ -77,11 +82,15 @@ interface StyledEuiButtonContent {
   readonly isShowingIcon: boolean;
 }
 
-const StyledEuiButtonContent = styled.span<StyledEuiButtonContent>`
+const StyledEuiButtonContent = styled('span', {
+  shouldForwardProp: (prop) => prop !== 'isShowingIcon',
+})<StyledEuiButtonContent>`
   padding: ${(props) => (props.isShowingIcon ? '0px' : '0 12px')};
 `;
 
-const StyledOuterGroup = styled.g<{ isNodeLoading: boolean }>`
+const StyledOuterGroup = styled('g', {
+  shouldForwardProp: (prop) => prop !== 'isNodeLoading',
+})<{ isNodeLoading: boolean }>`
   fill: none;
   pointer-events: visiblePainted;
   // The below will apply the loading css to the <use> element that references the cube

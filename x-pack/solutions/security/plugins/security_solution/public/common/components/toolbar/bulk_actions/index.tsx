@@ -8,7 +8,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 
 interface OwnProps {

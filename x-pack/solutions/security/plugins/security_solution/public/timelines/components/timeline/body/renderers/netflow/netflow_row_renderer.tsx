@@ -7,7 +7,7 @@
 
 import { get } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { RowRenderer } from '../../../../../../../common/types/timeline';
 import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';

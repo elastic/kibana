@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -19,7 +19,7 @@ import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
 import type { AddFilterProps } from '../common/types';
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
-  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l}) {
+  @media only screen and (min-width: ${({ theme }) => theme.euiTheme.breakpoint.l}px) {
   }
 `;
 
