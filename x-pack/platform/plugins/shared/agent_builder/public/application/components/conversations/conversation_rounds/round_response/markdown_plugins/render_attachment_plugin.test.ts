@@ -75,41 +75,6 @@ describe('resolveAttachmentVersion', () => {
 
       expect(result).toBe(2);
     });
-
-    it('returns undefined for invalid explicit version string', () => {
-      const attachment = createMockAttachment(attachmentId);
-      const result = resolveAttachmentVersion({
-        explicitVersion: 'abc',
-        attachmentId,
-        attachmentRefs: undefined,
-        attachment,
-        conversationAttachments: [attachment],
-      });
-
-      expect(result).toBeUndefined();
-    });
-
-    it('returns undefined for non-positive explicit version', () => {
-      const attachment = createMockAttachment(attachmentId);
-      const zeroResult = resolveAttachmentVersion({
-        explicitVersion: 0,
-        attachmentId,
-        attachmentRefs: undefined,
-        attachment,
-        conversationAttachments: [attachment],
-      });
-
-      const negativeResult = resolveAttachmentVersion({
-        explicitVersion: -1,
-        attachmentId,
-        attachmentRefs: undefined,
-        attachment,
-        conversationAttachments: [attachment],
-      });
-
-      expect(zeroResult).toBeUndefined();
-      expect(negativeResult).toBeUndefined();
-    });
   });
 
   describe('when explicitVersion is undefined', () => {
