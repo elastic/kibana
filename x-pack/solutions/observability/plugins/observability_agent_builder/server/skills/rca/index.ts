@@ -41,6 +41,7 @@ export const createRcaSkill = () =>
       'Do NOT use for generic log queries or analytics (e.g. "show me logs", "how many requests today", "list events").',
     content: buildRcaSkillContent(),
     getRegistryTools: () => RCA_TOOL_IDS,
+    experimental: true,
   });
 
 function buildRcaSkillContent(): string {
