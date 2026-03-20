@@ -252,6 +252,23 @@ describe('MonitorIntegrationHealthApi', () => {
       expect(result.monitors[0].isUnhealthy).toBe(true);
     });
 
+    it('does not mark public-only monitors as unhealthy when package is not installed', async () => {
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'us-east-1', label: 'US East', isServiceManaged: true }],
+      });
+
+      const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetGetInstallation,
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.monitors[0].isUnhealthy).toBe(false);
+      expect(result.monitors[0].locations).toHaveLength(0);
+    });
+
     it('skips package/agent policy fetches when package is not installed', async () => {
       const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
       const so = createMonitorSO('mon-1', {
