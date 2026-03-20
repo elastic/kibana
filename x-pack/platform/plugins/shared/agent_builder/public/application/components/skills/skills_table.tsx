@@ -172,10 +172,10 @@ const useSkillsTableColumns = ({
         truncateText: true,
         width: '40%',
         render: (description: string, skill: PublicSkillSummary) => (
-          <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             {skill.experimental && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="warning">{labels.skills.experimentalLabel}</EuiBadge>
+                <EuiBadge color="hollow">{labels.skills.experimentalLabel}</EuiBadge>
               </EuiFlexItem>
             )}
             <EuiFlexItem>
