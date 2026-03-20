@@ -128,6 +128,7 @@ const stateTransitionSchema = z
       .number()
       .int()
       .min(0)
+      .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
       .describe('Consecutive recoveries before inactive.'),
     recovering_timeframe: durationSchema

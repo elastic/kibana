@@ -38,8 +38,8 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
       },
       timeField: '@timestamp', // Default to @timestamp; TimeFieldSelect may update if not available
       schedule: {
-        every: '5m',
-        lookback: '1m',
+        every: '1m',
+        lookback: '5m',
       },
       evaluation: {
         query: {

@@ -14,6 +14,9 @@ export const ruleKeys = {
   create: () => [...ruleKeys.all, 'create'] as const,
   update: () => [...ruleKeys.all, 'update'] as const,
   delete: () => [...ruleKeys.all, 'delete'] as const,
+  bulkDelete: () => [...ruleKeys.all, 'bulkDelete'] as const,
+  bulkEnable: () => [...ruleKeys.all, 'bulkEnable'] as const,
+  bulkDisable: () => [...ruleKeys.all, 'bulkDisable'] as const,
 };
 
 export const workflowKeys = {

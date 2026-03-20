@@ -11,6 +11,7 @@ import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
 import type {
   BulkCreateAlertActionItemBody,
+  BulkGetAlertActionsResponse,
   CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
@@ -22,6 +23,7 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import { getBulkGetAlertActionsQuery } from './queries';
 
 @injectable()
 export class AlertActionsClient {
@@ -53,6 +55,29 @@ export class AlertActionsClient {
         }),
       ],
     });
+  }
+
+  public async bulkGet(episodeIds: string[]): Promise<BulkGetAlertActionsResponse> {
+    const query = getBulkGetAlertActionsQuery(episodeIds);
+    const records = queryResponseToRecords<BulkGetAlertActionsResponse[number]>(
+      await this.queryService.executeQuery({ query: query.query })
+    );
+
+    const returnedEpisodeIds = new Set(records.map((r) => r.episode_id));
+    for (const episodeId of episodeIds) {
+      if (!returnedEpisodeIds.has(episodeId)) {
+        records.push({
+          episode_id: episodeId,
+          rule_id: null,
+          group_hash: null,
+          last_ack_action: null,
+          last_deactivate_action: null,
+          last_snooze_action: null,
+        });
+      }
+    }
+
+    return records;
   }
 
   public async createBulkActions(
