@@ -22,7 +22,8 @@ describe('TaskManagerService telemetry', () => {
       loggerMock.create(),
       { registerTaskDefinitions: jest.fn() } as any,
       {} as any,
-      mockAnalytics as any
+      mockAnalytics as any,
+      {} as any
     );
   });
 
