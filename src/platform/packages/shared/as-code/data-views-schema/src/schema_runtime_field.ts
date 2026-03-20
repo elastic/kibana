@@ -134,7 +134,7 @@ export const compositeRuntimeFieldSchema = schema.object({
   ...commonRuntimeFieldSchema,
 });
 
-export const runtimeFieldsSchema = schema.discriminatedUnion('type', [
+export const runtimeFieldSchema = schema.discriminatedUnion('type', [
   primitiveRuntimeFieldSchema,
   compositeRuntimeFieldSchema,
 ]);
