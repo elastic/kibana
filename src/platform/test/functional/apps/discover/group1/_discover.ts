@@ -300,10 +300,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const requestStatsRow = requestStats.filter(
             (r) => r && r[0] && r[0].includes('Request timestamp')
           );
+          await inspector.close();
           if (!requestStatsRow || !requestStatsRow[0] || !requestStatsRow[0][1]) {
             return '';
           }
-          await inspector.close();
           return requestStatsRow[0][1];
         };
 
