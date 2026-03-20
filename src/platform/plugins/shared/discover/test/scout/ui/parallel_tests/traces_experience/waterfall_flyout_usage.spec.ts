@@ -37,6 +37,12 @@ const openTraceTimeline = async (pageObjects: {
   const { flyout } = pageObjects.tracesExperience;
   await flyout.traceSummary.fullScreenButton.click();
   await expect(flyout.waterfallFlyout.container).toBeVisible();
+  // Dismiss the "Trace insights in Discover" tour step if shown (it has a 500ms render delay
+  // and a z-index that overlaps the child flyout, blocking subsequent interactions).
+  await flyout.traceSummary.tourOkButton
+    .waitFor({ state: 'visible', timeout: 2000 })
+    .then(() => flyout.traceSummary.tourOkButton.click())
+    .catch(() => {});
 };
 
 spaceTest.describe(

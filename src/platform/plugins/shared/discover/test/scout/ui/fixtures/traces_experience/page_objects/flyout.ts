@@ -30,6 +30,7 @@ export interface TracesFlyout {
     readonly waterfallClickArea: Locator;
     readonly fullScreenButton: Locator;
     readonly openInDiscoverButton: Locator;
+    readonly tourOkButton: Locator;
   };
 
   readonly errors: {
@@ -107,6 +108,7 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
       openInDiscoverButton: page.testSubj.locator(
         'unifiedDocViewerObservabilityTracesOpenInDiscoverButton'
       ),
+      tourOkButton: page.testSubj.locator('traceWaterfallFullScreenActionTourOkButton'),
     },
 
     errors: {
