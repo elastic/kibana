@@ -83,7 +83,7 @@ const callToolJson = async (
 export const GithubConnector: ConnectorSpec = {
   metadata: {
     id: '.github',
-    displayName: 'Github',
+    displayName: 'GitHub',
     description: i18n.translate('core.kibanaConnectorSpecs.github.metadata.description', {
       defaultMessage:
         'Search repositories, issues, and pull requests, browse file contents, and list branches in GitHub',
