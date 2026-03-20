@@ -21,7 +21,7 @@ export const normalizePathSlashes = (path: string): string => {
 
 export interface ApiClientOptions {
   headers?: Record<string, string>;
-  responseType?: 'json' | 'text';
+  responseType?: 'json' | 'text' | 'buffer';
   body?: any;
 }
 
@@ -75,6 +75,19 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
           // Set Accept header for JSON if requested
           if (options.responseType === 'json') {
             req = req.set('Accept', 'application/json');
+          }
+
+          // Enable binary buffering for buffer responseType
+          if (options.responseType === 'buffer') {
+            req = req.buffer(true).parse((res, callback) => {
+              const chunks: Buffer[] = [];
+              res.on('data', (chunk: Buffer) => {
+                chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+              });
+              res.on('end', () => {
+                callback(null, Buffer.concat(chunks));
+              });
+            });
           }
 
           // Handle body and auto-set Content-Type if needed
