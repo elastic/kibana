@@ -10,8 +10,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
 import { AlertConsumers, getRuleDetailsRoute, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { ProjectRoutingAccess } from '@kbn/cps-utils';
-import { useCpsPickerAccess } from '../../hooks/use_cps_picker_access';
+import { ProjectRoutingAccess, useCpsPickerAccess } from '@kbn/cps-utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
@@ -23,6 +22,7 @@ export const RuleFormRoute = () => {
   const {
     http,
     application,
+    cps,
     notifications,
     charts,
     settings,
@@ -66,7 +66,7 @@ export const RuleFormRoute = () => {
     templateId,
   });
 
-  useCpsPickerAccess(ProjectRoutingAccess.READONLY);
+  useCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
   const ruleTypeId = ruleTypeIdParams ?? ruleTemplate?.ruleTypeId;
 
