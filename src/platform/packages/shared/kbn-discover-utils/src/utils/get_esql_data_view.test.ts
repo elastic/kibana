@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { getEsqlDataView } from './get_esql_data_view';
 import { dataViewMock } from '../__mocks__';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const dataViewAdHoc = {
   id: 'ad-hoc-id',
@@ -22,26 +23,25 @@ const dataViewAdHoc = {
   timeFieldName: '@timestamp',
 } as unknown as DataView;
 
-describe('getEsqlDataView', () => {
-  const mockDataViewsCreate = jest.fn().mockImplementation((spec) => {
-    return Promise.resolve({
-      ...dataViewMock,
-      isPersisted: () => false,
-      id: 'ad-hoc-id',
-      title: 'test',
-      timeFieldName: spec.timeFieldName,
-    });
-  });
+const mockDataViewsService = dataPluginMock.createStartContract().dataViews;
+jest.mocked(mockDataViewsService.create).mockImplementation((spec) => {
+  return Promise.resolve({
+    ...dataViewMock,
+    isPersisted: () => false,
+    id: 'ad-hoc-id',
+    title: 'test',
+    timeFieldName: spec.timeFieldName,
+  } as DataView);
+});
 
+describe('getEsqlDataView', () => {
   const dataViewAdHocNoAtTimestamp = {
     ...dataViewAdHoc,
     timeFieldName: undefined,
   } as DataView;
 
   const services = {
-    dataViews: {
-      create: mockDataViewsCreate,
-    } as unknown as DataViewsContract,
+    dataViews: mockDataViewsService,
     http: {
       get: jest.fn(),
     } as unknown as HttpStart,
