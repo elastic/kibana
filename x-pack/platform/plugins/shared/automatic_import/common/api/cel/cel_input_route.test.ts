@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseSuccess } from '@kbn/zod-helpers';
+import { expectParseSuccess } from '@kbn/zod-helpers/v4';
 import { getCelRequestMock } from '../model/api_test.mock';
 import { CelInputRequestBody } from './cel_input_route.gen';
 
