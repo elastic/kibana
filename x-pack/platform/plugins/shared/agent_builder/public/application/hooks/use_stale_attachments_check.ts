@@ -53,11 +53,11 @@ export const useStaleAttachments = (
     const attachments = response.attachments ?? [];
 
     const checkFailed = attachments.filter(isFreshAttachmentStalenessCheckError);
-    const errorLines = checkFailed.map(({ id, error }) => `${id}: ${error}`).sort();
+    const errorLines = checkFailed.map(({ id, error }) => `${error} (attachment id: ${id})`).sort();
     if (errorLines.length > 0) {
       addErrorToast({
         title: labels.conversations.staleCheckPartialFailureTitle,
-        text: labels.conversations.staleCheckPartialFailureBody(errorLines.join('\n')),
+        text: errorLines.join('\n'),
       });
     }
 

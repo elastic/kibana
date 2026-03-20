@@ -23,11 +23,6 @@ export const labels = {
         defaultMessage: 'Could not check whether some attachments are outdated',
       }
     ),
-    staleCheckPartialFailureBody: (details: string) =>
-      i18n.translate('xpack.agentBuilder.conversations.staleCheckPartialFailureBody', {
-        defaultMessage: '{details}',
-        values: { details },
-      }),
   },
   tools: {
     // Landing page
