@@ -194,7 +194,7 @@ test.describe(
           { name: HOST5_NAME, color: '#61a2ff' },
           { name: HOST4_NAME, color: '#bbd4ff' },
           { name: HOST3_NAME, color: '#f6726a' },
-          { name: HOST2_NAME, color: '#ffbab3' },
+          { name: HOST2_NAME, color: '#ffc1ba' },
           { name: HOST1_NAME, color: '#fbefee' },
         ];
 
