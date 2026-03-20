@@ -214,8 +214,13 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/search-concept-chat-messages
     searchMessages: {
       isTool: true,
-      description:
-        'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.microsoftTeams.actions.searchMessages.description',
+        {
+          defaultMessage:
+            'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
+        }
+      ),
       input: SearchMessagesInputSchema,
       output: z
         .object({

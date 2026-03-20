@@ -46,7 +46,7 @@ The Microsoft Teams connector has the following actions:
     - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (bearer token).
 
 **List channels**
-:   Returns chats for the authenticated user when using delegated auth, or for the specified user when `userId` is provided for app-only auth.
+:   Returns channels for the specified team.
     - `teamId` (required): The ID of the team.
 
 **List channel messages**

@@ -33,7 +33,12 @@ export type ListChannelsInput = z.infer<typeof ListChannelsInputSchema>;
 export const ListChannelMessagesInputSchema = z.object({
   teamId: z.string().describe('The ID of the team'),
   channelId: z.string().describe('The ID of the channel'),
-  top: z.number().optional().describe('Number of messages to return (max 50; default: 20)'),
+  top: z
+    .number()
+    .min(1)
+    .max(50)
+    .optional()
+    .describe('Number of messages to return (max 50; default: 20)'),
 });
 export type ListChannelMessagesInput = z.infer<typeof ListChannelMessagesInputSchema>;
 
@@ -44,13 +49,13 @@ export const ListChatsInputSchema = z.object({
     .describe(
       'User ID for app-only auth via client credentials. Omit when using delegated auth (bearer token).'
     ),
-  top: z.number().optional().describe('Number of chats to return (max 50; default: 20)'),
+  top: z.number().min(1).optional().describe('Number of chats to return (max 50; default: 20)'),
 });
 export type ListChatsInput = z.infer<typeof ListChatsInputSchema>;
 
 export const ListChatMessagesInputSchema = z.object({
   chatId: z.string().describe('The ID of the chat'),
-  top: z.number().optional().describe('Number of messages to return (max 50; default: 20)'),
+  top: z.number().min(1).optional().describe('Number of messages to return (max 50; default: 20)'),
 });
 export type ListChatMessagesInput = z.infer<typeof ListChatMessagesInputSchema>;
 

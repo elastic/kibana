@@ -13,6 +13,8 @@ import type { ConnectorIconProps } from '../../../types';
 
 import teamsIcon from './teams.png';
 
-export default (props: ConnectorIconProps) => {
+const MicrosoftTeamsIcon = (props: ConnectorIconProps): React.JSX.Element => {
   return <EuiIcon type={teamsIcon} {...props} />;
 };
+
+export default MicrosoftTeamsIcon;

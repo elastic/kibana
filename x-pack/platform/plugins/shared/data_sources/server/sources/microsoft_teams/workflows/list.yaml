@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.microsoft-teams.list'
-description: 'List/browse Microsoft Teams resources. Actions and inputs: listJoinedTeams (no inputs); listChannels (team_id); listChannelMessages (team_id, channel_id, optional top); listChats (optional top); listChatMessages (chat_id, optional top).'
+description: 'List/browse Microsoft Teams resources. Actions and inputs: listJoinedTeams (optional user_id for app-only auth); listChannels (team_id); listChannelMessages (team_id, channel_id, optional top); listChats (optional user_id for app-only auth, optional top); listChatMessages (chat_id, optional top).'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
