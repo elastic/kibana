@@ -213,7 +213,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         buttonId: BUTTON_IDS.SAVE_AND_CHAT,
         navigateToListView: false,
       });
-      deferNavigateToAgentBuilderUrl(appPaths.agent.root({ agentId: data.id }));
+      deferNavigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: data.id }));
     },
     [deferNavigateToAgentBuilderUrl, handleSave]
   );
@@ -394,7 +394,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         <EuiButton
           {...commonProps}
           onClick={() =>
-            navigateToAgentBuilderUrl(appPaths.agent.root({ agentId: editingAgentId }))
+            navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: editingAgentId }))
           }
         >
           {i18n.translate('xpack.agentBuilder.agents.form.chatButton', {
