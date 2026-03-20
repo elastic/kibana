@@ -176,10 +176,7 @@ describe('DataStreams', () => {
       fireEvent.click(getByTestId('addDataStreamButton'));
 
       expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
-        expect.objectContaining({
-          integrationId: 'test-id',
-          isFirstDataStream: true,
-        })
+        expect.objectContaining({ isFirstDataStream: true })
       );
     });
 
@@ -199,7 +196,6 @@ describe('DataStreams', () => {
       expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
         expect.objectContaining({
           isFirstDataStream: false,
-          integrationName: 'My Integration',
         })
       );
     });

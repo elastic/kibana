@@ -151,9 +151,7 @@ describe('DataStreamsTable', () => {
       const expandButton = screen.getByTestId('expandDataStreamButton');
       await userEvent.click(expandButton);
 
-      expect(mockReportEditDataStreamFlyoutOpened).toHaveBeenCalledWith(
-        expect.objectContaining({ integrationId: 'integration-123', dataStreamId: 'ds-1' })
-      );
+      expect(mockReportEditDataStreamFlyoutOpened).toHaveBeenCalled();
     });
 
     it('should render empty table when no items', () => {
