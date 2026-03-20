@@ -807,7 +807,7 @@ describe('McpClient', () => {
       );
     });
 
-    it('throws error with empty message when no text content parts', async () => {
+    it('throws error with default message when no text content parts', async () => {
       const client = await createConnectedClient();
 
       mockClient.callTool.mockResolvedValue({
@@ -816,7 +816,7 @@ describe('McpClient', () => {
       });
 
       await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        `Error calling tool 'test-tool' with arguments '{}': `
+        `Error calling tool 'test-tool' with arguments '{}': Unknown tool error`
       );
     });
 

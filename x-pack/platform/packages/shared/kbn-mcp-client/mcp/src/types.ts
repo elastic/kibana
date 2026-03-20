@@ -38,42 +38,27 @@ export interface CallToolParams {
 }
 
 /**
- * Resource annotations returned by MCP servers. These hints can be used by
- * clients/UI for prioritization and audience targeting.
+ * We reuse upstream MCP SDK types where possible to avoid drift from the MCP spec.
  */
-export interface ResourceAnnotations {
-  audience?: Array<'user' | 'assistant'>;
-  priority?: number;
-  lastModified?: string;
-}
+import type {
+  Annotations as SdkAnnotations,
+  EmbeddedResource as SdkEmbeddedResource,
+  ResourceLink as SdkResourceLink,
+  TextContent as SdkTextContent,
+} from '@modelcontextprotocol/sdk/types.js';
 
 /**
  * A resource link returned as part of a tool call response.
  * Links are references to resources that can be fetched via resources/read.
  */
-export interface ResourceLinkPart {
-  type: 'resource_link';
-  uri: string;
-  name?: string;
-  description?: string;
-  mimeType?: string;
-  annotations?: ResourceAnnotations;
-}
+export type ResourceAnnotations = SdkAnnotations;
+export type ResourceLinkPart = SdkResourceLink;
 
 /**
  * Embedded resource returned as part of a tool call response.
  * Servers may embed resource contents (text or base64 blob) inline.
  */
-export interface EmbeddedResourcePart {
-  type: 'resource';
-  resource: {
-    uri: string;
-    mimeType?: string;
-    text?: string;
-    blob?: string;
-    annotations?: ResourceAnnotations;
-  };
-}
+export type EmbeddedResourcePart = SdkEmbeddedResource;
 
 /**
  * Non-text (or otherwise unknown) content returned as part of a tool call response.
@@ -86,10 +71,7 @@ export interface NonTextPart {
 /**
  * A text content as part of a tool call response.
  */
-export interface TextPart {
-  type: 'text';
-  text: string;
-}
+export type TextPart = SdkTextContent;
 
 export type ContentPart = TextPart | ResourceLinkPart | EmbeddedResourcePart | NonTextPart;
 
