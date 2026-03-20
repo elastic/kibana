@@ -63,7 +63,7 @@ describe('resolvePanelsFromAttachments', () => {
       }),
     });
 
-    const result = await resolvePanelsFromAttachments({
+    const result = resolvePanelsFromAttachments({
       attachmentInputs: [{ attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments,
       logger: createMockLogger(),
@@ -88,7 +88,7 @@ describe('resolvePanelsFromAttachments', () => {
       }),
     });
 
-    const result = await resolvePanelsFromAttachments({
+    const result = resolvePanelsFromAttachments({
       attachmentInputs: [{ attachmentId: 'unsupported-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments,
       logger: createMockLogger(),
@@ -104,7 +104,7 @@ describe('resolvePanelsFromAttachments', () => {
   });
 
   it('collects per-attachment failures without failing the whole operation', async () => {
-    const result = await resolvePanelsFromAttachments({
+    const result = resolvePanelsFromAttachments({
       attachmentInputs: [{ attachmentId: 'missing-id', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments: createAttachmentManager({}),
       logger: createMockLogger(),
