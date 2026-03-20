@@ -130,6 +130,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
           hideLabel: true,
           hideViewWorkflowLink: true,
           listViewMaxHeight: 240,
+          showSelectedInSearch: false,
         }}
         selectedWorkflowId={selectedId || undefined}
         onWorkflowChange={setSelectedId}

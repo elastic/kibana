@@ -53,6 +53,7 @@ const defaultConfig: WorkflowSelectorConfig = {
   listView: false,
   hideLabel: false,
   hideViewWorkflowLink: false,
+  showSelectedInSearch: true,
 };
 
 const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
@@ -92,9 +93,8 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     if (!finalConfig.listView) return undefined;
     const visibleCount =
       isSearching && inputValue
-        ? workflowOptions.filter((opt) =>
-            opt.label.toLowerCase().includes(inputValue.toLowerCase())
-          ).length
+        ? workflowOptions.filter((opt) => opt.name.toLowerCase().includes(inputValue.toLowerCase()))
+            .length
         : workflowOptions.length;
     // Ensure at least one row height so the empty state message has space
     const height = Math.max(visibleCount, 1) * ROW_HEIGHT;
@@ -166,11 +166,11 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
 
       const labelContent =
         finalConfig.listView && option.checked === 'on' ? (
-          <strong>{option.label}</strong>
+          <strong>{option.name}</strong>
         ) : finalConfig.listView ? (
-          option.label
+          option.name
         ) : (
-          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+          <EuiHighlight search={searchValue}>{option.name}</EuiHighlight>
         );
 
       const secondaryContent = finalConfig.listView ? (
@@ -215,30 +215,40 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
 
       if (changedOption.checked === 'on') {
         onWorkflowChange(changedOption.id);
-        setInputValue(changedOption.name);
-        setIsSearching(false);
+        if (finalConfig.showSelectedInSearch) {
+          setInputValue(changedOption.name);
+          setIsSearching(false);
+        } else {
+          setInputValue('');
+          setIsSearching(true);
+        }
       } else {
         onWorkflowChange('');
         setInputValue('');
         setIsSearching(true);
       }
     },
-    [onWorkflowChange]
+    [finalConfig.showSelectedInSearch, onWorkflowChange]
   );
 
   const handlePopoverClose = useCallback(() => {
     setIsPopoverOpen(false);
 
     // If the user cleared the input but didn't select anything new,
-    // revert to the currently selected workflow
-    if (selectedWorkflowId && workflowOptions.length > 0 && isSearching) {
+    // revert to the currently selected workflow (only when showSelectedInSearch is enabled)
+    if (
+      finalConfig.showSelectedInSearch &&
+      selectedWorkflowId &&
+      workflowOptions.length > 0 &&
+      isSearching
+    ) {
       const selectedWorkflow = workflowOptions.find((w) => w.id === selectedWorkflowId);
       if (selectedWorkflow) {
         setInputValue(selectedWorkflow.name);
         setIsSearching(false);
       }
     }
-  }, [selectedWorkflowId, workflowOptions, isSearching]);
+  }, [finalConfig.showSelectedInSearch, selectedWorkflowId, workflowOptions, isSearching]);
 
   // Use href+target for regular links
   const workflowManagementLinkProps = useMemo(() => {
@@ -253,14 +263,16 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     if (selectedWorkflowId && workflowOptions.length > 0) {
       const selectedWorkflow = workflowOptions.find((w) => w.id === selectedWorkflowId);
       if (selectedWorkflow) {
-        setInputValue(selectedWorkflow.name);
-        setIsSearching(false);
+        if (finalConfig.showSelectedInSearch) {
+          setInputValue(selectedWorkflow.name);
+          setIsSearching(false);
+        }
       }
     } else {
       setInputValue('');
       setIsSearching(true);
     }
-  }, [selectedWorkflowId, workflowOptions]);
+  }, [selectedWorkflowId, workflowOptions, finalConfig.showSelectedInSearch]);
 
   // Prioritize selected workflow disabled error over validation errors
   const displayError = selectedWorkflowDisabledError || error;
