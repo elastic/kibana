@@ -457,7 +457,7 @@ export class NotificationPolicyClient {
           }
         }
         if (authMap.size >= targetIds.size) {
-          await finder.close();
+          finder.close().catch(() => {});
           break;
         }
       }
