@@ -126,20 +126,27 @@ function buildRcaSkillContent(): string {
 
     ### Step A-2: Load All Knowledge Indicators
 
-    Call \`search_knowledge_indicators\` with:
+    **Always start with a targeted call**, using the symptom from Step A-0 as \`search_text\`:
     - \`stream_names\`: the target stream(s) from Step A-1 when known; omit only for discovery (Step A-1)
-    - \`limit\`: **50** when **not** passing \`stream_names\` (discovery across streams — caps breadth).
-      **20** when passing \`stream_names\` (scoped stream — smaller payloads, fewer KIs in context).
+    - \`search_text\`: the symptom keyword(s) from Step A-0 (e.g. "database errors", "connection timeout", "OOM killed")
+    - \`limit\`: **50** when **not** passing \`stream_names\` (discovery); **20** when passing \`stream_names\`
     - No \`kind\` filter (retrieve both features and queries)
 
-    If the user described a specific symptom (e.g. "OOM errors", "connection timeouts",
-    "database unavailable"), make a SECOND call with \`search_text\` matching the symptom
-    to surface semantically relevant KIs that may not appear in the stream-scoped results.
+     **If the targeted call returns fewer than 5 KIs**, make a second broader call with no \`search_text\`
+    to surface all KIs for the stream regardless of semantic relevance:
+    - Same \`stream_names\` and \`limit\`
+    - Merge results from both calls (deduplicate by ID) before proceeding to A-3
 
     ### Step A-3: Form Hypotheses from the Knowledge Indicators
 
-    This is the core analytical step. Read all returned KIs and construct explicit, testable
-    hypotheses BEFORE executing any queries. A hypothesis has four parts:
+    This is the core analytical step. Read **all** returned KIs and construct explicit, testable
+    hypotheses BEFORE executing any queries.
+
+    > **Result ordering:** the tool returns feature KIs before query KIs. Query KIs — often the
+    > highest-trust signals — appear at the **end** of the list. Read through to the end before
+    > forming any hypothesis.
+
+    A hypothesis has four parts:
 
     1. **Claim**: "The [component] is failing because [specific mechanism]"
        (be specific: not "there are errors" but "the database connection pool is exhausted")
@@ -184,8 +191,8 @@ function buildRcaSkillContent(): string {
     - \`feature.properties\`: structured data about the pattern (field names, values, counts) — use for query construction
     - \`feature.confidence\`: 0–100 reliability. **Higher** values mean the pattern is more consistently observed — compare within the returned feature set.
     - \`feature.evidence\`: human-readable supporting facts (may name the error type, field, or component directly)
-    - \`feature.filter\`: the KQL/streamlang condition that scopes this feature to a data subset
-      (e.g. "service.name: checkout AND log.level: error"). You MUST apply this same filter in any
+    - \`feature.filter\`: - \`feature.filter\`: a structured JSON condition (streamlang format) scoping this feature to the
+      data subset it was computed on — **not** a KQL string. You MUST use this same filter in any
       query you derive from this feature — otherwise your query operates on different data than the feature did.
     - \`feature.status\`: "active" = currently observed; "stale" or "expired" = historical only.
       Always validate stale/expired features with a live query before including them in your conclusion.
@@ -238,7 +245,7 @@ function buildRcaSkillContent(): string {
       and the \`filter\` condition (so the generated query scopes correctly)
     - Describe what you want to confirm: "count occurrences of [error pattern] matching [filter] per 5-minute bucket"
     - Ask for **bounded** results: prefer \`STATS\` / aggregates; if the generated query returns raw events, it must include \`| LIMIT 20\` (or lower).
-    - Run \`generate_esql\` so you obtain executable ES|QL and rows (enable execution if the tool allows draft-only vs run).
+    - Run \`generate_esql\` to obtain and execute ES|QL against live data.
 
     **After each query result:**
     - Write down what the result tells you: how many events? Which time range? Which services?
@@ -372,15 +379,12 @@ function buildRcaSkillContent(): string {
 
     **A-1**: stream = "payment", window = 14:00 → now.
 
-    **A-2**: search_knowledge_indicators(stream_names=["payment"], limit=20)
-    → Returns 4 KIs:
+    **A-2 (targeted)**: search_knowledge_indicators(stream_names=["payment"], search_text="database errors", limit=20)
+    → Returns 4 KIs (features first, then queries — read all before forming hypotheses):
+      - Feature KI F1: type="error_logs", confidence=93, description="FATAL: connection pool exhausted — all 100 slots occupied", filter={"field":"service.name","eq":"payment"}, status="active"
+      - Feature KI F2: type="log_patterns", confidence=61, description="Slow query warnings from PostgreSQL", filter={"field":"service.name","eq":"payment"}, status="stale"
       - Query KI Q1: "DB connection pool exhaustion" (severity=88, backed=true, esql="FROM payment | WHERE error.message LIKE \\"*too many connections*\\" | STATS count=COUNT(*)")
-      - Query KI Q2: "High payment error rate" (severity=72, backed=true, esql="FROM payment | WHERE @timestamp >= ?_tstart | STATS err=COUNT(*) BY error.type | WHERE err > 50")
-      - Feature KI F1: type="error_logs", confidence=93, description="FATAL: connection pool exhausted — all 100 slots occupied", filter="service.name: payment", status="active"
-      - Feature KI F2: type="log_patterns", confidence=61, description="Slow query warnings from PostgreSQL", filter="service.name: payment", status="stale"
-
-    **A-2 (semantic)**: search_knowledge_indicators(stream_names=["payment"], search_text="database connection", limit=20)
-    → Returns same KIs, no new ones.
+    4 KIs returned — sufficient, no broader follow-up needed.
 
     **A-3 — Hypotheses:**
     > H1 (Critical): Payment service has exhausted its database connection pool.
