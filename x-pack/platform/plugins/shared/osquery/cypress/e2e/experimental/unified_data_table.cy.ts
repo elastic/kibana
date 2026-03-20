@@ -6,16 +6,8 @@
  */
 
 import { navigateTo } from '../../tasks/navigation';
-import {
-  inputQuery,
-  selectAllAgents,
-  submitQuery,
-} from '../../tasks/live_query';
-import {
-  RESULTS_PANEL,
-  RESULTS_TABLE,
-  RESULTS_FLYOUT,
-} from '../../screens/experimental';
+import { inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
+import { RESULTS_PANEL, RESULTS_TABLE, RESULTS_FLYOUT } from '../../screens/experimental';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe(
@@ -64,13 +56,13 @@ describe(
       cy.getBySel('querySubmitButton').click();
       cy.wait('@filteredResults');
       cy.getBySel(RESULTS_TABLE).should('exist');
-      cy.getBySel(RESULTS_TABLE)
-        .find('[role="row"]')
-        .should('have.length.greaterThan', 1);
+      cy.getBySel(RESULTS_TABLE).find('[role="row"]').should('have.length.greaterThan', 1);
 
       // KQL search with a non-matching filter yields empty state
       cy.intercept('GET', '/api/osquery/live_queries/*/results/*').as('noResults');
-      cy.getBySel('osqueryResultsSearchBar').clear({ force: true }).type('agent.name: "nonexistentagent"');
+      cy.getBySel('osqueryResultsSearchBar')
+        .clear({ force: true })
+        .type('agent.name: "nonexistentagent"');
       cy.getBySel('querySubmitButton').click();
       cy.wait('@noResults');
       cy.contains('No results match your search criteria').should('exist');
@@ -82,9 +74,7 @@ describe(
       cy.getBySel('querySubmitButton').click();
       cy.wait('@allResults');
       cy.getBySel(RESULTS_TABLE, { timeout: 30000 }).should('exist');
-      cy.getBySel(RESULTS_TABLE)
-        .find('[role="row"]')
-        .should('have.length.greaterThan', 1);
+      cy.getBySel(RESULTS_TABLE).find('[role="row"]').should('have.length.greaterThan', 1);
 
       // Sorting: click the Sort fields button and verify it opens
       cy.getBySel(RESULTS_TABLE).within(() => {
