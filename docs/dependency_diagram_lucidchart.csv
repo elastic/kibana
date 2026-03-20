@@ -1,0 +1,21 @@
+# Lucidchart Import Format
+# Import: File > Import Data > choose this CSV
+# Shape column: rectangle, diamond, ellipse, or hexagon
+# Lines from: "Id" to values in dependency columns
+
+Id,Name,Description,Team,Tier,Shape,Dependency1,Dependency2,Dependency3
+A1,Rule Type Registry,Register new rule types with Detection Engine,@detection-engine,Tier 1,rectangle,,,,
+A2,Alert Schema,TypeScript types for correlation/vulnerability alerts,@detection-engine,Tier 1,rectangle,,,,
+A3,AI Constants,Batch sizes and thresholds for pipeline,@generative-ai,Tier 1,rectangle,,,,
+A4,Test Infrastructure,E2E test utilities for Scout tests,@detection-engine,Tier 1,rectangle,,,,
+B1,Correlation Engine,ES|QL cross-alert correlation queries,@detection-engine,Tier 2,rectangle,A1,A2,,
+B2,Vulnerability Detection,CVE matching + AI triage,@detection-engine,Tier 2,rectangle,A1,A2,,
+C1,Compliance Monitoring,CIS benchmark checks via osquery,@defend-workflows,Tier 3,rectangle,A1,E2,,
+C2,Alert Pipeline,Deduplication + case matching,@generative-ai,Tier 3,rectangle,A3,B1,B2,
+C3,Hierarchical Batch,LLM batch processing for large alert sets,@generative-ai,Tier 3,rectangle,A3,,,
+D1,Workflows Integration,Compose detection → correlation → case,All teams,Tier 4,hexagon,C1,C2,E3,
+D2,Cases Auto-Creation,Pipeline → Cases plugin integration,@generative-ai + @cases,Tier 4,hexagon,C2,C3,E1,
+D3,UI Components,Alert flyouts and dashboards,@security-solution,Tier 4,hexagon,B1,B2,E1,
+E1,Cases Plugin,External: Cases team,@kibana-cases,External,ellipse,,,,
+E2,Fleet Plugin,External: Fleet team,Fleet team,External,ellipse,,,,
+E3,Workflows Plugin,External: Workflows team,Workflows team,External,ellipse,,,,

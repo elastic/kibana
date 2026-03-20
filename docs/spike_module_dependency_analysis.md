@@ -1,5 +1,85 @@
 # Module Dependency Analysis - Security Detection Spikes
 
+## Executive Summary
+
+**Purpose**: This document maps the 4 security spikes to team ownership and identifies which components can ship independently.
+
+**Key Finding**: These spikes form a **4-tier dependency stack** — each tier must ship before the next:
+
+```
+Tier 1: Platform Foundations (2 weeks)
+   ↓ ALL spikes blocked until this ships
+Tier 2: New Rule Types (2 weeks)
+   ↓ Correlation & Vulnerability features blocked
+Tier 3: Plugin Features (4 weeks, can parallelize)
+   ↓ Integration blocked until all features stable
+Tier 4: Cross-Plugin Integration (4 weeks)
+```
+
+**Critical Path**: 12 weeks end-to-end IF no blockers. Tier 1 is the gating factor.
+
+**Recommendation**: Start with Tier 1 foundation work immediately (involves 2 teams, blocks all downstream work).
+
+### Quick Reference: What Each Spike Delivers
+
+| Spike | User-Facing Feature | Backend Capability | Team Owner |
+|-------|---------------------|-------------------|------------|
+| **Compliance Monitoring** | Dashboard showing CIS benchmark pass/fail rates per endpoint | Osquery-based compliance rule engine | @security-defend-workflows |
+| **Vulnerability Checker** | Alert rule type that correlates endpoint packages to CVEs, AI-powered triage | CVE matching engine + LLM analysis | @security-detection-engine + @security-generative-ai |
+| **Correlation Engine** | Alert rule type that groups related alerts (temporal, count-based) | ES\|QL query compiler for cross-alert correlation | @security-detection-engine |
+| **Alert Pipeline** | Auto-creates cases from deduplicated alerts, enriches with entities | Alert deduplication + case matching algorithm | @security-generative-ai |
+
+---
+
+## High-Level Module Map
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ TIER 1: Platform Foundations (Week 1-2)                     │
+│ @elastic/security-detection-engine + @security-generative-ai│
+│                                                             │
+│ ┌─────────────┐  ┌──────────────┐  ┌───────────────┐      │
+│ │ Rule Type   │  │ Alert Schema │  │ AI Assistant  │      │
+│ │ Registry    │  │ Definitions  │  │ Constants     │      │
+│ └─────────────┘  └──────────────┘  └───────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+                         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ TIER 2: New Detection Capabilities (Week 3-4)               │
+│ @elastic/security-detection-engine                          │
+│                                                             │
+│ ┌──────────────────┐         ┌─────────────────────┐       │
+│ │ Correlation      │         │ Vulnerability       │       │
+│ │ Engine           │         │ Detection Engine    │       │
+│ │ (ES|QL queries)  │         │ (CVE matching)      │       │
+│ └──────────────────┘         └─────────────────────┘       │
+└─────────────────────────────────────────────────────────────┘
+                         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ TIER 3: Plugin Features (Week 5-8, PARALLEL)                │
+│                                                             │
+│ ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│ │ Compliance   │  │ Alert        │  │ Hierarchical │      │
+│ │ Monitoring   │  │ Pipeline     │  │ Batch LLM    │      │
+│ │              │  │              │  │              │      │
+│ │ @defend-     │  │ @generative- │  │ @generative- │      │
+│ │  workflows   │  │  ai          │  │  ai          │      │
+│ └──────────────┘  └──────────────┘  └──────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+                         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ TIER 4: Integration (Week 9-12)                             │
+│ ALL TEAMS coordinate                                        │
+│                                                             │
+│ ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│ │ Workflows    │  │ Cases        │  │ UI           │      │
+│ │ Integration  │  │ Auto-Create  │  │ Components   │      │
+│ └──────────────┘  └──────────────┘  └──────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Team Ownership Map (from CODEOWNERS)
 
 | Team | Owns |
@@ -112,49 +192,49 @@ graph TB
 ## Standalone Modules (Can Ship Independently)
 
 ### Tier 1: Platform Foundations (Ship First)
-These are pure infrastructure with no spike-specific logic:
+These are pure infrastructure components that ALL spikes depend on:
 
-| Module | Team | Description | Used By | Ship As |
-|--------|------|-------------|---------|---------|
-| **kbn-securitysolution-rules** | @elastic/security-detection-engine | Rule type constants, mappings | All detection rules | Platform package v1.0 |
-| **kbn-securitysolution-io-ts-alerting-types** | @elastic/security-detection-engine | Alert schema types | Correlation, Vuln Checker | Platform package v1.0 |
-| **kbn-elastic-assistant-common** | @elastic/security-generative-ai | Shared assistant types/constants | Pipeline, Vuln Checker | Platform package v1.0 |
-| **kbn-scout-security** | @elastic/security-detection-engine | Security E2E test fixtures | All spikes (tests) | Dev package v1.0 |
+| What It Does | Team Owner | Why It Matters | Blocking Impact |
+|--------------|------------|----------------|-----------------|
+| **Detection Rule Type Registry** | @elastic/security-detection-engine | Defines how new rule types (Correlation, Vulnerability) register with the Detection Engine | **ALL** rule types can't load without this |
+| **Alert Schema Definitions** | @elastic/security-detection-engine | TypeScript types for new alert formats (correlation alerts, vulnerability alerts) | Correlation & Vuln Checker can't create alerts |
+| **AI Assistant Shared Constants** | @elastic/security-generative-ai | Configuration limits (batch sizes, thresholds) used by pipeline | Pipeline can't function |
+| **Security Test Infrastructure** | @elastic/security-detection-engine | E2E test utilities for new UI components | All spikes can't write tests |
 
-**Recommendation**: Ship these 4 packages as standalone modules **before** any spike work. They have zero spike-specific logic and provide the foundation.
+**Recommendation**: Ship these 4 capability areas **before** any spike work. They have zero spike-specific logic and provide the foundation.
 
-### Tier 2: Rule Type Extensions (Ship with Detection Engine)
-These extend the detection engine's rule type system:
+### Tier 2: New Rule Type Engines (Ship with Detection Engine)
+These add new detection capabilities to the Security Solution:
 
-| Module | Team | Description | Depends On | Ship As |
-|--------|------|-------------|-----------|---------|
-| **correlation query compiler** | @elastic/security-detection-engine | ES\|QL query generation from config | Tier 1 packages | Detection Engine v9.5 |
-| **vulnerability correlation engine** | @elastic/security-detection-engine | CVE matching, enrichment | Tier 1 packages | Detection Engine v9.5 |
-| **rule type registry updates** | @elastic/security-detection-engine | New rule type constants | Tier 1 packages | Detection Engine v9.5 |
+| Capability | Team Owner | What It Provides | Business Value |
+|------------|------------|------------------|----------------|
+| **Cross-Alert Correlation** | @elastic/security-detection-engine | Groups related alerts using ES\|QL queries (temporal, count-based patterns) | Detect multi-stage attacks (lateral movement, kill chains) |
+| **Vulnerability Detection** | @elastic/security-detection-engine | Matches endpoint packages against CVE databases, AI-powered triage | Proactive vulnerability management, zero-day detection |
+| **ES\|QL Query Generation** | @elastic/security-detection-engine | Compiles declarative correlation configs into executable queries | Powers both correlation and vuln checker |
 
-**Recommendation**: Ship as part of Detection Engine milestone, gated by feature flags.
+**Recommendation**: Ship as part of Detection Engine milestone, gated by feature flags (`correlationRulesEnabled`, `vulnerabilityCheckerEnabled`).
 
-### Tier 3: Plugin Modules (Ship with Plugin Updates)
-These are plugin-specific but could be modularized:
+### Tier 3: Plugin-Level Features (Ship with Plugin Updates)
+These are new capabilities within existing plugins:
 
-| Module | Team | Description | Depends On | Ship As |
-|--------|------|-------------|-----------|---------|
-| **osquery compliance services** | @elastic/security-defend-workflows | Compliance rule engine, scoring | Tier 1 + osquery plugin | Osquery plugin v9.6 |
-| **attack_discovery/pipeline** | @elastic/security-generative-ai | Dedup, entity extraction, case matching | Tier 1 + elastic_assistant | Assistant plugin v9.6 |
-| **batch processing (hierarchical merge)** | @elastic/security-generative-ai | LLM batch orchestration | Tier 1 + elastic_assistant | Assistant plugin v9.6 |
+| Feature | Team Owner | What It Provides | User-Facing Impact |
+|---------|------------|------------------|-------------------|
+| **Endpoint Compliance Monitoring** | @elastic/security-defend-workflows | CIS benchmark checks via osquery, compliance scoring dashboard | SOC teams can track endpoint compliance posture |
+| **Alert Investigation Pipeline** | @elastic/security-generative-ai | Auto-deduplicates alerts, extracts entities, matches to cases | Reduces alert fatigue, auto-creates cases |
+| **Hierarchical Attack Discovery** | @elastic/security-generative-ai | Batches large alert sets for LLM processing (hierarchical merge) | Enables Attack Discovery on OSS models (8K context) |
 
-**Recommendation**: Each team ships their plugin module independently once Tier 1 is available.
+**Recommendation**: Each team ships their feature independently once Tier 1 & 2 are available.
 
-### Tier 4: Integration Layers (Ship Last)
-These orchestrate across modules:
+### Tier 4: Cross-Plugin Integration (Ship Last)
+These connect features across team boundaries:
 
-| Module | Team | Description | Depends On | Ship As |
-|--------|------|-------------|-----------|---------|
-| **workflow steps** | Multiple teams | Workflows plugin integration | All Tier 2-3 modules | Cross-team v9.7+ |
-| **case integration** | @elastic/security-generative-ai + @elastic/kibana-cases | Auto-case creation, observables | Pipeline + Cases plugin | Cross-team v9.7+ |
-| **UI components** | @elastic/security-solution | Flyouts, dashboards, forms | All backend modules | Security Solution v9.7+ |
+| Integration | Teams Involved | What It Enables | Coordination Required |
+|-------------|----------------|-----------------|----------------------|
+| **Workflow Orchestration** | All teams → Workflows team | Compose detection → correlation → case creation in YAML workflows | Weekly sync on step definitions |
+| **Cases Auto-Creation** | Gen AI + Cases team | Pipeline auto-creates cases from correlated alerts, attaches observables | Bi-weekly sync on schema changes |
+| **Unified UI Layer** | All teams → Security Solution team | Alert flyouts show correlation context, vuln details, compliance findings | Monthly UI review meetings |
 
-**Recommendation**: Wait until Tier 2-3 modules are stable before integrating.
+**Recommendation**: Wait until Tier 2-3 features are stable before integrating (avoid coordinating 4 moving targets).
 
 ## Cross-Module Dependencies by Spike
 
@@ -572,3 +652,99 @@ Based on reusability and low coupling:
 **Document Owner**: Patryk Kopycinski
 **Last Updated**: 2026-03-20
 **Status**: Draft for team review
+## What to Communicate to Each Team
+
+### @elastic/security-detection-engine (Primary: 60% of work)
+
+**Your Responsibilities:**
+1. **Tier 1** (Week 1-2): Update rule type registry and alert schema packages
+2. **Tier 2** (Week 3-4): Ship correlation and vulnerability rule type engines
+3. **Tier 4** (Week 11-12): Integration support for UI components
+
+**What You're Blocking:**
+- ALL downstream work depends on Tier 1 package updates
+- Correlation and vulnerability features can't start until Tier 2 ships
+
+**Required Coordination:**
+- Weekly sync with @security-generative-ai on alert schema changes
+- Bi-weekly sync with @security-solution on UI integration
+
+**Decision Needed:**
+- Should correlation and vulnerability be separate packages or unified?
+- Who owns ES|QL compiler long-term (your team or Search team)?
+
+---
+
+### @elastic/security-generative-ai (Primary: 30% of work)
+
+**Your Responsibilities:**
+1. **Tier 1** (Week 1-2): Update AI assistant constants package
+2. **Tier 3** (Week 5-8): Ship alert pipeline and hierarchical batch processing
+3. **Tier 4** (Week 9-12): Cases integration with @kibana-cases team
+
+**What You're Blocking:**
+- Pipeline feature can't start until Tier 1 ships
+- Cases integration blocks final E2E testing
+
+**Required Coordination:**
+- Weekly sync with @security-detection-engine on alert queries
+- Bi-weekly sync with @kibana-cases on observable schema
+
+**Decision Needed:**
+- Should pipeline modules (dedup, entity extraction) move to standalone packages?
+- What's the LLM cost budget for incremental Attack Discovery at scale?
+
+---
+
+### @elastic/security-defend-workflows (Primary: 10% of work)
+
+**Your Responsibilities:**
+1. **Tier 3** (Week 9-10): Ship compliance monitoring feature in osquery plugin
+2. **Tier 4** (Week 11-12): Workflow steps integration
+
+**What You're Blocking:**
+- Compliance feature doesn't block other spikes
+- Can work in parallel with Gen AI's Tier 3 work
+
+**Required Coordination:**
+- Sync with @security-detection-engine on rule type registration (one-time)
+- Sync with Workflows team on step definitions (one-time)
+
+**Decision Needed:**
+- Should compliance modules stay in osquery plugin or move to security_solution?
+- What's the osquery polling frequency limit before performance issues?
+
+---
+
+### @elastic/kibana-cases (Supporting: Integration only)
+
+**Your Responsibilities:**
+1. **Tier 4** (Week 11-12): Cases auto-creation API integration
+
+**What You're Blocking:**
+- Final E2E testing (not a critical path blocker)
+
+**Required Coordination:**
+- Bi-weekly sync with @security-generative-ai on observable schema
+- Review PR for observable attachment API changes
+
+**Decision Needed:**
+- Entity schema standardization: should we unify pipeline's bare keys (e.g. `ipv4`) with Cases' prefixed keys (e.g. `observable-type-ipv4`)?
+
+---
+
+### @elastic/security-solution (Supporting: UI only)
+
+**Your Responsibilities:**
+1. **Tier 4** (Week 11-12): Alert flyout, dashboards, rule creation forms for new rule types
+
+**What You're Blocking:**
+- Final UI polish (not a critical path blocker)
+
+**Required Coordination:**
+- Monthly UI review with all feature teams
+- Accessibility audit before feature flag removal
+
+**Decision Needed:**
+- Should we create dedicated UI components for correlation/vulnerability or extend existing ones?
+
