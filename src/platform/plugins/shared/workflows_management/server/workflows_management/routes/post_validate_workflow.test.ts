@@ -15,7 +15,7 @@ import {
   createMockWorkflowsApi,
   createSpacesMock,
   mockLogger,
-} from './test_utils';
+} from './utils/test_utils';
 import type { ValidateWorkflowResponse } from '../../../common/lib/validate_workflow_yaml';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 

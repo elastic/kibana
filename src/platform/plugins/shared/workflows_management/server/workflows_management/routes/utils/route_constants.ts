@@ -13,3 +13,6 @@
 export const WORKFLOW_ROUTE_OPTIONS = {
   tags: ['api', 'workflows'],
 };
+
+// Pagination constants
+export const MAX_PAGE_SIZE = 100; // Limit to prevent performance issues with large result sets

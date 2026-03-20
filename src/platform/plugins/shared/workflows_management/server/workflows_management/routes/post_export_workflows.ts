@@ -8,13 +8,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { handleRouteError } from './route_error_handlers';
-import { WORKFLOW_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './utils/route_constants';
+import { handleRouteError } from './utils/route_error_handlers';
+import { WORKFLOW_READ_SECURITY } from './utils/route_security';
+import { withLicenseCheck } from './utils/with_license_check';
 import type { WorkflowExportEntry } from '../../../common/lib/export';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
-import { withLicenseCheck } from '../lib/with_license_check';
 import { generateWorkflowsArchive } from '../lib/zip_archive';
 
 export function registerPostExportWorkflowsRoute({

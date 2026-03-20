@@ -18,7 +18,7 @@ import {
   InvalidYamlSyntaxError,
   isWorkflowConflictError,
   isWorkflowValidationError,
-} from '../../../common/lib/errors';
+} from '../../../../common/lib/errors';
 
 /**
  * Unified error handler for workflow management routes

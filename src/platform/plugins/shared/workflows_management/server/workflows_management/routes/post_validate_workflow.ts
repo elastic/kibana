@@ -9,10 +9,10 @@
 
 import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
-import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { WORKFLOW_READ_SECURITY } from './route_security';
+import { WORKFLOW_ROUTE_OPTIONS } from './utils/route_constants';
+import { WORKFLOW_READ_SECURITY } from './utils/route_security';
 import type { RouteDependencies } from './types';
-import { withLicenseCheck } from '../lib/with_license_check';
+import { withLicenseCheck } from './utils/with_license_check';
 
 const validateWorkflowBodySchema = z.object({
   yaml: z.string(),

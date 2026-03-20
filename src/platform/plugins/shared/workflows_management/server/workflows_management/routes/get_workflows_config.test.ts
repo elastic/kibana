@@ -8,7 +8,7 @@
  */
 
 import { registerGetWorkflowsConfigRoute } from './get_workflows_config';
-import { createMockRouterInstance, getWorkflowExecutionEngineMock } from './test_utils';
+import { createMockRouterInstance, getWorkflowExecutionEngineMock } from './utils/test_utils';
 import { WORKFLOWS_CONFIG_PATH } from '../../../common/routes';
 
 jest.mock('../lib/with_license_check', () => ({

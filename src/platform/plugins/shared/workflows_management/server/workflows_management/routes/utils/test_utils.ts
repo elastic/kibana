@@ -17,8 +17,8 @@ import { mockRouter as createMockRouter } from '@kbn/core-http-router-server-moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import type { WorkflowsRequestHandlerContext } from '../../types';
-import type { WorkflowsManagementApi } from '../workflows_management_api';
+import type { WorkflowsRequestHandlerContext } from '../../../types';
+import type { WorkflowsManagementApi } from '../../workflows_management_api';
 
 export const mockLogger = loggingSystemMock.create().get();
 

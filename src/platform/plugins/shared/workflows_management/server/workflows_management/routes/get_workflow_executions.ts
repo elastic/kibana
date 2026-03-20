@@ -10,12 +10,11 @@
 import { schema, type Type } from '@kbn/config-schema';
 import type { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { ExecutionStatusValues, ExecutionTypeValues } from '@kbn/workflows';
-import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { handleRouteError } from './route_error_handlers';
-import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
-import { MAX_PAGE_SIZE, parseExecutionStatuses, parseExecutionTypes } from './types';
-import { withLicenseCheck } from '../lib/with_license_check';
+import { MAX_PAGE_SIZE, WORKFLOW_ROUTE_OPTIONS } from './utils/route_constants';
+import { handleRouteError } from './utils/route_error_handlers';
+import { WORKFLOW_EXECUTION_READ_SECURITY } from './utils/route_security';
+import { withLicenseCheck } from './utils/with_license_check';
 import type { SearchWorkflowExecutionsParams } from '../workflows_management_service';
 
 export function registerGetWorkflowExecutionsRoute({
@@ -107,4 +106,28 @@ export function registerGetWorkflowExecutionsRoute({
       }
     })
   );
+}
+
+/**
+ * Helper function to parse execution statuses from query parameters
+ * Handles both single string and array of strings
+ */
+function parseExecutionStatuses(
+  statuses: string | ExecutionStatus[] | undefined
+): ExecutionStatus[] | undefined {
+  if (!statuses) return undefined;
+  return typeof statuses === 'string' ? ([statuses] as ExecutionStatus[]) : statuses;
+}
+
+/**
+ * Helper function to parse execution types from query parameters
+ * Handles both single string and array of strings
+ */
+function parseExecutionTypes(
+  executionTypes?: ExecutionType | ExecutionType[] | undefined
+): ExecutionType[] | undefined {
+  if (!executionTypes) return undefined;
+  return typeof executionTypes === 'string'
+    ? ([executionTypes] as ExecutionType[])
+    : executionTypes;
 }

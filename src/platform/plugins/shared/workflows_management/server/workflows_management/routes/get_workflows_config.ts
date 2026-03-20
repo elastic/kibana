@@ -8,11 +8,11 @@
  */
 
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { WORKFLOW_READ_SECURITY } from './route_security';
+import { WORKFLOW_ROUTE_OPTIONS } from './utils/route_constants';
+import { WORKFLOW_READ_SECURITY } from './utils/route_security';
+import { withLicenseCheck } from './utils/with_license_check';
 import { WORKFLOWS_CONFIG_PATH } from '../../../common/routes';
 import type { WorkflowsRouter } from '../../types';
-import { withLicenseCheck } from '../lib/with_license_check';
 
 export function registerGetWorkflowsConfigRoute({
   router,

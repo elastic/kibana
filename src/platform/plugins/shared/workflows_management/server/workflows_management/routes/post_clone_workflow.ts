@@ -8,11 +8,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { handleRouteError } from './route_error_handlers';
-import { WORKFLOW_CREATE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
-import { withLicenseCheck } from '../lib/with_license_check';
+import { WORKFLOW_ROUTE_OPTIONS } from './utils/route_constants';
+import { handleRouteError } from './utils/route_error_handlers';
+import { WORKFLOW_CREATE_SECURITY } from './utils/route_security';
+import { withLicenseCheck } from './utils/with_license_check';
 
 export function registerPostCloneWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.post(

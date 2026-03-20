@@ -17,9 +17,9 @@ import type {
   AlertEventRule,
   AlertSelection,
   AlertTriggerInput,
-} from '../../../common/types/alert_types';
-import { buildAlertEvent } from '../../../common/utils/build_alert_event';
-import type { WorkflowsRequestHandlerContext } from '../../types';
+} from '../../../../common/types/alert_types';
+import { buildAlertEvent } from '../../../../common/utils/build_alert_event';
+import type { WorkflowsRequestHandlerContext } from '../../../types';
 
 /**
  * Extracts rule information from an alert's _source

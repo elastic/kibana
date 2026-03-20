@@ -10,7 +10,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { preprocessAlertInputs } from './preprocess_alert_inputs';
-import type { WorkflowsRequestHandlerContext } from '../../types';
+import type { WorkflowsRequestHandlerContext } from '../../../types';
 
 describe('preprocessAlertInputs', () => {
   let mockEsClient: { mget: jest.Mock };

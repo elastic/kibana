@@ -11,7 +11,7 @@ import type { RequestHandler, RouteMethod } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { type CheckLicense, wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { WorkflowsRequestHandlerContext } from '../../types';
+import type { WorkflowsRequestHandlerContext } from '../../../types';
 
 const RequiredLicenseType: LicenseType = 'enterprise';
 

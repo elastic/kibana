@@ -9,12 +9,12 @@
 
 import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
-import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { handleRouteError } from './route_error_handlers';
-import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
-import { withLicenseCheck } from '../lib/with_license_check';
-import { preprocessAlertInputs } from '../utils/preprocess_alert_inputs';
+import { preprocessAlertInputs } from './utils/preprocess_alert_inputs';
+import { WORKFLOW_ROUTE_OPTIONS } from './utils/route_constants';
+import { handleRouteError } from './utils/route_error_handlers';
+import { WORKFLOW_EXECUTE_SECURITY } from './utils/route_security';
+import { withLicenseCheck } from './utils/with_license_check';
 
 export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.post(

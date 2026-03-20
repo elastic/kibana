@@ -16,7 +16,7 @@ import {
   createMockWorkflowsApi,
   createSpacesMock,
   mockLogger,
-} from './test_utils';
+} from './utils/test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 jest.mock('../lib/with_license_check');
