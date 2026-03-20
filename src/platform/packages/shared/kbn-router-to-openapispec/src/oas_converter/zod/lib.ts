@@ -9,7 +9,7 @@
 
 import { z, isZod } from '@kbn/zod';
 import { z as z4 } from '@kbn/zod/v4';
-import { isPassThroughAny } from '@kbn/zod-helpers';
+import { isPassThroughAny } from '@kbn/zod-helpers/v4';
 import zodToJsonSchema, { jsonDescription } from 'zod-to-json-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 

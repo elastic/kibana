@@ -6,9 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import type { AutomaticImportSamplesProperties } from './storage';
-import { createIndexAdapter } from './storage';
+import { createIndexAdapter, type AutomaticImportSamplesIndexAdapter } from './storage';
 import type { OriginalSource } from '../../../common';
 
 export interface AddSamplesToDataStreamParams {
@@ -16,35 +15,50 @@ export interface AddSamplesToDataStreamParams {
   dataStreamId: string;
   rawSamples: string[];
   originalSource: OriginalSource;
-  authenticatedUser: AuthenticatedUser;
-  esClient: ElasticsearchClient;
+  createdBy: string;
 }
+
 export class AutomaticImportSamplesIndexService {
   private logger: Logger;
+  private internalEsClient: ElasticsearchClient | null = null;
 
   constructor(logger: LoggerFactory) {
     this.logger = logger.get('samplesIndexService');
   }
 
   /**
+   * Initializes the service with the internal ES client. Must be called during plugin start.
+   */
+  public initialize(esClient: ElasticsearchClient): void {
+    this.internalEsClient = esClient;
+  }
+
+  private getAdapter(): AutomaticImportSamplesIndexAdapter {
+    if (!this.internalEsClient) {
+      throw new Error(
+        'AutomaticImportSamplesIndexService not initialized: internal ES client not set'
+      );
+    }
+    return createIndexAdapter({
+      logger: this.logger,
+      esClient: this.internalEsClient,
+    });
+  }
+
+  /**
    * Creates samples documents in the samples index.
    */
   public async addSamplesToDataStream(params: AddSamplesToDataStreamParams) {
-    const { integrationId, dataStreamId, rawSamples, originalSource, authenticatedUser, esClient } =
-      params;
+    const { integrationId, dataStreamId, rawSamples, originalSource, createdBy } = params;
 
-    // Create adapter with the scoped ES client for this request
-    const samplesIndexAdapter = createIndexAdapter({
-      logger: this.logger,
-      esClient,
-    });
+    const samplesIndexAdapter = this.getAdapter();
 
     const operations = rawSamples.map((sample: string) => {
       const document: Omit<AutomaticImportSamplesProperties, '_id'> = {
         integration_id: integrationId,
         data_stream_id: dataStreamId,
         log_data: sample,
-        created_by: authenticatedUser.username,
+        created_by: createdBy,
         original_source: {
           source_type: originalSource.sourceType,
           source_value: originalSource.sourceValue,
@@ -67,19 +81,10 @@ export class AutomaticImportSamplesIndexService {
    * Gets samples for a data stream
    * @param integrationId - The integration ID
    * @param dataStreamId - The data stream ID
-   * @param esClient - The Elasticsearch client to use (scoped to the user)
    * @returns The samples for the data stream
    */
-  public async getSamplesForDataStream(
-    integrationId: string,
-    dataStreamId: string,
-    esClient: ElasticsearchClient
-  ) {
-    // Create adapter with the scoped ES client for this request
-    const samplesIndexAdapter = createIndexAdapter({
-      logger: this.logger,
-      esClient,
-    });
+  public async getSamplesForDataStream(integrationId: string, dataStreamId: string) {
+    const samplesIndexAdapter = this.getAdapter();
 
     const results = await samplesIndexAdapter.getClient().search({
       query: {
@@ -103,19 +108,10 @@ export class AutomaticImportSamplesIndexService {
    * Deletes all samples for a data stream
    * @param integrationId - The integration ID
    * @param dataStreamId - The data stream ID
-   * @param esClient - The Elasticsearch client to use (scoped to the user)
    * @returns The number of deleted samples
    */
-  public async deleteSamplesForDataStream(
-    integrationId: string,
-    dataStreamId: string,
-    esClient: ElasticsearchClient
-  ) {
-    // Create adapter with the scoped ES client for this request
-    const samplesIndexAdapter = createIndexAdapter({
-      logger: this.logger,
-      esClient,
-    });
+  public async deleteSamplesForDataStream(integrationId: string, dataStreamId: string) {
+    const samplesIndexAdapter = this.getAdapter();
 
     let deletedCount = 0;
     let hasMore = true;
