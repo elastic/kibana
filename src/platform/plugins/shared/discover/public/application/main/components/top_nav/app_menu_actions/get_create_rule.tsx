@@ -40,7 +40,7 @@ export function CreateESQLRuleFlyout({
   const currentTab = selectTab(getState(), tabId);
   const query = (currentTab.appState.query as AggregateQuery)?.esql || '';
 
-  const { http, data, dataViews, notifications, history, core } = services;
+  const { http, data, dataViews, notifications, history, core, lens } = services;
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -75,6 +75,7 @@ export function CreateESQLRuleFlyout({
           dataViews,
           notifications,
           application: core.application,
+          lens,
         }}
         query={query}
         onClose={onClose}

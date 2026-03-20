@@ -8,30 +8,13 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { TimeFieldSelect } from './time_field_select';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 import * as useDataFieldsModule from '../hooks/use_data_fields';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../hooks/use_data_fields');
 
-const mockHttp = httpServiceMock.createStartContract();
-const mockDataViews = dataViewPluginMocks.createStartContract();
-const mockData = dataPluginMock.createStartContract();
-const mockNotifications = notificationServiceMock.createStartContract();
-const mockApplication = applicationServiceMock.createStartContract();
-
-const mockServices = {
-  http: mockHttp,
-  data: mockData,
-  dataViews: mockDataViews,
-  notifications: mockNotifications,
-  application: mockApplication,
-};
+const mockServices = createMockServices();
 
 describe('TimeFieldSelect', () => {
   beforeEach(() => {
@@ -141,8 +124,8 @@ describe('TimeFieldSelect', () => {
     expect(useDataFieldsModule.useDataFields).toHaveBeenCalledWith(
       expect.objectContaining({
         query: 'FROM logs-*',
-        http: mockHttp,
-        dataViews: mockDataViews,
+        http: mockServices.http,
+        dataViews: mockServices.dataViews,
       })
     );
   });
