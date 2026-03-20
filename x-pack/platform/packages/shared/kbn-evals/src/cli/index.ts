@@ -18,6 +18,7 @@ import { startCmd } from './commands/start';
 import { stopCmd } from './commands/stop';
 import { logsCmd } from './commands/logs';
 import { scoutCmd } from './commands/scout';
+import { clearIndexCmd } from './commands/clear_index';
 
 export async function run() {
   await new RunWithCommands(
@@ -30,6 +31,7 @@ export async function run() {
       stopCmd,
       logsCmd,
       scoutCmd,
+      clearIndexCmd,
       runSuiteCmd,
       listSuitesCmd,
       labelsCmd,

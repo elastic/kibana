@@ -177,10 +177,12 @@ const getExistingApiKey = (configPath: string): string | null => {
 
 const runConfigInit = async (
   repoRoot: string,
-  log: { info: (msg: string) => void; warning: (msg: string) => void }
+  log: { info: (msg: string) => void; warning: (msg: string) => void },
+  options?: { profile?: string }
 ): Promise<boolean> => {
   const configDir = Path.resolve(repoRoot, CONFIG_DIR);
-  const configPath = Path.join(configDir, CONFIG_FILENAME);
+  const configFileName = options?.profile ? `config.${options.profile}.json` : CONFIG_FILENAME;
+  const configPath = Path.join(configDir, configFileName);
   const examplePath = Path.join(configDir, CONFIG_EXAMPLE_FILENAME);
   const userIdentifier = resolveUserIdentifier();
 
@@ -188,11 +190,11 @@ const runConfigInit = async (
 
   if (Fs.existsSync(configPath)) {
     existingApiKey = getExistingApiKey(configPath);
-    log.info(`Config already exists at ${CONFIG_DIR}/${CONFIG_FILENAME}`);
+    log.info(`Config already exists at ${CONFIG_DIR}/${configFileName}`);
     const { overwrite } = await inquirer.prompt<{ overwrite: boolean }>({
       type: 'confirm',
       name: 'overwrite',
-      message: 'Overwrite existing config.json?',
+      message: `Overwrite existing ${configFileName}?`,
       default: false,
     });
     if (!overwrite) {
@@ -212,13 +214,37 @@ const runConfigInit = async (
   example.contact = userIdentifier;
   example.owner = userIdentifier;
 
+  const profile = options?.profile;
+  const isLocalProfile = profile === 'local';
+  if (isLocalProfile) {
+    // Local profile is intended for exporting results/traces to a local ES/Kibana.
+    setNestedValue(example, 'evaluationsEs.url', 'http://elastic:changeme@localhost:9200');
+    setNestedValue(example, 'evaluationsEs.apiKey', '');
+    setNestedValue(example, 'tracingEs.url', 'http://elastic:changeme@localhost:9200');
+    setNestedValue(example, 'tracingEs.apiKey', '');
+    example.tracingExporters = [{ http: { url: 'http://localhost:4318/v1/traces' } }];
+
+    // This profile doesn't need golden-cluster dataset/GCS settings.
+    delete example.evaluationsKbn;
+    delete example.gcsDatasetAccessCredentials;
+
+    // Avoid prompting for unrelated secrets in the local export profile.
+    setNestedValue(example, 'litellm.virtualKey', '');
+    setNestedValue(example, 'litellm.teamId', '');
+    setNestedValue(example, 'evaluationConnectorId', '');
+  }
+
   log.info('');
   log.info('The config has sensible URL defaults. You only need to fill in secret values.');
   log.info('');
 
   // --- Golden cluster API key ---
+  if (isLocalProfile) {
+    log.info('Skipping golden cluster API key setup for local profile.');
+    log.info('');
+  }
   let reusingKey = false;
-  if (existingApiKey) {
+  if (!isLocalProfile && existingApiKey) {
     const { reuseKey } = await inquirer.prompt<{ reuseKey: boolean }>({
       type: 'confirm',
       name: 'reuseKey',
@@ -239,7 +265,7 @@ const runConfigInit = async (
     }
   }
 
-  if (!reusingKey) {
+  if (!isLocalProfile && !reusingKey) {
     const { useAutoKey } = await inquirer.prompt<{ useAutoKey: boolean }>({
       type: 'confirm',
       name: 'useAutoKey',
@@ -311,36 +337,38 @@ const runConfigInit = async (
   }
 
   // --- GCS credentials ---
-  const { wantGcs } = await inquirer.prompt<{ wantGcs: boolean }>({
-    type: 'confirm',
-    name: 'wantGcs',
-    message: 'Do you have GCS service account credentials for snapshot datasets?',
-    default: false,
-  });
-
-  if (!wantGcs) {
-    delete example.gcsDatasetAccessCredentials;
-  } else {
-    const { gcsPath } = await inquirer.prompt<{ gcsPath: string }>({
-      type: 'input',
-      name: 'gcsPath',
-      message: 'Path to GCS service account JSON file (leave empty to fill later):',
-      default: '',
+  if (!isLocalProfile) {
+    const { wantGcs } = await inquirer.prompt<{ wantGcs: boolean }>({
+      type: 'confirm',
+      name: 'wantGcs',
+      message: 'Do you have GCS service account credentials for snapshot datasets?',
+      default: false,
     });
-    if (gcsPath.trim() && Fs.existsSync(gcsPath.trim())) {
-      try {
-        const gcsCreds = JSON.parse(Fs.readFileSync(gcsPath.trim(), 'utf-8'));
-        example.gcsDatasetAccessCredentials = gcsCreds;
-        log.info('GCS credentials loaded from file.');
-      } catch {
-        log.warning('Failed to parse GCS credentials file. Fill in config.json manually.');
+
+    if (!wantGcs) {
+      delete example.gcsDatasetAccessCredentials;
+    } else {
+      const { gcsPath } = await inquirer.prompt<{ gcsPath: string }>({
+        type: 'input',
+        name: 'gcsPath',
+        message: 'Path to GCS service account JSON file (leave empty to fill later):',
+        default: '',
+      });
+      if (gcsPath.trim() && Fs.existsSync(gcsPath.trim())) {
+        try {
+          const gcsCreds = JSON.parse(Fs.readFileSync(gcsPath.trim(), 'utf-8'));
+          example.gcsDatasetAccessCredentials = gcsCreds;
+          log.info('GCS credentials loaded from file.');
+        } catch {
+          log.warning('Failed to parse GCS credentials file. Fill in config.json manually.');
+        }
       }
     }
   }
 
   Fs.writeFileSync(configPath, JSON.stringify(example, null, 2) + '\n');
   log.info('');
-  log.info(`Config written to ${CONFIG_DIR}/${CONFIG_FILENAME}`);
+  log.info(`Config written to ${CONFIG_DIR}/${configFileName}`);
   log.info('Edit it to fill in any remaining REPLACE_ME values.');
   log.info('');
   log.info('Start an eval (config is loaded automatically):');
@@ -432,18 +460,20 @@ export const initCmd: Command<void> = {
   `,
   flags: {
     boolean: ['skip-discovery'],
+    string: ['profile'],
     default: { 'skip-discovery': false },
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
     const positionals = flagsReader.getPositionals();
     const configOnly = positionals.includes('config');
+    const profile = flagsReader.string('profile') ?? undefined;
 
     log.info('Welcome to kbn-evals setup!');
     log.info('');
 
     // Step 0: Config init (always runs first)
-    await runConfigInit(repoRoot, log);
+    await runConfigInit(repoRoot, log, { profile });
 
     if (configOnly) {
       return;

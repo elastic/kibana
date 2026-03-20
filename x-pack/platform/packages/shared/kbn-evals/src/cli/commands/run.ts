@@ -12,9 +12,31 @@ import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolveEvalSuites } from '../suites';
 import { promptForSuite, promptForConnector, isTTY } from '../prompts';
+import { defaultExportProfile, envFromDatasetsProfile, envFromExportProfile } from '../profiles';
 
 const EXECUTORS = ['phoenix', 'kibana'] as const;
 type Executor = (typeof EXECUTORS)[number];
+
+// Any HTTP response (including 401/503) means the service is listening.
+// We only care that the port is up, not that auth is configured yet.
+const probeHttp = async (url: string): Promise<boolean> => {
+  try {
+    await fetch(url, { signal: AbortSignal.timeout(2000) });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const stripTrailingSlash = (url: string): string => url.replace(/\/$/, '');
+
+const isExportProfileImplicitLocal = (flagsReader: any, exportProfile?: string): boolean => {
+  if (exportProfile !== 'local') return false;
+  const hasExplicitExport = Boolean(
+    flagsReader.string('export-profile') ?? flagsReader.string('profile')
+  );
+  return !hasExplicitExport;
+};
 
 const formatEnvPrefix = (overrides: Record<string, string>) =>
   Object.entries(overrides)
@@ -63,6 +85,9 @@ export const runSuiteCmd: Command<void> = {
       'evaluation-connector-id',
       'repetitions',
       'grep',
+      'profile',
+      'datasets-profile',
+      'export-profile',
       'trace-es-url',
       'trace-es-api-key',
       'evaluations-es-url',
@@ -120,6 +145,49 @@ export const runSuiteCmd: Command<void> = {
     if (suite) {
       envOverrides.EVAL_SUITE_ID = suite.id;
     }
+
+    const baseProfile = flagsReader.string('profile') ?? undefined;
+    const datasetsProfile = flagsReader.string('datasets-profile') ?? baseProfile;
+    const exportProfile =
+      flagsReader.string('export-profile') ?? baseProfile ?? defaultExportProfile(repoRoot);
+
+    Object.assign(envOverrides, envFromDatasetsProfile(repoRoot, datasetsProfile));
+    Object.assign(
+      envOverrides,
+      envFromExportProfile(repoRoot, exportProfile, {
+        defaultTracingExporters: exportProfile === 'local',
+      })
+    );
+
+    if (isExportProfileImplicitLocal(flagsReader, exportProfile)) {
+      const evaluationsEsUrl = envOverrides.EVALUATIONS_ES_URL;
+      const tracingEsUrl = envOverrides.TRACING_ES_URL;
+
+      const [evalsReachable, tracingReachable] = await Promise.all([
+        evaluationsEsUrl ? probeHttp(stripTrailingSlash(evaluationsEsUrl)) : Promise.resolve(true),
+        tracingEsUrl ? probeHttp(stripTrailingSlash(tracingEsUrl)) : Promise.resolve(true),
+      ]);
+
+      if (!evalsReachable) {
+        log.warning(
+          `Export profile \"local\" was auto-selected but EVALUATIONS_ES_URL is not reachable (${evaluationsEsUrl}). ` +
+            'Continuing without exporting evaluation results. To require export, pass --export-profile local.'
+        );
+        delete envOverrides.EVALUATIONS_ES_URL;
+        delete envOverrides.EVALUATIONS_ES_API_KEY;
+      }
+
+      if (!tracingReachable) {
+        log.warning(
+          `Export profile \"local\" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
+            'Continuing without external trace queries. To require export, pass --export-profile local.'
+        );
+        delete envOverrides.TRACING_ES_URL;
+        delete envOverrides.TRACING_ES_API_KEY;
+      }
+    }
+
+    log.info(`Profiles: datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`);
 
     if (executor === 'phoenix') {
       envOverrides.KBN_EVALS_EXECUTOR = 'phoenix';
@@ -194,10 +262,16 @@ export const runSuiteCmd: Command<void> = {
     }
 
     await new Promise<void>((resolve, reject) => {
+      const childEnv: Record<string, string> = { ...process.env, ...envOverrides } as Record<
+        string,
+        string
+      >;
+      // Kibana exits on unrecognized Node warnings; avoid Playwright NO_COLOR warning.
+      delete childEnv.NO_COLOR;
       const child = spawn('node', args, {
         cwd: repoRoot,
         stdio: 'inherit',
-        env: { ...process.env, ...envOverrides },
+        env: childEnv,
       });
 
       child.on('exit', (code) => {

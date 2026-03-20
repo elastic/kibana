@@ -13,6 +13,7 @@ import type { Command } from '@kbn/dev-cli-runner';
 import { parseConnectorsFromEnv, isTTY } from '../prompts';
 import { isServiceRunning, readState } from '../services';
 import { safeExec } from '../utils';
+import { defaultExportProfile, readVaultConfig, resolveVaultConfigPath } from '../profiles';
 
 const SCOUT_LOCAL_SERVER_CONFIG_PATH = '.scout/servers/local.json';
 
@@ -241,5 +242,23 @@ export const doctorCmd: Command<void> = {
     log.info('');
     log.info('Quick start:');
     log.info('  node scripts/evals start --suite <suite-id>');
+
+    // --- Profile hint: golden datasets + local export ---
+    const goldenConfigExists = readVaultConfig(repoRoot) !== undefined;
+    const localProfile = defaultExportProfile(repoRoot);
+    const localConfigExists = localProfile != null;
+    if (goldenConfigExists) {
+      log.info('');
+      log.info('Tip: golden datasets + local export');
+      log.info(
+        `  (datasets from ${resolveVaultConfigPath(repoRoot)}; export via ${
+          localConfigExists ? resolveVaultConfigPath(repoRoot, localProfile) : 'local defaults'
+        })`
+      );
+      if (!localConfigExists) {
+        log.info('  Create local export profile: node scripts/evals init config --profile local');
+      }
+      log.info('  node scripts/evals start --suite attack-discovery --export-profile local');
+    }
   },
 };

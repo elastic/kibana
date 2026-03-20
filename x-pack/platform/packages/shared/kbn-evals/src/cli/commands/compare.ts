@@ -12,7 +12,7 @@ import { EvaluationScoreRepository } from '../../utils/score_repository';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
 import { computePairedTTestResults, pairScores } from '../../utils/statistical_analysis';
 
-const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9220';
+const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9200';
 
 export const compareCmd: Command<void> = {
   name: 'compare',

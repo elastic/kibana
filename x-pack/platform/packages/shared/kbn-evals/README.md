@@ -112,14 +112,47 @@ node scripts/evals start --suite agent-builder
 `evals init` walks you through EIS (Cloud Connected Mode) connector discovery or validates existing connectors in `kibana.dev.yml`. It outputs an `export KIBANA_TESTING_AI_CONNECTORS="..."` command to paste into your shell.
 
 `evals start` orchestrates the full stack in one terminal:
-1. Starts the EDOT collector (Docker) for trace capture -- exports traces to your local ES from `kibana.dev.yml`
+1. Starts the EDOT collector (Docker) for trace capture -- exports traces to the configured tracing Elasticsearch cluster (via `TRACING_ES_URL`)
 2. Starts Scout (ES + Kibana with `evals_tracing` config)
 3. Enables EIS CCM on the Scout ES cluster (if using EIS connectors)
-4. Runs the Playwright eval suite with `TRACING_ES_URL` pointing to your local ES
+4. Runs the Playwright eval suite with `TRACING_ES_URL` pointing to the configured tracing cluster
 
 EDOT and Scout run as **persistent background daemons** -- they stay alive between eval runs for faster iteration. Use `node scripts/evals stop` to shut them down when you're done.
 
 Both commands prompt interactively when flags are omitted (suite, connector, model). Pass `--skip-server` to skip EDOT/Scout startup if you already have them running.
+
+#### Profiles: golden datasets + local export (recommended for UI iteration)
+
+For iterating on the Evals UI (runs list / run detail pages), it’s often useful to:
+
+- **Read datasets from the golden cluster** (shared, curated datasets)
+- **Write results + traces to your local Elasticsearch/Kibana** (`http://localhost:9200` / `http://localhost:5601`)
+
+The Evals CLI supports this via **vault config profiles** in:
+
+- `x-pack/platform/packages/shared/kbn-evals/scripts/vault/`
+- `config.json` (default)
+- `config.<profile>.json` (e.g. `config.local.json`)
+
+Create the profiles:
+
+```bash
+# 1) Golden cluster config (datasets + keys)
+node scripts/evals init config
+
+# 2) Local export profile (results + traces to localhost:9200, no golden API key setup)
+node scripts/evals init config --profile local
+```
+
+Run a suite using golden datasets but exporting locally:
+
+```bash
+node scripts/evals start --suite attack-discovery --export-profile local
+```
+
+Notes:
+- `--datasets-profile <name>` loads `EVALUATIONS_KBN_URL` / `EVALUATIONS_KBN_API_KEY` from `config.<name>.json`
+- `--export-profile <name>` loads `EVALUATIONS_ES_URL`, `TRACING_ES_URL`, and `TRACING_EXPORTERS` from `config.<name>.json`
 
 #### Filtering tests with `--grep`
 
@@ -361,7 +394,7 @@ telemetry.tracing.exporters:
 If you want EDOT to store traces in a specific Elasticsearch cluster, override via env:
 
 ```bash
-ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
+ELASTICSEARCH_HOST=http://localhost:9200 node scripts/edot_collector.js
 ```
 
 If you want to view traces in the Phoenix UI, configure a Phoenix exporter in `kibana.dev.yml`:
@@ -438,7 +471,7 @@ Start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector to rece
 ```bash
 # Optionally use non-default ports using --http-port <http-port> or --grpc-port <grpc-port>
 # You must update the tracing exporters with the right port in kibana.dev.yml
-ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
+ELASTICSEARCH_HOST=http://localhost:9200 node scripts/edot_collector.js
 ```
 
 The EDOT Collector receives traces from Kibana via the HTTP exporter and stores them in your local Elasticsearch cluster. Alternatively, you can use a managed OTLP endpoint instead of running EDOT Collector locally (this hasn't been tested yet though).
