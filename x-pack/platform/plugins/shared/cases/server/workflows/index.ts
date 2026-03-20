@@ -14,7 +14,6 @@ import { createCaseStepDefinition } from './steps/create_case';
 // import { createCaseFromTemplateStepDefinition } from './steps/create_case_from_template';
 import { updateCaseStepDefinition } from './steps/update_case';
 import { updateCasesStepDefinition } from './steps/update_cases';
-import { setCustomFieldStepDefinition } from './steps/set_custom_field';
 import { addCommentStepDefinition } from './steps/add_comment';
 import { findCasesStepDefinition } from './steps/find_cases';
 import { deleteCasesStepDefinition } from './steps/delete_cases';
