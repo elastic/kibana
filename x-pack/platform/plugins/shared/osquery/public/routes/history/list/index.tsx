@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
@@ -13,7 +13,7 @@ import React, { useMemo } from 'react';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { ActionsTable } from '../../../actions/actions_table';
 import { UnifiedHistoryTable } from '../../../actions/unified_history_table';
-import { WithHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, WithoutHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
@@ -44,10 +44,11 @@ const HistoryPageComponent = () => {
 
   if (isHistoryEnabled) {
     return (
-      <div css={fullWidthContentCss}>
-        <EuiSpacer size="l" />
-        <UnifiedHistoryTable />
-      </div>
+      <WithoutHeaderLayout restrictWidth={false}>
+        <div css={fullWidthContentCss}>
+          <UnifiedHistoryTable />
+        </div>
+      </WithoutHeaderLayout>
     );
   }
 

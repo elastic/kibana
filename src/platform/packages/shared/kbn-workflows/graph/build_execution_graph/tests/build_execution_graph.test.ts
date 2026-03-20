@@ -8,17 +8,18 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type {
-  ConnectorStep,
-  ElasticsearchStep,
-  ForEachStep,
-  IfStep,
-  KibanaStep,
-  LoopBreakStep,
-  LoopContinueStep,
-  WaitStep,
-  WhileStep,
-  WorkflowYaml,
+import {
+  type ConnectorStep,
+  DEFAULT_LOOP_MAX_ITERATIONS,
+  type ElasticsearchStep,
+  type ForEachStep,
+  type IfStep,
+  type KibanaStep,
+  type LoopBreakStep,
+  type LoopContinueStep,
+  type WaitStep,
+  type WhileStep,
+  type WorkflowYaml,
 } from '../../../spec/schema';
 import type {
   AtomicGraphNode,
@@ -780,6 +781,8 @@ describe('convertToWorkflowGraph', () => {
           stepType: 'foreach',
           stepId: 'testForeachStep',
           startNodeId: 'enterForeach_testForeachStep',
+          maxIterations: DEFAULT_LOOP_MAX_ITERATIONS,
+          onLimit: 'continue',
         } as ExitForeachNode);
       });
 
@@ -945,6 +948,8 @@ describe('convertToWorkflowGraph', () => {
           stepId: 'foreach_testForeachConnectorStep',
           stepType: 'foreach',
           startNodeId: 'enterForeach_foreach_testForeachConnectorStep',
+          maxIterations: DEFAULT_LOOP_MAX_ITERATIONS,
+          onLimit: 'continue',
         } as ExitForeachNode);
       });
     });
