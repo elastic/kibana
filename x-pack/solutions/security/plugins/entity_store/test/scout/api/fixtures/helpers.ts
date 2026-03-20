@@ -174,8 +174,9 @@ export const assertNotResolved = async (
  * Triggers a maintainer run by calling the async `run/{id}` endpoint.
  * The route calls `taskManager.runSoon()` — it does NOT wait for completion.
  *
- * Retries on 500 "currently running" errors, which happen when the scheduler
- * fires an automatic run that overlaps with the manual trigger.
+ * Retries on 500 errors, which happen when the scheduler fires an automatic
+ * run that overlaps with the manual trigger. Kibana wraps the actual
+ * "currently running" error in a generic 500 body, so we retry on any 500.
  */
 export const triggerMaintainerRun = async (
   apiClient: ForceLogExtractionApiClient,
@@ -198,9 +199,8 @@ export const triggerMaintainerRun = async (
     }
 
     const body = JSON.stringify(response.body);
-    const isCurrentlyRunning = response.statusCode === 500 && body.includes('currently running');
 
-    if (isCurrentlyRunning && attempt < maxRetries) {
+    if (response.statusCode === 500 && attempt < maxRetries) {
       await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
       continue;
     }
