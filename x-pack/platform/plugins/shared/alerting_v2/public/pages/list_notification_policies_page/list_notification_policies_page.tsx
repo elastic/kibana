@@ -123,15 +123,15 @@ export const ListNotificationPoliciesPage = () => {
     sortOrder: sortDirection,
   });
 
-  const handleSearchChange = (value: string) => {
+  const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
     setPage(0);
-  };
+  }, []);
 
-  const handleEnabledChange = (value: string) => {
+  const handleEnabledChange = useCallback((value: string) => {
     setEnabled(value);
     setPage(0);
-  };
+  }, []);
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -140,9 +140,11 @@ export const ListNotificationPoliciesPage = () => {
     page: tablePage,
     sort,
   }: CriteriaWithPagination<NotificationPolicyResponse>) => {
-    setPage(tablePage.index);
-    setPerPage(tablePage.size);
-    clearSelection();
+    if (tablePage) {
+      setPage(tablePage.index);
+      setPerPage(tablePage.size);
+    }
+
     if (sort) {
       setSortField(sort.field as 'name' | 'updatedAt' | 'updatedByUsername');
       setSortDirection(sort.direction);
@@ -187,10 +189,10 @@ export const ListNotificationPoliciesPage = () => {
 
   const selection: EuiTableSelectionType<NotificationPolicyResponse> = {
     onSelectionChange,
-    selected: selectedPolicies,
     selectable: () => {
       return !isBulkActionInProgress;
     },
+    selected: selectedPolicies,
   };
 
   const columns: Array<EuiBasicTableColumn<NotificationPolicyResponse>> = [
