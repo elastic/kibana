@@ -156,7 +156,7 @@ function buildRcaSkillContent(): string {
 
     **Hypothesis confidence scoring:**
 
-    \`severity_score\` and \`confidence\` use a 0–100 scale. The combinations below are **heuristics**:
+    \`severity_score\` and \`confidence\` use a 0-100 scale. The combinations below are **heuristics**:
     when scores sit near a boundary, prefer **relative ordering among the KIs returned in this response**
     (higher = stronger evidence) rather than treating any numeric cutoff as absolute.
 
@@ -176,7 +176,7 @@ function buildRcaSkillContent(): string {
     *Query KIs* (\`kind: "query"\`):
     - \`query.title\` + \`query.description\`: what condition this detects — this IS the hypothesis claim
     - \`query.esql.query\`: the verbatim ES|QL that tests the condition — this IS your test query
-    - \`query.severity_score\`: 0–100, aligned with anomaly detection scoring
+    - \`query.severity_score\`: 0-100, aligned with anomaly detection scoring
     - \`query.evidence\`: human context about why this query was created (often names the root cause directly)
     - \`rule.backed\`: true = active Kibana alert rule monitoring this in production (highest-trust signal)
     - A backed query that fires = the condition its operator defined as "alertworthy" is currently true
@@ -189,7 +189,7 @@ function buildRcaSkillContent(): string {
       - \`log_samples\`: representative raw documents from the stream
     - \`feature.description\`: what pattern was observed — use this as the hypothesis claim
     - \`feature.properties\`: structured data about the pattern (field names, values, counts) — use for query construction
-    - \`feature.confidence\`: 0–100 reliability. **Higher** values mean the pattern is more consistently observed — compare within the returned feature set.
+    - \`feature.confidence\`: 0-100 reliability. **Higher** values mean the pattern is more consistently observed — compare within the returned feature set.
     - \`feature.evidence\`: human-readable supporting facts (may name the error type, field, or component directly)
     - \`feature.filter\`: - \`feature.filter\`: a structured JSON condition (streamlang format) scoping this feature to the
       data subset it was computed on — **not** a KQL string. You MUST use this same filter in any
