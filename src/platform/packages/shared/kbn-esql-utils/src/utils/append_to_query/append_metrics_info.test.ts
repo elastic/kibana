@@ -21,9 +21,10 @@ describe('buildMetricsInfoQuery', () => {
     expect(buildMetricsInfoQuery('TS INDEX')).toBe(`TS INDEX\n | METRICS_INFO`);
   });
 
-  it('returns query as-is when it already ends with METRICS_INFO and no dimension filter', () => {
-    const query = 'TS INDEX | METRICS_INFO';
-    expect(buildMetricsInfoQuery(query)).toBe(query);
+  it('returns query as-is when METRICS_INFO is already in the pipeline', () => {
+    expect(buildMetricsInfoQuery('TS INDEX | METRICS_INFO')).toBe('TS INDEX | METRICS_INFO');
+    const withLimit = 'TS INDEX | METRICS_INFO | LIMIT 100';
+    expect(buildMetricsInfoQuery(withLimit)).toBe(withLimit);
   });
 
   it('does not add dimension filter when dimensionFieldNames is empty', () => {

@@ -35,15 +35,17 @@ export function buildMetricsInfoQuery(esql?: string, dimensions?: string[]): str
     return '';
   }
 
-  const hasLimit = Walker.matchAll(root, { type: 'command', name: 'limit' }).length > 0;
-  // Remove sort cause sorting for METRCS_INFO the user needs to pass only the fields from METRICS_INFO response
-  const baseCommands = root.commands.filter((cmd) => cmd.name !== 'sort' && cmd.name !== 'limit');
-  const baseQuery = BasicPrettyPrinter.print({ ...root, commands: baseCommands }).trim();
-
   // Avoid double append
-  if (/metrics_info\s*$/i.test(trimmed) || trimmed.toUpperCase().endsWith('| METRICS_INFO')) {
+  const hasMetricsInfo =
+    Walker.matchAll(root, { type: 'command', name: 'metrics_info' }).length > 0;
+  if (hasMetricsInfo) {
     return trimmed;
   }
+
+  const hasLimit = Walker.matchAll(root, { type: 'command', name: 'limit' }).length > 0;
+  // Remove sort cause sorting for METRICS_INFO the user needs to pass only the fields from METRICS_INFO response
+  const baseCommands = root.commands.filter((cmd) => cmd.name !== 'sort' && cmd.name !== 'limit');
+  const baseQuery = BasicPrettyPrinter.print({ ...root, commands: baseCommands }).trim();
 
   const filteringDimensions =
     dimensions?.map((dimension) => `${sanitazeESQLInput(dimension)} IS NOT NULL`).join(' AND ') ??
