@@ -38,8 +38,8 @@ interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
 }
 
 const customButtonStyles = css({
-  borderTopLeftRadius: 0,
-  borderBottomLeftRadius: 0,
+  borderTopRightRadius: 0,
+  borderBottomRightRadius: 0,
 });
 
 const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
