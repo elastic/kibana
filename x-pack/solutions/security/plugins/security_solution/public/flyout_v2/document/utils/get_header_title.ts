@@ -49,13 +49,47 @@ export const EVENT_CATEGORY_TO_FIELD: Record<string, string> = {
   web: '',
 };
 
+export type FieldAccessor = (fieldName: string) => string | undefined;
+
+/**
+ * Returns the alert title based on the rule name, or a default title.
+ */
+export const getAlertTitle = (ruleName?: string | null): string => {
+  return ruleName ?? DEFAULT_DOCUMENT_TITLE;
+};
+
+/**
+ * Returns a human-readable title for an event based on its event.kind and event.category fields.
+ * Uses a generic field accessor to look up the mapped field value.
+ */
+export const getEventTitle = (
+  eventKind: string | null | undefined,
+  eventCategory: string | null | undefined,
+  getField: FieldAccessor
+): string => {
+  if (eventKind === 'event' && eventCategory) {
+    const fieldName = EVENT_CATEGORY_TO_FIELD[eventCategory];
+    if (fieldName) {
+      return getField(fieldName) ?? DEFAULT_EVENT_TITLE;
+    }
+    return DEFAULT_EVENT_TITLE;
+  }
+
+  if (eventKind === 'alert') {
+    return EXTERNAL_ALERT_TITLE;
+  }
+
+  return eventKind
+    ? i18n.translate('xpack.securitySolution.flyout.title.otherEventTitle', {
+        defaultMessage: '{eventKind} details',
+        values: { eventKind: startCase(eventKind) },
+      })
+    : DEFAULT_EVENT_TITLE;
+};
+
 /**
  * Returns a human-readable title for a document based on its event.kind and event.category fields.
- * - For signals (alerts): returns the rule name or a default title
- * - For events with a known category: returns the value of the mapped field
- * - For external alerts: returns "External alert details"
- * - For other event kinds: returns "{eventKind} details"
- * - Fallback: "Event details"
+ * Convenience wrapper for flyout_v2 consumers that takes a DataTableRecord.
  */
 export const getDocumentTitle = (hit: DataTableRecord): string => {
   const eventKind = getFieldValue(hit, EVENT_KIND) as string | undefined;
@@ -63,33 +97,13 @@ export const getDocumentTitle = (hit: DataTableRecord): string => {
   // Security alert (signal): use rule name
   if (eventKind === EventKind.signal) {
     const ruleName = getFieldValue(hit, ALERT_RULE_NAME) as string | undefined;
-    return ruleName ?? DEFAULT_DOCUMENT_TITLE;
+    return getAlertTitle(ruleName);
   }
 
-  // Event with known category: use mapped field value
-  if (eventKind === EventKind.event) {
-    const eventCategory = getFieldValue(hit, 'event.category') as string | undefined;
-    if (eventCategory) {
-      const fieldName = EVENT_CATEGORY_TO_FIELD[eventCategory];
-      if (fieldName) {
-        return (getFieldValue(hit, fieldName) as string) ?? DEFAULT_EVENT_TITLE;
-      }
-    }
-    return DEFAULT_EVENT_TITLE;
-  }
-
-  // External alert
-  if (eventKind === EventKind.alert) {
-    return EXTERNAL_ALERT_TITLE;
-  }
-
-  // Other event kinds (e.g. "metric", "state", etc.)
-  if (eventKind) {
-    return i18n.translate('xpack.securitySolution.flyout.title.otherEventTitle', {
-      defaultMessage: '{eventKind} details',
-      values: { eventKind: startCase(eventKind) },
-    });
-  }
-
-  return DEFAULT_EVENT_TITLE;
+  const eventCategory = getFieldValue(hit, 'event.category') as string | undefined;
+  return getEventTitle(
+    eventKind,
+    eventCategory,
+    (fieldName) => getFieldValue(hit, fieldName) as string | undefined
+  );
 };
