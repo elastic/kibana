@@ -74,8 +74,7 @@ describe('getActionOptions', () => {
     expect(result[3].id).toBe('ai');
     expect(result[4].id).toBe('data');
     expect(result[5].id).toBe('external');
-    expect(result[6].id).toBe('http');
-    expect(result[7].id).toBe('flowControl');
+    expect(result[6].id).toBe('flowControl');
   });
 
   it('should include trigger options', () => {
