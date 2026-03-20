@@ -198,7 +198,10 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   checked: platform === option.id ? 'on' : undefined,
                   'data-test-subj': option['data-test-subj'],
                 }))}
-                onChange={(_allOptions, _event, option) => setPlatform(option.key)}
+                onChange={(_allOptions, _event, option) => {
+                  setPlatform(option.key);
+                  setShowExtendedPlatforms(false);
+                }}
                 css={{ width: 150 }}
                 listProps={{ paddingSize: 'none', onFocusBadge: false }}
               >

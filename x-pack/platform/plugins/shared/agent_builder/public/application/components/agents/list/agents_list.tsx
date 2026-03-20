@@ -22,7 +22,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type AgentDefinition } from '@kbn/agent-builder-common';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
+import { hasAgentWriteAccess, type AgentDefinition } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
@@ -30,13 +31,19 @@ import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
-import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { AgentVisibilityBadge } from './agent_visibility_badge';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
+  visibility: i18n.translate('xpack.agentBuilder.agents.visibilityColumn', {
+    defaultMessage: 'Visibility',
+  }),
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
 };
 
@@ -57,13 +64,56 @@ const actionLabels = {
   deleteDescription: i18n.translate('xpack.agentBuilder.agents.actions.deleteDescription', {
     defaultMessage: 'Delete agent',
   }),
+  checkingPermissions: i18n.translate('xpack.agentBuilder.agents.actions.checkingPermissions', {
+    defaultMessage: 'Checking permissions…',
+  }),
+};
+
+const canCurrentUserEditAgent = ({
+  agent,
+  manageAgents,
+  experimentalFeaturesEnabled,
+  currentUser,
+  isAdmin,
+  isCurrentUserLoading,
+}: {
+  agent: AgentDefinition;
+  manageAgents: boolean;
+  experimentalFeaturesEnabled: boolean;
+  currentUser?: UserIdAndName | null;
+  isAdmin: boolean;
+  isCurrentUserLoading: boolean;
+}) => {
+  if (agent.readonly || !manageAgents) {
+    return false;
+  }
+
+  // When experimental visibility is off, ignore loading/visibility and allow edit (legacy behaviour).
+  if (!experimentalFeaturesEnabled) {
+    return true;
+  }
+
+  if (isCurrentUserLoading) {
+    return false;
+  }
+
+  return hasAgentWriteAccess({
+    visibility: agent.visibility,
+    owner: agent.created_by,
+    currentUser,
+    isAdmin,
+  });
 };
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
-  const { manageAgents } = useUiPrivileges();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
+  const { manageAgents, isAdmin } = useUiPrivileges();
+  const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser({
+    enabled: isExperimentalFeaturesEnabled,
+  });
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
@@ -74,31 +124,52 @@ export const AgentsList: React.FC = () => {
       render: (agent) => <AgentAvatar agent={agent} size="m" />,
       'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
+    const canEditAgent = (agent: AgentDefinition) =>
+      canCurrentUserEditAgent({
+        agent,
+        manageAgents,
+        experimentalFeaturesEnabled: isExperimentalFeaturesEnabled,
+        currentUser,
+        isAdmin,
+        isCurrentUserLoading,
+      });
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinition> = {
       field: 'name',
       name: columnNames.name,
-      render: (name: string, agent: AgentDefinition) => (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            {agent.readonly ? (
-              <EuiText data-test-subj="agentBuilderAgentsListName" size="s">
-                {name}
-              </EuiText>
-            ) : (
-              <EuiLink
-                data-test-subj="agentBuilderAgentsListName"
-                href={createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id }))}
-              >
-                {name}
-              </EuiLink>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{agent.description}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      render: (name: string, agent: AgentDefinition) => {
+        const canEdit = canEditAgent(agent);
+        const showCheckingTooltip =
+          !canEdit && isExperimentalFeaturesEnabled && isCurrentUserLoading;
+        const nameContent = !canEdit ? (
+          <EuiText data-test-subj="agentBuilderAgentsListName" size="s">
+            {name}
+          </EuiText>
+        ) : (
+          <EuiLink
+            data-test-subj="agentBuilderAgentsListName"
+            href={createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id }))}
+          >
+            {name}
+          </EuiLink>
+        );
+        return (
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              {showCheckingTooltip ? (
+                <EuiToolTip content={actionLabels.checkingPermissions} position="top">
+                  <span tabIndex={0}>{nameContent}</span>
+                </EuiToolTip>
+              ) : (
+                nameContent
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{agent.description}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
       'data-test-subj': 'agentBuilderAgentsListNameAndDescription',
     };
 
@@ -113,6 +184,12 @@ export const AgentsList: React.FC = () => {
         return <Labels labels={labels} />;
       },
       'data-test-subj': 'agentBuilderAgentsListLabels',
+    };
+
+    const agentVisibility: EuiTableComputedColumnType<AgentDefinition> = {
+      name: columnNames.visibility,
+      render: (agent) => <AgentVisibilityBadge agent={agent} />,
+      'data-test-subj': 'agentBuilderAgentsListVisibility',
     };
 
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
@@ -137,7 +214,7 @@ export const AgentsList: React.FC = () => {
           isPrimary: true,
           showOnHover: true,
           href: (agent) => createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id })),
-          available: (agent) => !agent.readonly && manageAgents,
+          available: canEditAgent,
         },
         {
           type: 'icon',
@@ -157,7 +234,7 @@ export const AgentsList: React.FC = () => {
             return (
               <EuiToolTip position="right" content={actionLabels.deleteDescription} delay="long">
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                  <EuiIcon type="trash" color="danger" />
+                  <EuiIcon type="trash" color="danger" aria-hidden={true} />
                   <EuiLink
                     data-test-subj={`agentBuilderAgentsListDelete-${agent.id}`}
                     onClick={() => {
@@ -171,13 +248,23 @@ export const AgentsList: React.FC = () => {
               </EuiToolTip>
             );
           },
-          available: (agent) => !agent.readonly && manageAgents,
+          available: canEditAgent,
         },
       ],
     };
 
-    return [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
-  }, [createAgentBuilderUrl, deleteAgent, manageAgents]);
+    return isExperimentalFeaturesEnabled
+      ? [agentAvatar, agentNameAndDescription, agentVisibility, agentLabels, agentActions]
+      : [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
+  }, [
+    createAgentBuilderUrl,
+    currentUser,
+    deleteAgent,
+    isAdmin,
+    isCurrentUserLoading,
+    manageAgents,
+    isExperimentalFeaturesEnabled,
+  ]);
 
   const errorMessage = useMemo(
     () =>

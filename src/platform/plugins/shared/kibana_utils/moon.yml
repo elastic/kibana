@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/kibana-utils-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/kibana-utils-plugin'
+  title: '@kbn/kibana-utils-plugin'
   description: Moon project for @kbn/kibana-utils-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/kibana_utils
+  sourceRoot: src/platform/plugins/shared/kibana_utils
 dependsOn:
   - '@kbn/core'
   - '@kbn/expect'
@@ -47,14 +46,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

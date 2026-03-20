@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-solution-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-solution'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-plugin'
+  title: '@kbn/security-solution-plugin'
   description: Moon project for @kbn/security-solution-plugin
   channel: ''
   owner: '@elastic/security-solution'
-  metadata:
-    sourceRoot: x-pack/solutions/security/plugins/security_solution
+  sourceRoot: x-pack/solutions/security/plugins/security_solution
 dependsOn:
   - '@kbn/setup-node-env'
   - '@kbn/core'
@@ -276,6 +275,7 @@ dependsOn:
   - '@kbn/as-code-filters-transforms'
   - '@kbn/cps-utils'
   - '@kbn/cps'
+  - '@kbn/esql-language'
   - '@kbn/workflows-ui'
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
@@ -295,6 +295,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - test/scout/**/*
+    - test/scout_security_attacks_alignment/**/*
     - common/**/*.json
     - server/**/*.json
     - scripts/**/*.json

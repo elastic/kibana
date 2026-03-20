@@ -132,16 +132,13 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           fields={fields}
           packageInfo={packageInfo}
           onChange={(key, value) => {
-            // Use schema-based lookup to map var names to credential properties
             const credentialKey = getCredentialKeyFromVarName('azure', key);
 
-            // If we have credentials and setCredentials, update via credentials state
             if (credentials && isAzureCredentials(credentials) && setCredentials && credentialKey) {
               setCredentials({ ...credentials, [credentialKey]: value });
               return;
             }
 
-            // Fallback: update policy directly when credentials or setCredentials is unavailable
             if (credentialKey) {
               const updatedPolicy = writeCredentials(
                 newPolicy,

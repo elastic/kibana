@@ -132,11 +132,7 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
       ${chromeStyle === 'project' && `border-radius: ${_euiTheme.border.radius.medium};`}
     }
 
-    // adjust position of all the right flyouts relative to the application area
     .euiFlyout[class*='right'] {
-      ${logicalCSS('top', layoutVar('application.top', '0px'))};
-      ${logicalCSS('right', layoutVar('application.right', '0px'))};
-      ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
       // match the application area border-radius on the right edge,
       // but not for side-by-side child flyouts since they aren't positioned at the rightmost edge
       ${chromeStyle === 'project' &&
@@ -149,13 +145,11 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
         }`}
     }
 
-    // if the overlay mask exists that is above the header, set the top, right and bottom of the right flyouts to 0
+    // When overlay is above the header (full-viewport modal style), only border-radius
+    // is overridden; positioning is left to the flyout's reference container.
     .euiOverlayMask[data-relative-to-header='above']
       + [data-euiportal='true']
       .euiFlyout[class*='right'] {
-      ${logicalCSS('top', 0)};
-      ${logicalCSS('right', 0)};
-      ${logicalCSS('bottom', 0)};
       border-radius: 0;
     }
   }

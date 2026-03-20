@@ -38,13 +38,14 @@ export interface LiveHistoryRow extends UnifiedHistoryRowBase {
   agentAll?: boolean;
   agentPlatforms?: string[];
   agentPolicyIds?: string[];
+  tags?: string[];
 }
 
 export interface ScheduledHistoryRow extends UnifiedHistoryRowBase {
   sourceType: 'scheduled';
   source: 'Scheduled';
-  scheduleId?: string;
-  executionCount?: number;
+  scheduleId: string;
+  executionCount: number;
   plannedTime?: string;
 }
 

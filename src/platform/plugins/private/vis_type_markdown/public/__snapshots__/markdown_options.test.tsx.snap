@@ -42,7 +42,7 @@ exports[`MarkdownOptions should match snapshot 1`] = `
                 Help
                 <span
                   class="emotion-EuiExternalLinkIcon"
-                  data-euiicon-type="popout"
+                  data-euiicon-type="external"
                   role="presentation"
                 />
                 <span

@@ -41,7 +41,7 @@ import {
   useCreateUpdateIntegration,
   useGetIntegrationById,
   useUploadSamples,
-  generateId,
+  normalizeTitleName,
 } from '../../../../common';
 
 interface CreateDataStreamFlyoutProps {
@@ -250,8 +250,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const handleAnalyzeLogs = useCallback(async () => {
     if (!formData) return;
 
-    const integrationId = currentIntegrationId ?? generateId();
-    const dataStreamId = generateId();
+    const integrationId = currentIntegrationId ?? normalizeTitleName(formData.title);
+    const dataStreamId = normalizeTitleName(formData.dataStreamTitle);
     const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
       name: method as InputType['name'],
     }));
@@ -279,8 +279,15 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         },
       });
     } else if (logsSourceOption === 'index' && selectedIndex) {
-      // For index source, we don't need to upload
-      // TODO: Add logic to fetch samples from the index.
+      await uploadSamplesMutation.mutateAsync({
+        integrationId,
+        dataStreamId,
+        sourceIndex: selectedIndex,
+        originalSource: {
+          sourceType: 'index',
+          sourceValue: selectedIndex,
+        },
+      });
     }
 
     await createUpdateIntegrationMutation.mutateAsync({

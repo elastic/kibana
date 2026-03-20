@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/automatic-import-v2-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/integration-experience'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/automatic-import-v2-plugin'
+  title: '@kbn/automatic-import-v2-plugin'
   description: Moon project for @kbn/automatic-import-v2-plugin
   channel: ''
   owner: '@elastic/integration-experience'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/automatic_import_v2
+  sourceRoot: x-pack/platform/plugins/shared/automatic_import_v2
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'
@@ -41,6 +40,7 @@ dependsOn:
   - '@kbn/core-application-common'
   - '@kbn/i18n'
   - '@kbn/features-plugin'
+  - '@kbn/fields-metadata-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/logging'
   - '@kbn/i18n-react'
@@ -73,14 +73,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

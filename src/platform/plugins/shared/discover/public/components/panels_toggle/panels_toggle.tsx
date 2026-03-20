@@ -28,9 +28,8 @@ export interface PanelsToggleProps {
 
 /**
  * An element of this component is created in DiscoverLayout
- * @param stateContainer
  * @param sidebarToggleState$
- * @param renderedIn
+ * @param renderedFor
  * @param isChartAvailable
  * @constructor
  */

@@ -25,13 +25,19 @@ export async function resolveConnectorId(
     return defaultConnector.connectorId;
   }
 
+  const connectorById = await inferencePlugin.getConnectorById(nameOrId, kibanaRequest);
+
+  if (connectorById) {
+    return connectorById.connectorId;
+  }
+
   const allConnectors = await inferencePlugin.getConnectorList(kibanaRequest);
 
   if (!allConnectors.length) {
     throw new Error(`No AI connectors found.`);
   }
 
-  const connector = allConnectors.find((c) => c.name === nameOrId || c.connectorId === nameOrId);
+  const connector = allConnectors.find((c) => c.name === nameOrId);
 
   if (!connector) {
     throw new Error(

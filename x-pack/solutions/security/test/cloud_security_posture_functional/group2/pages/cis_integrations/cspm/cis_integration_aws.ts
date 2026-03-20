@@ -234,8 +234,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/225030
-    describe.skip('CIS_AWS Organization Manual Shared Access', () => {
+    describe('CIS_AWS Organization Manual Shared Access', () => {
       it('CIS_AWS Organization Manual Shared Access Workflow', async () => {
         const sharedCredentialFile = 'sharedCredentialFileTest';
         const sharedCredentialProfileName = 'sharedCredentialProfileNameTest';
@@ -277,8 +276,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/222865
-    describe.skip('CIS_AWS Single Manual Assume Role', () => {
+    describe('CIS_AWS Single Manual Assume Role', () => {
       it('CIS_AWS Single Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
