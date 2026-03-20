@@ -685,7 +685,7 @@ export class HttpServer {
     this.server!.ext('onPostHandler', (request, responseToolkit) => {
       const app = request.app as KibanaRequestState;
       app.otelSubSpan?.end();
-      app.otelSubSpan = this.createSubspan('port-route handler middlewares');
+      app.otelSubSpan = this.createSubspan('post-route handler middlewares');
 
       return responseToolkit.continue;
     });
