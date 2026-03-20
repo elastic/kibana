@@ -58,7 +58,7 @@ export const alertInvestigationWorkflowDefinition = {
       name: 'Deduplicate Similar Alerts',
       type: 'security.deduplicateAlerts',
       config: {
-        alert_ids: '\${steps.fetch_alerts.output.alert_ids}', // State interpolation
+        alert_ids: '${steps.fetch_alerts.output.alert_ids}', // State interpolation
         index_pattern: '.alerts-security.alerts-default',
         similarity_threshold: 0.85,
       },
@@ -70,7 +70,7 @@ export const alertInvestigationWorkflowDefinition = {
       name: 'Extract Observable Entities',
       type: 'security.extractEntities',
       config: {
-        alert_ids: '\${steps.deduplicate.output.leader_alert_ids}',
+        alert_ids: '${steps.deduplicate.output.leader_alert_ids}',
         index_pattern: '.alerts-security.alerts-default',
       },
     },
@@ -81,8 +81,8 @@ export const alertInvestigationWorkflowDefinition = {
       name: 'Match Alerts to Cases',
       type: 'security.matchAndAttachAlertsToCases',
       config: {
-        entities: '\${steps.extract_entities.output.entities}',
-        leader_alert_ids: '\${steps.deduplicate.output.leader_alert_ids}',
+        entities: '${steps.extract_entities.output.entities}',
+        leader_alert_ids: '${steps.deduplicate.output.leader_alert_ids}',
         index_pattern: '.alerts-security.alerts-default',
       },
     },
@@ -93,8 +93,8 @@ export const alertInvestigationWorkflowDefinition = {
       name: 'Trigger Incremental Attack Discovery',
       type: 'security.triggerIncrementalAd',
       config: {
-        affected_case_ids: '\${steps.match_and_attach.output.affected_case_ids}',
-        alert_ids_by_case: '\${steps.match_and_attach.output.alert_ids_by_case}',
+        affected_case_ids: '${steps.match_and_attach.output.affected_case_ids}',
+        alert_ids_by_case: '${steps.match_and_attach.output.alert_ids_by_case}',
         min_new_alerts: 2,
       },
     },
@@ -105,7 +105,7 @@ export const alertInvestigationWorkflowDefinition = {
       name: 'Tag Alerts as Processed',
       type: 'security.tagProcessedAlerts',
       config: {
-        alert_ids: '\${steps.fetch_alerts.output.alert_ids}',
+        alert_ids: '${steps.fetch_alerts.output.alert_ids}',
         index_pattern: '.alerts-security.alerts-default',
       },
     },
@@ -142,12 +142,14 @@ export function registerAlertInvestigationWorkflow(
 
   if (typeof workflowsExtensions.registerWorkflow === 'function') {
     workflowsExtensions.registerWorkflow(alertInvestigationWorkflowDefinition);
-    console.log(`✅ Registered Alert Investigation Pipeline workflow: ${ALERT_INVESTIGATION_WORKFLOW_ID}`);
+    console.log(
+      `✅ Registered Alert Investigation Pipeline workflow: ${ALERT_INVESTIGATION_WORKFLOW_ID}`
+    );
   } else {
     console.warn(
       '⚠️ Elastic Workflows does not support workflow registration yet. ' +
-      'Workflow definition created but not registered. ' +
-      'Pipeline must be triggered manually via API or custom Task Manager job.'
+        'Workflow definition created but not registered. ' +
+        'Pipeline must be triggered manually via API or custom Task Manager job.'
     );
   }
 }

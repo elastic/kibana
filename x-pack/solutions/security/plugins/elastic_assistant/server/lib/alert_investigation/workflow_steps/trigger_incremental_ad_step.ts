@@ -86,7 +86,9 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
           };
         } catch (error) {
           context.logger.error(
-            `Failed to trigger AD for case ${caseId}: ${error instanceof Error ? error.message : error}`
+            `Failed to trigger AD for case ${caseId}: ${
+              error instanceof Error ? error.message : error
+            }`
           );
           return {
             case_id: caseId,
