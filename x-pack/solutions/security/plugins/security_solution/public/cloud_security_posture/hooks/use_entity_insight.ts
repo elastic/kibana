@@ -10,7 +10,7 @@ import { useCallback, useMemo } from 'react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { buildEntityFlyoutPreviewCspOptions } from '../utils/entity_flyout_preview_options';
+import { buildEuidCspPreviewOptions } from '../utils/build_euid_csp_preview_options';
 import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
 import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
 import { EntityDetailsLeftPanelTab } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -45,10 +45,6 @@ export const useNavigateEntityInsight = ({
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}${queryIdExtension}`,
   });
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
-  );
-
   const primaryField = useMemo(() => {
     if (identityFields['host.name']) return 'host.name';
     if (identityFields['user.name']) return 'user.name';
@@ -61,6 +57,10 @@ export const useNavigateEntityInsight = ({
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const entityType = primaryField === 'host.name' ? 'host' : 'user';
+
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
+    buildEuidCspPreviewOptions(entityType, identityFields, euidApi)
+  );
 
   const entityFromStore = useEntityFromStore({
     entityId:
@@ -83,7 +83,7 @@ export const useNavigateEntityInsight = ({
 
   const hasRiskScore = entityStoreV2Enabled ? hasRiskScoreFromStore : hasRiskScoreFromSearch;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
+    buildEuidCspPreviewOptions(entityType, identityFields, euidApi)
   );
   const { openLeftPanel } = useExpandableFlyoutApi();
 

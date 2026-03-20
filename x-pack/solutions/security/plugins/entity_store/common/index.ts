@@ -14,12 +14,11 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { getEuidFromObject } from './domain/euid/memory';
+import { getEuidFromObject, getEntityIdentifiersFromDocument } from './domain/euid/memory';
 import { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './domain/euid/painless';
 import {
   getEuidDslFilterBasedOnDocument,
   getEuidDslDocumentsContainsIdFilter,
-  getEntityIdentifiersFromDocument,
 } from './domain/euid/dsl';
 import { getEuidSourceFields } from './domain/euid/identity_fields';
 
@@ -34,24 +33,20 @@ export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
  * For ESQL helpers (getEuidEsql*), use common/euid_helpers (server-only).
  *
  * @example
- * import { euid, type EntityType } from '@kbn/entity-store/public';
+ * import { euid, type EntityType } from '@kbn/entity-store/common';
  * euid.getEuidFromObject('host', doc);
+ * euid.getEntityIdentifiersFromDocument('host', doc);
  * euid.getEuidDslFilterBasedOnDocument('host', identifiers);
  */
 export const euid = {
   getEuidFromObject,
+  getEntityIdentifiersFromDocument,
   getEuidPainlessEvaluation,
   getEuidPainlessRuntimeMapping,
   getEuidDslFilterBasedOnDocument,
   getEuidDslDocumentsContainsIdFilter,
   getEuidSourceFields,
-  getEntityIdentifiersFromDocument,
 };
-
-export {
-  buildEntityFiltersFromEntityIdentifiers,
-  buildGenericEntityFlyoutPreviewQuery,
-} from './domain/euid/entity_filters';
 
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
 export const EntityStoreStatus = z.enum([

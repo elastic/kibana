@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-export { getEuidFromObject } from './memory';
+export { getEuidFromObject, getEntityIdentifiersFromDocument } from './memory';
 export { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './painless';
-export {
-  getEuidDslFilterBasedOnDocument,
-  getEuidDslDocumentsContainsIdFilter,
-  type GetEuidFilterOptions,
-} from './dsl';
-export {
-  buildEntityFiltersFromEntityIdentifiers,
-  buildGenericEntityFlyoutPreviewQuery,
-} from './entity_filters';
+export { getEuidDslFilterBasedOnDocument, getEuidDslDocumentsContainsIdFilter } from './dsl';
+
 export {
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation,

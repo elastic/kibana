@@ -16,11 +16,7 @@ import {
   getVulnerabilitiesQuery,
   VULNERABILITIES_RESULT_EVALUATION,
 } from '@kbn/cloud-security-posture-common/utils/findings_query_builders';
-import {
-  buildEntityFlyoutPreviewQueryWithStatus,
-  VULNERABILITY_QUERY_FIELD,
-} from '@kbn/cloud-security-posture-common';
-import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/common';
+import { buildVulnerabilityEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue, getRawDataOrDefault } from '@kbn/elastic-assistant-common';
 import { omit } from 'lodash';
@@ -219,11 +215,7 @@ export const entityDetailsHighlightsServiceFactory = ({
     },
     async getVulnerabilityData(entityField: EntityIdentifierFields, entityIdentifier: string) {
       const vulnerabilitiesQuery = getVulnerabilitiesQuery({
-        query: buildEntityFlyoutPreviewQueryWithStatus(
-          buildEntityFiltersFromEntityIdentifiers({ [entityField]: entityIdentifier }),
-          undefined,
-          VULNERABILITY_QUERY_FIELD
-        ),
+        query: buildVulnerabilityEntityFlyoutPreviewQuery(entityField, entityIdentifier),
         enabled: true,
         pageSize: 1,
         sort: [{ 'vulnerability.score.base': 'desc' }],

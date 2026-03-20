@@ -25,7 +25,7 @@ import {
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
+import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
@@ -178,7 +178,6 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   const hostRiskFromSearch = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
 
   const [isHostDetailsLoading, { hostDetails }] = useHostDetails({
-    identityFields,
     hostName,
     indexNames: selectedPatterns,
     startDate: from,
@@ -297,15 +296,16 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     from,
     queryId: HOST_ENTITY_OVERVIEW_ID,
   });
+  const hostCspIdentityDoc = entityRecord ?? identityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
+    buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi)
   );
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
+    buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi)
   );
 
   const openDetailsPanel = useNavigateToHostDetails({
-    identityFields,
+    hostName,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,

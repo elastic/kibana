@@ -28,8 +28,8 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/constants';
-import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
@@ -173,11 +173,16 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     [dispatch]
   );
 
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const euidApi = useEntityStoreEuidApi();
+  const storeUserEntityId = identityFields['entity.id'];
+
   const openUserPreview = useCallback(() => {
     openPreviewPanel({
       id: UserPreviewPanelKey,
       params: {
-        identityFields,
+        userName,
+        entityId: storeUserEntityId,
         scopeId,
         banner: USER_PREVIEW_BANNER,
       },
@@ -186,11 +191,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       location: scopeId,
       panel: 'preview',
     });
-  }, [openPreviewPanel, identityFields, scopeId, telemetry]);
-
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
-  const euidApi = useEntityStoreEuidApi();
-  const storeUserEntityId = identityFields['user.entity.id'];
+  }, [openPreviewPanel, userName, storeUserEntityId, scopeId, telemetry]);
 
   const entityFromStoreResult = useEntityFromStore({
     entityId: storeUserEntityId,
@@ -217,7 +218,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       id: userDetailsQueryId,
       startDate: from,
       endDate: to,
-      identityFields,
       userName,
       indexNames: selectedPatterns,
       skip: entityStoreV2Enabled || selectedPatterns.length === 0,
@@ -249,7 +249,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       : !!userRiskData?.user?.risk;
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
+    buildEuidCspPreviewOptions('user', identityFields, euidApi)
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields,
@@ -288,7 +288,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     totalCount,
     refetch: refetchRelatedHosts,
   } = useUserRelatedHosts({
-    identityFields,
+    userName,
     from: timestamp, // related hosts are hosts this user has successfully authenticated onto AFTER alert time
     skip: selectedPatterns.length === 0,
   });
@@ -447,7 +447,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             setQuery={setQuery}
             refetch={entityStoreV2Enabled ? observedUser.refetchEntityStore ?? (() => {}) : refetch}
             inspect={entityStoreV2Enabled ? entityFromStoreResult?.inspect : inspect}
-            identityFields={identityFields}
+            userName={userName}
             indexPatterns={selectedPatterns}
             jobNameById={jobNameById}
             scopeId={scopeId}

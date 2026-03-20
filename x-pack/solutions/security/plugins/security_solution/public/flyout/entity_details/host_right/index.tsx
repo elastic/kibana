@@ -12,8 +12,8 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import type { ESQuery } from '../../../../common/typed_json';
-import { buildEntityFlyoutPreviewCspOptions } from '../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -95,7 +95,7 @@ export const HostPanel = ({
       next['host.name'] = hostName;
     }
     if (entityIdProp) {
-      next['host.entity.id'] = entityIdProp;
+      next['entity.id'] = entityIdProp;
     }
     return next;
   }, [hostName, entityIdProp]);
@@ -135,18 +135,14 @@ export const HostPanel = ({
     () =>
       (euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', documentEntityIdentifiers, {
         includeEuidSourceFilter: entityStoreV2Enabled,
-      }) as ESQuery | undefined) ??
-      (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
-    [euidApi?.euid, documentEntityIdentifiers, effectiveHostName, entityStoreV2Enabled]
+      }) as ESQuery | undefined) ?? (hostName ? buildHostNamesFilter([hostName]) : undefined),
+    [euidApi?.euid, documentEntityIdentifiers, hostName, entityStoreV2Enabled]
   );
 
   // Risk score index is keyed by host.name; use host name filter so the API finds the host
   const riskScoreFilterQuery = useMemo(
-    () =>
-      effectiveHostName
-        ? (buildHostNamesFilter([effectiveHostName]) as ESQuery)
-        : (hostFilterQuery as ESQuery),
-    [effectiveHostName, hostFilterQuery]
+    () => (hostName ? (buildHostNamesFilter([hostName]) as ESQuery) : (hostFilterQuery as ESQuery)),
+    [hostName, hostFilterQuery]
   );
 
   const riskScoreState = useRiskScore({
@@ -173,11 +169,11 @@ export const HostPanel = ({
   );
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(documentEntityIdentifiers, euidApi)
+    buildEuidCspPreviewOptions('host', documentEntityIdentifiers, euidApi)
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(documentEntityIdentifiers, euidApi)
+    buildEuidCspPreviewOptions('host', documentEntityIdentifiers, euidApi)
   );
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
@@ -302,7 +298,6 @@ export const HostPanel = ({
         recalculatingScore={recalculatingScore}
         onAssetCriticalityChange={calculateEntityRiskScore}
         isPreviewMode={isPreviewMode}
-        entity={entityFromStore}
         entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
         criticalityFromEntityStore={
           entityStoreV2Enabled && observedHost.entityRecord?.asset?.criticality

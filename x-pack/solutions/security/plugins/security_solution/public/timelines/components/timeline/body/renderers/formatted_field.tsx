@@ -13,8 +13,8 @@ import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import { euid } from '@kbn/entity-store/common';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
@@ -100,6 +100,8 @@ const FormattedFieldValueComponent: React.FC<{
   linkValue,
   data,
 }) => {
+  const euidApi = useEntityStoreEuidApi();
+
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
@@ -134,9 +136,10 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
     return <Duration fieldName={fieldName} value={`${value}`} />;
   } else if (fieldName === EntityTypeToIdentifierField.host) {
-    const hostEntityIdentifiers = data
-      ? euid.getEntityIdentifiersFromDocument('host', data)
-      : undefined;
+    const hostEntityIdentifiers =
+      data && euidApi?.euid
+        ? euidApi.euid.getEntityIdentifiersFromDocument('host', data)
+        : undefined;
     return (
       <HostName
         Component={Component}
@@ -149,9 +152,10 @@ const FormattedFieldValueComponent: React.FC<{
       />
     );
   } else if (fieldName === EntityTypeToIdentifierField.user) {
-    const userEntityIdentifiers = data
-      ? euid.getEntityIdentifiersFromDocument('user', data)
-      : undefined;
+    const userEntityIdentifiers =
+      data && euidApi?.euid
+        ? euidApi.euid.getEntityIdentifiersFromDocument('user', data)
+        : undefined;
     return (
       <UserName
         Component={Component}
@@ -164,9 +168,10 @@ const FormattedFieldValueComponent: React.FC<{
       />
     );
   } else if (fieldName === EntityTypeToIdentifierField.service) {
-    const serviceEntityIdentifiers = data
-      ? euid.getEntityIdentifiersFromDocument('service', data)
-      : undefined;
+    const serviceEntityIdentifiers =
+      data && euidApi?.euid
+        ? euidApi.euid.getEntityIdentifiersFromDocument('service', data)
+        : undefined;
     return (
       <ServiceName
         Component={Component}

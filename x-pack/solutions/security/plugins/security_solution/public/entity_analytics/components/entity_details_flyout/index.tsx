@@ -45,6 +45,12 @@ export const getInsightsInputTab = ({
   identityFields: IdentityFields;
   scopeId: string;
 }) => {
+  const field = Object.keys(identityFields)[0] as CloudPostureEntityIdentifier;
+  const value = identityFields['host.name'] || Object.values(identityFields)[0] || '';
+  const entityId = identityFields['host.entity.id'] ?? identityFields['user.entity.id'];
+  const entityType: 'host' | 'user' =
+    field === 'user.name' || identityFields['user.entity.id'] !== undefined ? 'user' : 'host';
+
   return {
     id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
     'data-test-subj': INSIGHTS_TAB_TEST_ID,
@@ -56,9 +62,11 @@ export const getInsightsInputTab = ({
     ),
     content: (
       <InsightsTabCsp
-        value={identityFields['host.name'] || Object.values(identityFields)[0] || ''}
-        field={Object.keys(identityFields)[0] as CloudPostureEntityIdentifier}
+        value={value}
+        field={field}
         scopeId={scopeId}
+        entityId={entityId}
+        entityType={entityType}
       />
     ),
   };

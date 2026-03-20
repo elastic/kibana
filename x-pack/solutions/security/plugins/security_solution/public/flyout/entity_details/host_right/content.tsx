@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
-import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
@@ -37,8 +36,6 @@ interface HostPanelContentProps {
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
   isPreviewMode: boolean;
-  /** When entity store v2 is enabled: entity record from the store. */
-  entity?: EntityStoreRecord;
   /** When using Entity Store v2: entity record for asset criticality upsert. */
   entityRecord?: Entity;
   /** When using Entity Store v2: criticality from store. */
@@ -61,7 +58,6 @@ export const HostPanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
-  entity,
   entityRecord,
   criticalityFromEntityStore,
   onSaveAssetCriticalityViaEntityStore,

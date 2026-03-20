@@ -11,7 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { buildEntityFlyoutPreviewCspOptions } from '../../../cloud_security_posture/utils/entity_flyout_preview_options';
+import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
 import type { ESQuery } from '../../../../common/typed_json';
@@ -176,7 +176,7 @@ export const UserPanel = ({
   );
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(documentEntityIdentifiers, euidApi)
+    buildEuidCspPreviewOptions('user', documentEntityIdentifiers, euidApi)
   );
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({

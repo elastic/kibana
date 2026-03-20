@@ -5,7 +5,32 @@
  * 2.0.
  */
 
-import { getEuidFromObject } from './memory';
+import { getEuidFromObject, getEntityIdentifiersFromDocument } from './memory';
+
+describe('getEntityIdentifiersFromDocument', () => {
+  it('returns undefined when doc is null or undefined', () => {
+    expect(getEntityIdentifiersFromDocument('host', null)).toBeUndefined();
+    expect(getEntityIdentifiersFromDocument('host', undefined)).toBeUndefined();
+  });
+
+  it('returns host.id entry when nested host.id is present', () => {
+    expect(getEntityIdentifiersFromDocument('host', { host: { id: 'h1' } })).toEqual({
+      'host.id': 'h1',
+    });
+  });
+
+  it('returns host.name when host.id is absent', () => {
+    expect(getEntityIdentifiersFromDocument('host', { host: { name: 'server1' } })).toEqual({
+      'host.name': 'server1',
+    });
+  });
+
+  it('unwraps _source like getEuidFromObject', () => {
+    expect(
+      getEntityIdentifiersFromDocument('generic', { _source: { entity: { id: 'e-123' } } })
+    ).toEqual({ 'entity.id': 'e-123' });
+  });
+});
 
 describe('getEuidFromObject', () => {
   it('returns empty string when obj is null or undefined', () => {

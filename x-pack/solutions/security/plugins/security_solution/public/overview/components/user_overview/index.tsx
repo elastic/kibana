@@ -68,8 +68,6 @@ export interface UserSummaryProps {
   firstSeenFromEntityStore?: string;
   /** When using Entity Store v2: last seen from entity lifecycle. */
   lastSeenFromEntityStore?: string;
-  /** When true (e.g. from explore pages), only user.name from identityFields is used with a terms filter; identityFields filter is not applied. */
-  isExploreContext?: boolean;
   /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
   showInspectButtonAlways?: boolean;
 }
@@ -103,7 +101,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
     riskScoreState: riskScoreStateFromEntityStore,
     firstSeenFromEntityStore,
     lastSeenFromEntityStore,
-    isExploreContext = false,
     showInspectButtonAlways = false,
   }) => {
     const capabilities = useMlCapabilities();

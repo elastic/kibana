@@ -32,7 +32,7 @@ import {
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
+import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
@@ -294,16 +294,17 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       : !!hostRiskData?.host?.risk;
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    identityFields: { 'host.name': hostName },
+    identityFields: hostIdentityFieldsForStore ?? {},
     to,
     from,
     queryId: 'HostEntityOverview',
   });
+  const hostEuidIdentityDoc = observedHost.entityRecord ?? hostIdentityFieldsForStore;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions({ 'host.name': hostName }, euidApi)
+    buildEuidCspPreviewOptions('host', hostEuidIdentityDoc, euidApi)
   );
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions({ 'host.name': hostName }, euidApi)
+    buildEuidCspPreviewOptions('host', hostEuidIdentityDoc, euidApi)
   );
 
   const openDetailsPanel = useNavigateToHostDetails({

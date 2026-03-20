@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { EntityType, IdentitySourceFields } from '../common/constants';
 
 export interface EntityStoreEuidApi {
   euid: {
     getEuidFromObject: (entityType: EntityType, doc: unknown) => string | undefined;
+    getEntityIdentifiersFromDocument: (
+      entityType: EntityType,
+      doc: unknown
+    ) => Record<string, string> | undefined;
     getEuidPainlessEvaluation: (entityType: EntityType) => string;
     getEuidPainlessRuntimeMapping: (entityType: EntityType) => {
       type: 'keyword';
@@ -21,22 +25,10 @@ export interface EntityStoreEuidApi {
       entityType: EntityType,
       doc: unknown,
       options?: { includeEuidSourceFilter?: boolean }
-    ) => unknown;
-    getEuidDslDocumentsContainsIdFilter: (entityType: EntityType) => unknown;
+    ) => QueryDslQueryContainer | undefined;
+    getEuidDslDocumentsContainsIdFilter: (entityType: EntityType) => QueryDslQueryContainer;
     getEuidSourceFields: (entityType: EntityType) => IdentitySourceFields;
-    getEntityIdentifiersFromDocument: (
-      entityType: EntityType,
-      doc: unknown
-    ) => Record<string, string> | undefined;
   };
-  buildEntityFiltersFromEntityIdentifiers: (
-    entityIdentifiers: Record<string, string>
-  ) => QueryDslQueryContainer[];
-  buildGenericEntityFlyoutPreviewQuery: (
-    entityIdentifiers: Record<string, string>,
-    status?: string,
-    queryField?: string
-  ) => { bool: { filter: QueryDslQueryContainer[] } };
 }
 
 const EntityStoreEuidApiContext = createContext<EntityStoreEuidApi | null>(null);
@@ -50,8 +42,6 @@ export function EntityStoreEuidApiProvider({ children }: Readonly<{ children: Re
       if (!cancelled) {
         setApi({
           euid: mod.euid,
-          buildEntityFiltersFromEntityIdentifiers: mod.buildEntityFiltersFromEntityIdentifiers,
-          buildGenericEntityFlyoutPreviewQuery: mod.buildGenericEntityFlyoutPreviewQuery,
         });
       }
     });

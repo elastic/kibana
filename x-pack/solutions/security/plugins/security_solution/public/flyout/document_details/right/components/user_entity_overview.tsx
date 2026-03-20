@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
+import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { ESQuery } from '../../../../../common/typed_json';
@@ -190,7 +190,6 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   );
 
   const [isUserDetailsLoading, { userDetails }] = useObservedUserDetails({
-    identityFields: stableEntityIdentifiers,
     userName,
     endDate: to,
     indexNames: selectedPatterns,
@@ -232,8 +231,9 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const isRiskScoreExist = !!userRiskData?.user?.risk;
   const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
 
+  const userCspIdentityDoc = entityRecord ?? stableEntityIdentifiers;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(stableEntityIdentifiers, euidApi)
+    buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi)
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: stableEntityIdentifiers,

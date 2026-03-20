@@ -27,8 +27,6 @@ export type {
 export const loadEuidApi = () =>
   import('./euid_browser').then((m) => ({
     euid: m.euid,
-    buildEntityFiltersFromEntityIdentifiers: m.buildEntityFiltersFromEntityIdentifiers,
-    buildGenericEntityFlyoutPreviewQuery: m.buildGenericEntityFlyoutPreviewQuery,
   }));
 
 export function plugin() {

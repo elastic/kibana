@@ -12,7 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { buildEntityFlyoutPreviewCspOptions } from '../utils/entity_flyout_preview_options';
+import {
+  buildEuidCspPreviewOptions,
+  inferEntityTypeFromIdentityFields,
+} from '../utils/build_euid_csp_preview_options';
 import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
 import type { IdentityFields } from '../../flyout/document_details/shared/utils';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
@@ -45,12 +48,13 @@ export const EntityInsight = <T,>({
   const euidApi = useEntityStoreEuidApi();
   const insightContent: React.ReactElement[] = [];
 
+  const cspPreviewEntityType = inferEntityTypeFromIdentityFields(identityFields);
   const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
+    buildEuidCspPreviewOptions(cspPreviewEntityType, identityFields, euidApi)
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(identityFields, euidApi)
+    buildEuidCspPreviewOptions(cspPreviewEntityType, identityFields, euidApi)
   );
 
   const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && identityFields !== undefined;

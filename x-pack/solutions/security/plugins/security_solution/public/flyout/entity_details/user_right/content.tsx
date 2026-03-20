@@ -32,7 +32,7 @@ export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> &
 };
 
 interface UserPanelContentProps {
-  lookupFields: IdentityFields;
+  identityFields: IdentityFields;
   observedUser: ObservedUserData;
   riskScoreState: RiskScoreState<EntityType.user>;
   recalculatingScore: boolean;

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { buildVulnerabilityEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type {
   VulnerabilitiesFindingDetailFields,
@@ -43,14 +42,21 @@ import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { get } from 'lodash/fp';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 import { VulnerabilityFindingsPreviewPanelKey } from '../../../flyout/csp_details/vulnerabilities_flyout/constants';
-import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
+import { useUiSetting } from '../../../common/lib/kibana';
+import type { HostEntity, UserEntity } from '../../../../common/api/entity_analytics';
+import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  getHostIdentityFieldsFromStoreRecord,
+  getUserIdentityFieldsFromStoreRecord,
+} from '../../../flyout/entity_details/shared/entity_record_to_identifiers';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
-import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
 
 type VulnerabilitySortFieldType =
   | 'score'
@@ -65,15 +71,63 @@ type VulnerabilitySortFieldType =
 
 const EMPTY_VALUE = '-';
 
+const buildVulnerabilityCspOptions = ({
+  euidEntityFilter,
+  sort,
+  enabled,
+  pageSize,
+  currentFilter,
+  includeSeverityFilter,
+}: {
+  euidEntityFilter: QueryDslQueryContainer | undefined;
+  sort: UseCspOptions['sort'];
+  enabled: boolean;
+  pageSize: number;
+  currentFilter: string;
+  includeSeverityFilter: boolean;
+}): UseCspOptions => {
+  const filters: QueryDslQueryContainer[] = [];
+  if (euidEntityFilter) {
+    filters.push(euidEntityFilter);
+  }
+  if (includeSeverityFilter && currentFilter) {
+    filters.push({
+      bool: {
+        should: [
+          {
+            term: {
+              'vulnerability.severity': {
+                value: currentFilter,
+                case_insensitive: true,
+              },
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  }
+  return {
+    query: { bool: { filter: filters } },
+    sort: sort ?? [],
+    enabled,
+    pageSize,
+  };
+};
+
 export const VulnerabilitiesFindingsDetailsTable = memo(
   ({
     identityField,
     value,
     scopeId,
+    entityId,
+    entityType,
   }: {
     identityField: CloudPostureEntityIdentifier;
     value: string;
     scopeId: string;
+    entityId?: string;
+    entityType?: 'host' | 'user';
   }) => {
     const { getSeverityStatusColor } = useGetSeverityStatusColor();
 
@@ -103,16 +157,70 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
       },
     };
 
-    const { data } = useVulnerabilitiesFindings({
-      query: buildVulnerabilityEntityFlyoutPreviewQuery('host.name', value, currentFilter),
-      sort: [sortFieldDirection],
-      enabled: true,
-      pageSize: 1,
+    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+    const entityTypeResolved: 'host' | 'user' =
+      entityType ?? (identityField === 'user.name' ? 'user' : 'host');
+
+    const { entityRecord, isLoading: isEntityRecordLoading } = useEntityFromStore({
+      entityId,
+      entityType: entityTypeResolved,
+      skip: !entityStoreV2Enabled || !entityId,
     });
 
+    const identityForEuidDoc = useMemo((): Record<string, string> | null => {
+      if (entityStoreV2Enabled && entityId) {
+        if (entityRecord) {
+          return entityTypeResolved === 'host'
+            ? getHostIdentityFieldsFromStoreRecord(entityRecord as HostEntity)
+            : getUserIdentityFieldsFromStoreRecord(entityRecord as UserEntity);
+        }
+        if (isEntityRecordLoading) {
+          return null;
+        }
+        return { [identityField]: value };
+      }
+      return { [identityField]: value };
+    }, [
+      entityStoreV2Enabled,
+      entityId,
+      entityRecord,
+      entityTypeResolved,
+      identityField,
+      value,
+      isEntityRecordLoading,
+    ]);
+
     const euidApi = useEntityStoreEuidApi();
+    const euidEntityFilter = useMemo(() => {
+      if (!euidApi?.euid || identityForEuidDoc == null) {
+        return undefined;
+      }
+      return euidApi.euid.getEuidDslFilterBasedOnDocument(entityTypeResolved, identityForEuidDoc);
+    }, [euidApi?.euid, identityForEuidDoc, entityTypeResolved]);
+
+    const cspQueriesEnabled =
+      identityForEuidDoc !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);
+
+    const { data, isLoading } = useVulnerabilitiesFindings(
+      buildVulnerabilityCspOptions({
+        euidEntityFilter,
+        sort: [sortFieldDirection],
+        enabled: cspQueriesEnabled,
+        pageSize: 1,
+        currentFilter,
+        includeSeverityFilter: true,
+      })
+    );
+
     const { counts } = useHasVulnerabilities(
-      buildEntityFlyoutPreviewCspOptions({ [identityField]: value }, euidApi)
+      buildVulnerabilityCspOptions({
+        euidEntityFilter,
+        sort: [],
+        enabled: cspQueriesEnabled,
+        pageSize: 1,
+        currentFilter: '',
+        includeSeverityFilter: false,
+      })
     );
 
     const { critical = 0, high = 0, medium = 0, low = 0, none = 0 } = counts || {};
@@ -355,7 +463,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         <EuiPanel hasShadow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-            path={`${getVulnerabilityUrl(value, EntityIdentifierFields.hostName)}`}
+            path={`${getVulnerabilityUrl(value, identityField)}`}
             target={'_blank'}
             external={false}
             onClick={() => {
@@ -384,6 +492,9 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
             onChange={onTableChange}
             data-test-subj={'securitySolutionFlyoutVulnerabilitiesFindingsTable'}
             sorting={sorting}
+            loading={
+              isLoading || (entityStoreV2Enabled && Boolean(entityId) && isEntityRecordLoading)
+            }
             tableCaption={i18n.translate(
               'xpack.securitySolution.flyout.left.insights.vulnerability.findingsTableCaption',
               {
