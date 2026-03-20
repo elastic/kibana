@@ -257,17 +257,26 @@ processors:
   k8sattributes:
     auth_type: "serviceAccount"
     passthrough: false
+    filter:
+      node_from_env_var: K8S_NODE_NAME
     extract:
       metadata:
         - k8s.namespace.name
         - k8s.deployment.name
+        - k8s.replicaset.name
         - k8s.pod.name
         - k8s.pod.uid
+        - k8s.pod.start_time
+        - k8s.pod.ip
         - k8s.node.name
         - k8s.container.name
         - container.id
         - container.image.name
         - container.image.tag
+      annotations:
+        - tag_name: $$1
+          key_regex: (.*)
+          from: pod
       labels:
         - tag_name: app
           key: app
@@ -277,6 +286,12 @@ processors:
           from: pod
         - tag_name: app.kubernetes.io/part-of
           key: app.kubernetes.io/part-of
+          from: pod
+        - tag_name: app.kubernetes.io/component
+          key: app.kubernetes.io/component
+          from: pod
+        - tag_name: app.kubernetes.io/version
+          key: app.kubernetes.io/version
           from: pod
     pod_association:
       - sources:
