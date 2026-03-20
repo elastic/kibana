@@ -80,11 +80,21 @@ describe('useAppMenuData', () => {
     });
   });
 
-  it('does not add "Switch to ES|QL" when ES|QL is disabled', async () => {
+  it('does not add "Switch to ES|QL" when ES|QL is disabled but still shows inspect', async () => {
     const { toolkit, hook } = await setup({ enableEsql: false });
     const items = hook.result.current.getAdditionalTabMenuItems?.(toolkit.getCurrentTab());
 
-    expect(items).toEqual([]);
+    expect(items).not.toContainEqual(
+      expect.objectContaining({
+        'data-test-subj': 'unifiedTabs_tabMenuItem_switchToESQL',
+      })
+    );
+
+    expect(items).toContainEqual(
+      expect.objectContaining({
+        'data-test-subj': 'unifiedTabs_tabMenuItem_inspect',
+      })
+    );
   });
 
   it('keeps "Switch to classic" for the current tab when in ES|QL mode', async () => {
@@ -123,5 +133,24 @@ describe('useAppMenuData', () => {
     const items = hook.result.current.getAdditionalTabMenuItems?.(toolkit.getCurrentTab());
 
     expect(items).toEqual([]);
+  });
+
+  it('adds "Inspect" menu item for the current tab', async () => {
+    const { toolkit, hook } = await setup();
+    const items = hook.result.current.getAdditionalTabMenuItems?.(toolkit.getCurrentTab());
+
+    expect(items).toContainEqual(
+      expect.objectContaining({
+        'data-test-subj': 'unifiedTabs_tabMenuItem_inspect',
+        name: 'inspect',
+        label: 'Inspect',
+      })
+    );
+
+    const inspectItem = items?.find((menuItem): menuItem is TabMenuItemWithClick => {
+      return menuItem !== 'divider' && menuItem.name === 'inspect';
+    });
+
+    expect(inspectItem?.onClick).toBeInstanceOf(Function);
   });
 });

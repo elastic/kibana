@@ -10,8 +10,8 @@
 import { useMemo } from 'react';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useIsWithinBreakpoints } from '@elastic/eui';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { getTopNavBadges } from './get_top_nav_badges';
 import { useTopNavLinks } from './use_top_nav_links';
@@ -21,6 +21,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
+import { useDiscoverCustomizationContext } from '../../../../customizations';
 
 export const useDiscoverTopNav = ({
   persistedDiscoverSession,
@@ -28,8 +29,15 @@ export const useDiscoverTopNav = ({
   persistedDiscoverSession: DiscoverSession | undefined;
 }) => {
   const services = useDiscoverServices();
+  const customizationContext = useDiscoverCustomizationContext();
   const hasUnsavedChanges = useInternalStateSelector((state) => state.hasUnsavedChanges);
   const isMobile = useIsWithinBreakpoints(['xs']);
+  const onOpenInspector = useInspector({ inspector: services.inspector });
+
+  // When tabs are enabled, the inspector is in the tab menu instead of the top nav
+  const tabsEnabled =
+    !services.embeddableEditor.isByValueEditor() &&
+    customizationContext.displayMode === 'standalone';
 
   const topNavBadges = useMemo(
     () =>
@@ -44,13 +52,12 @@ export const useDiscoverTopNav = ({
   const dataView = useCurrentDataView();
   const adHocDataViews = useAdHocDataViews();
   const isEsqlMode = useIsEsqlMode();
-  const onOpenInspector = useInspector({ inspector: services.inspector });
   const hasShareIntegration = useHasShareIntegration(services);
 
   const topNavMenu = useTopNavLinks({
     dataView,
     services,
-    onOpenInspector,
+    onOpenInspector: tabsEnabled ? undefined : onOpenInspector,
     hasUnsavedChanges,
     isEsqlMode,
     adHocDataViews,

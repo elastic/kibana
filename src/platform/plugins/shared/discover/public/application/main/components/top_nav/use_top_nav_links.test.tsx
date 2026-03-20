@@ -55,7 +55,6 @@ describe('useTopNavLinks', () => {
       () =>
         useTopNavLinks({
           dataView: dataViewMock,
-          onOpenInspector: jest.fn(),
           services,
           hasUnsavedChanges: false,
           isEsqlMode: false,
@@ -261,6 +260,23 @@ describe('useTopNavLinks', () => {
       const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
 
       expect(resetChangesItem?.disableButton).toBe(false);
+    });
+  });
+
+  describe('inspect menu item', () => {
+    it('should include the inspect menu item when onOpenInspector is provided', async () => {
+      const appMenuConfig = await setup({ onOpenInspector: jest.fn() });
+
+      const inspectItem = appMenuConfig.items?.find((item) => item.id === 'inspect');
+      expect(inspectItem).toBeDefined();
+      expect(inspectItem?.label).toBe('Inspect');
+    });
+
+    it('should NOT include the inspect menu item when onOpenInspector is not provided', async () => {
+      const appMenuConfig = await setup();
+
+      const inspectItem = appMenuConfig.items?.find((item) => item.id === 'inspect');
+      expect(inspectItem).toBeUndefined();
     });
   });
 
