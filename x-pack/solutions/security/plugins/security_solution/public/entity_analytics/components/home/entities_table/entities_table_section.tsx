@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { GroupWrapper } from '@kbn/cloud-security-posture';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import {
   DEFAULT_TABLE_SECTION_HEIGHT,
+  ENTITY_FIELDS,
+  ENTITY_GROUPING_OPTIONS,
   TEST_SUBJ_GROUPING,
   TEST_SUBJ_GROUPING_LOADING,
 } from './constants';
@@ -76,6 +78,7 @@ const GroupWithURLPagination = ({
           currentGroupFilters={currentGroupFilters}
           state={state}
           groupingLevel={1}
+          selectedGroup={selectedGroup}
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
         />
@@ -97,6 +100,7 @@ interface GroupContentProps {
   currentGroupFilters: Filter[];
   state: EntityURLStateResult;
   groupingLevel: number;
+  selectedGroup: string;
   selectedGroupOptions: string[];
   parentGroupFilters?: string;
   groupSelectorComponent?: JSX.Element;
@@ -116,10 +120,43 @@ const groupFilterMap = (filter: Filter | null): Filter | null => {
   return query?.match_phrase || query?.bool?.should || query?.bool?.filter ? filter : null;
 };
 
+/**
+ * Transforms a resolution group filter from a simple match_phrase on resolved_to
+ * into a bool/should that matches both the target entity (by entity.id) and its
+ * aliases (by resolved_to). Without this, expanding a resolution group only shows
+ * aliases because the target entity doesn't have resolved_to set.
+ */
+const transformResolutionFilter = (filter: Filter): Filter => {
+  const matchPhrase = filter?.query?.match_phrase as
+    | Record<string, string | { query: string }>
+    | undefined;
+  if (!matchPhrase) return filter;
+
+  const resolvedToEntry = matchPhrase[ENTITY_FIELDS.RESOLVED_TO];
+  if (!resolvedToEntry) return filter;
+
+  const targetEntityId =
+    typeof resolvedToEntry === 'string' ? resolvedToEntry : resolvedToEntry.query;
+
+  return {
+    ...filter,
+    query: {
+      bool: {
+        should: [
+          { term: { [ENTITY_FIELDS.ENTITY_ID]: targetEntityId } },
+          { term: { [ENTITY_FIELDS.RESOLVED_TO]: targetEntityId } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  };
+};
+
 const GroupContent = ({
   currentGroupFilters,
   state,
   groupingLevel,
+  selectedGroup,
   selectedGroupOptions,
   parentGroupFilters,
   groupSelectorComponent,
@@ -131,6 +168,7 @@ const GroupContent = ({
       currentGroupFilters,
       parentGroupFilters
     )
+      .map(transformResolutionFilter)
       .map(groupFilterMap)
       .filter(filterTypeGuard);
 
@@ -151,6 +189,7 @@ const GroupContent = ({
       state={state}
       currentGroupFilters={currentGroupFilters}
       parentGroupFilters={parentGroupFilters}
+      selectedGroup={selectedGroup}
     />
   );
 };
@@ -192,6 +231,7 @@ const GroupWithLocalPagination = ({
           currentGroupFilters={currentGroupFilters.map(groupFilterMap).filter(filterTypeGuard)}
           state={state}
           groupingLevel={groupingLevel}
+          selectedGroup={selectedGroup}
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
           parentGroupFilters={JSON.stringify(groupFilters)}
@@ -214,6 +254,7 @@ interface DataTableWithLocalPaginationProps {
   state: EntityURLStateResult;
   currentGroupFilters: Filter[];
   parentGroupFilters?: string;
+  selectedGroup: string;
 }
 
 const getDataGridFilter = (filter: Filter | null) => {
@@ -223,19 +264,56 @@ const getDataGridFilter = (filter: Filter | null) => {
   };
 };
 
+const extractMatchPhraseValue = (filter: Filter): string | undefined => {
+  const matchPhrase = filter?.query?.match_phrase as Record<string, { query: string }> | undefined;
+  if (!matchPhrase) return undefined;
+  return Object.values(matchPhrase)[0]?.query;
+};
+
+const buildResolutionGroupFilter = (
+  filters: Filter[]
+): Array<NonNullable<Filter['query']>> | undefined => {
+  const targetEntityId = filters.map(extractMatchPhraseValue).find(Boolean);
+  if (!targetEntityId) return undefined;
+
+  return [
+    {
+      bool: {
+        should: [
+          { term: { [ENTITY_FIELDS.ENTITY_ID]: targetEntityId } },
+          { term: { [ENTITY_FIELDS.RESOLVED_TO]: targetEntityId } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+};
+
 const DataTableWithLocalPagination = ({
   state,
   currentGroupFilters,
   parentGroupFilters,
+  selectedGroup,
 }: DataTableWithLocalPaginationProps) => {
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
 
-  const combinedFilters = mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters)
-    .map(groupFilterMap)
-    .filter(filterTypeGuard)
-    .map(getDataGridFilter)
-    .filter((filter): filter is NonNullable<Filter['query']> => Boolean(filter));
+  const isResolutionGrouping = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
+
+  const combinedFilters = useMemo(() => {
+    const allFilters = mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters)
+      .map(transformResolutionFilter)
+      .map(groupFilterMap)
+      .filter(filterTypeGuard);
+
+    if (isResolutionGrouping) {
+      return buildResolutionGroupFilter(allFilters) ?? [];
+    }
+
+    return allFilters
+      .map(getDataGridFilter)
+      .filter((filter): filter is NonNullable<Filter['query']> => Boolean(filter));
+  }, [currentGroupFilters, parentGroupFilters, isResolutionGrouping]);
 
   const newState: EntityURLStateResult = {
     ...state,
