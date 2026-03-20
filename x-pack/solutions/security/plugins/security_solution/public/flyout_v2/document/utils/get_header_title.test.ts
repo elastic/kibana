@@ -7,7 +7,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 
-import { getDocumentTitle } from './get_header_title';
+import { getDocumentTitle, getAlertTitle, getEventTitle } from './get_header_title';
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -16,6 +16,58 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     flattened,
     isAnchor: false,
   } as DataTableRecord);
+
+describe('getAlertTitle', () => {
+  it('returns the rule name when provided', () => {
+    expect(getAlertTitle('test rule')).toBe('test rule');
+  });
+
+  it('returns Document details when ruleName is undefined', () => {
+    expect(getAlertTitle(undefined)).toBe('Document details');
+  });
+
+  it('returns Document details when ruleName is null', () => {
+    expect(getAlertTitle(null)).toBe('Document details');
+  });
+});
+
+describe('getEventTitle', () => {
+  it('returns the mapped field value when event kind is event and category is known', () => {
+    expect(
+      getEventTitle('event', 'process', (field) =>
+        field === 'process.name' ? 'process name' : undefined
+      )
+    ).toBe('process name');
+  });
+
+  it('returns Event details when event kind is event but mapped field is missing', () => {
+    expect(getEventTitle('event', 'process', () => undefined)).toBe('Event details');
+  });
+
+  it('returns Event details when event kind is event but category is unmapped', () => {
+    expect(getEventTitle('event', 'configuration', () => undefined)).toBe('Event details');
+  });
+
+  it('returns Event details when event kind is event but category is null', () => {
+    expect(getEventTitle('event', null, () => undefined)).toBe('Event details');
+  });
+
+  it('returns External alert details when event kind is alert', () => {
+    expect(getEventTitle('alert', null, () => undefined)).toBe('External alert details');
+  });
+
+  it('returns start-cased event kind for other event kinds', () => {
+    expect(getEventTitle('metric', null, () => undefined)).toBe('Metric details');
+  });
+
+  it('returns Event details when event kind is null', () => {
+    expect(getEventTitle(null, null, () => undefined)).toBe('Event details');
+  });
+
+  it('returns Event details when event kind is undefined', () => {
+    expect(getEventTitle(undefined, undefined, () => undefined)).toBe('Event details');
+  });
+});
 
 describe('getDocumentTitle', () => {
   it('returns the rule name for signals', () => {
