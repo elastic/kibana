@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { useFilterBarContext } from '../filter_bar_context';
 
@@ -41,30 +41,44 @@ export const FilterBarToggleButton: React.FC<{}> = () => {
   const themeContext = useEuiTheme();
   const styles = toggleStyles(themeContext);
 
+  // Workaround for https://github.com/elastic/eui/issues/9520
   const expandTooltipRef = useRef<EuiToolTip>(null);
-  const onClickToggleButton = useCallback(() => {
-    // Clicking the toggle button will bring it into focus if it's not already. EuiToolTip is designed
-    // to stay visible permanently on focused elements, but this is not a desirable behavior when the user
-    // has just toggled the button. They already know what this button does. So, hide the tooltip manually.
-    onToggleCollapse();
-    expandTooltipRef.current?.hideToolTip();
-  }, [onToggleCollapse]);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [buttonInFocusNotVisible, setButtonInFocusNotVisible] = useState(false);
+  const onTooltipMouseOut = useCallback(() => {
+    if (buttonInFocusNotVisible) {
+      expandTooltipRef.current?.hideToolTip();
+    }
+  }, [buttonInFocusNotVisible]);
+  const onButtonFocus = useCallback(() => {
+    if (document.querySelector('button:focus-visible') !== buttonRef.current) {
+      setButtonInFocusNotVisible(true);
+    }
+  }, []);
+  const onButtonBlur = useCallback(() => setButtonInFocusNotVisible(false), []);
+  // End workaround, delete above block when EUI fixes this issue
 
   return (
     <EuiToolTip
       ref={expandTooltipRef}
       content={isCollapsed ? expandLabel : collapseLabel}
       disableScreenReaderOutput
+      onMouseOut={
+        /*  Workaround for https://github.com/elastic/eui/issues/9520 */ onTooltipMouseOut
+      }
     >
       <EuiButtonEmpty
+        buttonRef={buttonRef}
         color="text"
         aria-label={isCollapsed ? expandLabel : collapseLabel}
         aria-expanded={!isCollapsed}
         aria-controls={expandablePillsId}
-        onClick={onClickToggleButton}
+        onClick={onToggleCollapse}
         css={styles.filterButtonStyle}
         size="s"
         data-test-subj="filterBarToggleButton"
+        onFocus={/*  Workaround for https://github.com/elastic/eui/issues/9520 */ onButtonFocus}
+        onBlur={/*  Workaround for https://github.com/elastic/eui/issues/9520 */ onButtonBlur}
       >
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem>
