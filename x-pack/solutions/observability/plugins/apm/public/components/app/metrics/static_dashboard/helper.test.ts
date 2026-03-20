@@ -71,20 +71,20 @@ describe('APM metrics static dashboard helpers', () => {
       ).toBe(true);
     });
 
-    it('resolves EDOT .NET 9 to a versioned dashboard', () => {
-      expect(
-        hasDashboard({
-          agentName: 'opentelemetry/dotnet/elastic',
-          runtimeVersion: '9.0.0',
-        })
-      ).toBe(true);
-    });
-
-    it('falls back to default for EDOT .NET 8 (no versioned dashboard)', () => {
+    it('resolves EDOT .NET 8 to a versioned dashboard via <=8 rule', () => {
       expect(
         hasDashboard({
           agentName: 'opentelemetry/dotnet/elastic',
           runtimeVersion: '8.0.11',
+        })
+      ).toBe(true);
+    });
+
+    it('falls back to default for EDOT .NET 9 (above <=8 rule)', () => {
+      expect(
+        hasDashboard({
+          agentName: 'opentelemetry/dotnet/elastic',
+          runtimeVersion: '9.0.0',
         })
       ).toBe(true);
     });

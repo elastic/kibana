@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
 import type { DashboardFileName } from './dashboards/dashboard_catalog';
-import { existingDashboardFileNames, loadDashboardFile } from './dashboards/dashboard_catalog';
+import { loadDashboardFile } from './dashboards/dashboard_catalog';
 import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
 
 interface DashboardFileProps {
@@ -37,22 +37,12 @@ function getDashboardFileNameFromProps({
     return undefined;
   }
 
-  const { versionedFileName, defaultFileName } = getDashboardFileName({
+  return getDashboardFileName({
     agentName,
     telemetrySdkName,
     telemetrySdkLanguage,
     runtimeVersion,
   });
-
-  if (versionedFileName && existingDashboardFileNames.has(versionedFileName)) {
-    return versionedFileName as DashboardFileName;
-  }
-
-  if (defaultFileName && existingDashboardFileNames.has(defaultFileName)) {
-    return defaultFileName as DashboardFileName;
-  }
-
-  return undefined;
 }
 
 export function hasDashboard(props: DashboardFileProps) {

@@ -6,6 +6,8 @@
  */
 
 import { getSdkNameAndLanguage, getIngestionPath } from '@kbn/elastic-agent-utils';
+import type { DashboardFileName } from './dashboard_catalog';
+import { resolveDashboard } from './dashboard_catalog';
 
 interface DashboardFileNamePartsProps {
   agentName: string;
@@ -17,7 +19,7 @@ interface DashboardFileNamePartsProps {
 const standardizeLanguageName = (languageName?: string) =>
   languageName ? languageName.toLowerCase().replace('/', '_') : undefined;
 
-export const parseMajorVersion = (version?: string): string | undefined => {
+export const parseMajorVersion = (version?: string): number | undefined => {
   if (!version) {
     return undefined;
   }
@@ -29,7 +31,7 @@ export const parseMajorVersion = (version?: string): string | undefined => {
     return undefined;
   }
 
-  return String(parsed);
+  return parsed;
 };
 
 export const getDashboardFileName = ({
@@ -37,22 +39,16 @@ export const getDashboardFileName = ({
   telemetrySdkName,
   telemetrySdkLanguage,
   runtimeVersion,
-}: DashboardFileNamePartsProps): {
-  versionedFileName: string | undefined;
-  defaultFileName: string | undefined;
-} => {
+}: DashboardFileNamePartsProps): DashboardFileName | undefined => {
   const dataFormat = getIngestionPath(!!(telemetrySdkName ?? telemetrySdkLanguage));
   const { sdkName, language } = getSdkNameAndLanguage(agentName);
   const sdkLanguage = standardizeLanguageName(language);
   if (!sdkName || !sdkLanguage) {
-    return { versionedFileName: undefined, defaultFileName: undefined };
+    return undefined;
   }
 
-  const defaultFileName = `${dataFormat}-${sdkName}-${sdkLanguage}-default`;
+  const baseKey = `${dataFormat}-${sdkName}-${sdkLanguage}`;
   const majorVersion = parseMajorVersion(runtimeVersion);
-  const versionedFileName = majorVersion
-    ? `${dataFormat}-${sdkName}-${sdkLanguage}-v${majorVersion}`
-    : undefined;
 
-  return { versionedFileName, defaultFileName };
+  return resolveDashboard(baseKey, majorVersion);
 };
