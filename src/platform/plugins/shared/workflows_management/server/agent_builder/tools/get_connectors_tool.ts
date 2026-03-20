@@ -10,17 +10,16 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
+import { workflowTools } from '../../../common/agent_builder/constants';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
-
-export const GET_CONNECTORS_TOOL_ID = 'platform.workflows.get_connectors';
 
 export function registerGetConnectorsTool(
   agentBuilder: AgentBuilderPluginSetupContract,
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
-    id: GET_CONNECTORS_TOOL_ID,
+    id: workflowTools.getConnectors,
     type: ToolType.builtin,
     description: `Get connector instances configured in the user's environment.
 
