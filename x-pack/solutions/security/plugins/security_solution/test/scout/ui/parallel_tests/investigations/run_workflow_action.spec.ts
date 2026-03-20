@@ -52,22 +52,28 @@ const WORKFLOW_ENABLED_ROLE: KibanaRole = {
 spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic] }, () => {
   let ruleName: string;
 
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
+    // Enable the Workflows UI feature flag required for the "Run workflow" action to appear
+    await scoutSpace.uiSettings.set({ 'workflows:ui:enabled': true });
+  });
+
   spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
     ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
     await apiServices.detectionRule.createCustomQueryRule({
       ...CUSTOM_QUERY_RULE,
       name: ruleName,
     });
-    // Enable the Workflows UI feature flag required for the "Run workflow" action to appear
-    await scoutSpace.uiSettings.set({ 'workflows:ui:enabled': true });
     // Use a custom role that includes workflowsManagement privileges (canExecuteWorkflow)
     // in addition to the security index privileges needed to view alerts
     await browserAuth.loginWithCustomRole(WORKFLOW_ENABLED_ROLE);
   });
 
-  spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
+  spaceTest.afterEach(async ({ apiServices }) => {
     await apiServices.detectionRule.deleteAll();
     await apiServices.detectionAlerts.deleteAll();
+  });
+
+  spaceTest.afterAll(async ({ scoutSpace }) => {
     await scoutSpace.uiSettings.unset('workflows:ui:enabled');
   });
 
@@ -143,7 +149,7 @@ spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic
   );
 
   spaceTest(
-    'should show Run workflow action in alert row context menu',
+    'should open the workflow selection panel when Run workflow is clicked',
     async ({ pageObjects }) => {
       const { alertsTablePage } = pageObjects;
 
@@ -152,17 +158,6 @@ spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic
       await alertsTablePage.openAlertContextMenu(ruleName);
 
       await expect(alertsTablePage.runWorkflowMenuItem).toBeVisible();
-    }
-  );
-
-  spaceTest(
-    'should open the workflow selection panel when Run workflow is clicked',
-    async ({ pageObjects }) => {
-      const { alertsTablePage } = pageObjects;
-
-      await alertsTablePage.navigate();
-      await alertsTablePage.waitForDetectionsAlertsWrapper();
-      await alertsTablePage.openAlertContextMenu(ruleName);
       await alertsTablePage.runWorkflowMenuItem.click();
 
       await expect(alertsTablePage.workflowPanel).toBeVisible();
