@@ -19,7 +19,6 @@ import { getPrivateLocationsForMonitor } from './add_monitor/utils';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import type { PackagePolicyLink } from '../../../common/types';
 
-
 export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT,

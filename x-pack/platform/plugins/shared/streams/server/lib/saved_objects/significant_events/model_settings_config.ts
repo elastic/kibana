@@ -14,6 +14,7 @@ export const streamsSignificantEventsSettingsSOAttributesV1 = schema.object({
   connectorIdKnowledgeIndicatorExtraction: schema.maybe(schema.string()),
   connectorIdRuleGeneration: schema.maybe(schema.string()),
   connectorIdDiscovery: schema.maybe(schema.string()),
+  indexPatterns: schema.maybe(schema.string()),
 });
 
 export type ModelSettingsConfigAttributes = TypeOf<
