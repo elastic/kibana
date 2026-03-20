@@ -83,14 +83,14 @@ export async function identifyStreamFeatures({
   const batches = chunk(sampleDocuments, DOCUMENTS_BATCH_SIZE);
   const effectiveMaxIterations = Math.min(maxIterations, batches.length);
 
-  const knownFeatures: Feature[] = [...existingFeatures];
+  const existingByLowerId = new Map<string, Feature>();
+  for (const ef of existingFeatures) {
+    existingByLowerId.set(ef.id.toLowerCase(), ef);
+  }
+
+  const knownFeatures: Feature[] = [];
   const knownByLowerId = new Map<string, Feature>();
   const knownIdxByUuid = new Map<string, number>();
-  for (let idx = 0; idx < knownFeatures.length; idx++) {
-    const kf = knownFeatures[idx];
-    knownByLowerId.set(kf.id.toLowerCase(), kf);
-    knownIdxByUuid.set(kf.uuid, idx);
-  }
 
   let totalTokensUsed: ChatCompletionTokenCount = {
     prompt: 0,
@@ -102,7 +102,7 @@ export async function identifyStreamFeatures({
   for (let i = 0; i < effectiveMaxIterations; i++) {
     if (signal.aborted) {
       logger.debug('Feature identification aborted');
-      break;
+      throw new Error('Request was aborted');
     }
 
     const batch = batches[i];
@@ -139,6 +139,8 @@ export async function identifyStreamFeatures({
       rawFeatures,
       knownFeatures,
       knownByLowerId,
+      existingFeatures,
+      existingByLowerId,
     });
 
     const changedFeatures = [...newFeatures, ...updatedFeatures];
@@ -415,28 +417,43 @@ function reconcileFeatures({
   rawFeatures,
   knownFeatures,
   knownByLowerId,
+  existingFeatures,
+  existingByLowerId,
 }: {
   rawFeatures: BaseFeature[];
   knownFeatures: Feature[];
   knownByLowerId: Map<string, Feature>;
+  existingFeatures: Feature[];
+  existingByLowerId: Map<string, Feature>;
 }): { newFeatures: Feature[]; updatedFeatures: Feature[] } {
   const newFeatures: Feature[] = [];
   const updatedFeatures: Feature[] = [];
   const metadata = createFeatureMetadata();
 
   for (const raw of rawFeatures) {
-    // Fast path: O(1) ID match; slow path: O(n) fingerprint fallback
-    const existing =
+    // 1. Intra-run match: merge features between iterations of this run
+    const thisRunMatch =
       knownByLowerId.get(raw.id.toLowerCase()) ??
       knownFeatures.find((kf) => isDuplicateFeature(kf, raw));
 
-    if (existing) {
-      const merged = mergeFeature(existing, raw);
-      if (!isEqual(merged, toBaseFeature(existing))) {
-        updatedFeatures.push({ ...merged, ...metadata, uuid: existing.uuid });
+    if (thisRunMatch) {
+      const merged = mergeFeature(thisRunMatch, raw);
+      if (!isEqual(merged, toBaseFeature(thisRunMatch))) {
+        updatedFeatures.push({ ...merged, ...metadata, uuid: thisRunMatch.uuid });
       }
     } else {
-      newFeatures.push({ ...raw, ...metadata, uuid: uuid() });
+      // 2. Cross-run match: check against features from prior runs
+      const existingMatch =
+        existingByLowerId.get(raw.id.toLowerCase()) ??
+        existingFeatures.find((ef) => isDuplicateFeature(ef, raw));
+
+      if (existingMatch) {
+        // Re-discovered: new version + existing UUID + fresh metadata
+        newFeatures.push({ ...raw, ...metadata, uuid: existingMatch.uuid });
+      } else {
+        // Truly new feature
+        newFeatures.push({ ...raw, ...metadata, uuid: uuid() });
+      }
     }
   }
 
