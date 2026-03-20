@@ -28,6 +28,7 @@ import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../../../common/use_per
 import { usePacks } from '../../../packs/use_packs';
 import { useGenericBulkGetUserProfiles } from '../../../common/use_bulk_get_user_profiles';
 import { RunByColumn } from '../../../actions/components/run_by_column';
+import { PacksTableEmptyState } from './empty_state';
 import { TableToolbar } from '../../../components/table_toolbar';
 import type { EnabledFilter, SortDirection } from '../../../components/table_toolbar';
 import { ActiveStateSwitch } from '../../../packs/active_state_switch';
@@ -117,7 +118,7 @@ const PackNameComponent = ({ id, name }: { id: string; name: string }) => (
 );
 const PackName = React.memo(PackNameComponent);
 
-const PacksTableComponent = () => {
+const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: boolean }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { push } = useHistory();
   const newPackLinkProps = useRouterNavigate('packs/add');
@@ -222,7 +223,7 @@ const PacksTableComponent = () => {
       const canRun = permissions.writeLiveQueries || permissions.runSavedQueries;
 
       return (
-        <EuiToolTip position="top" content={playText}>
+        <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
           <EuiButtonIcon
             color="primary"
             iconType="play"
@@ -414,6 +415,13 @@ const PacksTableComponent = () => {
 
   if (isLoading) {
     return <EuiSkeletonText lines={10} />;
+  }
+
+  const hasActiveFilters =
+    !!searchValue || selectedCreators.length > 0 || enabledFilter !== undefined;
+
+  if (totalItemCount === 0 && !hasActiveFilters && hasAssetsToInstall) {
+    return <PacksTableEmptyState />;
   }
 
   return (

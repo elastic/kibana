@@ -22,14 +22,16 @@ import { PacksTable } from './packs_table';
 const PacksPageComponent = () => {
   const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { data: assetsData, isLoading: isLoadingAssetsStatus } = useAssetsStatus();
-  const { data: packsData, isLoading: isLoadingPacks } = usePacks({});
+  const { data: packsData, isLoading: isLoadingPacks } = usePacks({
+    skip: queryHistoryRework,
+  });
   const showEmptyState = useMemo(
     () => !packsData?.total && assetsData?.install?.length,
     [assetsData?.install?.length, packsData?.total]
   );
 
   if (queryHistoryRework) {
-    if (isLoadingAssetsStatus || isLoadingPacks) {
+    if (isLoadingAssetsStatus) {
       return (
         <div css={fullWidthContentCss}>
           <EuiSpacer size="l" />
@@ -38,19 +40,10 @@ const PacksPageComponent = () => {
       );
     }
 
-    if (showEmptyState) {
-      return (
-        <div css={fullWidthContentCss}>
-          <EuiSpacer size="l" />
-          <PacksTableEmptyState />
-        </div>
-      );
-    }
-
     return (
       <div css={fullWidthContentCss}>
         <EuiSpacer size="l" />
-        <PacksTable />
+        <PacksTable hasAssetsToInstall={!!assetsData?.install?.length} />
       </div>
     );
   }
