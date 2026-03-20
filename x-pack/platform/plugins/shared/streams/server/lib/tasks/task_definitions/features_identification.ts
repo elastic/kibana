@@ -23,7 +23,7 @@ import {
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
 import { identifyFeatures, generateAllComputedFeatures, sumTokens } from '@kbn/streams-ai';
-import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
+import { getDiverseSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_diverse_sample_documents';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
@@ -263,7 +263,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const { hits: sampleDocuments } = await getSampleDocuments({
+                const { hits: sampleDocuments } = await getDiverseSampleDocuments({
                   esClient,
                   index: stream.name,
                   start,
