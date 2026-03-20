@@ -19,6 +19,13 @@ export const RESULTS_PANEL = 'osqueryResultsPanel';
 export const RESULTS_TABLE = 'osqueryResultsTable';
 export const RESULTS_FLYOUT = 'osqueryResultsFlyout';
 
+// Saved queries list (queryHistoryRework)
+export const SAVED_QUERIES_TABLE = 'savedQueriesTable';
+export const SAVED_QUERIES_SEARCH = 'saved-queries-toolbar-search';
+export const SAVED_QUERIES_CREATED_BY = 'saved-queries-toolbar-created-by-button';
+export const SAVED_QUERIES_COLUMNS = 'saved-queries-toolbar-columns-button';
+export const SAVED_QUERIES_SORT = 'saved-queries-toolbar-sort-button';
+
 // Row actions menu (kebab) — used by packs and saved queries
 export const rowActionsMenuSelector = (itemName: string) =>
   `[aria-label="Actions for ${itemName}"]`;
