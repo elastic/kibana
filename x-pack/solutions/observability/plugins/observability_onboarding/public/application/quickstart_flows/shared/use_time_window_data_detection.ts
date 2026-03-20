@@ -69,9 +69,9 @@ export function useTimeWindowDataDetection({
     status: hasDataStatus,
     refetch: refetchHasData,
   } = useFetcher(
-    (callApi) => {
+    (callApi): Promise<{ hasData: boolean }> | undefined => {
       if (!isMonitoringActive) return;
-      return callApi(`GET ${endpoint}` as any, {
+      return callApi(`GET ${endpoint}` as Parameters<typeof callApi>[0], {
         params: {
           query: { start: sessionStartTime, ...effectiveExtraParams },
         },
