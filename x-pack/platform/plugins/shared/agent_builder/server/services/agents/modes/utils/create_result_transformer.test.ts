@@ -12,7 +12,7 @@ import type { ToolManager } from '@kbn/agent-builder-server/runner/tool_manager'
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import {
   createResultTransformer,
-  FILE_REFERENCE_TOKEN_THRESHOLD,
+  FS_TOOL_CALL_TOKEN_THRESHOLD,
 } from './create_result_transformer';
 
 describe('createResultTransformer', () => {
@@ -265,7 +265,7 @@ describe('createResultTransformer', () => {
         '/tool_calls/search/call-1/result-1.json',
         createFileEntry(
           '/tool_calls/search/call-1/result-1.json',
-          FILE_REFERENCE_TOKEN_THRESHOLD + 100,
+          FS_TOOL_CALL_TOKEN_THRESHOLD + 100,
           { large: 'data' }
         )
       );
@@ -349,7 +349,7 @@ describe('createResultTransformer', () => {
         '/tool_calls/search/call-1/result-1.json',
         createFileEntry(
           '/tool_calls/search/call-1/result-1.json',
-          FILE_REFERENCE_TOKEN_THRESHOLD + 100,
+          FS_TOOL_CALL_TOKEN_THRESHOLD + 100,
           { large: 'data' }
         )
       );
@@ -394,7 +394,7 @@ describe('createResultTransformer', () => {
         '/tool_calls/search/call-1/summarized.json',
         createFileEntry(
           '/tool_calls/search/call-1/summarized.json',
-          FILE_REFERENCE_TOKEN_THRESHOLD + 1000,
+          FS_TOOL_CALL_TOKEN_THRESHOLD + 1000,
           { summary: 'Summarized data' }
         )
       );
