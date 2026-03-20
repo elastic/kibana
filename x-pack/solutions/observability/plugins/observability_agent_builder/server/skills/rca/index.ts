@@ -11,7 +11,6 @@ import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-bui
 import { OBSERVABILITY_GET_LOGS_TOOL_ID } from '../../tools/get_logs/constants';
 import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '../../tools/run_log_rate_analysis/tool';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../../tools/get_index_info/tool';
-import { getKqlInstructions } from '../../agent/register_observability_agent';
 
 const RCA_TOOL_IDS = [
   platformStreamsSigEventsTools.searchKnowledgeIndicators,
@@ -79,12 +78,20 @@ function buildRcaSkillContent(): string {
     \`search_knowledge_indicators\`. Do not call \`get_logs\`, \`execute_esql\`, or any other
     tool before it.**
 
+    **Tool identity:** Your tool list may show a **longer registry id** (e.g. containing
+    \`platform.streams\` and ending in \`search_knowledge_indicators\`). That is the same tool as
+    \`search_knowledge_indicators\` in these instructions.
+
     Knowledge Indicators (KIs) are curated, stream-specific signals — operator-written detection
     queries and automatically extracted behavioral patterns. They encode what "bad" looks like for
     this stream and are faster and more targeted than raw log search.
 
+    **If \`search_knowledge_indicators\` errors** (timeout, permission, internal error): retry **once**.
+    If it still fails, tell the user and **proceed to Track B** — do not block the investigation.
+
     Only fall back to Track B (log funnel) if:
     - \`search_knowledge_indicators\` is NOT in your tool list, OR
+    - it **failed** after one retry (see above), OR
     - it returned no KIs for the target stream after two attempts, OR
     - every KI-derived hypothesis was explicitly refuted by live query data
 
@@ -120,8 +127,9 @@ function buildRcaSkillContent(): string {
     ### Step A-2: Load All Knowledge Indicators
 
     Call \`search_knowledge_indicators\` with:
-    - \`stream_names\`: the target stream(s) from Step A-1
-    - \`limit\`: 50
+    - \`stream_names\`: the target stream(s) from Step A-1 when known; omit only for discovery (Step A-1)
+    - \`limit\`: **50** when **not** passing \`stream_names\` (discovery across streams — caps breadth).
+      **20** when passing \`stream_names\` (scoped stream — smaller payloads, fewer KIs in context).
     - No \`kind\` filter (retrieve both features and queries)
 
     If the user described a specific symptom (e.g. "OOM errors", "connection timeouts",
@@ -141,13 +149,17 @@ function buildRcaSkillContent(): string {
 
     **Hypothesis confidence scoring:**
 
+    \`severity_score\` and \`confidence\` use a 0–100 scale. The combinations below are **heuristics**:
+    when scores sit near a boundary, prefer **relative ordering among the KIs returned in this response**
+    (higher = stronger evidence) rather than treating any numeric cutoff as absolute.
+
     | Evidence combination | Confidence |
     |---|---|
-    | Backed query (severity ≥ 70) + corroborating \`error_logs\` feature (confidence ≥ 70) | Critical |
-    | Backed query alone (severity ≥ 70) | High |
-    | \`error_logs\` feature (confidence ≥ 70) alone | High |
-    | Non-backed query (severity ≥ 70) + supporting \`log_patterns\` feature | Medium-High |
-    | \`error_logs\` feature (confidence 40–70) | Medium |
+    | Backed query with **high** \`severity_score\` + corroborating \`error_logs\` feature with **high** \`confidence\` | Critical |
+    | Backed query with **high** \`severity_score\` alone | High |
+    | \`error_logs\` feature with **high** \`confidence\` alone | High |
+    | Non-backed query with **high** \`severity_score\` + supporting \`log_patterns\` feature | Medium-High |
+    | \`error_logs\` feature with **mid-range** \`confidence\` | Medium |
     | \`log_patterns\` feature without corroboration | Medium |
     | \`dataset_analysis\` anomaly | Medium |
     | \`log_samples\` anomaly | Low |
@@ -170,7 +182,7 @@ function buildRcaSkillContent(): string {
       - \`log_samples\`: representative raw documents from the stream
     - \`feature.description\`: what pattern was observed — use this as the hypothesis claim
     - \`feature.properties\`: structured data about the pattern (field names, values, counts) — use for query construction
-    - \`feature.confidence\`: 0–100 reliability. >70 = frequently and reliably observed.
+    - \`feature.confidence\`: 0–100 reliability. **Higher** values mean the pattern is more consistently observed — compare within the returned feature set.
     - \`feature.evidence\`: human-readable supporting facts (may name the error type, field, or component directly)
     - \`feature.filter\`: the KQL/streamlang condition that scopes this feature to a data subset
       (e.g. "service.name: checkout AND log.level: error"). You MUST apply this same filter in any
@@ -275,8 +287,8 @@ function buildRcaSkillContent(): string {
 
     ## Track B: Log Funnel Investigation (Fallback Only)
 
-    Only enter this track if \`search_knowledge_indicators\` is not in your tool list, returned
-    no KIs after two attempts, or all KI-derived hypotheses were explicitly refuted.
+    Enter this track if \`search_knowledge_indicators\` is not in your tool list, **failed after one retry**,
+    returned no KIs after two attempts, or all KI-derived hypotheses were explicitly refuted.
 
     ### Phase 1: Initial Peek
 
@@ -324,8 +336,8 @@ function buildRcaSkillContent(): string {
 
     ## Critical Rules
 
-    1. **\`search_knowledge_indicators\` is always your first tool call** when available.
-       Never call \`get_logs\` before exhausting the KI track.
+    1. **KI tool order** — same as *Mandatory First Step*: when the KI tool is available and succeeds,
+       call it first; do not use \`get_logs\` until the KI track is exhausted or you moved to Track B per the fallbacks above.
     2. **Form all hypotheses before testing any.** Read the full KI set, then rank and test.
     3. **Never state a root cause without tool evidence.** Every claim must trace to a KI or query result.
     4. **Validate stale KIs.** \`status: "stale"\` or \`status: "expired"\` = historical — always confirm with a live query.
@@ -335,8 +347,6 @@ function buildRcaSkillContent(): string {
     8. **0 rows = refuted. Move on.** Do not retry a refuted hypothesis with the same parameters.
     9. **Do not fabricate.** Never invent scores, IDs, query names, or ES|QL results.
 
-    ${getKqlInstructions()}
-
     ## OTel Exception Events
 
     OpenTelemetry exception events have \`error.exception.message\` / \`error.exception.type\` but NO \`log.level\` or \`message\`.
@@ -345,6 +355,7 @@ function buildRcaSkillContent(): string {
 
     ## Tips
 
+    - **KQL for \`kqlFilter\`:** Follow the **KQL (Kibana Query Language)** section in the **host agent's** system instructions (not repeated here) when building filters for \`get_logs\` and related tools.
     - **ES|QL + context:** \`FROM\` without \`STATS\` / tight aggregation can return huge row sets; add \`| LIMIT 20\` (or lower) before executing unless the query already has \`LIMIT\` or returns a small aggregate.
     - \`log.level\` is often unreliable (mixed casing, missing on OTel events). Prefer filtering by message content.
     - Use \`get_index_info(operation="get-field-values", fields=["log.level"], ...)\` to discover actual keyword values before filtering.
@@ -361,14 +372,14 @@ function buildRcaSkillContent(): string {
 
     **A-1**: stream = "payment", window = 14:00 → now.
 
-    **A-2**: search_knowledge_indicators(stream_names=["payment"], limit=50)
+    **A-2**: search_knowledge_indicators(stream_names=["payment"], limit=20)
     → Returns 4 KIs:
       - Query KI Q1: "DB connection pool exhaustion" (severity=88, backed=true, esql="FROM payment | WHERE error.message LIKE \\"*too many connections*\\" | STATS count=COUNT(*)")
       - Query KI Q2: "High payment error rate" (severity=72, backed=true, esql="FROM payment | WHERE @timestamp >= ?_tstart | STATS err=COUNT(*) BY error.type | WHERE err > 50")
       - Feature KI F1: type="error_logs", confidence=93, description="FATAL: connection pool exhausted — all 100 slots occupied", filter="service.name: payment", status="active"
       - Feature KI F2: type="log_patterns", confidence=61, description="Slow query warnings from PostgreSQL", filter="service.name: payment", status="stale"
 
-    **A-2 (semantic)**: search_knowledge_indicators(stream_names=["payment"], search_text="database connection", limit=50)
+    **A-2 (semantic)**: search_knowledge_indicators(stream_names=["payment"], search_text="database connection", limit=20)
     → Returns same KIs, no new ones.
 
     **A-3 — Hypotheses:**
@@ -381,30 +392,29 @@ function buildRcaSkillContent(): string {
     >   Test: generate_esql to count slow query warnings in payment stream since 14:00.
 
     **A-4 — Test H1:**
-    execute_esql(query="FROM payment | WHERE error.message LIKE \\"*too many connections*\\" | STATS count=COUNT(*)", time_range={from:"2026-03-20T14:00:00Z", to:"now"})
-    (Single \`STATS\` row — no extra \`LIMIT\` needed; raw-row KI queries would need \`| LIMIT 20\` when unstated.)
+    execute_esql(query="FROM payment | WHERE error.message LIKE \\"*too many connections*\\" | STATS count=COUNT(*)", time_range={from:"<investigation_window_start>", to:"now"})
+    (\`from\`/\`to\` match A-1 — placeholders only. Single \`STATS\` row — no extra \`LIMIT\`; raw-row KI queries need \`| LIMIT 20\` when unstated.)
     → Returns: count=1,847 — the condition is actively firing.
     → H1 = Confirmed.
 
     **A-4 — Test H2 (for completeness):**
-    generate_esql(query="count slow query warnings in payment stream since 14:00, grouped by 5min bucket", index="payment", time_range={from:"2026-03-20T14:00:00Z", to:"now"})
-    → Returns: 12 slow warnings, all before 13:55 (before the incident window).
+    generate_esql(query="count slow query warnings in payment stream in the investigation window, grouped by 5min bucket", index="payment", time_range={from:"<investigation_window_start>", to:"now"})
+    → Returns: a few slow-warning buckets, all **ending before** the main incident window in this scenario.
     → H2 = Refuted for this window. Slow queries preceded the pool exhaustion — likely a contributing factor, not the root cause.
 
     **A-5 — Timeline:**
     generate_esql(query="find MIN(@timestamp) for error.message matching 'too many connections' in payment stream in the last 24h", index="payment", time_range={from:"now-24h", to:"now"})
-    → MIN(@timestamp) = 2026-03-20T13:58:42Z. Onset ~13:58, user-reported since ~14:00 ✓.
+    → MIN(@timestamp) is **just before** the user-reported window — consistent with "since 2pm" ✓.
 
     Blast radius: generate_esql to group by service.name → only "payment" affected (F1 filter confirms).
 
     **A-6 — Report:**
-    Root Cause (Confirmed): The payment service exhausted its PostgreSQL connection pool at 13:58.
-    All 100 connection slots were occupied, making the service unable to process new requests.
-    A preceding spike in slow queries (visible before 13:55) likely held connections open longer than
-    usual, accelerating pool exhaustion.
+    Root Cause (Confirmed): The payment service exhausted its PostgreSQL connection pool shortly before / at the user-reported window.
+    Connection slots were fully occupied, making the service unable to process new requests.
+    A preceding burst of slow queries likely held connections open longer than usual, accelerating pool exhaustion.
 
     Evidence: Q1 fired (1,847 matching events); F1 active (confidence=93).
-    Timeline: Started 13:58, ongoing.
+    Timeline: Onset from MIN(@timestamp); still ongoing in this scenario.
     Blast radius: payment service only.
     Actions: Increase connection pool size or add a query timeout to release stuck connections.
     Q2 ("High payment error rate") has a backed rule — confirm it is actively alerting.
