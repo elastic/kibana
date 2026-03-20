@@ -67,6 +67,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         },
       },
       async (context, request, res) => {
+        request.enableEsTimingTracking = true;
+
         const { sessionId, name, expires, initialState, restoreState, appId, locatorId } =
           request.body;
 
@@ -117,6 +119,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         },
       },
       async (context, request, res) => {
+        request.enableEsTimingTracking = true;
+
         const { id } = request.params;
         try {
           const searchContext = await context.search;
@@ -157,6 +161,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         },
       },
       async (context, request, res) => {
+        request.enableEsTimingTracking = true;
+
         const { id } = request.params;
         try {
           const searchContext = await context.search;
@@ -208,6 +214,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         },
       },
       async (context, request, res) => {
+        request.enableEsTimingTracking = true;
+
         const { page, perPage, sortField, sortOrder, filter, searchFields, search } = request.body;
         try {
           const searchContext = await context.search;
@@ -255,6 +263,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         },
       },
       async (context, request, res) => {
+        request.enableEsTimingTracking = true;
+
         const { id } = request.params;
         try {
           const searchContext = await context.search;
@@ -289,6 +299,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         },
       },
       async (context, request, res) => {
+        request.enableEsTimingTracking = true;
+
         const { id } = request.params;
         try {
           const searchContext = await context.search;
@@ -332,6 +344,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         },
       },
       async (context, request, res) => {
+        request.enableEsTimingTracking = true;
+
         const { id } = request.params;
         const { name, expires } = request.body;
         try {
@@ -378,6 +392,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         },
       },
       async (context, request, res) => {
+        request.enableEsTimingTracking = true;
+
         const { id } = request.params;
         const { expires } = request.body;
         try {
@@ -426,6 +442,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         },
       },
       async (context, request, res) => {
+        request.enableEsTimingTracking = true;
+
         const { sessionIds } = request.body;
         try {
           const searchContext = await context.search;

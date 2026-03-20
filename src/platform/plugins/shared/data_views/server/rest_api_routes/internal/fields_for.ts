@@ -154,6 +154,8 @@ export const validate: VersionedRouteValidation<any, any, any> = {
 
 const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
+    request.enableEsTimingTracking = true;
+
     const abortSignal = getRequestAbortedSignal(request.events.aborted$);
     const core = await context.core;
     const { asCurrentUser } = core.elasticsearch.client;

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'perf_hooks';
 import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 import type { TransportRequestMetadata } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { OnRequestHandler } from '../create_transport';
 
 // temporary type correction while @elastic/elasticsearch types fixes the actual acceptedParams type
@@ -26,7 +28,8 @@ type AcceptedParams = NonNullable<TransportRequestMetadata['acceptedParams']>;
 export function getCpsRequestHandler(
   cpsEnabled: boolean,
   projectRouting: string,
-  logger: Logger
+  logger: Logger,
+  kibanaRequest?: KibanaRequest
 ): OnRequestHandler {
   return (_ctx, params, options, _receivedLogger) => {
     const body = isPlainObject(params.body) ? (params.body as Record<string, unknown>) : undefined;
@@ -92,6 +95,14 @@ export function getCpsRequestHandler(
       options.context = {};
     }
     (options.context as any).cpsRoutingContext = routingContext;
+
+    // Store timing context for transport instrumentation (opt-in only)
+    if (kibanaRequest?.enableEsTimingTracking) {
+      (options.context as any).timingContext = {
+        startTime: performance.now(),
+        kibanaRequest,
+      };
+    }
   };
 }
 

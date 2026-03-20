@@ -15,6 +15,8 @@ import { getDataViews, hasUserDataView } from '../../has_user_data_view';
 type Handler = Parameters<VersionedRoute<any, RequestHandlerContext>['addVersion']>[1];
 
 export const handler: Handler = async (ctx: RequestHandlerContext, req, res) => {
+  req.enableEsTimingTracking = true;
+
   const core = await ctx.core;
   const savedObjectsClient = core.savedObjects.client;
   const elasticsearchClient = core.elasticsearch.client.asCurrentUser;

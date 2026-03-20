@@ -544,9 +544,8 @@ export class HttpServer {
     totalTime: number,
     customEvents: readonly TimingEvent[]
   ): string {
-    // Format: metric1;dur=X.XX;desc="...", metric2;dur=Y.YY;desc="..."
     const timingMetrics = [
-      `apptotal;dur=${totalTime.toFixed(2)};desc="Application Server Processing Time"`,
+      `apptotal;dur=${totalTime.toFixed(2)};desc="Application Server Processing Time (Total)"`,
     ];
 
     // Limit to 20 events, sanitize names, escape descriptions

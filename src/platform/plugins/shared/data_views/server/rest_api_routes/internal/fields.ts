@@ -27,6 +27,8 @@ export const createHandler: (
   isRollupsEnabled: () => boolean
 ) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
+    request.enableEsTimingTracking = true;
+
     const core = await context.core;
     const uiSettings = core.uiSettings.client;
     const { asCurrentUser } = core.elasticsearch.client;

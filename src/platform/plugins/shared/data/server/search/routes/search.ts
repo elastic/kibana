@@ -63,6 +63,8 @@ export function registerSearchRoute(
         },
       },
       async (context, request, res) => {
+        request.enableEsTimingTracking = true;
+
         const {
           legacyHitsTotal = true,
           sessionId,
@@ -154,6 +156,8 @@ export function registerSearchRoute(
         },
       },
       async (context, request, res) => {
+        request.enableEsTimingTracking = true;
+
         const { strategy, id } = request.params;
 
         try {

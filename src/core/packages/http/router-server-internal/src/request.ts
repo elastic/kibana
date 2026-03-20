@@ -154,6 +154,8 @@ export class CoreKibanaRequest<
   public readonly authzResult?: Record<string, boolean>;
   /** {@inheritDoc KibanaRequest.timing} */
   public readonly timing: RequestTiming;
+  /** {@inheritDoc KibanaRequest.enableEsTimingTracking} */
+  public enableEsTimingTracking?: boolean;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
