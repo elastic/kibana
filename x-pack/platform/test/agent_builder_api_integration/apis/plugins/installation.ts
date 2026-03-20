@@ -17,7 +17,6 @@ const PLUGIN_NAME = 'test-plugin';
 const PLUGIN_DESCRIPTION = 'A test plugin for integration testing';
 const PLUGIN_VERSION = '1.0.0';
 const SKILL_DIR_NAME = 'test-skill';
-const EXPECTED_SKILL_ID = `${PLUGIN_NAME}-${SKILL_DIR_NAME}`;
 const EXPECTED_SKILL_NAME = 'Test Skill';
 
 const createZipBuffer = async (): Promise<Buffer> => {
@@ -59,7 +58,11 @@ export default function ({ getService }: FtrProviderContext) {
     let pluginsServer: PluginsTestServer;
     let serverUrl: string;
     let zipBuffer: Buffer;
+    let createdPluginId: string;
     const createdPluginIds: string[] = [];
+
+    const expectedSkillId = (pluginName: string = PLUGIN_NAME) =>
+      `${pluginName!}-${SKILL_DIR_NAME}`;
 
     before(async () => {
       const serverArgs: string[] = config.get('kbnTestServer.serverArgs');
@@ -134,11 +137,9 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     describe('install from remote zip URL', () => {
-      let pluginId: string;
-
       after(async () => {
-        if (pluginId) {
-          const idx = createdPluginIds.indexOf(pluginId);
+        if (createdPluginId) {
+          const idx = createdPluginIds.indexOf(createdPluginId);
           if (idx !== -1) {
             createdPluginIds.splice(idx, 1);
           }
@@ -150,33 +151,33 @@ export default function ({ getService }: FtrProviderContext) {
           200
         );
 
-        pluginId = response.body.id;
-        createdPluginIds.push(pluginId);
+        createdPluginId = response.body.id;
+        createdPluginIds.push(createdPluginId);
 
         expect(response.body.name).to.be(PLUGIN_NAME);
         expect(response.body.version).to.be(PLUGIN_VERSION);
         expect(response.body.description).to.be(PLUGIN_DESCRIPTION);
-        expect(response.body.skill_ids).to.contain(EXPECTED_SKILL_ID);
+        expect(response.body.skill_ids).to.contain(expectedSkillId());
       });
 
       it('creates the associated skills', async () => {
-        const skill = await findPluginSkill(EXPECTED_SKILL_ID);
+        const skill = await findPluginSkill(expectedSkillId());
         expect(skill).to.be.ok();
         expect(skill!.name).to.be(EXPECTED_SKILL_NAME);
         expect(skill!.readonly).to.be(true);
-        expect(skill!.plugin_id).to.be(PLUGIN_NAME);
+        expect(skill!.plugin_id).to.be(createdPluginId);
       });
 
       it('uninstalls the plugin', async () => {
-        await deletePlugin(pluginId).expect(200);
-        const idx = createdPluginIds.indexOf(pluginId);
+        await deletePlugin(createdPluginId).expect(200);
+        const idx = createdPluginIds.indexOf(createdPluginId);
         if (idx !== -1) {
           createdPluginIds.splice(idx, 1);
         }
       });
 
       it('removes the associated skills on uninstall', async () => {
-        const skill = await findPluginSkill(EXPECTED_SKILL_ID);
+        const skill = await findPluginSkill(expectedSkillId());
         expect(skill).to.be(undefined);
       });
     });
@@ -203,15 +204,15 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.name).to.be(PLUGIN_NAME);
         expect(response.body.version).to.be(PLUGIN_VERSION);
         expect(response.body.description).to.be(PLUGIN_DESCRIPTION);
-        expect(response.body.skill_ids).to.contain(EXPECTED_SKILL_ID);
+        expect(response.body.skill_ids).to.contain(expectedSkillId());
       });
 
       it('creates the associated skills', async () => {
-        const skill = await findPluginSkill(EXPECTED_SKILL_ID);
+        const skill = await findPluginSkill(expectedSkillId());
         expect(skill).to.be.ok();
         expect(skill!.name).to.be(EXPECTED_SKILL_NAME);
         expect(skill!.readonly).to.be(true);
-        expect(skill!.plugin_id).to.be(PLUGIN_NAME);
+        expect(skill!.plugin_id).to.be(pluginId);
       });
 
       it('uninstalls the plugin', async () => {
@@ -223,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('removes the associated skills on uninstall', async () => {
-        const skill = await findPluginSkill(EXPECTED_SKILL_ID);
+        const skill = await findPluginSkill(expectedSkillId());
         expect(skill).to.be(undefined);
       });
     });
@@ -249,15 +250,15 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.name).to.be(PLUGIN_NAME);
         expect(response.body.version).to.be(PLUGIN_VERSION);
         expect(response.body.description).to.be(PLUGIN_DESCRIPTION);
-        expect(response.body.skill_ids).to.contain(EXPECTED_SKILL_ID);
+        expect(response.body.skill_ids).to.contain(expectedSkillId());
       });
 
       it('creates the associated skills', async () => {
-        const skill = await findPluginSkill(EXPECTED_SKILL_ID);
+        const skill = await findPluginSkill(expectedSkillId());
         expect(skill).to.be.ok();
         expect(skill!.name).to.be(EXPECTED_SKILL_NAME);
         expect(skill!.readonly).to.be(true);
-        expect(skill!.plugin_id).to.be(PLUGIN_NAME);
+        expect(skill!.plugin_id).to.be(pluginId);
       });
 
       it('uninstalls the plugin', async () => {
@@ -269,7 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('removes the associated skills on uninstall', async () => {
-        const skill = await findPluginSkill(EXPECTED_SKILL_ID);
+        const skill = await findPluginSkill(expectedSkillId());
         expect(skill).to.be(undefined);
       });
     });
@@ -344,12 +345,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body.name).to.be(overrideName);
         expect(response.body.skill_ids).to.contain(overrideSkillId);
-      });
-
-      it('creates skills with the overridden plugin name as plugin_id', async () => {
-        const skill = await findPluginSkill(overrideSkillId);
-        expect(skill).to.be.ok();
-        expect(skill!.plugin_id).to.be(overrideName);
       });
     });
 

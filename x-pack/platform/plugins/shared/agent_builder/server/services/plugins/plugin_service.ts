@@ -143,7 +143,7 @@ class PluginsServiceImpl implements PluginsService {
   }): Promise<void> {
     const { pluginClient, skillClient } = this.getScopedClients({ request });
     const plugin = await pluginClient.get(pluginId);
-    await skillClient.deleteByPluginId(plugin.name);
+    await skillClient.deleteByPluginId(plugin.id);
     await pluginClient.delete(pluginId);
   }
 }

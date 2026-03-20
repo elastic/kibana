@@ -417,7 +417,7 @@ describe('PluginsService', () => {
       await start.deletePlugin({ request: mockRequest, pluginId: 'plugin-1' });
 
       expect(mockClient.get).toHaveBeenCalledWith('plugin-1');
-      expect(mockSkillClient.deleteByPluginId).toHaveBeenCalledWith('my-plugin');
+      expect(mockSkillClient.deleteByPluginId).toHaveBeenCalledWith('plugin-1');
       expect(mockClient.delete).toHaveBeenCalledWith('plugin-1');
     });
 
