@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlQueryResponse, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 
 export function getAlertEventESQLResponse(overrides?: {
   '@timestamp'?: string;
@@ -59,15 +59,18 @@ export function getBulkGetAlertActionsESQLResponse(
       { name: 'last_snooze_action', type: 'keyword' },
       { name: 'tags', type: 'keyword' },
     ],
-    values: records.map((record) => [
-      record.episode_id ?? 'episode-1',
-      record.rule_id ?? 'test-rule-id',
-      record.group_hash ?? 'test-group-hash',
-      record.last_ack_action ?? null,
-      record.last_deactivate_action ?? null,
-      record.last_snooze_action ?? null,
-      record.tags ?? null,
-    ]),
+    values: records.map(
+      (record) =>
+        [
+          record.episode_id ?? 'episode-1',
+          record.rule_id ?? 'test-rule-id',
+          record.group_hash ?? 'test-group-hash',
+          record.last_ack_action ?? null,
+          record.last_deactivate_action ?? null,
+          record.last_snooze_action ?? null,
+          record.tags ?? null,
+        ] as FieldValue[]
+    ),
   };
 }
 

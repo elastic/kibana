@@ -112,6 +112,7 @@ export const bulkGetAlertActionsResponseSchema = z
         .enum(['snooze', 'unsnooze'])
         .nullable()
         .describe('The last snooze action, or null if none.'),
+      tags: z.array(z.string()).nullable().describe('The tags for the alert, or null if none.'),
     })
   )
   .describe('Response body for bulk getting alert actions by episode IDs.');
