@@ -12,8 +12,13 @@ import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime } from '@kbn/data-plugin/public';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { executeEsqlQuery } from './execute_esql_query';
 import { dataViewWithAtTimefieldMock } from '@kbn/unified-histogram/__mocks__/data_view_with_timefield';
+import {
+  MetricsExecutionContextAction,
+  MetricsExecutionContextName,
+} from './execution_context_enums';
+import { executeEsqlQuery } from './execute_esql_query';
+import { getMetricsExecutionContext } from './execution_context';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLResults: jest.fn(),
@@ -80,6 +85,28 @@ describe('executeEsqlQuery', () => {
         signal,
         timeRange,
         variables,
+        ...getMetricsExecutionContext(
+          MetricsExecutionContextAction.FETCH,
+          MetricsExecutionContextName.METRICS_INFO
+        ),
+      })
+    );
+  });
+
+  it('passes metrics info execution context so the request is labeled in APM', async () => {
+    await executeEsqlQuery({
+      esqlQuery: 'TS metrics-* | METRICS_INFO',
+      search: mockSearch,
+      dataView: dataViewWithAtTimefieldMock,
+      uiSettings: mockUiSettings,
+    });
+
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: getMetricsExecutionContext(
+          MetricsExecutionContextAction.FETCH,
+          MetricsExecutionContextName.METRICS_INFO
+        ).executionContext,
       })
     );
   });

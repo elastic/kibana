@@ -8,36 +8,23 @@
  */
 
 import type { FC } from 'react';
-import React, { useRef, useLayoutEffect, useState } from 'react';
-import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
-import { useChromeComponentsDeps } from '../context';
-
-const useHeaderActionMenuMounter = () => {
-  const { application } = useChromeComponentsDeps();
-  const actionMenu$ = application.currentActionMenu$;
-  const [mounter, setMounter] = useState<{ mount: MountPoint | undefined }>({ mount: undefined });
-  useLayoutEffect(() => {
-    const s = actionMenu$.subscribe((value) => {
-      setMounter({ mount: value });
-    });
-    return () => s.unsubscribe();
-  }, [actionMenu$]);
-  return mounter;
-};
+import React, { useRef, useLayoutEffect } from 'react';
+import type { UnmountCallback } from '@kbn/core-mount-utils-browser';
+import { useCurrentActionMenu } from './chrome_hooks';
 
 /**
  * Renders the currently mounted header action menu set via {@link ChromeStart.setHeaderActionMenu}.
  * @deprecated Use {@link HeaderAppMenu} instead. See kibana-team#2651.
  */
 export const HeaderActionMenu: FC = () => {
-  const mounter = useHeaderActionMenuMounter();
+  const mount = useCurrentActionMenu();
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
 
   useLayoutEffect(() => {
-    if (mounter.mount && elementRef.current) {
+    if (mount && elementRef.current) {
       try {
-        unmountRef.current = mounter.mount(elementRef.current);
+        unmountRef.current = mount(elementRef.current);
       } catch (e) {
         // TODO: use client-side logger when feature is implemented
         // eslint-disable-next-line no-console
@@ -50,7 +37,7 @@ export const HeaderActionMenu: FC = () => {
         unmountRef.current = null;
       }
     };
-  }, [mounter]);
+  }, [mount]);
 
   return <div data-test-subj="headerAppActionMenu" ref={elementRef} />;
 };
