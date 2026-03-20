@@ -12,7 +12,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { getEsqlDataView } from './get_esql_data_view';
 import { dataViewMock } from '../__mocks__';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 const dataViewAdHoc = {
   id: 'ad-hoc-id',
@@ -23,7 +23,7 @@ const dataViewAdHoc = {
   timeFieldName: '@timestamp',
 } as unknown as DataView;
 
-const mockDataViewsService = dataPluginMock.createStartContract().dataViews;
+const mockDataViewsService = dataViewPluginMocks.createStartContract();
 jest.mocked(mockDataViewsService.create).mockImplementation((spec) => {
   return Promise.resolve({
     ...dataViewMock,
