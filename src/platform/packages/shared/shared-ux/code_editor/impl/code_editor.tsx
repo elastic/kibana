@@ -470,10 +470,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         }
 
         if (documentHighlightProvider) {
-          monaco.languages.registerDocumentHighlightProvider(
-            languageId,
-            documentHighlightProvider
-          );
+          monaco.languages.registerDocumentHighlightProvider(languageId, documentHighlightProvider);
         }
       });
 
