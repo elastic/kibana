@@ -25,6 +25,7 @@ export function getDashboardMeta(
     updated_at: savedObject.updated_at,
     updated_by: savedObject.updated_by,
     version: savedObject.version ?? '',
+    ...(savedObject?.accessControl?.owner && { owner: savedObject.accessControl.owner }),
     ...(['create', 'read', 'search'].includes(operation) && {
       created_at: savedObject.created_at,
       created_by: savedObject.created_by,
@@ -56,7 +57,6 @@ export function getDashboardCRUResponseBody(
       ...(savedObject?.accessControl && {
         access_control: {
           access_mode: savedObject.accessControl.accessMode,
-          owner: savedObject.accessControl.owner,
         },
       }),
     },

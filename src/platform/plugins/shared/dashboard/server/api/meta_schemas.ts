@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 
 export const baseMetaSchema = schema.object({
   managed: schema.maybe(schema.boolean()),
+  owner: schema.maybe(schema.string()),
   error: schema.maybe(
     schema.object({
       error: schema.string(),
