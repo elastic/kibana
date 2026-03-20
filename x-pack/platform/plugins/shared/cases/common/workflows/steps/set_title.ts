@@ -18,17 +18,16 @@ import {
 
 export const SetTitleStepTypeId = 'cases.setTitle';
 
-export const InputSchema = CasesStepCaseIdVersionSchema.extend({
+const InputSchema = CasesStepCaseIdVersionSchema.extend({
   title: CaseTitle.min(1, 'title is required'),
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type SetTitleStepInputSchema = typeof InputSchema;
-export type SetTitleStepOutputSchema = typeof OutputSchema;
+type SetTitleStepInputSchema = typeof InputSchema;
+type SetTitleStepOutputSchema = typeof OutputSchema;
 
 export type SetTitleStepInput = z.infer<typeof InputSchema>;
-export type SetTitleStepOutput = z.infer<typeof OutputSchema>;
 
 export const setTitleStepCommonDefinition: CommonStepDefinition<
   SetTitleStepInputSchema,

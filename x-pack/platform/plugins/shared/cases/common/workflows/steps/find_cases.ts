@@ -75,11 +75,8 @@ export const OutputSchema = z.object({
   total: z.number().int(),
 });
 
-export type FindCasesStepInputSchema = typeof InputSchema;
-export type FindCasesStepOutputSchema = typeof OutputSchema;
-
-export type FindCasesStepInput = z.infer<typeof InputSchema>;
-export type FindCasesStepOutput = z.infer<typeof OutputSchema>;
+type FindCasesStepInputSchema = typeof InputSchema;
+type FindCasesStepOutputSchema = typeof OutputSchema;
 
 export const findCasesStepCommonDefinition: CommonStepDefinition<
   FindCasesStepInputSchema,

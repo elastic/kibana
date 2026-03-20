@@ -17,15 +17,14 @@ import {
 
 export const CloseCaseStepTypeId = 'cases.closeCase';
 
-export const InputSchema = CasesStepCaseIdVersionSchema;
+const InputSchema = CasesStepCaseIdVersionSchema;
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type CloseCaseStepInputSchema = typeof InputSchema;
-export type CloseCaseStepOutputSchema = typeof OutputSchema;
+type CloseCaseStepInputSchema = typeof InputSchema;
+type CloseCaseStepOutputSchema = typeof OutputSchema;
 
 export type CloseCaseStepInput = z.infer<typeof InputSchema>;
-export type CloseCaseStepOutput = z.infer<typeof OutputSchema>;
 
 export const closeCaseStepCommonDefinition: CommonStepDefinition<
   CloseCaseStepInputSchema,

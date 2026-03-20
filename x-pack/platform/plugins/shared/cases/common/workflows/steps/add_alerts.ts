@@ -25,17 +25,16 @@ const AlertInputSchema = z.object({
   rule: Rule.optional(),
 });
 
-export const InputSchema = CasesStepCaseIdSchema.extend({
+const InputSchema = CasesStepCaseIdSchema.extend({
   alerts: z.array(AlertInputSchema).min(1).max(MAX_ALERTS_PER_CASE),
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type AddAlertsStepInputSchema = typeof InputSchema;
-export type AddAlertsStepOutputSchema = typeof OutputSchema;
+type AddAlertsStepInputSchema = typeof InputSchema;
+type AddAlertsStepOutputSchema = typeof OutputSchema;
 
 export type AddAlertsStepInput = z.infer<typeof InputSchema>;
-export type AddAlertsStepOutput = z.infer<typeof OutputSchema>;
 
 export const addAlertsStepCommonDefinition: CommonStepDefinition<
   AddAlertsStepInputSchema,

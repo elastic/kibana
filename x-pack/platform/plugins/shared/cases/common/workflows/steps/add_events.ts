@@ -23,17 +23,16 @@ const EventInputSchema = z.object({
   index: z.string().min(1, 'index is required'),
 });
 
-export const InputSchema = CasesStepCaseIdSchema.extend({
+const InputSchema = CasesStepCaseIdSchema.extend({
   events: z.array(EventInputSchema).min(1).max(MAX_ALERTS_PER_CASE),
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type AddEventsStepInputSchema = typeof InputSchema;
-export type AddEventsStepOutputSchema = typeof OutputSchema;
+type AddEventsStepInputSchema = typeof InputSchema;
+type AddEventsStepOutputSchema = typeof OutputSchema;
 
 export type AddEventsStepInput = z.infer<typeof InputSchema>;
-export type AddEventsStepOutput = z.infer<typeof OutputSchema>;
 
 export const addEventsStepCommonDefinition: CommonStepDefinition<
   AddEventsStepInputSchema,

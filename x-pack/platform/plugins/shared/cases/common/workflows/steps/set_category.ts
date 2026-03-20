@@ -18,17 +18,16 @@ import {
 
 export const SetCategoryStepTypeId = 'cases.setCategory';
 
-export const InputSchema = CasesStepCaseIdVersionSchema.extend({
+const InputSchema = CasesStepCaseIdVersionSchema.extend({
   category: CaseCategory.min(1, 'category is required'),
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type SetCategoryStepInputSchema = typeof InputSchema;
-export type SetCategoryStepOutputSchema = typeof OutputSchema;
+type SetCategoryStepInputSchema = typeof InputSchema;
+type SetCategoryStepOutputSchema = typeof OutputSchema;
 
 export type SetCategoryStepInput = z.infer<typeof InputSchema>;
-export type SetCategoryStepOutput = z.infer<typeof OutputSchema>;
 
 export const setCategoryStepCommonDefinition: CommonStepDefinition<
   SetCategoryStepInputSchema,

@@ -13,17 +13,16 @@ import { CasesStepCaseIdSchema, CasesStepSingleCaseOutputSchema } from './shared
 
 export const GetCaseStepTypeId = 'cases.getCase';
 
-export const InputSchema = CasesStepCaseIdSchema.extend({
+const InputSchema = CasesStepCaseIdSchema.extend({
   include_comments: z.boolean().optional().default(false),
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type GetCaseStepInputSchema = typeof InputSchema;
-export type GetCaseStepOutputSchema = typeof OutputSchema;
+type GetCaseStepInputSchema = typeof InputSchema;
+type GetCaseStepOutputSchema = typeof OutputSchema;
 
 export type GetCaseStepInput = z.infer<typeof InputSchema>;
-export type GetCaseStepOutput = z.infer<typeof OutputSchema>;
 
 export const getCaseStepCommonDefinition: CommonStepDefinition<
   GetCaseStepInputSchema,

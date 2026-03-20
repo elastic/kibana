@@ -37,11 +37,8 @@ export const OutputSchema = z.object({
   cases: z.array(CaseResponsePropertiesSchema).max(MAX_CASES_TO_UPDATE),
 });
 
-export type UpdateCasesStepInputSchema = typeof InputSchema;
-export type UpdateCasesStepOutputSchema = typeof OutputSchema;
-
-export type UpdateCasesStepInput = z.infer<typeof InputSchema>;
-export type UpdateCasesStepOutput = z.infer<typeof OutputSchema>;
+type UpdateCasesStepInputSchema = typeof InputSchema;
+type UpdateCasesStepOutputSchema = typeof OutputSchema;
 
 export const updateCasesStepCommonDefinition: CommonStepDefinition<
   UpdateCasesStepInputSchema,

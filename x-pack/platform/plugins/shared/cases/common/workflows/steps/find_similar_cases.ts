@@ -26,24 +26,21 @@ const SimilarCaseSchema = CaseResponsePropertiesSchema.extend({
   }),
 });
 
-export const InputSchema = z.object({
+const InputSchema = z.object({
   case_id: z.string().min(1, 'case_id is required'),
   page: z.number().int().positive().optional().default(1),
   perPage: z.number().int().positive().max(MAX_CASES_PER_PAGE).optional().default(20),
 });
 
-export const OutputSchema = z.object({
+const OutputSchema = z.object({
   cases: z.array(SimilarCaseSchema).max(MAX_DOCS_PER_PAGE),
   page: z.number().int(),
   per_page: z.number().int(),
   total: z.number().int(),
 });
 
-export type FindSimilarCasesStepInputSchema = typeof InputSchema;
-export type FindSimilarCasesStepOutputSchema = typeof OutputSchema;
-
-export type FindSimilarCasesStepInput = z.infer<typeof InputSchema>;
-export type FindSimilarCasesStepOutput = z.infer<typeof OutputSchema>;
+type FindSimilarCasesStepInputSchema = typeof InputSchema;
+type FindSimilarCasesStepOutputSchema = typeof OutputSchema;
 
 export const findSimilarCasesStepCommonDefinition: CommonStepDefinition<
   FindSimilarCasesStepInputSchema,

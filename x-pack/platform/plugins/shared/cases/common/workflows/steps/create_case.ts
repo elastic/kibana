@@ -25,13 +25,12 @@ export const InputSchema = CreateCaseRequestSchema.partial({
 export const OutputSchema = CasesStepSingleCaseOutputSchema;
 
 // `connector-id` is what's triggering the connector selector.
-export const ConfigSchema = CasesStepBaseConfigSchema.extend({
+const ConfigSchema = CasesStepBaseConfigSchema.extend({
   'connector-id': z.string().optional(),
 });
 
-export type CreateCaseStepInputSchema = typeof InputSchema;
-export type CreateCaseStepOutputSchema = typeof OutputSchema;
-export type CreateCaseStepConfigSchema = typeof ConfigSchema;
+type CreateCaseStepInputSchema = typeof InputSchema;
+type CreateCaseStepOutputSchema = typeof OutputSchema;
 
 export type CreateCaseStepInput = z.infer<typeof InputSchema>;
 export type CreateCaseStepOutput = z.infer<typeof OutputSchema>;

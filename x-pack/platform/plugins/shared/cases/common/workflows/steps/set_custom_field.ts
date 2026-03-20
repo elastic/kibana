@@ -24,11 +24,10 @@ export const InputSchema = CasesStepCaseIdVersionSchema.extend({
 
 export const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type SetCustomFieldStepInputSchema = typeof InputSchema;
-export type SetCustomFieldStepOutputSchema = typeof OutputSchema;
+type SetCustomFieldStepInputSchema = typeof InputSchema;
+type SetCustomFieldStepOutputSchema = typeof OutputSchema;
 
 export type SetCustomFieldStepInput = z.infer<typeof InputSchema>;
-export type SetCustomFieldStepOutput = z.infer<typeof OutputSchema>;
 
 export const setCustomFieldStepCommonDefinition: CommonStepDefinition<
   SetCustomFieldStepInputSchema,

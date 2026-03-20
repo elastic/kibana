@@ -18,19 +18,16 @@ const CaseIdsSchema = z
   .min(1)
   .max(MAX_DELETE_IDS_LENGTH);
 
-export const InputSchema = z.object({
+const InputSchema = z.object({
   case_ids: CaseIdsSchema,
 });
 
-export const OutputSchema = z.object({
+const OutputSchema = z.object({
   case_ids: CaseIdsSchema,
 });
 
-export type DeleteCasesStepInputSchema = typeof InputSchema;
-export type DeleteCasesStepOutputSchema = typeof OutputSchema;
-
-export type DeleteCasesStepInput = z.infer<typeof InputSchema>;
-export type DeleteCasesStepOutput = z.infer<typeof OutputSchema>;
+type DeleteCasesStepInputSchema = typeof InputSchema;
+type DeleteCasesStepOutputSchema = typeof OutputSchema;
 
 export const deleteCasesStepCommonDefinition: CommonStepDefinition<
   DeleteCasesStepInputSchema,

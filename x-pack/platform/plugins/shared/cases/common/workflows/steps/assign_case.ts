@@ -18,17 +18,16 @@ import {
 
 export const AssignCaseStepTypeId = 'cases.assignCase';
 
-export const InputSchema = CasesStepCaseIdVersionSchema.extend({
+const InputSchema = CasesStepCaseIdVersionSchema.extend({
   assignees: Assignees,
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type AssignCaseStepInputSchema = typeof InputSchema;
-export type AssignCaseStepOutputSchema = typeof OutputSchema;
+type AssignCaseStepInputSchema = typeof InputSchema;
+type AssignCaseStepOutputSchema = typeof OutputSchema;
 
 export type AssignCaseStepInput = z.infer<typeof InputSchema>;
-export type AssignCaseStepOutput = z.infer<typeof OutputSchema>;
 
 export const assignCaseStepCommonDefinition: CommonStepDefinition<
   AssignCaseStepInputSchema,

@@ -18,17 +18,16 @@ import {
 
 export const AddTagsStepTypeId = 'cases.addTags';
 
-export const InputSchema = CasesStepCaseIdSchema.extend({
+const InputSchema = CasesStepCaseIdSchema.extend({
   tags: CaseTags,
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type AddTagsStepInputSchema = typeof InputSchema;
-export type AddTagsStepOutputSchema = typeof OutputSchema;
+type AddTagsStepInputSchema = typeof InputSchema;
+type AddTagsStepOutputSchema = typeof OutputSchema;
 
 export type AddTagsStepInput = z.infer<typeof InputSchema>;
-export type AddTagsStepOutput = z.infer<typeof OutputSchema>;
 
 export const addTagsStepCommonDefinition: CommonStepDefinition<
   AddTagsStepInputSchema,

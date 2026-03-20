@@ -18,17 +18,16 @@ import {
 
 export const SetSeverityStepTypeId = 'cases.setSeverity';
 
-export const InputSchema = CasesStepCaseIdVersionSchema.extend({
+const InputSchema = CasesStepCaseIdVersionSchema.extend({
   severity: CaseSeverity,
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type SetSeverityStepInputSchema = typeof InputSchema;
-export type SetSeverityStepOutputSchema = typeof OutputSchema;
+type SetSeverityStepInputSchema = typeof InputSchema;
+type SetSeverityStepOutputSchema = typeof OutputSchema;
 
 export type SetSeverityStepInput = z.infer<typeof InputSchema>;
-export type SetSeverityStepOutput = z.infer<typeof OutputSchema>;
 
 export const setSeverityStepCommonDefinition: CommonStepDefinition<
   SetSeverityStepInputSchema,

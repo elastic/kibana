@@ -5,36 +5,23 @@
  * 2.0.
  */
 
+import { AddAlertsStepTypeId, addAlertsStepCommonDefinition } from './add_alerts';
+import { AddEventsStepTypeId, addEventsStepCommonDefinition } from './add_events';
+import { AddObservablesStepTypeId, addObservablesStepCommonDefinition } from './add_observables';
+import { AddTagsStepTypeId, addTagsStepCommonDefinition } from './add_tags';
+import { AssignCaseStepTypeId, assignCaseStepCommonDefinition } from './assign_case';
+import { CloseCaseStepTypeId, closeCaseStepCommonDefinition } from './close_case';
+import { DeleteCasesStepTypeId, deleteCasesStepCommonDefinition } from './delete_cases';
 import {
-  AddAlertsStepTypeId,
-  addAlertsStepCommonDefinition,
-  SetCategoryStepTypeId,
-  setCategoryStepCommonDefinition,
-  AddEventsStepTypeId,
-  addEventsStepCommonDefinition,
-  AddObservablesStepTypeId,
-  addObservablesStepCommonDefinition,
-  AddTagsStepTypeId,
-  addTagsStepCommonDefinition,
-  AssignCaseStepTypeId,
-  assignCaseStepCommonDefinition,
-  CloseCaseStepTypeId,
-  closeCaseStepCommonDefinition,
-  DeleteCasesStepTypeId,
-  deleteCasesStepCommonDefinition,
   FindSimilarCasesStepTypeId,
   findSimilarCasesStepCommonDefinition,
-  UnassignCaseStepTypeId,
-  unassignCaseStepCommonDefinition,
-  SetDescriptionStepTypeId,
-  setDescriptionStepCommonDefinition,
-  SetSeverityStepTypeId,
-  setSeverityStepCommonDefinition,
-  SetStatusStepTypeId,
-  setStatusStepCommonDefinition,
-  SetTitleStepTypeId,
-  setTitleStepCommonDefinition,
-} from '.';
+} from './find_similar_cases';
+import { SetCategoryStepTypeId, setCategoryStepCommonDefinition } from './set_category';
+import { SetDescriptionStepTypeId, setDescriptionStepCommonDefinition } from './set_description';
+import { SetSeverityStepTypeId, setSeverityStepCommonDefinition } from './set_severity';
+import { SetStatusStepTypeId, setStatusStepCommonDefinition } from './set_status';
+import { SetTitleStepTypeId, setTitleStepCommonDefinition } from './set_title';
+import { UnassignCaseStepTypeId, unassignCaseStepCommonDefinition } from './unassign_case';
 import {
   addAlertsInputFixture,
   addCategoryInputFixture,

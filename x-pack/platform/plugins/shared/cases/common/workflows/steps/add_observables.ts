@@ -24,17 +24,16 @@ const ObservableInputSchema = z.object({
   description: z.string().nullable().optional(),
 });
 
-export const InputSchema = CasesStepCaseIdSchema.extend({
+const InputSchema = CasesStepCaseIdSchema.extend({
   observables: z.array(ObservableInputSchema).min(1).max(MAX_OBSERVABLES_PER_CASE),
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type AddObservablesStepInputSchema = typeof InputSchema;
-export type AddObservablesStepOutputSchema = typeof OutputSchema;
+type AddObservablesStepInputSchema = typeof InputSchema;
+type AddObservablesStepOutputSchema = typeof OutputSchema;
 
 export type AddObservablesStepInput = z.infer<typeof InputSchema>;
-export type AddObservablesStepOutput = z.infer<typeof OutputSchema>;
 
 export const addObservablesStepCommonDefinition: CommonStepDefinition<
   AddObservablesStepInputSchema,

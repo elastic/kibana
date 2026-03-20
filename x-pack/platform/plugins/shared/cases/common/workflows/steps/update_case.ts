@@ -31,11 +31,10 @@ export const InputSchema = CasesStepCaseIdVersionSchema.extend({
 
 export const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type UpdateCaseStepInputSchema = typeof InputSchema;
-export type UpdateCaseStepOutputSchema = typeof OutputSchema;
+type UpdateCaseStepInputSchema = typeof InputSchema;
+type UpdateCaseStepOutputSchema = typeof OutputSchema;
 
 export type UpdateCaseStepInput = z.infer<typeof InputSchema>;
-export type UpdateCaseStepOutput = z.infer<typeof OutputSchema>;
 
 export const updateCaseStepCommonDefinition: CommonStepDefinition<
   UpdateCaseStepInputSchema,

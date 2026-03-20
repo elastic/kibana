@@ -18,17 +18,16 @@ import {
 
 export const SetStatusStepTypeId = 'cases.setStatus';
 
-export const InputSchema = CasesStepCaseIdVersionSchema.extend({
+const InputSchema = CasesStepCaseIdVersionSchema.extend({
   status: CaseStatus,
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type SetStatusStepInputSchema = typeof InputSchema;
-export type SetStatusStepOutputSchema = typeof OutputSchema;
+type SetStatusStepInputSchema = typeof InputSchema;
+type SetStatusStepOutputSchema = typeof OutputSchema;
 
 export type SetStatusStepInput = z.infer<typeof InputSchema>;
-export type SetStatusStepOutput = z.infer<typeof OutputSchema>;
 
 export const setStatusStepCommonDefinition: CommonStepDefinition<
   SetStatusStepInputSchema,

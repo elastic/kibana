@@ -14,23 +14,22 @@ import * as i18n from '../translations';
 
 export const CreateCaseFromTemplateStepTypeId = 'cases.createCaseFromTemplate';
 
-export const OverwritesSchema = UpdateCaseRequestSchema.shape.cases.element.omit({
+const OverwritesSchema = UpdateCaseRequestSchema.shape.cases.element.omit({
   id: true,
   version: true,
 });
 
-export const InputSchema = z.object({
+const InputSchema = z.object({
   case_template_id: z.string().min(1, 'case_template_id is required'),
   overwrites: OverwritesSchema.optional(),
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export const ConfigSchema = CasesStepBaseConfigSchema;
+const ConfigSchema = CasesStepBaseConfigSchema;
 
-export type CreateCaseFromTemplateStepInputSchema = typeof InputSchema;
-export type CreateCaseFromTemplateStepOutputSchema = typeof OutputSchema;
-export type CreateCaseFromTemplateStepConfigSchema = typeof ConfigSchema;
+type CreateCaseFromTemplateStepInputSchema = typeof InputSchema;
+type CreateCaseFromTemplateStepOutputSchema = typeof OutputSchema;
 
 export type CreateCaseFromTemplateStepInput = z.infer<typeof InputSchema>;
 export type CreateCaseFromTemplateStepOutput = z.infer<typeof OutputSchema>;

@@ -18,17 +18,16 @@ import {
 
 export const SetDescriptionStepTypeId = 'cases.setDescription';
 
-export const InputSchema = CasesStepCaseIdVersionSchema.extend({
+const InputSchema = CasesStepCaseIdVersionSchema.extend({
   description: CaseDescription.min(1, 'description is required'),
 });
 
-export const OutputSchema = CasesStepSingleCaseOutputSchema;
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type SetDescriptionStepInputSchema = typeof InputSchema;
-export type SetDescriptionStepOutputSchema = typeof OutputSchema;
+type SetDescriptionStepInputSchema = typeof InputSchema;
+type SetDescriptionStepOutputSchema = typeof OutputSchema;
 
 export type SetDescriptionStepInput = z.infer<typeof InputSchema>;
-export type SetDescriptionStepOutput = z.infer<typeof OutputSchema>;
 
 export const setDescriptionStepCommonDefinition: CommonStepDefinition<
   SetDescriptionStepInputSchema,
