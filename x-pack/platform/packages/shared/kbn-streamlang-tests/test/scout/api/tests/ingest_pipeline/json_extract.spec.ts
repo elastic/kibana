@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { JsonExtractProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -22,7 +23,7 @@ import { streamlangApiTest as apiTest } from '../..';
  */
 apiTest.describe(
   'Streamlang to Ingest Pipeline - JsonExtract Processor (Ingest Pipeline-specific)',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should fail ingestion when JSON parsing fails (Ingest Pipeline-specific error handling)',
