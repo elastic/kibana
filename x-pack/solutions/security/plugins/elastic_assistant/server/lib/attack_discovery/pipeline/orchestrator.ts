@@ -10,6 +10,7 @@ import type {
   KibanaRequest,
   Logger,
   SavedObjectsClientContract,
+  IUiSettingsClient,
 } from '@kbn/core/server';
 import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -24,6 +25,7 @@ import { extractEntitiesFromAlerts } from './entity_extraction';
 import { matchAlertsToCases } from './case_matching';
 import { triggerCaseAttackDiscovery } from './case_integration';
 import type { EnrichmentRegistry } from './enrichment';
+import { ALERT_INVESTIGATION_PIPELINE_ENABLED } from '../../../../common/ui_settings';
 
 type GenerateAdFn = (params: {
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -50,6 +52,7 @@ export interface RunPipelineParams {
   request: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
   spaceId: string;
+  uiSettings?: IUiSettingsClient; // Optional for backward compatibility
   dryRun?: boolean;
   generateAttackDiscoveriesFn: GenerateAdFn;
 }
@@ -379,6 +382,7 @@ export const runInvestigationPipeline = async ({
   request,
   savedObjectsClient,
   spaceId,
+  uiSettings,
   dryRun = false,
 }: RunPipelineParams): Promise<PipelineExecutionResult> => {
   const executionId = uuidv4();
@@ -402,6 +406,40 @@ export const runInvestigationPipeline = async ({
     },
     incrementalAd: { ...DEFAULT_PIPELINE_CONFIG.incrementalAd, ...configOverrides?.incrementalAd },
   };
+
+  // Check feature flag (skip pipeline if disabled, unless dry run for testing)
+  if (!dryRun && uiSettings) {
+    const isPipelineEnabled = await uiSettings.get<boolean>(ALERT_INVESTIGATION_PIPELINE_ENABLED);
+
+    if (!isPipelineEnabled) {
+      logger.info(
+        `Pipeline ${executionId}: disabled via feature flag (${ALERT_INVESTIGATION_PIPELINE_ENABLED})`
+      );
+
+      const completedAt = new Date().toISOString();
+      return {
+        executionId,
+        startedAt,
+        completedAt,
+        alertsProcessed: 0,
+        alertsDeduplicated: 0,
+        entitiesExtracted: 0,
+        entitiesEnriched: 0,
+        enrichmentStats: {},
+        casesMatched: 0,
+        casesCreated: 0,
+        alertsAttached: 0,
+        adTriggered: 0,
+        errors: [
+          `Pipeline disabled. Enable via Advanced Settings → ${ALERT_INVESTIGATION_PIPELINE_ENABLED}`,
+        ],
+      };
+    }
+  } else if (!uiSettings && !dryRun) {
+    logger.warn(
+      `Pipeline ${executionId}: uiSettings not provided - cannot check feature flag. Pipeline will run.`
+    );
+  }
 
   logger.info(`Pipeline ${executionId}: starting${dryRun ? ' (dry run)' : ''}`);
 
