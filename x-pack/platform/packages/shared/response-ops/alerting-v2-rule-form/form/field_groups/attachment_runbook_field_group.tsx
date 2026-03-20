@@ -25,7 +25,7 @@ import { FieldGroup } from './field_group';
 
 const RUNBOOK_ARTIFACT_TYPE = 'runbook';
 
-export const AttachmentRunbookGroup: React.FC = () => {
+export const AttachmentRunbookFieldGroup: React.FC = () => {
   const { setValue, control } = useFormContext<FormValues>();
   const {
     field: { value: artifactsValue },

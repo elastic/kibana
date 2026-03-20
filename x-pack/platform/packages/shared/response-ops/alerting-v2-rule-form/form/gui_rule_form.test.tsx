@@ -42,9 +42,9 @@ jest.mock('./fields/kind_field', () => ({
   KindField: () => <div data-test-subj="mockKindField">Kind Field</div>,
 }));
 
-jest.mock('./field_groups/attachment_runbook_group', () => ({
-  AttachmentRunbookGroup: () => (
-    <div data-test-subj="mockAttachmentRunbookGroup">Attachment Runbook Group</div>
+jest.mock('./field_groups/attachment_runbook_field_group', () => ({
+  AttachmentRunbookFieldGroup: () => (
+    <div data-test-subj="mockAttachmentRunbookFieldGroup">Attachment Runbook Field Group</div>
   ),
 }));
 
@@ -100,10 +100,10 @@ describe('GuiRuleForm', () => {
       expect(screen.getByTestId('mockKindField')).toBeInTheDocument();
     });
 
-    it('renders AttachmentRunbookGroup', () => {
+    it('renders AttachmentRunbookFieldGroup', () => {
       render(<GuiRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
 
-      expect(screen.getByTestId('mockAttachmentRunbookGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('mockAttachmentRunbookFieldGroup')).toBeInTheDocument();
     });
   });
 
@@ -150,7 +150,7 @@ describe('GuiRuleForm', () => {
         'mockRuleExecutionFieldGroup',
         'mockKindField',
         'mockAlertConditionsFieldGroup',
-        'mockAttachmentRunbookGroup',
+        'mockAttachmentRunbookFieldGroup',
       ]);
     });
 
@@ -169,7 +169,7 @@ describe('GuiRuleForm', () => {
         'mockRuleExecutionFieldGroup',
         'mockKindField',
         'mockAlertConditionsFieldGroup',
-        'mockAttachmentRunbookGroup',
+        'mockAttachmentRunbookFieldGroup',
       ]);
     });
   });
