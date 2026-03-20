@@ -89,6 +89,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform
   'data-exploration',
   'visualization-creation',
+  'graph-creation',
 
   // Platform – Dashboard
   'dashboard-management',
