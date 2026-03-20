@@ -137,7 +137,7 @@ describe('Discover component', () => {
         dataView: dataViewWithTimefieldMock,
         prevSidebarClosed: true,
       });
-      expect(screen.queryByTestId('dscShowSidebarButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
     }, 10000);
   });
 
