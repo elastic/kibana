@@ -148,6 +148,17 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflow(id, spaceId);
   }
 
+  public async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {
+    return this.workflowsService.getWorkflowsByIds(ids, spaceId);
+  }
+
+  public async checkWorkflowConflicts(
+    ids: string[],
+    spaceId: string
+  ): Promise<Array<{ id: string; name: string }>> {
+    return this.workflowsService.checkWorkflowConflicts(ids, spaceId);
+  }
+
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
@@ -159,12 +170,13 @@ export class WorkflowsManagementApi {
   public async bulkCreateWorkflows(
     workflows: CreateWorkflowCommand[],
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { overwrite?: boolean }
   ): Promise<{
     created: WorkflowDetailDto[];
-    failed: Array<{ index: number; error: string }>;
+    failed: Array<{ index: number; id: string; error: string }>;
   }> {
-    return this.workflowsService.bulkCreateWorkflows(workflows, spaceId, request);
+    return this.workflowsService.bulkCreateWorkflows(workflows, spaceId, request, options);
   }
 
   public async cloneWorkflow(
