@@ -57,7 +57,7 @@ export const ControlsContent = ({
   const isLoading = isPending(status);
 
   const getInitialInput = useCallback(async () => {
-    const initialInput: Partial<ControlGroupRuntimeState> = {
+    const initialInput: ControlGroupRuntimeState = {
       initialChildControlState: controlPanels as ControlPanelsState,
     };
 

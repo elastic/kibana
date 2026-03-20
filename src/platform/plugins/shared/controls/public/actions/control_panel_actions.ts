@@ -14,7 +14,7 @@ import type { DataControlState } from '@kbn/controls-schemas';
 import type { CustomOptionsComponentProps } from '../controls/data_controls/types';
 
 export type CreateControlTypeContext<State extends DataControlState> = EmbeddableApiContext & {
-  state: State;
+  state: Partial<State>;
   controlId?: string;
   isPinned?: boolean;
 };
