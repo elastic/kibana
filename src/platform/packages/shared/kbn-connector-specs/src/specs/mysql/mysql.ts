@@ -246,7 +246,7 @@ class MysqlClient {
     const username = ctx.config?.username as string;
     const password = ctx.config?.password as string;
 
-    const key = `${host}:${port}:${username}:${Buffer.from(password).toString('base64')}`;
+    const key = `${host}:${port}:${username}`;
     let pool = this.pools.get(key);
     if (!pool) {
       if (this.pools.size >= MysqlClient.MAX_POOLS) {
