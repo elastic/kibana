@@ -226,7 +226,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   // Subclasses implement this to execute the step logic
-  protected abstract _run(input?: Record<string, unknown>): Promise<RunStepResult>;
+  protected abstract _run(input: Record<string, unknown>): Promise<RunStepResult>;
 
   /**
    * Resolves the maximum step size in bytes.

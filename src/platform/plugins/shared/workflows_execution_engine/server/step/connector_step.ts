@@ -50,7 +50,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
     );
   }
 
-  public async _run(withInputs?: Record<string, unknown>): Promise<RunStepResult> {
+  public async _run(withInputs: Record<string, unknown>): Promise<RunStepResult> {
     try {
       const step = this.step;
 

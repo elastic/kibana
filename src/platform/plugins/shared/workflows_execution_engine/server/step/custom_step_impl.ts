@@ -39,6 +39,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   ) {
     const baseStep: BaseStep = {
       name: node.stepId,
+      stepId: node.stepId,
       type: node.stepType,
       spaceId: '',
       'max-step-size': node.configuration['max-step-size'],
@@ -56,7 +57,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   /**
    * Get and validate the input for this step
    */
-  public override getInput(): unknown {
+  public override getInput(): Record<string, unknown> {
     const withData = this.node.configuration.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(withData);
   }
