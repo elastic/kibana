@@ -6,7 +6,12 @@
  */
 
 import React from 'react';
-import { MAX_DURATION, validateMaxDuration } from '@kbn/alerting-v2-schemas';
+import {
+  MAX_DURATION,
+  MIN_SCHEDULE_INTERVAL,
+  validateMaxDuration,
+  validateMinDuration,
+} from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -25,8 +30,15 @@ export const ScheduleField = () => {
       rules={{
         validate: (value) => {
           if (!value) return true;
-          const error = validateMaxDuration(value, MAX_DURATION);
-          if (error) {
+          const minError = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
+          if (minError) {
+            return i18n.translate('xpack.alertingV2.ruleForm.schedule.everyMinError', {
+              defaultMessage: 'Schedule cannot be less than {min}.',
+              values: { min: MIN_SCHEDULE_INTERVAL },
+            });
+          }
+          const maxError = validateMaxDuration(value, MAX_DURATION);
+          if (maxError) {
             return i18n.translate('xpack.alertingV2.ruleForm.schedule.everyMaxError', {
               defaultMessage: 'Schedule cannot exceed {max}.',
               values: { max: MAX_DURATION },

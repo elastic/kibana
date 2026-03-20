@@ -9,14 +9,24 @@ import React from 'react';
 import { MAX_DURATION, validateMaxDuration } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
+import { parseDuration } from '../utils';
 import { LookbackWindow } from './lookback_window';
 
 const LOOKBACK_WINDOW_ROW_ID = 'ruleV2FormLookbackWindowField';
 
+const LOOKBACK_LESS_THAN_INTERVAL_WARNING = i18n.translate(
+  'xpack.alertingV2.ruleForm.schedule.lookbackLessThanIntervalWarning',
+  {
+    defaultMessage:
+      'Lookback window is shorter than the schedule interval. Some data may be missed between evaluations.',
+  }
+);
+
 export const LookbackWindowField = () => {
   const { control } = useFormContext<FormValues>();
+  const scheduleEvery = useWatch({ control, name: 'schedule.every' });
 
   return (
     <Controller
@@ -35,18 +45,30 @@ export const LookbackWindowField = () => {
           return true;
         },
       }}
-      render={({ field, fieldState: { error } }) => (
-        <EuiFormRow
-          id={LOOKBACK_WINDOW_ROW_ID}
-          label={i18n.translate('xpack.alertingV2.ruleForm.lookbackWindowLabel', {
-            defaultMessage: 'Lookback Window',
-          })}
-          isInvalid={!!error}
-          fullWidth
-        >
-          <LookbackWindow {...field} errors={error?.message} />
-        </EuiFormRow>
-      )}
+      render={({ field, fieldState: { error } }) => {
+        let showIntervalWarning = false;
+        if (field.value && scheduleEvery) {
+          try {
+            showIntervalWarning = parseDuration(field.value) < parseDuration(scheduleEvery);
+          } catch {
+            // invalid duration — no warning
+          }
+        }
+
+        return (
+          <EuiFormRow
+            id={LOOKBACK_WINDOW_ROW_ID}
+            label={i18n.translate('xpack.alertingV2.ruleForm.lookbackWindowLabel', {
+              defaultMessage: 'Lookback Window',
+            })}
+            helpText={showIntervalWarning ? LOOKBACK_LESS_THAN_INTERVAL_WARNING : undefined}
+            isInvalid={!!error}
+            fullWidth
+          >
+            <LookbackWindow {...field} errors={error?.message} />
+          </EuiFormRow>
+        );
+      }}
     />
   );
 };

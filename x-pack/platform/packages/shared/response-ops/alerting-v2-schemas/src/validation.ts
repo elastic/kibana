@@ -18,7 +18,7 @@ const DURATION_UNIT_TO_MS: Record<string, number> = {
   w: 604_800_000,
 };
 
-function parseDurationToMs(value: string): number {
+export function parseDurationToMs(value: string): number {
   const match = DURATION_RE.exec(value);
   if (!match) return NaN;
   return parseInt(match[1], 10) * DURATION_UNIT_TO_MS[match[2]];
@@ -44,6 +44,19 @@ export function validateMaxDuration(value: string, max: string): string | void {
   const maxMs = parseDurationToMs(max);
   if (!isNaN(valueMs) && !isNaN(maxMs) && valueMs > maxMs) {
     return `Duration "${value}" exceeds the maximum allowed value of "${max}"`;
+  }
+}
+
+/**
+ * Validate that a duration string is not below a minimum duration.
+ * Both values must be valid duration strings.
+ * @returns Error message if below minimum, undefined if valid
+ */
+export function validateMinDuration(value: string, min: string): string | void {
+  const valueMs = parseDurationToMs(value);
+  const minMs = parseDurationToMs(min);
+  if (!isNaN(valueMs) && !isNaN(minMs) && valueMs < minMs) {
+    return `Duration "${value}" is below the minimum allowed value of "${min}"`;
   }
 }
 

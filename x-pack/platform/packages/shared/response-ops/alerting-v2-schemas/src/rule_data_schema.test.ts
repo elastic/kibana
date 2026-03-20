@@ -200,7 +200,34 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('accepts schedule.every of exactly 365d', () => {
+    it('accepts schedule.every of exactly 1m (minimum)', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        schedule: { every: '1m' },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects schedule.every below 1m (30s)', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        schedule: { every: '30s' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects schedule.every below 1m via cross-unit (59s)', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        schedule: { every: '59s' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts schedule.every of exactly 365d (maximum)', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         schedule: { every: '365d' },
@@ -213,6 +240,16 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         schedule: { every: '366d' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects schedule.every exceeding 365d via cross-unit (55w)', () => {
+      // 55 weeks = 385 days > 365 days
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        schedule: { every: '55w' },
       });
 
       expect(result.success).toBe(false);
@@ -696,8 +733,18 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('rejects schedule.every below 1m (30s)', () => {
+      const result = updateRuleDataSchema.safeParse({ schedule: { every: '30s' } });
+      expect(result.success).toBe(false);
+    });
+
     it('rejects schedule.every exceeding 365d', () => {
       const result = updateRuleDataSchema.safeParse({ schedule: { every: '366d' } });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects schedule.every exceeding 365d via cross-unit (55w)', () => {
+      const result = updateRuleDataSchema.safeParse({ schedule: { every: '55w' } });
       expect(result.success).toBe(false);
     });
 
