@@ -14,6 +14,8 @@ import {
   extractEntitiesStep,
   tagProcessedAlertsStep,
 } from './alert_pipeline_steps';
+import { caseMatchingStep } from './case_matching_step';
+import { triggerIncrementalAdStep } from './trigger_incremental_ad_step';
 
 export const registerPipelineWorkflowSteps = ({
   workflowsExtensions,

@@ -38,7 +38,7 @@ export const alertInvestigationWorkflowDefinition = {
     // Feature flag check: Workflow runner should check flag before execution
   },
 
-  // Pipeline stages as workflow steps
+  // Complete E2E pipeline: All 6 stages as workflow steps
   steps: [
     // Stage 1: Fetch unprocessed alerts
     {
@@ -52,7 +52,7 @@ export const alertInvestigationWorkflowDefinition = {
       },
     },
 
-    // Stage 2: Deduplicate alerts
+    // Stage 2: Deduplicate alerts (with ELSER fallback to Jaccard)
     {
       id: 'deduplicate',
       name: 'Deduplicate Similar Alerts',
@@ -75,18 +75,31 @@ export const alertInvestigationWorkflowDefinition = {
       },
     },
 
-    // Stage 4: Match to cases and attach
-    // TODO: When case_matching_step is complete, add:
-    // {
-    //   id: 'match_and_attach',
-    //   type: 'security.matchAndAttachAlertsToCases',
-    //   config: {
-    //     entities: '${steps.extract_entities.output.entities}',
-    //     leader_alert_ids: '${steps.deduplicate.output.leader_alert_ids}',
-    //   },
-    // },
+    // Stage 4: Match to cases and attach alerts
+    {
+      id: 'match_and_attach',
+      name: 'Match Alerts to Cases',
+      type: 'security.matchAndAttachAlertsToCases',
+      config: {
+        entities: '${steps.extract_entities.output.entities}',
+        leader_alert_ids: '${steps.deduplicate.output.leader_alert_ids}',
+        index_pattern: '.alerts-security.alerts-default',
+      },
+    },
 
-    // Stage 5: Tag processed alerts
+    // Stage 5: Trigger incremental Attack Discovery
+    {
+      id: 'trigger_incremental_ad',
+      name: 'Trigger Incremental Attack Discovery',
+      type: 'security.triggerIncrementalAd',
+      config: {
+        affected_case_ids: '${steps.match_and_attach.output.affected_case_ids}',
+        alert_ids_by_case: '${steps.match_and_attach.output.alert_ids_by_case}',
+        min_new_alerts: 2,
+      },
+    },
+
+    // Stage 6: Tag processed alerts
     {
       id: 'tag_processed',
       name: 'Tag Alerts as Processed',
@@ -98,6 +111,22 @@ export const alertInvestigationWorkflowDefinition = {
     },
   ],
 };
+
+/**
+ * Complete E2E Alert Investigation Pipeline as Elastic Workflow
+ *
+ * This workflow definition orchestrates all 6 stages:
+ * 1. Fetch → 2. Dedup → 3. Extract → 4. Match → 5. Incremental AD → 6. Tag
+ *
+ * Replaces the need for orchestrator.ts (719 lines) - Elastic Workflows handles orchestration!
+ *
+ * Execution:
+ * - Scheduled: Every 15 minutes (cron: */15 * * * *)
+ * - Feature flag: Controlled by elasticAssistant:alertInvestigationPipeline_enabled
+ * - State management: Automatic (${steps.X.output} interpolation)
+ * - Error handling: Built-in workflow error handling
+ * - Monitoring: Elastic Workflows execution history UI
+ */
 
 /**
  * Register workflow with Elastic Workflows
