@@ -94,7 +94,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
 
   // O11Y
-  'observability.log-search',
   'observability.rca',
 ] as const;
 
