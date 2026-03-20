@@ -35,7 +35,7 @@ export const EcsMappingRequestBody = z.object({
   rawSamples: RawSamples,
   samplesFormat: SamplesFormat,
   mapping: Mapping.optional(),
-  additionalProcessors: z.array(ESProcessorItem).max(50).optional(),
+  additionalProcessors: z.array(ESProcessorItem).max(200).optional(),
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),
 });
