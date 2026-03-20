@@ -58,6 +58,7 @@ test.describe(
       await expect(pageObjects.ruleDetailsPage.alertSummaryWidget.compact).toBeVisible();
     });
 
+    // Bundling with: See https://github.com/elastic/kibana/issues/249094
     // Skipping these tests for now since the alert summary widget doesn't currently control the alerts tab navigation
     test.skip('should navigate to alerts tab when clicking active alerts', async ({
       page,
@@ -75,6 +76,7 @@ test.describe(
       expect(url).toContain('selected_options:!(active)');
     });
 
+    // Bundling with: See https://github.com/elastic/kibana/issues/249094
     // Skipping these tests for now since the alert summary widget doesn't currently control the alerts tab navigation
     test.skip('should navigate to alerts tab when clicking total alerts', async ({
       page,
