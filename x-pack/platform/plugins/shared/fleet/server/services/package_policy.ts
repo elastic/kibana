@@ -65,6 +65,7 @@ import type {
   UpgradePackagePolicyResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
+  PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
   PackagePolicyInputStream,
   PackageInfo,
