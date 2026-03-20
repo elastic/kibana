@@ -28,16 +28,29 @@ jest.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () =
 }));
 
 const mockParseImportFile = parseImportFile as jest.MockedFunction<typeof parseImportFile>;
-jest.mock('@kbn/workflows-ui', () => ({
-  useRunWorkflow: () => ({
-    mutate: jest.fn(),
-    mutateAsync: jest.fn(),
-    isLoading: false,
-    data: undefined,
-    error: null,
-    reset: jest.fn(),
-  }),
-}));
+
+// var avoids TDZ when the hoisted jest.mock factory assigns these before `let` would init
+var mockGetBatchWorkflows: jest.Mock;
+var mockBulkCreateWorkflows: jest.Mock;
+
+jest.mock('@kbn/workflows-ui', () => {
+  mockGetBatchWorkflows = jest.fn();
+  mockBulkCreateWorkflows = jest.fn();
+  return {
+    useRunWorkflow: () => ({
+      mutate: jest.fn(),
+      mutateAsync: jest.fn(),
+      isLoading: false,
+      data: undefined,
+      error: null,
+      reset: jest.fn(),
+    }),
+    useWorkflowsApi: () => ({
+      getBatchWorkflows: mockGetBatchWorkflows,
+      bulkCreateWorkflows: mockBulkCreateWorkflows,
+    }),
+  };
+});
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
@@ -137,7 +150,6 @@ const createPreflightResult = (
 };
 
 describe('ImportWorkflowsFlyout', () => {
-  let mockHttpPost: jest.Mock;
   let mockToasts: {
     addSuccess: jest.Mock;
     addWarning: jest.Mock;
@@ -147,7 +159,6 @@ describe('ImportWorkflowsFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockHttpPost = jest.fn();
     mockToasts = {
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
@@ -156,7 +167,6 @@ describe('ImportWorkflowsFlyout', () => {
     };
     mockUseKibana.mockReturnValue({
       services: {
-        http: { post: mockHttpPost },
         notifications: { toasts: mockToasts },
       },
     } as any);
@@ -195,7 +205,7 @@ describe('ImportWorkflowsFlyout', () => {
       await waitFor(() => {
         expect(screen.getByText(/exceeds the 10 MB limit/)).toBeInTheDocument();
       });
-      expect(mockHttpPost).not.toHaveBeenCalled();
+      expect(mockGetBatchWorkflows).not.toHaveBeenCalled();
     });
   });
 
@@ -205,7 +215,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockGetBatchWorkflows.mockResolvedValue({ conflicts: [] });
 
       renderFlyout();
 
@@ -214,12 +224,7 @@ describe('ImportWorkflowsFlyout', () => {
 
       await waitFor(() => {
         expect(mockParseImportFile).toHaveBeenCalled();
-        expect(mockHttpPost).toHaveBeenCalledWith(
-          '/api/workflows/_check-conflicts',
-          expect.objectContaining({
-            body: JSON.stringify({ ids: ['test'] }),
-          })
-        );
+        expect(mockGetBatchWorkflows).toHaveBeenCalledWith({ ids: ['test'] });
       });
     });
 
@@ -242,7 +247,7 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({
+      mockGetBatchWorkflows.mockResolvedValue({
         conflicts: [{ id: 'w-1', existingName: 'Existing Workflow' }],
       });
 
@@ -267,7 +272,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockGetBatchWorkflows.mockResolvedValue({ conflicts: [] });
 
       renderFlyout();
 
@@ -318,7 +323,7 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockGetBatchWorkflows.mockResolvedValue({ conflicts: [] });
 
       renderFlyout();
 
@@ -353,7 +358,7 @@ describe('ImportWorkflowsFlyout', () => {
       });
       clientResult.workflows[0].name = null;
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockGetBatchWorkflows.mockResolvedValue({ conflicts: [] });
 
       renderFlyout();
 
@@ -369,7 +374,7 @@ describe('ImportWorkflowsFlyout', () => {
     it('should not render preview when workflows array is empty', async () => {
       const clientResult = createPreflightResult();
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockGetBatchWorkflows.mockResolvedValue({ conflicts: [] });
 
       renderFlyout();
 
@@ -389,7 +394,8 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
+      mockGetBatchWorkflows.mockResolvedValueOnce({ conflicts: [] });
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1', name: 'Test' }],
         failed: [],
         parseErrors: [],
@@ -423,7 +429,8 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
+      mockGetBatchWorkflows.mockResolvedValueOnce({ conflicts: [] });
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1' }],
         failed: [{ index: 1, error: 'invalid yaml' }],
         parseErrors: [],
@@ -455,7 +462,8 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Workflow 1' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
+      mockGetBatchWorkflows.mockResolvedValueOnce({ conflicts: [] });
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [],
         failed: [{ index: 0, error: 'bad yaml' }],
         parseErrors: [],
@@ -486,7 +494,8 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Workflow 1' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
+      mockGetBatchWorkflows.mockResolvedValueOnce({ conflicts: [] });
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1' }],
         failed: [],
         parseErrors: ['Entry readme.txt is not a .yml file'],
@@ -517,7 +526,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Existing' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({
+      mockGetBatchWorkflows.mockResolvedValueOnce({
         conflicts: [{ id: 'w-1', existingName: 'Existing' }],
       });
 
@@ -535,7 +544,7 @@ describe('ImportWorkflowsFlyout', () => {
       const select = screen.getByTestId('import-workflows-conflict-resolution');
       fireEvent.change(select, { target: { value: 'overwrite' } });
 
-      mockHttpPost.mockResolvedValueOnce({
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1' }],
         failed: [],
         parseErrors: [],
@@ -544,21 +553,19 @@ describe('ImportWorkflowsFlyout', () => {
       fireEvent.click(screen.getByTestId('import-workflows-confirm'));
 
       await waitFor(() => {
-        const importCall = mockHttpPost.mock.calls.find(
-          (call: unknown[]) => call[0] === '/api/workflows/_bulk_create'
+        expect(mockBulkCreateWorkflows).toHaveBeenCalledWith(
+          expect.objectContaining({ overwrite: true })
         );
-        expect(importCall).toBeDefined();
-        expect(importCall![1]).toEqual(expect.objectContaining({ query: { overwrite: true } }));
       });
     });
 
-    it('should call _bulk_create with new IDs when conflict resolution is generateNewIds', async () => {
+    it('should call bulkCreateWorkflows with new IDs when conflict resolution is generateNewIds', async () => {
       const clientResult = createPreflightResult({
         format: 'zip',
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Existing' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({
+      mockGetBatchWorkflows.mockResolvedValueOnce({
         conflicts: [{ id: 'w-1', existingName: 'Existing' }],
       });
 
@@ -573,7 +580,7 @@ describe('ImportWorkflowsFlyout', () => {
         expect(screen.getByTestId('import-workflows-confirm')).not.toBeDisabled();
       });
 
-      mockHttpPost.mockResolvedValueOnce({
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-new' }],
         failed: [],
         parseErrors: [],
@@ -582,14 +589,10 @@ describe('ImportWorkflowsFlyout', () => {
       fireEvent.click(screen.getByTestId('import-workflows-confirm'));
 
       await waitFor(() => {
-        const importCall = mockHttpPost.mock.calls.find(
-          (call: unknown[]) => call[0] === '/api/workflows/_bulk_create'
-        );
-        expect(importCall).toBeDefined();
-        const body = JSON.parse(importCall![1].body);
-        expect(body.workflows).toHaveLength(1);
-        expect(body.workflows[0].id).not.toBe('w-1');
-        expect(body.workflows[0].id).toMatch(/^workflow-/);
+        const [{ workflows }] = mockBulkCreateWorkflows.mock.calls[0];
+        expect(workflows).toHaveLength(1);
+        expect(workflows[0].id).not.toBe('w-1');
+        expect(workflows[0].id).toMatch(/^workflow-/);
       });
     });
   });

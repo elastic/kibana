@@ -11,7 +11,7 @@ import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import { isNotNullable } from '../../../../common/lib/utils';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import {
   exportSingleWorkflow,
   exportWorkflows,
@@ -35,14 +35,14 @@ export const useExportWithReferences = ({
   allWorkflowsMap,
   onComplete,
 }: UseExportWithReferencesParams) => {
-  const { http, notifications } = useKibana().services;
+  const { notifications } = useKibana().services;
+  const api = useWorkflowsApi();
   const [exportModalState, setExportModalState] = useState<ExportModalState | null>(null);
 
   const performExport = useCallback(
     async (workflowsToExport: WorkflowListItemDto[]) => {
-      if (!http) return;
       try {
-        const exportedCount = await exportWorkflows(workflowsToExport, http);
+        const exportedCount = await exportWorkflows(workflowsToExport, api);
         const skippedCount = workflowsToExport.length - exportedCount;
 
         if (skippedCount > 0) {
@@ -76,7 +76,7 @@ export const useExportWithReferences = ({
       }
       onComplete?.();
     },
-    [http, notifications, onComplete]
+    [api, notifications, onComplete]
   );
 
   const exportWithoutReferences = useCallback(
@@ -108,7 +108,7 @@ export const useExportWithReferences = ({
 
       const missingWorkflows = missingIds
         .map((id) => allWorkflowsMap.get(id))
-        .filter(isNotNullable);
+        .filter((id): id is WorkflowListItemDto => id != null);
 
       if (missingWorkflows.length === 0) {
         exportWithoutReferences(workflowsToExport);

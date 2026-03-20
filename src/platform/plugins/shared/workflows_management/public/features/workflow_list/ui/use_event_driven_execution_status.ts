@@ -8,28 +8,18 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { WORKFLOWS_CONFIG_PATH } from '../../../../common/routes';
-import { useKibana } from '../../../hooks/use_kibana';
-
-export interface WorkflowsConfig {
-  eventDrivenExecutionEnabled: boolean;
-}
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 
 export function useEventDrivenExecutionStatus(): {
   eventDrivenExecutionEnabled: boolean;
   isLoading: boolean;
   error: boolean;
 } {
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
 
-  const { data, isLoading, isError } = useQuery<WorkflowsConfig>({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['workflows', 'config'],
-    queryFn: async () => {
-      if (!http) {
-        throw new Error('Http service is not available');
-      }
-      return http.get<WorkflowsConfig>(WORKFLOWS_CONFIG_PATH);
-    },
+    queryFn: () => api.getConfig(),
   });
 
   return {

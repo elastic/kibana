@@ -51,8 +51,9 @@ describe('useRunWorkflow', () => {
       });
     });
 
-    expect(mockCore.http.post).toHaveBeenCalledWith('/api/workflows/workflow-1/run', {
+    expect(mockCore.http.post).toHaveBeenCalledWith('/api/workflows/workflow/workflow-1/run', {
       body: JSON.stringify({ inputs: { event: { triggerType: 'manual' } } }),
+      headers: { 'elastic-api-version': '2023-10-31' },
     });
   });
 
@@ -78,6 +79,6 @@ describe('useRunWorkflow', () => {
       }
     });
 
-    expect(thrownError?.message).toBe('Http service is not available');
+    expect(thrownError?.message).toMatch(/Cannot read properties of null/);
   });
 });

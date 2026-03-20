@@ -21,6 +21,7 @@ import type {
 } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type {
   ConnectorTypeInfo,
   CreateWorkflowCommand,
@@ -30,6 +31,7 @@ import type {
   EsWorkflowStepExecution,
   ExecutionStatus,
   UpdatedWorkflowResponseDto,
+  ValidateWorkflowResponseDto,
   WorkflowAggsDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -39,8 +41,11 @@ import type {
   WorkflowStatsDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import type { ConnectorInstanceConfig } from '@kbn/workflows/types/v1';
+import type {
+  ConnectorInstanceConfig,
+  GetAvailableConnectorsResponse,
+  WorkflowPartialDetailDto,
+} from '@kbn/workflows/types/v1';
 import type {
   IWorkflowEventLoggerService,
   LogSearchResult,
@@ -62,7 +67,6 @@ import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 
 import type {
   DeleteWorkflowsResponse,
-  GetAvailableConnectorsResponse,
   GetStepExecutionParams,
   GetWorkflowsParams,
   SearchStepExecutionsParams,
@@ -70,9 +74,7 @@ import type {
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import { WorkflowConflictError, WorkflowValidationError } from '../../common/lib/errors';
-import { isNotNullable } from '../../common/lib/utils';
 
-import type { ValidateWorkflowResponse } from '../../common/lib/validate_workflow_yaml';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
@@ -221,10 +223,11 @@ export class WorkflowsService {
    * Returns an array of `{ id, name }` for each existing workflow, suitable for
    * conflict detection during import.
    */
-  public async checkWorkflowConflicts(
+  public async getWorkflowsSourceByIds(
     ids: string[],
-    spaceId: string
-  ): Promise<Array<{ id: string; name: string }>> {
+    spaceId: string,
+    source: string[]
+  ): Promise<WorkflowPartialDetailDto[]> {
     if (!this.workflowStorage || ids.length === 0) {
       return [];
     }
@@ -236,18 +239,26 @@ export class WorkflowsService {
           must_not: [{ exists: { field: 'deleted_at' } }],
         },
       },
-      _source: ['name'],
+      _source: source,
       size: ids.length,
       track_total_hits: false,
     });
 
-    const entries = response.hits.hits
-      .map((hit) => {
-        const source: WorkflowProperties = hit._source ?? {};
-        const name = typeof source.name === 'string' ? source.name : hit._id;
-        return { id: hit._id, name };
-      })
-      .filter((entry): entry is { id: string; name: string } => isNotNullable(entry.id));
+    const entries = response.hits.hits.reduce<WorkflowPartialDetailDto[]>((acc, hit) => {
+      if (!hit._id || !hit._source) {
+        return acc;
+      }
+      const hitSource: WorkflowProperties = hit._source;
+      const entry: Record<string, unknown> = { id: hit._id };
+      for (const field of source) {
+        if (field in hit._source) {
+          entry[field] = hitSource[field as keyof WorkflowProperties];
+        }
+      }
+
+      acc.push(entry as unknown as WorkflowPartialDetailDto);
+      return acc;
+    }, []);
 
     return entries;
   }
@@ -1611,7 +1622,7 @@ export class WorkflowsService {
       }
     });
 
-    return { connectorsByType, totalConnectors: connectors.length };
+    return { connectorTypes: connectorsByType, totalConnectors: connectors.length };
   }
 
   private getConnectorInstanceConfig(
@@ -1627,7 +1638,7 @@ export class WorkflowsService {
     yaml: string,
     spaceId: string,
     request: KibanaRequest
-  ): Promise<ValidateWorkflowResponse> {
+  ): Promise<ValidateWorkflowResponseDto> {
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
     return validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
@@ -1640,9 +1651,9 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<z.ZodType> {
-    const { connectorsByType } = await this.getAvailableConnectors(spaceId, request);
+    const { connectorTypes } = await this.getAvailableConnectors(spaceId, request);
     const registeredTriggerIds =
       this.workflowsExtensions?.getAllTriggerDefinitions().map((t) => t.id) ?? [];
-    return getWorkflowZodSchema(connectorsByType, registeredTriggerIds);
+    return getWorkflowZodSchema(connectorTypes, registeredTriggerIds);
   }
 }

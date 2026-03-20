@@ -1,0 +1,75 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { schema } from '@kbn/config-schema';
+import type { SearchStepExecutionsParams } from '../../workflows_management_api';
+import type { RouteDependencies } from '../types';
+import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
+import { handleRouteError } from '../utils/route_error_handlers';
+import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
+import { workflowIdParamSchema } from '../utils/schemas';
+import { withLicenseCheck } from '../utils/with_license_check';
+
+export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: RouteDependencies) {
+  router.versioned
+    .get({
+      path: '/api/workflows/workflow/{workflowId}/executions/steps',
+      access: 'public',
+      security: WORKFLOW_EXECUTION_READ_SECURITY,
+      summary: 'Get workflow step executions',
+      description: 'Retrieve step execution data for a specific workflow.',
+      options: {
+        tags: [OAS_TAG],
+        availability: AVAILABILITY,
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSION,
+        validate: {
+          request: {
+            params: workflowIdParamSchema,
+            query: schema.object({
+              stepId: schema.maybe(schema.string({ meta: { description: 'Filter by step ID.' } })),
+              includeInput: schema.maybe(
+                schema.boolean({ meta: { description: 'Include step input data.' } })
+              ),
+              includeOutput: schema.maybe(
+                schema.boolean({ meta: { description: 'Include step output data.' } })
+              ),
+              page: schema.maybe(schema.number({ min: 1 })),
+              size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
+            }),
+          },
+        },
+      },
+      withLicenseCheck(async (context, request, response) => {
+        try {
+          const spaceId = spaces.getSpaceId(request);
+          const { workflowId } = request.params;
+          const query = request.query;
+
+          const params: SearchStepExecutionsParams = {
+            workflowId,
+            stepId: query.stepId,
+            includeInput: query.includeInput ?? false,
+            includeOutput: query.includeOutput ?? false,
+            page: query.page,
+            size: query.size,
+          };
+
+          return response.ok({
+            body: await api.searchStepExecutions(params, spaceId),
+          });
+        } catch (error) {
+          return handleRouteError(response, error);
+        }
+      })
+    );
+}

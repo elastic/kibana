@@ -15,4 +15,9 @@ export const WORKFLOW_ROUTE_OPTIONS = {
 };
 
 // Pagination constants
-export const MAX_PAGE_SIZE = 100; // Limit to prevent performance issues with large result sets
+export const MAX_PAGE_SIZE = 100;
+
+// Versioned API constants
+export const API_VERSION = '2023-10-31';
+export const OAS_TAG = 'oas-tag:workflows';
+export const AVAILABILITY = { since: '9.4.0' } as const;

@@ -75,9 +75,13 @@ describe('saveYamlThunk', () => {
 
       const result = await store.dispatch(saveYamlThunk());
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify({ yaml: 'name: Updated Workflow\nsteps: []' }),
-      });
+      expect(mockServices.http.put).toHaveBeenCalledWith(
+        '/api/workflows/workflow/test-workflow-1',
+        {
+          body: JSON.stringify({ yaml: 'name: Updated Workflow\nsteps: []' }),
+          headers: { 'elastic-api-version': '2023-10-31' },
+        }
+      );
       expect(mockLoadWorkflowThunk).toHaveBeenCalled();
       expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalled();
       expect(result.type).toBe('detail/saveYamlThunk/fulfilled');
@@ -115,8 +119,9 @@ describe('saveYamlThunk', () => {
 
       const result = await store.dispatch(saveYamlThunk());
 
-      expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows', {
+      expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/workflow', {
         body: JSON.stringify({ yaml: 'name: New Workflow\nsteps: []' }),
+        headers: { 'elastic-api-version': '2023-10-31' },
       });
       expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
       expect(queryClient.invalidateQueries).toHaveBeenCalledWith({

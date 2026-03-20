@@ -51,7 +51,7 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 describe('WorkflowsParamsFields', () => {
   const mockEditAction = jest.fn();
-  const mockHttpPost = jest.fn();
+  const mockHttpGet = jest.fn();
 
   const defaultProps = {
     actionParams: {
@@ -71,7 +71,7 @@ describe('WorkflowsParamsFields', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    mockHttpPost.mockResolvedValue({
+    mockHttpGet.mockResolvedValue({
       results: [
         {
           id: 'workflow-1',
@@ -101,7 +101,7 @@ describe('WorkflowsParamsFields', () => {
     mockUseKibana.mockReturnValue({
       services: {
         http: {
-          post: mockHttpPost,
+          get: mockHttpGet,
         },
         application: {
           getUrlForApp: jest.fn().mockReturnValue('/app/workflows'),
@@ -150,7 +150,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should show loading spinner while fetching workflows', async () => {
-    mockHttpPost.mockReturnValue(new Promise(() => {})); // Never resolves
+    mockHttpGet.mockReturnValue(new Promise(() => {})); // Never resolves
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -165,12 +165,13 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
-        body: JSON.stringify({
+      expect(mockHttpGet).toHaveBeenCalledWith('/api/workflows', {
+        query: expect.objectContaining({
           size: 1000,
           page: 1,
           query: '',
         }),
+        headers: { 'elastic-api-version': '2023-10-31' },
       });
     });
 
@@ -188,12 +189,13 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
-        body: JSON.stringify({
+      expect(mockHttpGet).toHaveBeenCalledWith('/api/workflows', {
+        query: expect.objectContaining({
           size: 1000,
           page: 1,
           query: '',
         }),
+        headers: { 'elastic-api-version': '2023-10-31' },
       });
     });
 
@@ -213,7 +215,7 @@ describe('WorkflowsParamsFields', () => {
 
   test('should show error message when fetch fails', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    mockHttpPost.mockRejectedValue(new Error('Failed to fetch'));
+    mockHttpGet.mockRejectedValue(new Error('Failed to fetch'));
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -229,7 +231,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should show no workflows message when no workflows are returned', async () => {
-    mockHttpPost.mockResolvedValue({ results: [] });
+    mockHttpGet.mockResolvedValue({ results: [] });
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
@@ -290,7 +292,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should handle workflows with different statuses', async () => {
-    mockHttpPost.mockResolvedValue({
+    mockHttpGet.mockResolvedValue({
       results: [
         {
           id: 'workflow-1',
@@ -337,7 +339,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should show warning icon for selected disabled workflow', async () => {
-    mockHttpPost.mockResolvedValue({
+    mockHttpGet.mockResolvedValue({
       results: [
         {
           id: 'workflow-1',
@@ -368,7 +370,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should handle workflow selection correctly', async () => {
-    mockHttpPost.mockResolvedValue({
+    mockHttpGet.mockResolvedValue({
       results: [
         {
           id: 'workflow-1',
@@ -430,7 +432,7 @@ describe('WorkflowsParamsFields', () => {
     mockUseKibana.mockReturnValue({
       services: {
         http: {
-          post: mockHttpPost,
+          get: mockHttpGet,
         },
         application: {
           getUrlForApp: mockGetUrlForApp,
@@ -546,12 +548,13 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
-        body: JSON.stringify({
+      expect(mockHttpGet).toHaveBeenCalledWith('/api/workflows', {
+        query: expect.objectContaining({
           size: 1000,
           page: 1,
           query: '',
         }),
+        headers: { 'elastic-api-version': '2023-10-31' },
       });
     });
 
@@ -576,7 +579,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should sort workflows: enabled before disabled, alert-triggered before others', async () => {
-    mockHttpPost.mockResolvedValue({
+    mockHttpGet.mockResolvedValue({
       results: [
         {
           id: 'workflow-disabled-alert',
@@ -654,7 +657,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should handle workflows without definition or triggers gracefully', async () => {
-    mockHttpPost.mockResolvedValue({
+    mockHttpGet.mockResolvedValue({
       results: [
         {
           id: 'workflow-1',
@@ -698,12 +701,13 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
-        body: JSON.stringify({
+      expect(mockHttpGet).toHaveBeenCalledWith('/api/workflows', {
+        query: expect.objectContaining({
           size: 1000,
           page: 1,
           query: '',
         }),
+        headers: { 'elastic-api-version': '2023-10-31' },
       });
     });
 
@@ -739,7 +743,7 @@ describe('WorkflowsParamsFields', () => {
     mockUseKibana.mockReturnValue({
       services: {
         http: {
-          post: mockHttpPost,
+          get: mockHttpGet,
         },
         application: {
           getUrlForApp: mockGetUrlForApp,
@@ -747,7 +751,7 @@ describe('WorkflowsParamsFields', () => {
       },
     } as any);
 
-    mockHttpPost.mockResolvedValue({
+    mockHttpGet.mockResolvedValue({
       results: [
         {
           id: 'workflow-1',
@@ -767,12 +771,13 @@ describe('WorkflowsParamsFields', () => {
 
     // Wait for workflows to load
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
-        body: JSON.stringify({
+      expect(mockHttpGet).toHaveBeenCalledWith('/api/workflows', {
+        query: expect.objectContaining({
           size: 1000,
           page: 1,
           query: '',
         }),
+        headers: { 'elastic-api-version': '2023-10-31' },
       });
     });
 
@@ -810,14 +815,14 @@ describe('WorkflowsParamsFields', () => {
       ],
     };
 
-    mockHttpPost.mockResolvedValue(mockWorkflows);
+    mockHttpGet.mockResolvedValue(mockWorkflows);
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalled();
+      expect(mockHttpGet).toHaveBeenCalled();
     });
 
     // Click on the input to open the popover
@@ -844,14 +849,14 @@ describe('WorkflowsParamsFields', () => {
       ],
     };
 
-    mockHttpPost.mockResolvedValue(mockWorkflows);
+    mockHttpGet.mockResolvedValue(mockWorkflows);
 
     await act(async () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalled();
+      expect(mockHttpGet).toHaveBeenCalled();
     });
 
     // Click on the input to open the popover

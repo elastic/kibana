@@ -11,12 +11,14 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type {
-  ConnectorTypeInfo,
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowStepExecution,
+  GetAvailableConnectorsResponse,
   UpdatedWorkflowResponseDto,
+  ValidateWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
@@ -24,8 +26,8 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
@@ -40,7 +42,6 @@ import type {
   WorkflowsService,
 } from './workflows_management_service';
 import { WorkflowValidationError } from '../../common/lib/errors';
-import type { ValidateWorkflowResponse } from '../../common/lib/validate_workflow_yaml';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
 
 export interface GetWorkflowsParams {
@@ -110,11 +111,6 @@ export interface GetAvailableConnectorsParams {
   request: KibanaRequest;
 }
 
-export interface GetAvailableConnectorsResponse {
-  connectorsByType: Record<string, ConnectorTypeInfo>;
-  totalConnectors: number;
-}
-
 export interface TestWorkflowParams {
   workflowId?: string;
   workflowYaml?: string;
@@ -152,11 +148,12 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowsByIds(ids, spaceId);
   }
 
-  public async checkWorkflowConflicts(
+  public async getWorkflowsSourceByIds(
     ids: string[],
-    spaceId: string
-  ): Promise<Array<{ id: string; name: string }>> {
-    return this.workflowsService.checkWorkflowConflicts(ids, spaceId);
+    spaceId: string,
+    source: string[]
+  ): Promise<WorkflowPartialDetailDto[]> {
+    return this.workflowsService.getWorkflowsSourceByIds(ids, spaceId, source);
   }
 
   public async createWorkflow(
@@ -507,7 +504,7 @@ export class WorkflowsManagementApi {
     yaml: string,
     spaceId: string,
     request: KibanaRequest
-  ): Promise<ValidateWorkflowResponse> {
+  ): Promise<ValidateWorkflowResponseDto> {
     return this.workflowsService.validateWorkflow(yaml, spaceId, request);
   }
 

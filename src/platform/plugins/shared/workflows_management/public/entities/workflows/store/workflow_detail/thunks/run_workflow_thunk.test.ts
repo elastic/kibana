@@ -44,11 +44,15 @@ describe('runWorkflowThunk', () => {
 
     const result = await store.dispatch(runWorkflowThunk({ inputs: testInputs }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith(`/api/workflows/${mockWorkflow.id}/run`, {
-      body: JSON.stringify({
-        inputs: testInputs,
-      }),
-    });
+    expect(mockServices.http.post).toHaveBeenCalledWith(
+      `/api/workflows/workflow/${mockWorkflow.id}/run`,
+      {
+        body: JSON.stringify({
+          inputs: testInputs,
+        }),
+        headers: { 'elastic-api-version': '2023-10-31' },
+      }
+    );
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       'Workflow execution started',
       { toastLifeTimeMs: 2000 }
@@ -136,11 +140,15 @@ describe('runWorkflowThunk', () => {
 
     const result = await store.dispatch(runWorkflowThunk({ inputs: {} }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith(`/api/workflows/${mockWorkflow.id}/run`, {
-      body: JSON.stringify({
-        inputs: {},
-      }),
-    });
+    expect(mockServices.http.post).toHaveBeenCalledWith(
+      `/api/workflows/workflow/${mockWorkflow.id}/run`,
+      {
+        body: JSON.stringify({
+          inputs: {},
+        }),
+        headers: { 'elastic-api-version': '2023-10-31' },
+      }
+    );
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       'Workflow execution started',
       { toastLifeTimeMs: 2000 }

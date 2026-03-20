@@ -146,8 +146,9 @@ describe('updateWorkflowThunk', () => {
 
     const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
+    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/workflow/test-workflow-1', {
       body: JSON.stringify(workflowUpdate),
+      headers: { 'elastic-api-version': '2023-10-31' },
     });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
@@ -168,8 +169,9 @@ describe('updateWorkflowThunk', () => {
 
     const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
+    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/workflow/test-workflow-1', {
       body: JSON.stringify(workflowUpdate),
+      headers: { 'elastic-api-version': '2023-10-31' },
     });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
@@ -188,8 +190,9 @@ describe('updateWorkflowThunk', () => {
 
     const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
+    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/workflow/test-workflow-1', {
       body: JSON.stringify(workflowUpdate),
+      headers: { 'elastic-api-version': '2023-10-31' },
     });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
@@ -289,8 +292,9 @@ describe('updateWorkflowThunk', () => {
 
     const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
+    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/workflow/test-workflow-1', {
       body: JSON.stringify(workflowUpdate),
+      headers: { 'elastic-api-version': '2023-10-31' },
     });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
@@ -315,9 +319,13 @@ describe('updateWorkflowThunk', () => {
 
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockServices.http.put).toHaveBeenCalledWith(
+        '/api/workflows/workflow/test-workflow-1',
+        {
+          body: JSON.stringify(workflowUpdate),
+          headers: { 'elastic-api-version': '2023-10-31' },
+        }
+      );
 
       // Verify loadWorkflowThunk was called to sync with server
       expect(mockLoadWorkflowThunk).toHaveBeenCalledWith({ id: 'test-workflow-1' });
@@ -342,9 +350,13 @@ describe('updateWorkflowThunk', () => {
 
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockServices.http.put).toHaveBeenCalledWith(
+        '/api/workflows/workflow/test-workflow-1',
+        {
+          body: JSON.stringify(workflowUpdate),
+          headers: { 'elastic-api-version': '2023-10-31' },
+        }
+      );
 
       const state = store.getState();
       expect(state.detail.yamlString).toContain('name: New Workflow Name');
@@ -364,9 +376,13 @@ describe('updateWorkflowThunk', () => {
 
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockServices.http.put).toHaveBeenCalledWith(
+        '/api/workflows/workflow/test-workflow-1',
+        {
+          body: JSON.stringify(workflowUpdate),
+          headers: { 'elastic-api-version': '2023-10-31' },
+        }
+      );
 
       const state = store.getState() as RootState;
       expect(state.detail.yamlString).toContain('description: New description');
@@ -386,9 +402,13 @@ describe('updateWorkflowThunk', () => {
 
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockServices.http.put).toHaveBeenCalledWith(
+        '/api/workflows/workflow/test-workflow-1',
+        {
+          body: JSON.stringify(workflowUpdate),
+          headers: { 'elastic-api-version': '2023-10-31' },
+        }
+      );
 
       const state = store.getState() as RootState;
       expect(state.detail.yamlString).toContain('tags:');
@@ -410,9 +430,13 @@ describe('updateWorkflowThunk', () => {
 
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockServices.http.put).toHaveBeenCalledWith(
+        '/api/workflows/workflow/test-workflow-1',
+        {
+          body: JSON.stringify(workflowUpdate),
+          headers: { 'elastic-api-version': '2023-10-31' },
+        }
+      );
 
       expect(mockLoadWorkflowThunk).toHaveBeenCalledWith({ id: 'test-workflow-1' });
 
@@ -437,9 +461,13 @@ describe('updateWorkflowThunk', () => {
 
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockServices.http.put).toHaveBeenCalledWith(
+        '/api/workflows/workflow/test-workflow-1',
+        {
+          body: JSON.stringify(workflowUpdate),
+          headers: { 'elastic-api-version': '2023-10-31' },
+        }
+      );
 
       expect(mockLoadWorkflowThunk).not.toHaveBeenCalled();
 
@@ -461,9 +489,13 @@ describe('updateWorkflowThunk', () => {
 
       const result = await dispatchThunk(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
-        body: JSON.stringify(workflowUpdate),
-      });
+      expect(mockServices.http.put).toHaveBeenCalledWith(
+        '/api/workflows/workflow/test-workflow-1',
+        {
+          body: JSON.stringify(workflowUpdate),
+          headers: { 'elastic-api-version': '2023-10-31' },
+        }
+      );
 
       expect(mockLoadWorkflowThunk).not.toHaveBeenCalled();
 

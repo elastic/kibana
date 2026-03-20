@@ -46,6 +46,7 @@ describe('testWorkflowThunk', () => {
         workflowYaml: 'name: Test Workflow\nsteps: []',
         inputs: testInputs,
       }),
+      headers: { 'elastic-api-version': '2023-10-31' },
     });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       'Workflow test execution started',
@@ -77,9 +78,10 @@ describe('testWorkflowThunk', () => {
     expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/test', {
       body: JSON.stringify({
         workflowYaml: 'name: Test Workflow\nsteps: []',
-        inputs: testInputs,
         workflowId: 'workflow-123',
+        inputs: testInputs,
       }),
+      headers: { 'elastic-api-version': '2023-10-31' },
     });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       'Workflow test execution started',
@@ -173,6 +175,7 @@ describe('testWorkflowThunk', () => {
         workflowYaml: 'name: Test Workflow\nsteps: []',
         inputs: {},
       }),
+      headers: { 'elastic-api-version': '2023-10-31' },
     });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       'Workflow test execution started',

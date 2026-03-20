@@ -67,7 +67,9 @@ describe('loadConnectorsThunk', () => {
 
     const result = await store.dispatch(loadConnectorsThunk());
 
-    expect(mockServices.http.get).toHaveBeenCalledWith('/api/workflows/connectors');
+    expect(mockServices.http.get).toHaveBeenCalledWith('/api/workflows/connectors', {
+      headers: { 'elastic-api-version': '2023-10-31' },
+    });
     expect(addDynamicConnectorsToCache).toHaveBeenCalledWith(
       mockConnectorsResponse1.connectorTypes
     );
@@ -88,7 +90,9 @@ describe('loadConnectorsThunk', () => {
 
     const result = await store.dispatch(loadConnectorsThunk());
 
-    expect(mockServices.http.get).toHaveBeenCalledWith('/api/workflows/connectors');
+    expect(mockServices.http.get).toHaveBeenCalledWith('/api/workflows/connectors', {
+      headers: { 'elastic-api-version': '2023-10-31' },
+    });
     expect(addDynamicConnectorsToCache).toHaveBeenCalledWith(
       mockConnectorsResponse2.connectorTypes
     );
@@ -110,7 +114,9 @@ describe('loadConnectorsThunk', () => {
 
     const result = await store.dispatch(loadConnectorsThunk());
 
-    expect(mockServices.http.get).toHaveBeenCalledWith('/api/workflows/connectors');
+    expect(mockServices.http.get).toHaveBeenCalledWith('/api/workflows/connectors', {
+      headers: { 'elastic-api-version': '2023-10-31' },
+    });
     expect(addDynamicConnectorsToCache).not.toHaveBeenCalled();
     expect(getWorkflowZodSchema).not.toHaveBeenCalled();
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
