@@ -10,16 +10,21 @@
 import { useState, useLayoutEffect } from 'react';
 import { EXPANDED_WIDTH } from '@kbn/core-chrome-navigation';
 
-// Target app content area thresholds (in px).
-// The grid is: nav | 1fr (app) | sidebar. window.innerWidth is stable and
-// never changes as a side effect of the nav collapsing, so no feedback loop.
+// Thresholds for how wide the main app column is (px). Layout: nav | app | sidebar.
+// `window.innerWidth` does not change when the nav collapses, so measuring it does not
+// create a feedback loop with auto-collapse.
 const APP_COLLAPSE_AT_WIDTH = 1000;
+// Slightly larger than APP_COLLAPSE_AT_WIDTH so we do not flip between collapsed and
+// expanded on every small resize when the width sits near the boundary.
 const APP_EXPAND_AT_WIDTH = 1100;
 
 /**
- * Returns whether the sidenav should be auto-collapsed based on the current
- * viewport width and sidebar width. Collapses when the app content area would
- * be too narrow for a comfortably expanded nav.
+ * Whether the sidenav should be auto-collapsed for the current window size.
+ *
+ * Main app width is approximated as viewport width minus expanded nav width and
+ * `sidebarWidth`. Below the collapse threshold we collapse; above the expand
+ * threshold we expand. Between the two thresholds we leave the nav unchanged so
+ * small resizes near the edge do not keep toggling it.
  */
 export const useAutoCollapse = (sidebarWidth: number): boolean => {
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -33,7 +38,8 @@ export const useAutoCollapse = (sidebarWidth: number): boolean => {
         const appWidth = window.innerWidth - EXPANDED_WIDTH - sidebarWidth;
         if (appWidth <= APP_COLLAPSE_AT_WIDTH) return true;
         if (appWidth >= APP_EXPAND_AT_WIDTH) return false;
-        return current; // stay in current state within the hysteresis zone
+        // Between collapse and expand thresholds: keep current state (see constants above).
+        return current;
       });
 
     check();
