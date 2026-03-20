@@ -283,7 +283,6 @@ export function useWorkflowActions() {
     },
     onSuccess: ({ workflowExecutionId }, variables) => {
       // Report telemetry for successful step test run
-      console.log('variables.triggerTab', variables.triggerTab);
       telemetry.reportWorkflowStepTestRunInitiated({
         workflowYaml: variables.workflowYaml,
         stepId: variables.stepId,
