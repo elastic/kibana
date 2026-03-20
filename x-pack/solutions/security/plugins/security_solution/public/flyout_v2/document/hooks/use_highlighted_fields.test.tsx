@@ -6,24 +6,34 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
 import {
   mockDataFormattedForFieldBrowser,
   mockDataFormattedForFieldBrowserWithOverridenField,
-} from '../mocks/mock_data_formatted_for_field_browser';
+} from '../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
 import { useHighlightedFields } from './use_highlighted_fields';
-import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS } from '../../../../../common/endpoint/service/response_actions/constants';
-import { parseEcsFieldPath } from '../../../../common/lib/endpoint';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
+import { parseEcsFieldPath } from '../../../common/lib/endpoint';
 
-jest.mock('../../../../common/experimental_features_service');
+jest.mock('../../../common/experimental_features_service');
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
+
+const buildMockHit = (data: TimelineEventsDetailsItem[]): DataTableRecord =>
+  ({
+    flattened: data.reduce<Record<string, unknown>>((acc, item) => {
+      acc[item.field] = item.originalValue ?? item.values;
+      return acc;
+    }, {}),
+  } as DataTableRecord);
 
 describe('useHighlightedFields', () => {
   it('should return data', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
-        dataFormattedForFieldBrowser,
+        hit: buildMockHit(dataFormattedForFieldBrowser),
         investigationFields: [],
       })
     );
@@ -50,7 +60,7 @@ describe('useHighlightedFields', () => {
   it('should return overriden field value when it is present', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
-        dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowserWithOverridenField,
+        hit: buildMockHit(mockDataFormattedForFieldBrowserWithOverridenField),
         investigationFields: [],
       })
     );
@@ -70,13 +80,15 @@ describe('useHighlightedFields', () => {
   it('should omit endpoint agent id field if data is not s1 alert', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
-        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat({
-          category: 'agent',
-          field: 'agent.id',
-          values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
-          originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
-          isObjectArray: false,
-        }),
+        hit: buildMockHit(
+          dataFormattedForFieldBrowser.concat({
+            category: 'agent',
+            field: 'agent.id',
+            values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+            originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+            isObjectArray: false,
+          })
+        ),
         investigationFields: ['agent.status', 'agent.id'],
       })
     );
@@ -104,22 +116,24 @@ describe('useHighlightedFields', () => {
   it('should return endpoint agent id field if data is s1 alert', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
-        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat([
-          {
-            category: 'agent',
-            field: 'agent.type',
-            values: ['endpoint'],
-            originalValue: ['endpoint'],
-            isObjectArray: false,
-          },
-          {
-            category: 'agent',
-            field: 'agent.id',
-            values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
-            originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
-            isObjectArray: false,
-          },
-        ]),
+        hit: buildMockHit(
+          dataFormattedForFieldBrowser.concat([
+            {
+              category: 'agent',
+              field: 'agent.type',
+              values: ['endpoint'],
+              originalValue: ['endpoint'],
+              isObjectArray: false,
+            },
+            {
+              category: 'agent',
+              field: 'agent.id',
+              values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+              originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+              isObjectArray: false,
+            },
+          ])
+        ),
         investigationFields: ['agent.status', 'agent.id'],
       })
     );
@@ -132,7 +146,7 @@ describe('useHighlightedFields', () => {
         values: ['query'],
       },
       'agent.id': {
-        values: ['agent.id'],
+        values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
       },
       'user.name': {
         values: ['user-name'],
@@ -150,14 +164,16 @@ describe('useHighlightedFields', () => {
   it('should omit sentinelone agent id field if data is not s1 alert', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
-        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat({
-          category: parseEcsFieldPath(RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0])
-            .category,
-          field: `observer.${RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0]}`,
-          values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
-          originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
-          isObjectArray: false,
-        }),
+        hit: buildMockHit(
+          dataFormattedForFieldBrowser.concat({
+            category: parseEcsFieldPath(RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0])
+              .category,
+            field: `observer.${RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0]}`,
+            values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+            originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+            isObjectArray: false,
+          })
+        ),
         investigationFields: [
           'agent.status',
           RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0],
@@ -188,14 +204,16 @@ describe('useHighlightedFields', () => {
   it('should omit crowdstrike agent id field if data is not crowdstrike alert', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
-        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat({
-          category: parseEcsFieldPath(RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.crowdstrike[0])
-            .category,
-          field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.crowdstrike[0],
-          values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
-          originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
-          isObjectArray: false,
-        }),
+        hit: buildMockHit(
+          dataFormattedForFieldBrowser.concat({
+            category: parseEcsFieldPath(RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.crowdstrike[0])
+              .category,
+            field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.crowdstrike[0],
+            values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+            originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+            isObjectArray: false,
+          })
+        ),
         investigationFields: ['agent.status', 'device.id'],
       })
     );
@@ -225,22 +243,24 @@ describe('useHighlightedFields', () => {
     (agentIdField) => {
       const hookResult = renderHook(() =>
         useHighlightedFields({
-          dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat([
-            {
-              category: 'event',
-              field: 'event.module',
-              values: ['sentinel_one'],
-              originalValue: ['sentinel_one'],
-              isObjectArray: false,
-            },
-            {
-              category: parseEcsFieldPath(agentIdField).category,
-              field: agentIdField,
-              values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
-              originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
-              isObjectArray: false,
-            },
-          ]),
+          hit: buildMockHit(
+            dataFormattedForFieldBrowser.concat([
+              {
+                category: 'event',
+                field: 'event.module',
+                values: ['sentinel_one'],
+                originalValue: ['sentinel_one'],
+                isObjectArray: false,
+              },
+              {
+                category: parseEcsFieldPath(agentIdField).category,
+                field: agentIdField,
+                values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+                originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+                isObjectArray: false,
+              },
+            ])
+          ),
           investigationFields: ['agent.status', agentIdField],
         })
       );
@@ -272,22 +292,24 @@ describe('useHighlightedFields', () => {
   it('should return crowdstrike agent id field if data is crowdstrike alert', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
-        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat([
-          {
-            category: 'event',
-            field: 'event.module',
-            values: ['crowdstrike'],
-            originalValue: ['crowdstrike'],
-            isObjectArray: false,
-          },
-          {
-            category: 'device',
-            field: 'device.id',
-            values: ['expectedCrowdstrikeAgentId'],
-            originalValue: ['expectedCrowdstrikeAgentId'],
-            isObjectArray: false,
-          },
-        ]),
+        hit: buildMockHit(
+          dataFormattedForFieldBrowser.concat([
+            {
+              category: 'event',
+              field: 'event.module',
+              values: ['crowdstrike'],
+              originalValue: ['crowdstrike'],
+              isObjectArray: false,
+            },
+            {
+              category: 'device',
+              field: 'device.id',
+              values: ['expectedCrowdstrikeAgentId'],
+              originalValue: ['expectedCrowdstrikeAgentId'],
+              isObjectArray: false,
+            },
+          ])
+        ),
         investigationFields: ['agent.status', 'device.id'],
       })
     );
@@ -318,34 +340,36 @@ describe('useHighlightedFields', () => {
   it('should only include ancestors with depth 0 in the "source event" field', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
-        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser
-          .filter((item) => item.field !== 'kibana.alert.ancestors.id')
-          .concat([
-            {
-              category: 'kibana',
-              field: 'kibana.alert.ancestors.depth',
-              values: ['0', '1', '0', '1'],
-              originalValue: ['0', '1', '0', '1'],
-              isObjectArray: false,
-            },
-            {
-              category: 'kibana',
-              field: 'kibana.alert.ancestors.id',
-              values: [
-                'AZkupz0BWCNsCtptscaJ',
-                'e7f11264eb2dbcdd2588ebd64f3cdbfc04d47d364db700b817ded6503f995b75',
-                'AZkupz0BWCNsCtptscaU',
-                '3c8211dd158a96ef6884fc50267fd778ae36704fa8b8a448399d4832e93cac3b',
-              ],
-              originalValue: [
-                'AZkupz0BWCNsCtptscaJ',
-                'e7f11264eb2dbcdd2588ebd64f3cdbfc04d47d364db700b817ded6503f995b75',
-                'AZkupz0BWCNsCtptscaU',
-                '3c8211dd158a96ef6884fc50267fd778ae36704fa8b8a448399d4832e93cac3b',
-              ],
-              isObjectArray: false,
-            },
-          ]),
+        hit: buildMockHit(
+          dataFormattedForFieldBrowser
+            .filter((item) => item.field !== 'kibana.alert.ancestors.id')
+            .concat([
+              {
+                category: 'kibana',
+                field: 'kibana.alert.ancestors.depth',
+                values: ['0', '1', '0', '1'],
+                originalValue: ['0', '1', '0', '1'],
+                isObjectArray: false,
+              },
+              {
+                category: 'kibana',
+                field: 'kibana.alert.ancestors.id',
+                values: [
+                  'AZkupz0BWCNsCtptscaJ',
+                  'e7f11264eb2dbcdd2588ebd64f3cdbfc04d47d364db700b817ded6503f995b75',
+                  'AZkupz0BWCNsCtptscaU',
+                  '3c8211dd158a96ef6884fc50267fd778ae36704fa8b8a448399d4832e93cac3b',
+                ],
+                originalValue: [
+                  'AZkupz0BWCNsCtptscaJ',
+                  'e7f11264eb2dbcdd2588ebd64f3cdbfc04d47d364db700b817ded6503f995b75',
+                  'AZkupz0BWCNsCtptscaU',
+                  '3c8211dd158a96ef6884fc50267fd778ae36704fa8b8a448399d4832e93cac3b',
+                ],
+                isObjectArray: false,
+              },
+            ])
+        ),
         investigationFields: ['kibana.alert.ancestors.id'],
       })
     );

@@ -6,21 +6,21 @@
  */
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { useMemo } from 'react';
 import { find, isEmpty } from 'lodash/fp';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
-import { useAlertResponseActionsSupport } from '../../../../common/hooks/endpoint/use_alert_response_actions_support';
-import { isResponseActionsAlertAgentIdField } from '../../../../common/lib/endpoint';
-import {
-  getEventCategoriesFromData,
-  getHighlightedFieldsToDisplay,
-} from '../../../../common/components/event_details/get_alert_summary_rows';
-import { EVENT_SOURCE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { getEventCategoriesFromData } from '../utils/get_event_categories';
+import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
+import { isResponseActionsAlertAgentIdField } from '../../../common/lib/endpoint';
+import { getHighlightedFieldsToDisplay } from '../../../common/components/event_details/get_alert_summary_rows';
+import { EVENT_SOURCE_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 
 export interface UseHighlightedFieldsParams {
   /**
-   * An array of field objects with category and value
+   * Document record to extract highlighted fields from
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  hit: DataTableRecord;
   /**
    * An array of fields user has selected to highlight, defined on rule
    */
@@ -51,12 +51,30 @@ export interface UseHighlightedFieldsResult {
  * Returns the highlighted fields to display in the right panel under the Investigation section.
  */
 export const useHighlightedFields = ({
-  dataFormattedForFieldBrowser,
+  hit,
   investigationFields,
   type,
 }: UseHighlightedFieldsParams): UseHighlightedFieldsResult => {
+  // Build TimelineEventsDetailsItem[] from DataTableRecord for internal use
+  // We do this to avoid increasing scope as useAlertResponseActionsSupport is used in many places
+  const dataFormattedForFieldBrowser = useMemo<TimelineEventsDetailsItem[]>(() => {
+    return Object.entries(hit.flattened).map(([field, value]) => ({
+      field,
+      values: Array.isArray(value)
+        ? value.map(String)
+        : value != null
+        ? [String(value)]
+        : undefined,
+      originalValue: value,
+      isObjectArray: Array.isArray(value) && value.length > 0 && typeof value[0] === 'object',
+      // Derive category from field path to keep downstream category lookups working.
+      category: field.split('.')[0],
+    }));
+  }, [hit]);
+
+  // TODO eventually convert useAlertResponseActionsSupport to support hit
   const responseActionsSupport = useAlertResponseActionsSupport(dataFormattedForFieldBrowser);
-  const eventCategories = getEventCategoriesFromData(dataFormattedForFieldBrowser);
+  const eventCategories = getEventCategoriesFromData(hit);
 
   const eventCodeField = find(
     { category: 'event', field: 'event.code' },
