@@ -288,7 +288,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
               {!readOnly && (
                 <>
                   {!isActive && (
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem grow={false} css={[styles.floatToRight]}>
                       <EuiButtonIcon
                         data-no-drag
                         iconType="trash"
@@ -301,17 +301,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       />
                     </EuiFlexItem>
                   )}
-                  <EuiFlexItem grow={false} css={[styles.floatToRight]}>
-                    <EuiButtonIcon
-                      iconType="move"
-                      color="text"
-                      className="kbnGridSection--dragHandle"
-                      aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
-                        defaultMessage: 'Move section',
-                      })}
-                      data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
-                    />
-                  </EuiFlexItem>
                 </>
               )}
             </>

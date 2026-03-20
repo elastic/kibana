@@ -94,15 +94,23 @@ export const GridSectionTitle = React.memo(
       [sectionId, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
     );
 
+    const moveLabel = i18n.translate('kbnGridLayout.section.moveRow', {
+      defaultMessage: 'Move section',
+    });
+
+    const toggleLabel = i18n.translate('kbnGridLayout.section.toggleCollapse', {
+      defaultMessage: 'Toggle collapse',
+    });
+
+    const combinedAriaLabel = `${sectionTitle}. ${toggleLabel}. ${moveLabel}.`;
+
     return (
       <>
         <EuiFlexItem grow={false} css={styles.titleButton}>
           <EuiButtonEmpty
             buttonRef={collapseButtonRef}
             color="text"
-            aria-label={i18n.translate('kbnGridLayout.section.toggleCollapse', {
-              defaultMessage: 'Toggle collapse',
-            })}
+            aria-label={combinedAriaLabel}
             iconType={'arrowDown'}
             size="m"
             id={`kbnGridSectionTitle-${sectionId}`}
