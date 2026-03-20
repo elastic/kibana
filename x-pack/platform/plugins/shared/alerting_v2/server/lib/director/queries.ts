@@ -33,9 +33,8 @@ export const getLatestAlertEventStateQuery = ({
   // Without this, docs without episode or with null episode.status can be included
   // in STATS and LAST(episode.status, @timestamp) may yield null, so the next
   // run would see no previous state and keep outputting pending.
-  query = query.where`rule.id == ${{ ruleId }} AND group_hash IN (${{
-    groupHashes,
-  }}) AND type == "alert" AND episode.status IS NOT NULL`;
+  const groupHashValues = groupHashes.map((hash) => esql.str(hash));
+  query = query.where`rule.id == ${{ ruleId }} AND group_hash IN (${groupHashValues}) AND type == "alert" AND episode.status IS NOT NULL`;
 
   query = query.pipe`STATS
       last_status = LAST(status, @timestamp),

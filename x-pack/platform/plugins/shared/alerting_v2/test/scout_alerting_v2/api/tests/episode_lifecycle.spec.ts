@@ -166,13 +166,34 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
   ): Promise<Map<string, Record<string, unknown>>> {
     const start = Date.now();
 
+    let pollCount = 0;
+
     while (Date.now() - start < POLL_TIMEOUT_MS) {
+      pollCount++;
       const states = await getLatestEpisodeStates(esClient, ruleId);
       const statuses = Array.from(states.values()).map(
         (doc) => (doc.episode as Record<string, unknown>).status as string
       );
 
-      const allFound = expectedStatuses.every((s) => statuses.includes(s));
+      // eslint-disable-next-line no-console
+      console.log(
+        `[waitForEpisodeStatuses] poll #${pollCount} | rule=${ruleId} | expected=[${expectedStatuses}] | actual=[${statuses}] | groups=${
+          states.size
+        } | entries=${JSON.stringify(
+          Array.from(states.entries()).map(([hash, doc]) => ({
+            group_hash: hash,
+            type: doc.type,
+            status: doc.status,
+            episode: doc.episode,
+          }))
+        )}`
+      );
+
+      const sortedExpected = [...expectedStatuses].sort();
+      const sortedActual = [...statuses].sort();
+      const allFound =
+        sortedExpected.length === sortedActual.length &&
+        sortedExpected.every((s, i) => s === sortedActual[i]);
       if (allFound) {
         return states;
       }
@@ -327,7 +348,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
     }
   );
 
-  apiTest.fixme(
+  apiTest(
     'should track multiple groups independently',
     async ({ apiClient, esClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();

@@ -11,7 +11,7 @@ describe('getLatestAlertEventStateQuery', () => {
   it('generates a valid ES|QL query for a single group hash', () => {
     const query = getLatestAlertEventStateQuery({
       ruleId: 'rule-1',
-      groupHashes: ['hash-a'],
+      groupHashes: ['hash-a', 'hash-b'],
     });
 
     const printed = query.print();
@@ -19,7 +19,7 @@ describe('getLatestAlertEventStateQuery', () => {
     expect(printed).toContain('FROM .alerting-events');
     expect(printed).toContain('WHERE');
     expect(printed).toContain('rule.id == ?ruleId');
-    expect(printed).toContain('group_hash IN (?groupHashes)');
+    expect(printed).toContain('group_hash IN ("hash-a", "hash-b")');
     expect(printed).toContain('type == "alert"');
     expect(printed).toContain('episode.status IS NOT NULL');
     expect(printed).toContain('STATS');
@@ -32,20 +32,18 @@ describe('getLatestAlertEventStateQuery', () => {
     expect(printed).toContain('KEEP');
   });
 
-  it('passes ruleId and groupHashes as named parameters', () => {
+  it('passes ruleId as a named parameter and inlines groupHashes', () => {
     const query = getLatestAlertEventStateQuery({
       ruleId: 'rule-abc',
       groupHashes: ['hash-1', 'hash-2', 'hash-3'],
     });
 
     const params = query.getParams();
+    expect(params).toEqual(expect.objectContaining({ ruleId: 'rule-abc' }));
+    expect(params).not.toHaveProperty('groupHashes');
 
-    expect(params).toEqual(
-      expect.objectContaining({
-        ruleId: 'rule-abc',
-        groupHashes: ['hash-1', 'hash-2', 'hash-3'],
-      })
-    );
+    const printed = query.print();
+    expect(printed).toContain('group_hash IN ("hash-1", "hash-2", "hash-3")');
   });
 
   it('keeps exactly the expected columns in the correct order', () => {
@@ -104,11 +102,10 @@ describe('getLatestAlertEventStateQuery', () => {
     expect(typeof request.query).toBe('string');
     expect(request.query).toContain('FROM .alerting-events');
 
-    const params = request.params as Array<{ ruleId?: string; groupHashes?: string[] }>;
+    const params = request.params as Array<{ ruleId?: string }>;
     const ruleIdParam = params.find((p) => 'ruleId' in p);
-    const groupHashesParam = params.find((p) => 'groupHashes' in p);
 
     expect(ruleIdParam).toEqual({ ruleId: 'rule-42' });
-    expect(groupHashesParam).toEqual({ groupHashes: ['h1', 'h2'] });
+    expect(request.query).toContain('group_hash IN ("h1", "h2")');
   });
 });
