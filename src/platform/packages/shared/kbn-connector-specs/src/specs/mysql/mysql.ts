@@ -182,7 +182,7 @@ export const MysqlConnector: ConnectorSpec = {
         const sql =
           `SELECT * FROM ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}` +
           ` WHERE ${whereClause}`;
-        return getClient().runReadonlyQuery(ctx, sql, db, input.maxRows ?? 50);
+        return getClient().runReadonlyQuery(ctx, sql, db, input.maxRows ?? 100);
       },
     },
   },

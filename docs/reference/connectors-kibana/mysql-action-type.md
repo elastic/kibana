@@ -62,7 +62,7 @@ Search Rows
 :   Search rows in a table by matching a search term against specified columns.
     - **table** (required): The table to search.
     - **searchTerm** (required): The text to search for.
-    - **columns** (optional): Array of column names to search in.
+    - **columns** (required): Array of column names to search in. Use `describe_table` to discover available columns.
     - **maxRows** (optional): Maximum number of rows to return (default: 50).
     - **database** (optional): The database name. Uses the configured default if omitted.
 
