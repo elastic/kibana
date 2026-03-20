@@ -12,6 +12,8 @@ import {
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   type NotificationPolicySavedObjectAttributes,
 } from '../../saved_objects';
+import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
+import { createMockApiKeyService } from '../services/api_key_service/api_key_service.mock';
 import type { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import {
   createMockEncryptedSavedObjects,
@@ -19,8 +21,6 @@ import {
 } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
 import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
-import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
-import { createMockApiKeyService } from '../services/api_key_service/api_key_service.mock';
 import { NotificationPolicyClient } from './notification_policy_client';
 
 describe('NotificationPolicyClient', () => {
@@ -1567,6 +1567,109 @@ describe('NotificationPolicyClient', () => {
       expect(res.processed).toBe(0);
       expect(res.total).toBe(2);
       expect(res.errors).toHaveLength(2);
+    });
+
+    it('invalidates API keys for successfully bulk-deleted policies', async () => {
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce(
+        {
+          async *find() {
+            yield {
+              saved_objects: [
+                {
+                  id: 'policy-del-1',
+                  type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    auth: { apiKey: 'key-1', createdByUser: false, owner: 'test-user' },
+                  },
+                  references: [],
+                },
+                {
+                  id: 'policy-del-2',
+                  type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    auth: { apiKey: 'key-2', createdByUser: false, owner: 'test-user' },
+                  },
+                  references: [],
+                },
+              ],
+            };
+          },
+          close: jest.fn(),
+        }
+      );
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'policy-del-1', type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, success: true },
+          { id: 'policy-del-2', type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [
+          { id: 'policy-del-1', action: 'delete' },
+          { id: 'policy-del-2', action: 'delete' },
+        ],
+      });
+
+      expect(res).toEqual({ processed: 2, total: 2, errors: [] });
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledTimes(2);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-1']);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-2']);
+    });
+
+    it('skips API key invalidation for bulk-deleted policies with createdByUser: true', async () => {
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce(
+        {
+          async *find() {
+            yield {
+              saved_objects: [
+                {
+                  id: 'policy-del-user',
+                  type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    auth: { apiKey: 'user-key', createdByUser: true, owner: 'test-user' },
+                  },
+                  references: [],
+                },
+              ],
+            };
+          },
+          close: jest.fn(),
+        }
+      );
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'policy-del-user', type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [{ id: 'policy-del-user', action: 'delete' }],
+      });
+
+      expect(res).toEqual({ processed: 1, total: 1, errors: [] });
+      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
+
+    it('does not throw when PIT finder fails during bulk delete', async () => {
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockRejectedValueOnce(
+        new Error('decryption failure')
+      );
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'policy-del-err', type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [{ id: 'policy-del-err', action: 'delete' }],
+      });
+
+      expect(res).toEqual({ processed: 1, total: 1, errors: [] });
+      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
     });
   });
 

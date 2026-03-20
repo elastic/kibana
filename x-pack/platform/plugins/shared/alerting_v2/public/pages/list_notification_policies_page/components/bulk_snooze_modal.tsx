@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { NotificationPolicySnoozeForm } from '../../../components/notification_policy/notification_policy_snooze_form';
@@ -17,10 +23,11 @@ interface BulkSnoozeModalProps {
 }
 
 export const BulkSnoozeModal = ({ count, onApplySnooze, onCancel }: BulkSnoozeModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
   return (
-    <EuiModal onClose={onCancel}>
+    <EuiModal aria-labelledby={modalTitleId} onClose={onCancel}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.alertingV2.notificationPolicy.bulkSnoozeModal.title"
             defaultMessage="Snooze {count} {count, plural, one {notification policy} other {notification policies}}"
@@ -32,7 +39,7 @@ export const BulkSnoozeModal = ({ count, onApplySnooze, onCancel }: BulkSnoozeMo
         <NotificationPolicySnoozeForm
           isSnoozed={false}
           onApplySnooze={onApplySnooze}
-          onCancelSnooze={() => {}}
+          onCancelSnooze={onCancel}
         />
       </EuiModalBody>
     </EuiModal>

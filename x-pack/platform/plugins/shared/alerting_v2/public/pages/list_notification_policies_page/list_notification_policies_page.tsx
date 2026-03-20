@@ -165,16 +165,19 @@ export const ListNotificationPoliciesPage = () => {
     const ids = selectedPolicies.map((policy) => policy.id);
     let actions: NotificationPolicyBulkAction[];
     if (action === 'snooze' && snoozedUntil) {
-      actions = ids.map((id) => ({ id, action: 'snooze' as const, snoozedUntil }));
+      actions = ids.map((id) => ({ id, action: 'snooze', snoozedUntil }));
     } else if (action === 'enable') {
-      actions = ids.map((id) => ({ id, action: 'enable' as const }));
+      actions = ids.map((id) => ({ id, action: 'enable' }));
     } else if (action === 'disable') {
-      actions = ids.map((id) => ({ id, action: 'disable' as const }));
+      actions = ids.map((id) => ({ id, action: 'disable' }));
     } else if (action === 'unsnooze') {
-      actions = ids.map((id) => ({ id, action: 'unsnooze' as const }));
+      actions = ids.map((id) => ({ id, action: 'unsnooze' }));
+    } else if (action === 'delete') {
+      actions = ids.map((id) => ({ id, action: 'delete' }));
     } else {
-      actions = ids.map((id) => ({ id, action: 'delete' as const }));
+      throw new Error(`Invalid action: ${action}`);
     }
+
     bulkAction({ actions }, { onSuccess: clearSelection });
   };
 

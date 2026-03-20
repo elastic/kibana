@@ -20,6 +20,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
+import { partition } from 'lodash';
 import {
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   type NotificationPolicySavedObjectAttributes,
@@ -27,7 +28,7 @@ import {
 import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
-import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/types';
 import { NotificationPolicySavedObjectServiceScopedToken } from '../services/notification_policy_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
@@ -302,8 +303,7 @@ export class NotificationPolicyClient {
     const userProfile = await this.getUserProfile();
     const now = new Date().toISOString();
 
-    const deleteActions = actions.filter((a) => a.action === 'delete');
-    const updateActions = actions.filter((a) => a.action !== 'delete');
+    const [deleteActions, updateActions] = partition(actions, (a) => a.action === 'delete');
 
     const errors: Array<{ id: string; message: string }> = [];
     let processed = 0;
@@ -333,8 +333,11 @@ export class NotificationPolicyClient {
     }
 
     if (deleteActions.length > 0) {
+      const deleteIds = deleteActions.map((a) => a.id);
+      const authMap = await this.getBulkDecryptedAuth(deleteIds);
+
       const deleteResults = await this.notificationPolicySavedObjectService.bulkDelete({
-        ids: deleteActions.map((a) => a.id),
+        ids: deleteIds,
       });
 
       for (const result of deleteResults) {
@@ -342,6 +345,8 @@ export class NotificationPolicyClient {
           errors.push({ id: result.id, message: result.error.message });
         } else {
           processed++;
+          const auth = authMap.get(result.id);
+          this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
         }
       }
     }
@@ -424,6 +429,43 @@ export class NotificationPolicyClient {
     } catch {
       return null;
     }
+  }
+
+  private async getBulkDecryptedAuth(
+    ids: string[]
+  ): Promise<Map<string, { apiKey: string; createdByUser: boolean }>> {
+    const targetIds = new Set(ids);
+    const authMap = new Map<string, { apiKey: string; createdByUser: boolean }>();
+
+    try {
+      const finder =
+        await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
+          {
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            perPage: Math.min(ids.length, 1000),
+            ...(this.namespace ? { namespaces: [this.namespace] } : {}),
+          }
+        );
+
+      for await (const response of finder.find()) {
+        for (const so of response.saved_objects) {
+          if (targetIds.has(so.id) && so.attributes.auth?.apiKey) {
+            authMap.set(so.id, {
+              apiKey: so.attributes.auth.apiKey,
+              createdByUser: so.attributes.auth.createdByUser,
+            });
+          }
+        }
+        if (authMap.size >= targetIds.size) {
+          await finder.close();
+          break;
+        }
+      }
+    } catch {
+      // best-effort — same as getDecryptedAuth returning null on failure
+    }
+
+    return authMap;
   }
 
   private async updatePolicyState(

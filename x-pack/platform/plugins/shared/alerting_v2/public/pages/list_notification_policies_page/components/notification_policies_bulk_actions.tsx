@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
@@ -98,7 +97,7 @@ export const NotificationPoliciesBulkActions = ({
       ],
     },
   ];
-  const popoverTitleId = useGeneratedHtmlId();
+
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
