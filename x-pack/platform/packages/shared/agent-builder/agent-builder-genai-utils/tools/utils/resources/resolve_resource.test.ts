@@ -30,7 +30,7 @@ describe('resolveResource', () => {
     it('uses _field_caps instead of _mapping for a CCS index target', async () => {
       // _resolve/index succeeds and identifies a remote index
       esClient.indices.resolveIndex.mockResolvedValue({
-        indices: [{ name: 'remote_cluster:my-index' }],
+        indices: [{ name: 'remote_cluster:my-index', attributes: ['open'] }],
         aliases: [],
         data_streams: [],
       });
@@ -119,7 +119,7 @@ describe('resolveResource', () => {
   describe('local targets (unchanged behavior)', () => {
     it('uses _mapping API for a local index', async () => {
       esClient.indices.resolveIndex.mockResolvedValue({
-        indices: [{ name: 'my-local-index' }],
+        indices: [{ name: 'my-local-index', attributes: ['open'] }],
         aliases: [],
         data_streams: [],
       });
