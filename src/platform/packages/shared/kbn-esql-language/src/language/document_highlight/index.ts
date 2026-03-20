@@ -8,7 +8,6 @@
  */
 
 import { Walker, within, Parser } from '@elastic/esql';
-import type { ESQLColumn } from '@elastic/esql/types';
 
 interface DocumentHighlightItem {
   start: number;
@@ -25,36 +24,25 @@ export function getDocumentHighlightItems(
 ): DocumentHighlightItem[] {
   const { root } = Parser.parse(fullText);
 
-  // Find the column node at the cursor position
-  let targetColumn: ESQLColumn | undefined;
+  // Single walk: find the target column at cursor and collect all columns grouped by name
+  let targetName: string | undefined;
+  const columnsByName = new Map<string, DocumentHighlightItem[]>();
 
   Walker.walk(root, {
     visitColumn: (node) => {
-      if (within(offset, node)) {
-        targetColumn = node;
+      if (!targetName && within(offset, node)) {
+        targetName = node.name;
+      }
+
+      const items = columnsByName.get(node.name);
+      const highlight = { start: node.location.min, end: node.location.max };
+      if (items) {
+        items.push(highlight);
+      } else {
+        columnsByName.set(node.name, [highlight]);
       }
     },
   });
 
-  if (!targetColumn) {
-    return [];
-  }
-
-  const targetName = targetColumn.name;
-
-  // Collect all columns with the same name
-  const highlights: DocumentHighlightItem[] = [];
-
-  Walker.walk(root, {
-    visitColumn: (node) => {
-      if (node.name === targetName) {
-        highlights.push({
-          start: node.location.min,
-          end: node.location.max,
-        });
-      }
-    },
-  });
-
-  return highlights;
+  return targetName ? columnsByName.get(targetName) ?? [] : [];
 }
