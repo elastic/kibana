@@ -27,7 +27,9 @@ export const registerPipelineWorkflowSteps = ({
   workflowsExtensions.registerStepDefinition(fetchUnprocessedAlertsStep);
   workflowsExtensions.registerStepDefinition(deduplicateAlertsStep);
   workflowsExtensions.registerStepDefinition(extractEntitiesStep);
+  workflowsExtensions.registerStepDefinition(caseMatchingStep);
+  workflowsExtensions.registerStepDefinition(triggerIncrementalAdStep);
   workflowsExtensions.registerStepDefinition(tagProcessedAlertsStep);
 
-  logger.info('Registered 4 alert investigation pipeline workflow steps');
+  logger.info('Registered 6 alert investigation pipeline workflow steps (complete E2E)');
 };

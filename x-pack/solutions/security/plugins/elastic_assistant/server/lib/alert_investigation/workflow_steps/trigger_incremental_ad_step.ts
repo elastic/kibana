@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { Logger } from '@kbn/core/server';
 
 export const TriggerIncrementalAdStepId = 'security.triggerIncrementalAd';
 
@@ -70,11 +69,9 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
             };
           }
 
-          // Import incremental AD functions
-          const { triggerCaseAttackDiscovery } = await import('../case_integration');
-
-          // TODO: Wire to actual AD function when available in context
+          // TODO: Wire to actual AD function when available in workflow context
           // For now, log that it would be triggered
+          // const { triggerCaseAttackDiscovery } = await import('../case_integration');
           context.logger.info(
             `Would trigger incremental AD for case ${caseId} with ${alertIds.length} new alerts`
           );
