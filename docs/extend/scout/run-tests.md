@@ -232,11 +232,12 @@ To retrieve its password, call the `_reset-internal-credentials` Elastic Cloud A
 ```bash
 curl -XPOST \
   -H "Authorization: ApiKey $API_KEY" \
-  "${CLOUD_ENV_URL}/api/v1/serverless/projects/elasticsearch/${PROJECT_ID}/_reset-internal-credentials"
+  "${CLOUD_ENV_URL}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}/_reset-internal-credentials"
 ```
 
 - `API_KEY`: create in the Elastic Cloud UI (Organization → API keys)
 - `CLOUD_ENV_URL`: base URL of your Cloud environment (for example `https://console.qa.cld.elstc.co`)
+- `PROJECT_TYPE`: serverless project type (`elasticsearch`, `security`, or `observability`)
 - `PROJECT_ID`: serverless project ID from the Cloud UI
 
 :::::::

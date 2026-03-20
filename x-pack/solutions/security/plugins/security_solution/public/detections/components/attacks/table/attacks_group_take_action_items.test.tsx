@@ -65,7 +65,10 @@ const mockAttack = getMockAttackDiscoveryAlerts()[0];
 function renderAttack(attack: AttackDiscoveryAlert) {
   return render(
     <TestProviders>
-      <AttacksGroupTakeActionItems attack={attack} />
+      <AttacksGroupTakeActionItems
+        attack={attack}
+        telemetrySource="attacks_page_group_take_action"
+      />
     </TestProviders>
   );
 }

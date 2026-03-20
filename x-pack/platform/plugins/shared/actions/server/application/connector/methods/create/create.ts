@@ -9,12 +9,15 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectAttributes } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import { getWorkflowTemplatesForConnector } from '@kbn/connector-specs/server';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { isConnectorDeprecated } from '../../lib';
 import type { HookServices, ActionResult } from '../../../../types';
 import { tryCatch } from '../../../../lib';
+import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
+import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 
 export async function create({
   context,
@@ -115,6 +118,11 @@ export async function create({
       outcome: 'unknown',
     })
   );
+  const authMode = inferAuthMode({
+    authTypeRegistry: context.authTypeRegistry,
+    secrets,
+    config,
+  });
 
   const result = await tryCatch(
     async () =>
@@ -126,6 +134,7 @@ export async function create({
           isMissingSecrets: false,
           config: validatedActionTypeConfig as SavedObjectAttributes,
           secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          ...(authMode !== undefined ? { authMode } : {}),
         },
         { id }
       )
@@ -154,6 +163,23 @@ export async function create({
     }
   }
 
+  // Invoke cross-plugin lifecycle listeners (fire-and-forget to avoid blocking the API response)
+  void invokePostCreateListeners(
+    context.connectorLifecycleListeners,
+    actionTypeId,
+    {
+      connectorId: id,
+      connectorName: name,
+      config,
+      logger: context.logger,
+      request: context.request,
+      services: hookServices,
+      wasSuccessful,
+      workflowTemplates: getWorkflowTemplatesForConnector(actionTypeId),
+    },
+    context.logger
+  );
+
   if (!wasSuccessful) {
     throw result;
   }
@@ -168,5 +194,6 @@ export async function create({
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
+    ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
   };
 }

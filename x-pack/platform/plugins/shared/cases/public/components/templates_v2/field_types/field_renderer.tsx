@@ -6,17 +6,20 @@
  */
 
 import type { FC } from 'react';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import React from 'react';
 import { FormProvider, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
+import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { controlRegistry } from './field_types_registry';
+import { useYamlFormSync } from './hooks/use_yaml_form_sync';
+import { getYamlDefaultAsString } from '../utils';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
 export interface TemplateFieldRendererProps {
   parsedTemplate: ParsedTemplateDefinition;
-  values?: Record<string, unknown>;
+  onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
 }
 
 /**
@@ -25,21 +28,38 @@ export interface TemplateFieldRendererProps {
  */
 export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
   parsedTemplate,
-  values = {},
+  onFieldDefaultChange,
 }) => {
-  // NOTE: we are using `@kbn/es-ui-shared-plugin` here for compatibility with the current cases code.
+  const templateKey = React.useMemo(
+    () => parsedTemplate.fields.map((f) => `${f.name}:${f.type}`).join('|'),
+    [parsedTemplate.fields]
+  );
+
+  const initialDefaultValues = React.useMemo(() => {
+    const defaults: Record<string, Record<string, string>> = {
+      [CASE_EXTENDED_FIELDS]: {},
+    };
+    for (const field of parsedTemplate.fields) {
+      const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
+      const fieldKey = `${field.name}_as_${field.type}`;
+      defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
+    }
+    return defaults;
+  }, [parsedTemplate.fields]);
+
   const { form } = useForm<{}>({
-    defaultValue: {},
+    defaultValue: initialDefaultValues,
     options: { stripEmptyFields: false },
   });
 
+  useYamlFormSync(form, parsedTemplate.fields, onFieldDefaultChange);
+
   return (
-    <FormProvider form={form}>
+    <FormProvider key={templateKey} form={form}>
       {parsedTemplate.fields.map((field) => {
         const Control = controlRegistry[field.control] as FC<Record<string, unknown>>;
-        const controlProps = { ...field, value: values[field.name] };
 
-        return <Control key={field.name} {...controlProps} />;
+        return <Control key={field.name} {...field} />;
       })}
     </FormProvider>
   );

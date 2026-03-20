@@ -2913,6 +2913,8 @@
           "CoreWorkerFixtures",
           " & { esArchiver: ",
           "EsArchiverFixture",
+          "; } & { linkedProject: ",
+          "LinkedProjectFixture",
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & ",
@@ -3466,6 +3468,8 @@
             "section": "def-common.ApiServicesFixture",
             "text": "ApiServicesFixture"
           },
+          "; } & { linkedProject: ",
+          "LinkedProjectFixture",
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & { kbnUrl: ",
@@ -3487,7 +3491,13 @@
           "; } & { profilingSetup: ",
           "ProfilingSetupFixture",
           "; } & { sloData: ",
-          "SloDataFixture",
+          {
+            "pluginId": "@kbn/scout-oblt",
+            "scope": "common",
+            "docId": "kibKbnScoutObltPluginApi",
+            "section": "def-common.SloDataFixture",
+            "text": "SloDataFixture"
+          },
           "; }>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/global_hook/index.ts",
@@ -3627,6 +3637,8 @@
           "CoreWorkerFixtures",
           " & { esArchiver: ",
           "EsArchiverFixture",
+          "; } & { linkedProject: ",
+          "LinkedProjectFixture",
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & ",
@@ -3954,6 +3966,185 @@
       },
       {
         "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.sloDataFixture",
+        "type": "Function",
+        "tags": [],
+        "label": "sloDataFixture",
+        "description": [],
+        "signature": [
+          "TestType",
+          "<",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          " & { context: ",
+          "BrowserContext",
+          "; } & { browserAuth: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
+          "; } & { page: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutPage",
+            "text": "ScoutPage"
+          },
+          "; log: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutLogger",
+            "text": "ScoutLogger"
+          },
+          "; } & { pageObjects: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.PageObjects",
+            "text": "PageObjects"
+          },
+          "; } & { validateTags: void; } & { perfTracker: ",
+          "PerformanceTracker",
+          "; }, ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          " & ",
+          "CoreWorkerFixtures",
+          " & { esArchiver: ",
+          "EsArchiverFixture",
+          "; } & { linkedProject: ",
+          "LinkedProjectFixture",
+          "; } & { uiSettings: ",
+          "UiSettingsFixture",
+          "; } & ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
+          "; } & { kbnUrl: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
+          },
+          "; } & { config: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
+          "; } & { sloData: ",
+          {
+            "pluginId": "@kbn/scout-oblt",
+            "scope": "common",
+            "docId": "kibKbnScoutObltPluginApi",
+            "section": "def-common.SloDataFixture",
+            "text": "SloDataFixture"
+          },
+          "; }>"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/worker/slo_data.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.sloDataFixture.$1",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "node_modules/playwright/types/test.d.ts",
+            "lineNumber": 2747,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.sloDataFixture.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "(args: TestArgs & WorkerArgs, testInfo: ",
+              "TestInfo",
+              ") => void | Promise<void>"
+            ],
+            "path": "node_modules/playwright/types/test.d.ts",
+            "lineNumber": 2747,
+            "columnNumber": 19,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.sloDataFixture.$2.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "TestArgs"
+                ],
+                "path": "node_modules/playwright/types/test.d.ts",
+                "lineNumber": 2653,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.sloDataFixture.$2.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "testInfo",
+                "description": [],
+                "signature": [
+                  "TestInfo"
+                ],
+                "path": "node_modules/playwright/types/test.d.ts",
+                "lineNumber": 2653,
+                "columnNumber": 44,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-oblt",
         "id": "def-common.spaceTest",
         "type": "Function",
         "tags": [],
@@ -4081,6 +4272,8 @@
           },
           " & { esArchiver: ",
           "EsArchiverFixture",
+          "; } & { linkedProject: ",
+          "LinkedProjectFixture",
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & ",
@@ -4359,6 +4552,8 @@
           "CoreWorkerFixtures",
           " & { esArchiver: ",
           "EsArchiverFixture",
+          "; } & { linkedProject: ",
+          "LinkedProjectFixture",
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & ",
@@ -4402,7 +4597,13 @@
             "text": "ObltWorkerFixtures"
           },
           " & { sloData: ",
-          "SloDataFixture",
+          {
+            "pluginId": "@kbn/scout-oblt",
+            "scope": "common",
+            "docId": "kibKbnScoutObltPluginApi",
+            "section": "def-common.SloDataFixture",
+            "text": "SloDataFixture"
+          },
           "; } & { profilingSetup: ",
           "ProfilingSetupFixture",
           "; }>"
@@ -10875,7 +11076,13 @@
             "label": "sloData",
             "description": [],
             "signature": [
-              "SloDataFixture"
+              {
+                "pluginId": "@kbn/scout-oblt",
+                "scope": "common",
+                "docId": "kibKbnScoutObltPluginApi",
+                "section": "def-common.SloDataFixture",
+                "text": "SloDataFixture"
+              }
             ],
             "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
             "lineNumber": 26,
@@ -11751,7 +11958,15 @@
                 "section": "def-common.UrlParts",
                 "text": "UrlParts"
               },
-              "; fleet?: ",
+              "; linkedElasticsearch?: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.UrlParts",
+                "text": "UrlParts"
+              },
+              " | undefined; fleet?: ",
               {
                 "pluginId": "@kbn/test",
                 "scope": "common",
@@ -11778,7 +11993,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11794,7 +12009,7 @@
               "{ from: string; license?: string | undefined; files: string[]; serverArgs: string[]; ssl: boolean; secureFiles?: string[] | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 20,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11807,10 +12022,10 @@
             "label": "esServerlessOptions",
             "description": [],
             "signature": [
-              "{ uiam: boolean; } | undefined"
+              "{ uiam: boolean; cps?: boolean | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11826,7 +12041,7 @@
               "{ env: any; buildArgs: string[]; sourceArgs: string[]; serverArgs: string[]; useDedicatedTestRunner?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11994,6 +12209,22 @@
           },
           {
             "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ScoutTestConfig.linkedProject",
+            "type": "Object",
+            "tags": [],
+            "label": "linkedProject",
+            "description": [],
+            "signature": [
+              "{ hosts: { elasticsearch: string; }; auth: { username: string; password: string; }; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
             "id": "def-common.ScoutTestConfig.metadata",
             "type": "Any",
             "tags": [],
@@ -12003,7 +12234,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 29,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12019,7 +12250,7 @@
         "label": "ScoutTestFixtures",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-        "lineNumber": 66,
+        "lineNumber": 69,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12041,7 +12272,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 67,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12074,7 +12305,7 @@
               "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 68,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12096,7 +12327,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 69,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12112,7 +12343,7 @@
               "void"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 70,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12230,7 +12461,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-        "lineNumber": 73,
+        "lineNumber": 76,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12252,7 +12483,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 74,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12274,7 +12505,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 75,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12296,7 +12527,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 76,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12318,7 +12549,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 77,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12334,7 +12565,7 @@
               "default"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 78,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12350,7 +12581,23 @@
               "EsArchiverFixture"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 79,
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ScoutWorkerFixtures.linkedProject",
+            "type": "Object",
+            "tags": [],
+            "label": "linkedProject",
+            "description": [],
+            "signature": [
+              "LinkedProjectFixture"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12366,7 +12613,7 @@
               "UiSettingsFixture"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 80,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12388,7 +12635,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 81,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12424,7 +12671,7 @@
               ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 82,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12460,10 +12707,62 @@
               ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 83,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.SloDataFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "SloDataFixture",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/worker/slo_data.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.SloDataFixture.generateSloData",
+            "type": "Function",
+            "tags": [],
+            "label": "generateSloData",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/worker/slo_data.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.SloDataFixture.addSLO",
+            "type": "Function",
+            "tags": [],
+            "label": "addSLO",
+            "description": [],
+            "signature": [
+              "() => Promise<unknown>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/worker/slo_data.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

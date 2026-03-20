@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/saved-search-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/saved-search-plugin'
+  title: '@kbn/saved-search-plugin'
   description: Moon project for @kbn/saved-search-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/saved_search
+  sourceRoot: src/platform/plugins/shared/saved_search
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -60,14 +59,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

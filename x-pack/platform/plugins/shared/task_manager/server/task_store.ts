@@ -309,18 +309,54 @@ export class TaskStore {
     return userScopeAndApiKey;
   }
 
-  private async bulkGetDecryptedTaskApiKeys(ids: string[]) {
-    const result = new Map<string, string | undefined>();
-    if (!this.canEncryptSo() || !ids.length) {
+  private async bulkGetDecryptedTaskApiKeys(
+    taskIds: string[]
+  ): Promise<Map<string, string | undefined>> {
+    if (!this.canEncryptSo() || !taskIds.length) {
+      return new Map<string, string | undefined>();
+    }
+
+    const result = await this.getApiKeys(taskIds);
+
+    // the search doesn't wait for refresh, so may miss a newly created key
+    const idsOfMissingKeys = taskIds.filter((id) => result.get(id) === undefined);
+
+    if (idsOfMissingKeys.length === 0) return result;
+
+    // do a refresh, and get the remaining keys
+    this.logger.warn('Refreshing index to get recently created API keys for tasks');
+
+    // refresh; if that fails, return what we currently have
+    try {
+      await this.esClient.indices.refresh({ index: this.index });
+    } catch (e) {
+      this.logger.error(`Error refreshing index ${this.index}: ${e.message}`);
       return result;
     }
 
+    // get the missing keys, a log an error if they continue to be missing
+    const missingResult = await this.getApiKeys(idsOfMissingKeys);
+
+    for (const id of idsOfMissingKeys) {
+      const foundKey = missingResult.get(id);
+      if (foundKey === undefined) {
+        this.logger.error(`Unable to obtain API key for task ${id} after retry`);
+      } else {
+        result.set(id, foundKey);
+      }
+    }
+
+    return result;
+  }
+
+  private async getApiKeys(taskIds: string[]) {
     const kueryNode = nodeBuilder.or(
-      ids.map((id) => {
+      taskIds.map((id) => {
         return nodeBuilder.is(`${TASK_SO_NAME}.id`, `${TASK_SO_NAME}:${id}`);
       })
     );
 
+    const result = new Map<string, string | undefined>();
     const finder =
       await this.esoClient!.createPointInTimeFinderDecryptedAsInternalUser<SerializedConcreteTaskInstance>(
         {
@@ -334,8 +370,8 @@ export class TaskStore {
         result.set(savedObject.id, savedObject.attributes.apiKey);
       });
     }
-    await finder.close();
 
+    await finder.close();
     return result;
   }
 

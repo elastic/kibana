@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-streams'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals-suite-streams'
+  title: '@kbn/evals-suite-streams'
   description: Moon project for @kbn/evals-suite-streams
   channel: ''
   owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/kbn-evals-suite-streams
+  sourceRoot: x-pack/platform/packages/shared/kbn-evals-suite-streams
 dependsOn:
   - '@kbn/evals'
   - '@kbn/evals-phoenix-executor'
@@ -35,6 +34,8 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/dissect-heuristics'
   - '@kbn/inference-common'
+  - '@kbn/inference-prompt-utils'
+  - '@kbn/zod'
   - '@kbn/es-snapshot-loader'
   - '@kbn/es-errors'
 tags:
@@ -50,14 +51,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

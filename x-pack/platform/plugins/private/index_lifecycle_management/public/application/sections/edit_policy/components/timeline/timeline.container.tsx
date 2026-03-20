@@ -10,18 +10,21 @@ import React from 'react';
 
 import { useFormData } from '../../../../../shared_imports';
 
-import { formDataToAbsoluteTimings } from '../../lib';
+import { formDataToAbsoluteTimings, getPhaseEnabled } from '../../lib';
 
 import { useConfiguration } from '../../form';
 
 import type { FormInternal } from '../../types';
+import { useEditPolicyContext } from '../../edit_policy_context';
 
 import { Timeline as ViewComponent } from './timeline';
 
 export const Timeline: FunctionComponent = () => {
   const [formData] = useFormData<FormInternal>();
+  const { isHotPhaseRequired } = useEditPolicyContext();
   const timings = formDataToAbsoluteTimings(formData);
   const { isUsingRollover } = useConfiguration();
+  const showHotPhase = getPhaseEnabled({ phase: 'hot', formData, isHotPhaseRequired });
   return (
     <ViewComponent
       hotPhaseMinAge={timings.hot.min_age}
@@ -31,6 +34,7 @@ export const Timeline: FunctionComponent = () => {
       deletePhaseMinAge={timings.delete?.min_age}
       isUsingRollover={isUsingRollover}
       hasDeletePhase={Boolean(formData._meta?.delete?.enabled)}
+      showHotPhase={showHotPhase}
     />
   );
 };

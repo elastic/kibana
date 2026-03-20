@@ -18,6 +18,20 @@ export const EntityMaintainerTaskStatus = {
 export type EntityMaintainerTaskStatus =
   (typeof EntityMaintainerTaskStatus)[keyof typeof EntityMaintainerTaskStatus];
 
+export const EntityMaintainerTelemetryEventType = {
+  REGISTER: 'register',
+  ABORT: 'abort',
+  SETUP: 'setup',
+  RUN: 'run',
+  ERROR: 'error',
+  STOP: 'stop',
+  START: 'start',
+  DELETE: 'delete',
+} as const;
+
+export type EntityMaintainerTelemetryEventType =
+  (typeof EntityMaintainerTelemetryEventType)[keyof typeof EntityMaintainerTelemetryEventType];
+
 export interface EntityMaintainerRegistryData {
   interval: string;
   description?: string;

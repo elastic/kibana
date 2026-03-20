@@ -79,7 +79,6 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-design',
     'elastic/security-detection-engine',
     'elastic/security-detection-rule-management',
-    'elastic/security-detections-response',
     'elastic/security-engineering-productivity',
     'elastic/security-entity-analytics',
     'elastic/security-generative-ai',

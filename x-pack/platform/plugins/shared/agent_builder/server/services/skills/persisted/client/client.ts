@@ -15,9 +15,9 @@ import {
 } from '@kbn/agent-builder-common';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { SkillStorage } from './storage';
-import { createStorage } from './storage';
+import { createStorage, skillIndexName } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';
-import type { SkillDocument, SkillPersistedDefinition } from './types';
+import type { SkillDocument, SkillPersistedDefinition, SkillListOptions } from './types';
 
 const MAX_SKILLS_PER_SPACE = 1000;
 
@@ -26,13 +26,28 @@ const MAX_SKILLS_PER_SPACE = 1000;
  */
 export interface SkillClient {
   get(skillId: string): Promise<SkillPersistedDefinition>;
-  list(): Promise<SkillPersistedDefinition[]>;
+  list(options?: SkillListOptions): Promise<SkillPersistedDefinition[]>;
   create(request: PersistedSkillCreateRequest): Promise<SkillPersistedDefinition>;
   update(skillId: string, updates: PersistedSkillUpdateRequest): Promise<SkillPersistedDefinition>;
   /**
-   * Deletes a skill. Throws if the skill does not exist.
+   * Deletes a skill. Throws if the skill does not exist or is plugin-managed.
    */
   delete(skillId: string): Promise<void>;
+  /**
+   * Creates multiple skills in a single bulk request.
+   * Optimized for plugin installation where IDs are deterministic.
+   * Does not perform per-skill uniqueness checks.
+   */
+  bulkCreate(requests: PersistedSkillCreateRequest[]): Promise<SkillPersistedDefinition[]>;
+  /**
+   * Deletes all skills associated with the given plugin.
+   */
+  deleteByPluginId(pluginId: string): Promise<void>;
+  /**
+   * Fetches multiple skills by ID in a single ES query.
+   * Silently omits skills that are not found.
+   */
+  bulkGet(ids: string[]): Promise<SkillPersistedDefinition[]>;
   has(skillId: string): Promise<boolean>;
 }
 
@@ -46,26 +61,30 @@ export const createClient = ({
   esClient: ElasticsearchClient;
 }): SkillClient => {
   const storage = createStorage({ logger, esClient });
-  return new SkillClientImpl({ space, storage, logger });
+  return new SkillClientImpl({ space, storage, logger, esClient });
 };
 
 class SkillClientImpl implements SkillClient {
   private readonly space: string;
   private readonly storage: SkillStorage;
   private readonly logger: Logger;
+  private readonly esClient: ElasticsearchClient;
 
   constructor({
     space,
     storage,
     logger,
+    esClient,
   }: {
     space: string;
     storage: SkillStorage;
     logger: Logger;
+    esClient: ElasticsearchClient;
   }) {
     this.space = space;
     this.storage = storage;
     this.logger = logger;
+    this.esClient = esClient;
   }
 
   async get(id: string): Promise<SkillPersistedDefinition> {
@@ -76,13 +95,26 @@ class SkillClientImpl implements SkillClient {
     return fromEs(document);
   }
 
-  async list(): Promise<SkillPersistedDefinition[]> {
+  async list(options?: SkillListOptions): Promise<SkillPersistedDefinition[]> {
     const response = await this.storage.getClient().search({
       query: {
         bool: {
           filter: [createSpaceDslFilter(this.space)],
         },
       },
+      ...(options?.summaryOnly && {
+        _source: { excludes: ['content', 'referenced_content'] },
+        runtime_mappings: {
+          referenced_content_count: {
+            type: 'long' as const,
+            script: {
+              source:
+                'emit(params._source.referenced_content == null ? 0 : params._source.referenced_content.size())',
+            },
+          },
+        },
+        fields: ['referenced_content_count'],
+      }),
       size: MAX_SKILLS_PER_SPACE,
       track_total_hits: true,
     });
@@ -121,10 +153,48 @@ class SkillClientImpl implements SkillClient {
     return this.get(id);
   }
 
+  async bulkCreate(requests: PersistedSkillCreateRequest[]): Promise<SkillPersistedDefinition[]> {
+    if (requests.length === 0) {
+      return [];
+    }
+
+    const creationDate = new Date();
+    const allAttributes = requests.map((createRequest) =>
+      createAttributes({ createRequest, space: this.space, creationDate })
+    );
+
+    await this.storage.getClient().bulk({
+      operations: allAttributes.map((attributes) => ({
+        index: { document: attributes },
+      })),
+      throwOnFail: true,
+    });
+
+    return allAttributes.map((attributes) => ({
+      id: attributes.id,
+      name: attributes.name,
+      description: attributes.description,
+      content: attributes.content,
+      referenced_content: attributes.referenced_content,
+      tool_ids: attributes.tool_ids,
+      plugin_id: attributes.plugin_id,
+      created_at: attributes.created_at,
+      updated_at: attributes.updated_at,
+      referenced_content_count: attributes.referenced_content?.length ?? 0,
+    }));
+  }
+
   async update(id: string, update: PersistedSkillUpdateRequest): Promise<SkillPersistedDefinition> {
     const document = await this._get(id);
     if (!document) {
       throw createSkillNotFoundError({ skillId: id });
+    }
+
+    const skill = fromEs(document);
+    if (skill.plugin_id) {
+      throw createBadRequestError(
+        `Skill '${id}' is managed by plugin '${skill.plugin_id}' and cannot be modified directly.`
+      );
     }
 
     const updatedAttributes = updateDocument({
@@ -148,10 +218,45 @@ class SkillClientImpl implements SkillClient {
     if (!document) {
       throw createSkillNotFoundError({ skillId: id });
     }
+
+    const skill = fromEs(document);
+    if (skill.plugin_id) {
+      throw createBadRequestError(
+        `Skill '${id}' is managed by plugin '${skill.plugin_id}' and cannot be deleted directly.`
+      );
+    }
+
     const result = await this.storage.getClient().delete({ id: document._id });
     if (result.result === 'not_found') {
       throw createSkillNotFoundError({ skillId: id });
     }
+  }
+
+  async deleteByPluginId(pluginId: string): Promise<void> {
+    await this.esClient.deleteByQuery({
+      index: `${skillIndexName}*`,
+      query: {
+        bool: {
+          filter: [createSpaceDslFilter(this.space), { term: { plugin_id: pluginId } }],
+        },
+      },
+    });
+  }
+
+  async bulkGet(ids: string[]): Promise<SkillPersistedDefinition[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    const response = await this.storage.getClient().search({
+      query: {
+        bool: {
+          filter: [createSpaceDslFilter(this.space), { terms: { id: ids } }],
+        },
+      },
+      size: ids.length,
+      track_total_hits: false,
+    });
+    return response.hits.hits.map((hit) => fromEs(hit as SkillDocument));
   }
 
   async has(id: string): Promise<boolean> {

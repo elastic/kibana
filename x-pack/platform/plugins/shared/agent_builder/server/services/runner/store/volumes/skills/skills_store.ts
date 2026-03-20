@@ -8,7 +8,7 @@
 import type { SkillsStore, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { MemoryVolume } from '../../filesystem';
-import { createSkillEntries, getSkillEntryPath } from './utils';
+import { createSkillEntries, getSkillEntryPath, getSkillReferencedContentEntryPath } from './utils';
 
 export const createSkillsStore = ({ skills }: { skills: InternalSkillDefinition[] }) => {
   return new SkillsStoreImpl({ skills });
@@ -29,12 +29,8 @@ export class SkillsStoreImpl implements WritableSkillsStore {
 
   add(skill: InternalSkillDefinition): void {
     this.skills.set(skill.id, skill);
-    // Only mount skills with a basePath to the VFS (builtin skills)
-    if (skill.basePath) {
-      const mountable = skill as InternalSkillDefinition & { basePath: string };
-      const entries = createSkillEntries(mountable);
-      entries.forEach((entry) => this.volume.add(entry));
-    }
+    const entries = createSkillEntries(skill);
+    entries.forEach((entry) => this.volume.add(entry));
   }
 
   /**
@@ -44,12 +40,16 @@ export class SkillsStoreImpl implements WritableSkillsStore {
    */
   delete(skillId: string): boolean {
     const skill = this.skills.get(skillId);
-    if (skill && skill.basePath) {
-      const mountable = skill as InternalSkillDefinition & { basePath: string };
-      const path = getSkillEntryPath({
-        skill: mountable,
-      });
+    if (skill) {
+      const path = getSkillEntryPath({ skill });
       this.volume.remove(path);
+      skill.referencedContent?.forEach((rc) => {
+        const rcPath = getSkillReferencedContentEntryPath({
+          skill,
+          referencedContent: rc,
+        });
+        this.volume.remove(rcPath);
+      });
     }
     return this.skills.delete(skillId);
   }

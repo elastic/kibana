@@ -53,6 +53,14 @@ export const predefinedStepTypes = [
     displayName: 'Foreach',
   },
   {
+    actionTypeId: 'while',
+    displayName: 'While',
+  },
+  {
+    actionTypeId: 'switch',
+    displayName: 'Switch',
+  },
+  {
     actionTypeId: 'parallel',
     displayName: 'Parallel',
   },
@@ -79,6 +87,22 @@ export const predefinedStepTypes = [
   {
     actionTypeId: 'workflow.executeAsync',
     displayName: 'Workflow Execute Async',
+  },
+  {
+    actionTypeId: 'workflow.output',
+    displayName: 'Workflow Output',
+  },
+  {
+    actionTypeId: 'workflow.fail',
+    displayName: 'Workflow Fail',
+  },
+  {
+    actionTypeId: 'loop.break',
+    displayName: 'Break',
+  },
+  {
+    actionTypeId: 'loop.continue',
+    displayName: 'Continue',
   },
   {
     actionTypeId: 'manual',

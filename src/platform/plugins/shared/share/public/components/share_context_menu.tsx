@@ -129,7 +129,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
         name: i18n.translate('share.contextMenu.embedCodeLabel', {
           defaultMessage: 'Embed code',
         }),
-        icon: 'console',
+        icon: 'commandLine',
         panel: embedPanel.id,
         sortOrder: 0,
       });

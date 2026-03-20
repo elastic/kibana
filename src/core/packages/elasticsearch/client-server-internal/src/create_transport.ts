@@ -16,6 +16,7 @@ import {
   type TransportResult,
 } from '@elastic/elasticsearch';
 import { isUnauthorizedError } from '@kbn/es-errors';
+import type { Logger } from '@kbn/logging';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
 import { isRetryResult } from './retry_unauthorized';
 
@@ -31,7 +32,8 @@ export type OnRequestHandler = (
   ctx: OnRequestContext,
   params: TransportRequestParams,
   //  guaranteed to exist because the transport layer normalizes it before handler invocation
-  options: TransportRequestOptions
+  options: TransportRequestOptions,
+  logger: Logger
 ) => void;
 
 const noop = () => undefined;
@@ -41,11 +43,13 @@ export const createTransport = ({
   getExecutionContext = noop,
   getUnauthorizedErrorHandler,
   onRequest,
+  logger,
 }: {
   scoped?: boolean;
   getExecutionContext?: () => string | undefined;
   getUnauthorizedErrorHandler?: ErrorHandlerAccessor;
   onRequest: OnRequestHandler;
+  logger: Logger;
 }): TransportClass => {
   class KibanaTransport extends Transport {
     private headers: IncomingHttpHeaders = {};
@@ -84,7 +88,7 @@ export const createTransport = ({
         ...options?.headers,
       };
 
-      onRequest({ scoped }, params, opts);
+      onRequest({ scoped }, params, opts, logger);
 
       try {
         return (await super.request(params, opts)) as TransportResult<any, any>;

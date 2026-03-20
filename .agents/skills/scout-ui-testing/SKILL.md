@@ -95,6 +95,7 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 
 - Don’t use `page.waitForTimeout`. Wait on a page-ready signal (loading indicator hidden, container visible, `expect.poll` on element counts).
 - If selectors aren’t stable, add `data-test-subj` (Scout uses it as the `testIdAttribute`).
+- Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`). Don’t use them in tests or page objects for app loading state management; rely on Playwright auto-waiting and page-ready signals instead.
 
 ## A11y checks (optional, high value)
 

@@ -4,24 +4,24 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/content-list-table'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/content-list-table'
+  title: '@kbn/content-list-table'
   description: Moon project for @kbn/content-list-table
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-table
+  sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-table
 dependsOn:
   - '@kbn/content-list-assembly'
   - '@kbn/content-list-provider'
   - '@kbn/content-list-mock-data'
   - '@kbn/content-management-tags'
+  - '@kbn/content-management-favorites-public'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/content-list-toolbar'
@@ -39,14 +39,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

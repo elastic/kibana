@@ -1,5 +1,6 @@
 env:
   KBN_EVALS: '1'
+  KBN_EVALS_WEEKLY: '1'
 steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
@@ -110,6 +111,28 @@ steps:
             - exit_status: '-1'
               limit: 3
 
+      - label: 'Evals: Streams Significant Events'
+        key: kbn-evals-weekly-streams-significant-events
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'streams/significant-events'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
       - label: 'Evals: LLM Tasks'
         key: kbn-evals-weekly-llm-tasks
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
@@ -131,13 +154,35 @@ steps:
           automatic:
             - exit_status: '-1'
               limit: 3
-      - label: 'Evals: Observability AI Insights'
-        key: kbn-evals-weekly-obs-ai-assistant-ai-insights
+      - label: 'Evals: Observability AI'
+        key: kbn-evals-weekly-observability-ai
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
           FTR_EIS_CCM: '1'
-          EVAL_SUITE_ID: 'obs-ai-assistant/ai_insights'
+          EVAL_SUITE_ID: 'observability-ai'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Security AI Rules'
+        key: kbn-evals-weekly-security-ai-rules
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'security-ai-rules'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_model_groups
@@ -176,7 +221,7 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      - label: 'Evals: Entity Anlaytics'
+      - label: 'Evals: Entity Analytics'
         key: kbn-evals-weekly-entity-analytics
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:

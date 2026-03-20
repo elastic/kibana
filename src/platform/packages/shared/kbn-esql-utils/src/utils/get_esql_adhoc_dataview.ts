@@ -9,8 +9,14 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import {
+  type ESQLSourceResult,
+  SOURCES_AUTOCOMPLETE_ROUTE,
+  TIMEFIELD_ROUTE,
+} from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
+
+const timeFieldCache = new Map<string, string | undefined>();
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -70,21 +76,37 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  const encodedQuery = encodeURIComponent(query);
-  const response = (await http?.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
-    // eslint-disable-next-line no-console
-    console.error('Failed to fetch the timefield', error);
-    return undefined;
-  })) as { timeField?: string } | undefined;
-  const timeField = response?.timeField;
+  if (options?.createNewInstanceEvenIfCachedOneAvailable) {
+    timeFieldCache.delete(query);
+  }
+
+  let timeField: string | undefined;
+  if (timeFieldCache.has(query)) {
+    timeField = timeFieldCache.get(query);
+  } else if (http) {
+    const encodedQuery = encodeURIComponent(query);
+    const response = (await http.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch the timefield', error);
+      return undefined;
+    })) as { timeField?: string } | undefined;
+    timeField = response?.timeField;
+    if (response !== undefined) {
+      timeFieldCache.set(query, timeField);
+    }
+  }
+
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const prefix = options?.idPrefix ?? 'esql';
-  const dataViewId = await sha256(`${prefix}-${indexPattern}`);
+  const dataViewId = await sha256(
+    timeField ? `${prefix}-${indexPattern}-${timeField}` : `${prefix}-${indexPattern}`
+  );
 
   if (options?.createNewInstanceEvenIfCachedOneAvailable) {
     // overwise it might return a cached data view with a different time field
     dataViewsService.clearInstanceCache(dataViewId);
   }
+
   const skipFetchFields = options?.skipFetchFields ?? false;
 
   const dataView = await dataViewsService.create(
@@ -102,29 +124,31 @@ export async function getESQLAdHocDataview({
 }
 
 /**
- * This can be used to get an initial index for a default ES|QL query.
+ * Gets an initial index for a default ES|QL query by querying both local and remote (CCS) indices.
  * Could be used during onboarding when data views to get a better index are not yet available.
  * Can be used in combination with {@link getESQLAdHocDataview} to create a dataview for the index.
+ *
+ * Prefers a local `logs*` pattern if any local index starts with "logs",
+ * otherwise returns the first available non-hidden index (local or remote).
  */
-export async function getIndexForESQLQuery(deps: {
-  dataViews: { getIndices: DataViewsPublicPluginStart['getIndices'] };
-}): Promise<string | null> {
-  const indices = (
-    await deps.dataViews.getIndices({
-      showAllIndices: false,
-      pattern: '*',
-      isRollupIndex: () => false,
-    })
-  )
-    .filter((index) => !index.name.startsWith('.'))
-    .map((index) => index.name);
+export async function getIndexForESQLQuery(deps: { http: HttpStart }): Promise<string | null> {
+  const fetchIndices = async (scope: 'local' | 'all' | 'remote') => {
+    const response = await deps.http.get(`${SOURCES_AUTOCOMPLETE_ROUTE}${scope}`).catch(() => []);
+    return (response as ESQLSourceResult[]).filter((source) => !source.hidden);
+  };
 
-  let indexName = indices[0];
-  if (indices.length > 0) {
-    if (indices.find((index) => index.startsWith('logs'))) {
-      indexName = 'logs*';
-    }
+  let indices = await fetchIndices('local');
+  // only if no local indices are found, try to fetch remote indices
+  if (indices.length === 0) {
+    indices = await fetchIndices('remote');
   }
 
-  return indexName ?? null;
+  if (indices.length === 0) return null;
+
+  const hasLocalLogs = indices.some(
+    (source) => !source.name.includes(':') && source.name.startsWith('logs')
+  );
+  if (hasLocalLogs) return 'logs*';
+
+  return indices[0].name;
 }

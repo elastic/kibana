@@ -10,6 +10,9 @@ import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
+import { analyzerCellActionRenderer } from '../../../../flyout_v2/analyzer/components/cell_actions';
 import { OverviewTab } from '../../../../flyout_v2/document/tabs/overview_tab';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
@@ -75,9 +78,15 @@ const RowActionComponent = ({
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
+  const hit: DataTableRecord | undefined = useMemo(
+    () => esHitRecord && buildDataTableRecord(esHitRecord),
+    [esHitRecord]
+  );
 
   const { services } = useKibana();
   const { telemetry, overlays } = services;
+  const store = useStore();
+  const history = useHistory();
 
   const { openFlyout } = useExpandableFlyoutApi();
   const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
@@ -104,13 +113,16 @@ const RowActionComponent = ({
   const showNotes = canReadNotes;
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    if (newFlyoutSystemEnabled && esHitRecord) {
-      const hit: DataTableRecord = buildDataTableRecord(esHitRecord);
+    if (newFlyoutSystemEnabled && hit) {
       overlays.openSystemFlyout(
-        flyoutProviders({ services, children: <OverviewTab hit={hit} /> }),
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: <OverviewTab hit={hit} renderCellActions={analyzerCellActionRenderer} />,
+        }),
         {
           ownFocus: false,
-          // @ts-ignore EUI to fix this typing issue
           resizable: true,
           size: 's',
           type: 'overlay',
@@ -133,13 +145,15 @@ const RowActionComponent = ({
       });
     }
   }, [
-    esHitRecord,
     eventId,
+    hit,
     indexName,
     newFlyoutSystemEnabled,
     openFlyout,
     overlays,
+    history,
     services,
+    store,
     tableId,
     telemetry,
   ]);
@@ -194,6 +208,7 @@ const RowActionComponent = ({
           disableTimelineAction={!canReadTimelines}
           ecsData={ecsData}
           eventId={eventId}
+          hit={hit}
           index={index}
           isEventViewer={isEventViewer}
           loadingEventIds={loadingEventIds}

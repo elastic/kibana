@@ -68,7 +68,29 @@ export const StepIcon = React.memo(
       iconType = getStepIconType(stepType);
     }
 
-    if (iconType.startsWith('token')) {
+    if (typeof iconType === 'string' && iconType.startsWith('data:')) {
+      const statusColor = shouldApplyColorToIcon
+        ? getExecutionStatusColors(euiTheme, executionStatus).color
+        : undefined;
+      return (
+        <span
+          css={css`
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            mask-image: url('${iconType}');
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+            background-color: ${statusColor ?? euiTheme.colors.textParagraph};
+          `}
+          onClick={onClick}
+          aria-hidden={true}
+        />
+      );
+    }
+
+    if (typeof iconType === 'string' && iconType.startsWith('token')) {
       return (
         <EuiToken
           iconType={iconType}
