@@ -7,6 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useTemplateFormSync } from './use_template_form_sync';
+import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 
 const mockSetFieldValue = jest.fn();
 const mockUseFormContext = jest.fn(() => ({ setFieldValue: mockSetFieldValue }));
@@ -32,6 +33,43 @@ const mockTemplate = {
     severity: 'high',
     category: 'general',
     fields: [],
+  },
+};
+
+const mockTemplateWithExtendedFields = {
+  templateId: 'template-2',
+  templateVersion: 1,
+  definition: {
+    name: 'Template with Fields',
+    description: 'Has extended fields',
+    tags: [],
+    severity: 'low',
+    category: null,
+    fields: [
+      {
+        name: 'summary',
+        type: 'keyword',
+        control: 'INPUT_TEXT',
+        metadata: { default: 'Default summary' },
+      },
+      {
+        name: 'effort',
+        type: 'integer',
+        control: 'INPUT_NUMBER',
+        metadata: { default: 42 },
+      },
+      {
+        name: 'priority',
+        type: 'keyword',
+        control: 'SELECT_BASIC',
+        metadata: { default: 'high', options: ['low', 'medium', 'high'] },
+      },
+      {
+        name: 'notes',
+        type: 'keyword',
+        control: 'TEXTAREA',
+      },
+    ],
   },
 };
 
@@ -155,5 +193,186 @@ describe('useTemplateFormSync', () => {
 
     expect(result.current.isLoading).toBe(true);
     expect(result.current.template).toBeUndefined();
+  });
+
+  describe('extended fields', () => {
+    it('applies default values for extended fields when template has fields', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: mockTemplateWithExtendedFields,
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync());
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
+        'Default summary'
+      );
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.effort_as_integer`,
+        '42'
+      );
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.priority_as_keyword`,
+        'high'
+      );
+    });
+
+    it('sets empty string for extended fields without default value', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: mockTemplateWithExtendedFields,
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync());
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.notes_as_keyword`,
+        ''
+      );
+    });
+
+    it('clears extended fields when template is deselected', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: mockTemplateWithExtendedFields,
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync());
+
+      mockSetFieldValue.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: '' }]);
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
+        ''
+      );
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.effort_as_integer`,
+        ''
+      );
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.priority_as_keyword`,
+        ''
+      );
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.notes_as_keyword`,
+        ''
+      );
+    });
+
+    it('does not clear extended fields if no template was previously applied', () => {
+      mockUseFormData.mockReturnValue([{ templateId: '' }]);
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      renderHook(() => useTemplateFormSync());
+
+      const extendedFieldCalls = mockSetFieldValue.mock.calls.filter(
+        (call) => typeof call[0] === 'string' && call[0].startsWith(CASE_EXTENDED_FIELDS)
+      );
+      expect(extendedFieldCalls).toHaveLength(0);
+    });
+
+    it('handles switching between templates with different fields', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: mockTemplateWithExtendedFields,
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync());
+
+      mockSetFieldValue.mockClear();
+
+      const differentTemplate = {
+        templateId: 'template-3',
+        templateVersion: 1,
+        definition: {
+          name: 'Different Template',
+          fields: [
+            {
+              name: 'other_field',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              metadata: { default: 'other value' },
+            },
+          ],
+        },
+      };
+
+      mockUseFormData.mockReturnValue([{ templateId: 'template-3' }]);
+      mockUseGetTemplate.mockReturnValue({ data: differentTemplate, isLoading: false });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.other_field_as_keyword`,
+        'other value'
+      );
+    });
+
+    it('converts numeric default values to strings', () => {
+      const templateWithNumericDefaults = {
+        templateId: 'template-numeric',
+        templateVersion: 1,
+        definition: {
+          name: 'Numeric Template',
+          fields: [
+            {
+              name: 'count',
+              type: 'integer',
+              control: 'INPUT_NUMBER',
+              metadata: { default: 0 },
+            },
+            {
+              name: 'score',
+              type: 'float',
+              control: 'INPUT_NUMBER',
+              metadata: { default: 3.14 },
+            },
+          ],
+        },
+      };
+
+      mockUseFormData.mockReturnValue([{ templateId: 'template-numeric' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithNumericDefaults, isLoading: false });
+
+      renderHook(() => useTemplateFormSync());
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.count_as_integer`,
+        '0'
+      );
+      expect(mockSetFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.score_as_float`,
+        '3.14'
+      );
+    });
+
+    it('does not apply extended fields when template has no fields array', () => {
+      const templateWithoutFields = {
+        templateId: 'template-no-fields',
+        templateVersion: 1,
+        definition: {
+          name: 'No Fields Template',
+        },
+      };
+
+      mockUseFormData.mockReturnValue([{ templateId: 'template-no-fields' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithoutFields, isLoading: false });
+
+      renderHook(() => useTemplateFormSync());
+
+      const extendedFieldCalls = mockSetFieldValue.mock.calls.filter(
+        (call) => typeof call[0] === 'string' && call[0].startsWith(CASE_EXTENDED_FIELDS)
+      );
+      expect(extendedFieldCalls).toHaveLength(0);
+    });
   });
 });
