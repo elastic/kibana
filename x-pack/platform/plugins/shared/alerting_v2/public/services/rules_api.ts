@@ -21,6 +21,12 @@ export interface FindRulesResponse {
   perPage: number;
 }
 
+export interface ListRulesParams {
+  page?: number;
+  perPage?: number;
+  search?: string;
+}
+
 export interface BulkOperationError {
   id: string;
   error: { message: string; statusCode: number };
@@ -39,9 +45,9 @@ export type BulkOperationParams =
 export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listRules(params: { page?: number; perPage?: number }) {
+  public async listRules(params: ListRulesParams) {
     return this.http.get<FindRulesResponse>(INTERNAL_ALERTING_V2_RULE_API_PATH, {
-      query: { page: params.page, perPage: params.perPage },
+      query: { page: params.page, perPage: params.perPage, search: params.search },
     });
   }
 

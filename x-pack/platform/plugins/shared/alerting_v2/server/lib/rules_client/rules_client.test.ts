@@ -732,6 +732,29 @@ describe('RulesClient', () => {
       });
     });
 
+    it('forwards search parameter with supported search fields', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 2,
+        per_page: 10,
+      });
+
+      await client.findRules({ page: 2, perPage: 10, search: 'prod alerts' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: RULE_SAVED_OBJECT_TYPE,
+        page: 2,
+        perPage: 10,
+        sortField: 'updatedAt',
+        sortOrder: 'desc',
+        search: 'prod alerts',
+        searchFields: ['metadata.name', 'metadata.labels'],
+      });
+    });
+
     it('does not pass filter when it is undefined', async () => {
       const client = createClient();
 

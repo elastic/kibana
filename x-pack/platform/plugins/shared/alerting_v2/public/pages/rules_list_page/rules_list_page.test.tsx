@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -114,6 +114,10 @@ describe('RulesListPage', () => {
     });
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('renders loading state', () => {
     mockUseFetchRules.mockReturnValue({
       data: undefined,
@@ -139,6 +143,19 @@ describe('RulesListPage', () => {
 
     expect(screen.getByText('Rule One')).toBeInTheDocument();
     expect(screen.getByText('Rule Two')).toBeInTheDocument();
+  });
+
+  it('renders the search bar', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByPlaceholderText('Search rules')).toBeInTheDocument();
   });
 
   it('renders description under the rule name when present', () => {
@@ -223,6 +240,128 @@ describe('RulesListPage', () => {
 
     const showingLabel = screen.getByTestId('rulesListShowingLabel');
     expect(showingLabel).toHaveTextContent('Showing 1-2 of 2 Rules');
+  });
+
+  it('passes the debounced search term to useFetchRules', async () => {
+    jest.useFakeTimers();
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.change(screen.getByPlaceholderText('Search rules'), {
+      target: { value: 'Rule One' },
+    });
+
+    expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+      page: 1,
+      perPage: 20,
+      search: undefined,
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        search: 'Rule One',
+      });
+    });
+
+    jest.useRealTimers();
+  });
+
+  it('clearing the search resets the fetch back to an unfiltered list', async () => {
+    jest.useFakeTimers();
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const searchInput = screen.getByPlaceholderText('Search rules');
+
+    fireEvent.change(searchInput, {
+      target: { value: 'prod' },
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        search: 'prod',
+      });
+    });
+
+    fireEvent.change(searchInput, {
+      target: { value: '' },
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        search: undefined,
+      });
+    });
+
+    jest.useRealTimers();
+  });
+
+  it('resets pagination to the first page after a new search', async () => {
+    jest.useFakeTimers();
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 40, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByLabelText('Next page'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 2,
+        perPage: 20,
+        search: undefined,
+      });
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('Search rules'), {
+      target: { value: 'Rule' },
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        search: 'Rule',
+      });
+    });
   });
 
   it('navigates to create page when create button is clicked', () => {
