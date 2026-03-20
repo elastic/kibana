@@ -9,6 +9,7 @@ import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
+import { ALERT_INVESTIGATION_PIPELINE_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
 import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { PLUGIN_ID } from '../../../../common/constants';
 import { deduplicateAlerts } from '../../../lib/attack_discovery/pipeline/deduplication';
@@ -50,6 +51,22 @@ export const registerPipelineRoutes = (
     },
     async (context, request, response): Promise<IKibanaResponse> => {
       try {
+        // Check if pipeline feature is enabled
+        const { featureFlags } = await context.core;
+        const isPipelineEnabled = await featureFlags.getBooleanValue(
+          ALERT_INVESTIGATION_PIPELINE_ENABLED_FEATURE_FLAG,
+          false
+        );
+
+        if (!isPipelineEnabled) {
+          return response.forbidden({
+            body: {
+              message:
+                'Alert investigation pipeline is disabled. Enable via feature flag: xpack.feature_flags.overrides.elasticAssistant.alertInvestigationPipelineEnabled: true',
+            },
+          });
+        }
+
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const {
           max_alerts: maxAlerts,
@@ -162,6 +179,22 @@ export const registerPipelineRoutes = (
     },
     async (context, request, response): Promise<IKibanaResponse> => {
       try {
+        // Check if pipeline feature is enabled
+        const { featureFlags } = await context.core;
+        const isPipelineEnabled = await featureFlags.getBooleanValue(
+          ALERT_INVESTIGATION_PIPELINE_ENABLED_FEATURE_FLAG,
+          false
+        );
+
+        if (!isPipelineEnabled) {
+          return response.forbidden({
+            body: {
+              message:
+                'Alert investigation pipeline is disabled. Enable via feature flag: xpack.feature_flags.overrides.elasticAssistant.alertInvestigationPipelineEnabled: true',
+            },
+          });
+        }
+
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const assistantContext = await context.elasticAssistant;
         const spaceId = assistantContext.getSpaceId();

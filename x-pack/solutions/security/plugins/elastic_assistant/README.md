@@ -25,8 +25,21 @@ Maintained by the Security Solution team
 ## Alert Investigation Pipeline
 
 > **Status:** Spike / Proof-of-concept (see [security-team#16339](https://github.com/elastic/security-team/issues/16339))
+>
+> **Feature Flag:** `elasticAssistant.alertInvestigationPipelineEnabled` (disabled by default)
 
 The pipeline automates the flow from raw security alerts to organized investigation cases with Attack Discovery. It lives under `server/lib/attack_discovery/pipeline/`.
+
+### Enabling the Pipeline
+
+This feature is experimental and disabled by default. To enable it, add to your `kibana.yml`:
+
+```yaml
+xpack.feature_flags.overrides:
+  elasticAssistant.alertInvestigationPipelineEnabled: true
+```
+
+After enabling, restart Kibana and navigate to: http://localhost:5601/app/alert-investigation-pipeline
 
 ### Architecture
 
